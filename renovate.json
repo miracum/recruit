@@ -1,0 +1,11 @@
+{
+  "extends": ["config:base", ":disableDependencyDashboard"],
+  "ignoreDeps": ["postgres", "docker.io/hapiproject/hapi"],
+  "packageRules": [
+    {
+      "updateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": true,
+      "requiredStatusChecks": null
+    }
+  ]
+}

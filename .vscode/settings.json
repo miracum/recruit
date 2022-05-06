@@ -1,0 +1,8 @@
+{
+  "yaml.schemas": {
+    "https://squidfunk.github.io/mkdocs-material/schema.json": "mkdocs.yml"
+  },
+  "yaml.customTags": [
+    "tag:yaml.org,2002:python/name:pymdownx.superfences.fence_code_format"
+  ]
+}

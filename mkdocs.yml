@@ -1,0 +1,40 @@
+site_name: recruIT
+# TODO: uncomment once migrated
+# repo_url: https://github.com/miracum/recruit
+copyright: Copyright &copy; 2022+ miracum.org
+markdown_extensions:
+  - attr_list
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - md_in_html
+  - pymdownx.snippets:
+      base_path: "docs"
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+extra:
+  social:
+    - icon: fontawesome/solid/globe
+      link: https://www.miracum.org/
+      name: MIRACUM Website
+extra_css:
+  - _css/extra.css
+theme:
+  name: material
+  logo: _img/miracum-logo-transparent-256x256.png
+  favicon: _img/favicon.ico
+  features:
+    - navigation.expand
+    - navigation.sections
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode

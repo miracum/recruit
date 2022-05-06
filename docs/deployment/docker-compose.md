@@ -1,0 +1,74 @@
+# Docker Compose
+
+The main repository contains the `docker-compose.yaml` files to deploy recruIT via Docker Compose.
+The following guides assume that you have cloned it and it is currently your working directory:
+
+```sh
+git clone https://github.com/miracum/recruit.git
+cd recruit/
+```
+
+## Installation for local testing using sample data
+
+To run everything locally with Keycloak-based authentication enabled, a sample cohort,
+and an OMOP DB filled with sample data:
+
+```sh
+docker-compose --project-name=recruit \
+    --env-file=docker-compose/.staging.env \
+    -f docker-compose/docker-compose.yaml \
+    -f docker-compose/docker-compose.staging.yaml up
+```
+
+You can run the following to probe every component for its availability/health status:
+
+!!! note
+
+    The query module will only switch to its ready state if it has run at least once,
+    so it may take up to 5 minutes for it to appear healthy.
+
+```sh
+docker-compose --project-name=recruit \
+    --env-file=docker-compose/.staging.env \
+    -f docker-compose/docker-compose.yaml \
+    -f docker-compose/docker-compose.staging.yaml \
+    -f docker-compose/docker-compose.probe.yaml run health-probes
+```
+
+You can now access the services at the following localhost ports:
+
+| Service                | Ingress URL                    | Note                                                                                          |
+| ---------------------- | ------------------------------ | --------------------------------------------------------------------------------------------- |
+| OHDSI Atlas            | <http://localhost:38084/atlas> |                                                                                               |
+| recruIT Screening List | <http://localhost:38080/>      | login with username: `user1` and password: `user1`; Or as `uc1-admin`/`admin` for full access |
+| HAPI FHIR Server       | <http://localhost:38083/>      |                                                                                               |
+| MailDev                | <http://localhost:38085/>      |                                                                                               |
+| Keycloak               | <http://localhost:38086/>      | login with username: `admin` and password: `admin`                                            |
+
+By default, the query module runs every 5 minutes to check for new study candidates. So after some time, you should see
+the following when opening the screening list at <http://localhost:38080/> and logging in as `uc1-admin`/`admin`:
+
+![Screening list overview](../_img/docker-compose/list-overview.png)
+
+Clicking on the list for the `SAMPLE M` study should show the list of candidates:
+
+![Screening list for the sample study](../_img/docker-compose/list-sample-m.png)
+
+Finally, checking the mail viewer at <http://localhost:38085/> you can see the email notifications:
+
+![Screening list for the sample study](../_img/docker-compose/notify-mail-sample-m.png)
+
+## Standalone installation
+
+The instructions above installed a FHIR server, a pre-filled OMOP database, the OHDSI tools initialized with a sample cohort,
+a mock mail viewer, and pre-configured Keycloak.
+
+This standalone, or "production-grade" installation assumes that you already have deployed a FHIR server, an OMOP database,
+the OHDSI WebAPI and Atlas, and optionally Keycloak. So all that is needed to do is configure the recruIT modules with the
+correct parameters and start them.
+
+There are several environment variables which need to be set before calling `docker-compose up`.
+You can create a .env file in the current directory and set them according to your environment.
+See the `.staging.env` file in the `docker-compose` folder for an example configuration.
+
+You can find a [list of available configuration options here](../configuration/options.md).

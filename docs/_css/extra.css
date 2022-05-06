@@ -1,0 +1,7 @@
+:root {
+  --md-primary-fg-color: #1b2259;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-typeset-a-color: #4e5cc2;
+}

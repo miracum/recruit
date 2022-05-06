@@ -1,0 +1,80 @@
+list:
+  ingress:
+    enabled: true
+    hosts:
+      - host: recruit-list.127.0.0.1.nip.io
+        paths: ["/"]
+
+fhirserver:
+  postgresql:
+    auth:
+      postgresPassword: fhir
+  ingress:
+    enabled: true
+    hosts:
+      - host: recruit-fhir-server.127.0.0.1.nip.io
+        paths: ["/"]
+
+query:
+  webAPI:
+    dataSource: "SynPUF-CDMV5"
+  omop:
+    resultsSchema: synpuf_results
+    cdmSchema: synpuf_cdm
+  cohortSelectorLabels:
+    - "recruIT"
+
+notify:
+  rules:
+    schedules:
+      everyMorning: "0 0 8 1/1 * ? *"
+    trials:
+      - acronym: "*"
+        subscriptions:
+          - email: "everything@example.com"
+      - acronym: "SAMPLE"
+        accessibleBy:
+          users:
+            - "user1"
+            - "user.two@example.com"
+        subscriptions:
+          - email: "everyMorning@example.com"
+            notify: "everyMorning"
+
+mailhog:
+  ingress:
+    enabled: true
+    hosts:
+      - host: recruit-mailhog.127.0.0.1.nip.io
+        paths:
+          - path: "/"
+            pathType: Prefix
+
+ohdsi:
+  postgresql:
+    auth:
+      postgresPassword: ohdsi
+    primary:
+      resources:
+        limits:
+          memory: 4Gi
+          cpu: 2500m
+        requests:
+          memory: 256Mi
+          cpu: 250m
+  ingress:
+    enabled: true
+    hosts:
+      - host: recruit-ohdsi.127.0.0.1.nip.io
+  cdmInitJob:
+    enabled: true
+    ttlSecondsAfterFinished: ""
+    extraEnv:
+      - name: SETUP_SYNPUF
+        value: "true"
+  achilles:
+    schemas:
+      cdm: "synpuf_cdm"
+      vocab: "synpuf_cdm"
+      res: "synpuf_results"
+    sourceName: "SynPUF-CDMV5"

@@ -1,0 +1,115 @@
+version: "3.7"
+
+services:
+  omopdb:
+    image: quay.io/miracum/omop:test-data-v2
+    restart: unless-stopped
+
+  broadsea-webtools:
+    image: harbor.miracum.org/miracum-etl/omop/webtools:v3.0.1-rc.1-cdm5.3.1
+    restart: unless-stopped
+    ports:
+      - "38084:8080"
+    environment:
+      PGHOST: omopdb
+      DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
+      DATASOURCE_URL: jdbc:postgresql://omopdb:5432/ohdsi
+      DATASOURCE_USERNAME: postgres
+      DATASOURCE_PASSWORD: postgres
+      DATASOURCE_OHDSI_SCHEMA: ohdsi
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: ohdsi
+      SPRING_BATCH_REPOSITORY_TABLEPREFIX: ohdsi.BATCH_
+      FLYWAY_DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
+      FLYWAY_DATASOURCE_URL: jdbc:postgresql://omopdb:5432/ohdsi
+      FLYWAY_DATASOURCE_USERNAME: postgres
+      FLYWAY_DATASOURCE_PASSWORD: postgres
+      FLYWAY_LOCATIONS: classpath:db/migration/postgresql
+      FLYWAY_PLACEHOLDERS_OHDSISCHEMA: ohdsi
+      FLYWAY_SCHEMAS: ohdsi
+    volumes:
+      - ./staging/webtools-entrypoint.sh:/entrypoint.sh:ro
+    entrypoint: /entrypoint.sh
+    depends_on:
+      - omopdb
+
+  fhir:
+    image: docker.io/hapiproject/hapi:v5.5.2-distroless
+    restart: unless-stopped
+    ports:
+      - "38083:8080"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://fhir-db:5432/fhir?currentSchema=public"
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQL10Dialect
+      VALIDATION_REQUESTS_ENABLED: "false"
+      HAPI_FHIR_USE_APACHE_ADDRESS_STRATEGY: "true"
+      HAPI_FHIR_ENFORCE_REFERENTIAL_INTEGRITY_ON_DELETE: "false"
+      HAPI_FHIR_ENFORCE_REFERENTIAL_INTEGRITY_ON_WRITE: "false"
+      HAPI_FHIR_SUBSCRIPTION_RESTHOOK_ENABLED: "true"
+      HAPI_FHIR_ALLOW_MULTIPLE_DELETE: "true"
+    depends_on:
+      - fhir-db
+
+  fhir-db:
+    image: postgres:13.3
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fhir
+
+  loader:
+    image: curlimages/curl:7.83.0
+    command: >
+      -X POST
+      -H "Content-Type: application/json"
+      --retry-connrefuse
+      --connect-timeout 10
+      --retry-max-time 0
+      --retry 500
+      --retry-delay 30
+      --data "@/data/sample-cohortdefinition.json"
+      http://broadsea-webtools:8080/WebAPI/cohortdefinition
+    volumes:
+      - ./staging/sample-cohortdefinition.json:/data/sample-cohortdefinition.json:ro
+    depends_on:
+      - broadsea-webtools
+
+  maildev:
+    image: djfarrelly/maildev:1.1.0
+    restart: unless-stopped
+    ports:
+      - "38085:80"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:15.1.1
+    restart: unless-stopped
+    command:
+      - -Dkeycloak.migration.action=import
+      - -Dkeycloak.migration.provider=singleFile
+      - -Dkeycloak.migration.file=/tmp/realm.json
+    environment:
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      KEYCLOAK_STATISTICS: "all"
+    volumes:
+      - ./staging/aio-export.json:/tmp/realm.json:ro
+    ports:
+      - 38086:8080
+
+  notify:
+    depends_on:
+      - fhir
+      - maildev
+
+  query:
+    depends_on:
+      - fhir
+      - omopdb
+      - broadsea-webtools
+
+  list:
+    depends_on:
+      - fhir

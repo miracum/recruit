@@ -1,0 +1,50 @@
+{
+  "plugins": [
+    [
+      "@semantic-release/commit-analyzer",
+      {
+        "preset": "conventionalcommits",
+        "releaseRules": [
+          {
+            "type": "chore",
+            "release": "minor"
+          }
+        ]
+      }
+    ],
+    [
+      "@semantic-release/release-notes-generator",
+      {
+        "preset": "conventionalcommits",
+        "presetConfig": {
+          "types": [
+            {
+              "type": "chore",
+              "section": "Miscellaneous Chores",
+              "hidden": false
+            }
+          ]
+        }
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "verifyReleaseCmd": "echo ${nextRelease.version} > .VERSION"
+      }
+    ],
+    [
+      "@semantic-release/gitlab",
+      {
+        "gitlabUrl": "https://gitlab.miracum.org",
+        "assets": [
+          {
+            "path": "dist/recruit-docker-compose.tar.gz",
+            "label": "Archive containing just the docker-compose YAML files",
+            "type": "package"
+          }
+        ]
+      }
+    ]
+  ]
+}
