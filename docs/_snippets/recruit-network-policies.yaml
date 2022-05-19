@@ -26,7 +26,7 @@ spec:
               app.kubernetes.io/component: query
       ports:
         - port: http
-    # allow the list module to be accessed via the NGINX Ingress
+    # allow the FHIR server to be accessed via the NGINX Ingress
     - from:
         - namespaceSelector:
             matchLabels:
@@ -55,6 +55,7 @@ spec:
               app.kubernetes.io/name: fhir-server-postgres
       ports:
         - port: tcp-postgresql
+    # allow DNS lookups
     - to:
         - namespaceSelector:
             matchLabels:
@@ -95,6 +96,7 @@ spec:
         - port: http
   egress:
     # allow the list module to initiate connections to the FHIR server
+    # for querying screening lists
     - to:
         - podSelector:
             matchLabels:
@@ -102,6 +104,7 @@ spec:
               app.kubernetes.io/name: fhirserver
       ports:
         - port: http
+    # allow DNS lookups
     - to:
         - namespaceSelector:
             matchLabels:
@@ -136,6 +139,7 @@ spec:
         - port: http
   egress:
     # allow the query module to initiate connections to the FHIR server
+    # to transmit FHIR resources
     - to:
         - podSelector:
             matchLabels:
