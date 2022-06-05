@@ -26,6 +26,16 @@ spec:
               app.kubernetes.io/component: query
       ports:
         - port: http
+    - from:
+        # allow the FHIR server to be scraped by the Prometheus stack
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: kube-prometheus-stack-prometheus
+      ports:
+        - port: metrics
     # allow the FHIR server to be accessed via the NGINX Ingress
     - from:
         - namespaceSelector:
