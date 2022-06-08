@@ -221,15 +221,35 @@ to spread the pods across node topology zones:
 The application can be integrated with a service mesh, both for observability and to secure service-to-service
 communication via mTLS.
 
-The following `values-kind-recruit-service-mesh.yaml` shows how to configure the chart release
-to place Linkerd's `linkerd.io/inject` annotation for all pods (the init CDM and Achilles jobs are not supported yet,
-see <https://github.com/linkerd/linkerd2/issues/8006> and <https://itnext.io/three-ways-to-use-linkerd-with-kubernetes-jobs-c12ccc6d4c7c>):
+### Linkerd
 
-```yaml title="values-kind-recruit-service-mesh.yaml"
---8<-- "_snippets/values-kind-recruit-service-mesh.yaml"
+The following `values-kind-recruit-linkerd.yaml` shows how to configure the chart release
+to place Linkerd's `linkerd.io/inject: enabled` annotation for all service pods (excluding pods created by Jobs):
+
+```yaml title="values-kind-recruit-linkerd.yaml"
+--8<-- "_snippets/values-kind-recruit-linkerd.yaml"
 ```
 
-![Linkerd dashboard view of the recruiT deployment](../_img/observability/linkerd-dashboard.png)
+![Linkerd dashboard view of the recruiT deployment](_img/linkerd-dashboard.png)
+
+You can also use the `linkerd.io/inject: enabled` on the `recruit` namespace, see <https://linkerd.io/2.11/features/proxy-injection/>
+but you will have to manually add a `disabled` annotation to the OHDSI Achilles CronJob and init job.
+
+### Istio
+
+Add a namespace label to instruct Istio to automatically inject Envoy sidecar proxies when you deploy your application later:
+
+```sh
+kubectl label namespace recruit istio-injection=enabled
+```
+
+To disable sidecar proxy injection for the Achilles and OMOP CDM init job, see the following values.yaml:
+
+```yaml title="values-kind-recruit-istio.yaml"
+--8<-- "_snippets/values-kind-recruit-istio.yaml"
+```
+
+![Kiali dashboard view of the recruiT deployment](_img/kiali-dashboard.png)
 
 ## Zero-Trust Networking
 

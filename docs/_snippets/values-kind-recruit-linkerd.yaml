@@ -16,7 +16,6 @@ ohdsi:
   atlas:
     podAnnotations:
       linkerd.io/inject: "enabled"
-
   webApi:
     podAnnotations:
       linkerd.io/inject: "enabled"

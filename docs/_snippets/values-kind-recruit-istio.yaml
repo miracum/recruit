@@ -1,0 +1,10 @@
+ohdsi:
+  cdmInitJob:
+    podAnnotations:
+      sidecar.istio.io/inject: "false"
+  achilles:
+    podAnnotations:
+      sidecar.istio.io/inject: "false"
+
+mailhog:
+  automountServiceAccountToken: true
