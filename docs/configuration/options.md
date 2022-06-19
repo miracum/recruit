@@ -40,7 +40,7 @@ using the `.staging.env` file.
 | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
 | ATLAS_URL                                     | URL of the ATLAS WebAPI endpoint. Usually ends in `/WebAPI`. Used by the query module.¹                                                                                                                         | `http://broadsea-webtools:8080/WebAPI` |
 | ATLAS_DATASOURCE                              | Name of the ATLAS datasource used to generate the cohorts from.                                                                                                                                                 | `OHDSI-CDMV5`                          |
-| OMOP_JDBCURL                                  | JDBC url of the OMOP database.                                                                                                                                                                                  | `jdbc:postgresql://omopdb:5432/OHDSI`  |
+| OMOP_JDBCURL                                  | JDBC URL of the OMOP database.                                                                                                                                                                                  | `jdbc:postgresql://omopdb:5432/OHDSI`  |
 | OMOP_USERNAME                                 | Username to access the OMOP database.                                                                                                                                                                           | `postgres`                             |
 | OMOP_PASSWORD                                 | Password to access the OMOP database.                                                                                                                                                                           | `postgres`                             |
 | OMOP_RESULTSSCHEMA                            | Name of the database schema containing the results of the cohort generation.                                                                                                                                    | `synpuf_results`                       |
@@ -58,7 +58,7 @@ using the `.staging.env` file.
 
 ¹: This is usually the same URL you configured in the `config-local.js` file when setting up the ATLAS server.
 
-²: E.g., the default values of `UC1,Test` require the cohort definitions name or description in Atlas to contain either
+²: For example, the default values of `UC1,Test` require the cohort definitions name or description in Atlas to contain either
 the string `[UC1]` or `[Test]` in order to be processed by the query module.
 
 ## Notification Module
@@ -67,7 +67,7 @@ the string `[UC1]` or `[Test]` in order to be processed by the query module.
 | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
 | NOTIFY_WEBHOOK_ENDPOINT    | External URL for the notification module's webhook endpoint. Should end in `/on-list-change`.³                                               | `http://notify:8080/on-list-change`                |
 | NOTIFY_RULES_CONFIG_PATH   | Path to the notification rule configuration file. The file is mounted inside the notification module.                                        | `./staging/notify-rules.yml`                       |
-| NOTIFY_MAIL_HOST           | Hostname of the SMTP server used to send notification emails.                                                                                | `maildev`                                          |
+| NOTIFY_MAIL_HOST           | Host of the SMTP server used to send notification emails.                                                                                    | `maildev`                                          |
 | NOTIFY_MAIL_SMTP_PORT      | SMTP port on the host.                                                                                                                       | `25`                                               |
 | NOTIFY_MAIL_USERNAME       | SMTP username.                                                                                                                               | `user`                                             |
 | NOTIFY_MAIL_PASSWORD       | SMTP password.                                                                                                                               | `pass`                                             |
@@ -75,7 +75,7 @@ the string `[UC1]` or `[Test]` in order to be processed by the query module.
 | NOTIFY_MAILER_FROM         | The sender email address for the created notification mails.                                                                                 | `rekrutierung@miracum.org`                         |
 
 ³: If your FHIR server is running on `fhir.example.com` and your notification module runs on `notify.example.com:8080`,
-then this value should be set to `http://notify.example.com:8080/on-list-change`. The default exposed port of the notification module is `38087`. This external port is used when the FHIR server cannot access the notification module using the Docker-network internal host and port `notify:8080`.
+then this value should be set to `http://notify.example.com:8080/on-list-change`. The default exposed port of the notification module is `38087`. This external port is used when the FHIR server can't access the notification module using the Docker-network internal host and port `notify:8080`.
 
 ⁴: If your screening list is running on `https://list.example.com:38080/`, then this value should be set to
 `https://list.example.com:38080/recommendations/[list_id]`.

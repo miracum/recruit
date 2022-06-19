@@ -2,8 +2,8 @@
 
 All contributions are welcome!
 
-Development and issue tracking is currently happening in the internal MIRACUM GitLab instance.
-But all internal recruIT repositories are mirrored to the MIRACUM GitHub organization:
+Development and issue tracking is currently happening in the internal MIRACUM GitLab instance,
+but all internal recruIT repositories are mirrored to the MIRACUM GitHub organization:
 
 | recruIT module                              | GitLab Repository                                                        | GitHub Repository                                              |
 | ------------------------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------- |
@@ -14,5 +14,5 @@ But all internal recruIT repositories are mirrored to the MIRACUM GitHub organiz
 | Notify                                      | <https://gitlab.miracum.org/miracum/uc1/recruit/notify>                  | <https://github.com/miracum/recruit-notify>                    |
 
 If you want to provide an external contribution, or report a bug or feature request,
-please first create an issue on the corresponding GitHub repository (or simply the <https://github.com/miracum/recruit> repository)
+please first create an issue on the corresponding GitHub repository (or the <https://github.com/miracum/recruit> repository)
 and we can assist and discuss further.

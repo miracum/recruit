@@ -1,11 +1,11 @@
 # Using an existing FHIR server
 
-## FHIR Subscription Support
+## FHIR subscription support
 
 The notification module relies on the server's [FHIR Subscription](https://www.hl7.org/fhir/subscription.html) support
-in order to be notified whenever a screening list has beedn updated by the query module. Many FHIR servers don't support
+to be notified whenever a screening list has been updated by the query module. Many FHIR servers don't support
 this FHIR subscription mechanism, but there is no technical reason for the recruIT infrastructure to entirely depend on it.
-So please create an issue if support for a non-HAPI FHIR server is desired.
+Please create an issue if support for a non-HAPI FHIR server is desired.
 
 ## Pre-filled server
 

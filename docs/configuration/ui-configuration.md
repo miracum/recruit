@@ -1,17 +1,17 @@
-# Customizing the UI
+# Customizing the user interface
 
 ## Configuring columns shown in the screening list
 
 See the `HIDE_DEMOGRAPHICS`, `HIDE_LAST_VISIT`, `HIDE_EHR_BUTTON` options in the
 [configuration section for the screening list](./options.md#screening-list).
 
-## Hiding screening lists from the UI
+## Hiding screening lists from the user interface
 
 !!! note ""
 
     Requires `list` module version 2.14 or later
 
-Any user having the `admin` role will note switch controls to mark individual screening lists as "inactive".
+Any user having the `admin` role will note switch controls to mark individual screening lists as inactive.
 These will then no longer show up for regular users.
 
 ![Screening List overview with active and inactive studies](../_img/customize-ui/list-active-inactive-studies.png)

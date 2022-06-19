@@ -6,7 +6,7 @@
     to be deployed.
 
 If the `Patient` and `Encounter` resources in the FHIR server are pseudonymized (which is true if the OMOP DB is pseudonymized),
-you may want to de-pseudonymize them before displaying them in the screening list in order to show the original patient
+you may want to de-pseudonymize them before displaying them in the screening list to show the original patient
 and encounter identifiers.
 
 On the `list` module, you need to set the environment variable `DE_PSEUDONYMIZATION_ENABLED` to `true`. This will cause

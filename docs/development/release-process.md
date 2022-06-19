@@ -14,13 +14,13 @@ image is build. Usually, this happens whenever there's a new commit to the maste
 [semantic-release](https://github.com/semantic-release/semantic-release).
 
 Because all three modules (plus at least a FHIR server) are required to run the entire application, this repository is
-used to bundle them within one easy-to-use `docker-compose.yml`. The [Helm Chart](https://gitlab.miracum.org/miracum/charts/-/tree/master/charts/recruit)
+used to bundle them within one `docker-compose.yml`. The [Helm Chart](https://gitlab.miracum.org/miracum/charts/-/tree/master/charts/recruit)
 works the same way.
 
-To avoid having to manually bump version numbers for each release in one of the repos above, we use [Renovate](https://github.com/renovatebot/renovate)
+To avoid having to manually bump version numbers for each release in one of the repositories above, we use [Renovate](https://github.com/renovatebot/renovate)
 to automatically update the image tags in the compose file. Renovate creates a new MR whenever one of the components is updated
 and is configured to merge it without intervention. This merge in turn triggers the `semantic-release` in the `.gitlab-ci.yml`,
-which creates a new release and tag in this repo.
+which creates a new release and tag in this repository.
 
 Note that `.releaserc.json` is configured to bump the minor version whenever there's a commit of type
 `chore(deps)` to the master branch.

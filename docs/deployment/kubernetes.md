@@ -33,7 +33,7 @@ helm install -n recruit \
   recruit miracum/recruit
 ```
 
-!!! warning "Auto-generated default passwords for the included databases"
+!!! warning "Auto generated default passwords for the included databases"
 
     The included HAPI FHIR server, OHDSI, and - if high-availability is enabled - recruIT chart itself depend on the
     [Bitnami PostgreSQL chart](https://github.com/bitnami/charts/tree/master/bitnami/postgresql). By default, this chart
@@ -70,7 +70,7 @@ NOTES:
   http://recruit-list.127.0.0.1.nip.io/
 ```
 
-## Example Installation of the recruIT chart with Ingress support using KinD
+## Example installation of the recruIT chart with ingress support using KinD
 
 This will demonstrate how to install recruIT on your local machine using KinD including exposing the services behind an ingress.
 
@@ -104,7 +104,7 @@ Install the NGINX ingress controller
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
 ```
 
-Wait until it is ready to process requests by running
+Wait until it's ready to process requests by running
 
 ```sh
 kubectl wait --namespace ingress-nginx \
@@ -147,7 +147,7 @@ helm install --create-namespace -n recruit \
     You should set `ohdsi.cdmInitJob.enabled=false` when the job has completed once when changing the chart configuration.
 
 The application stack is now deployed. You can wait for the OMOP CDM init job to be done by running the following.
-But be wary that this may take quite some time to complete.
+This may take quite some time to complete.
 
 ```sh
 kubectl wait job \
@@ -216,7 +216,7 @@ to spread the pods across node topology zones:
 --8<-- "_snippets/values-kind-recruit-ha.yaml"
 ```
 
-## Service Mesh Integration
+## Service mesh integration
 
 The application can be integrated with a service mesh, both for observability and to secure service-to-service
 communication via mTLS.
@@ -251,7 +251,7 @@ To disable sidecar proxy injection for the Achilles and OMOP CDM init job, see t
 
 ![Kiali dashboard view of the recruiT deployment](_img/kiali-dashboard.png)
 
-## Zero-Trust Networking
+## Zero-trust networking
 
 To limit the communication between the components you can deploy [Kubernetes NetworkPolicy](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 resources. Because the details of a deployment can differ significantly (external databases, dependencies spread across

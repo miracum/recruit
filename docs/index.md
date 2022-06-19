@@ -25,7 +25,7 @@ is used to define trial metadata.
 
 ### Query Module
 
-The query module, simply referred to as `query`, uses the [OHDSI WebAPI](https://github.com/OHDSI/WebAPI) to list the
+The query module, also referred to as `query`, uses the [OHDSI WebAPI](https://github.com/OHDSI/WebAPI) to list the
 studies ("cohort definitions") [created using OHDSI Atlas](https://ohdsi.github.io/TheBookOfOhdsi/Cohorts.html#Cohorts),
 generates them to identify the patients in the OMOP database, maps these OMOP patients to FHIR resources, and finally sends
 them to a FHIR server for persistence.

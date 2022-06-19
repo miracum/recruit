@@ -1,7 +1,7 @@
 # Docker Compose
 
 The main repository contains the `docker-compose.yaml` files to deploy recruIT via Docker Compose.
-The following guides assume that you have cloned it and it is currently your working directory:
+The following guides assume that you have cloned it to your current working directory:
 
 ```sh
 git clone https://github.com/miracum/recruit.git
@@ -45,7 +45,7 @@ You can now access the services at the following localhost ports:
 | MailDev                | <http://localhost:38085/>      |                                                                                               |
 | Keycloak               | <http://localhost:38086/>      | login with username: `admin` and password: `admin`                                            |
 
-By default, the query module runs every 5 minutes to check for new study candidates. So after some time, you should see
+By default, the query module runs every 5 minutes to check for new study candidates. After some time, you should see
 the following when opening the screening list at <http://localhost:38080/> and logging in as `uc1-admin`/`admin`:
 
 ![Screening list overview](../_img/docker-compose/list-overview.png)
@@ -64,11 +64,11 @@ The instructions above installed a FHIR server, a pre-filled OMOP database, the 
 a mock mail viewer, and pre-configured Keycloak.
 
 This standalone, or "production-grade" installation assumes that you already have deployed a FHIR server, an OMOP database,
-the OHDSI WebAPI and Atlas, and optionally Keycloak. So all that is needed to do is configure the recruIT modules with the
+the OHDSI WebAPI and Atlas services, and optionally, Keycloak. All that's needed to do is configure the recruIT modules with the
 correct parameters and start them.
 
-There are several environment variables which need to be set before calling `docker-compose up`.
-You can create a .env file in the current directory and set them according to your environment.
-See the `.staging.env` file in the `docker-compose` folder for an example configuration.
+Several environment variables need to be set before calling `docker-compose up`.
+You can create a .env file in the current directory and set them according to your environment based on the `.staging.env`
+example configuration file in the `docker-compose` folder.
 
 You can find a [list of available configuration options here](../configuration/options.md).
