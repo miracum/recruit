@@ -3,15 +3,19 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    branches:
+      - master
 jobs:
   deploy:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.x
       - run: pip install mkdocs-material
       - run: mkdocs build --strict --verbose
       # TODO: re-enable once the repo is public
       # - run: mkdocs gh-deploy --force
+      #   if: github.event_name != 'pull_request'
