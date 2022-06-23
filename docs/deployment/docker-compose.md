@@ -37,13 +37,13 @@ docker-compose --project-name=recruit \
 
 You can now access the services at the following localhost ports:
 
-| Service                | Ingress URL                    | Note                                                                                          |
-| ---------------------- | ------------------------------ | --------------------------------------------------------------------------------------------- |
-| OHDSI Atlas            | <http://localhost:38084/atlas> |                                                                                               |
-| recruIT Screening List | <http://localhost:38080/>      | login with username: `user1` and password: `user1`; Or as `uc1-admin`/`admin` for full access |
-| HAPI FHIR Server       | <http://localhost:38083/>      |                                                                                               |
-| MailDev                | <http://localhost:38085/>      |                                                                                               |
-| Keycloak               | <http://localhost:38086/>      | login with username: `admin` and password: `admin`                                            |
+| Service                | Ingress URL                     | Note                                                                                          |
+| ---------------------- | ------------------------------- | --------------------------------------------------------------------------------------------- |
+| OHDSI Atlas            | <http://localhost:38084/atlas/> |                                                                                               |
+| recruIT Screening List | <http://localhost:38080/>       | login with username: `user1` and password: `user1`; Or as `uc1-admin`/`admin` for full access |
+| HAPI FHIR Server       | <http://localhost:38083/>       |                                                                                               |
+| MailDev                | <http://localhost:38085/>       |                                                                                               |
+| Keycloak               | <http://localhost:38086/>       | login with username: `admin` and password: `admin`                                            |
 
 By default, the query module runs every 5 minutes to check for new study candidates. After some time, you should see
 the following when opening the screening list at <http://localhost:38080/> and logging in as `uc1-admin`/`admin`:

@@ -2,10 +2,12 @@ version: "3.7"
 
 services:
   list:
-    image: ghcr.io/miracum/recruit/list:v2.15.0
+    image: ghcr.io/miracum/recruit/list:v2.15.4
     restart: unless-stopped
+    cap_drop:
+      - ALL
     ports:
-      - "38080:8080"
+      - "127.0.0.1:38080:8080"
     environment:
       JAEGER_SERVICE_NAME: uc1-recruit-list
       FHIR_URL: ${FHIR_URL:?}
@@ -24,8 +26,10 @@ services:
       - ${NOTIFY_RULES_CONFIG_PATH:?}:/etc/rules.yaml:ro
 
   query:
-    image: ghcr.io/miracum/recruit/query:v3.16.1
+    image: ghcr.io/miracum/recruit/query:v3.16.2
     restart: unless-stopped
+    cap_drop:
+      - ALL
     environment:
       JAEGER_SERVICE_NAME: uc1-recruit-query
       FHIR_URL: ${FHIR_URL:?}
@@ -53,8 +57,10 @@ services:
   notify:
     image: ghcr.io/miracum/recruit/notify:v3.2.4
     restart: unless-stopped
+    cap_drop:
+      - ALL
     ports:
-      - "38087:8080"
+      - "127.0.0.1:38087:8080"
     environment:
       JAEGER_SERVICE_NAME: uc1-recruit-notify
       FHIR_URL: ${FHIR_URL:?}

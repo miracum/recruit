@@ -2,14 +2,16 @@ version: "3.7"
 
 services:
   omopdb:
-    image: quay.io/miracum/omop:test-data-v2
+    image: quay.io/miracum/omop:test-data-v3
     restart: unless-stopped
 
-  broadsea-webtools:
-    image: harbor.miracum.org/miracum-etl/omop/webtools:v3.0.1-rc.1-cdm5.3.1
-    restart: unless-stopped
+  ohdsi-webapi:
+    image: docker.io/ohdsi/webapi:2.11.0
     ports:
-      - "38084:8080"
+      - "127.0.0.1:38089:8080"
+    restart: unless-stopped
+    cap_drop:
+      - ALL
     environment:
       PGHOST: omopdb
       DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
@@ -27,23 +29,36 @@ services:
       FLYWAY_LOCATIONS: classpath:db/migration/postgresql
       FLYWAY_PLACEHOLDERS_OHDSISCHEMA: ohdsi
       FLYWAY_SCHEMAS: ohdsi
-    volumes:
-      - ./staging/webtools-entrypoint.sh:/entrypoint.sh:ro
-    entrypoint: /entrypoint.sh
+      SECURITY_CORS_ENABLED: "true"
+      SECURITY_ORIGIN: "http://localhost:38084"
     depends_on:
       - omopdb
 
-  fhir:
-    image: docker.io/hapiproject/hapi:v5.5.2-distroless
-    restart: unless-stopped
+  ohdsi-atlas:
+    image: docker.io/ohdsi/atlas:2.11.0
     ports:
-      - "38083:8080"
+      - "127.0.0.1:38084:8080"
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    environment:
+      WEBAPI_URL: "http://localhost:38089/WebAPI/"
+    depends_on:
+      - ohdsi-webapi
+
+  fhir:
+    image: docker.io/hapiproject/hapi:v6.0.1
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    ports:
+      - "127.0.0.1:38083:8080"
     environment:
       SPRING_DATASOURCE_URL: "jdbc:postgresql://fhir-db:5432/fhir?currentSchema=public"
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
-      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQL10Dialect
+      spring.jpa.properties.hibernate.dialect: ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect
       VALIDATION_REQUESTS_ENABLED: "false"
       HAPI_FHIR_USE_APACHE_ADDRESS_STRATEGY: "true"
       HAPI_FHIR_ENFORCE_REFERENTIAL_INTEGRITY_ON_DELETE: "false"
@@ -54,14 +69,16 @@ services:
       - fhir-db
 
   fhir-db:
-    image: postgres:13.3
+    image: postgres:14.4
     restart: unless-stopped
     environment:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: fhir
 
   loader:
-    image: curlimages/curl:7.83.0
+    image: curlimages/curl:7.83.1
+    cap_drop:
+      - ALL
     command: >
       -X POST
       -H "Content-Type: application/json"
@@ -71,21 +88,25 @@ services:
       --retry 500
       --retry-delay 30
       --data "@/data/sample-cohortdefinition.json"
-      http://broadsea-webtools:8080/WebAPI/cohortdefinition
+      http://ohdsi-webapi:8080/WebAPI/cohortdefinition
     volumes:
       - ./staging/sample-cohortdefinition.json:/data/sample-cohortdefinition.json:ro
     depends_on:
-      - broadsea-webtools
+      - ohdsi-webapi
 
   maildev:
-    image: djfarrelly/maildev:1.1.0
+    image: maildev/maildev:2.0.5
     restart: unless-stopped
+    cap_drop:
+      - ALL
     ports:
-      - "38085:80"
+      - "127.0.0.1:38085:1080"
 
   keycloak:
     image: quay.io/keycloak/keycloak:15.1.1
     restart: unless-stopped
+    cap_drop:
+      - ALL
     command:
       - -Dkeycloak.migration.action=import
       - -Dkeycloak.migration.provider=singleFile
@@ -97,7 +118,7 @@ services:
     volumes:
       - ./staging/aio-export.json:/tmp/realm.json:ro
     ports:
-      - 38086:8080
+      - "127.0.0.1:38086:8080"
 
   notify:
     depends_on:
@@ -108,7 +129,7 @@ services:
     depends_on:
       - fhir
       - omopdb
-      - broadsea-webtools
+      - ohdsi-webapi
 
   list:
     depends_on:

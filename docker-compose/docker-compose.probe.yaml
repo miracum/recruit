@@ -2,15 +2,17 @@ version: "3.7"
 
 services:
   health-probes:
-    image: curlimages/curl:7.83.0
+    image: curlimages/curl:7.83.1
+    cap_drop:
+      - ALL
     command: >
       sh -euxc "curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://fhir:8080/fhir/metadata &&
                 curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://query:8080/actuator/health &&
                 curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://notify:8080/actuator/health &&
                 curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://list:8080/api/health/readiness &&
-                curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://maildev:80/healthz &&
-                curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://broadsea-webtools:8080/WebAPI/info &&
-                curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://broadsea-webtools:8080/atlas/ &&
+                curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://maildev:1080/healthz &&
+                curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://ohdsi-webapi:8080/WebAPI/info &&
+                curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://ohdsi-atlas:8080/atlas/ &&
                 curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://keycloak:8080/"
     depends_on:
       - fhir
@@ -18,5 +20,6 @@ services:
       - notify
       - list
       - maildev
-      - broadsea-webtools
+      - ohdsi-webapi
+      - ohdsi-atlas
       - keycloak
