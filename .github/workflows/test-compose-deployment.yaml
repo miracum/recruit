@@ -8,13 +8,15 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - run: |
+      - name: Deploy using Docker Compose in staging mode
+        run: |
           docker compose \
             --project-name=recruit \
             --env-file=docker-compose/.staging.env \
             -f docker-compose/docker-compose.yaml \
             -f docker-compose/docker-compose.staging.yaml up --detach
-      - run: |
+      - name: Run basic health probes
+        run: |
           docker compose \
             --project-name=recruit \
             --env-file=docker-compose/.staging.env \
