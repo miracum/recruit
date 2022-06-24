@@ -1,0 +1,23 @@
+name: test-compose-deployment
+on:
+  pull_request:
+    branches:
+      - master
+jobs:
+  test-compose-deployment:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          docker compose \
+            --project-name=recruit \
+            --env-file=docker-compose/.staging.env \
+            -f docker-compose/docker-compose.yaml \
+            -f docker-compose/docker-compose.staging.yaml up --detach
+      - run: |
+          docker compose \
+            --project-name=recruit \
+            --env-file=docker-compose/.staging.env \
+            -f docker-compose/docker-compose.yaml \
+            -f docker-compose/docker-compose.staging.yaml \
+            -f docker-compose/docker-compose.probe.yaml run health-probes
