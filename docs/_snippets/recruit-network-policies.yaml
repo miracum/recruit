@@ -145,7 +145,7 @@ spec:
             matchLabels:
               app.kubernetes.io/instance: kube-prometheus-stack-prometheus
       ports:
-        - port: metrics
+        - port: http-metrics
   egress:
     # allow the query module to initiate connections to the FHIR server
     # to transmit FHIR resources
@@ -211,7 +211,7 @@ spec:
             matchLabels:
               app.kubernetes.io/instance: kube-prometheus-stack-prometheus
       ports:
-        - port: metrics
+        - port: http-metrics
     # allow the notify module to receive subscription invocations from the FHIR server
     - from:
         - podSelector:
