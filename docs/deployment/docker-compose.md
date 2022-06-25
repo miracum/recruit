@@ -8,13 +8,17 @@ git clone https://github.com/miracum/recruit.git
 cd recruit/
 ```
 
+## Prerequisites
+
+Docker CLI version 20.10.14 or later.
+
 ## Installation for local testing using sample data
 
 To run everything locally with Keycloak-based authentication enabled, a sample cohort,
 and an OMOP DB filled with sample data:
 
 ```sh
-docker-compose --project-name=recruit \
+docker compose --project-name=recruit \
     --env-file=docker-compose/.staging.env \
     -f docker-compose/docker-compose.yaml \
     -f docker-compose/docker-compose.staging.yaml up
@@ -28,7 +32,7 @@ You can run the following to probe every component for its availability/health s
     so it may take up to 5 minutes for it to appear healthy.
 
 ```sh
-docker-compose --project-name=recruit \
+docker compose --project-name=recruit \
     --env-file=docker-compose/.staging.env \
     -f docker-compose/docker-compose.yaml \
     -f docker-compose/docker-compose.staging.yaml \

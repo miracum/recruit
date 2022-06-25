@@ -1,9 +1,12 @@
-version: "3.7"
+version: "3.8"
 
 services:
   list:
     image: ghcr.io/miracum/recruit/list:v2.15.4
     restart: unless-stopped
+    ipc: private
+    security_opt:
+      - "no-new-privileges:true"
     cap_drop:
       - ALL
     ports:
@@ -28,6 +31,9 @@ services:
   query:
     image: ghcr.io/miracum/recruit/query:v3.16.2
     restart: unless-stopped
+    ipc: private
+    security_opt:
+      - "no-new-privileges:true"
     cap_drop:
       - ALL
     environment:
@@ -57,6 +63,9 @@ services:
   notify:
     image: ghcr.io/miracum/recruit/notify:v3.2.4
     restart: unless-stopped
+    ipc: private
+    security_opt:
+      - "no-new-privileges:true"
     cap_drop:
       - ALL
     ports:
