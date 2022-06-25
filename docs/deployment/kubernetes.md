@@ -129,7 +129,7 @@ The `ohdsi.cdmInitJob.extraEnv` option `SETUP_SYNPUF=true` means that the OMOP d
     <https://github.com/miracum/charts/blob/master/charts/recruit/README.md#configuration>
 
 ```yaml title="values-kind-recruit.yaml"
---8<-- "_snippets/values-kind-recruit.yaml"
+--8<-- "_snippets/k8s/values-kind-recruit.yaml"
 ```
 
 And finally, run
@@ -186,7 +186,7 @@ helm install --create-namespace -n monitoring kube-prometheus-stack prometheus-c
 You can now update your release by combining the `values-kind-recruit.yaml` from above with the following:
 
 ```yaml title="values-kind-recruit-enable-servicemonitors.yaml"
---8<-- "_snippets/values-kind-recruit-enable-servicemonitors.yaml"
+--8<-- "_snippets/k8s/values-kind-recruit-enable-servicemonitors.yaml"
 ```
 
 ```sh
@@ -213,7 +213,7 @@ resources, and uses [pod topology spread constraints](https://kubernetes.io/docs
 to spread the pods across node topology zones:
 
 ```yaml title="values-kind-recruit-ha.yaml"
---8<-- "_snippets/values-kind-recruit-ha.yaml"
+--8<-- "_snippets/k8s/values-kind-recruit-ha.yaml"
 ```
 
 ## Service mesh integration
@@ -227,7 +227,7 @@ The following `values-kind-recruit-linkerd.yaml` shows how to configure the char
 to place Linkerd's `linkerd.io/inject: enabled` annotation for all service pods (excluding pods created by Jobs):
 
 ```yaml title="values-kind-recruit-linkerd.yaml"
---8<-- "_snippets/values-kind-recruit-linkerd.yaml"
+--8<-- "_snippets/k8s/values-kind-recruit-linkerd.yaml"
 ```
 
 ![Linkerd dashboard view of the recruiT deployment](_img/linkerd-dashboard.png)
@@ -246,7 +246,7 @@ kubectl label namespace recruit istio-injection=enabled
 To disable sidecar proxy injection for the Achilles and OMOP CDM init job, see the following values.yaml:
 
 ```yaml title="values-kind-recruit-istio.yaml"
---8<-- "_snippets/values-kind-recruit-istio.yaml"
+--8<-- "_snippets/k8s/values-kind-recruit-istio.yaml"
 ```
 
 ![Kiali dashboard view of the recruiT deployment](_img/kiali-dashboard.png)
@@ -269,5 +269,5 @@ You can use <https://editor.cilium.io/> to visualize and edit individual policie
 or <https://orca.tufin.io/netpol/#> to have the entire policies explained.
 
 ```yaml title="recruit-network-policies.yaml"
---8<-- "_snippets/recruit-network-policies.yaml"
+--8<-- "_snippets/k8s/recruit-network-policies.yaml"
 ```

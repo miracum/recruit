@@ -1,0 +1,79 @@
+name: test-deployments
+on:
+  pull_request:
+    paths:
+      - "docker-compose/**"
+      - "docs/_snippets/k8s/**"
+    branches:
+      - master
+jobs:
+  test-compose-deployment:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # renovate: tag=v3.0.2
+      - name: Deploy using Docker Compose in staging mode
+        run: |
+          docker compose \
+            --project-name=recruit \
+            --env-file=docker-compose/.staging.env \
+            -f docker-compose/docker-compose.yaml \
+            -f docker-compose/docker-compose.staging.yaml up --detach
+
+      - name: List containers
+        run: |
+          docker compose \
+            --project-name=recruit \
+            --env-file=docker-compose/.staging.env \
+            -f docker-compose/docker-compose.yaml \
+            -f docker-compose/docker-compose.staging.yaml ps
+
+      - name: Run basic health probes
+        run: |
+          docker compose \
+            --project-name=recruit \
+            --env-file=docker-compose/.staging.env \
+            -f docker-compose/docker-compose.yaml \
+            -f docker-compose/docker-compose.staging.yaml \
+            -f docker-compose/docker-compose.probe.yaml run health-probes
+
+      - name: Display logs
+        if: always()
+        run: |
+          docker compose \
+            --project-name=recruit \
+            --env-file=docker-compose/.staging.env \
+            -f docker-compose/docker-compose.yaml \
+            -f docker-compose/docker-compose.staging.yaml logs
+
+  # test-helm-deployment:
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # renovate: tag=v3.0.2
+
+  #     - name: Create k8s Kind Cluster
+  #       uses: helm/kind-action@d08cf6ff1575077dee99962540d77ce91c62387d # tag=v1.3.0
+  #       with:
+  #         version: v0.13.0
+
+  #     - name: Install prerequisites
+  #       run: |
+  #         helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+  #         helm install --create-namespace -n monitoring \
+  #           --set grafana.enabled=false \
+  #           --set alertmanager.enabled=false \
+  #           kube-prometheus-stack prometheus-community/kube-prometheus-stack
+
+  #     - name: Install recruIT Helm chart (helm install)
+  #       run: |
+  #         helm repo add miracum https://miracum.github.io/charts
+  #         helm install --create-namespace --namespace=recruit \
+  #           --render-subchart-notes \
+  #           -f docs/_snippets/values-kind-recruit.yaml \
+  #           -f docs/_snippets/values-kind-recruit-enable-servicemonitors.yaml \
+  #           -f docs/_snippets/values-kind-recruit-ha.yaml \
+  #           --set ohdsi.cdmInitJob.enabled=false \
+  #           recruit miracum/recruit
+
+  #     - name: Test if installation succeeded (helm test)
+  #       run: |
+  #         helm test --namespace=recruit recruit
