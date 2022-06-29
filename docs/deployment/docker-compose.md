@@ -64,15 +64,15 @@ Finally, checking the mail viewer at <http://localhost:38085/> you can see the e
 
 ## Standalone installation
 
-The instructions above installed a FHIR server, a pre-filled OMOP database, the OHDSI tools initialized with a sample cohort,
-a mock mail viewer, and pre-configured Keycloak.
+The instructions above used the `docker-compose/docker-compose.staging.yaml` to deploy a FHIR server,
+a pre-filled OMOP CDM database, the OHDSI tools initialized with sample cohorts, a mock email viewer,
+and a pre-configured Keycloak.
 
-This standalone, or "production-grade" installation assumes that you already have deployed a FHIR server, an OMOP database,
-the OHDSI WebAPI and Atlas services, and optionally, Keycloak. All that's needed to do is configure the recruIT modules with the
-correct parameters and start them.
+The recommended way to install in "production-mode" is to already have deployed all these services and only need to
+configure and deploy the recruIT modules. These modules are listed in the `docker-compose/docker-compose.yaml` file.
 
-Several environment variables need to be set before calling `docker-compose up`.
-You can create a .env file in the current directory and set them according to your environment based on the `.staging.env`
+Several environment variables need to be set before calling `docker-compose -f docker-compose/docker-compose.yaml up`.
+You can create a `.env` file in the current directory and set them according to your environment based on the `.staging.env`
 example configuration file in the `docker-compose` folder.
 
 You can find a [list of available configuration options here](../configuration/options.md).
