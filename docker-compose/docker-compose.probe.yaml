@@ -1,8 +1,6 @@
-version: "3.8"
-
 services:
   health-probes:
-    image: curlimages/curl:7.83.1
+    image: docker.io/curlimages/curl:7.83.1
     ipc: private
     security_opt:
       - "no-new-privileges:true"

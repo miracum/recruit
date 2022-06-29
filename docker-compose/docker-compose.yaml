@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   list:
     image: ghcr.io/miracum/recruit/list:v2.15.4
@@ -11,8 +9,9 @@ services:
       - ALL
     ports:
       - "127.0.0.1:38080:8080"
+    read_only: true
     environment:
-      JAEGER_SERVICE_NAME: uc1-recruit-list
+      JAEGER_SERVICE_NAME: recruit-list
       FHIR_URL: ${FHIR_URL:?}
       KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:?}
       KEYCLOAK_REALM: ${KEYCLOAK_REALM:?}
@@ -36,15 +35,18 @@ services:
       - "no-new-privileges:true"
     cap_drop:
       - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
     environment:
-      JAEGER_SERVICE_NAME: uc1-recruit-query
+      JAEGER_SERVICE_NAME: recruit-query
       FHIR_URL: ${FHIR_URL:?}
       OMOP_JDBCURL: ${OMOP_JDBCURL:?}
       OMOP_USERNAME: ${OMOP_USERNAME:?}
       OMOP_PASSWORD: ${OMOP_PASSWORD:?}
       OMOP_RESULTSSCHEMA: ${OMOP_RESULTSSCHEMA:?}
       OMOP_CDMSCHEMA: ${OMOP_CDMSCHEMA:?}
-      ATLAS_URL: ${ATLAS_URL:?}
+      QUERY_WEBAPI_BASE_URL: ${ATLAS_URL:?}
       ATLAS_DATASOURCE: ${ATLAS_DATASOURCE:?}
       QUERY_SCHEDULE_UNIXCRON: ${QUERY_SCHEDULE_UNIXCRON:?}
       QUERY_SELECTOR_MATCHLABELS: ${QUERY_SELECTOR_MATCHLABELS:?}
@@ -70,8 +72,11 @@ services:
       - ALL
     ports:
       - "127.0.0.1:38087:8080"
+    read_only: true
+    tmpfs:
+      - /tmp
     environment:
-      JAEGER_SERVICE_NAME: uc1-recruit-notify
+      JAEGER_SERVICE_NAME: recruit-notify
       FHIR_URL: ${FHIR_URL:?}
       NOTIFY_MAILER_LINKTEMPLATE: ${NOTIFY_MAILER_LINKTEMPLATE:?}
       NOTIFY_MAILER_FROM: ${NOTIFY_MAILER_FROM:?}

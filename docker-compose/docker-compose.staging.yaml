@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   omopdb:
     image: ghcr.io/miracum/recruit/omop-cdm-test-db:v4.0.0
@@ -7,7 +5,8 @@ services:
     ipc: private
     security_opt:
       - "no-new-privileges:true"
-    mem_limit: 512m
+    shm_size: 1024m
+    mem_limit: 2048m
 
   ohdsi-webapi:
     image: docker.io/ohdsi/webapi:2.11.0
@@ -20,6 +19,9 @@ services:
     cap_drop:
       - ALL
     mem_limit: 2048m
+    read_only: true
+    tmpfs:
+      - /tmp
     environment:
       PGHOST: omopdb
       DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
@@ -69,6 +71,10 @@ services:
     security_opt:
       - "no-new-privileges:true"
     mem_limit: 2048m
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/target
     environment:
       SPRING_DATASOURCE_URL: "jdbc:postgresql://fhir-db:5432/fhir?currentSchema=public"
       SPRING_DATASOURCE_USERNAME: postgres
@@ -85,7 +91,7 @@ services:
       - fhir-db
 
   fhir-db:
-    image: postgres:14.4
+    image: docker.io/library/postgres:14.4
     restart: unless-stopped
     mem_limit: 512m
     ipc: private
@@ -96,7 +102,7 @@ services:
       POSTGRES_DB: fhir
 
   maildev:
-    image: maildev/maildev:2.0.5
+    image: docker.io/maildev/maildev:2.0.5
     restart: unless-stopped
     ipc: private
     security_opt:
@@ -105,7 +111,7 @@ services:
       - ALL
     ports:
       - "127.0.0.1:38085:1080"
-    mem_limit: 128m
+    mem_limit: 64m
 
   keycloak:
     image: quay.io/keycloak/keycloak:15.1.1
@@ -143,6 +149,6 @@ services:
       - ohdsi-webapi
 
   list:
-    mem_limit: 128m
+    mem_limit: 64m
     depends_on:
       - fhir
