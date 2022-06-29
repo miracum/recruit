@@ -23,7 +23,6 @@ services:
     tmpfs:
       - /tmp
     environment:
-      PGHOST: omopdb
       DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
       DATASOURCE_URL: jdbc:postgresql://omopdb:5432/ohdsi
       DATASOURCE_USERNAME: postgres
