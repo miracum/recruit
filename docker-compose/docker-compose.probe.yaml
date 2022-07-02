@@ -7,6 +7,7 @@ services:
     cap_drop:
       - ALL
     mem_limit: 32m
+    privileged: false
     command: >
       sh -euxc "curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://fhir:8080/fhir/metadata &&
                 curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://query:8080/actuator/health &&
