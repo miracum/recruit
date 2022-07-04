@@ -39,18 +39,19 @@ docker compose --project-name=recruit \
     -f docker-compose/docker-compose.probe.yaml run health-probes
 ```
 
-You can now access the services at the following localhost ports:
+The `docker-compose.staging.yaml` also includes [Traefik](https://traefik.io/) as a reverse proxy, so you can access the
+services running on your local machine on the following named URLs:
 
-| Service                | Ingress URL                     | Note                                                                                          |
-| ---------------------- | ------------------------------- | --------------------------------------------------------------------------------------------- |
-| OHDSI Atlas            | <http://localhost:38084/atlas/> |                                                                                               |
-| recruIT Screening List | <http://localhost:38080/>       | login with username: `user1` and password: `user1`; Or as `uc1-admin`/`admin` for full access |
-| HAPI FHIR Server       | <http://localhost:38083/>       |                                                                                               |
-| MailDev                | <http://localhost:38085/>       |                                                                                               |
-| Keycloak               | <http://localhost:38086/>       | login with username: `admin` and password: `admin`                                            |
+| Service                | Ingress URL                                    | Note                                                                                          |
+| ---------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| OHDSI Atlas            | <http://recruit-ohdsi.127.0.0.1.nip.io/atlas/> |                                                                                               |
+| recruIT Screening List | <http://recruit-list.127.0.0.1.nip.io>         | login with username: `user1` and password: `user1`; Or as `uc1-admin`/`admin` for full access |
+| HAPI FHIR Server       | <http://recruit-fhir-server.127.0.0.1.nip.io>  |                                                                                               |
+| MailDev                | <http://maildev.127.0.0.1.nip.io>              |                                                                                               |
+| Keycloak               | <http://auth.127.0.0.1.nip.io/>                | login with username: `admin` and password: `admin`                                            |
 
 By default, the query module runs every 5 minutes to check for new study candidates. After some time, you should see
-the following when opening the screening list at <http://localhost:38080/> and logging in as `uc1-admin`/`admin`:
+the following when opening the screening list at <http://recruit-list.127.0.0.1.nip.io> and logging in as `uc1-admin`/`admin`:
 
 ![Screening list overview](../_img/docker-compose/list-overview.png)
 
@@ -58,7 +59,7 @@ Clicking on the list for the `SAMPLE M` study should show the list of candidates
 
 ![Screening list for the sample study](../_img/docker-compose/list-sample-m.png)
 
-Finally, checking the mail viewer at <http://localhost:38085/> you can see the email notifications:
+Finally, checking the mail viewer at <http://maildev.127.0.0.1.nip.io> you can see the email notifications:
 
 ![Screening list for the sample study](../_img/docker-compose/notify-mail-sample-m.png)
 

@@ -12,5 +12,10 @@
       "automerge": true,
       "requiredStatusChecks": null
     }
-  ]
+  ],
+  "docker": {
+    "digest": {
+      "enabled": true
+    }
+  }
 }
