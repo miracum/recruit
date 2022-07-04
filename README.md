@@ -14,6 +14,14 @@ Then you can just run the following to build and serve the documentation locally
 mkdocs serve
 ```
 
+## Build FHIR IG
+
+```sh
+docker run --rm -it -v $PWD/fhir-ig:/usr/src/build ghcr.io/miracum/ig-build-tools:latest
+
+root@eddc76b8b235:/usr/src/build# ./_genonce.sh
+```
+
 ## Contributing
 
 See [CONTRIBUTING.md](docs/development/contributing.md)
