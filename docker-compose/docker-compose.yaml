@@ -2,7 +2,7 @@ services:
   list:
     image: ghcr.io/miracum/recruit/list:v2.15.4
     restart: unless-stopped
-    ipc: private
+    ipc: none
     security_opt:
       - "no-new-privileges:true"
     cap_drop:
@@ -31,7 +31,7 @@ services:
   query:
     image: ghcr.io/miracum/recruit/query:v3.16.2
     restart: unless-stopped
-    ipc: private
+    ipc: none
     security_opt:
       - "no-new-privileges:true"
     cap_drop:
@@ -67,13 +67,11 @@ services:
   notify:
     image: ghcr.io/miracum/recruit/notify:v3.2.4
     restart: unless-stopped
-    ipc: private
+    ipc: none
     security_opt:
       - "no-new-privileges:true"
     cap_drop:
       - ALL
-    ports:
-      - "127.0.0.1:38087:8080"
     read_only: true
     tmpfs:
       - /tmp

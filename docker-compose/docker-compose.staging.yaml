@@ -1,4 +1,26 @@
 services:
+  traefik:
+    image: traefik:v2.8.0
+    restart: unless-stopped
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    read_only: true
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+
   omopdb:
     image: ghcr.io/miracum/recruit/omop-cdm-test-db:v4.0.0
     restart: unless-stopped
@@ -6,20 +28,24 @@ services:
     security_opt:
       - "no-new-privileges:true"
     shm_size: 1024m
-    mem_limit: 2048m
     privileged: false
+    deploy:
+      resources:
+        limits:
+          memory: 2048m
 
   ohdsi-webapi:
     image: docker.io/ohdsi/webapi:2.11.1
-    ports:
-      - "127.0.0.1:38089:8080"
     restart: unless-stopped
-    ipc: private
+    ipc: none
     security_opt:
       - "no-new-privileges:true"
     cap_drop:
       - ALL
-    mem_limit: 2048m
+    deploy:
+      resources:
+        limits:
+          memory: 4096m
     read_only: true
     tmpfs:
       - /tmp
@@ -41,38 +67,49 @@ services:
       FLYWAY_PLACEHOLDERS_OHDSISCHEMA: ohdsi
       FLYWAY_SCHEMAS: ohdsi
       SECURITY_CORS_ENABLED: "true"
-      SECURITY_ORIGIN: "http://localhost:38084"
+      SECURITY_ORIGIN: "http://recruit-ohdsi.127.0.0.1.nip.io"
     depends_on:
       - omopdb
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ohdsi-webapi.rule=Host(`recruit-ohdsi.127.0.0.1.nip.io`) && PathPrefix(`/WebAPI`)"
+      - "traefik.http.routers.ohdsi-webapi.entrypoints=web"
 
   ohdsi-atlas:
     image: docker.io/ohdsi/atlas:2.11.1
-    ports:
-      - "127.0.0.1:38084:8080"
     restart: unless-stopped
-    ipc: private
+    ipc: none
     security_opt:
       - "no-new-privileges:true"
     cap_drop:
       - ALL
-    mem_limit: 64m
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+          cpus: "1"
     privileged: false
     environment:
-      WEBAPI_URL: "http://localhost:38089/WebAPI/"
+      WEBAPI_URL: "http://recruit-ohdsi.127.0.0.1.nip.io/WebAPI/"
     depends_on:
       - ohdsi-webapi
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ohdsi-atlas.rule=Host(`recruit-ohdsi.127.0.0.1.nip.io`) && PathPrefix(`/atlas`)"
+      - "traefik.http.routers.ohdsi-atlas.entrypoints=web"
 
   fhir:
     image: docker.io/hapiproject/hapi:v6.0.1
     restart: unless-stopped
     cap_drop:
       - ALL
-    ports:
-      - "127.0.0.1:38083:8080"
-    ipc: private
+    ipc: none
     security_opt:
       - "no-new-privileges:true"
-    mem_limit: 2048m
+    deploy:
+      resources:
+        limits:
+          memory: 2048m
     read_only: true
     tmpfs:
       - /tmp
@@ -92,11 +129,19 @@ services:
       HAPI_FHIR_ALLOW_MULTIPLE_DELETE: "true"
     depends_on:
       - fhir-db
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.fhir.loadbalancer.server.port=8080"
+      - "traefik.http.routers.fhir.rule=Host(`recruit-fhir-server.127.0.0.1.nip.io`)"
+      - "traefik.http.routers.fhir.entrypoints=web"
 
   fhir-db:
     image: docker.io/library/postgres:14.4
     restart: unless-stopped
-    mem_limit: 512m
+    deploy:
+      resources:
+        limits:
+          memory: 512m
     ipc: private
     security_opt:
       - "no-new-privileges:true"
@@ -108,23 +153,35 @@ services:
   maildev:
     image: docker.io/maildev/maildev:2.0.5
     restart: unless-stopped
-    ipc: private
+    ipc: none
     security_opt:
       - "no-new-privileges:true"
     cap_drop:
       - ALL
     privileged: false
-    ports:
-      - "127.0.0.1:38085:1080"
-    mem_limit: 64m
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+    read_only: true
+    tmpfs:
+      - /tmp
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.maildev.loadbalancer.server.port=1080"
+      - "traefik.http.routers.maildev.rule=Host(`maildev.127.0.0.1.nip.io`)"
+      - "traefik.http.routers.maildev.entrypoints=web"
 
   keycloak:
     image: quay.io/keycloak/keycloak:15.1.1
     restart: unless-stopped
     cap_drop:
       - ALL
-    mem_limit: 1024m
-    ipc: private
+    deploy:
+      resources:
+        limits:
+          memory: 1024m
+    ipc: none
     security_opt:
       - "no-new-privileges:true"
     command:
@@ -140,21 +197,39 @@ services:
       - ./staging/aio-export.json:/tmp/realm.json:ro
     ports:
       - "127.0.0.1:38086:8080"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.keycloak.rule=Host(`auth.127.0.0.1.nip.io`)"
+      - "traefik.http.routers.keycloak.entrypoints=web"
 
   notify:
-    mem_limit: 512m
+    deploy:
+      resources:
+        limits:
+          memory: 512m
     depends_on:
       - fhir
       - maildev
 
   query:
-    mem_limit: 512m
+    deploy:
+      resources:
+        limits:
+          memory: 512m
     depends_on:
       - fhir
       - omopdb
       - ohdsi-webapi
 
   list:
-    mem_limit: 64m
+    deploy:
+      resources:
+        limits:
+          memory: 128m
     depends_on:
       - fhir
+    ports: []
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.list.rule=Host(`recruit-list.127.0.0.1.nip.io`)"
+      - "traefik.http.routers.list.entrypoints=web"
