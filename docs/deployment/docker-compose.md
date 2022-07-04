@@ -8,6 +8,9 @@ git clone https://github.com/miracum/recruit.git
 cd recruit/
 ```
 
+You can also download a versioned archive of the latest `docker-compose.yaml` files from the tagged releases by visiting
+<https://github.com/miracum/recruit/releases> and getting it from the assets.
+
 ## Prerequisites
 
 Docker CLI version 20.10.14 or later.
