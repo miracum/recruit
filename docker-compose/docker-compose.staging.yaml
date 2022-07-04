@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: traefik:v2.8.0
+    image: docker.io/library/traefik:v2.8.0@sha256:e2ba68ab66797f6a89b49e389d9d77bfd7118bd07f17daa2042c03861d8d2ace
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -22,7 +22,7 @@ services:
           memory: 128m
 
   omopdb:
-    image: ghcr.io/miracum/recruit/omop-cdm-test-db:v4.0.0
+    image: ghcr.io/miracum/recruit/omop-cdm-test-db:v4.0.0@sha256:00be4b12281795318fc5674e6007fd59500c86f443147132546a2b46a4d40f64
     restart: unless-stopped
     ipc: private
     security_opt:
@@ -35,7 +35,7 @@ services:
           memory: 2048m
 
   ohdsi-webapi:
-    image: docker.io/ohdsi/webapi:2.11.1
+    image: docker.io/ohdsi/webapi:2.11.1@sha256:9bcb5003e6504669b53c94f3e0b4aa6ad9b5c78741f772ca402579632ce64fb3
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -76,7 +76,7 @@ services:
       - "traefik.http.routers.ohdsi-webapi.entrypoints=web"
 
   ohdsi-atlas:
-    image: docker.io/ohdsi/atlas:2.11.1
+    image: docker.io/ohdsi/atlas:2.11.1@sha256:36df31ecd1c92f2f2d66535ff759e7626545179696a3f291f35dc75c14017564
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -99,7 +99,7 @@ services:
       - "traefik.http.routers.ohdsi-atlas.entrypoints=web"
 
   fhir:
-    image: docker.io/hapiproject/hapi:v6.0.1
+    image: docker.io/hapiproject/hapi:v6.0.1@sha256:63c98d8be3dadc77b47dca3115490f22bf99512f363f779f7bbcb42f569aeac3
     restart: unless-stopped
     cap_drop:
       - ALL
@@ -136,7 +136,7 @@ services:
       - "traefik.http.routers.fhir.entrypoints=web"
 
   fhir-db:
-    image: docker.io/library/postgres:14.4
+    image: docker.io/library/postgres:14.4@sha256:4ba3b78788bb284687376b9c1e0565b245375ddee0fe14cef25e315b6bd88b1a
     restart: unless-stopped
     deploy:
       resources:
@@ -151,7 +151,7 @@ services:
       POSTGRES_DB: fhir
 
   maildev:
-    image: docker.io/maildev/maildev:2.0.5
+    image: docker.io/maildev/maildev:2.0.5@sha256:082ec5ee92266c6e17493998ff1bf1c3eb70604b159fbeeaa435ee777f5cc953
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -173,7 +173,7 @@ services:
       - "traefik.http.routers.maildev.entrypoints=web"
 
   keycloak:
-    image: quay.io/keycloak/keycloak:15.1.1
+    image: quay.io/keycloak/keycloak:15.1.1@sha256:abade9a9cf985b454b30a9119183e62a0018ec546c8fc4fbd8572457afb4a666
     restart: unless-stopped
     cap_drop:
       - ALL

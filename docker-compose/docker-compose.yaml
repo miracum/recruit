@@ -1,6 +1,6 @@
 services:
   list:
-    image: ghcr.io/miracum/recruit/list:v2.15.4
+    image: ghcr.io/miracum/recruit/list:v2.15.4@sha256:c63f67666869b1cba9d5b7f958f0ef3c4797499407c2d0e0684ecfa976bb90f0
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -29,7 +29,7 @@ services:
       - ${NOTIFY_RULES_CONFIG_PATH:?}:/etc/rules.yaml:ro
 
   query:
-    image: ghcr.io/miracum/recruit/query:v3.16.2
+    image: ghcr.io/miracum/recruit/query:v3.16.2@sha256:121f13d9df05791024b5e4659570bbe0a2a9fbcfc2cf066d29325d240b4b4dcd
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -65,7 +65,7 @@ services:
       QUERY_COHORTSIZETHRESHOLD: ${QUERY_COHORTSIZETHRESHOLD:-100}
 
   notify:
-    image: ghcr.io/miracum/recruit/notify:v3.2.4
+    image: ghcr.io/miracum/recruit/notify:v3.2.4@sha256:0a3a2fffec7bca9a41ce1c762a2180bfa03bd64bae3f741515ead4fc48156050
     restart: unless-stopped
     ipc: none
     security_opt:
