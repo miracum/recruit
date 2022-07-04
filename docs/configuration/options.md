@@ -63,16 +63,16 @@ the string `[UC1]` or `[Test]` in order to be processed by the query module.
 
 ## Notification Module
 
-| Variable                   | Description                                                                                                                                  | Staging Default Value                                    |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| NOTIFY_WEBHOOK_ENDPOINT    | External URL for the notification module's webhook endpoint. Should end in `/on-list-change`.³                                               | `http://notify:8080/on-list-change`                      |
-| NOTIFY_RULES_CONFIG_PATH   | Path to the notification rule configuration file. The file is mounted inside the notification module.                                        | `./staging/notify-rules.yml`                             |
-| NOTIFY_MAIL_HOST           | Host of the SMTP server used to send notification emails.                                                                                    | `maildev`                                                |
-| NOTIFY_MAIL_SMTP_PORT      | SMTP port on the host.                                                                                                                       | `25`                                                     |
-| NOTIFY_MAIL_USERNAME       | SMTP username.                                                                                                                               | `user`                                                   |
-| NOTIFY_MAIL_PASSWORD       | SMTP password.                                                                                                                               | `pass`                                                   |
-| NOTIFY_MAILER_LINKTEMPLATE | Template used to generate a clickable link in the notification emails. `[list_id]` is mandatory and is replaced with the lists internal id.⁴ | `http://list.127.0.0.1.nip.io/recommendations/[list_id]` |
-| NOTIFY_MAILER_FROM         | The sender email address for the created notification mails.                                                                                 | `rekrutierung@miracum.org`                               |
+| Variable                   | Description                                                                                                                                  | Staging Default Value                                            |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| NOTIFY_WEBHOOK_ENDPOINT    | External URL for the notification module's webhook endpoint. Should end in `/on-list-change`.³                                               | `http://notify:8080/on-list-change`                              |
+| NOTIFY_RULES_CONFIG_PATH   | Path to the notification rule configuration file. The file is mounted inside the notification module.                                        | `./staging/notify-rules.yml`                                     |
+| NOTIFY_MAIL_HOST           | Host of the SMTP server used to send notification emails.                                                                                    | `maildev`                                                        |
+| NOTIFY_MAIL_SMTP_PORT      | SMTP port on the host.                                                                                                                       | `1025`                                                           |
+| NOTIFY_MAIL_USERNAME       | SMTP username.                                                                                                                               | `user`                                                           |
+| NOTIFY_MAIL_PASSWORD       | SMTP password.                                                                                                                               | `pass`                                                           |
+| NOTIFY_MAILER_LINKTEMPLATE | Template used to generate a clickable link in the notification emails. `[list_id]` is mandatory and is replaced with the lists internal id.⁴ | `http://recruit-list.127.0.0.1.nip.io/recommendations/[list_id]` |
+| NOTIFY_MAILER_FROM         | The sender email address for the created notification mails.                                                                                 | `rekrutierung@miracum.org`                                       |
 
 ³: If your FHIR server is running on `fhir.example.com` and your notification module runs on `notify.example.com:8080`,
 then this value should be set to `http://notify.example.com:8080/on-list-change`. The default exposed port of the notification module is `38087`. This external port is used when the FHIR server can't access the notification module using the Docker-network internal host and port `notify:8080`.
