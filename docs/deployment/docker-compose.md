@@ -27,12 +27,7 @@ docker compose --project-name=recruit \
     -f docker-compose/docker-compose.staging.yaml up
 ```
 
-You can run the following to probe every component for its availability/health status:
-
-!!! note
-
-    The query module will only switch to its ready state if it has run at least once,
-    so it may take up to 5 minutes for it to appear healthy.
+You can run the following to probe every component for its health status:
 
 ```sh
 docker compose --project-name=recruit \
