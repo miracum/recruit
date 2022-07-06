@@ -40,7 +40,7 @@
         "assets": [
           {
             "path": "dist/recruit-docker-compose.tar.gz",
-            "label": "Docker Compose deployment files"
+            "label": "Docker Compose deployment bundle"
           }
         ]
       }

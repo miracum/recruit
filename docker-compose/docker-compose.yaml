@@ -42,6 +42,7 @@ services:
     privileged: false
     environment:
       JAEGER_SERVICE_NAME: recruit-query
+      CAMEL_HEALTH_ENABLED: "false"
       FHIR_URL: ${FHIR_URL:?}
       OMOP_JDBCURL: ${OMOP_JDBCURL:?}
       OMOP_USERNAME: ${OMOP_USERNAME:?}
