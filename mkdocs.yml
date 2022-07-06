@@ -1,7 +1,14 @@
 site_name: recruIT
-# TODO: uncomment once migrated
-# repo_url: https://github.com/miracum/recruit
+site_url: https://miracum.github.io/recruit/
+site_description: >-
+  A Cloud-Native Clinical Trial Recruitment Support System based on HL7 FHIR and the OMOP CDM.
+
+repo_name: miracum/recruit
+repo_url: https://github.com/miracum/recruit
+edit_uri: ""
+
 copyright: Copyright &copy; 2022+ miracum.org
+
 markdown_extensions:
   - attr_list
   - admonition
