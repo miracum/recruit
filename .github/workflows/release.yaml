@@ -9,7 +9,6 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-22.04
-    if: github.event_name != 'pull_request'
     steps:
       - name: Checkout
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
@@ -27,6 +26,5 @@ jobs:
         with:
           extra_plugins: |
             conventional-changelog-conventionalcommits@5.0.0
-          dry_run: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
