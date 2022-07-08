@@ -196,7 +196,7 @@ services:
     volumes:
       - ./staging/aio-export.json:/tmp/realm.json:ro
     ports:
-      - "127.0.0.1:38086:8080"
+      - "0.0.0.0:38086:8080"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.keycloak.rule=Host(`auth.127.0.0.1.nip.io`)"
