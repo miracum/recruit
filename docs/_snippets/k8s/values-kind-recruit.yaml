@@ -67,7 +67,7 @@ ohdsi:
     hosts:
       - host: recruit-ohdsi.127.0.0.1.nip.io
   cdmInitJob:
-    enabled: true
+    enabled: false
     ttlSecondsAfterFinished: ""
     extraEnv:
       - name: SETUP_SYNPUF

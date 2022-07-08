@@ -30,6 +30,7 @@ then deploy recruIT to a namespace called `recruit` by running
 helm install -n recruit \
   --create-namespace \
   --render-subchart-notes \
+  --set ohdsi.cdmInitJob.enabled=true \
   recruit miracum/recruit
 ```
 
@@ -138,6 +139,7 @@ And finally, run
 helm install --create-namespace -n recruit \
   --render-subchart-notes \
   -f values-kind-recruit.yaml \
+  --set ohdsi.cdmInitJob.enabled=true \
   recruit miracum/recruit
 ```
 
