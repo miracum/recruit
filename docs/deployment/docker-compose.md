@@ -61,6 +61,18 @@ Finally, checking the mail viewer at <http://maildev.127.0.0.1.nip.io> you can s
 
 ![Screening list for the sample study](../_img/docker-compose/notify-mail-sample-m.png)
 
+## Stop the deployment
+
+To stop all services, run:
+
+```sh
+docker compose --project-name=recruit \
+    --env-file=docker-compose/.staging.env \
+    -f docker-compose/docker-compose.yaml \
+    -f docker-compose/docker-compose.staging.yaml \
+    down -v
+```
+
 ## Standalone installation
 
 The instructions above used the `docker-compose/docker-compose.staging.yaml` to deploy a FHIR server,
