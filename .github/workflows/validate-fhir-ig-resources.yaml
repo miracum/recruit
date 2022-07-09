@@ -1,0 +1,41 @@
+name: validate-fhir
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  fhir-validation:
+    runs-on: ubuntu-22.04
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@c0d4ad69d8bd405d234f1c9166d383b7a4f69ed8 # tag=v2.1.0
+        with:
+          dotnet-version: 3.1.x
+
+      # - name: Setup Java JDK
+      #   uses: actions/setup-java@16cca5479d7c6b6843f6a6515640ba33c6501543 # tag=v3.4.0
+      #   with:
+      #     distribution: 'microsoft'
+      #     java-version: '17'
+
+      - name: Firely.Terminal (GitHub Actions)
+        uses: FirelyTeam/firely-terminal-pipeline@43506ff9f7f5fc076721efc6f572ada2bf26a1ac # tag=v0.3.4
+        # working-directory: fhir-ig/
+        with:
+          PATH_TO_CONFORMANCE_RESOURCES: fsh-generated/resources/
+          DOTNET_VALIDATION_ENABLED: true
+          JAVA_VALIDATION_ENABLED: true
+          OUTPUT_FORMAT: RAW
+          # JAVA_VALIDATION_OPTIONS: -allow-example-urls true
+          SUSHI_ENABLED: true

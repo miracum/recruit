@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+
       - name: Deploy using Docker Compose in staging mode
         run: |
           docker compose \
