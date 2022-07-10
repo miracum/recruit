@@ -1,6 +1,6 @@
 services:
   list:
-    image: ghcr.io/miracum/recruit/list:v2.15.4@sha256:c63f67666869b1cba9d5b7f958f0ef3c4797499407c2d0e0684ecfa976bb90f0
+    image: ghcr.io/miracum/recruit/list:v2.15.5@sha256:1d076650cbf2f364235e49203a98015d35443d72e74f462085ea3bcedd25cb4c
     restart: unless-stopped
     ipc: none
     security_opt:
