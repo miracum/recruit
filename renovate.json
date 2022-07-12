@@ -2,6 +2,8 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:base",
+    "schedule:weekly",
+    "group:allNonMajor",
     ":disableDependencyDashboard",
     "helpers:pinGitHubActionDigests"
   ],
@@ -11,6 +13,14 @@
       "updateTypes": ["minor", "patch", "pin", "digest"],
       "automerge": true,
       "requiredStatusChecks": null
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "extends": ["schedule:monthly"]
+    },
+    {
+      "matchPackagePrefixes": ["ghcr.io/miracum/recruit"],
+      "extends": ["schedule:daily"]
     }
   ],
   "docker": {
