@@ -136,7 +136,7 @@ services:
       - "traefik.http.routers.fhir.entrypoints=web"
 
   fhir-db:
-    image: docker.io/library/postgres:14.4@sha256:4ba3b78788bb284687376b9c1e0565b245375ddee0fe14cef25e315b6bd88b1a
+    image: docker.io/library/postgres:14.4@sha256:0137ad83edaf18f6b36daf35b7f07f5ac694657178c0087dfa78d71c98774af4
     restart: unless-stopped
     deploy:
       resources:
