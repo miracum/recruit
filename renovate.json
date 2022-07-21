@@ -7,7 +7,7 @@
     ":disableDependencyDashboard",
     "helpers:pinGitHubActionDigests"
   ],
-  "ignoreDeps": ["postgres", "docker.io/hapiproject/hapi"],
+  "ignoreDeps": ["docker.io/library/postgres"],
   "packageRules": [
     {
       "updateTypes": ["minor", "patch", "pin", "digest"],
