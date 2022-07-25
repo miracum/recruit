@@ -1,0 +1,1577 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A Cloud-Native Clinical Trial Recruitment Support System based on HL7 FHIR and the OMOP CDM.">
+      
+      
+      
+        <link rel="canonical" href="https://miracum.github.io/recruit/deployment/kubernetes/">
+      
+      <link rel="icon" href="../../_img/favicon.ico">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.3.9">
+    
+    
+      
+        <title>Kubernetes - recruIT</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.1d29e8d0.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.cbb835fc.min.css">
+        
+      
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../_css/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent="">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#kubernetes" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="recruIT" class="md-header__button md-logo" aria-label="recruIT" data-md-component="logo">
+      
+  <img src="../../_img/miracum-logo-transparent-256x256.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            recruIT
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Kubernetes
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/miracum/recruit" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    miracum/recruit
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="recruIT" class="md-nav__button md-logo" aria-label="recruIT" data-md-component="logo">
+      
+  <img src="../../_img/miracum-logo-transparent-256x256.png" alt="logo">
+
+    </a>
+    recruIT
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/miracum/recruit" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    miracum/recruit
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Introduction
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Configuration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Configuration" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Configuration
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/de-pseudonymization/" class="md-nav__link">
+        De-Pseudonymization
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/existing-fhir-server/" class="md-nav__link">
+        Using an existing FHIR server
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/options/" class="md-nav__link">
+        Configuration Options
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/security/" class="md-nav__link">
+        Security
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/ui-configuration/" class="md-nav__link">
+        Customizing the user interface
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          Deployment
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Deployment" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Deployment
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docker-compose/" class="md-nav__link">
+        Docker Compose
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Kubernetes
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Kubernetes
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    Setup
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-installation-of-the-recruit-chart-with-ingress-support-using-kind" class="md-nav__link">
+    Example installation of the recruIT chart with ingress support using KinD
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metrics" class="md-nav__link">
+    Metrics
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#high-availability" class="md-nav__link">
+    High-Availability
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#service-mesh-integration" class="md-nav__link">
+    Service mesh integration
+  </a>
+  
+    <nav class="md-nav" aria-label="Service mesh integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#linkerd" class="md-nav__link">
+    Linkerd
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#istio" class="md-nav__link">
+    Istio
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#zero-trust-networking" class="md-nav__link">
+    Zero-trust networking
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../observability/" class="md-nav__link">
+        Observability
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../resource-requirements/" class="md-nav__link">
+        Resource requirements
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4">
+          Development
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Development" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Development
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/contributing/" class="md-nav__link">
+        Contributing
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/release-process/" class="md-nav__link">
+        Release process
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Getting started
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Getting started" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Getting started
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/creating-your-first-study/" class="md-nav__link">
+        Creating your first study
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/installation/" class="md-nav__link">
+        Installation
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    Setup
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-installation-of-the-recruit-chart-with-ingress-support-using-kind" class="md-nav__link">
+    Example installation of the recruIT chart with ingress support using KinD
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metrics" class="md-nav__link">
+    Metrics
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#high-availability" class="md-nav__link">
+    High-Availability
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#service-mesh-integration" class="md-nav__link">
+    Service mesh integration
+  </a>
+  
+    <nav class="md-nav" aria-label="Service mesh integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#linkerd" class="md-nav__link">
+    Linkerd
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#istio" class="md-nav__link">
+    Istio
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#zero-trust-networking" class="md-nav__link">
+    Zero-trust networking
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+
+
+<h1 id="kubernetes">Kubernetes</h1>
+<h2 id="introduction">Introduction</h2>
+<p>A Helm chart for deploying recruIT on a Kubernetes cluster is located in the <a href="https://github.com/miracum/charts">MIRACUM charts</a>
+repository. The chart can be used to deploy the application as well as all dependencies required for it to run (<a href="https://github.com/OHDSI/WebAPI">OHDSI WebAPI</a>,
+<a href="https://github.com/OHDSI/Atlas">OHDSI Atlas</a>, <a href="https://github.com/hapifhir/hapi-fhir-jpaserver-starter">HAPI FHIR server</a>).
+The chart also includes <a href="https://github.com/mailhog/MailHog">MailHog</a>, a mock mail server for testing email notifications.</p>
+<p>Using the default values provided with the chart, all dependencies are installed and all services are configured to use them.</p>
+<h2 id="setup">Setup</h2>
+<ol>
+<li>
+<p>Setup a Kubernetes cluster using your cloud provider of choice OR in a local environment using <a href="https://minikube.sigs.k8s.io/docs/">minikube</a>,
+   <a href="https://kind.sigs.k8s.io/">KinD</a>, or <a href="https://k3d.io/">k3d</a>.</p>
+</li>
+<li>
+<p>Install <a href="https://kubernetes.io/docs/tasks/tools/">kubectl</a> and <a href="https://helm.sh/docs/intro/install/">helm</a></p>
+</li>
+</ol>
+<h2 id="installation">Installation</h2>
+<p>Add the MIRACUM Helm repository by running</p>
+<div class="highlight"><pre><span></span><code>helm repo add miracum https://miracum.github.io/charts
+</code></pre></div>
+<p>then deploy recruIT to a namespace called <code>recruit</code> by running</p>
+<div class="highlight"><pre><span></span><code>helm install -n recruit <span class="se">\</span>
+  --create-namespace <span class="se">\</span>
+  --render-subchart-notes <span class="se">\</span>
+  --set ohdsi.cdmInitJob.enabled<span class="o">=</span><span class="nb">true</span> <span class="se">\</span>
+  recruit miracum/recruit
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Auto generated default passwords for the included databases</p>
+<p>The included HAPI FHIR server, OHDSI, and - if high-availability is enabled - recruIT chart itself depend on the
+<a href="https://github.com/bitnami/charts/tree/master/bitnami/postgresql">Bitnami PostgreSQL chart</a>. By default, this chart
+generates a random password for the <code>postgres</code> user unless either <code>auth.postgresPassword</code> or <code>auth.existingSecret</code>
+are set. Upgrading the release (or simply re-running <code>helm upgrade --install</code>) will generate a new password which
+will result in credential errors and the PostgreSQL pod will fail to start. You should therefore overwrite these
+parameters or set them after the initial install. The <code>--render-subchart-notes</code> flag above will also print this
+note.</p>
+</div>
+<p>As a quick check to make sure everything is running correctly, you can use the following to check the readiness of all services:</p>
+<div class="highlight"><pre><span></span><code>$ helm <span class="nb">test</span> -n recruit recruit
+
+NAME: recruit
+LAST DEPLOYED: Wed May  <span class="m">4</span> <span class="m">21</span>:45:06 <span class="m">2022</span>
+NAMESPACE: recruit
+STATUS: deployed
+REVISION: <span class="m">1</span>
+TEST SUITE:     recruit-fhirserver-test-endpoints
+Last Started:   Wed May  <span class="m">4</span> <span class="m">22</span>:14:23 <span class="m">2022</span>
+Last Completed: Wed May  <span class="m">4</span> <span class="m">22</span>:14:39 <span class="m">2022</span>
+Phase:          Succeeded
+TEST SUITE:     recruit-ohdsi-test-connection
+Last Started:   Wed May  <span class="m">4</span> <span class="m">22</span>:14:39 <span class="m">2022</span>
+Last Completed: Wed May  <span class="m">4</span> <span class="m">22</span>:14:43 <span class="m">2022</span>
+Phase:          Succeeded
+TEST SUITE:     recruit-test-health-probes
+Last Started:   Wed May  <span class="m">4</span> <span class="m">22</span>:14:43 <span class="m">2022</span>
+Last Completed: Wed May  <span class="m">4</span> <span class="m">22</span>:14:49 <span class="m">2022</span>
+Phase:          Succeeded
+NOTES:
+<span class="m">1</span>. Get the screening list URL by running these commands:
+  http://recruit-list.127.0.0.1.nip.io/
+</code></pre></div>
+<h2 id="example-installation-of-the-recruit-chart-with-ingress-support-using-kind">Example installation of the recruIT chart with ingress support using KinD</h2>
+<p>This will demonstrate how to install recruIT on your local machine using KinD including exposing the services behind an ingress.</p>
+<p>First, create <a href="https://kind.sigs.k8s.io/docs/user/ingress/">a new cluster with Ingress support</a>:</p>
+<div class="highlight"><pre><span></span><code>cat <span class="s">&lt;&lt;EOF | kind create cluster --config=-</span>
+<span class="s">kind: Cluster</span>
+<span class="s">apiVersion: kind.x-k8s.io/v1alpha4</span>
+<span class="s">nodes:</span>
+<span class="s">- role: control-plane</span>
+<span class="s">  kubeadmConfigPatches:</span>
+<span class="s">  - |</span>
+<span class="s">    kind: InitConfiguration</span>
+<span class="s">    nodeRegistration:</span>
+<span class="s">      kubeletExtraArgs:</span>
+<span class="s">        node-labels: &quot;ingress-ready=true&quot;</span>
+<span class="s">  extraPortMappings:</span>
+<span class="s">  - containerPort: 80</span>
+<span class="s">    hostPort: 80</span>
+<span class="s">    protocol: TCP</span>
+<span class="s">  - containerPort: 443</span>
+<span class="s">    hostPort: 443</span>
+<span class="s">    protocol: TCP</span>
+<span class="s">EOF</span>
+</code></pre></div>
+<p>Install the NGINX ingress controller</p>
+<div class="highlight"><pre><span></span><code>kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+</code></pre></div>
+<p>Wait until it's ready to process requests by running</p>
+<div class="highlight"><pre><span></span><code>kubectl <span class="nb">wait</span> --namespace ingress-nginx <span class="se">\</span>
+  --for<span class="o">=</span><span class="nv">condition</span><span class="o">=</span>ready pod <span class="se">\</span>
+  --selector<span class="o">=</span>app.kubernetes.io/component<span class="o">=</span>controller <span class="se">\</span>
+  --timeout<span class="o">=</span>90s
+</code></pre></div>
+<p>Add the MIRACUM chart repository</p>
+<div class="highlight"><pre><span></span><code>helm repo add miracum https://miracum.github.io/charts
+</code></pre></div>
+<p>Save the following as <code>values-kind-recruit.yaml</code>, or you can clone this repo and reference the file as <code>-f docs/_snippets/values-kind-recruit.yaml</code>.
+The <code>ohdsi.cdmInitJob.extraEnv</code> option <code>SETUP_SYNPUF=true</code> means that the OMOP database will be initialized with SynPUF
+1K sample patient data.</p>
+<div class="admonition info">
+<p class="admonition-title">Documentation for all available chart options</p>
+<p>You can find a complete description of all available chart configuration options here:
+<a href="https://github.com/miracum/charts/blob/master/charts/recruit/README.md#configuration">https://github.com/miracum/charts/blob/master/charts/recruit/README.md#configuration</a></p>
+</div>
+<div class="highlight"><span class="filename">values-kind-recruit.yaml</span><pre><span></span><code><span class="nt">list</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">ingress</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">    </span><span class="nt">hosts</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit-list.127.0.0.1.nip.io</span><span class="w"></span>
+<span class="w">        </span><span class="nt">paths</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;/&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
+
+<span class="nt">fhirserver</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">postgresql</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">auth</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">postgresPassword</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fhir</span><span class="w"></span>
+<span class="w">  </span><span class="nt">ingress</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">    </span><span class="nt">hosts</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit-fhir-server.127.0.0.1.nip.io</span><span class="w"></span>
+<span class="w">        </span><span class="nt">paths</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;/&quot;</span><span class="p p-Indicator">]</span><span class="w"></span>
+
+<span class="nt">query</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">webAPI</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">dataSource</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;SynPUF-CDMV5&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">omop</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">resultsSchema</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">synpuf_results</span><span class="w"></span>
+<span class="w">    </span><span class="nt">cdmSchema</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">synpuf_cdm</span><span class="w"></span>
+<span class="w">  </span><span class="nt">cohortSelectorLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;recruIT&quot;</span><span class="w"></span>
+
+<span class="nt">notify</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">schedules</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">everyMorning</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">0</span><span class="nv"> </span><span class="s">8</span><span class="nv"> </span><span class="s">1/1</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">?</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">trials</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">acronym</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">subscriptions</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">email</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;everything@example.com&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">acronym</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;SAMPLE&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">accessibleBy</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">users</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;user1&quot;</span><span class="w"></span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;user.two@example.com&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">subscriptions</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">email</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;everyMorning@example.com&quot;</span><span class="w"></span>
+<span class="w">            </span><span class="nt">notify</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;everyMorning&quot;</span><span class="w"></span>
+
+<span class="nt">mailhog</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">ingress</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">    </span><span class="nt">hosts</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit-mailhog.127.0.0.1.nip.io</span><span class="w"></span>
+<span class="w">        </span><span class="nt">paths</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/&quot;</span><span class="w"></span>
+<span class="w">            </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span><span class="w"></span>
+
+<span class="nt">ohdsi</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">postgresql</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">auth</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">postgresPassword</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ohdsi</span><span class="w"></span>
+<span class="w">    </span><span class="nt">primary</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">resources</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">limits</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4Gi</span><span class="w"></span>
+<span class="w">          </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2500m</span><span class="w"></span>
+<span class="w">        </span><span class="nt">requests</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">256Mi</span><span class="w"></span>
+<span class="w">          </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">250m</span><span class="w"></span>
+<span class="w">  </span><span class="nt">ingress</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">    </span><span class="nt">hosts</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit-ohdsi.127.0.0.1.nip.io</span><span class="w"></span>
+<span class="w">  </span><span class="nt">cdmInitJob</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+<span class="w">    </span><span class="nt">ttlSecondsAfterFinished</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">extraEnv</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SETUP_SYNPUF</span><span class="w"></span>
+<span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;true&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">achilles</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">schemas</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">cdm</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;synpuf_cdm&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">vocab</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;synpuf_cdm&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">res</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;synpuf_results&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">sourceName</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;SynPUF-CDMV5&quot;</span><span class="w"></span>
+</code></pre></div>
+<p>And finally, run</p>
+<div class="highlight"><pre><span></span><code>helm install --create-namespace -n recruit <span class="se">\</span>
+  --render-subchart-notes <span class="se">\</span>
+  -f values-kind-recruit.yaml <span class="se">\</span>
+  --set ohdsi.cdmInitJob.enabled<span class="o">=</span><span class="nb">true</span> <span class="se">\</span>
+  recruit miracum/recruit
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">CDM init job</p>
+<p>The included CDM initialization job is currently not idempotent and may cause problems if ran multiple times.
+You should set <code>ohdsi.cdmInitJob.enabled=false</code> when the job has completed once when changing the chart configuration.</p>
+</div>
+<p>The application stack is now deployed. You can wait for the OMOP CDM init job to be done by running the following.
+This may take quite some time to complete.</p>
+<div class="highlight"><pre><span></span><code>kubectl <span class="nb">wait</span> job <span class="se">\</span>
+  --namespace<span class="o">=</span>recruit <span class="se">\</span>
+  --for<span class="o">=</span><span class="nv">condition</span><span class="o">=</span>Complete <span class="se">\</span>
+  --selector<span class="o">=</span>app.kubernetes.io/component<span class="o">=</span>cdm-init <span class="se">\</span>
+  --timeout<span class="o">=</span>1h
+</code></pre></div>
+<p>At this point, all externally exposed services should be accessible:</p>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Ingress URL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OHDSI Atlas</td>
+<td><a href="http://recruit-ohdsi.127.0.0.1.nip.io/atlas/">http://recruit-ohdsi.127.0.0.1.nip.io/atlas/</a></td>
+</tr>
+<tr>
+<td>recruIT Screening List</td>
+<td><a href="http://recruit-list.127.0.0.1.nip.io/">http://recruit-list.127.0.0.1.nip.io/</a></td>
+</tr>
+<tr>
+<td>HAPI FHIR Server</td>
+<td><a href="http://recruit-fhir-server.127.0.0.1.nip.io/">http://recruit-fhir-server.127.0.0.1.nip.io/</a></td>
+</tr>
+<tr>
+<td>MailHog</td>
+<td><a href="http://recruit-mailhog.127.0.0.1.nip.io/">http://recruit-mailhog.127.0.0.1.nip.io/</a></td>
+</tr>
+</tbody>
+</table>
+<p>You can now create a study by following the <a href="../../getting-started/creating-your-first-study/">Creating your first study</a>
+guide using Atlas at <a href="http://recruit-ohdsi.127.0.0.1.nip.io/atlas/">http://recruit-ohdsi.127.0.0.1.nip.io/atlas/</a>. Be sure to use <code>[recruIT]</code> as the special
+label instead of <code>[UC1]</code> as the values above override <code>query.cohortSelectorLabels[0]=recruIT</code>.</p>
+<p>Once the study appears on the screening list at <a href="http://recruit-list.127.0.0.1.nip.io/">http://recruit-list.127.0.0.1.nip.io/</a>, you should also see
+a notification email having arrived in the MailHog mail receiver at <a href="http://recruit-mailhog.127.0.0.1.nip.io/">http://recruit-mailhog.127.0.0.1.nip.io/</a>.</p>
+<h2 id="metrics">Metrics</h2>
+<p>All modules expose metrics in Prometheus format (see <a href="../observability/">Observability</a>). The chart makes it easy to scrape
+these metrics by integrating with the widely used <a href="https://prometheus-operator.dev/">Prometheus Operator</a>:</p>
+<div class="highlight"><pre><span></span><code>helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm install --create-namespace -n monitoring kube-prometheus-stack prometheus-community/kube-prometheus-stack
+</code></pre></div>
+<p>You can now update your release by combining the <code>values-kind-recruit.yaml</code> from above with the following:</p>
+<div class="highlight"><span class="filename">values-kind-recruit-enable-servicemonitors.yaml</span><pre><span></span><code><span class="nt">list</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">metrics</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">serviceMonitor</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">      </span><span class="nt">additionalLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">release</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kube-prometheus-stack</span><span class="w"></span>
+
+<span class="nt">query</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">metrics</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">serviceMonitor</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">      </span><span class="nt">additionalLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">release</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kube-prometheus-stack</span><span class="w"></span>
+
+<span class="nt">notify</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">metrics</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">serviceMonitor</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">      </span><span class="nt">additionalLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">release</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kube-prometheus-stack</span><span class="w"></span>
+
+<span class="nt">fhirserver</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">metrics</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">serviceMonitor</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">      </span><span class="nt">additionalLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">release</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kube-prometheus-stack</span><span class="w"></span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>helm upgrade -n recruit <span class="se">\</span>
+  -f values-kind-recruit.yaml <span class="se">\</span>
+  -f values-kind-recruit-enable-servicemonitors.yaml <span class="se">\</span>
+  recruit miracum/recruit
+</code></pre></div>
+<p>Opening the Grafana instance included with the <code>kube-prometheus-stack</code> chart will allow you to query the exposed metrics:</p>
+<p><img alt="Grafana Explore view of some metrics for the list module" src="../../_img/observability/grafana-sample-metrics.png" /></p>
+<h2 id="high-availability">High-Availability</h2>
+<p>The FHIR server, the screening list, and the notification module support running using multiple replicas to ensure
+high-availability in case of individual component failures.
+Scaling up the notification module requires setting up a backend database for persistence to avoid sending duplicate emails.
+Setting <code>notify.ha.enabled=true</code> and <code>postgresql.enabled=true</code> in the values will deploy an integrated PostgreSQL database
+for the notification module. See the options under the <code>notify.ha.database</code> key for specifying a custom database to use.</p>
+<p>The snippet below configures the release to run multiple replicas of any supporting service, enables <a href="https://kubernetes.io/docs/tasks/run-application/configure-pdb/">pod disruption budget</a>
+resources, and uses <a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/">pod topology spread constraints</a>
+to spread the pods across node topology zones:</p>
+<div class="highlight"><span class="filename">values-kind-recruit-ha.yaml</span><pre><span></span><code><span class="nt">notify</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">replicaCount</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
+<span class="w">  </span><span class="nt">podDisruptionBudget</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">topologySpreadConstraints</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">maxSkew</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">      </span><span class="nt">topologyKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">topology.kubernetes.io/zone</span><span class="w"></span>
+<span class="w">      </span><span class="nt">whenUnsatisfiable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ScheduleAnyway</span><span class="w"></span>
+<span class="w">      </span><span class="nt">labelSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">app.kubernetes.io/name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit</span><span class="w"></span>
+<span class="w">          </span><span class="c1"># note that this label depends on the name of the chart release</span><span class="w"></span>
+<span class="w">          </span><span class="c1"># this assumes the chart is deployed with a name of `recruit`</span><span class="w"></span>
+<span class="w">          </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit</span><span class="w"></span>
+<span class="w">          </span><span class="nt">app.kubernetes.io/component</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">notify</span><span class="w"></span>
+<span class="w">  </span><span class="nt">ha</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+
+<span class="nt">list</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">replicaCount</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
+<span class="w">  </span><span class="nt">podDisruptionBudget</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">topologySpreadConstraints</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">maxSkew</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">      </span><span class="nt">topologyKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">topology.kubernetes.io/zone</span><span class="w"></span>
+<span class="w">      </span><span class="nt">whenUnsatisfiable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ScheduleAnyway</span><span class="w"></span>
+<span class="w">      </span><span class="nt">labelSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">app.kubernetes.io/name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit</span><span class="w"></span>
+<span class="w">          </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit</span><span class="w"></span>
+<span class="w">          </span><span class="nt">app.kubernetes.io/component</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">list</span><span class="w"></span>
+
+<span class="nt">postgresql</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">auth</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">postgresPassword</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit-notify-ha</span><span class="w"></span>
+
+<span class="nt">ohdsi</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">atlas</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">replicaCount</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
+<span class="w">    </span><span class="nt">topologySpreadConstraints</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">maxSkew</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">        </span><span class="nt">topologyKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">topology.kubernetes.io/zone</span><span class="w"></span>
+<span class="w">        </span><span class="nt">whenUnsatisfiable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ScheduleAnyway</span><span class="w"></span>
+<span class="w">        </span><span class="nt">labelSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">app.kubernetes.io/name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ohdsi</span><span class="w"></span>
+<span class="w">            </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit</span><span class="w"></span>
+<span class="w">            </span><span class="nt">app.kubernetes.io/component</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">atlas</span><span class="w"></span>
+
+<span class="nt">fhirserver</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">replicaCount</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
+<span class="w">  </span><span class="nt">podDisruptionBudget</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">topologySpreadConstraints</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">maxSkew</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">      </span><span class="nt">topologyKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">topology.kubernetes.io/zone</span><span class="w"></span>
+<span class="w">      </span><span class="nt">whenUnsatisfiable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ScheduleAnyway</span><span class="w"></span>
+<span class="w">      </span><span class="nt">labelSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">app.kubernetes.io/name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fhirserver</span><span class="w"></span>
+<span class="w">          </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit</span><span class="w"></span>
+</code></pre></div>
+<h2 id="service-mesh-integration">Service mesh integration</h2>
+<p>The application can be integrated with a service mesh, both for observability and to secure service-to-service
+communication via mTLS.</p>
+<h3 id="linkerd">Linkerd</h3>
+<p>The following <code>values-kind-recruit-linkerd.yaml</code> shows how to configure the chart release
+to place Linkerd's <code>linkerd.io/inject: enabled</code> annotation for all service pods (excluding pods created by Jobs):</p>
+<div class="highlight"><span class="filename">values-kind-recruit-linkerd.yaml</span><pre><span></span><code><span class="nt">podAnnotations</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">linkerd.io/inject</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;enabled&quot;</span><span class="w"></span>
+
+<span class="nt">postgresql</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">primary</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">service</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">annotations</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">config.linkerd.io/opaque-ports</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5432&quot;</span><span class="w"></span>
+
+<span class="nt">ohdsi</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">postgresql</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">primary</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">service</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">annotations</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">config.linkerd.io/opaque-ports</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5432&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">atlas</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">podAnnotations</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">linkerd.io/inject</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;enabled&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">webApi</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">podAnnotations</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">linkerd.io/inject</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;enabled&quot;</span><span class="w"></span>
+
+<span class="nt">fhirserver</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">postgresql</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">primary</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">service</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">annotations</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">config.linkerd.io/opaque-ports</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5432&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">podAnnotations</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">linkerd.io/inject</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;enabled&quot;</span><span class="w"></span>
+
+<span class="nt">mailhog</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">automountServiceAccountToken</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">podAnnotations</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">linkerd.io/inject</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;enabled&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">service</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">annotations</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">config.linkerd.io/opaque-ports</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1025&quot;</span><span class="w"></span>
+</code></pre></div>
+<p><img alt="Linkerd dashboard view of the recruiT deployment" src="../_img/linkerd-dashboard.png" /></p>
+<p>You can also use the <code>linkerd.io/inject: enabled</code> on the <code>recruit</code> namespace, see <a href="https://linkerd.io/2.11/features/proxy-injection/">https://linkerd.io/2.11/features/proxy-injection/</a>
+but you will have to manually add a <code>disabled</code> annotation to the OHDSI Achilles CronJob and init job.</p>
+<h3 id="istio">Istio</h3>
+<p>Add a namespace label to instruct Istio to automatically inject Envoy sidecar proxies when you deploy your application later:</p>
+<div class="highlight"><pre><span></span><code>kubectl label namespace recruit istio-injection<span class="o">=</span>enabled
+</code></pre></div>
+<p>To disable sidecar proxy injection for the Achilles and OMOP CDM init job, see the following values.yaml:</p>
+<div class="highlight"><span class="filename">values-kind-recruit-istio.yaml</span><pre><span></span><code><span class="nt">ohdsi</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">cdmInitJob</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">podAnnotations</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">sidecar.istio.io/inject</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;false&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">achilles</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">podAnnotations</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">sidecar.istio.io/inject</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;false&quot;</span><span class="w"></span>
+
+<span class="nt">mailhog</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">automountServiceAccountToken</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+</code></pre></div>
+<p><img alt="Kiali dashboard view of the recruiT deployment" src="../_img/kiali-dashboard.png" /></p>
+<h2 id="zero-trust-networking">Zero-trust networking</h2>
+<p>To limit the communication between the components you can deploy <a href="https://kubernetes.io/docs/concepts/services-networking/network-policies/">Kubernetes NetworkPolicy</a>
+resources. Because the details of a deployment can differ significantly (external databases, dependencies spread across
+several namespaces, etc.), no generic <code>NetworkPolicy</code> resources are included in the Helm chart. Instead, the following
+policies and explanations should provide a starting point for customization.</p>
+<p>The policies are based on these assumptions:</p>
+<ol>
+<li>the recruit application is deployed in a namespace called <code>recruit</code></li>
+<li>the OHDSI stack is deployed in a namespace called <code>ohdsi</code></li>
+<li>the SMTP server is running on a host outside the cluster at IP <code>192.0.2.1</code> and port <code>1025</code></li>
+<li>the Prometheus monitoring stack is deployed in a namespace called <code>monitoring</code></li>
+</ol>
+<p>You can use <a href="https://editor.cilium.io/">https://editor.cilium.io/</a> to visualize and edit individual policies
+or <a href="https://orca.tufin.io/netpol/#">https://orca.tufin.io/netpol/#</a> to have the entire policies explained.</p>
+<div class="highlight"><span class="filename">recruit-network-policies.yaml</span><pre><span></span><code><span class="nn">---</span><span class="w"></span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NetworkPolicy</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fhir-server-policy</span><span class="w"></span>
+<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit</span><span class="w"></span>
+<span class="w">      </span><span class="nt">app.kubernetes.io/name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fhirserver</span><span class="w"></span>
+<span class="w">  </span><span class="nt">ingress</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># all modules are allowed to communicate with</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># the FHIR server</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">from</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/component</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">list</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/component</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">notify</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/component</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">query</span><span class="w"></span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">from</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># allow the FHIR server to be scraped by the Prometheus stack</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">namespaceSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">kubernetes.io/metadata.name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">monitoring</span><span class="w"></span>
+<span class="w">          </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kube-prometheus-stack-prometheus</span><span class="w"></span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metrics</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># allow the FHIR server to be accessed via the NGINX Ingress</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">from</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">namespaceSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">kubernetes.io/metadata.name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ingress-nginx</span><span class="w"></span>
+<span class="w">          </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ingress-nginx</span><span class="w"></span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span><span class="w"></span>
+<span class="w">  </span><span class="nt">egress</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># for subscriptions to work, the FHIR server must be allowed to</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># initiate connections to the notify module</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">to</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/component</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">notify</span><span class="w"></span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># allow the server access to its own database</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">to</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/component</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">primary</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fhir-server-postgres</span><span class="w"></span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tcp-postgresql</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># allow DNS lookups</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">to</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">namespaceSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">kubernetes.io/metadata.name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kube-system</span><span class="w"></span>
+<span class="w">          </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">k8s-app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kube-dns</span><span class="w"></span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">53</span><span class="w"></span>
+<span class="w">          </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UDP</span><span class="w"></span>
+<span class="nn">---</span><span class="w"></span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NetworkPolicy</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">list-policy</span><span class="w"></span>
+<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit</span><span class="w"></span>
+<span class="w">      </span><span class="nt">app.kubernetes.io/component</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">list</span><span class="w"></span>
+<span class="w">  </span><span class="nt">ingress</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">from</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># allow the list module to be scraped by the Prometheus stack</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">namespaceSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">kubernetes.io/metadata.name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">monitoring</span><span class="w"></span>
+<span class="w">          </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kube-prometheus-stack-prometheus</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># allow the list module to be accessed via the NGINX Ingress</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">namespaceSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">kubernetes.io/metadata.name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ingress-nginx</span><span class="w"></span>
+<span class="w">          </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ingress-nginx</span><span class="w"></span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span><span class="w"></span>
+<span class="w">  </span><span class="nt">egress</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># allow the list module to initiate connections to the FHIR server</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># for querying screening lists</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">to</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fhirserver</span><span class="w"></span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># allow DNS lookups</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">to</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">namespaceSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">kubernetes.io/metadata.name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kube-system</span><span class="w"></span>
+<span class="w">          </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">k8s-app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kube-dns</span><span class="w"></span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">53</span><span class="w"></span>
+<span class="w">          </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UDP</span><span class="w"></span>
+<span class="nn">---</span><span class="w"></span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NetworkPolicy</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">query-policy</span><span class="w"></span>
+<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit</span><span class="w"></span>
+<span class="w">      </span><span class="nt">app.kubernetes.io/component</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">query</span><span class="w"></span>
+<span class="w">  </span><span class="nt">ingress</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># allow the query module to be scraped by the Prometheus stack</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">from</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">namespaceSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">kubernetes.io/metadata.name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">monitoring</span><span class="w"></span>
+<span class="w">          </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kube-prometheus-stack-prometheus</span><span class="w"></span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http-metrics</span><span class="w"></span>
+<span class="w">  </span><span class="nt">egress</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># allow the query module to initiate connections to the FHIR server</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># to transmit FHIR resources</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">to</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fhirserver</span><span class="w"></span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># allow the query module to initiate connections to the OHDSI WebAPI</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># in the ohdsi namespace</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">to</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">namespaceSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">kubernetes.io/metadata.name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ohdsi</span><span class="w"></span>
+<span class="w">          </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ohdsi</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/component</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webapi</span><span class="w"></span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># allow the query module to initiate connections to the OHDSI PostgreSQL DB</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># in the ohdsi namespace</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">to</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">namespaceSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">kubernetes.io/metadata.name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ohdsi</span><span class="w"></span>
+<span class="w">          </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">postgresql</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ohdsi</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/component</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">primary</span><span class="w"></span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tcp-postgresql</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">to</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">namespaceSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">kubernetes.io/metadata.name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kube-system</span><span class="w"></span>
+<span class="w">          </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">k8s-app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kube-dns</span><span class="w"></span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">53</span><span class="w"></span>
+<span class="w">          </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UDP</span><span class="w"></span>
+<span class="nn">---</span><span class="w"></span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span><span class="w"></span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NetworkPolicy</span><span class="w"></span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">notify-policy</span><span class="w"></span>
+<span class="nt">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit</span><span class="w"></span>
+<span class="w">      </span><span class="nt">app.kubernetes.io/component</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">notify</span><span class="w"></span>
+<span class="w">  </span><span class="nt">ingress</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># allow the notify module to be scraped by the Prometheus stack</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">from</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">namespaceSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">kubernetes.io/metadata.name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">monitoring</span><span class="w"></span>
+<span class="w">          </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kube-prometheus-stack-prometheus</span><span class="w"></span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http-metrics</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># allow the notify module to receive subscription invocations from the FHIR server</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">from</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fhirserver</span><span class="w"></span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span><span class="w"></span>
+<span class="w">  </span><span class="nt">egress</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># allow the notify module to initiate connections to the FHIR server</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">to</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fhirserver</span><span class="w"></span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># allow the notify module to access the SMTP server at</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># 192.0.2.1. The `32` subnet prefix length limits egress</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># to just this one address</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">to</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">ipBlock</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">cidr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.0.2.1/32</span><span class="w"></span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span><span class="w"></span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1025</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># allow the notify module to initiate connections to its PostgreSQL db</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># in case of HA</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">to</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit-postgres</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recruit</span><span class="w"></span>
+<span class="w">              </span><span class="nt">app.kubernetes.io/component</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">primary</span><span class="w"></span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tcp-postgresql</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">to</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">namespaceSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">kubernetes.io/metadata.name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kube-system</span><span class="w"></span>
+<span class="w">          </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nt">k8s-app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kube-dns</span><span class="w"></span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">53</span><span class="w"></span>
+<span class="w">          </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UDP</span><span class="w"></span>
+</code></pre></div>
+
+              
+            </article>
+            
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../docker-compose/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Docker Compose" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Docker Compose
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../observability/" class="md-footer__link md-footer__link--next" aria-label="Next: Observability" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Observability
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2022+ miracum.org
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    <a href="https://www.miracum.org/" target="_blank" rel="noopener" title="MIRACUM Website" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M352 256c0 22.2-1.2 43.6-3.3 64H163.3c-2.1-20.4-4.2-41.8-4.2-64 0-22.2 2.1-43.6 4.2-64h185.4c2.1 20.4 3.3 41.8 3.3 64zm151.9-64c5.3 20.5 8.1 41.9 8.1 64s-2.8 43.5-8.1 64H380.8c2.1-20.6 3.2-42.9 3.2-64 0-22-1.1-43.4-3.2-64h123.1zm-10.5-32H376.7c-10-63.86-29.8-117.38-55.3-151.558C399.8 29.09 463.4 85.94 493.4 160zm-149.1 0H167.7c6.1-36.4 15.5-68.62 27-94.65 10.5-23.61 22.2-40.74 33.5-51.54C239.4 3.178 248.7 0 256 0c7.3 0 16.6 3.178 27.8 13.81 11.3 10.8 23 27.93 33.5 51.54 11.5 26.03 20.9 58.25 27 94.65zm-325.69 0C48.59 85.94 112.2 29.09 190.6 8.442 165.1 42.62 145.3 96.14 135.3 160H18.61zm112.59 32c-2.1 20.6-4.1 42-4.1 64 0 21.1 2 43.4 4.1 64H8.065C2.8 299.5 0 278.1 0 256s2.8-43.5 8.065-64H131.2zm63.5 254.6c-11.5-26-20.9-58.2-27-94.6h176.6c-6.1 36.4-15.5 68.6-27 94.6-10.5 23.7-22.2 40.8-33.5 51.6-11.2 10.6-20.5 13.8-28.7 13.8-6.4 0-15.7-3.2-26.9-13.8-11.3-10.8-23-27.9-33.5-51.6zm-4.1 57C112.2 482.9 48.59 426.1 18.61 352H135.3c10 63.9 29.8 117.4 55.3 151.6zm130.8 0c25.5-34.2 45.3-87.7 55.3-151.6h116.7c-30 74.1-93.6 130.9-172 151.6z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.sections"], "search": "../../assets/javascripts/workers/search.b97dbffb.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.6c7ad80a.min.js"></script>
+      
+    
+  </body>
+</html>
