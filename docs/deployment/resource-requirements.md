@@ -10,7 +10,7 @@ and [here](https://focusedlabs.io/blog/the-no-nonsense-guide-to-jvm-14-memory-on
 The `list` module is a NodeJS ExpressJS application with a significantly smaller footprint.
 
 The staging Docker Compose deployment sets the container memory limit for `query` and `notify` to `512m` which is
-sufficient to handle small and moderately-sized cohorts. The limit should be larger than `256m` to avoid
+sufficient to handle small and moderately sized cohorts. The limit should be larger than `256m` to avoid
 OOM-kills. The screening list has fairly consistent memory usage and a limit of `128m` is reasonable.
 
 Here's the output of `docker stats` after deploying and running the stack for a brief period:
