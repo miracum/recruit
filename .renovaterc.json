@@ -5,7 +5,8 @@
     "schedule:weekly",
     "group:allNonMajor",
     ":disableDependencyDashboard",
-    "helpers:pinGitHubActionDigests"
+    "helpers:pinGitHubActionDigests",
+    "docker:pinDigests"
   ],
   "ignoreDeps": ["docker.io/library/postgres"],
   "packageRules": [
@@ -22,10 +23,5 @@
       "matchPackagePrefixes": ["ghcr.io/miracum/recruit"],
       "extends": ["schedule:daily"]
     }
-  ],
-  "docker": {
-    "digest": {
-      "enabled": true
-    }
-  }
+  ]
 }
