@@ -39,9 +39,19 @@
       {
         "assets": [
           {
-            "path": "dist/recruit-docker-compose.tar.gz",
-            "label": "Docker Compose Deployment Bundle",
+            "path": "attestation.intoto.jsonl/attestation.intoto.jsonl",
+            "label": "provenance-${nextRelease.gitTag}.intoto.jsonl",
+            "name": "provenance-${nextRelease.gitTag}.intoto.jsonl"
+          },
+          {
+            "path": "release-assets/recruit-docker-compose.tar.gz",
+            "label": "recruit-docker-compose-${nextRelease.gitTag}.tar.gz",
             "name": "recruit-docker-compose-${nextRelease.gitTag}.tar.gz"
+          },
+          {
+            "path": "release-assets/recruit-container-sboms.tar.gz",
+            "label": "recruit-container-sboms-${nextRelease.gitTag}.tar.gz",
+            "name": "recruit-container-sboms-${nextRelease.gitTag}.tar.gz"
           }
         ]
       }
