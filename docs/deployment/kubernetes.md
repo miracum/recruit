@@ -73,7 +73,15 @@ NOTES:
 
 ## Example installation of the recruIT chart with ingress support using KinD
 
-This will demonstrate how to install recruIT on your local machine using KinD including exposing the services behind an ingress.
+This will demonstrate how to install recruIT on your local machine using KinD
+using the following advanced features:
+
+- create a multi-node Kubernetes cluster to demonstrate topology-zone aware pod
+  spreading for high-availability deployments
+- expose all user-facing services behing the NGINX ingress controller on a <https://nip.io> domain resolved to localhost
+- enable and enforce the restricted [Pod Security Standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
+  to demonstrate security best practices followed by all components
+- pre-load the OMOP CDM database with SynPUF-based sample data
 
 First, create [a new cluster with Ingress support](https://kind.sigs.k8s.io/docs/user/ingress/):
 
@@ -81,21 +89,34 @@ First, create [a new cluster with Ingress support](https://kind.sigs.k8s.io/docs
 cat <<EOF | kind create cluster --config=-
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
+featureGates:
+  PodSecurity: true
 nodes:
-- role: control-plane
-  kubeadmConfigPatches:
-  - |
-    kind: InitConfiguration
-    nodeRegistration:
-      kubeletExtraArgs:
-        node-labels: "ingress-ready=true"
-  extraPortMappings:
-  - containerPort: 80
-    hostPort: 80
-    protocol: TCP
-  - containerPort: 443
-    hostPort: 443
-    protocol: TCP
+  - role: control-plane
+    image: docker.io/kindest/node:v1.24.3@sha256:09961d2443a557dfa59126ce8b5388e9c06610b0276dc0a986a74d3d0f01e53e
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 80
+        protocol: TCP
+      - containerPort: 443
+        hostPort: 443
+        protocol: TCP
+    labels:
+      topology.kubernetes.io/zone: a
+  - role: worker
+    image: docker.io/kindest/node:v1.24.3@sha256:09961d2443a557dfa59126ce8b5388e9c06610b0276dc0a986a74d3d0f01e53e
+    labels:
+      topology.kubernetes.io/zone: b
+  - role: worker
+    image: docker.io/kindest/node:v1.24.3@sha256:09961d2443a557dfa59126ce8b5388e9c06610b0276dc0a986a74d3d0f01e53e
+    labels:
+      topology.kubernetes.io/zone: c
 EOF
 ```
 
@@ -112,6 +133,14 @@ kubectl wait --namespace ingress-nginx \
   --for=condition=ready pod \
   --selector=app.kubernetes.io/component=controller \
   --timeout=90s
+```
+
+Create a namespace for the new installation. Enable and enforce restricted pod security policies:
+
+```sh
+kubectl create namespace recruit
+kubectl label namespace recruit pod-security.kubernetes.io/enforce=restricted
+kubectl label namespace recruit pod-security.kubernetes.io/enforce-version=v1.24
 ```
 
 Add the MIRACUM chart repository
@@ -136,7 +165,7 @@ The `ohdsi.cdmInitJob.extraEnv` option `SETUP_SYNPUF=true` means that the OMOP d
 And finally, run
 
 ```sh
-helm install --create-namespace -n recruit \
+helm install -n recruit \
   --render-subchart-notes \
   -f values-kind-recruit.yaml \
   --set ohdsi.cdmInitJob.enabled=true \

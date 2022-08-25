@@ -1,4 +1,10 @@
 list:
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "250m"
+    limits:
+      memory: "128Mi"
   ingress:
     enabled: true
     hosts:
@@ -6,6 +12,12 @@ list:
         paths: ["/"]
 
 fhirserver:
+  resources:
+    requests:
+      memory: "3Gi"
+      cpu: "2500m"
+    limits:
+      memory: "3Gi"
   postgresql:
     auth:
       postgresPassword: fhir
@@ -16,6 +28,12 @@ fhirserver:
         paths: ["/"]
 
 query:
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "1000m"
+    limits:
+      memory: "1Gi"
   webAPI:
     dataSource: "SynPUF-CDMV5"
   omop:
@@ -25,6 +43,12 @@ query:
     - "recruIT"
 
 notify:
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "1000m"
+    limits:
+      memory: "1Gi"
   rules:
     schedules:
       everyMorning: "0 0 8 1/1 * ? *"
@@ -42,6 +66,12 @@ notify:
             notify: "everyMorning"
 
 mailhog:
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "250m"
+    limits:
+      memory: "64Mi"
   ingress:
     enabled: true
     hosts:
@@ -51,6 +81,20 @@ mailhog:
             pathType: Prefix
 
 ohdsi:
+  atlas:
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "64Mi"
+  webApi:
+    resources:
+      requests:
+        memory: "4Gi"
+        cpu: "250m"
+      limits:
+        memory: "4Gi"
   postgresql:
     auth:
       postgresPassword: ohdsi
