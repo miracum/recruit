@@ -1,0 +1,40 @@
+notify:
+  rules:
+    # create custom notification schedules using https://www.cronmaker.com
+    # these are later referenced by each
+    schedules:
+      everyMorning: "0 0 8 1/1 * ? *"
+      everyMonday: "0 0 8 ? * MON *"
+      everyHour: "0 0 0/1 1/1 * ? *"
+      everyFiveMinutes: "0 0/5 * 1/1 * ? *"
+
+    # trials are identified by their acronym which corresponds to the cohort's title in Atlas or the "[acronym=XYZ]" tag
+    trials:
+      # a value of '*' matches every trial, so 'everything@example.com' will receive an email whenever any screeninglist
+      # gets updated.
+      - acronym: "*"
+        subscriptions:
+          - email: "everything@example.com"
+
+      - acronym: "PROSa"
+        subscriptions:
+          - email: "everyMorning@example.com"
+            # each 'notify'-value corresponds to one schedule
+            notify: "everyMorning"
+            # a lack of a 'notify'-key with an associated schedule means that the user will be notified immediately.
+          - email: "immediately-prosa@example.com"
+            # For example, the following entry means that if the 'PROsa' trial received new screening recommendations,
+            # an email is sent to 'everyMonday@example.com' on the next monday. This is useful for aggregating notifications
+            # about screening recommendations.
+          - email: "everyMonday@example.com"
+            notify: "everyMonday"
+
+      - acronym: "AMICA"
+        subscriptions:
+          - email: "immediately-amica@example.com"
+          - email: "everyHour1@example.com"
+            notify: "everyHour"
+          - email: "everyHour2@example.com"
+            notify: "everyHour"
+          - email: "everyFiveMinutes@example.com"
+            notify: "everyFiveMinutes"

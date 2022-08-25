@@ -1,0 +1,705 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "Encounter/0",
+      "resource": {
+        "resourceType": "Encounter",
+        "status": "finished",
+        "class": {
+          "code": "stationaer",
+          "display": "Stationär",
+          "system": "https://www.medizininformatik-initiative.de/fhir/core/CodeSystem/Versorgungsfallklasse"
+        },
+        "subject": {
+          "reference": "Patient/1"
+        },
+        "identifier": [
+          {
+            "system": "http://www.acme.com/identifiers/patient",
+            "type": {
+              "coding": [
+                {
+                  "code": "VN",
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203"
+                }
+              ]
+            },
+            "use": "official",
+            "value": "123456"
+          }
+        ],
+        "location": [
+          {
+            "location": {
+              "reference": "Location/1"
+            },
+            "status": "completed",
+            "period": {
+              "start": "2020-03-13T11:00:00+01:00",
+              "end": "2020-05-11T12:00:00+01:00"
+            }
+          }
+        ],
+        "period": {
+          "end": "2020-03-13T12:00:00+01:00",
+          "start": "2020-02-13T12:00:00+01:00"
+        },
+        "serviceProvider": {
+          "reference": "urn:uuid:4240038d-7e59-456a-a619-4abb85d3f06e",
+          "display": "Test Org. Einheit"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Encounter"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:4240038d-7e59-456a-a619-4abb85d3f06e",
+      "resource": {
+        "resourceType": "Organization",
+        "id": "4240038d-7e59-456a-a619-4abb85d3f06e",
+        "identifier": [
+          {
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "4240038d-7e59-456a-a619-4abb85d3f06e"
+          }
+        ],
+        "active": true,
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+                "code": "prov",
+                "display": "Healthcare Provider"
+              }
+            ],
+            "text": "Healthcare Provider"
+          }
+        ],
+        "name": "Test Org. Einheit",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "413-596-5550"
+          }
+        ],
+        "address": [
+          {
+            "line": ["2344 BOSTON RD"],
+            "city": "WILBRAHAM",
+            "state": "MA",
+            "postalCode": "01095-1104",
+            "country": "US"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Organization"
+      }
+    },
+    {
+      "fullUrl": "Encounter/1",
+      "resource": {
+        "resourceType": "Encounter",
+        "status": "finished",
+        "class": {
+          "code": "ub",
+          "display": "Untersuchung und Behandlung",
+          "system": "https://www.medizininformatik-initiative.de/fhir/core/CodeSystem/Abteilungsfallklasse"
+        },
+        "period": {
+          "end": "2020-06-13T12:00:00+01:00",
+          "start": "2020-05-13T12:00:00+01:00"
+        },
+        "subject": {
+          "reference": "Patient/0"
+        },
+        "serviceType": {
+          "coding": [
+            {
+              "code": "0100",
+              "display": "Fachabteilung für Innere Medizin",
+              "system": "https://www.medizininformatik-initiative.de/fhir/core/CodeSystem/Fachabteilungsschluessel"
+            }
+          ]
+        },
+        "location": [
+          {
+            "location": {
+              "identifier": {
+                "system": "https://diz.mii.de/fhir/CodeSystem/TestOrganisationAbteilungen",
+                "value": "Station 1"
+              }
+            },
+            "status": "completed",
+            "period": {
+              "start": "2020-04-13T10:00:00+01:00",
+              "end": "2020-06-13T11:00:00+01:00"
+            }
+          },
+          {
+            "location": {
+              "reference": "Location/0"
+            },
+            "status": "completed",
+            "period": {
+              "start": "2020-02-13T11:00:00+01:00",
+              "end": "2020-04-13T12:00:00+01:00"
+            }
+          }
+        ],
+        "partOf": {
+          "reference": "Encounter/0"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Encounter"
+      }
+    },
+    {
+      "fullUrl": "Location/0",
+      "resource": {
+        "resourceType": "Location",
+        "identifier": [
+          {
+            "system": "https://diz.mii.de/fhir/CodeSystem/TestOrganisationAbteilungen",
+            "value": "Chirurgie"
+          }
+        ],
+        "status": "active",
+        "name": "Allgemein- und Viszeralchirurgie",
+        "alias": ["Chirurgie"],
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "09131 00-0000",
+            "use": "work"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Location",
+        "ifNoneExist": "Location?identifier=https://diz.mii.de/fhir/CodeSystem/TestOrganisationAbteilungen|Chirurgie"
+      }
+    },
+    {
+      "fullUrl": "Location/1",
+      "resource": {
+        "resourceType": "Location",
+        "identifier": [
+          {
+            "system": "https://diz.mii.de/fhir/CodeSystem/TestOrganisationAbteilungen",
+            "value": "MedizinischeKlinik5"
+          }
+        ],
+        "status": "active",
+        "name": "Hämatologie und Internistische Onkologie",
+        "alias": ["Med 5"],
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "09131 00-0000",
+            "use": "work"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Location",
+        "ifNoneExist": "Location?identifier=https://diz.mii.de/fhir/CodeSystem/TestOrganisationAbteilungen|MedizinischeKlinik5"
+      }
+    },
+    {
+      "fullUrl": "Patient/0",
+      "resource": {
+        "resourceType": "Patient",
+        "identifier": [
+          {
+            "system": "http://ohdsi.org/omop/fhir/subject-identifier",
+            "value": "1"
+          },
+          {
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "bf3d74b1-5abf-4af9-89a3-69ee772bd88f"
+          }
+        ],
+        "name": [
+          {
+            "family": "Jones311",
+            "given": ["Bruce168"]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1987-04-25"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Patient",
+        "ifNoneExist": "Patient?identifier=https://github.com/synthetichealth/synthea|bf3d74b1-5abf-4af9-89a3-69ee772bd88f"
+      }
+    },
+    {
+      "fullUrl": "Patient/1",
+      "resource": {
+        "resourceType": "Patient",
+        "identifier": [
+          {
+            "system": "http://ohdsi.org/omop/fhir/subject-identifier",
+            "value": "2"
+          },
+          {
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "be1a04bd-2ecc-4996-a646-bc7ed0b0c4ea"
+          }
+        ],
+        "name": [
+          {
+            "family": "Tyla133",
+            "given": ["Phan898"]
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1977-01-15"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Patient",
+        "ifNoneExist": "Patient?identifier=https://github.com/synthetichealth/synthea|be1a04bd-2ecc-4996-a646-bc7ed0b0c4ea"
+      }
+    },
+    {
+      "fullUrl": "Patient/2",
+      "resource": {
+        "resourceType": "Patient",
+        "identifier": [
+          {
+            "system": "http://ohdsi.org/omop/fhir/subject-identifier",
+            "value": "3"
+          },
+          {
+            "system": "https://github.com/synthetichealth/synthea",
+            "value": "4399ee58-809f-4ad7-a8ab-309bc4cea8f3"
+          }
+        ],
+        "name": [
+          {
+            "family": "Zaine246",
+            "given": ["Wise067"]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1967-09-14"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Patient",
+        "ifNoneExist": "Patient?identifier=https://github.com/synthetichealth/synthea|4399ee58-809f-4ad7-a8ab-309bc4cea8f3"
+      }
+    },
+    {
+      "fullUrl": "ResearchSubject/0",
+      "resource": {
+        "resourceType": "ResearchSubject",
+        "status": "on-study",
+        "study": {
+          "reference": "ResearchStudy/0"
+        },
+        "individual": {
+          "reference": "Patient/0"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "ResearchSubject"
+      }
+    },
+    {
+      "fullUrl": "ResearchSubject/1",
+      "resource": {
+        "resourceType": "ResearchSubject",
+        "status": "candidate",
+        "study": {
+          "reference": "ResearchStudy/0"
+        },
+        "individual": {
+          "reference": "Patient/1"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "ResearchSubject"
+      }
+    },
+    {
+      "fullUrl": "ResearchSubject/2",
+      "resource": {
+        "resourceType": "ResearchSubject",
+        "status": "ineligible",
+        "study": {
+          "reference": "ResearchStudy/1"
+        },
+        "individual": {
+          "reference": "Patient/0"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "ResearchSubject"
+      }
+    },
+    {
+      "fullUrl": "ResearchSubject/3",
+      "resource": {
+        "resourceType": "ResearchSubject",
+        "status": "candidate",
+        "study": {
+          "reference": "ResearchStudy/1"
+        },
+        "individual": {
+          "reference": "Patient/1"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "ResearchSubject"
+      }
+    },
+    {
+      "fullUrl": "ResearchSubject/4",
+      "resource": {
+        "resourceType": "ResearchSubject",
+        "status": "withdrawn",
+        "study": {
+          "reference": "ResearchStudy/1"
+        },
+        "individual": {
+          "reference": "Patient/2"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "ResearchSubject"
+      }
+    },
+    {
+      "fullUrl": "List/0",
+      "resource": {
+        "resourceType": "List",
+        "status": "current",
+        "identifier": [
+          {
+            "system": "http://miracum.org/fhir/screening-list-cohort-identifier",
+            "value": "1"
+          }
+        ],
+        "extension": [
+          {
+            "url": "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy",
+            "valueReference": {
+              "reference": "ResearchStudy/0",
+              "display": "PROSa"
+            }
+          }
+        ],
+        "mode": "working",
+        "code": {
+          "coding": [
+            {
+              "system": "https://fhir.miracum.org/uc1/CodeSystem/screeningList",
+              "code": "screening-recommendations"
+            }
+          ]
+        },
+        "note": [
+          {
+            "text": "Es wurden mehr passende Patienten gefunden als auf dieser Liste dargestellt werden können (insgesamt 3100). Nur die ersten 100 Vorschläge werden angezeigt."
+          }
+        ],
+        "entry": [
+          {
+            "item": {
+              "reference": "ResearchSubject/0"
+            }
+          },
+          {
+            "item": {
+              "reference": "ResearchSubject/1"
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "List?identifier=http://miracum.org/fhir/screening-list-cohort-identifier|1"
+      }
+    },
+    {
+      "fullUrl": "List/1",
+      "resource": {
+        "resourceType": "List",
+        "status": "current",
+        "identifier": [
+          {
+            "system": "http://miracum.org/fhir/screening-list-cohort-identifier",
+            "value": "2"
+          }
+        ],
+        "extension": [
+          {
+            "url": "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy",
+            "valueReference": {
+              "reference": "ResearchStudy/1",
+              "display": "AMICA"
+            }
+          }
+        ],
+        "mode": "working",
+        "code": {
+          "coding": [
+            {
+              "system": "https://fhir.miracum.org/uc1/CodeSystem/screeningList",
+              "code": "screening-recommendations"
+            }
+          ]
+        },
+        "entry": [
+          {
+            "item": {
+              "reference": "ResearchSubject/2"
+            },
+            "date": "2021-12-12T13:28:17-05:00",
+            "flag": {
+              "coding": [
+                {
+                  "system": "https://fhir.miracum.org/uc1/CodeSystem/system-determined-subject-status",
+                  "code": "ineligible"
+                }
+              ]
+            }
+          },
+          {
+            "item": {
+              "reference": "ResearchSubject/3"
+            },
+            "date": "2021-12-01T00:00:00.000Z"
+          },
+          {
+            "item": {
+              "reference": "ResearchSubject/4"
+            },
+            "date": "2021-11-01T00:00:00.000Z"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "List?identifier=http://miracum.org/fhir/screening-list-cohort-identifier|2"
+      }
+    },
+    {
+      "fullUrl": "List/2",
+      "resource": {
+        "resourceType": "List",
+        "status": "current",
+        "identifier": [
+          {
+            "system": "http://miracum.org/fhir/screening-list-cohort-identifier",
+            "value": "3"
+          }
+        ],
+        "extension": [
+          {
+            "url": "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy",
+            "valueReference": {
+              "reference": "ResearchStudy/2",
+              "display": "SECRET"
+            }
+          }
+        ],
+        "mode": "working",
+        "code": {
+          "coding": [
+            {
+              "system": "https://fhir.miracum.org/uc1/CodeSystem/screeningList",
+              "code": "screening-recommendations"
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "List?identifier=http://miracum.org/fhir/screening-list-cohort-identifier|3"
+      }
+    },
+    {
+      "fullUrl": "List/3",
+      "resource": {
+        "resourceType": "List",
+        "status": "retired",
+        "identifier": [
+          {
+            "system": "http://miracum.org/fhir/screening-list-cohort-identifier",
+            "value": "4"
+          }
+        ],
+        "extension": [
+          {
+            "url": "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy",
+            "valueReference": {
+              "reference": "ResearchStudy/3",
+              "display": "RETIRED"
+            }
+          }
+        ],
+        "mode": "working",
+        "code": {
+          "coding": [
+            {
+              "system": "https://fhir.miracum.org/uc1/CodeSystem/screeningList",
+              "code": "screening-recommendations"
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "List?identifier=http://miracum.org/fhir/screening-list-cohort-identifier|4"
+      }
+    },
+    {
+      "fullUrl": "ResearchStudy/0",
+      "resource": {
+        "resourceType": "ResearchStudy",
+        "identifier": [
+          {
+            "use": "official",
+            "system": "http://clinicaltrials.gov/",
+            "value": "NCT03521531"
+          }
+        ],
+        "extension": [
+          {
+            "url": "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym",
+            "valueString": "PROSa"
+          }
+        ],
+        "title": "Burden and Medical Care of Sarcoma in Germany (PROSa)",
+        "description": "Krankheitslast und Versorgungssituation bei Sarkomen [...]",
+        "status": "active",
+        "relatedArtifact": [
+          {
+            "type": "documentation",
+            "url": "https://clinicaltrials.gov/ct2/show/NCT03521531"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "ResearchStudy",
+        "ifNoneExist": "ResearchStudy?identifier=http://clinicaltrials.gov/|NCT03521531"
+      }
+    },
+    {
+      "fullUrl": "ResearchStudy/1",
+      "resource": {
+        "resourceType": "ResearchStudy",
+        "identifier": [
+          {
+            "use": "official",
+            "system": "http://clinicaltrials.gov/",
+            "value": "NCT03555877"
+          }
+        ],
+        "extension": [
+          {
+            "url": "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym",
+            "valueString": "AMICA"
+          }
+        ],
+        "title": "Antihormonelle Erhaltungstherapie [...]",
+        "description": "This is a multicenter, prospective, randomized, [...]",
+        "status": "active",
+        "relatedArtifact": [
+          {
+            "type": "documentation",
+            "url": "https://clinicaltrials.gov/ct2/show/NCT03555877"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "ResearchStudy",
+        "ifNoneExist": "ResearchStudy?identifier=http://clinicaltrials.gov/|NCT03555877"
+      }
+    },
+    {
+      "fullUrl": "ResearchStudy/2",
+      "resource": {
+        "resourceType": "ResearchStudy",
+        "identifier": [
+          {
+            "use": "official",
+            "system": "http://clinicaltrials.gov/",
+            "value": "SECRET"
+          }
+        ],
+        "extension": [
+          {
+            "url": "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym",
+            "valueString": "SECRET"
+          }
+        ],
+        "title": "SECRET",
+        "description": "This is a multicenter, prospective, randomized, [...]",
+        "status": "active",
+        "relatedArtifact": [
+          {
+            "type": "documentation",
+            "url": "https://clinicaltrials.gov/ct2/show/NCT03555877"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "ResearchStudy",
+        "ifNoneExist": "ResearchStudy?identifier=http://clinicaltrials.gov/|SECRET"
+      }
+    },
+    {
+      "fullUrl": "ResearchStudy/3",
+      "resource": {
+        "resourceType": "ResearchStudy",
+        "identifier": [
+          {
+            "use": "official",
+            "system": "http://clinicaltrials.gov/",
+            "value": "RETIRED"
+          }
+        ],
+        "extension": [
+          {
+            "url": "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym",
+            "valueString": "RETIRED"
+          }
+        ],
+        "status": "active",
+        "title": "RETIRED",
+        "description": "This is a retired study"
+      },
+      "request": {
+        "method": "POST",
+        "url": "ResearchStudy",
+        "ifNoneExist": "ResearchStudy?identifier=http://clinicaltrials.gov/|RETIRED"
+      }
+    }
+  ]
+}

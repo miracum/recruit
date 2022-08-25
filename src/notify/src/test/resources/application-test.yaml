@@ -1,0 +1,24 @@
+notifications:
+  schedules:
+    every morning: "* 0 * * * *"
+
+  trials:
+    - acronym: PROSa
+      subscriptions:
+        - user: me@example.com
+          notify: every morning
+      allowed:
+        groups:
+          - diz-uc1
+        users:
+          - you@example.com
+
+    - atlasCohortId: 123
+      subscriptions:
+        - user: me@example.com
+          notify: every morning
+      allowed:
+        groups:
+          - diz-uc1
+        users:
+          - you@example.com

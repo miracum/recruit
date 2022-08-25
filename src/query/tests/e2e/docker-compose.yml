@@ -1,0 +1,74 @@
+version: "3.9"
+
+services:
+  fhir:
+    image: docker.io/hapiproject/hapi:v6.0.1@sha256:63c98d8be3dadc77b47dca3115490f22bf99512f363f779f7bbcb42f569aeac3
+    environment:
+      HAPI_FHIR_VALIDATION_REQUESTS_ENABLED: "true"
+      HAPI_FHIR_SUBSCRIPTION_RESTHOOK_ENABLED: "true"
+      HAPI_FHIR_FHIR_VERSION: "R4"
+      HAPI_FHIR_CORS_ALLOWCREDENTIALS: "false"
+      HAPI_FHIR_CORS_ALLOWED_ORIGIN: "*"
+      HAPI_FHIR_NARRATIVE_ENABLED: "false"
+
+  omopdb:
+    image: quay.io/miracum/omop:test-data-v3@sha256:34919d66facaff8b1e56d8cb3cd9ac649ca6420aa86740ae9e32dff1b2b6eb26
+
+  ohdsi-webapi:
+    image: docker.io/ohdsi/webapi:2.11.1@sha256:9bcb5003e6504669b53c94f3e0b4aa6ad9b5c78741f772ca402579632ce64fb3
+    environment:
+      DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
+      DATASOURCE_URL: jdbc:postgresql://omopdb:5432/ohdsi
+      DATASOURCE_USERNAME: postgres
+      DATASOURCE_PASSWORD: postgres
+      DATASOURCE_OHDSI_SCHEMA: ohdsi
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: ohdsi
+      SPRING_BATCH_REPOSITORY_TABLEPREFIX: ohdsi.BATCH_
+      FLYWAY_DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
+      FLYWAY_DATASOURCE_URL: jdbc:postgresql://omopdb:5432/ohdsi
+      FLYWAY_DATASOURCE_USERNAME: postgres
+      FLYWAY_DATASOURCE_PASSWORD: postgres
+      FLYWAY_LOCATIONS: classpath:db/migration/postgresql
+      FLYWAY_PLACEHOLDERS_OHDSISCHEMA: ohdsi
+      FLYWAY_SCHEMAS: ohdsi
+      SECURITY_PROVIDER: "AtlasRegularSecurity"
+      SECURITY_DB_DATASOURCE_URL: jdbc:postgresql://omopdb:5432/ohdsi
+      SECURITY_DB_DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
+      SECURITY_DB_DATASOURCE_SCHEMA: ohdsi
+      SECURITY_DB_DATASOURCE_USERNAME: postgres
+      SECURITY_DB_DATASOURCE_PASSWORD: postgres
+      SECURITY_DB_DATASOURCE_AUTHENTICATIONQUERY: >-
+        SELECT password, first_name AS firstname, middle_name AS middlename, last_name AS lastname, username
+        FROM ohdsi.basic_security_users
+        WHERE username = ?
+    depends_on:
+      - omopdb
+
+  query:
+    image: ghcr.io/miracum/recruit/query:${IMAGE_TAG}
+    environment:
+      FHIR_URL: http://fhir:8080/fhir
+      OMOP_JDBCURL: jdbc:postgresql://omopdb:5432/ohdsi
+      OMOP_USERNAME: postgres
+      OMOP_PASSWORD: postgres
+      OMOP_RESULTSSCHEMA: cds_results
+      OMOP_CDMSCHEMA: cds_cdm
+      ATLAS_DATASOURCE: CDS-CDMV5
+      QUERY_SCHEDULE_UNIXCRON: "* * * * *"
+      QUERY_WEBAPI_BASE_URL: http://ohdsi-webapi:8080/WebAPI
+      QUERY_WEBAPI_AUTH_ENABLED: "true"
+      QUERY_WEBAPI_AUTH_LOGIN_PATH: "/user/login/db"
+      QUERY_WEBAPI_AUTH_USERNAME: "recruit-query-module"
+      QUERY_WEBAPI_AUTH_PASSWORD: "pass123"
+    depends_on:
+      - fhir
+      - omopdb
+      - ohdsi-webapi
+
+  tester:
+    build: .
+    environment:
+      FHIR_SERVER_URL: "http://fhir:8080/fhir"
+    depends_on:
+      - query
