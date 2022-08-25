@@ -1,0 +1,5 @@
+Neue Rekrutierungsvorschläge für die [(${studyName})] Studie.
+
+Bitte fügen Sie den folgenden Link in die Adresszeile Ihres Web-Browsers ein um diese anzuzeigen:
+
+[(${screeningListUrl})]

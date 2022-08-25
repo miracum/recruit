@@ -1,0 +1,69 @@
+notify:
+  mailer:
+    from: "noreply@example.com"
+    link-template: "http://localhost:8083/recommendations/[list_id]"
+  rules:
+    schedules:
+      everyMorning: "0 0 8 1/1 * ? *"
+      everyMonday: "0 0 8 ? * MON *"
+      everyHour: "0 0 0/1 1/1 * ? *"
+      everyFiveMinutes: "0 0/5 * 1/1 * ? *"
+      every5Minutes: "0 0/5 * 1/1 * ? *"
+      everyMinute: "0 0/1 * 1/1 * ? *"
+
+    trials:
+      - acronym: "*"
+        subscriptions:
+          - email: "everything@example.com"
+      - acronym: "PROSa"
+        subscriptions:
+          - email: "everyMorning@example.com"
+            notify: "everyMorning"
+          - email: "everyMinute@example.com"
+            notify: "everyMinute"
+          - email: "everyHour@example.com"
+            notify: "everyHour"
+          - email: "prosa-every-5-minutes@example.com"
+            notify: "every5Minutes"
+            # a lack of a notify element means the user will be notified immediately.
+          - email: "immediately-prosa@example.com"
+      - acronym: "AMICA"
+        subscriptions:
+          - email: "immediately-amica@example.com"
+          - email: "everyHour1@example.com"
+            notify: "everyHour"
+          - email: "everyHour2@example.com"
+            notify: "everyHour"
+          - email: "everyFiveMinutes@example.com"
+            notify: "everyFiveMinutes"
+spring:
+  datasource:
+    url: "jdbc:postgresql://localhost:6432/recruit_notify_jobs?ApplicationName=recruit-notify"
+    username: "postgres"
+    password: "postgres" # pragma: allowlist secret
+  mail:
+    host: localhost
+    port: 3025
+    username: noreply@test.de
+    password: ""
+    properties:
+      mail:
+        debug: false
+
+webhook:
+  endpoint: "http://host.docker.internal:8080/on-list-change"
+
+fhir:
+  url: "http://recruit-fhir-server.127.0.0.1.nip.io/fhir"
+
+logging:
+  level:
+    org:
+      miracum:
+        recruit:
+          notify: TRACE
+
+opentracing:
+  jaeger:
+    log-spans: true
+    enabled: true

@@ -1,0 +1,25 @@
+notify:
+  rules:
+    schedules:
+      everyMorning: "0 0 8 1/1 * ? *"
+
+    trials:
+      - acronym: "*"
+        subscriptions:
+          - email: "user.all-access@example.com"
+
+      - acronym: "PROSa"
+        accessibleBy:
+          users:
+            - "user.one"
+            - "user.two"
+          roles:
+            - "prosa-users"
+        subscriptions:
+          - email: "user.two@example.com"
+            notify: "everyMorning"
+          - email: "immediately-sample@example.com"
+
+      - acronym: "AMICA"
+        subscriptions:
+          - email: "user.two@example.com"
