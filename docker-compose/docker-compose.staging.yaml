@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: docker.io/library/traefik:v2.8.1@sha256:29eb2d56974b41585bbb824bdd8d6cc688adb98d05fa3f609af64ebcaf98d2a9
+    image: docker.io/library/traefik:v2.8.3@sha256:ad8c1935c4b901e10b62b6868d6369218793c69e7a7ea9c1d036fdc2b919e38e
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -99,7 +99,7 @@ services:
       - "traefik.http.routers.ohdsi-atlas.entrypoints=web"
 
   fhir:
-    image: docker.io/hapiproject/hapi:v6.0.1@sha256:63c98d8be3dadc77b47dca3115490f22bf99512f363f779f7bbcb42f569aeac3
+    image: docker.io/hapiproject/hapi:v6.1.0@sha256:253f87bb1f5b7627f8e25f76a4b0aa7a83f31968c6e111ad74d3cc4ad9ae812e
     restart: unless-stopped
     cap_drop:
       - ALL
