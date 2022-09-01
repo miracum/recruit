@@ -6,20 +6,66 @@ on:
       - master
 
 jobs:
-  release:
-    name: Release
+  prepare-artifacts:
+    name: Prepare Artifacts
     runs-on: ubuntu-22.04
+    container: ghcr.io/chgl/kube-powertools:v1.19.12@sha256:e4a83ff88d1a8da75bdd9d3a7ba408a4cecc0da2088b8b1191bcb7e0f296a21c
+    outputs:
+      hashes: ${{ steps.hash.outputs.hashes }}
     steps:
       - name: Checkout
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
-        with:
-          fetch-depth: 0
 
       - name: Build Docker Compose deployment bundle
         run: |
           mkdir -p dist/
           cp -r docker-compose/ dist/
           tar -C dist -zcvf dist/recruit-docker-compose.tar.gz docker-compose/
+
+      - name: Build SBOM bundle from container images
+        run: |
+          ./.github/generate-sboms.sh
+          cp -r sboms/ dist/
+          tar -C dist -zcvf dist/recruit-container-sboms.tar.gz sboms/
+
+      - name: Generate SLSA subject for Docker Compose and SBOM bundles
+        id: hash
+        working-directory: dist
+        run: |
+          sha256sum recruit-docker-compose.tar.gz recruit-container-sboms.tar.gz > recruit-hashes.sha256
+          echo "::set-output name=hashes::$(base64 -w0 < recruit-hashes.sha256)"
+
+      - uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3.1.0
+        with:
+          name: release-assets
+          path: dist/*.tar.gz
+
+  provenance:
+    needs:
+      - prepare-artifacts
+    permissions:
+      actions: read # To read the workflow path.
+      id-token: write # To sign the provenance.
+      contents: write # To add assets to a release.
+    # can't be referenced by digest. See <https://github.com/slsa-framework/slsa-github-generator#verification-of-provenance>
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.2.0
+    with:
+      base64-subjects: "${{ needs.prepare-artifacts.outputs.hashes }}"
+
+  release:
+    name: Release
+    runs-on: ubuntu-22.04
+    needs:
+      - prepare-artifacts
+      - provenance
+    steps:
+      - name: Checkout
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 # tag=v3.0.0
 
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@e1fe1fc00a3729593e87efb2f88475de76d64a24 # tag=v3.1.1
