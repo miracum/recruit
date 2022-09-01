@@ -33,7 +33,7 @@ jobs:
         working-directory: dist
         run: |
           sha256sum recruit-docker-compose.tar.gz recruit-container-sboms.tar.gz > recruit-hashes.sha256
-          echo "::set-output name=hashes::$(cat recruit-hashes.sha256 | base64 -w0)"
+          echo "::set-output name=hashes::$(base64 -w0 < recruit-hashes.sha256)"
 
       - uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3.1.0
         with:
