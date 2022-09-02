@@ -1,0 +1,41 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Schedule
+metadata:
+  namespace: recruit
+  name: fail-one-of-the-notify-pods
+spec:
+  schedule: "@every 2m"
+  concurrencyPolicy: Forbid
+  historyLimit: 1
+  type: PodChaos
+  podChaos:
+    selector:
+      namespaces:
+        - recruit
+      labelSelectors:
+        app.kubernetes.io/component: notify
+        app.kubernetes.io/instance: recruit
+    mode: one
+    action: pod-failure
+    duration: 20s
+# ---
+# apiVersion: chaos-mesh.org/v1alpha1
+# kind: Schedule
+# metadata:
+#   namespace: recruit
+#   name: fail-one-of-the-fhir-server-pods
+# spec:
+#   schedule: "@every 1m"
+#   concurrencyPolicy: Forbid
+#   historyLimit: 1
+#   type: PodChaos
+#   podChaos:
+#     selector:
+#       namespaces:
+#         - recruit
+#       labelSelectors:
+#         app.kubernetes.io/name: fhirserver
+#         app.kubernetes.io/instance: recruit
+#     mode: one
+#     action: pod-failure
+#     duration: 20s

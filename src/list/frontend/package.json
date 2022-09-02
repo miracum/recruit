@@ -1,0 +1,49 @@
+{
+  "name": "list",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "test:unit": "vue-cli-service test:unit --coverage",
+    "test:e2e": "vue-cli-service test:e2e --mode e2e",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "1.2.36",
+    "@fortawesome/free-solid-svg-icons": "5.15.4",
+    "@fortawesome/vue-fontawesome": "2.0.8",
+    "buefy": "0.9.21",
+    "core-js": "3.24.1",
+    "csv-stringify": "6.2.0",
+    "fhirclient": "2.4.0",
+    "fhirpath": "2.14.6",
+    "vue": "2.7.8",
+    "vue-router": "3.5.4",
+    "vuejs-logger": "1.5.5",
+    "axios": "1.1.3",
+    "@dsb-norge/vue-keycloak-js": "1.3.2"
+  },
+  "devDependencies": {
+    "@babel/eslint-parser": "7.18.9",
+    "@vue/cli-plugin-babel": "5.0.8",
+    "@vue/cli-plugin-eslint": "5.0.8",
+    "@vue/cli-plugin-router": "5.0.8",
+    "@vue/cli-plugin-unit-jest": "5.0.8",
+    "@vue/cli-service": "5.0.8",
+    "@vue/eslint-config-airbnb": "6.0.0",
+    "@vue/test-utils": "1.3.0",
+    "@vue/vue2-jest": "27.0.0",
+    "eslint": "8.22.0",
+    "eslint-config-prettier": "8.5.0",
+    "eslint-plugin-vue": "9.3.0",
+    "sass": "1.54.4",
+    "sass-loader": "13.0.2",
+    "vue-template-compiler": "2.7.8",
+    "cypress-keycloak": "1.9.0",
+    "pino": "8.4.1"
+  },
+  "optionalDependencies": {
+    "@vue/cli-plugin-e2e-cypress": "5.0.8"
+  }
+}

@@ -76,7 +76,7 @@ public class WebApiRoute extends RouteBuilder {
     // @spotless:off
     if (isWebApiAuthEnabled) {
       var authUrl = new URL(baseUrl.getProtocol(), baseUrl.getHost(), baseUrl.getPort(),
-        baseUrl.getPath() + webApiAuthLoginPath, null);
+          baseUrl.getPath() + webApiAuthLoginPath, null);
 
       // via https://gist.github.com/rafaeltuelho/4d2449ac9b709fd29d79fa89acd8b48b
       from(GET_AUTH_TOKEN)
@@ -93,7 +93,7 @@ public class WebApiRoute extends RouteBuilder {
         .log(LoggingLevel.DEBUG, LOG, "response from token provider: ${body}")
         .choice()
           .when().simple("${header.CamelHttpResponseCode} == 200")
-                 .setHeader("bearerToken").simple("${header.Bearer}")
+              .setHeader("bearerToken").simple("${header.Bearer}")
           .endChoice()
           .otherwise()
             .log("Failed to authenticate as {{query.webapi.auth.username}} against " + authUrl);
@@ -123,7 +123,7 @@ public class WebApiRoute extends RouteBuilder {
 
     // when running just one cohort
     from(GET_COHORT_DEFINITION)
-    	.to(OmopRoute.CLEAR_CACHE)
+      .to(OmopRoute.CLEAR_CACHE)
         .choice()
           .when(constant(isWebApiAuthEnabled))
             .to(GET_AUTH_TOKEN)

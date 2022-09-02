@@ -1,0 +1,53 @@
+name: "Test container image in basic smple test"
+description: "Runs Docker Compose-based basic smoke tests against a newly build image"
+inputs:
+  project-name:
+    description: "Name of the project inside the /src/ dir"
+    required: true
+  working-directory:
+    description: "Working directory to run `docker compose` etc. in"
+    default: ./src
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Download artifact
+      uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 # tag=v3.0.0
+      with:
+        name: ${{ inputs.project-name }}-build-artifacts
+        path: /tmp
+
+    - name: Load image
+      shell: bash
+      run: |
+        docker load --input /tmp/jib-image.tar
+        docker image ls -a
+
+    - name: Run container structure tests
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        curl -LO https://github.com/GoogleContainerTools/container-structure-test/releases/download/v1.11.0/container-structure-test-linux-amd64
+        chmod +x container-structure-test-linux-amd64
+
+        IMAGE_NAME=$(jq -j .image /tmp/jib-image.json)
+        ./container-structure-test-linux-amd64 test --image="$IMAGE_NAME" --config=tests/container-structure/common-tests.yaml
+        ./container-structure-test-linux-amd64 test --image="$IMAGE_NAME" --config=tests/container-structure/java-container-tests.yaml
+
+    - name: Run isolated smoke test
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        IMAGE_TAG=$(jq -j .tags[0] /tmp/jib-image.json)
+        export IMAGE_TAG
+        docker compose -f ${{ inputs.project-name }}/tests/e2e/docker-compose.yml build
+        docker compose -f ${{ inputs.project-name }}/tests/e2e/docker-compose.yml run tester
+
+    - name: Print test logs and stop all running containers
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      if: always()
+      run: |
+        docker compose -f ${{ inputs.project-name }}/tests/e2e/docker-compose.yml logs
+        docker compose -f ${{ inputs.project-name }}/tests/e2e/docker-compose.yml down --volumes --remove-orphans

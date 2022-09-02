@@ -39,6 +39,7 @@ fhir:
   url: ""
   subscription:
     criteria: "List?code=https://fhir.miracum.org/uc1/CodeSystem/screeningList|screening-recommendations"
+    retry-count: 3
   systems:
     screening-list-reference: "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy"
     study-acronym: "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym"

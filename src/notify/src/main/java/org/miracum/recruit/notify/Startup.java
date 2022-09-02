@@ -1,7 +1,7 @@
 package org.miracum.recruit.notify;
 
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.util.HapiExtensions;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -9,6 +9,8 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CommunicationRequest;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Subscription;
 import org.miracum.recruit.notify.fhirserver.PractitionerTransmitter;
@@ -41,6 +43,7 @@ public class Startup {
   private final PractitionerCreator practitionerCreator;
   private final FhirServerProvider fhirServerProvider;
   private final IGenericClient fhirClient;
+  private final int subscriptionRetryCount;
 
   /**
    * Create util items needed for startup routine to add initial items to target fhir server and
@@ -55,7 +58,8 @@ public class Startup {
       PractitionerTransmitter practitionerTransmitter,
       IGenericClient fhirClient,
       UserConfig userConfig,
-      @Value("${fhir.subscription.criteria}") String criteria)
+      @Value("${fhir.subscription.criteria}") String criteria,
+      @Value("${fhir.subscription.retry-count}") int subscriptionRetryCount)
       throws MalformedURLException, URISyntaxException {
 
     this.retryTemplate = retryTemplate;
@@ -68,6 +72,7 @@ public class Startup {
     this.fhirClient = fhirClient;
     this.userConfig = userConfig;
     this.criteria = criteria;
+    this.subscriptionRetryCount = subscriptionRetryCount;
 
     createWebhookEndpoint(webhookEndpoint);
   }
@@ -132,12 +137,17 @@ public class Startup {
     LOG.info("Subscription resource '{}' created!!", outcome.getId());
   }
 
-  private MethodOutcome createSubscription() {
+  private Bundle createSubscription() {
     var channel =
         new Subscription.SubscriptionChannelComponent()
             .setType(Subscription.SubscriptionChannelType.RESTHOOK)
             .setEndpoint(webhookEndpoint.toString())
             .setPayload("application/fhir+json");
+
+    channel
+        .addExtension()
+        .setUrl(HapiExtensions.EX_RETRY_COUNT)
+        .setValue(new IntegerType(subscriptionRetryCount));
 
     var subscription =
         new Subscription()
@@ -146,12 +156,20 @@ public class Startup {
             .setReason("Create notifications based on screening list changes.")
             .setStatus(Subscription.SubscriptionStatus.REQUESTED);
 
-    return fhirClient
-        .update()
-        .resource(subscription)
-        .conditional()
-        .where(Subscription.CRITERIA.matchesExactly().value(criteria))
-        .execute();
+    subscription.setId(IdType.newRandomUuid());
+
+    Bundle bundle = new Bundle();
+    bundle.setType(Bundle.BundleType.TRANSACTION);
+
+    bundle
+        .addEntry()
+        .setFullUrl(subscription.getId())
+        .setResource(subscription)
+        .getRequest()
+        .setUrl(subscription.getResourceType().name() + "?criteria=" + criteria)
+        .setMethod(Bundle.HTTPVerb.PUT);
+
+    return fhirServerProvider.executeTransaction(bundle);
   }
 
   private void loadReceiverList(RetryTemplate retryTemplate) {

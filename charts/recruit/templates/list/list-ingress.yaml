@@ -1,0 +1,49 @@
+{{- if and .Values.list.enabled .Values.list.ingress.enabled -}}
+{{- $fullName := include "recruit.fullname" . -}}
+{{- $serviceName := printf "%s-list" $fullName -}}
+{{- $servicePort := .Values.list.service.port -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $serviceName }}
+  labels:
+    {{- include "recruit.labels" . | nindent 4 }}
+    app.kubernetes.io/component: list
+  {{- with .Values.list.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.list.ingress.ingressClassName }}
+  ingressClassName: {{ . }}
+  {{- end }}
+{{- if .Values.list.ingress.tls }}
+  tls:
+  {{- range .Values.list.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.list.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+        {{- range .paths }}
+          - path: {{ . }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $serviceName }}
+                port:
+                  {{- if kindIs "float64" $servicePort }}
+                  number: {{ $servicePort }}
+                  {{- else }}
+                  name: {{ $servicePort }}
+                  {{- end }}
+        {{- end }}
+  {{- end }}
+{{- end }}

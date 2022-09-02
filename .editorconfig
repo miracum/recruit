@@ -11,6 +11,10 @@ indent_style = space
 indent_size = 2
 continuation_indent_size = 4
 
+[*.bat]
+end_of_line = crlf
+charset = utf-8
+
 [*.{js,jsx,ts,tsx,vue}]
 indent_style = space
 indent_size = 2

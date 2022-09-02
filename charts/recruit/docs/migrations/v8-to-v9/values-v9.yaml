@@ -1,0 +1,33 @@
+ohdsi:
+  postgresql:
+    image:
+      # downgrade the version of postgres since the original volume (v8 of the recruit chart) uses postgres 13
+      # this resolves the error `database files are incompatible with server`
+      tag: 13.1.0-debian-10-r85
+    auth:
+      # the password for the `postgres` admin user was moved from
+      # `postgresql.postgresqlPassword` to `postgresql.auth.postgresPassword`
+      postgresPassword: ohdsi
+  # the init job used, `harbor.miracum.org/miracum-etl/omop/init` isn't idempotent in its current version
+  # to avoid any trouble when updating an existing, already initialized database, we just disable it.
+  # Generally, it should be disabled after the DB is initialized.
+  cdmInitJob:
+    enabled: false
+
+fhirserver:
+  postgresql:
+    image:
+      tag: 11.14.0-debian-10-r49
+    auth:
+      postgresPassword: fhir
+
+notify:
+  ha:
+    enabled: true
+
+postgresql:
+  enabled: true
+  image:
+    tag: 14.1.0-debian-10-r88
+  auth:
+    postgresPassword: notify-ha

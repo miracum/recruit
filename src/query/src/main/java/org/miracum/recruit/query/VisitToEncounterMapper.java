@@ -104,9 +104,8 @@ public class VisitToEncounterMapper {
   private BundleEntryComponent mapVisitOccurrenceToMainEncounter(
       VisitOccurrence visitOccurrence, Reference patientReference) {
 
-    var mainEncounterFullUrl = IdType.newRandomUuid().getValue();
-
-    // both status and class are required fields so they should be filled as soon as possible
+    // both status and class are required fields so they should be filled as soon as
+    // possible
     // to ensure validation passes.
     var mainEncounter = new Encounter().setStatus(EncounterStatus.UNKNOWN).setClass_(impCoding);
     var period = new Period();
@@ -152,6 +151,8 @@ public class VisitToEncounterMapper {
           createReferenceWithDisplay(visitOccurrence.getCareSite().getCareSiteName());
       mainEncounter.addLocation().setLocation(locationReference);
     }
+
+    var mainEncounterFullUrl = IdType.newRandomUuid().getValue();
 
     return new BundleEntryComponent()
         .setResource(mainEncounter)
@@ -239,9 +240,12 @@ public class VisitToEncounterMapper {
 
     subEncounter.addLocation().setLocation(locationReference);
 
-    // the visit_detail table does not contain stable identification data as opposed to the
-    // visit_occurrence's visit_source_value. So we'll have to create a surrogate identifier
-    // from the visit_source_value, the visit_detail's start date and the visit_detail_source_value
+    // the visit_detail table does not contain stable identification data as opposed
+    // to the
+    // visit_occurrence's visit_source_value. So we'll have to create a surrogate
+    // identifier
+    // from the visit_source_value, the visit_detail's start date and the
+    // visit_detail_source_value
     // which should at least approximate the location of the visit to some extent.
 
     var identifierValueBuilder = new StringBuilder();

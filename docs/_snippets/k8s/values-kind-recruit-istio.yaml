@@ -1,10 +1,31 @@
-ohdsi:
-  cdmInitJob:
-    podAnnotations:
-      sidecar.istio.io/inject: "false"
-  achilles:
-    podAnnotations:
-      sidecar.istio.io/inject: "false"
+# ohdsi:
+#   cdmInitJob:
+#     podAnnotations:
+#       sidecar.istio.io/inject: "false"
+#   achilles:
+#     podAnnotations:
+#       sidecar.istio.io/inject: "false"
 
 mailhog:
   automountServiceAccountToken: true
+  ingress:
+    annotations:
+      kubernetes.io/ingress.class: istio
+
+list:
+  ingress:
+    annotations:
+      kubernetes.io/ingress.class: istio
+
+fhirserver:
+  ingress:
+    annotations:
+      kubernetes.io/ingress.class: istio
+
+ohdsi:
+  ingress:
+    annotations:
+      kubernetes.io/ingress.class: istio
+    hosts:
+      - host: recruit-ohdsi.127.0.0.1.nip.io
+        pathType: Prefix

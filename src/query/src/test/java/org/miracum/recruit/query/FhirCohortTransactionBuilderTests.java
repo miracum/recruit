@@ -386,7 +386,7 @@ class FhirCohortTransactionBuilderTests {
 
   @Test
   void
-      buildFromOmopCohort_withShouldOnlyCreatePatientsIfNotExistEnabled_shouldUseAConditionalCreateInsteadOfUpdate() {
+      buildFromOmopCohort_withShouldOnlyCreatePatientsIfNotExistEnabled_shouldUseConditionalCreateInsteadOfUpdate() {
     var persons =
         List.of(
             Person.builder().personId(1L).yearOfBirth(Year.of(2001)).build(),
@@ -409,7 +409,7 @@ class FhirCohortTransactionBuilderTests {
 
   @Test
   void
-      buildFromOmopCohort_withGivenPreviousScreeningListAndCohortContainingPreviousPersonAndANewPerson_shouldCreateListContainingPreviousAndNewSubjects() {
+      buildFromOmopCohort_withGivenPreviousScreeningListAndCohortContainingPreviousPersonAndNewPerson_shouldCreateListContainingPreviousAndNewSubjects() {
     // previousPerson and previousPatient are the same since their identifier is identical:
     // source_value=1 is used as an identifier for the Patient.
     var previousPatient =

@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-22.04
     permissions:
       contents: write
+      pages: write
     steps:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
       - uses: actions/setup-python@5ccb29d8773c3f3f653e1705f474dfaa8a06a912 # v4.4.0

@@ -253,7 +253,7 @@ public class FhirServerProvider {
               .setResource(practitioner)
               .getRequest()
               .setUrl("Practitioner")
-              .setIfNoneExist(String.format("email=%s", email))
+              .setIfNoneExist(String.format("Practitioner?email=%s", email))
               .setMethod(Bundle.HTTPVerb.POST);
 
           executeTransaction(bundle);

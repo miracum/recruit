@@ -1,9 +1,2 @@
-*
-!src
-!tests/unit
-!server
-!public
-public/config*
-!package*.json
-!*.js
-!.prettierrc
+dist/
+node_modules/

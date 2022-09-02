@@ -1,0 +1,278 @@
+# Install via:
+# helm install -n recruit --render-subchart-notes -f tests/chaos/recruit-values.yaml --set ohdsi.cdmInitJob.enabled=true --set ohdsi.loadCohortDefinitionsJob.enabled=true recruit ./charts/recruit
+
+list:
+  enabled: false
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "250m"
+    limits:
+      memory: "128Mi"
+  ingress:
+    enabled: true
+    hosts:
+      - host: recruit-list.127.0.0.1.nip.io
+        paths: ["/"]
+  replicaCount: 2
+  podDisruptionBudget:
+    enabled: true
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: recruit
+          app.kubernetes.io/instance: recruit
+          app.kubernetes.io/component: list
+
+query:
+  enabled: false
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "1000m"
+    limits:
+      memory: "512Mi"
+  webAPI:
+    dataSource: "SynPUF-CDMV5"
+  omop:
+    resultsSchema: synpuf_results
+    cdmSchema: synpuf_cdm
+  cohortSelectorLabels:
+    - "recruIT"
+
+notify:
+  replicaCount: 3
+  image:
+    tag: 0.0.1-SNAPSHOT
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "1000m"
+    limits:
+      memory: "512Mi"
+  rules:
+    schedules:
+      everyMorning: "0 0 8 1/1 * ? *"
+    trials:
+      - acronym: "*"
+        subscriptions:
+          - email: "everything@example.com"
+      - acronym: "SAMPLE"
+        accessibleBy:
+          users:
+            - "user1"
+            - "user.two@example.com"
+        subscriptions:
+          - email: "everyMorning@example.com"
+            notify: "everyMorning"
+  podDisruptionBudget:
+    enabled: true
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: recruit
+          # note that this label depends on the name of the chart release
+          # this assumes the chart is deployed with a name of `recruit`
+          app.kubernetes.io/instance: recruit
+          app.kubernetes.io/component: notify
+  ha:
+    enabled: true
+    database:
+      host: "recruit-notify-db-rw"
+      port: 5432
+      username: "notify_user"
+      password: ""
+      name: "notify_jobstore"
+      existingSecret:
+        name: "recruit-notify-db-app-user"
+        key: "password"
+
+postgresql:
+  enabled: false
+
+fhirserver:
+  replicaCount: 1
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "2500m"
+    limits:
+      memory: "2Gi"
+  postgresql:
+    enabled: false
+  externalDatabase:
+    host: "recruit-fhir-server-db-rw"
+    port: 5432
+    database: "fhir_server"
+    user: "fhir_server_user"
+    password: ""
+    existingSecret: "recruit-fhir-server-db-app-user"
+    existingSecretKey: "password"
+  ingress:
+    enabled: true
+    hosts:
+      - host: recruit-fhir-server.127.0.0.1.nip.io
+        paths: ["/"]
+  podDisruptionBudget:
+    enabled: true
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: fhirserver
+          app.kubernetes.io/instance: recruit
+
+mailhog:
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "250m"
+    limits:
+      memory: "64Mi"
+  ingress:
+    enabled: true
+    hosts:
+      - host: recruit-mailhog.127.0.0.1.nip.io
+        paths:
+          - path: "/"
+            pathType: Prefix
+
+ohdsi:
+  enabled: false
+  atlas:
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "64Mi"
+  webApi:
+    resources:
+      requests:
+        memory: "2Gi"
+        cpu: "250m"
+      limits:
+        memory: "2Gi"
+  postgresql:
+    auth:
+      postgresPassword: ohdsi
+    primary:
+      resources:
+        limits:
+          memory: 4Gi
+        requests:
+          memory: 4Gi
+          cpu: 250m
+      persistence:
+        size: 24Gi
+      extendedConfiguration: |
+        max_connections = 50
+        shared_buffers = 1GB
+        effective_cache_size = 3GB
+        maintenance_work_mem = 256MB
+        checkpoint_completion_target = 0.9
+        wal_buffers = 16MB
+        default_statistics_target = 100
+        random_page_cost = 1.1
+        effective_io_concurrency = 200
+        work_mem = 10485kB
+        min_wal_size = 1GB
+        max_wal_size = 4GB
+        max_worker_processes = 4
+        max_parallel_workers_per_gather = 2
+        max_parallel_workers = 4
+        max_parallel_maintenance_workers = 2
+  ingress:
+    enabled: true
+    hosts:
+      - host: recruit-ohdsi.127.0.0.1.nip.io
+  cdmInitJob:
+    enabled: false
+    ttlSecondsAfterFinished: ""
+    extraEnv:
+      - name: SETUP_SYNPUF
+        value: "true"
+  achilles:
+    schemas:
+      cdm: "synpuf_cdm"
+      vocab: "synpuf_cdm"
+      res: "synpuf_results"
+    sourceName: "SynPUF-CDMV5"
+  loadCohortDefinitionsJob:
+    enabled: false
+    cohortDefinitions:
+      - |
+        {
+          "name": "A sample cohort",
+          "description": "[acronym=SAMPLE] [recruIT] Sample Cohort containing only female patients older than 90 years.",
+          "expressionType": "SIMPLE_EXPRESSION",
+          "expression": {
+            "ConceptSets": [],
+            "PrimaryCriteria": {
+              "CriteriaList": [
+                {
+                  "ObservationPeriod": {
+                    "First": true
+                  }
+                }
+              ],
+              "ObservationWindow": {
+                "PriorDays": 0,
+                "PostDays": 0
+              },
+              "PrimaryCriteriaLimit": {
+                "Type": "First"
+              }
+            },
+            "QualifiedLimit": {
+              "Type": "First"
+            },
+            "ExpressionLimit": {
+              "Type": "First"
+            },
+            "InclusionRules": [
+              {
+                "name": "Older than 18",
+                "expression": {
+                  "Type": "ALL",
+                  "CriteriaList": [],
+                  "DemographicCriteriaList": [
+                    {
+                      "Age": {
+                        "Value": 90,
+                        "Op": "gt"
+                      },
+                      "Gender": [
+                        {
+                          "CONCEPT_CODE": "F",
+                          "CONCEPT_ID": 8532,
+                          "CONCEPT_NAME": "FEMALE",
+                          "DOMAIN_ID": "Gender",
+                          "INVALID_REASON_CAPTION": "Unknown",
+                          "STANDARD_CONCEPT_CAPTION": "Unknown",
+                          "VOCABULARY_ID": "Gender"
+                        }
+                      ]
+                    }
+                  ],
+                  "Groups": []
+                }
+              }
+            ],
+            "CensoringCriteria": [],
+            "CollapseSettings": {
+              "CollapseType": "ERA",
+              "EraPad": 0
+            },
+            "CensorWindow": {},
+            "cdmVersionRange": ">=5.0.0"
+          }
+        }

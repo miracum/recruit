@@ -1,0 +1,49 @@
+{{- if and .Values.notify.enabled .Values.notify.ingress.enabled -}}
+{{- $fullName := include "recruit.fullname" . -}}
+{{- $serviceName := printf "%s-notify" $fullName -}}
+{{- $servicePort := .Values.notify.service.port -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $serviceName }}
+  labels:
+    {{- include "recruit.labels" . | nindent 4 }}
+    app.kubernetes.io/component: notify
+  {{- with .Values.notify.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.notify.ingress.ingressClassName }}
+  ingressClassName: {{ . }}
+  {{- end }}
+{{- if .Values.notify.ingress.tls }}
+  tls:
+  {{- range .Values.notify.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.notify.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+        {{- range .paths }}
+          - path: {{ . }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $serviceName }}
+                port:
+                  {{- if kindIs "float64" $servicePort }}
+                  number: {{ $servicePort }}
+                  {{- else }}
+                  name: {{ $servicePort }}
+                  {{- end }}
+        {{- end }}
+  {{- end }}
+{{- end }}

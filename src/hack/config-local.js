@@ -11,7 +11,7 @@ define([], function () {
   };
 
   configLocal.cohortComparisonResultsEnabled = false;
-  configLocal.userAuthenticationEnabled = true;
+  configLocal.userAuthenticationEnabled = false; // disabled for using the atlasdb
   configLocal.plpResultsEnabled = false;
 
   configLocal.authProviders = [
@@ -19,7 +19,7 @@ define([], function () {
       name: "DB Login",
       url: "user/login/db",
       ajax: true,
-      icon: "fa fa-openid",
+      icon: "fa fa-database",
       isUseCredentialsForm: true,
     },
   ];

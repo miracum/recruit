@@ -9,16 +9,14 @@ plugins {
     id 'java'
 }
 
+group = 'org.miracum.recruit'
+version = '0.0.1' // x-release-please-version
+sourceCompatibility = '17'
+targetCompatibility = '17'
+
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
-}
-
-dependencies {
-    constraints {
-        // Define dependency versions as constraints
-        implementation 'org.apache.commons:commons-text:1.9'
-    }
 }
 
 testing {

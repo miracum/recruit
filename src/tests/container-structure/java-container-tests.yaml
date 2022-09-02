@@ -1,0 +1,12 @@
+schemaVersion: "2.0.0"
+
+fileExistenceTests:
+  - name: "OpenTelemetry Java Agent JAR"
+    path: "/app/opentelemetry-javaagent.jar"
+    shouldExist: true
+    permissions: "-rw-r--r--"
+
+metadataTest:
+  env:
+    - key: SPRING_PROFILES_ACTIVE
+      value: prod

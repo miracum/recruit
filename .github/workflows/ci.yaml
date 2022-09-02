@@ -7,49 +7,102 @@ on:
     branches:
       - master
 
+env:
+  LIST_MODULE_CONTAINER_IMAGE_NAME: ghcr.io/miracum/recruit/list
+
 jobs:
-  build-java-modules:
-    runs-on: ubuntu-22.04
+  build:
     strategy:
       matrix:
-        module:
-          - query
-          - notify
+        include:
+          - module: "query"
+            build-with: "jib"
+          - module: "notify"
+            build-with: "jib"
+          - module: "list"
+            build-with: "dockerfile"
       fail-fast: true
-    defaults:
-      run:
-        working-directory: ./src
-    steps:
-      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+    uses: ./.github/workflows/build.yaml
+    with:
+      module-name: ${{ matrix.module }}
+      build-with: ${{ matrix.build-with }}
 
-      - uses: actions/setup-java@2c7a4878f5d120bd643426d54ae1209b29cc01a3 # tag=v3.4.1
-        with:
-          distribution: temurin
-          java-version: 17
-
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@356abb47e7664b5505e25d7997a5a522a17c62d9 # tag=v2.3.0
-
-      - name: Build
-        run: ./gradlew :${{ matrix.module }}:build
-
-      - name: Generate test report
-        run: ./gradlew :${{ matrix.module }}:jacocoTestReport
-
-      - name: Build container image
-        env:
-          # TODO: get from somewhere else. Or let https://github.com/googleapis/release-please do the work?
-          ORG_GRADLE_PROJECT_version: "test"
-        run: ./gradlew :${{ matrix.module }}:jibDockerBuild
-
-  build-list-module:
+  test:
     runs-on: ubuntu-22.04
-    defaults:
-      run:
-        working-directory: ./src/list
+    needs:
+      - build
+    strategy:
+      matrix:
+        include:
+          - module: "query"
+            build-with: "jib"
+          - module: "notify"
+            build-with: "jib"
+          - module: "list"
+            build-with: "dockerfile"
+      fail-fast: true
     steps:
       - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
 
+      - uses: ./.github/actions/test-image
+        with:
+          project-name: ${{ matrix.module }}
+
+  # TODO
+  # test-list-module:
+  #   runs-on: ubuntu-22.04
+  #   needs:
+  #     - build-list-module
+  #   defaults:
+  #     run:
+  #       working-directory: ./src/list
+  #   env:
+  #     IMAGE_TAG: ${{ needs.build-list-module.outputs.image-tag }}
+  #   steps:
+  #     - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+
+  #     - name: Download container image
+  #       uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 # tag=v3.0.0
+  #       with:
+  #         name: list-build-artifacts
+  #         path: /tmp
+
+  #     - name: Load images
+  #       run: |
+  #         docker load --input /tmp/list-image.tar
+  #         docker image ls -a
+
+  #     - name: Run E2E tests
+  #       working-directory: src/list/frontend
+  #       run: |
+  #         # removing babel.config.js prevents the error
+  #         # 'Error: Cannot find module '@vue/cli-plugin-babel/preset' from '/e2e' while parsing file: /e2e/tests/e2e/support/index.js'
+  #         # in cypress
+  #         rm babel.config.js
+
+  #         docker compose -f tests/e2e/docker-compose.yml run loader
+  #         docker compose -f tests/e2e/docker-compose.yml run e2e
+
+  #     - name: Upload cypress screenshots and videos
+  #       if: always()
+  #       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3.1.0
+  #       with:
+  #         name: cypress-test-videos-and-screenshots
+  #         path: |
+  #           src/list/tests/e2e/videos
+  #           src/list/tests/e2e/screenshots
+
+  #     - name: Print test logs and stop all running containers
+  #       if: always()
+  #       run: |
+  #         docker compose -f tests/e2e/docker-compose.yml logs
+  #         docker compose -f tests/e2e/docker-compose.yml down --volumes --remove-orphans
+
+  integration-tests:
+    runs-on: ubuntu-22.04
+    needs:
+      - test
+    steps:
       - run: |
-          docker build -t test .
-          docker image ls
+          echo "starting test fixtures: FHIR server, OHDSI stack, Mail"
+          echo "run e2e workflow..."

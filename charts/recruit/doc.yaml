@@ -1,0 +1,19 @@
+project:
+  name: recruIT
+  shortName: recruIT
+  url: https://miracum.github.io/recruit
+  description: Helm chart for deploying the recruIT clinical trial recruitment support system on Kubernetes.
+  app: the recruIT clinical trial recruitment support system
+repository:
+  url: https://miracum.github.io/charts
+  name: miracum
+chart:
+  name: recruit
+  values: "-- generate from values file --"
+  valuesExample: "-- generate from values file --"
+prerequisites:
+  - "Kubernetes v1.21+"
+  - "Helm v3.8+"
+release:
+  name: recruit
+  namespace: recruit

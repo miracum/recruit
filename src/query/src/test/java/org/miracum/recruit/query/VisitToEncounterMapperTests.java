@@ -160,7 +160,7 @@ class VisitToEncounterMapperTests {
 
   @Test
   void
-      map_withVisitDetailWithoutVisitDetailSourceValueAndWithoutCareSite_shouldNotCreateASubEncounter() {
+      map_withVisitDetailWithoutVisitDetailSourceValueAndWithoutCareSite_shouldNotCreateSubEncounter() {
     var vd = VisitDetail.builder().build();
     var vo = VisitOccurrence.builder().visitSourceValue("1").visitDetails(Set.of(vd)).build();
 
@@ -193,7 +193,7 @@ class VisitToEncounterMapperTests {
 
   @Test
   void
-      map_withVisitDetailWithoutVisitDetailSourceValueButWithCareSite_shouldCreateASubEncounterWithCareSiteNamesAsLocationDisplay() {
+      map_withVisitDetailWithoutVisitDetailSourceValueButWithCareSite_shouldCreateSubEncounterWithCareSiteNamesAsLocationDisplay() {
     var careSite = CareSite.builder().careSiteName("Test 1").build();
     var vd = VisitDetail.builder().visitDetailStartDate(LocalDate.now()).careSite(careSite).build();
     var vo = VisitOccurrence.builder().visitSourceValue("1").visitDetails(Set.of(vd)).build();
@@ -216,7 +216,7 @@ class VisitToEncounterMapperTests {
 
   @Test
   void
-      map_withVisitDetailWithoutCareSiteButWithVisitDetailSourceValue_shouldCreateASubEncounterWithVisitDetailSourceValueAsLocationDisplay() {
+      map_withVisitDetailWithoutCareSiteButWithVisitDetailSourceValue_shouldCreateSubEncounterWithVisitDetailSourceValueAsLocationDisplay() {
     var vd =
         VisitDetail.builder()
             .visitDetailStartDate(LocalDate.now())

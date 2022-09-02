@@ -56,12 +56,14 @@ public class FhirRoute extends RouteBuilder {
 
   @Override
   public void configure() {
-    // Gets the Ids of the patients for one cohort in "body" and CohortDefinition in "header.cohort"
+    // Gets the Ids of the patients for one cohort in "body" and CohortDefinition in
+    // "header.cohort"
     from(CREATE_SCREENING_LIST)
         .log(
             LoggingLevel.INFO,
             log,
-            "[Cohort ${header.cohort.id}] adding ${body.size()} patient(s) for cohort '${header.cohort.id} - ${header.cohort.name}'")
+            "[Cohort ${header.cohort.id}] adding ${body.size()} "
+                + "patient(s) for cohort '${header.cohort.id} - ${header.cohort.name}'")
         .process(
             ex -> {
               // get data from omop db and save it in variables
@@ -105,7 +107,8 @@ public class FhirRoute extends RouteBuilder {
               ex.getIn().setBody(transaction);
             })
         .to(
-            "fhir:transaction/withBundle?serverUrl={{fhir.url}}&inBody=bundle&fhirVersion=R4&fhirContext=#bean:fhirContext")
+            "fhir:transaction/withBundle?serverUrl={{fhir.url}}"
+                + "&inBody=bundle&fhirVersion=R4&fhirContext=#bean:fhirContext")
         .process(
             ex -> {
               var response = (Bundle) ex.getIn().getBody();
@@ -117,15 +120,22 @@ public class FhirRoute extends RouteBuilder {
   private Optional<ScreeningListResources> fetchPatientsInCohort(Long cohortId) {
     var screeningListIdentifier = fhirBuilder.getScreeningListIdentifierFromCohortId(cohortId);
 
-    // we need both the previous List resource (if available) and all ResearchSubjects + Patients:
-    // the List is required to be able to retain the List.entry.date from the previous list when
+    // we need both the previous List resource (if available) and all
+    // ResearchSubjects + Patients:
+    // the List is required to be able to retain the List.entry.date from the
+    // previous list when
     // appending the newly found persons from this cohort generation run.
-    // the Patient resources are used to determine which patients were newly found in this run
+    // the Patient resources are used to determine which patients were newly found
+    // in this run
     // compared to the last
-    // note that we eventually return only the Patient resources included in this search,
-    // this is because the ResearchSubjects don't contain any identifier we could use
-    // to determine whether a patient we plan on adding to the new list already exists
-    // or has to be added. This identifier is the Patient.identifier, ie. the medical record number.
+    // note that we eventually return only the Patient resources included in this
+    // search,
+    // this is because the ResearchSubjects don't contain any identifier we could
+    // use
+    // to determine whether a patient we plan on adding to the new list already
+    // exists
+    // or has to be added. This identifier is the Patient.identifier, ie. the
+    // medical record number.
 
     // fhir/List?identifier=<...>/screeningListId%7Cscreeninglist-3
     // &_include=List:item
@@ -153,12 +163,11 @@ public class FhirRoute extends RouteBuilder {
 
     if (listResources.size() > 1) {
       log.warn(
-          "Found more than one List resource (actually {}) for {}. Defaulting to the first occurrence.",
+          "Found more than one List resource (actually {}) for {}. "
+              + "Defaulting to the first occurrence.",
           kv("numLists", listResources.size()),
           kv("cohortId", cohortId));
     }
-
-    var previousList = listResources.get(0);
 
     var foundSubjects =
         BundleUtil.toListOfResourcesOfType(fhirContext, searchResults, ResearchSubject.class);
@@ -189,10 +198,13 @@ public class FhirRoute extends RouteBuilder {
 
     if (foundPatients.size() != foundSubjects.size()) {
       log.error(
-          "The number of ResearchSubject resources ({}) differs from the number of Patient ones ({})",
+          "The number of ResearchSubject resources ({}) "
+              + "differs from the number of Patient ones ({})",
           kv("numResearchSubjects", foundSubjects.size()),
           kv("numPatients", foundPatients.size()));
     }
+
+    var previousList = listResources.get(0);
 
     var screeningListResources =
         new ScreeningListResources(previousList, foundPatients, foundSubjects);

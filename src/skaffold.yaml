@@ -1,4 +1,4 @@
-apiVersion: skaffold/v2beta29
+apiVersion: skaffold/v3
 kind: Config
 metadata:
   name: recruit
@@ -6,39 +6,45 @@ build:
   local:
     useBuildkit: true
     push: false
+    tryImportMissing: true
   artifacts:
     - image: ghcr.io/miracum/recruit/query
       jib:
-        type: gradle
         project: query
-        args:
-          - "jibDockerBuild"
+        type: gradle
     - image: ghcr.io/miracum/recruit/notify
       jib:
-        type: gradle
         project: notify
-        args:
-          - "jibDockerBuild"
+        type: gradle
     - image: ghcr.io/miracum/recruit/list
       context: list
       docker:
         dockerfile: Dockerfile
+        buildArgs:
+          VERSION: skaffold
+          GIT_REF: skaffold
+manifests:
+  helm:
+    releases:
+      - name: recruit
+        chartPath: ../charts/recruit
+        skipBuildDependencies: true
+        setValues:
+          fhirserver.postgresql.auth.postgresPassword: fhir
+          ohdsi.postgresql.auth.postgresPassword: ohdsi
+        wait: true
+    flags:
+      install:
+        - --timeout=15m
 deploy:
   helm:
     releases:
       - name: recruit
-        wait: true
-        remoteChart: recruit
-        recreatePods: true
-        repo: https://miracum.github.io/charts
-        version: 9.2.1
+        chartPath: helm
+        skipBuildDependencies: true
         setValues:
           fhirserver.postgresql.auth.postgresPassword: fhir
           ohdsi.postgresql.auth.postgresPassword: ohdsi
-        artifactOverrides:
-          query.image: ghcr.io/miracum/recruit/query
-          notify.image: ghcr.io/miracum/recruit/notify
-          list.image: ghcr.io/miracum/recruit/list
-        imageStrategy:
-          helm:
-            explicitRegistry: true
+    flags:
+      install:
+        - --timeout=15m

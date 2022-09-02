@@ -9,4 +9,4 @@
  */
 
 rootProject.name = 'recruit'
-include('notify', 'query', 'utilities')
+include('notify', 'query')

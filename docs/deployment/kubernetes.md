@@ -93,7 +93,7 @@ featureGates:
   PodSecurity: true
 nodes:
   - role: control-plane
-    image: docker.io/kindest/node:v1.25.0@sha256:428aaa17ec82ccde0131cb2d1ca6547d13cf5fdabcc0bbecf749baa935387cbf
+    image: docker.io/kindest/node:v1.25.3@sha256:f1de3b0670462f43280114eccceab8bf1b9576d2afe0582f8f74529da6fd0365
     kubeadmConfigPatches:
       - |
         kind: InitConfiguration
@@ -110,11 +110,11 @@ nodes:
     labels:
       topology.kubernetes.io/zone: a
   - role: worker
-    image: docker.io/kindest/node:v1.25.0@sha256:428aaa17ec82ccde0131cb2d1ca6547d13cf5fdabcc0bbecf749baa935387cbf
+    image: docker.io/kindest/node:v1.25.3@sha256:f1de3b0670462f43280114eccceab8bf1b9576d2afe0582f8f74529da6fd0365
     labels:
       topology.kubernetes.io/zone: b
   - role: worker
-    image: docker.io/kindest/node:v1.25.0@sha256:428aaa17ec82ccde0131cb2d1ca6547d13cf5fdabcc0bbecf749baa935387cbf
+    image: docker.io/kindest/node:v1.25.3@sha256:f1de3b0670462f43280114eccceab8bf1b9576d2afe0582f8f74529da6fd0365
     labels:
       topology.kubernetes.io/zone: c
 EOF

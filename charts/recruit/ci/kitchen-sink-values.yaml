@@ -1,0 +1,178 @@
+podAnnotations:
+  linkerd.io/inject: "enabled"
+
+notify:
+  replicaCount: 1
+  podDisruptionBudget:
+    enabled: true
+  ha:
+    enabled: true
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: recruit
+          app.kubernetes.io/instance: recruit
+          app.kubernetes.io/component: notify
+  rules:
+    schedules:
+      everyMorning: "0 0 8 1/1 * ? *"
+    trials:
+      - acronym: "SAMPLE"
+        accessibleBy:
+          users:
+            - "user1"
+            - "user.two@example.com"
+        subscriptions:
+          - email: "everyMorning-sample@example.com"
+            notify: "everyMorning"
+  metrics:
+    serviceMonitor:
+      enabled: false
+      additionalLabels:
+        release: kube-prom-stack
+
+list:
+  dePseudonymization:
+    enabled: false
+  podDisruptionBudget:
+    enabled: true
+  replicaCount: 1
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: recruit
+          app.kubernetes.io/instance: recruit
+          app.kubernetes.io/component: list
+  ingress:
+    enabled: true
+    hosts:
+      - host: recruit-list.127.0.0.1.nip.io
+        paths:
+          - "/"
+  metrics:
+    serviceMonitor:
+      enabled: false
+      additionalLabels:
+        release: kube-prom-stack
+  extraEnv:
+    - name: LOG_LEVEL
+      value: "debug"
+query:
+  metrics:
+    serviceMonitor:
+      enabled: false
+      additionalLabels:
+        release: kube-prom-stack
+
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: recruit-notify-ha
+  primary:
+    service:
+      annotations:
+        config.linkerd.io/opaque-ports: "5432"
+
+ohdsi:
+  ingress:
+    enabled: true
+    hosts:
+      - host: recruit-ohdsi.127.0.0.1.nip.io
+  postgresql:
+    auth:
+      postgresPassword: ohdsi
+    primary:
+      service:
+        annotations:
+          config.linkerd.io/opaque-ports: "5432"
+      resources:
+        limits:
+          memory: 2Gi
+          cpu: 1000m
+  atlas:
+    replicaCount: 1
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: ohdsi
+            app.kubernetes.io/instance: recruit
+            app.kubernetes.io/component: atlas
+    podAnnotations:
+      linkerd.io/inject: "enabled"
+  webApi:
+    podAnnotations:
+      linkerd.io/inject: "enabled"
+  achilles:
+    enabled: false
+
+fhirserver:
+  replicaCount: 1
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: fhirserver
+          app.kubernetes.io/instance: recruit
+  ingress:
+    enabled: true
+    hosts:
+      - host: recruit-fhir-server.127.0.0.1.nip.io
+        pathType: ImplementationSpecific
+        paths: ["/"]
+  postgresql:
+    auth:
+      postgresPassword: fhir
+    primary:
+      service:
+        annotations:
+          config.linkerd.io/opaque-ports: "5432"
+  podAnnotations:
+    linkerd.io/inject: "enabled"
+  metrics:
+    serviceMonitor:
+      enabled: false
+      additionalLabels:
+        release: kube-prom-stack
+
+mailhog:
+  automountServiceAccountToken: true
+  podAnnotations:
+    linkerd.io/inject: "enabled"
+
+fhir-pseudonymizer:
+  enabled: false
+  vfps:
+    enabled: true
+  auth:
+    apiKey:
+      enabled: true
+      key: test
+  anonymizationConfig: |
+    fhirVersion: R4
+    fhirPathRules:
+      - path: nodesByType('Identifier').where(type.coding.system='http://terminology.hl7.org/CodeSystem/v2-0203' and type.coding.code='VN').value
+        method: encrypt
+      - path: nodesByType('Identifier').where(system='http://ohdsi.org/omop/fhir/subject-identifier').value
+        method: pseudonymize
+        namespace: test
+    parameters:
+      dateShiftKey: ""
+      dateShiftScope: resource
+      cryptoHashKey: fhir-pseudonymizer
+      # must be of a valid AES key length; here the key is padded to 192 bits
+      encryptKey: fhir-pseudonymizer000000
+      enablePartialAgesForRedact: true
+      enablePartialDatesForRedact: true
+      enablePartialZipCodesForRedact: true
+      restrictedZipCodeTabulationAreas: []

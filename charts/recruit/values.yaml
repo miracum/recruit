@@ -1,0 +1,632 @@
+# Default values for recruit.
+
+# image pull secrets used by all pods
+imagePullSecrets: []
+
+# partially override the release name
+nameOverride: ""
+
+# fully override the release name
+fullnameOverride: ""
+
+# Annotations to set on all Deployment resources
+deploymentAnnotations:
+  {}
+  # sidecar.jaegertracing.io/inject: "jaeger-prod"
+
+# Annotations to set on all Pod resources
+podAnnotations:
+  {}
+  # linkerd.io/inject: "enabled"
+
+# additionally labels to apply to all deployments
+extraLabels: {}
+
+# configure the init container used to wait for postgres database connectivity
+# used by the query module to wait for the OMOP database and the notify module
+# to wait for its HA database - if `notify.ha.enabled=true`
+waitForPostgresInitContainer:
+  # image to use for the init container which waits until the database
+  # is ready to accept connections
+  image: # +doc-gen:ignore
+    registry: docker.io
+    repository: bitnami/postgresql
+    tag: 15.1.0-debian-11-r0@sha256:27915588d5203a10a1c23624d9c81644437f33b7c224e25f79bcd9bd09bbb8e2
+    pullPolicy: IfNotPresent
+
+# container security context applied to init containers used by the query, list, and notify modules.
+# also used by the Helm test job pods
+restrictedContainerSecurityContext: # +doc-gen:ignore
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  privileged: false
+  capabilities:
+    drop:
+      - ALL
+  runAsNonRoot: true
+  runAsUser: 65534
+  runAsGroup: 65534
+  seccompProfile:
+    type: RuntimeDefault
+
+fhirserver:
+  # Whether the included HAPI FHIR server should be used
+  # See <https://github.com/hapifhir/hapi-fhir-jpaserver-starter/tree/master/charts/hapi-fhir-jpaserver#values> for options.
+  enabled: true
+  postgresql:
+    # overrides the chart's postgres server name to avoid conflicts with the included ohdsi chart
+    nameOverride: "fhir-server-postgres"
+  networkPolicy:
+    # if enabled, access to the included FHIR server is limited to pods with the required labels. If set to `true`,
+    # all pods of the recruIT chart will be automatically configured to be able to access the server.
+    enabled: false
+  # extra environment variables set for the HAPI FHIR server
+  extraEnv:
+    # the recruit tool relies on the FHIR server subscription mechanism to create notifications.
+    # if you overwrite `fhirserver.extraEnv`, make sure to keep this setting enabled.
+    - name: HAPI_FHIR_SUBSCRIPTION_RESTHOOK_ENABLED
+      value: "true"
+    - name: SPRING_FLYWAY_BASELINE_ON_MIGRATE
+      value: "true"
+
+externalFhirServer:
+  # URL of an external FHIR Server - only used when `fhirserver.enabled` is set to `false`
+  url: ""
+
+mailhog:
+  # Whether the included SMTP test server should be used. Not required for a production deployment.
+  # See <https://github.com/codecentric/helm-charts/blob/master/charts/mailhog/values.yaml> for available options.
+  enabled: true
+  image: # +doc-gen:ignore
+    pullPolicy: IfNotPresent
+  containerSecurityContext:
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+ohdsi:
+  # Whether the included OHDSI chart should be installed.
+  # See <https://github.com/chgl/charts/tree/master/charts/ohdsi/values.yaml> for available options.
+  enabled: true
+  postgresql:
+    # overrides the chart's postgres server name to avoid conflicts with the included HAPI FHIR server chart
+    nameOverride: "ohdsi-postgres"
+  cdmInitJob:
+    # to make sure the job runs only once, set this to `false` after the first installation completed
+    enabled: false
+    image: # +doc-gen:ignore
+      registry: harbor.miracum.org
+      repository: miracum-etl/omop/init
+      tag: v3.2.1-cdm5.3.1@sha256:75db2ecdb17b2c98493de6dda9432b5625c6aa736afdce29adecfa833a804cfd
+    securityContext: # +doc-gen:ignore
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      readOnlyRootFilesystem: false
+      runAsNonRoot: true
+      runAsUser: 10001
+      runAsGroup: 10001
+      seccompProfile:
+        type: RuntimeDefault
+    # extraEnv:
+    #   - name: SETUP_SYNPUF
+    #     value: "true"
+  achilles: # +doc-gen:ignore
+    schemas:
+      cdm: "cds_cdm"
+      vocab: "cds_cdm"
+      res: "cds_results"
+    sourceName: "CDS-CDMV5"
+
+query:
+  # Whether the query module should be enabled
+  enabled: true
+  # Number of replicas of the query module to run.
+  # Running more than one replica for this component is discouraged.
+  replicaCount: 1
+  # specify how many old ReplicaSets for this Deployment you want to retain.
+  revisionHistoryLimit: 5
+
+  # the query module's image
+  image: # +doc-gen:ignore
+    registry: ghcr.io
+    repository: miracum/recruit/query
+    tag: v3.16.4@sha256:0080bef593de3e4d535cfcf93815588dbc9b6f07bd18c48770bce5d4f1fc2f65
+    pullPolicy: IfNotPresent
+
+  metrics:
+    serviceMonitor:
+      # if enabled, creates a ServiceMonitor instance for Prometheus Operator-based monitoring
+      enabled: false
+      # additional labels to apply the the ServiceMonitor object, eg. `release: prometheus`
+      additionalLabels: {}
+      # namespace: monitoring
+      # interval: 30s
+      # scrapeTimeout: 10s
+
+  # extra environment vars on the container
+  extraEnv: []
+
+  # specify additional labels to apply to the query pod
+  extraPodLabels: {}
+
+  # the service used to expose the query module web port
+  service:
+    # the service type
+    type: ClusterIP
+    # the service port for the HTTP endpoint
+    port: 8080
+    # the service port for the actuator/metrics endpoint
+    metricsPort: 8081
+
+  webAPI:
+    # URL of the ATLAS WebAPI endpoint. Usually ends in /WebAPI.
+    url: "http://example:8080/WebAPI"
+    # name of the OMOP datasource used to generate the cohorts from.
+    dataSource: "CDS-CDMV5"
+    # configure authentication settings for the WebAPI
+    auth:
+      # set to true if the WebAPI requires authentication to access
+      enabled: false
+      # the login method/path to use. See <https://github.com/OHDSI/Atlas/blob/master/js/config/app.js#L20> for a list of possible values
+      loginPath: "/user/login/db"
+      # the username to login as. Note that this user needs permissions to query and generate cohorts
+      username: ""
+      # the password used for login.
+      password: ""
+      # use an existing secret to retrieve the login credentials from
+      existingSecret:
+        # name of an existing Kubernetes secret that contains the user password
+        name: ""
+        # the key containing the password
+        key: "webApiAuthPassword"
+
+  # A UNIX cron expression defining the execution schedule of the query module
+  schedule: "*/5 * * * *"
+
+  omop:
+    # hostname of the OHDSI OMOP db
+    host: "localhost"
+    # port of the db
+    port: 5432
+    # name of the db
+    database: OHDSI
+    # username to access the db
+    username: postgres
+    # password to access the db
+    password: postgres
+    # name of an existing secret to use instead of `omop.password`. Must include an `omop-password` key.
+    existingSecret: ""
+    # Name of the database schema containing the results of the cohort generation
+    resultsSchema: cds_results
+    # Name of the database schema containing the actual clinical data
+    cdmSchema: cds_cdm
+
+  # List of labels which must occur in a cohort's name or definition (enclosed in []-brackets) to be processed by the query module.
+  # Example:
+  # --set cohortSelectorLabels[0]=UC1
+  # --set cohortSelectorLabels[1]=Test
+  cohortSelectorLabels:
+    - "UC1"
+
+  # Configuration for the container's readiness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  readinessProbe: # +doc-gen:ignore
+    failureThreshold: 3
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
+  # Configuration for the container's liveness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  livenessProbe: # +doc-gen:ignore
+    failureThreshold: 3
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
+
+  # resource requests and limits for the container
+  resources: {}
+
+  # node labels for pod assignment
+  # see: <https://kubernetes.io/docs/user-guide/node-selection/>
+  nodeSelector: {}
+
+  # tolerations for pod assignment
+  # see: <https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/>
+  tolerations: []
+
+  # affinity for pod assignment
+  # see: <https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity>
+  affinity: {}
+
+  # security context for the pod
+  podSecurityContext: {}
+
+  # security context for the container
+  securityContext: # +doc-gen:ignore
+    privileged: false
+    capabilities:
+      drop:
+        - ALL
+    runAsNonRoot: true
+    runAsUser: 65532
+    runAsGroup: 65532
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+
+  # pod topology spread configuration
+  # see: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#api
+  topologySpreadConstraints:
+    []
+    # - maxSkew: 1
+    #   topologyKey: topology.kubernetes.io/zone
+    #   whenUnsatisfiable: ScheduleAnyway
+    #   labelSelector:
+    #     matchLabels:
+    #       app.kubernetes.io/component: query
+    #       app.kubernetes.io/instance: recruit
+
+notify:
+  # Whether the notification module should be enabled
+  enabled: true
+  # number of replicas for the notify component.
+  # should only be set to a number > 1 if `notify.ha.enabled=true`
+  replicaCount: 1
+  # specify how many old ReplicaSets for this Deployment you want to retain.
+  revisionHistoryLimit: 5
+
+  # the notify module's image
+  image: # +doc-gen:ignore
+    registry: ghcr.io
+    repository: miracum/recruit/notify
+    tag: v3.2.5@sha256:ce34fbcff8564ab856579837d7ced1dcbc8d2ee105f2bccbf2a2e6107a84e41d
+    pullPolicy: IfNotPresent
+
+  metrics:
+    serviceMonitor:
+      # if enabled, creates a ServiceMonitor instance for Prometheus Operator-based monitoring
+      enabled: false
+      # additional labels to set on the ServiceMonitor object, e.g. `release: prometheus-operator`
+      additionalLabels: {}
+      # namespace: monitoring
+      # interval: 30s
+      # scrapeTimeout: 10s
+
+  # extra environment vars on the container
+  extraEnv: []
+
+  # specify additional labels to apply to the notify pod
+  extraPodLabels: {}
+
+  mail:
+    # Configure the mail server used to send notification emails
+    # All of these values are only used when mailhog.enabled is set to false
+    server:
+      # Hostname of the external SMTP mail server
+      host: ""
+      # Mailserver port
+      port: 25
+      # Mailserver username
+      username: ""
+      # Mailserver password
+      password: ""
+      # Name of an existing secret containing an `smtp-password` key to use instead of the password value above
+      existingSecret: ""
+    # Used to link back to the screening list web app from an email.
+    # If the screening list ingress is enabled, it uses list.ingress.hosts.host to construct the URL, otherwise uses this value.
+    # Should include a '[list_id]' which is replaced with the internal screening list id.
+    screeningListLinkTemplate: "http://localhost:8080/recommendations/[list_id]"
+    # The sender email address for the created notification mails.
+    from: "recruit@example.com"
+
+  ha:
+    # whether to enable high-availability mode for the notification module
+    enabled: false
+    database:
+      # hostname for the database used to store notification jobs
+      # if `postgresql.enabled=true`, uses the included PostgreSQL database instead.
+      host: ""
+      # database port
+      port: 5432
+      # username to log into the database
+      username: ""
+      # password for the database
+      password: ""
+      # database name
+      name: "recruit_notify_jobstore"
+      existingSecret:
+        # name of an existing Kubernetes secret from which to retrieve the user's password.
+        name: ""
+        # key inside the existing secret
+        key: "postgresql-password"
+
+  podDisruptionBudget:
+    # uses policy/v1 of the PodDisruptionBudget resource requiring Kubernetes 1.21+
+    enabled: false
+    # Minimum available instances; ignored if there is no PodDisruptionBudget
+    minAvailable: 1
+    # Maximum unavailable instances; ignored if there is no PodDisruptionBudget
+    maxUnavailable: ""
+
+  # Configure the Notification rules. See the [Configure Notifcation Rules](#configure-notifcation-rules) section below.
+  rules: {}
+
+  # the service used to expose the notify module web port
+  service:
+    # service type
+    type: ClusterIP
+    # service port for the HTTP endpoint
+    port: 8080
+    # service port for the actuator/metrics endpoint
+    metricsPort: 8081
+
+  ingress:
+    # if enabled, this ingress is used when setting up the webhook subscription in the FHIR server.
+    # Setting this ingress is useful if the FHIR server is external to the cluster and can only be reached via this ingress.
+    # The URL called by the external FHIR server with ingress enabled is as follows: "http(s)://ingress.hosts[0].host/on-list-change"
+    # If ingress.enabled is false, then the notify.service is used to construct the URL invoked by the FHIR server.
+    enabled: false
+    # name of the IngressClass resource to use for this ingress
+    ingressClassName: ""
+    # additional annotations for the Ingress resource
+    annotations:
+      {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: notify.127.0.0.1.nip.io
+        paths:
+          - "/"
+    # TLS configuration
+    tls: []
+    #  - secretName: notify-example-tls
+    #    hosts:
+    #      - notify-example.local
+
+  # Configuration for the container's readiness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  readinessProbe: # +doc-gen:ignore
+    failureThreshold: 5
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 10
+  # Configuration for the container's liveness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  livenessProbe: # +doc-gen:ignore
+    failureThreshold: 3
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 10
+
+  # resource requests and limits for the container
+  resources: {}
+
+  # node labels for pod assignment
+  # see: <https://kubernetes.io/docs/user-guide/node-selection/>
+  nodeSelector: {}
+
+  # tolerations for pod assignment
+  # see: <https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/>
+  tolerations: []
+
+  # affinity for pod assignment
+  # see: <https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity>
+  affinity: {}
+
+  # pod topology spread configuration
+  # see: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#api
+  topologySpreadConstraints:
+    []
+    # - maxSkew: 1
+    #   topologyKey: topology.kubernetes.io/zone
+    #   whenUnsatisfiable: ScheduleAnyway
+    #   labelSelector:
+    #     matchLabels:
+    #       app.kubernetes.io/component: notify
+    #       app.kubernetes.io/instance: recruit
+
+  # security context for the pod
+  podSecurityContext: {}
+
+  # security context for the container
+  securityContext: # +doc-gen:ignore
+    privileged: false
+    capabilities:
+      drop:
+        - ALL
+    runAsNonRoot: true
+    runAsUser: 65532
+    runAsGroup: 65532
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+
+list:
+  # Whether the list module should be enabled
+  enabled: true
+  # Number of replicas for the list module. A fault-tolerant number of replicas is recommended.
+  replicaCount: 1
+  # specify how many old ReplicaSets for this Deployment you want to retain.
+  revisionHistoryLimit: 5
+
+  # the list module's image
+  image: # +doc-gen:ignore
+    registry: ghcr.io
+    repository: miracum/recruit/list
+    tag: v2.15.6@sha256:9c9ed72b32857cb1cccabc76a4d6fc75e7e9ea7359e02f51869ac91b9cccfa28
+    pullPolicy: IfNotPresent
+
+  # the service used to expose the list module web port
+  service:
+    # service type
+    type: ClusterIP
+    # service port
+    port: 8080
+
+  auth:
+    # if enabled, requires authentication before accessing the screening list
+    enabled: false
+    keycloak:
+      # the Keycloak client id
+      clientId: "uc1-screeninglist"
+      # the Keycloak realm
+      realm: "MIRACUM"
+      # the Keycloak auth URL. Should end in `/auth`.
+      url: "http://localhost:8083/auth"
+
+  dePseudonymization:
+    # if enabled, all FHIR resource will first be processed by the fhir-pseudonymizer for de-pseudonymization before being displayed.
+    enabled: false
+    # API base URL of the FHIR pseudonymizer to use. If `fhir-pseudonymizer.enabled` is set to `true`, this URL will be auto-configured.
+    serviceUrl: "http://fhir-pseudonymizer:8080/fhir"
+    # the API key to invoke the FHIR pseudonymizer
+    apiKey: ""
+    # use an existing Secret resource that contains the API key
+    existingApiKeySecret:
+      # name of an existing Kubernetes Secret that contains the API key.
+      # Leave empty to use `dePseudonymization.apiKey` instead.
+      name: ""
+      # key of the Kubernetes Secret that contains the API key
+      key: "fhir-pseudonymizer-api-key"
+
+  metrics:
+    serviceMonitor:
+      # if enabled, creates a ServiceMonitor instance for Prometheus Operator-based monitoring
+      enabled: false
+      # additional labels
+      additionalLabels: {}
+      # namespace: monitoring
+      # interval: 30s
+      # scrapeTimeout: 10s
+
+  # specify extra environment vars on the container
+  extraEnv: []
+
+  # specify additional labels to apply to the list pod
+  extraPodLabels: {}
+
+  ingress:
+    # if enabled, create an ingress resource to access the screening list
+    enabled: false
+    # name of the IngressClass resource to use for this ingress
+    ingressClassName: ""
+    # additional annotations for the Ingress resource
+    annotations:
+      {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: list.127.0.0.1.nip.io
+        paths:
+          - "/"
+    # TLS configuration
+    tls: []
+    #  - secretName: notify-example-tls
+    #    hosts:
+    #      - notify-example.local
+
+  podDisruptionBudget:
+    # uses policy/v1 of the PodDisruptionBudget resource requiring Kubernetes 1.21+
+    enabled: false
+    # Minimum available instances; ignored if there is no PodDisruptionBudget
+    minAvailable: 1
+    # Maximum unavailable instances; ignored if there is no PodDisruptionBudget
+    maxUnavailable: ""
+
+  # resource requests and limits for the container
+  resources: {}
+
+  # Configuration for the container's readiness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  readinessProbe: # +doc-gen:ignore
+    failureThreshold: 3
+    initialDelaySeconds: 20
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
+  # Configuration for the container's liveness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  livenessProbe: # +doc-gen:ignore
+    failureThreshold: 3
+    initialDelaySeconds: 20
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
+
+  # node labels for pod assignment
+  # see: <https://kubernetes.io/docs/user-guide/node-selection/>
+  nodeSelector: {}
+
+  # tolerations for pod assignment
+  # see: <https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/>
+  tolerations: []
+
+  # affinity for pod assignment
+  # see: <https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity>
+  affinity: {}
+
+  # security context for the pod
+  podSecurityContext: {}
+
+  # pod topology spread configuration
+  # see: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#api
+  topologySpreadConstraints:
+    []
+    # - maxSkew: 1
+    #   topologyKey: topology.kubernetes.io/zone
+    #   whenUnsatisfiable: ScheduleAnyway
+    #   labelSelector:
+    #     matchLabels:
+    #       app.kubernetes.io/component: list
+    #       app.kubernetes.io/instance: recruit
+
+  # security context for the container
+  securityContext: # +doc-gen:ignore
+    privileged: false
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    runAsNonRoot: true
+    runAsUser: 65534
+    runAsGroup: 65534
+    readOnlyRootFilesystem: true
+    seccompProfile:
+      type: RuntimeDefault
+
+postgresql:
+  # enable the included postgres DB, currently used only by the notification module
+  # to store jobs when running in high-availability mode (`notify.ha.enabled=true`)
+  enabled: false
+  # override the default name to avoid conflicts with the HAPI and OHDSI charts
+  nameOverride: "recruit-postgres"
+  auth:
+    # set the default database name to `recruit`
+    database: "recruit"
+  primary:
+    containerSecurityContext: # +doc-gen:ignore
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      seccompProfile:
+        type: RuntimeDefault
+
+# configuration for the optional fhir-pseudonymizer dependency
+fhir-pseudonymizer:
+  # install the included fhir-pseudonymizer chart. If set to `true`, the list module is auto-configured to use this service.
+  enabled: false
+  # default to using Vfps as a pseudonym service. It is included as a dependency of the fhir-pseudonymizer.
+  pseudonymizationService: Vfps
+  vfps:
+    # enable the included Vfps service.
+    enabled: true
+
+# @ignored
+curl: # +doc-gen:ignore
+  image:
+    registry: docker.io
+    repository: curlimages/curl
+    tag: 7.86.0@sha256:cfdeba7f88bb85f6c87f2ec9135115b523a1c24943976a61fbf59c4f2eafd78e

@@ -9,14 +9,12 @@ plugins {
 }
 
 dependencies {
-    implementation "org.springframework.boot:spring-boot-starter-mail"
-    implementation "org.springframework.boot:spring-boot-starter-thymeleaf"
-    implementation "org.springframework.boot:spring-boot-starter-aop"
-    implementation "org.springframework.boot:spring-boot-starter-quartz"
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'org.springframework.boot:spring-boot-starter-quartz'
 
-    implementation "org.springframework.retry:spring-retry:1.3.3"
+    implementation 'org.springframework.retry:spring-retry:1.3.3'
 
-    testImplementation "ognl:ognl:3.3.3"
-
-    implementation project(':utilities')
+    testImplementation 'ognl:ognl:3.3.3'
 }
