@@ -7,6 +7,9 @@ on:
     branches:
       - master
 
+env:
+  LIST_MODULE_CONTAINER_IMAGE_NAME: ghcr.io/miracum/recruit/list
+
 jobs:
   build-java-modules:
     runs-on: ubuntu-22.04
@@ -37,15 +40,31 @@ jobs:
         run: ./gradlew :${{ matrix.module }}:jacocoTestReport
 
       - name: Build container image
-        env:
-          # TODO: get from somewhere else. Or let https://github.com/googleapis/release-please do the work?
-          ORG_GRADLE_PROJECT_version: "test"
         run: |
           ./gradlew :${{ matrix.module }}:downloadOpenTelemetryJavaAgent
           ./gradlew -Djib.console=plain :${{ matrix.module }}:jibDockerBuild
 
-      - run: |
-          echo "run isolated e2e tests"
+      - name: Run container structure tests
+        run: |
+          curl -LO https://storage.googleapis.com/container-structure-test/v1.11.0/container-structure-test-linux-amd64
+          chmod +x container-structure-test-linux-amd64
+
+          IMAGE_NAME=$(jq -j .image ${{ matrix.module }}/build/jib-image.json)
+          ./container-structure-test-linux-amd64 test --image="$IMAGE_NAME" --config=tests/container-structure/common-tests.yaml
+          ./container-structure-test-linux-amd64 test --image="$IMAGE_NAME" --config=tests/container-structure/java-container-tests.yaml
+
+      - name: Run isolated smoke test
+        run: |
+          IMAGE_TAG=$(jq -j .tags[0] ${{ matrix.module }}/build/jib-image.json)
+          export IMAGE_TAG
+          docker compose -f ${{ matrix.module }}/tests/e2e/docker-compose.yml build
+          docker compose -f ${{ matrix.module }}/tests/e2e/docker-compose.yml run tester
+
+      - name: Print test logs and stop all running containers
+        if: always()
+        run: |
+          docker compose -f ${{ matrix.module }}/tests/e2e/docker-compose.yml logs
+          docker compose -f ${{ matrix.module }}/tests/e2e/docker-compose.yml down --volumes --remove-orphans
 
   build-list-module:
     runs-on: ubuntu-22.04
@@ -55,9 +74,17 @@ jobs:
     steps:
       - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
 
+      - id: image-with-version
+        run: echo "::set-output name=image-with-version::$LIST_MODULE_CONTAINER_IMAGE_NAME:$(cat ../../version.txt)"
+
       - run: |
-          docker build -t test .
+          docker build -t ${{ steps.image-with-version.outputs.image-with-version }} .
           docker image ls
+
+      # - name: Run container structure tests
+      #   uses: ghcr.io/chgl/kube-powertools:v1.20.0@sha256:a16b467f5777eb46f5bc35a26b503f6f9d6318049580cf34d0e29f172879fc57
+      #   run: |
+      #     container-structure-test test --image=${{ steps.image-with-version.outputs.image-with-version }} --config=tests/container-structure/common-tests.yaml
 
       - run: |
           echo "run isolated e2e test"
