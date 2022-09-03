@@ -96,6 +96,7 @@ jib {
         format = 'OCI'
         user = '65532:65532'
         ports = ['8080/tcp', '8081/tcp']
+        workingDirectory = '/app'
         environment = [
             'SPRING_PROFILES_ACTIVE': 'prod',
             'APP_VERSION': project.version

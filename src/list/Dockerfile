@@ -22,8 +22,8 @@ RUN npm prune --omit=dev
 
 FROM gcr.io/distroless/nodejs:18@sha256:1c03ff9d14da154b8d19fc28da20534b6d906be249a412cc43426b9d24350a55
 WORKDIR /app
-USER 65534:65534
-EXPOSE 8080/tcp
+USER 65532:65532
+EXPOSE 8080/tcp 8081/tcp
 
 COPY package.json ./
 COPY package-lock.json ./
