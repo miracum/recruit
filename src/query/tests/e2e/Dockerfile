@@ -8,5 +8,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
+USER 65534:65534
+
 ENTRYPOINT ["pytest"]
 CMD [ "test.py" ]

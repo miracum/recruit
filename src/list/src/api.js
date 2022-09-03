@@ -153,7 +153,11 @@ const actions = {
     // fetch the latest 5 (or maxNumberOfEncounters) Encounters for the given patient, sorted by date
     // and include the Encounter's location to reduce the number of server round-trips
     const entries = await client.request(
-      `Encounter?subject=Patient/${patientId}&_sort=-date&_count=${maxNumberOfEncounters}&_include=Encounter:location&_pretty=false`,
+      `Encounter?subject=Patient/${patientId}` +
+        `&_count=${maxNumberOfEncounters}` +
+        "&_include=Encounter:location" +
+        "&_pretty=false" +
+        "&_sort=-date",
       {
         flat: true,
         pageLimit: 1,
@@ -164,9 +168,7 @@ const actions = {
     // with the the actual Location object doesn't work. So we need to build a manual
     // lookup from Location.id to the Location object.
     const locations = entries.filter((entry) => entry.resourceType === "Location");
-    const locationLookup = new Map(
-      locations.map((location) => [`Location/${location.id}`, location])
-    );
+    const locationLookup = new Map(locations.map((location) => [`Location/${location.id}`, location]));
 
     // select the encounters so we only need to iterate over them
     const encounters = entries
@@ -193,9 +195,7 @@ const actions = {
       // if there's a location associated with the encounter then that's already a good sign
       // that this is the most recent encounter we can use for displaying
       if (encounter.location) {
-        Vue.$log.debug(
-          `Found Encounter/${encounter.id} with location containing ${encounter.location?.length} entries`
-        );
+        Vue.$log.debug(`Found Encounter/${encounter.id} with location containing ${encounter.location?.length} entries`);
 
         // sort updates in-place
         encounter.location.sort((a, b) => {
@@ -227,9 +227,7 @@ const actions = {
           // if no reference is set, there still might be a display element we could use
           const locationDisplay = locationEntry.location.display;
           if (locationDisplay) {
-            Vue.$log.debug(
-              `Found location entry with display "${locationDisplay}" with status "${locationEntry.status}"`
-            );
+            Vue.$log.debug(`Found location entry with display "${locationDisplay}" with status "${locationEntry.status}"`);
 
             // replace reference with a "Location" object where only the name is set
             // this makes it easier to work with later on, since we don't have to duplicate
@@ -267,14 +265,11 @@ const actions = {
   async fetchAllRecommendationsByPatientId(patientId) {
     const client = createFhirClient();
 
-    return client.request(
-      `ResearchSubject?patient=Patient/${patientId}&_include=ResearchSubject:study&_pretty=false`,
-      {
-        flat: true,
-        pageLimit: 0,
-        resolveReferences: ["study"],
-      }
-    );
+    return client.request(`ResearchSubject?patient=Patient/${patientId}&_include=ResearchSubject:study&_pretty=false`, {
+      flat: true,
+      pageLimit: 0,
+      resolveReferences: ["study"],
+    });
   },
   async deleteList(listId) {
     let answer;

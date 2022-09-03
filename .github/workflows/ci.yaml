@@ -40,7 +40,12 @@ jobs:
         env:
           # TODO: get from somewhere else. Or let https://github.com/googleapis/release-please do the work?
           ORG_GRADLE_PROJECT_version: "test"
-        run: ./gradlew :${{ matrix.module }}:jibDockerBuild
+        run: |
+          ./gradlew :${{ matrix.module }}:downloadOpenTelemetryJavaAgent
+          ./gradlew -Djib.console=plain :${{ matrix.module }}:jibDockerBuild
+
+      - run: |
+          echo "run isolated e2e tests"
 
   build-list-module:
     runs-on: ubuntu-22.04
@@ -53,3 +58,16 @@ jobs:
       - run: |
           docker build -t test .
           docker image ls
+
+      - run: |
+          echo "run isolated e2e test"
+
+  integration-tests:
+    runs-on: ubuntu-22.04
+    needs:
+      - build-java-modules
+      - build-list-module
+    steps:
+      - run: |
+          echo "starting test fixtures: FHIR server, OHDSI stack, Mail"
+          echo "run e2e workflow..."

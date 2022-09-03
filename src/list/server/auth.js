@@ -8,7 +8,8 @@ exports.createJwtCheck = (config) => {
   }
 
   return jwt({
-    // Provide a signing key based on the key identifier in the header and the signing keys provided by your Auth0 JWKS endpoint.
+    // Provide a signing key based on the key identifier in the header
+    // and the signing keys provided by your Auth0 JWKS endpoint.
     secret: jwksRsa.expressJwtSecret({
       cache: true,
       rateLimit: true,

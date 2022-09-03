@@ -9,6 +9,9 @@ plugins {
     id 'java'
 }
 
+File searchDir = gradle.startParameter.projectDir ?: gradle.startParameter.currentDir
+project.version = new File("${searchDir}/..", 'version.txt').text.trim()
+
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()

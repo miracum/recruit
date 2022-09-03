@@ -5,10 +5,7 @@
       "type": "node",
       "name": "Launch via NPM",
       "request": "launch",
-      "runtimeArgs": [
-        "run-script",
-        "server:debug"
-      ],
+      "runtimeArgs": ["run-script", "server:debug"],
       "runtimeExecutable": "npm",
       "port": 9229
     },
@@ -17,10 +14,7 @@
       "request": "launch",
       "name": "Jest All",
       "program": "${workspaceFolder}/node_modules/.bin/jest",
-      "args": [
-        "--runInBand",
-        "--config=${workspaceFolder}/jest.config.js"
-      ],
+      "args": ["--runInBand", "--config=${workspaceFolder}/jest.config.js"],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "disableOptimisticBPs": true,

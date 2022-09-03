@@ -3,34 +3,34 @@
 -- available as a standalone image at quay.io/chgl/omop:latest-synpuf1k-cdm5.3.1-with-visit-details
 INSERT INTO cds_cdm.location (location_id, address_1, address_2, city, state, zip, county,
                               location_source_value)
-VALUES (1, null, null, null, 'WI', null, '52020', '52-020');
+VALUES (1, NULL, NULL, NULL, 'WI', NULL, '52020', '52-020');
 INSERT INTO cds_cdm.location (location_id, address_1, address_2, city, state, zip, county,
                               location_source_value)
-VALUES (2, null, null, null, 'CA', null, '05510', '05-510');
+VALUES (2, NULL, NULL, NULL, 'CA', NULL, '05510', '05-510');
 INSERT INTO cds_cdm.location (location_id, address_1, address_2, city, state, zip, county,
                               location_source_value)
-VALUES (3, null, null, null, 'MI', null, '23800', '23-800');
+VALUES (3, NULL, NULL, NULL, 'MI', NULL, '23800', '23-800');
 INSERT INTO cds_cdm.location (location_id, address_1, address_2, city, state, zip, county,
                               location_source_value)
-VALUES (4, null, null, null, 'IL', null, '14500', '14-500');
+VALUES (4, NULL, NULL, NULL, 'IL', NULL, '14500', '14-500');
 INSERT INTO cds_cdm.location (location_id, address_1, address_2, city, state, zip, county,
                               location_source_value)
-VALUES (5, null, null, null, 'OH', null, '36490', '36-490');
+VALUES (5, NULL, NULL, NULL, 'OH', NULL, '36490', '36-490');
 INSERT INTO cds_cdm.location (location_id, address_1, address_2, city, state, zip, county,
                               location_source_value)
-VALUES (6, null, null, null, 'WA', null, '50310', '50-310');
+VALUES (6, NULL, NULL, NULL, 'WA', NULL, '50310', '50-310');
 INSERT INTO cds_cdm.location (location_id, address_1, address_2, city, state, zip, county,
                               location_source_value)
-VALUES (7, null, null, null, 'NC', null, '34440', '34-440');
+VALUES (7, NULL, NULL, NULL, 'NC', NULL, '34440', '34-440');
 INSERT INTO cds_cdm.location (location_id, address_1, address_2, city, state, zip, county,
                               location_source_value)
-VALUES (8, null, null, null, 'OK', null, '37710', '37-710');
+VALUES (8, NULL, NULL, NULL, 'OK', NULL, '37710', '37-710');
 INSERT INTO cds_cdm.location (location_id, address_1, address_2, city, state, zip, county,
                               location_source_value)
-VALUES (9, null, null, null, 'SD', null, '43490', '43-490');
+VALUES (9, NULL, NULL, NULL, 'SD', NULL, '43490', '43-490');
 INSERT INTO cds_cdm.location (location_id, address_1, address_2, city, state, zip, county,
                               location_source_value)
-VALUES (10, null, null, null, 'NC', null, '34090', '34-090');
+VALUES (10, NULL, NULL, NULL, 'NC', NULL, '34090', '34-090');
 
 INSERT INTO cds_cdm.person (person_id, gender_concept_id, year_of_birth, month_of_birth,
                             day_of_birth, birth_datetime,
@@ -40,8 +40,8 @@ INSERT INTO cds_cdm.person (person_id, gender_concept_id, year_of_birth, month_o
                             race_source_value,
                             race_source_concept_id, ethnicity_source_value,
                             ethnicity_source_concept_id)
-VALUES (1, 8507, 1923, 5, 1, null, 8527, 38003564, 1, null, null, '00013D2EFD8E45D1', '1', null,
-        '1', null, '1', null);
+VALUES (1, 8507, 1923, 5, 1, NULL, 8527, 38003564, 1, NULL, NULL, '00013D2EFD8E45D1', '1', NULL,
+        '1', NULL, '1', NULL);
 INSERT INTO cds_cdm.person (person_id, gender_concept_id, year_of_birth, month_of_birth,
                             day_of_birth, birth_datetime,
                             race_concept_id, ethnicity_concept_id, location_id, provider_id,
@@ -50,8 +50,8 @@ INSERT INTO cds_cdm.person (person_id, gender_concept_id, year_of_birth, month_o
                             race_source_value,
                             race_source_concept_id, ethnicity_source_value,
                             ethnicity_source_concept_id)
-VALUES (2, 8507, 1943, 1, 1, null, 8527, 38003564, 2, null, null, '00016F745862898F', '1', null,
-        '1', null, '1', null);
+VALUES (2, 8507, 1943, 1, 1, NULL, 8527, 38003564, 2, NULL, NULL, '00016F745862898F', '1', NULL,
+        '1', NULL, '1', NULL);
 INSERT INTO cds_cdm.person (person_id, gender_concept_id, year_of_birth, month_of_birth,
                             day_of_birth, birth_datetime,
                             race_concept_id, ethnicity_concept_id, location_id, provider_id,
@@ -60,8 +60,8 @@ INSERT INTO cds_cdm.person (person_id, gender_concept_id, year_of_birth, month_o
                             race_source_value,
                             race_source_concept_id, ethnicity_source_value,
                             ethnicity_source_concept_id)
-VALUES (3, 8532, 1936, 9, 1, null, 8527, 38003564, 3, null, null, '0001FDD721E223DC', '2', null,
-        '1', null, '1', null);
+VALUES (3, 8532, 1936, 9, 1, NULL, 8527, 38003564, 3, NULL, NULL, '0001FDD721E223DC', '2', NULL,
+        '1', NULL, '1', NULL);
 INSERT INTO cds_cdm.person (person_id, gender_concept_id, year_of_birth, month_of_birth,
                             day_of_birth, birth_datetime,
                             race_concept_id, ethnicity_concept_id, location_id, provider_id,
@@ -70,8 +70,8 @@ INSERT INTO cds_cdm.person (person_id, gender_concept_id, year_of_birth, month_o
                             race_source_value,
                             race_source_concept_id, ethnicity_source_value,
                             ethnicity_source_concept_id)
-VALUES (4, 8507, 1941, 6, 1, null, 0, 38003563, 4, null, null, '00021CA6FF03E670', '1', null, '5',
-        null, '5', null);
+VALUES (4, 8507, 1941, 6, 1, NULL, 0, 38003563, 4, NULL, NULL, '00021CA6FF03E670', '1', NULL, '5',
+        NULL, '5', NULL);
 INSERT INTO cds_cdm.person (person_id, gender_concept_id, year_of_birth, month_of_birth,
                             day_of_birth, birth_datetime,
                             race_concept_id, ethnicity_concept_id, location_id, provider_id,
@@ -80,8 +80,8 @@ INSERT INTO cds_cdm.person (person_id, gender_concept_id, year_of_birth, month_o
                             race_source_value,
                             race_source_concept_id, ethnicity_source_value,
                             ethnicity_source_concept_id)
-VALUES (5, 8507, 1936, 8, 1, null, 8527, 38003564, 5, null, null, '00024B3D2352D2D0', '1', null,
-        '1', null, '1', null);
+VALUES (5, 8507, 1936, 8, 1, NULL, 8527, 38003564, 5, NULL, NULL, '00024B3D2352D2D0', '1', NULL,
+        '1', NULL, '1', NULL);
 INSERT INTO cds_cdm.person (person_id, gender_concept_id, year_of_birth, month_of_birth,
                             day_of_birth, birth_datetime,
                             race_concept_id, ethnicity_concept_id, location_id, provider_id,
@@ -90,8 +90,8 @@ INSERT INTO cds_cdm.person (person_id, gender_concept_id, year_of_birth, month_o
                             race_source_value,
                             race_source_concept_id, ethnicity_source_value,
                             ethnicity_source_concept_id)
-VALUES (6, 8507, 1943, 10, 1, null, 8516, 38003564, 6, null, null, '0002DAE1C81CC70D', '1', null,
-        '2', null, '2', null);
+VALUES (6, 8507, 1943, 10, 1, NULL, 8516, 38003564, 6, NULL, NULL, '0002DAE1C81CC70D', '1', NULL,
+        '2', NULL, '2', NULL);
 INSERT INTO cds_cdm.person (person_id, gender_concept_id, year_of_birth, month_of_birth,
                             day_of_birth, birth_datetime,
                             race_concept_id, ethnicity_concept_id, location_id, provider_id,
@@ -100,8 +100,8 @@ INSERT INTO cds_cdm.person (person_id, gender_concept_id, year_of_birth, month_o
                             race_source_value,
                             race_source_concept_id, ethnicity_source_value,
                             ethnicity_source_concept_id)
-VALUES (7, 8507, 1922, 7, 1, null, 8527, 38003564, 7, null, null, '0002F28CE057345B', '1', null,
-        '1', null, '1', null);
+VALUES (7, 8507, 1922, 7, 1, NULL, 8527, 38003564, 7, NULL, NULL, '0002F28CE057345B', '1', NULL,
+        '1', NULL, '1', NULL);
 INSERT INTO cds_cdm.person (person_id, gender_concept_id, year_of_birth, month_of_birth,
                             day_of_birth, birth_datetime,
                             race_concept_id, ethnicity_concept_id, location_id, provider_id,
@@ -110,8 +110,8 @@ INSERT INTO cds_cdm.person (person_id, gender_concept_id, year_of_birth, month_o
                             race_source_value,
                             race_source_concept_id, ethnicity_source_value,
                             ethnicity_source_concept_id)
-VALUES (8, 8507, 1935, 9, 1, null, 8527, 38003564, 8, null, null, '000308435E3E5B76', '1', null,
-        '1', null, '1', null);
+VALUES (8, 8507, 1935, 9, 1, NULL, 8527, 38003564, 8, NULL, NULL, '000308435E3E5B76', '1', NULL,
+        '1', NULL, '1', NULL);
 INSERT INTO cds_cdm.person (person_id, gender_concept_id, year_of_birth, month_of_birth,
                             day_of_birth, birth_datetime,
                             race_concept_id, ethnicity_concept_id, location_id, provider_id,
@@ -120,8 +120,8 @@ INSERT INTO cds_cdm.person (person_id, gender_concept_id, year_of_birth, month_o
                             race_source_value,
                             race_source_concept_id, ethnicity_source_value,
                             ethnicity_source_concept_id)
-VALUES (9, 8532, 1976, 9, 1, null, 8527, 38003564, 9, null, null, '000345A39D4157C9', '2', null,
-        '1', null, '1', null);
+VALUES (9, 8532, 1976, 9, 1, NULL, 8527, 38003564, 9, NULL, NULL, '000345A39D4157C9', '2', NULL,
+        '1', NULL, '1', NULL);
 INSERT INTO cds_cdm.person (person_id, gender_concept_id, year_of_birth, month_of_birth,
                             day_of_birth, birth_datetime,
                             race_concept_id, ethnicity_concept_id, location_id, provider_id,
@@ -130,9 +130,9 @@ INSERT INTO cds_cdm.person (person_id, gender_concept_id, year_of_birth, month_o
                             race_source_value,
                             race_source_concept_id, ethnicity_source_value,
                             ethnicity_source_concept_id)
-VALUES (10, 8532, 1938, 10, 1, null, 8516, 38003564, 10, null, null, '00036A21B65B0206', '2', null,
-        '2', null, '2',
-        null);
+VALUES (10, 8532, 1938, 10, 1, NULL, 8516, 38003564, 10, NULL, NULL, '00036A21B65B0206', '2', NULL,
+        '2', NULL, '2',
+        NULL);
 
 INSERT INTO cds_cdm.observation_period (observation_period_id, person_id,
                                         observation_period_start_date,
@@ -184,8 +184,8 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (6, 1, 0, '2009-07-25', null, '2009-07-25', null, 44818517, null, 6, '887733386680966', null,
-        0, null, 0, null);
+VALUES (6, 1, 0, '2009-07-25', NULL, '2009-07-25', NULL, 44818517, NULL, 6, '887733386680966', NULL,
+        0, NULL, 0, NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -195,9 +195,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (2, 1, 9202, '2008-09-04', null, '2008-09-04', null, 44818517, null, 2, '542192281063886',
-        null, 0, null, 0,
-        null);
+VALUES (2, 1, 9202, '2008-09-04', NULL, '2008-09-04', NULL, 44818517, NULL, 2, '542192281063886',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -207,8 +207,8 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (5, 1, 0, '2010-11-05', null, '2010-11-05', null, 44818517, null, 5, '887463387476539', null,
-        0, null, 0, null);
+VALUES (5, 1, 0, '2010-11-05', NULL, '2010-11-05', NULL, 44818517, NULL, 5, '887463387476539', NULL,
+        0, NULL, 0, NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -218,8 +218,8 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (4, 1, 0, '2010-04-01', null, '2010-04-01', null, 44818517, null, 4, '887243388666441', null,
-        0, null, 0, null);
+VALUES (4, 1, 0, '2010-04-01', NULL, '2010-04-01', NULL, 44818517, NULL, 4, '887243388666441', NULL,
+        0, NULL, 0, NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -229,8 +229,8 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (3, 1, 0, '2009-10-14', null, '2009-10-14', null, 44818517, null, 3, '887213386947664', null,
-        0, null, 0, null);
+VALUES (3, 1, 0, '2009-10-14', NULL, '2009-10-14', NULL, 44818517, NULL, 3, '887213386947664', NULL,
+        0, NULL, 0, NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -240,9 +240,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (1, 1, 9201, '2010-03-12', null, '2010-03-13', null, 44818517, null, 1, '196661176988405',
-        null, 0, null, 0,
-        null);
+VALUES (1, 1, 9201, '2010-03-12', NULL, '2010-03-13', NULL, 44818517, NULL, 1, '196661176988405',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -252,8 +252,8 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (7, 1, 0, '2010-08-17', null, '2010-08-17', null, 44818517, null, 7, '887893388307089', null,
-        0, null, 0, null);
+VALUES (7, 1, 0, '2010-08-17', NULL, '2010-08-17', NULL, 44818517, NULL, 7, '887893388307089', NULL,
+        0, NULL, 0, NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -263,9 +263,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (38, 2, 0, '2009-03-24', null, '2009-03-24', null, 44818517, null, 29, '887693385935201',
-        null, 0, null, 0,
-        null);
+VALUES (38, 2, 0, '2009-03-24', NULL, '2009-03-24', NULL, 44818517, NULL, 29, '887693385935201',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -275,9 +275,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (39, 2, 0, '2009-07-31', null, '2009-07-31', null, 44818517, null, 33, '887713388064954',
-        null, 0, null, 0,
-        null);
+VALUES (39, 2, 0, '2009-07-31', NULL, '2009-07-31', NULL, 44818517, NULL, 33, '887713388064954',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -287,9 +287,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (40, 2, 0, '2009-04-15', null, '2009-04-15', null, 44818517, null, 34, '887743388182774',
-        null, 0, null, 0,
-        null);
+VALUES (40, 2, 0, '2009-04-15', NULL, '2009-04-15', NULL, 44818517, NULL, 34, '887743388182774',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -299,9 +299,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (11, 2, 9201, '2009-08-31', null, '2009-09-02', null, 44818517, null, 10, '196661177015632',
-        null, 0, null, 0,
-        null);
+VALUES (11, 2, 9201, '2009-08-31', NULL, '2009-09-02', NULL, 44818517, NULL, 10, '196661177015632',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -311,9 +311,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (26, 2, 0, '2009-03-30', null, '2009-03-30', null, 44818517, null, 23, '887433386151111',
-        null, 0, null, 0,
-        null);
+VALUES (26, 2, 0, '2009-03-30', NULL, '2009-03-30', NULL, 44818517, NULL, 23, '887433386151111',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -323,9 +323,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (22, 2, 0, '2010-03-21', null, '2010-03-21', null, 44818517, null, 21, '887353386843897',
-        null, 0, null, 0,
-        null);
+VALUES (22, 2, 0, '2010-03-21', NULL, '2010-03-21', NULL, 44818517, NULL, 21, '887353386843897',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -335,9 +335,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (10, 2, 9201, '2010-06-26', null, '2010-07-01', null, 44818517, null, 9, '196261176983265',
-        null, 0, null, 0,
-        null);
+VALUES (10, 2, 9201, '2010-06-26', NULL, '2010-07-01', NULL, 44818517, NULL, 9, '196261176983265',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -347,9 +347,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (9, 2, 9201, '2009-04-12', null, '2009-04-18', null, 44818517, null, 9, '196201177000368',
-        null, 0, null, 0,
-        null);
+VALUES (9, 2, 9201, '2009-04-12', NULL, '2009-04-18', NULL, 44818517, NULL, 9, '196201177000368',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -359,9 +359,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (8, 2, 9201, '2009-09-17', null, '2009-09-20', null, 44818517, null, 8, '196091176981058',
-        null, 0, null, 0,
-        null);
+VALUES (8, 2, 9201, '2009-09-17', NULL, '2009-09-20', NULL, 44818517, NULL, 8, '196091176981058',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -371,9 +371,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (28, 2, 0, '2009-07-03', null, '2009-07-03', null, 44818517, null, 25, '887443385121084',
-        null, 0, null, 0,
-        null);
+VALUES (28, 2, 0, '2009-07-03', NULL, '2009-07-03', NULL, 44818517, NULL, 25, '887443385121084',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -383,9 +383,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (24, 2, 0, '2010-02-19', null, '2010-02-19', null, 44818517, null, 20, '887393386608161',
-        null, 0, null, 0,
-        null);
+VALUES (24, 2, 0, '2010-02-19', NULL, '2010-02-19', NULL, 44818517, NULL, 20, '887393386608161',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -395,9 +395,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (29, 2, 0, '2009-07-16', null, '2009-07-16', null, 44818517, null, 17, '887453384924494',
-        null, 0, null, 0,
-        null);
+VALUES (29, 2, 0, '2009-07-16', NULL, '2009-07-16', NULL, 44818517, NULL, 17, '887453384924494',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -407,9 +407,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (21, 2, 0, '2009-01-17', null, '2009-01-17', null, 44818517, null, 20, '887293389131196',
-        null, 0, null, 0,
-        null);
+VALUES (21, 2, 0, '2009-01-17', NULL, '2009-01-17', NULL, 44818517, NULL, 20, '887293389131196',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -419,9 +419,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (13, 2, 9202, '2009-06-23', null, '2009-06-23', null, 44818517, null, 12, '542282281644416',
-        null, 0, null, 0,
-        null);
+VALUES (13, 2, 9202, '2009-06-23', NULL, '2009-06-23', NULL, 44818517, NULL, 12, '542282281644416',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -431,9 +431,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (30, 2, 0, '2010-06-18', null, '2010-06-27', null, 44818517, null, 26, '887513388218955',
-        null, 0, null, 0,
-        null);
+VALUES (30, 2, 0, '2010-06-18', NULL, '2010-06-27', NULL, 44818517, NULL, 26, '887513388218955',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -443,9 +443,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (19, 2, 0, '2009-08-11', null, '2009-08-11', null, 44818517, null, 18, '887243387711309',
-        null, 0, null, 0,
-        null);
+VALUES (19, 2, 0, '2009-08-11', NULL, '2009-08-11', NULL, 44818517, NULL, 18, '887243387711309',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -455,9 +455,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (18, 2, 0, '2009-10-01', null, '2009-10-01', null, 44818517, null, 17, '887243387365395',
-        null, 0, null, 0,
-        null);
+VALUES (18, 2, 0, '2009-10-01', NULL, '2009-10-01', NULL, 44818517, NULL, 17, '887243387365395',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -467,9 +467,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (17, 2, 0, '2010-05-04', null, '2010-05-04', null, 44818517, null, 16, '887233384922699',
-        null, 0, null, 0,
-        null);
+VALUES (17, 2, 0, '2010-05-04', NULL, '2010-05-04', NULL, 44818517, NULL, 16, '887233384922699',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -479,9 +479,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (16, 2, 0, '2010-08-03', null, '2010-08-03', null, 44818517, null, 15, '887223385558356',
-        null, 0, null, 0,
-        null);
+VALUES (16, 2, 0, '2010-08-03', NULL, '2010-08-03', NULL, 44818517, NULL, 15, '887223385558356',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -491,9 +491,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (15, 2, 0, '2009-08-24', null, '2009-08-24', null, 44818517, null, 14, '887023387989281',
-        null, 0, null, 0,
-        null);
+VALUES (15, 2, 0, '2009-08-24', NULL, '2009-08-24', NULL, 44818517, NULL, 14, '887023387989281',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -503,9 +503,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (14, 2, 0, '2010-05-29', null, '2010-05-29', null, 44818517, null, 13, '887023385728164',
-        null, 0, null, 0,
-        null);
+VALUES (14, 2, 0, '2010-05-29', NULL, '2010-05-29', NULL, 44818517, NULL, 13, '887023385728164',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -515,9 +515,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (31, 2, 0, '2009-03-08', null, '2009-03-08', null, 44818517, null, 27, '887523385536820',
-        null, 0, null, 0,
-        null);
+VALUES (31, 2, 0, '2009-03-08', NULL, '2009-03-08', NULL, 44818517, NULL, 27, '887523385536820',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -527,9 +527,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (32, 2, 0, '2008-10-04', null, '2008-10-04', null, 44818517, null, 28, '887523386668713',
-        null, 0, null, 0,
-        null);
+VALUES (32, 2, 0, '2008-10-04', NULL, '2008-10-04', NULL, 44818517, NULL, 28, '887523386668713',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -539,9 +539,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (33, 2, 0, '2010-02-24', null, '2010-02-26', null, 44818517, null, 29, '887603386008014',
-        null, 0, null, 0,
-        null);
+VALUES (33, 2, 0, '2010-02-24', NULL, '2010-02-26', NULL, 44818517, NULL, 29, '887603386008014',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -551,9 +551,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (23, 2, 0, '2009-01-05', null, '2009-01-05', null, 44818517, null, 15, '887383388842050',
-        null, 0, null, 0,
-        null);
+VALUES (23, 2, 0, '2009-01-05', NULL, '2009-01-05', NULL, 44818517, NULL, 15, '887383388842050',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -563,9 +563,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (34, 2, 0, '2009-06-21', null, '2009-06-21', null, 44818517, null, 30, '887603386081276',
-        null, 0, null, 0,
-        null);
+VALUES (34, 2, 0, '2009-06-21', NULL, '2009-06-21', NULL, 44818517, NULL, 30, '887603386081276',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -575,9 +575,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (27, 2, 0, '2009-05-16', null, '2009-05-16', null, 44818517, null, 24, '887433388731696',
-        null, 0, null, 0,
-        null);
+VALUES (27, 2, 0, '2009-05-16', NULL, '2009-05-16', NULL, 44818517, NULL, 24, '887433388731696',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -587,9 +587,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (35, 2, 0, '2010-01-23', null, '2010-01-23', null, 44818517, null, 31, '887603388613084',
-        null, 0, null, 0,
-        null);
+VALUES (35, 2, 0, '2010-01-23', NULL, '2010-01-23', NULL, 44818517, NULL, 31, '887603388613084',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -599,9 +599,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (36, 2, 0, '2010-08-30', null, '2010-09-08', null, 44818517, null, 32, '887633386647330',
-        null, 0, null, 0,
-        null);
+VALUES (36, 2, 0, '2010-08-30', NULL, '2010-09-08', NULL, 44818517, NULL, 32, '887633386647330',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -611,9 +611,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (37, 2, 0, '2009-03-14', null, '2009-03-14', null, 44818517, null, 27, '887683387620011',
-        null, 0, null, 0,
-        null);
+VALUES (37, 2, 0, '2009-03-14', NULL, '2009-03-14', NULL, 44818517, NULL, 27, '887683387620011',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -623,9 +623,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (41, 2, 0, '2009-12-06', null, '2009-12-06', null, 44818517, null, 35, '887753386337995',
-        null, 0, null, 0,
-        null);
+VALUES (41, 2, 0, '2009-12-06', NULL, '2009-12-06', NULL, 44818517, NULL, 35, '887753386337995',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -635,9 +635,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (42, 2, 0, '2009-01-13', null, '2009-01-13', null, 44818517, null, 36, '887783384850257',
-        null, 0, null, 0,
-        null);
+VALUES (42, 2, 0, '2009-01-13', NULL, '2009-01-13', NULL, 44818517, NULL, 36, '887783384850257',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -647,9 +647,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (43, 2, 0, '2008-10-09', null, '2008-10-18', null, 44818517, null, 37, '887783385091632',
-        null, 0, null, 0,
-        null);
+VALUES (43, 2, 0, '2008-10-09', NULL, '2008-10-18', NULL, 44818517, NULL, 37, '887783385091632',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -659,9 +659,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (44, 2, 0, '2009-11-11', null, '2009-11-11', null, 44818517, null, 38, '887783386404610',
-        null, 0, null, 0,
-        null);
+VALUES (44, 2, 0, '2009-11-11', NULL, '2009-11-11', NULL, 44818517, NULL, 38, '887783386404610',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -671,9 +671,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (45, 2, 0, '2008-10-08', null, '2008-10-08', null, 44818517, null, 39, '887793388522804',
-        null, 0, null, 0,
-        null);
+VALUES (45, 2, 0, '2008-10-08', NULL, '2008-10-08', NULL, 44818517, NULL, 39, '887793388522804',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -683,9 +683,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (46, 2, 0, '2009-12-02', null, '2009-12-02', null, 44818517, null, 40, '887813386861087',
-        null, 0, null, 0,
-        null);
+VALUES (46, 2, 0, '2009-12-02', NULL, '2009-12-02', NULL, 44818517, NULL, 40, '887813386861087',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -695,9 +695,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (20, 2, 0, '2009-10-29', null, '2009-10-29', null, 44818517, null, 19, '887253385863058',
-        null, 0, null, 0,
-        null);
+VALUES (20, 2, 0, '2009-10-29', NULL, '2009-10-29', NULL, 44818517, NULL, 19, '887253385863058',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -707,9 +707,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (47, 2, 0, '2009-06-05', null, '2009-06-05', null, 44818517, null, 41, '887853388412950',
-        null, 0, null, 0,
-        null);
+VALUES (47, 2, 0, '2009-06-05', NULL, '2009-06-05', NULL, 44818517, NULL, 41, '887853388412950',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -719,9 +719,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (48, 2, 0, '2010-02-23', null, '2010-02-23', null, 44818517, null, 42, '887863389123205',
-        null, 0, null, 0,
-        null);
+VALUES (48, 2, 0, '2010-02-23', NULL, '2010-02-23', NULL, 44818517, NULL, 42, '887863389123205',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -731,9 +731,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (49, 2, 0, '2009-10-05', null, '2009-10-05', null, 44818517, null, 43, '887873386493630',
-        null, 0, null, 0,
-        null);
+VALUES (49, 2, 0, '2009-10-05', NULL, '2009-10-05', NULL, 44818517, NULL, 43, '887873386493630',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -743,9 +743,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (50, 2, 0, '2009-05-11', null, '2009-05-11', null, 44818517, null, 44, '887903389160104',
-        null, 0, null, 0,
-        null);
+VALUES (50, 2, 0, '2009-05-11', NULL, '2009-05-11', NULL, 44818517, NULL, 44, '887903389160104',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -755,9 +755,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (12, 2, 9202, '2009-06-02', null, '2009-06-02', null, 44818517, null, 11, '542272281166593',
-        null, 0, null, 0,
-        null);
+VALUES (12, 2, 9202, '2009-06-02', NULL, '2009-06-02', NULL, 44818517, NULL, 11, '542272281166593',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -767,9 +767,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (25, 2, 0, '2008-12-09', null, '2008-12-09', null, 44818517, null, 22, '887423388326030',
-        null, 0, null, 0,
-        null);
+VALUES (25, 2, 0, '2008-12-09', NULL, '2008-12-09', NULL, 44818517, NULL, 22, '887423388326030',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -779,9 +779,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (51, 2, 0, '2008-10-20', null, '2008-10-20', null, 44818517, null, 17, '887953385848149',
-        null, 0, null, 0,
-        null);
+VALUES (51, 2, 0, '2008-10-20', NULL, '2008-10-20', NULL, 44818517, NULL, 17, '887953385848149',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -791,9 +791,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (53, 3, 0, '2009-11-17', null, '2009-11-17', null, 44818517, null, 46, '887963387118445',
-        null, 0, null, 0,
-        null);
+VALUES (53, 3, 0, '2009-11-17', NULL, '2009-11-17', NULL, 44818517, NULL, 46, '887963387118445',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -803,9 +803,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (52, 3, 9202, '2009-10-11', null, '2009-10-11', null, 44818517, null, 45, '542642281250669',
-        null, 0, null, 0,
-        null);
+VALUES (52, 3, 9202, '2009-10-11', NULL, '2009-10-11', NULL, 44818517, NULL, 45, '542642281250669',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -815,9 +815,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (54, 4, 0, '2009-11-25', null, '2009-11-25', null, 44818517, null, 47, '887143387616314',
-        null, 0, null, 0,
-        null);
+VALUES (54, 4, 0, '2009-11-25', NULL, '2009-11-25', NULL, 44818517, NULL, 47, '887143387616314',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -827,9 +827,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (55, 4, 0, '2009-09-20', null, '2009-09-20', null, 44818517, null, 48, '887363384755754',
-        null, 0, null, 0,
-        null);
+VALUES (55, 4, 0, '2009-09-20', NULL, '2009-09-20', NULL, 44818517, NULL, 48, '887363384755754',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -839,9 +839,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (56, 4, 0, '2009-06-24', null, '2009-06-24', null, 44818517, null, 49, '887443387031402',
-        null, 0, null, 0,
-        null);
+VALUES (56, 4, 0, '2009-06-24', NULL, '2009-06-24', NULL, 44818517, NULL, 49, '887443387031402',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -851,9 +851,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (79, 5, 0, '2008-09-16', null, '2008-09-16', null, 44818517, null, 51, '887753388589395',
-        null, 0, null, 0,
-        null);
+VALUES (79, 5, 0, '2008-09-16', NULL, '2008-09-16', NULL, 44818517, NULL, 51, '887753388589395',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -863,9 +863,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (75, 5, 0, '2010-02-09', null, '2010-02-09', null, 44818517, null, 42, '887603387585803',
-        null, 0, null, 0,
-        null);
+VALUES (75, 5, 0, '2010-02-09', NULL, '2010-02-09', NULL, 44818517, NULL, 42, '887603387585803',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -875,9 +875,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (74, 5, 0, '2009-07-02', null, '2009-07-02', null, 44818517, null, 51, '887573385602356',
-        null, 0, null, 0,
-        null);
+VALUES (74, 5, 0, '2009-07-02', NULL, '2009-07-02', NULL, 44818517, NULL, 51, '887573385602356',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -887,9 +887,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (73, 5, 0, '2009-11-18', null, '2009-11-18', null, 44818517, null, 43, '887523387400539',
-        null, 0, null, 0,
-        null);
+VALUES (73, 5, 0, '2009-11-18', NULL, '2009-11-18', NULL, 44818517, NULL, 43, '887523387400539',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -899,9 +899,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (72, 5, 0, '2009-12-21', null, '2009-12-21', null, 44818517, null, 51, '887523384847829',
-        null, 0, null, 0,
-        null);
+VALUES (72, 5, 0, '2009-12-21', NULL, '2009-12-21', NULL, 44818517, NULL, 51, '887523384847829',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -911,9 +911,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (71, 5, 0, '2009-07-20', null, '2009-07-20', null, 44818517, null, 51, '887523384723768',
-        null, 0, null, 0,
-        null);
+VALUES (71, 5, 0, '2009-07-20', NULL, '2009-07-20', NULL, 44818517, NULL, 51, '887523384723768',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -923,9 +923,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (70, 5, 0, '2009-05-20', null, '2009-05-20', null, 44818517, null, 42, '887473389392345',
-        null, 0, null, 0,
-        null);
+VALUES (70, 5, 0, '2009-05-20', NULL, '2009-05-20', NULL, 44818517, NULL, 42, '887473389392345',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -935,9 +935,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (69, 5, 0, '2009-09-24', null, '2009-09-24', null, 44818517, null, 51, '887473386268431',
-        null, 0, null, 0,
-        null);
+VALUES (69, 5, 0, '2009-09-24', NULL, '2009-09-24', NULL, 44818517, NULL, 51, '887473386268431',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -947,9 +947,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (68, 5, 0, '2008-07-27', null, '2008-07-27', null, 44818517, null, 51, '887383384810677',
-        null, 0, null, 0,
-        null);
+VALUES (68, 5, 0, '2008-07-27', NULL, '2008-07-27', NULL, 44818517, NULL, 51, '887383384810677',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -959,9 +959,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (67, 5, 0, '2009-04-25', null, '2009-04-25', null, 44818517, null, 42, '887233387820468',
-        null, 0, null, 0,
-        null);
+VALUES (67, 5, 0, '2009-04-25', NULL, '2009-04-25', NULL, 44818517, NULL, 42, '887233387820468',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -971,9 +971,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (66, 5, 0, '2010-02-18', null, '2010-02-18', null, 44818517, null, 42, '887203386679943',
-        null, 0, null, 0,
-        null);
+VALUES (66, 5, 0, '2010-02-18', NULL, '2010-02-18', NULL, 44818517, NULL, 42, '887203386679943',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -983,9 +983,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (65, 5, 0, '2009-08-05', null, '2009-08-05', null, 44818517, null, 42, '887183386066187',
-        null, 0, null, 0,
-        null);
+VALUES (65, 5, 0, '2009-08-05', NULL, '2009-08-05', NULL, 44818517, NULL, 42, '887183386066187',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -995,9 +995,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (64, 5, 0, '2008-08-29', null, '2008-08-29', null, 44818517, null, 42, '887173385784056',
-        null, 0, null, 0,
-        null);
+VALUES (64, 5, 0, '2008-08-29', NULL, '2008-08-29', NULL, 44818517, NULL, 42, '887173385784056',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -1007,9 +1007,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (63, 5, 0, '2008-12-14', null, '2008-12-14', null, 44818517, null, 42, '887143386784523',
-        null, 0, null, 0,
-        null);
+VALUES (63, 5, 0, '2008-12-14', NULL, '2008-12-14', NULL, 44818517, NULL, 42, '887143386784523',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -1019,9 +1019,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (62, 5, 0, '2009-10-21', null, '2009-10-21', null, 44818517, null, 42, '887113385530987',
-        null, 0, null, 0,
-        null);
+VALUES (62, 5, 0, '2009-10-21', NULL, '2009-10-21', NULL, 44818517, NULL, 42, '887113385530987',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -1031,9 +1031,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (61, 5, 0, '2010-01-31', null, '2010-01-31', null, 44818517, null, 42, '887023388626288',
-        null, 0, null, 0,
-        null);
+VALUES (61, 5, 0, '2010-01-31', NULL, '2010-01-31', NULL, 44818517, NULL, 42, '887023388626288',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -1043,9 +1043,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (60, 5, 9202, '2009-02-12', null, '2009-02-12', null, 44818517, null, 42, '542442280980633',
-        null, 0, null, 0,
-        null);
+VALUES (60, 5, 9202, '2009-02-12', NULL, '2009-02-12', NULL, 44818517, NULL, 42, '542442280980633',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -1055,9 +1055,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (59, 5, 9202, '2009-06-27', null, '2009-06-27', null, 44818517, null, 42, '542422281208985',
-        null, 0, null, 0,
-        null);
+VALUES (59, 5, 9202, '2009-06-27', NULL, '2009-06-27', NULL, 44818517, NULL, 42, '542422281208985',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -1067,9 +1067,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (58, 5, 9202, '2010-05-26', null, '2010-05-26', null, 44818517, null, 42, '542372281246633',
-        null, 0, null, 0,
-        null);
+VALUES (58, 5, 9202, '2010-05-26', NULL, '2010-05-26', NULL, 44818517, NULL, 42, '542372281246633',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -1079,9 +1079,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (57, 5, 9202, '2008-07-12', null, '2008-07-12', null, 44818517, null, 50, '542242281386963',
-        null, 0, null, 0,
-        null);
+VALUES (57, 5, 9202, '2008-07-12', NULL, '2008-07-12', NULL, 44818517, NULL, 50, '542242281386963',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -1091,9 +1091,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (86, 5, 0, '2010-02-13', null, '2010-02-13', null, 44818517, null, 42, '887993388478305',
-        null, 0, null, 0,
-        null);
+VALUES (86, 5, 0, '2010-02-13', NULL, '2010-02-13', NULL, 44818517, NULL, 42, '887993388478305',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -1103,9 +1103,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (85, 5, 0, '2008-06-01', null, '2008-06-01', null, 44818517, null, 42, '887993386362589',
-        null, 0, null, 0,
-        null);
+VALUES (85, 5, 0, '2008-06-01', NULL, '2008-06-01', NULL, 44818517, NULL, 42, '887993386362589',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -1115,9 +1115,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (84, 5, 0, '2010-03-16', null, '2010-03-16', null, 44818517, null, 42, '887943386651455',
-        null, 0, null, 0,
-        null);
+VALUES (84, 5, 0, '2010-03-16', NULL, '2010-03-16', NULL, 44818517, NULL, 42, '887943386651455',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -1127,9 +1127,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (83, 5, 0, '2010-04-17', null, '2010-04-17', null, 44818517, null, 42, '887923387462434',
-        null, 0, null, 0,
-        null);
+VALUES (83, 5, 0, '2010-04-17', NULL, '2010-04-17', NULL, 44818517, NULL, 42, '887923387462434',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -1139,9 +1139,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (82, 5, 0, '2009-06-28', null, '2009-06-28', null, 44818517, null, 42, '887903389073446',
-        null, 0, null, 0,
-        null);
+VALUES (82, 5, 0, '2009-06-28', NULL, '2009-06-28', NULL, 44818517, NULL, 42, '887903389073446',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -1151,9 +1151,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (81, 5, 0, '2008-06-27', null, '2008-06-27', null, 44818517, null, 42, '887773387266387',
-        null, 0, null, 0,
-        null);
+VALUES (81, 5, 0, '2008-06-27', NULL, '2008-06-27', NULL, 44818517, NULL, 42, '887773387266387',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -1163,9 +1163,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (80, 5, 0, '2009-06-30', null, '2009-06-30', null, 44818517, null, 42, '887763386321169',
-        null, 0, null, 0,
-        null);
+VALUES (80, 5, 0, '2009-06-30', NULL, '2009-06-30', NULL, 44818517, NULL, 42, '887763386321169',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -1175,9 +1175,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (78, 5, 0, '2008-06-12', null, '2008-06-12', null, 44818517, null, 42, '887743389442863',
-        null, 0, null, 0,
-        null);
+VALUES (78, 5, 0, '2008-06-12', NULL, '2008-06-12', NULL, 44818517, NULL, 42, '887743389442863',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -1187,9 +1187,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (77, 5, 0, '2009-07-04', null, '2009-07-04', null, 44818517, null, 42, '887713386730964',
-        null, 0, null, 0,
-        null);
+VALUES (77, 5, 0, '2009-07-04', NULL, '2009-07-04', NULL, 44818517, NULL, 42, '887713386730964',
+        NULL, 0, NULL, 0,
+        NULL);
 INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_concept_id,
                                       visit_start_date,
                                       visit_start_datetime, visit_end_date, visit_end_datetime,
@@ -1199,9 +1199,9 @@ INSERT INTO cds_cdm.visit_occurrence (visit_occurrence_id, person_id, visit_conc
                                       admitting_source_concept_id, admitting_source_value,
                                       discharge_to_concept_id,
                                       discharge_to_source_value)
-VALUES (76, 5, 0, '2008-06-24', null, '2008-06-24', null, 44818517, null, 42, '887623386353527',
-        null, 0, null, 0,
-        null);
+VALUES (76, 5, 0, '2008-06-24', NULL, '2008-06-24', NULL, 44818517, NULL, 42, '887623386353527',
+        NULL, 0, NULL, 0,
+        NULL);
 
 INSERT INTO cds_cdm.visit_detail (visit_detail_id, person_id, visit_detail_concept_id,
                                   visit_detail_start_date,
@@ -1215,8 +1215,8 @@ INSERT INTO cds_cdm.visit_detail (visit_detail_id, person_id, visit_detail_conce
                                   discharge_to_source_value,
                                   visit_detail_parent_id, visit_occurrence_id)
 VALUES (1, 1, 9201, '2010-03-12', '2010-03-12 00:00:00.000000', '2010-03-12',
-        '2010-03-12 00:00:00.000000', 32817, null,
-        29, null, null, null, null, null, null, null, null, 1);
+        '2010-03-12 00:00:00.000000', 32817, NULL,
+        29, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
 INSERT INTO cds_cdm.visit_detail (visit_detail_id, person_id, visit_detail_concept_id,
                                   visit_detail_start_date,
                                   visit_detail_start_datetime, visit_detail_end_date,
@@ -1229,8 +1229,8 @@ INSERT INTO cds_cdm.visit_detail (visit_detail_id, person_id, visit_detail_conce
                                   discharge_to_source_value,
                                   visit_detail_parent_id, visit_occurrence_id)
 VALUES (2, 1, 9201, '2010-03-13', '2010-03-13 00:00:00.000000', '2010-03-13',
-        '2010-03-13 00:00:00.000000', 32220, null,
-        26, null, null, null, null, null, null, null, null, 1);
+        '2010-03-13 00:00:00.000000', 32220, NULL,
+        26, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
 
 INSERT INTO cds_cdm.visit_detail (visit_detail_id, person_id, visit_detail_concept_id,
                                   visit_detail_start_date, visit_detail_start_datetime,
@@ -1242,8 +1242,8 @@ INSERT INTO cds_cdm.visit_detail (visit_detail_id, person_id, visit_detail_conce
                                   discharge_to_source_value, visit_detail_parent_id,
                                   visit_occurrence_id)
 VALUES (3, 2, 9201, '2009-04-15', '2009-04-15 00:00:00.000000', '2009-04-15',
-        '2009-04-15 00:00:00.000000', 32817, null, 35, null, null, null, 'FK', null, null, null,
-        null, 53);
+        '2009-04-15 00:00:00.000000', 32817, NULL, 35, NULL, NULL, NULL, 'FK', NULL, NULL, NULL,
+        NULL, 53);
 INSERT INTO cds_cdm.visit_detail (visit_detail_id, person_id, visit_detail_concept_id,
                                   visit_detail_start_date, visit_detail_start_datetime,
                                   visit_detail_end_date, visit_detail_end_datetime,
@@ -1254,8 +1254,8 @@ INSERT INTO cds_cdm.visit_detail (visit_detail_id, person_id, visit_detail_conce
                                   discharge_to_source_value, visit_detail_parent_id,
                                   visit_occurrence_id)
 VALUES (4, 2, 9201, '2010-06-18', '2010-06-18 00:00:00.000000', '2010-06-20',
-        '2010-06-20 00:00:00.000000', 32817, null, 37, null, null, null, 'HNO', null, null, null,
-        null, 30);
+        '2010-06-20 00:00:00.000000', 32817, NULL, 37, NULL, NULL, NULL, 'HNO', NULL, NULL, NULL,
+        NULL, 30);
 INSERT INTO cds_cdm.visit_detail (visit_detail_id, person_id, visit_detail_concept_id,
                                   visit_detail_start_date, visit_detail_start_datetime,
                                   visit_detail_end_date, visit_detail_end_datetime,
@@ -1266,8 +1266,8 @@ INSERT INTO cds_cdm.visit_detail (visit_detail_id, person_id, visit_detail_conce
                                   discharge_to_source_value, visit_detail_parent_id,
                                   visit_occurrence_id)
 VALUES (5, 2, 9201, '2010-06-21', '2010-06-21 00:00:00.000000', '2010-06-22',
-        '2010-06-22 00:00:00.000000', 32817, null, 26, null, null, null, 'CH', null, null, null,
-        null, 30);
+        '2010-06-22 00:00:00.000000', 32817, NULL, 26, NULL, NULL, NULL, 'CH', NULL, NULL, NULL,
+        NULL, 30);
 INSERT INTO cds_cdm.visit_detail (visit_detail_id, person_id, visit_detail_concept_id,
                                   visit_detail_start_date, visit_detail_start_datetime,
                                   visit_detail_end_date, visit_detail_end_datetime,
@@ -1278,8 +1278,8 @@ INSERT INTO cds_cdm.visit_detail (visit_detail_id, person_id, visit_detail_conce
                                   discharge_to_source_value, visit_detail_parent_id,
                                   visit_occurrence_id)
 VALUES (6, 2, 9201, '2010-06-23', '2010-06-23 00:00:00.000000', '2010-06-26',
-        '2010-06-26 00:00:00.000000', 32817, null, 44, null, null, null, 'ST', null, null, null,
-        null, 30);
+        '2010-06-26 00:00:00.000000', 32817, NULL, 44, NULL, NULL, NULL, 'ST', NULL, NULL, NULL,
+        NULL, 30);
 
 INSERT INTO cds_cdm.visit_detail (visit_detail_id, person_id, visit_detail_concept_id,
                                   visit_detail_start_date, visit_detail_start_datetime,
@@ -1291,5 +1291,5 @@ INSERT INTO cds_cdm.visit_detail (visit_detail_id, person_id, visit_detail_conce
                                   discharge_to_source_value, visit_detail_parent_id,
                                   visit_occurrence_id)
 VALUES (7, 3, 9201, '2009-11-17', '2009-11-17 00:00:00.000000', '2009-11-17',
-        '2009-11-17 00:00:00.000000', 32220, null, 35, null, null, null, 'FK', null, null, null,
-        null, 53);
+        '2009-11-17 00:00:00.000000', 32220, NULL, 35, NULL, NULL, NULL, 'FK', NULL, NULL, NULL,
+        NULL, 53);

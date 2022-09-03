@@ -12,10 +12,7 @@
     </b-message>
     <template v-else>
       <template v-if="encounterPeriod">
-        <span
-          v-if="encounterPeriod.end"
-          class="is-size-7 has-text-weight-semibold"
-        >
+        <span v-if="encounterPeriod.end" class="is-size-7 has-text-weight-semibold">
           {{ new Date(encounterPeriod.start).toLocaleDateString() }}
           -
           {{ new Date(encounterPeriod.end).toLocaleDateString() }}:
@@ -28,18 +25,11 @@
       </template>
       <p v-if="latestEncounterLocation">
         <span class="has-text-weight-semibold">{{
-          latestEncounterLocation.name
+            latestEncounterLocation.name
         }}</span>
         <br />
-        <span
-          v-for="(telecom, index) in latestEncounterLocation.telecom"
-          :key="index"
-        >
-          <b-icon
-            pack="fas"
-            :icon="getIconNameFromContactPointSystem(telecom.system)"
-            size="is-small"
-          >
+        <span v-for="(telecom, index) in latestEncounterLocation.telecom" :key="index">
+          <b-icon pack="fas" :icon="getIconNameFromContactPointSystem(telecom.system)" size="is-small">
           </b-icon>
           {{ telecom.value }}
           <br />
@@ -75,9 +65,11 @@ export default {
     };
   },
   computed: {
-    // if https://www.hl7.org/fhir/encounter-definitions.html#Encounter.location.period is set, use it
-    // to display the stay begin and end. If it is not set, use https://www.hl7.org/fhir/encounter-definitions.html#Encounter.period
-    // in general, Encounter.location.period may be more accurate, so if available, use it. Fallback to Encounter.period otherwise.
+    // if https://www.hl7.org/fhir/encounter-definitions.html#Encounter.location.period is set,
+    // use it to display the stay begin and end. If it is not set,
+    // use https://www.hl7.org/fhir/encounter-definitions.html#Encounter.period.
+    // In general, Encounter.location.period may be more accurate, so if available, use it.
+    // Fallback to Encounter.period otherwise.
     encounterPeriod() {
       const locationEntryComponent =
         this.latestEncounterAndLocation?.locationEntry;

@@ -11,14 +11,12 @@ build:
       jib:
         type: gradle
         project: query
-        args:
-          - "jibDockerBuild"
+
     - image: ghcr.io/miracum/recruit/notify
       jib:
         type: gradle
         project: notify
-        args:
-          - "jibDockerBuild"
+
     - image: ghcr.io/miracum/recruit/list
       context: list
       docker:
@@ -29,7 +27,6 @@ deploy:
       - name: recruit
         wait: true
         remoteChart: recruit
-        recreatePods: true
         repo: https://miracum.github.io/charts
         version: 9.2.1
         setValues:

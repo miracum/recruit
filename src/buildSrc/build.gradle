@@ -5,8 +5,7 @@
  */
 
 plugins {
-    // Support convention plugins written in Groovy. Convention plugins are build scripts in 'src/main' that automatically become available as plugins in the main build.
-    id "groovy-gradle-plugin"
+    id 'groovy-gradle-plugin'
 }
 
 repositories {
@@ -19,7 +18,7 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-gradle-plugin:2.7.3')
     implementation('io.spring.gradle:dependency-management-plugin:1.0.13.RELEASE')
     implementation('com.google.cloud.tools:jib-gradle-plugin:3.3.0')
-    implementation("com.diffplug.spotless:spotless-plugin-gradle:6.10.0")
-    implementation("io.freefair.gradle:lombok-plugin:6.5.1")
-    implementation("de.undercouch:gradle-download-task:5.1.2")
+    implementation('com.diffplug.spotless:spotless-plugin-gradle:6.10.0')
+    implementation('io.freefair.gradle:lombok-plugin:6.5.1')
+    implementation('de.undercouch:gradle-download-task:5.1.2')
 }

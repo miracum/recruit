@@ -122,9 +122,7 @@
                 "url": "http://hl7.org/fhir/StructureDefinition/geolocation"
               }
             ],
-            "line": [
-              "120 Howe Burg Apt 7"
-            ],
+            "line": ["120 Howe Burg Apt 7"],
             "city": "Holbrook",
             "state": "Massachusetts",
             "postalCode": "02368",
@@ -195,9 +193,7 @@
         ],
         "address": [
           {
-            "line": [
-              "21 E MAIN ST"
-            ],
+            "line": ["21 E MAIN ST"],
             "city": "AVON",
             "state": "MA",
             "postalCode": "02322-1413",
@@ -240,9 +236,7 @@
         ],
         "address": [
           {
-            "line": [
-              "21 E MAIN ST"
-            ],
+            "line": ["21 E MAIN ST"],
             "city": "AVON",
             "state": "MA",
             "postalCode": "02322-1413",
@@ -607,9 +601,7 @@
         ],
         "address": [
           {
-            "line": [
-              "235 NORTH PEARL STREET"
-            ],
+            "line": ["235 NORTH PEARL STREET"],
             "city": "BROCKTON",
             "state": "MA",
             "postalCode": "02301",
@@ -652,9 +644,7 @@
         ],
         "address": [
           {
-            "line": [
-              "235 NORTH PEARL STREET"
-            ],
+            "line": ["235 NORTH PEARL STREET"],
             "city": "BROCKTON",
             "state": "MA",
             "postalCode": "02301",
@@ -2139,9 +2129,7 @@
           },
           {
             "sequence": 2,
-            "diagnosisSequence": [
-              1
-            ],
+            "diagnosisSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -2155,9 +2143,7 @@
           },
           {
             "sequence": 3,
-            "diagnosisSequence": [
-              2
-            ],
+            "diagnosisSequence": [2],
             "productOrService": {
               "coding": [
                 {
@@ -2171,9 +2157,7 @@
           },
           {
             "sequence": 4,
-            "procedureSequence": [
-              1
-            ],
+            "procedureSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -2384,9 +2368,7 @@
           },
           {
             "sequence": 2,
-            "diagnosisSequence": [
-              1
-            ],
+            "diagnosisSequence": [1],
             "category": {
               "coding": [
                 {
@@ -2422,9 +2404,7 @@
           },
           {
             "sequence": 3,
-            "diagnosisSequence": [
-              2
-            ],
+            "diagnosisSequence": [2],
             "category": {
               "coding": [
                 {
@@ -4022,9 +4002,7 @@
           },
           {
             "sequence": 2,
-            "procedureSequence": [
-              1
-            ],
+            "procedureSequence": [1],
             "productOrService": {
               "coding": [
                 {

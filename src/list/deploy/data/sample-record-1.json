@@ -149,9 +149,7 @@
                 "url": "http://hl7.org/fhir/StructureDefinition/geolocation"
               }
             ],
-            "line": [
-              "598 Fisher Approach Unit 30"
-            ],
+            "line": ["598 Fisher Approach Unit 30"],
             "city": "Wilbraham",
             "state": "Massachusetts",
             "country": "US"
@@ -221,9 +219,7 @@
         ],
         "address": [
           {
-            "line": [
-              "2344 BOSTON RD"
-            ],
+            "line": ["2344 BOSTON RD"],
             "city": "WILBRAHAM",
             "state": "MA",
             "postalCode": "01095-1104",
@@ -266,9 +262,7 @@
         ],
         "address": [
           {
-            "line": [
-              "2344 BOSTON RD"
-            ],
+            "line": ["2344 BOSTON RD"],
             "city": "WILBRAHAM",
             "state": "MA",
             "postalCode": "01095-1104",
@@ -682,9 +676,7 @@
           },
           {
             "sequence": 2,
-            "diagnosisSequence": [
-              1
-            ],
+            "diagnosisSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -875,9 +867,7 @@
           },
           {
             "sequence": 2,
-            "diagnosisSequence": [
-              1
-            ],
+            "diagnosisSequence": [1],
             "category": {
               "coding": [
                 {
@@ -975,9 +965,7 @@
         ],
         "address": [
           {
-            "line": [
-              "40 WRIGHT STREET"
-            ],
+            "line": ["40 WRIGHT STREET"],
             "city": "PALMER",
             "state": "MA",
             "postalCode": "01069",
@@ -1020,9 +1008,7 @@
         ],
         "address": [
           {
-            "line": [
-              "40 WRIGHT STREET"
-            ],
+            "line": ["40 WRIGHT STREET"],
             "city": "PALMER",
             "state": "MA",
             "postalCode": "01069",
@@ -8713,9 +8699,7 @@
           },
           {
             "sequence": 2,
-            "diagnosisSequence": [
-              1
-            ],
+            "diagnosisSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -8906,9 +8890,7 @@
           },
           {
             "sequence": 2,
-            "diagnosisSequence": [
-              1
-            ],
+            "diagnosisSequence": [1],
             "category": {
               "coding": [
                 {
@@ -14054,9 +14036,7 @@
           },
           {
             "sequence": 2,
-            "informationSequence": [
-              1
-            ],
+            "informationSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -14074,9 +14054,7 @@
           },
           {
             "sequence": 3,
-            "informationSequence": [
-              2
-            ],
+            "informationSequence": [2],
             "productOrService": {
               "coding": [
                 {
@@ -14094,9 +14072,7 @@
           },
           {
             "sequence": 4,
-            "informationSequence": [
-              3
-            ],
+            "informationSequence": [3],
             "productOrService": {
               "coding": [
                 {
@@ -14114,9 +14090,7 @@
           },
           {
             "sequence": 5,
-            "procedureSequence": [
-              1
-            ],
+            "procedureSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -14293,9 +14267,7 @@
           },
           {
             "sequence": 2,
-            "informationSequence": [
-              1
-            ],
+            "informationSequence": [1],
             "category": {
               "coding": [
                 {
@@ -14423,9 +14395,7 @@
           },
           {
             "sequence": 3,
-            "informationSequence": [
-              2
-            ],
+            "informationSequence": [2],
             "category": {
               "coding": [
                 {
@@ -14553,9 +14523,7 @@
           },
           {
             "sequence": 4,
-            "informationSequence": [
-              3
-            ],
+            "informationSequence": [3],
             "category": {
               "coding": [
                 {
@@ -15034,9 +15002,7 @@
           },
           {
             "sequence": 2,
-            "diagnosisSequence": [
-              1
-            ],
+            "diagnosisSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -15227,9 +15193,7 @@
           },
           {
             "sequence": 2,
-            "diagnosisSequence": [
-              1
-            ],
+            "diagnosisSequence": [1],
             "category": {
               "coding": [
                 {
@@ -16245,9 +16209,7 @@
           },
           {
             "sequence": 2,
-            "informationSequence": [
-              1
-            ],
+            "informationSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -16424,9 +16386,7 @@
           },
           {
             "sequence": 2,
-            "informationSequence": [
-              1
-            ],
+            "informationSequence": [1],
             "category": {
               "coding": [
                 {
@@ -17121,9 +17081,7 @@
           },
           {
             "sequence": 2,
-            "diagnosisSequence": [
-              1
-            ],
+            "diagnosisSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -17314,9 +17272,7 @@
           },
           {
             "sequence": 2,
-            "diagnosisSequence": [
-              1
-            ],
+            "diagnosisSequence": [1],
             "category": {
               "coding": [
                 {
@@ -18085,9 +18041,7 @@
           },
           {
             "sequence": 2,
-            "informationSequence": [
-              1
-            ],
+            "informationSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -18264,9 +18218,7 @@
           },
           {
             "sequence": 2,
-            "informationSequence": [
-              1
-            ],
+            "informationSequence": [1],
             "category": {
               "coding": [
                 {
@@ -19167,9 +19119,7 @@
           },
           {
             "sequence": 2,
-            "informationSequence": [
-              1
-            ],
+            "informationSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -19187,9 +19137,7 @@
           },
           {
             "sequence": 3,
-            "procedureSequence": [
-              1
-            ],
+            "procedureSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -19366,9 +19314,7 @@
           },
           {
             "sequence": 2,
-            "informationSequence": [
-              1
-            ],
+            "informationSequence": [1],
             "category": {
               "coding": [
                 {
@@ -20643,9 +20589,7 @@
           },
           {
             "sequence": 2,
-            "informationSequence": [
-              1
-            ],
+            "informationSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -20663,9 +20607,7 @@
           },
           {
             "sequence": 3,
-            "procedureSequence": [
-              1
-            ],
+            "procedureSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -20842,9 +20784,7 @@
           },
           {
             "sequence": 2,
-            "informationSequence": [
-              1
-            ],
+            "informationSequence": [1],
             "category": {
               "coding": [
                 {
@@ -22476,9 +22416,7 @@
           },
           {
             "sequence": 2,
-            "informationSequence": [
-              1
-            ],
+            "informationSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -22496,9 +22434,7 @@
           },
           {
             "sequence": 3,
-            "procedureSequence": [
-              1
-            ],
+            "procedureSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -22675,9 +22611,7 @@
           },
           {
             "sequence": 2,
-            "informationSequence": [
-              1
-            ],
+            "informationSequence": [1],
             "category": {
               "coding": [
                 {
@@ -23986,9 +23920,7 @@
           },
           {
             "sequence": 2,
-            "informationSequence": [
-              1
-            ],
+            "informationSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -24006,9 +23938,7 @@
           },
           {
             "sequence": 3,
-            "procedureSequence": [
-              1
-            ],
+            "procedureSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -24026,9 +23956,7 @@
           },
           {
             "sequence": 4,
-            "diagnosisSequence": [
-              1
-            ],
+            "diagnosisSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -24219,9 +24147,7 @@
           },
           {
             "sequence": 2,
-            "informationSequence": [
-              1
-            ],
+            "informationSequence": [1],
             "category": {
               "coding": [
                 {
@@ -24476,9 +24402,7 @@
           },
           {
             "sequence": 4,
-            "diagnosisSequence": [
-              1
-            ],
+            "diagnosisSequence": [1],
             "category": {
               "coding": [
                 {
@@ -24790,9 +24714,7 @@
           },
           {
             "sequence": 2,
-            "diagnosisSequence": [
-              1
-            ],
+            "diagnosisSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -24983,9 +24905,7 @@
           },
           {
             "sequence": 2,
-            "diagnosisSequence": [
-              1
-            ],
+            "diagnosisSequence": [1],
             "category": {
               "coding": [
                 {
@@ -26539,9 +26459,7 @@
           },
           {
             "sequence": 2,
-            "informationSequence": [
-              1
-            ],
+            "informationSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -26559,9 +26477,7 @@
           },
           {
             "sequence": 3,
-            "procedureSequence": [
-              1
-            ],
+            "procedureSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -26738,9 +26654,7 @@
           },
           {
             "sequence": 2,
-            "informationSequence": [
-              1
-            ],
+            "informationSequence": [1],
             "category": {
               "coding": [
                 {
@@ -28279,9 +28193,7 @@
           },
           {
             "sequence": 2,
-            "informationSequence": [
-              1
-            ],
+            "informationSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -28299,9 +28211,7 @@
           },
           {
             "sequence": 3,
-            "diagnosisSequence": [
-              1
-            ],
+            "diagnosisSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -28492,9 +28402,7 @@
           },
           {
             "sequence": 2,
-            "informationSequence": [
-              1
-            ],
+            "informationSequence": [1],
             "category": {
               "coding": [
                 {
@@ -28622,9 +28530,7 @@
           },
           {
             "sequence": 3,
-            "diagnosisSequence": [
-              1
-            ],
+            "diagnosisSequence": [1],
             "category": {
               "coding": [
                 {
@@ -29704,9 +29610,7 @@
           },
           {
             "sequence": 2,
-            "procedureSequence": [
-              1
-            ],
+            "procedureSequence": [1],
             "productOrService": {
               "coding": [
                 {
@@ -29724,9 +29628,7 @@
           },
           {
             "sequence": 3,
-            "procedureSequence": [
-              2
-            ],
+            "procedureSequence": [2],
             "productOrService": {
               "coding": [
                 {
@@ -29744,9 +29646,7 @@
           },
           {
             "sequence": 4,
-            "procedureSequence": [
-              3
-            ],
+            "procedureSequence": [3],
             "productOrService": {
               "coding": [
                 {
@@ -29764,9 +29664,7 @@
           },
           {
             "sequence": 5,
-            "procedureSequence": [
-              4
-            ],
+            "procedureSequence": [4],
             "productOrService": {
               "coding": [
                 {
