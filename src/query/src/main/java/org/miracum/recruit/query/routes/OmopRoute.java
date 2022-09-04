@@ -44,10 +44,11 @@ public class OmopRoute extends RouteBuilder {
    * @param cohortId Cohort of which data has to be requested
    * @return SQL-String
    */
-  private String buildSQLString(String cohortId) {
+  private String buildSqlString(String cohortId) {
     StringBuilder sqlRequest =
         new StringBuilder(
-            "sql:SELECT {{omop.cdmSchema}}.person.person_id, {{omop.cdmSchema}}.person.person_source_value");
+            "sql:SELECT {{omop.cdmSchema}}.person.person_id, "
+                + "{{omop.cdmSchema}}.person.person_source_value");
 
     // Check if params should be requested
     if (!this.excludePatientParams) {
@@ -59,12 +60,15 @@ public class OmopRoute extends RouteBuilder {
     }
     sqlRequest.append(" FROM {{omop.resultsSchema}}.cohort");
     sqlRequest.append(
-        " INNER JOIN {{omop.cdmSchema}}.person ON {{omop.resultsSchema}}.cohort.subject_id={{omop.cdmSchema}}.person.person_id");
+        " INNER JOIN {{omop.cdmSchema}}.person "
+            + "ON {{omop.resultsSchema}}.cohort.subject_id={{omop.cdmSchema}}.person.person_id");
 
     // Join is only necessary for gender
     if (!this.excludePatientParams) {
       sqlRequest.append(
-          " LEFT JOIN {{omop.cdmSchema}}.concept ON {{omop.cdmSchema}}.concept.concept_id={{omop.cdmSchema}}.person.gender_concept_id");
+          " LEFT JOIN {{omop.cdmSchema}}.concept "
+              + "ON {{omop.cdmSchema}}.concept.concept_id = "
+              + "{{omop.cdmSchema}}.person.gender_concept_id");
     }
     sqlRequest.append(" WHERE {{omop.resultsSchema}}.cohort.cohort_definition_id=" + cohortId);
     sqlRequest.append(" ORDER BY {{omop.resultsSchema}}.cohort.cohort_start_date DESC");
@@ -80,15 +84,18 @@ public class OmopRoute extends RouteBuilder {
     // gets the CohortDefinition in the body
     from(GET_PATIENTS)
         .to(
-            "sql:SELECT count(*) from {{omop.resultsSchema}}.cohort where {{omop.resultsSchema}}.cohort.cohort_definition_id = :#${body.id};")
+            "sql:"
+                + "SELECT count(*)"
+                + "FROM {{omop.resultsSchema}}.cohort"
+                + "WHERE {{omop.resultsSchema}}.cohort.cohort_definition_id = :#${body.id};")
         .process(
             ex -> {
               @SuppressWarnings("unchecked")
               var result = (List<Map<String, Object>>) ex.getIn().getBody();
               ex.getIn().setHeader("cohortSize", result.get(0).get("count"));
             })
-        .log(buildSQLString("${header.cohort.id}"))
-        .toD(buildSQLString("${header.cohort.id}"))
+        .log(buildSqlString("${header.cohort.id}"))
+        .toD(buildSqlString("${header.cohort.id}"))
         .process(
             ex -> {
               @SuppressWarnings("unchecked")
@@ -145,7 +152,8 @@ public class OmopRoute extends RouteBuilder {
         .log(
             LoggingLevel.DEBUG,
             logger,
-            "[Cohort ${header.cohort.id}] found ${body.size()} patient(s) for cohort id ${header.cohort.id}")
+            "[Cohort ${header.cohort.id}] found ${body.size()} "
+                + "patient(s) for cohort id ${header.cohort.id}")
         .to(Router.DONE_GET_PATIENTS);
     // @formatter:on
 

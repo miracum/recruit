@@ -20,6 +20,8 @@ plugins {
     id 'io.freefair.lombok'
 
     id 'de.undercouch.download'
+
+    id 'checkstyle'
 }
 
 task downloadOpenTelemetryJavaAgent(type: Download) {
@@ -84,6 +86,11 @@ spotless {
     }
 }
 
+checkstyle {
+    toolVersion '10.3.3'
+    // configFile = file('../.checkstyle/checkstyle.xml')
+}
+
 jib {
     from {
         image = 'gcr.io/distroless/java17-debian11:nonroot' +
@@ -93,7 +100,9 @@ jib {
         image = "ghcr.io/miracum/recruit/${project.name}:${project.version}"
     }
     container {
-        format = 'OCI'
+        // when using the 'OCI' image format, the build tar can not be loaded via `docker load`
+        // so to work with CI, the format has to be Docker.
+        format = 'Docker'
         user = '65532:65532'
         ports = ['8080/tcp', '8081/tcp']
         workingDirectory = '/app'

@@ -145,7 +145,7 @@ public class FhirCohortTransactionBuilder {
 
   /**
    * Builds an FHIR Transaction with a list of ResearchSubjects from a given OMOP cohort includes
-   * Patients, ResearchStudy, ResearchSubjects, List
+   * Patients, ResearchStudy, ResearchSubjects, List.
    *
    * @param cohort OMOP CohortDefinition from an existing cohort
    * @param personsInCohort persons who should be packed to screening list
@@ -164,8 +164,6 @@ public class FhirCohortTransactionBuilder {
     if (previousScreeningListResources == null) {
       throw new IllegalArgumentException("previousScreeningListResources may not be null");
     }
-
-    var cohortId = cohort.getId();
 
     // Search in description and then in the cohort name for a study acronym
     var acronym = labelExtractor.extractByTag("acronym", cohort.getDescription());
@@ -189,6 +187,8 @@ public class FhirCohortTransactionBuilder {
         new Reference(device.getFullUrl()).setDisplay("recruIT query module " + appVersion);
 
     // create RESEARCHSTUDY and add to bundle
+    var cohortId = cohort.getId();
+
     ResearchStudy study = createResearchStudy(cohort, acronym);
     UUID studyUuid = UUID.randomUUID();
     transaction.addEntry(createStudyBundleEntryComponent(study, cohortId, studyUuid));
@@ -200,7 +200,8 @@ public class FhirCohortTransactionBuilder {
           new Annotation()
               .setAuthor(new StringType("UC1-Query Module"))
               .setText(
-                  "Es wurden mehr passende Patienten gefunden als auf dieser Liste dargestellt werden können (insgesamt "
+                  "Es wurden mehr passende Patienten gefunden als auf dieser "
+                      + "Liste dargestellt werden können (insgesamt "
                       + actualCohortSize
                       + "). Nur die ersten "
                       + this.maxListSize
@@ -240,25 +241,31 @@ public class FhirCohortTransactionBuilder {
         }
       } else {
         LOG.debug(
-            "Creation of Encounter resources is disabled. Transaction will only include ResearchStudy,"
-                + " ResearchSubject, and Patient resources.");
+            "Creation of Encounter resources is disabled. "
+                + "Transaction will only include ResearchStudy, "
+                + "ResearchSubject, and Patient resources.");
       }
 
       // add to the new screening list only if it doesn't already exist
       // note that we unfortunately can't (yet) just check List.entry since they
-      // just reference the ResearchSubject and we can't easily determine if these subjects
+      // just reference the ResearchSubject and we can't easily determine if these
+      // subjects
       // correspond to an existing Patient.
-      // These comparisons are all but efficient since we are comparing each entry in the cohort
+      // These comparisons are all but efficient since we are comparing each entry in
+      // the cohort
       // against
-      // all entries in the list of patients that were previously in the screening list, so O(n²).
-      // However, since we are usually looking at patient numbers in the lower tens or hundreds at
+      // all entries in the list of patients that were previously in the screening
+      // list, so O(n²).
+      // However, since we are usually looking at patient numbers in the lower tens or
+      // hundreds at
       // most,
       // this shouldn't be too limiting in reality.
       var matchesPatientAlreadyOnTheList =
           patientsInPreviousList.stream()
               .anyMatch(existing -> checkIfPatientsMatchByIdentifier(existing, patient));
 
-      // note that even if the recommendation isn't new, we still update the Patient resources and
+      // note that even if the recommendation isn't new, we still update the Patient
+      // resources and
       // their Encounters for all persons in the current cohort generation.
       var formattedIdentifier =
           String.format(
@@ -279,8 +286,10 @@ public class FhirCohortTransactionBuilder {
       }
     }
 
-    // TODO: instead of maps, we could resolve the references when fetching them from the server
-    //  and use ResearchSubject.getIndividualTarget() to get the patient referenced by the subject.
+    // TODO: instead of maps, we could resolve the references when fetching them
+    // from the server
+    // and use ResearchSubject.getIndividualTarget() to get the patient referenced
+    // by the subject.
     var patientIdToResourceMap =
         patientsInPreviousList.stream()
             .filter(distinctByKey(patient -> patient.getIdElement().getIdPart()))
@@ -297,12 +306,15 @@ public class FhirCohortTransactionBuilder {
                         patientIdToResourceMap.get(
                             subject.getIndividual().getReferenceElement().getIdPart())));
 
-    // if any of the List entries flags were cleared, this indicates a need to send an updated
-    // screening list to the server - even if the number of subjects in the list itself hasn't
+    // if any of the List entries flags were cleared, this indicates a need to send
+    // an updated
+    // screening list to the server - even if the number of subjects in the list
+    // itself hasn't
     // changed
     var haveFlagsBeenUpdated = false;
 
-    // add all List.entry to the newly created screening list - these entries are definitely part
+    // add all List.entry to the newly created screening list - these entries are
+    // definitely part
     // of the update.
     for (var entry : previousList.getEntry()) {
       // in previous versions of the query module, List.entry.date was never set.
@@ -321,7 +333,8 @@ public class FhirCohortTransactionBuilder {
             "Unable to find the Patient resource referenced by List entry {}",
             kv("entryItemReference", entry.getItem().getReference()));
       } else {
-        // check if the Patient referenced by the current entry in this previous screening list
+        // check if the Patient referenced by the current entry in this previous
+        // screening list
         // is also a Patient that is part of the newly generated Person cohort from OMOP
         var matchesPatientThatIsPartOfGeneratedCohort =
             patientsInCohort.stream()
@@ -333,7 +346,8 @@ public class FhirCohortTransactionBuilder {
           LOG.debug(
               "Patient that was already on the previous screening "
                   + "list is also included in the newly generated cohort.");
-          // because the Patient may drop from the list in one run (due to changed criteria),
+          // because the Patient may drop from the list in one run (due to changed
+          // criteria),
           // but may be re-added in another run, we can't forget to clear any flags.
           if (entry.hasFlag()) {
             LOG.debug("List entry has a flag set. Clearing it.");
@@ -341,23 +355,29 @@ public class FhirCohortTransactionBuilder {
             haveFlagsBeenUpdated = true;
           }
         } else {
-          // the Patient that was on the previous list is no longer part of the newly generated
+          // the Patient that was on the previous list is no longer part of the newly
+          // generated
           // cohort, we have to flag it as such.
           entry.setFlag(markedAsNoLongerEligibleBySystemConcept);
           haveFlagsBeenUpdated = true;
         }
       }
 
-      // all entries of the previous screening list will be added to the newly created one.
+      // all entries of the previous screening list will be added to the newly created
+      // one.
       // previousList could be empty, though.
       screeningList.addEntry(entry);
     }
 
-    // in general, only add the list and update its contents if the number of recommendations has
+    // in general, only add the list and update its contents if the number of
+    // recommendations has
     // increased
-    // but for convenience, we also add and update a list if it is empty - this makes sure the list
-    // shows on in the web UI every time. Note that we could be smarter here and check if this
-    // is the first time the list was published to avoid constantly updating an empty list.
+    // but for convenience, we also add and update a list if it is empty - this
+    // makes sure the list
+    // shows on in the web UI every time. Note that we could be smarter here and
+    // check if this
+    // is the first time the list was published to avoid constantly updating an
+    // empty list.
     if (shouldForceUpdateScreeningList
         || haveFlagsBeenUpdated
         || screeningList.getEntry().isEmpty()
@@ -477,11 +497,11 @@ public class FhirCohortTransactionBuilder {
 
   // CREATE RESOURCES
   private ResearchSubject createResearchSubject(
-      UUID studyUUID, UUID patientUuid, ResearchStudy study, Patient patient) {
+      UUID studyUuid, UUID patientUuid, ResearchStudy study, Patient patient) {
     return new ResearchSubject()
         .setStatus(ResearchSubject.ResearchSubjectStatus.CANDIDATE)
         .setStudy(
-            new Reference(UUID_URN_PREFIX + studyUUID).setIdentifier(study.getIdentifierFirstRep()))
+            new Reference(UUID_URN_PREFIX + studyUuid).setIdentifier(study.getIdentifierFirstRep()))
         .setIndividual(
             new Reference(UUID_URN_PREFIX + patientUuid)
                 .setIdentifier(patient.getIdentifierFirstRep()));
@@ -497,7 +517,8 @@ public class FhirCohortTransactionBuilder {
                 .setMethod(Bundle.HTTPVerb.POST)
                 // we can't easily use `ResearchSubject?identifier=` here (yet?) since this will
                 // cause duplicate
-                // subjects to be created if ones already exist that were created with a previous
+                // subjects to be created if ones already exist that were created with a
+                // previous
                 // version
                 // where `ResearchSubject.identifier` was left empty.
                 .setIfNoneExist(

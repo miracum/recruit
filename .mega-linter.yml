@@ -13,6 +13,9 @@ DISABLE_LINTERS:
   - JAVASCRIPT_STANDARD
   - SQL_TSQLLINT
   - PYTHON_PYLINT
+  - JAVA_PMD
+  - JAVA_CHECKSTYLE
+
 SHOW_ELAPSED_TIME: true
 FILEIO_REPORTER: false
 # DISABLE_ERRORS: true # Uncomment if you want MegaLinter to detect errors but not block CI to pass
@@ -27,3 +30,5 @@ ADDITIONAL_EXCLUDED_DIRECTORIES:
 
 GROOVY_NPM_GROOVY_LINT_ARGUMENTS:
   - "--failon=warning"
+
+JAVA_CHECKSTYLE_CONFIG_FILE: src/config/checkstyle/checkstyle.xml

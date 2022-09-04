@@ -76,7 +76,7 @@ public class WebApiRoute extends RouteBuilder {
     // @spotless:off
     if (isWebApiAuthEnabled) {
       var authUrl = new URL(baseUrl.getProtocol(), baseUrl.getHost(), baseUrl.getPort(),
-        baseUrl.getPath() + webApiAuthLoginPath, null);
+          baseUrl.getPath() + webApiAuthLoginPath, null);
 
       // via https://gist.github.com/rafaeltuelho/4d2449ac9b709fd29d79fa89acd8b48b
       from(GET_AUTH_TOKEN)
