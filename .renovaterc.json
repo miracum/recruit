@@ -20,7 +20,7 @@
       "extends": ["schedule:monthly"]
     },
     {
-      "matchPackagePatterns": ["^ghcr.io/miracum/recruit"],
+      "matchPackagePatterns": ["^ghcr\\.io\\/miracum\\/recruit"],
       "extends": ["schedule:daily"]
     }
   ]
