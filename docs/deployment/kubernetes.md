@@ -93,7 +93,7 @@ featureGates:
   PodSecurity: true
 nodes:
   - role: control-plane
-    image: docker.io/kindest/node:v1.24.3@sha256:09961d2443a557dfa59126ce8b5388e9c06610b0276dc0a986a74d3d0f01e53e
+    image: docker.io/kindest/node:v1.25.0@sha256:428aaa17ec82ccde0131cb2d1ca6547d13cf5fdabcc0bbecf749baa935387cbf
     kubeadmConfigPatches:
       - |
         kind: InitConfiguration
@@ -110,11 +110,11 @@ nodes:
     labels:
       topology.kubernetes.io/zone: a
   - role: worker
-    image: docker.io/kindest/node:v1.24.3@sha256:09961d2443a557dfa59126ce8b5388e9c06610b0276dc0a986a74d3d0f01e53e
+    image: docker.io/kindest/node:v1.25.0@sha256:428aaa17ec82ccde0131cb2d1ca6547d13cf5fdabcc0bbecf749baa935387cbf
     labels:
       topology.kubernetes.io/zone: b
   - role: worker
-    image: docker.io/kindest/node:v1.24.3@sha256:09961d2443a557dfa59126ce8b5388e9c06610b0276dc0a986a74d3d0f01e53e
+    image: docker.io/kindest/node:v1.25.0@sha256:428aaa17ec82ccde0131cb2d1ca6547d13cf5fdabcc0bbecf749baa935387cbf
     labels:
       topology.kubernetes.io/zone: c
 EOF
@@ -140,7 +140,7 @@ Create a namespace for the new installation. Enable and enforce restricted pod s
 ```sh
 kubectl create namespace recruit
 kubectl label namespace recruit pod-security.kubernetes.io/enforce=restricted
-kubectl label namespace recruit pod-security.kubernetes.io/enforce-version=v1.24
+kubectl label namespace recruit pod-security.kubernetes.io/enforce-version=v1.25
 ```
 
 Add the MIRACUM chart repository
@@ -169,6 +169,7 @@ helm install -n recruit \
   --render-subchart-notes \
   -f values-kind-recruit.yaml \
   --set ohdsi.cdmInitJob.enabled=true \
+  --set ohdsi.loadCohortDefinitionsJob.enabled=true \
   recruit miracum/recruit
 ```
 
@@ -176,6 +177,7 @@ helm install -n recruit \
 
     The included CDM initialization job is currently not idempotent and may cause problems if ran multiple times.
     You should set `ohdsi.cdmInitJob.enabled=false` when the job has completed once when changing the chart configuration.
+    Similarly, you should set `ohdsi.loadCohortDefinitionsJob.enabled=false` to avoid creating duplicate cohort definitions.
 
 The application stack is now deployed. You can wait for the OMOP CDM init job to be done by running the following.
 This may take quite some time to complete.
@@ -197,12 +199,19 @@ At this point, all externally exposed services should be accessible:
 | HAPI FHIR Server       | <http://recruit-fhir-server.127.0.0.1.nip.io/> |
 | MailHog                | <http://recruit-mailhog.127.0.0.1.nip.io/>     |
 
-You can now create a study by following the [Creating your first study](../getting-started/creating-your-first-study.md)
+The `values-kind-recruit.yaml` used to install the chart automatically loaded a sample cohort defined in
+the `ohdsi.loadCohortDefinitionsJob.cohortDefinitions` setting. If the CDM init job completed and the query module
+ran at least once, you should see a notification email at <http://recruit-mailhog.127.0.0.1.nip.io/>:
+
+![Notification Email for the SAMPLE study displayed in MailHog](../_img/k8s/mailhog-sample-mail-notification.png)
+
+and the corresponding screening list is accesible at <http://recruit-list.127.0.0.1.nip.io/>:
+
+![Screening list for the SAMPLE study](../_img/k8s/screeninglist-sample-study.png)
+
+To create additional studies, follow the [Creating your first study](../getting-started/creating-your-first-study.md)
 guide using Atlas at <http://recruit-ohdsi.127.0.0.1.nip.io/atlas/>. Be sure to use `[recruIT]` as the special
 label instead of `[UC1]` as the values above override `query.cohortSelectorLabels[0]=recruIT`.
-
-Once the study appears on the screening list at <http://recruit-list.127.0.0.1.nip.io/>, you should also see
-a notification email having arrived in the MailHog mail receiver at <http://recruit-mailhog.127.0.0.1.nip.io/>.
 
 ## Metrics
 
