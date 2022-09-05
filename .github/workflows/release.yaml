@@ -9,7 +9,7 @@ jobs:
   prepare-artifacts:
     name: Prepare Artifacts
     runs-on: ubuntu-22.04
-    container: ghcr.io/chgl/kube-powertools:v1.19.12@sha256:e4a83ff88d1a8da75bdd9d3a7ba408a4cecc0da2088b8b1191bcb7e0f296a21c
+    container: ghcr.io/chgl/kube-powertools:v1.20.0@sha256:a16b467f5777eb46f5bc35a26b503f6f9d6318049580cf34d0e29f172879fc57
     outputs:
       hashes: ${{ steps.hash.outputs.hashes }}
     steps:
