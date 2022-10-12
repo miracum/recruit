@@ -203,11 +203,18 @@ The `values-kind-recruit.yaml` used to install the chart automatically loaded a 
 the `ohdsi.loadCohortDefinitionsJob.cohortDefinitions` setting. If the CDM init job completed and the query module
 ran at least once, you should see a notification email at <http://recruit-mailhog.127.0.0.1.nip.io/>:
 
-![Notification Email for the SAMPLE study displayed in MailHog](../_img/k8s/mailhog-sample-mail-notification.png)
+<!-- markdownlint-disable MD033 -->
+<figure markdown>
+  ![Notification Email for the SAMPLE study displayed in MailHog](../_img/k8s/mailhog-sample-mail-notification.png)
+  <figcaption>Notification Email for the SAMPLE study displayed in MailHog</figcaption>
+</figure>
 
 and the corresponding screening list is accesible at <http://recruit-list.127.0.0.1.nip.io/>:
 
-![Screening list for the SAMPLE study](../_img/k8s/screeninglist-sample-study.png)
+<figure markdown>
+  ![Screening list for the SAMPLE study](../_img/k8s/screeninglist-sample-study.png)
+  <figcaption>Screening list for the SAMPLE study</figcaption>
+</figure>
 
 To create additional studies, follow the [Creating your first study](../getting-started/creating-your-first-study.md)
 guide using Atlas at <http://recruit-ohdsi.127.0.0.1.nip.io/atlas/>. Be sure to use `[recruIT]` as the special
@@ -238,7 +245,10 @@ helm upgrade -n recruit \
 
 Opening the Grafana instance included with the `kube-prometheus-stack` chart will allow you to query the exposed metrics:
 
-![Grafana Explore view of some metrics for the list module](../_img/observability/grafana-sample-metrics.png)
+<figure markdown>
+  ![Grafana Explore view of some metrics for the list module](_img/grafana-sample-metrics.png)
+  <figcaption>Grafana Explore view of some metrics for the list module</figcaption>
+</figure>
 
 ## High-Availability
 
@@ -270,7 +280,10 @@ to place Linkerd's `linkerd.io/inject: enabled` annotation for all service pods 
 --8<-- "_snippets/k8s/values-kind-recruit-linkerd.yaml"
 ```
 
-![Linkerd dashboard view of the recruiT deployment](_img/linkerd-dashboard.png)
+<figure markdown>
+  ![Linkerd dashboard view of the recruiT deployment](_img/linkerd-dashboard.png)
+  <figcaption>Linkerd dashboard view of the recruiT deployment</figcaption>
+</figure>
 
 You can also use the `linkerd.io/inject: enabled` on the `recruit` namespace, see <https://linkerd.io/2.11/features/proxy-injection/>
 but you will have to manually add a `disabled` annotation to the OHDSI Achilles CronJob and init job.
@@ -289,7 +302,10 @@ To disable sidecar proxy injection for the Achilles and OMOP CDM init job, see t
 --8<-- "_snippets/k8s/values-kind-recruit-istio.yaml"
 ```
 
-![Kiali dashboard view of the recruiT deployment](_img/kiali-dashboard.png)
+<figure markdown>
+  ![Kiali dashboard view of the recruiT deployment](_img/kiali-dashboard.png)
+  <figcaption>Kiali dashboard view of the recruiT deployment</figcaption>
+</figure>
 
 ## Zero-trust networking
 
@@ -311,3 +327,52 @@ or <https://orca.tufin.io/netpol/#> to have the entire policies explained.
 ```yaml title="recruit-network-policies.yaml"
 --8<-- "_snippets/k8s/recruit-network-policies.yaml"
 ```
+
+## Distributed Tracing
+
+All services support distributed tracing based on OpenTelemetry.
+
+For testing, you can install the Jaeger operator to prepare your cluster for tracing.
+
+```sh
+# Cert-Manager is required by the Jaeger Operator
+# See <https://cert-manager.io/docs/installation/> for details.
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.9.1/cert-manager.yaml
+
+kubectl wait --namespace cert-manager \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/instance=cert-manager \
+  --timeout=5m
+
+kubectl create namespace observability
+kubectl create -n observability -f https://github.com/jaegertracing/jaeger-operator/releases/download/v1.38.0/jaeger-operator.yaml
+
+kubectl wait --namespace observability \
+  --for=condition=ready pod \
+  --selector=name=jaeger-operator \
+  --timeout=5m
+
+cat <<EOF | kubectl apply -n observability -f -
+# simple, all-in-one Jaeger installation. Not suitable for production use.
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: simplest
+EOF
+```
+
+The following values enable tracing for the query, list, and notify module, the HAPI FHIR server and the OHDSI WebAPI:
+
+```yaml title="values-kind-recruit-tracing.yaml"
+--8<-- "_snippets/k8s/values-kind-recruit-tracing.yaml"
+```
+
+<figure markdown>
+  ![Jaeger Trace Graph view of a single scheduled run of the query module](_img/jaeger-trace-graph.png)
+  <figcaption>Jaeger Trace Graph view of a single scheduled run of the query module</figcaption>
+</figure>
+
+<figure markdown>
+  ![Jaeger Trace timeline for interacting with the screening list](_img/jaeger-trace-timeline.png)
+  <figcaption>Jaeger Trace timeline for interacting with the screening list</figcaption>
+</figure>
