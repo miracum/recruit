@@ -25,3 +25,11 @@ fhirserver:
       enabled: true
       additionalLabels:
         release: kube-prometheus-stack
+
+ohdsi:
+  webApi:
+    metrics:
+      serviceMonitor:
+        enabled: true
+        additionalLabels:
+          release: kube-prometheus-stack
