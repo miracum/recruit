@@ -39,9 +39,9 @@
       {
         "assets": [
           {
-            "path": "attestation.intoto.jsonl/attestation.intoto.jsonl",
-            "label": "provenance-${nextRelease.gitTag}.intoto.jsonl",
-            "name": "provenance-${nextRelease.gitTag}.intoto.jsonl"
+            "path": "multiple.intoto.jsonl/multiple.intoto.jsonl",
+            "label": "multiple-${nextRelease.gitTag}.intoto.jsonl",
+            "name": "multiple-${nextRelease.gitTag}.intoto.jsonl"
           },
           {
             "path": "release-assets/recruit-docker-compose.tar.gz",
