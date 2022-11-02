@@ -22,6 +22,11 @@
     {
       "matchPackagePatterns": ["^ghcr\\.io\\/miracum\\/recruit"],
       "extends": ["schedule:daily"]
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": ["slsa-framework/slsa-github-generator"],
+      "pinDigests": false
     }
   ]
 }
