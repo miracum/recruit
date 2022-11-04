@@ -1,5 +1,7 @@
 # recruIT
 
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/miracum/recruit/badge)](https://api.securityscorecards.dev/projects/github.com/miracum/recruit)
+
 See the documentation site at <https://miracum.github.io/recruit> for more information.
 
 ## Build Documentation
