@@ -18,10 +18,14 @@ concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
   cancel-in-progress: true
 
+permissions: read-all
+
 jobs:
   build:
     name: MegaLinter
     runs-on: ubuntu-22.04
+    permissions:
+      pull-requests: write
     steps:
       # Git Checkout
       - name: Checkout Code
