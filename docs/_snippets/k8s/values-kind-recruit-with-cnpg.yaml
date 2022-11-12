@@ -1,0 +1,56 @@
+ohdsi:
+  postgresql:
+    enabled: false
+  webApi:
+    db:
+      host: "recruit-ohdsi-db-rw"
+      port: 5432
+      database: "ohdsi"
+      username: "ohdsi"
+      password: ""
+      existingSecret: "recruit-ohdsi-db-app-user"
+      existingSecretKey: "password"
+      schema: "ohdsi"
+
+fhirserver:
+  postgresql:
+    enabled: false
+  externalDatabase:
+    host: "recruit-fhir-server-db-rw"
+    port: 5432
+    database: "fhir_server"
+    user: "fhir_server_user"
+    password: ""
+    existingSecret: "recruit-fhir-server-db-app-user"
+    existingSecretKey: "password"
+
+notify:
+  ha:
+    enabled: true
+    database:
+      host: "recruit-notify-db-rw"
+      port: 5432
+      username: "notify_user"
+      password: ""
+      name: "notify_jobstore"
+      existingSecret:
+        name: "recruit-notify-db-app-user"
+        key: "password"
+
+postgresql:
+  enabled: false
+
+fhir-pseudonymizer:
+  enabled: true
+  vfps:
+    postgresql:
+      enabled: false
+    database:
+      host: "vfps-db-rw"
+      port: 5432
+      database: "vfps"
+      username: "vfps_user"
+      password: ""
+      existingSecret: "vfps-db-app-user"
+      existingSecretKey: "password"
+      schema: "vfps"

@@ -5,6 +5,8 @@ on:
     branches:
       - master
 
+permissions: read-all
+
 jobs:
   prepare-artifacts:
     name: Prepare Artifacts
@@ -33,7 +35,7 @@ jobs:
         working-directory: dist
         run: |
           sha256sum recruit-docker-compose.tar.gz recruit-container-sboms.tar.gz > recruit-hashes.sha256
-          echo "::set-output name=hashes::$(base64 -w0 < recruit-hashes.sha256)"
+          echo "hashes=$(base64 -w0 < recruit-hashes.sha256)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3.1.0
         with:
@@ -56,6 +58,9 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+      pull-requests: write
     needs:
       - prepare-artifacts
       - provenance

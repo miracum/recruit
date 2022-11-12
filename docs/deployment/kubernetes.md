@@ -260,7 +260,10 @@ for the notification module. See the options under the `notify.ha.database` key 
 
 The snippet below configures the release to run multiple replicas of any supporting service, enables [pod disruption budget](https://kubernetes.io/docs/tasks/run-application/configure-pdb/)
 resources, and uses [pod topology spread constraints](https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/)
-to spread the pods across node topology zones:
+to spread the pods across node topology zones.
+
+For information on setting up recruIT with highly-available PostgreSQL clusters provided by [CloudNativePG](https://cloudnative-pg.io/),
+see [below](#cloudnativepg-for-ha-databases).
 
 ```yaml title="values-kind-recruit-ha.yaml"
 --8<-- "_snippets/k8s/values-kind-recruit-ha.yaml"
@@ -376,3 +379,50 @@ The following values enable tracing for the query, list, and notify module, the 
   ![Jaeger Trace timeline for interacting with the screening list](_img/jaeger-trace-timeline.png)
   <figcaption>Jaeger Trace timeline for interacting with the screening list</figcaption>
 </figure>
+
+## Screening List De-Pseudonymization
+
+!!! info
+
+    Requires version 9.3.0 or later of the recruIT Helm chart.
+
+You can optionally deploy both the [FHIR Pseudonymizer](https://github.com/miracum/fhir-pseudonymizer) and
+[Vfps](https://github.com/miracum/vfps) as a pseudonym service backend to allow for de-pseudonymizing
+patient and visit identifiers stored in OMOP or the FHIR server prior to displaying them on the screening list.
+
+The background is detailed in [De-Pseudonymization](../configuration/de-pseudonymization.md).
+
+The following values.yaml enable the included FHIR Pseudonymizer and Vfps as a pseudonym service.
+When Vfps is installed, it uses another PostgreSQL database which is naturally empty and does not contain
+any pre-defined namespaces or pseudonyms. It is up to the user to pseudonymize the resources stored inside
+the FHIR server used by the screening list.
+
+```yaml title="values-kind-recruit-de-pseudonymization.yaml"
+--8<-- "_snippets/k8s/values-kind-recruit-de-pseudonymization.yaml"
+```
+
+## CloudNativePG for HA databases
+
+Install the CloudNativePG operator first
+[by following the official documentation site](https://cloudnative-pg.io/documentation/1.18/installation_upgrade/):
+
+```sh
+kubectl apply -f https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.18/releases/cnpg-1.18.0.yaml
+```
+
+Next, create PostgreSQL clusters and pre-configured users for OHDSI, the HAPI FHIR server, the Vfps pseudonymization service,
+and the notify module:
+
+```yaml title="cnpg-clusters.yaml"
+--8<-- "_snippets/k8s/cnpg-clusters.yaml"
+```
+
+```sh
+kubectl apply -f cnpg-clusters.yaml
+```
+
+Finally, install the recruIT chart using the following updated values.yaml:
+
+```yaml title="values-kind-recruit-with-cnpg.yaml"
+--8<-- "_snippets/k8s/values-kind-recruit-with-cnpg.yaml"
+```
