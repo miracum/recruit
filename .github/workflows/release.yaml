@@ -11,12 +11,12 @@ jobs:
   prepare-artifacts:
     name: Prepare Artifacts
     runs-on: ubuntu-22.04
-    container: ghcr.io/chgl/kube-powertools:v1.21.1@sha256:b268e5690755019da1b8aa04e3f08e83f13420cb4d19ccb10856abd34a884697
+    container: ghcr.io/chgl/kube-powertools:v1.21.13@sha256:cb7a4802d34588b4eeab48cac0476741c327745ffd4e1d407d57f86b53750b40
     outputs:
       hashes: ${{ steps.hash.outputs.hashes }}
     steps:
       - name: Checkout
-        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
 
       - name: Build Docker Compose deployment bundle
         run: |
@@ -37,7 +37,7 @@ jobs:
           sha256sum recruit-docker-compose.tar.gz recruit-container-sboms.tar.gz > recruit-hashes.sha256
           echo "hashes=$(base64 -w0 < recruit-hashes.sha256)" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3.1.0
+      - uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # v3.1.1
         with:
           name: release-assets
           path: dist/*.tar.gz
@@ -50,7 +50,7 @@ jobs:
       id-token: write # To sign the provenance.
       contents: write # To add assets to a release.
     # can't be referenced by digest. See <https://github.com/slsa-framework/slsa-github-generator#verification-of-provenance>
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.2.1
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.3.0
     with:
       base64-subjects: "${{ needs.prepare-artifacts.outputs.hashes }}"
       compile-generator: true # Workaround for https://github.com/slsa-framework/slsa-github-generator/issues/1163
@@ -66,15 +66,15 @@ jobs:
       - provenance
     steps:
       - name: Checkout
-        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
         with:
           fetch-depth: 0
 
       - name: Download all artifacts
-        uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 # tag=v3.0.0
+        uses: actions/download-artifact@9782bd6a9848b53b110e712e20e42d89988822b7 # v3.0.1
 
       - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@e1fe1fc00a3729593e87efb2f88475de76d64a24 # tag=v3.1.1
+        uses: cycjimmy/semantic-release-action@8f6ceb9d5aae5578b1dcda6af00008235204e7fa # v3.2.0
         with:
           extra_plugins: |
             conventional-changelog-conventionalcommits@5.0.0
