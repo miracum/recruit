@@ -79,7 +79,7 @@ jobs:
       - name: Install chart
         run: |
           # image.repository is set to make it easier to run in forks - particularly to test releases.
-          helm install --dry-run --create-namespace -n recruit \
+          helm install --create-namespace -n recruit \
             --set query.image.repository=${{ github.repository }}/query \
             --set query.image.tag=${{ inputs.image-tag }} \
             --set notify.image.repository=${{ github.repository }}/notify \
@@ -90,6 +90,23 @@ jobs:
             --wait --timeout=15m \
             recruit charts/recruit/
 
-      - name: Run testing workflow
+      - name: Run helm test
+        run: |
+          helm test -n recruit recruit
+
+      - name: Run e2e testing workflow
         run: |
           ./argo submit tests/integration/argo-workflow.yaml -n recruit --wait --log
+
+      - name: Print cluster logs
+        if: always()
+        run: |
+          kubectl cluster-info dump -o yaml | tee kind-cluster-dump.txt
+
+      - name: Upload cluster dump
+        if: always()
+        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3.1.0
+        with:
+          name: kind-cluster-dump.txt
+          path: |
+            kind-cluster-dump.txt

@@ -78,3 +78,9 @@ annotations:
       description: "⚠️ BREAKING CHANGE: updated included hapi-fhir-jpaserver chart to v0.11.0, which internally uses a v12 postgresql chart based on PostgreSQL 15.1"
     - kind: changed
       description: "updated included fhir-pseudonymizer chart to v0.3.2"
+    - kind: changed
+      description: |
+        added an init container to wait for the notify module to the query deployment.
+        Mostly required for integration testing where the notify module may be unavailble
+        before the query module creates first recommendations therefore causing the FHIR server
+        to not be able to trigger the subscription webhook of notify.

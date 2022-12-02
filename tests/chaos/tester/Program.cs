@@ -151,13 +151,19 @@ static async System.Threading.Tasks.Task RunAssert(Uri mailHogServerBaseUrl, int
         }
         catch (Exception exc)
         {
-            Console.WriteLine($"Failed to get response from MailHog: {exc.Message}");
+            Console.WriteLine($"Failed to get response from MailHog: {exc.Message}. Attempt: {i + 1}");
+            if (i == retries - 1)
+            {
+                throw;
+            }
+
+            await System.Threading.Tasks.Task.Delay(TimeSpan.FromMinutes(1));
             continue;
         }
 
         Console.WriteLine($"Expected message count is {expectedMessageCount}. Actual: {response.Total}. Attempt: {i + 1}");
 
-        if (expectedMessageCount != response.Total && i == retries)
+        if (expectedMessageCount != response.Total && i == retries - 1)
         {
             throw new Exception($"response.Total ({response.Total}) is not the expected {expectedMessageCount}.");
         }

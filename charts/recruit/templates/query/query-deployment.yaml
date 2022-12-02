@@ -67,7 +67,7 @@ spec:
           {{- end }}
           env:
             - name: FHIR_URL
-              value: {{ template "recruit.fhirserver.url" . }}
+              value: {{ include "recruit.fhirserver.url" . }}
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -75,6 +75,29 @@ spec:
                 echo "$(date): Waiting for FHIR server @ $FHIR_URL to be up";
                 sleep 15;
               done;
+        # waiting for the notify module to be up is only necessary
+        # for integration testing, where new recruitment recommendations may be
+        # created by the query module before the notification module is up causing
+        # attempts by the FHIR server to trigger the Subscriptions to fail
+        {{- if (and .Values.notify.enabled .Values.query.shouldWaitForNotify) }}
+        - name: wait-for-notify
+          image: "{{ .Values.curl.image.registry }}/{{ .Values.curl.image.repository }}:{{ .Values.curl.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          {{- with .Values.restrictedContainerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: NOTIFY_HEALTH_URL
+              value: "http://{{ include "recruit.fullname" . }}-notify:{{ .Values.notify.service.metricsPort }}/actuator/health"
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              until [ "$(curl -s -o /dev/null -L -w '%{http_code}' ${NOTIFY_HEALTH_URL})" == "200" ]; do
+                echo "$(date): Waiting for notify module @ ${NOTIFY_HEALTH_URL} to be up";
+                sleep 15;
+              done;
+        {{- end }}
       containers:
         - name: query
           image: "{{ .Values.query.image.registry }}/{{ .Values.query.image.repository }}:{{ .Values.query.image.tag }}"

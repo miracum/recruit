@@ -209,6 +209,10 @@ query:
   cohortSelectorLabels:
     - "UC1"
 
+  # whether the query module should wait for the notification module to be up before starting.
+  # implemented as an init container that waits on notify's `/actuator/health` endpoint
+  shouldWaitForNotify: false
+
   # Configuration for the container's readiness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
   readinessProbe: # +doc-gen:ignore
     failureThreshold: 3

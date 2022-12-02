@@ -7,6 +7,7 @@ query:
   # run every minute
   schedule: "* * * * *"
   cohortSelectorLabels: []
+  shouldWaitForNotify: true
   omop:
     host: broadsea-atlasdb
     port: 5432
@@ -61,8 +62,6 @@ ohdsi:
       password: "mypass"
       schema: "webapi"
     extraEnv:
-      - name: FLYWAY_SCHEMAS
-        value: webapi
       - name: FLYWAY_BASELINEONMIGRATE
         value: "true"
       - name: FLYWAY_TABLE
@@ -73,8 +72,6 @@ ohdsi:
         value: "Base Migration"
       - name: FLYWAY_LOCATIONS
         value: "classpath:db/migration/postgresql"
-      - name: FLYWAY_PLACEHOLDERS_OHDSISCHEMA
-        value: "webapi"
   cdmInitJob:
     enabled: false
   achilles:
