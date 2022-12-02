@@ -7,3 +7,5 @@
 gradlew text eol=lf
 
 *.bat text eol=crlf
+
+*Dockerfile text eol=lf

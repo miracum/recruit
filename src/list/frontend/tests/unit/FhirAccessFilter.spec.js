@@ -46,10 +46,7 @@ describe("fhirAccessFilter", () => {
     expect(filtered.entry[0].resource.extension[0].valueReference.display).toBe("PROSa");
   });
   it("should not include Lists with a missing study reference extension", () => {
-    const filtered = filterAcessibleResources(
-      listsWithoutStudyExtension,
-      userAllowedToAccessPROSaStudy
-    );
+    const filtered = filterAcessibleResources(listsWithoutStudyExtension, userAllowedToAccessPROSaStudy);
 
     expect(filtered.entry).toHaveLength(0);
   });

@@ -43,9 +43,7 @@ try {
   isPatchRequestAllowed = createPatchFilter(config.auth);
   isDeleteAllowed = createDeleteFilter(config.auth);
 } catch (error) {
-  logger
-    .child({ error })
-    .error("Failed to load the trial rules config. Defaulting to no filtering.");
+  logger.child({ error }).error("Failed to load the trial rules config. Defaulting to no filtering.");
 }
 
 if (config.tracing.enabled) {
@@ -94,8 +92,7 @@ app.use(metricsMiddleware);
 
 const allowedResourcesToPatch = /^\/\/(?<resourceType>ResearchSubject|List)/;
 
-const proxyRequestFilter = (_pathname, req) =>
-  req.method === "GET" || req.method === "PATCH" || req.method === "DELETE";
+const proxyRequestFilter = (_pathname, req) => req.method === "GET" || req.method === "PATCH" || req.method === "DELETE";
 const proxy = createProxyMiddleware(proxyRequestFilter, {
   target: config.fhirUrl,
   changeOrigin: false,
@@ -143,9 +140,7 @@ const proxy = createProxyMiddleware(proxyRequestFilter, {
             .writeHead(403, {
               "Content-Type": "text/plain",
             })
-            .end(
-              `Operation unauthorized. Unauthorized to PATCH resources of type ${match.groups.resourceType}`
-            );
+            .end(`Operation unauthorized. Unauthorized to PATCH resources of type ${match.groups.resourceType}`);
         }
       } else {
         res
@@ -177,9 +172,7 @@ const proxy = createProxyMiddleware(proxyRequestFilter, {
           try {
             modifiedBody = await dePseudonymizer.dePseudonymize(config.pseudonymization, body);
           } catch (error) {
-            logger
-              .child({ error })
-              .error("De-pseudonymization failed. Returning original resource.");
+            logger.child({ error }).error("De-pseudonymization failed. Returning original resource.");
           }
         }
       }

@@ -1,4 +1,4 @@
-name: CI
+name: ci
 on:
   pull_request:
     branches:
@@ -7,25 +7,21 @@ on:
     branches:
       - master
 
-env:
-  LIST_MODULE_CONTAINER_IMAGE_NAME: ghcr.io/miracum/recruit/list
-
 jobs:
   build:
     strategy:
       matrix:
         include:
           - module: "query"
-            build-with: "jib"
+            context: "src/"
           - module: "notify"
-            build-with: "jib"
+            context: "src/"
           - module: "list"
-            build-with: "dockerfile"
-      fail-fast: true
+            context: "src/list/"
     uses: ./.github/workflows/build.yaml
     with:
       module-name: ${{ matrix.module }}
-      build-with: ${{ matrix.build-with }}
+      context: ${{ matrix.context }}
 
   test:
     runs-on: ubuntu-22.04
@@ -35,74 +31,28 @@ jobs:
       matrix:
         include:
           - module: "query"
-            build-with: "jib"
+            e2e-test-directory: "tests/e2e/"
           - module: "notify"
-            build-with: "jib"
-          - module: "list"
-            build-with: "dockerfile"
-      fail-fast: true
+            e2e-test-directory: "tests/e2e/"
+          # Disabled temporarily
+          # - module: "list"
+          #   e2e-test-directory: "frontend/tests/e2e/"
+    env:
+      IMAGE_NAME: ghcr.io/${{ github.repository }}/${{ matrix.module }}
     steps:
       - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
 
       - uses: ./.github/actions/test-image
         with:
           project-name: ${{ matrix.module }}
-
-  # TODO
-  # test-list-module:
-  #   runs-on: ubuntu-22.04
-  #   needs:
-  #     - build-list-module
-  #   defaults:
-  #     run:
-  #       working-directory: ./src/list
-  #   env:
-  #     IMAGE_TAG: ${{ needs.build-list-module.outputs.image-tag }}
-  #   steps:
-  #     - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
-
-  #     - name: Download container image
-  #       uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 # tag=v3.0.0
-  #       with:
-  #         name: list-build-artifacts
-  #         path: /tmp
-
-  #     - name: Load images
-  #       run: |
-  #         docker load --input /tmp/list-image.tar
-  #         docker image ls -a
-
-  #     - name: Run E2E tests
-  #       working-directory: src/list/frontend
-  #       run: |
-  #         # removing babel.config.js prevents the error
-  #         # 'Error: Cannot find module '@vue/cli-plugin-babel/preset' from '/e2e' while parsing file: /e2e/tests/e2e/support/index.js'
-  #         # in cypress
-  #         rm babel.config.js
-
-  #         docker compose -f tests/e2e/docker-compose.yml run loader
-  #         docker compose -f tests/e2e/docker-compose.yml run e2e
-
-  #     - name: Upload cypress screenshots and videos
-  #       if: always()
-  #       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3.1.0
-  #       with:
-  #         name: cypress-test-videos-and-screenshots
-  #         path: |
-  #           src/list/tests/e2e/videos
-  #           src/list/tests/e2e/screenshots
-
-  #     - name: Print test logs and stop all running containers
-  #       if: always()
-  #       run: |
-  #         docker compose -f tests/e2e/docker-compose.yml logs
-  #         docker compose -f tests/e2e/docker-compose.yml down --volumes --remove-orphans
+          image-name: ${{ env.IMAGE_NAME }}
+          image-tag: ${{ needs.build.outputs.image-tag }}
+          e2e-test-directory: ${{ matrix.e2e-test-directory }}
 
   integration-tests:
-    runs-on: ubuntu-22.04
     needs:
+      - build
       - test
-    steps:
-      - run: |
-          echo "starting test fixtures: FHIR server, OHDSI stack, Mail"
-          echo "run e2e workflow..."
+    uses: ./.github/workflows/integration-test.yaml
+    with:
+      image-tag: ${{ needs.build.outputs.image-tag }}

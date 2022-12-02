@@ -70,7 +70,8 @@ restrictions, you have to configure the following:
 
 1. set `VUE_APP_FHIR_URL` in [.env.development](.env.development) to `http://localhost:8080/fhir`
 1. run `npm run server:watch`
-1. in a new terminal run `npm run serve`. The app should now be accessible on <http://localhost:8081/> and use the server as its backend.
+1. in a new terminal run `npm run serve`. The app should now be accessible on <http://localhost:8081/> and use the server
+   as its backend.
 
 #### Run E2E tests locally
 
@@ -85,13 +86,13 @@ export IMAGE_TAG=test
 docker build -t ghcr.io/miracum/recruit/list:${IMAGE_TAG} .
 
 # this starts the FHIR server and pre-loads it with sample data
-docker-compose -p $CI_PROJECT_NAME-$CI_JOB_ID -f tests/e2e/docker-compose.e2e.yml run loader
+docker compose -p $CI_PROJECT_NAME-$CI_JOB_ID -f frontend/tests/e2e/docker-compose.yaml run loader
 
 # runs the actual E2E tests by starting the container under test
-docker-compose -p $CI_PROJECT_NAME-$CI_JOB_ID -f tests/e2e/docker-compose.e2e.yml run e2e
+docker compose -p $CI_PROJECT_NAME-$CI_JOB_ID -f frontend/tests/e2e/docker-compose.yaml run tester
 
 # cleans up after the test
-docker-compose -p $CI_PROJECT_NAME-$CI_JOB_ID -f tests/e2e/docker-compose.e2e.yml down -v --remove-orphans
+docker compose -p $CI_PROJECT_NAME-$CI_JOB_ID -f frontend/tests/e2e/docker-compose.yaml down -v --remove-orphans
 ```
 
 You can find screenshots and videos of the E2E tests inside the [tests/e2e](tests/e2e) directory.

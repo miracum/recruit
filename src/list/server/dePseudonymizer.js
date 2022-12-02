@@ -1,6 +1,6 @@
 const axios = require("axios");
-const rax = require("retry-axios");
 const promClient = require("prom-client");
+const rax = require("retry-axios");
 
 const dePseudonymizationDurationHistogram = new promClient.Histogram({
   name: "list_de_pseudonymization_duration_seconds",

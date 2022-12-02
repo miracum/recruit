@@ -95,6 +95,7 @@ spec:
           - "assert"
           - "--expected-number-of-messages=10"
           - "--mailhog-api-base-url=http://recruit-mailhog:8025/api/"
+          - "--retries=1"
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:

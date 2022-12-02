@@ -9,9 +9,7 @@
           <template v-else>unbekannt</template></span
         ></b-table-column
       >
-      <b-table-column v-slot="props" label="Wert">{{
-        getObservationValue(props.row)
-      }}</b-table-column>
+      <b-table-column v-slot="props" label="Wert">{{ getObservationValue(props.row) }}</b-table-column>
       <b-table-column v-slot="props" label="Zeitpunkt" centered>
         <b-tag type="is-primary"
           ><template v-if="props.row.effectiveDateTime">
@@ -66,10 +64,7 @@ export default {
           normalizedObservation.code = {};
         }
 
-        const display = fhirpath.evaluate(
-          observation,
-          "code.text | code.coding.display | code.coding.code"
-        )[0];
+        const display = fhirpath.evaluate(observation, "code.text | code.coding.display | code.coding.code")[0];
 
         if (display) {
           normalizedObservation.code.text = display;
@@ -89,9 +84,7 @@ export default {
       }
 
       if (Object.prototype.hasOwnProperty.call(o, "valueBoolean")) {
-        return !o.valueBoolean || o.valueBoolean === "false"
-          ? "Negative"
-          : "Positive";
+        return !o.valueBoolean || o.valueBoolean === "false" ? "Negative" : "Positive";
       }
 
       if (Object.prototype.hasOwnProperty.call(o, "valueCodeableConcept")) {
@@ -116,10 +109,7 @@ export default {
         return `${o.valueRatio.numerator} / ${o.valueRatio.denominator}`;
       }
 
-      return fhirpath.evaluate(
-        o,
-        "valueString | valueInteger | valueRange | valueTime | valueDateTime | valuePeriod"
-      )[0];
+      return fhirpath.evaluate(o, "valueString | valueInteger | valueRange | valueTime | valueDateTime | valuePeriod")[0];
     },
   },
 };

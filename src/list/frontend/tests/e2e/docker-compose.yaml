@@ -7,7 +7,7 @@ services:
       KEYCLOAK_REALM: MIRACUM
       KEYCLOAK_AUTH_URL: http://keycloak:8080/auth
       RULES_FILE_PATH: /etc/notify-rules.yaml
-      TRACING_ENABLED: "true"
+      TRACING_ENABLED: "false" # TODO: fix and re-enable
       OTEL_EXPORTER_JAEGER_ENDPOINT: "jaeger"
     depends_on:
       - fhir
@@ -16,21 +16,25 @@ services:
     volumes:
       - ${PWD}/notify-rules.dev.yaml:/etc/notify-rules.yaml:ro
 
-  e2e:
-    image: ghcr.io/miracum/recruit/list/cypress-with-keycloak-plugin:3.8.3@sha256:6c71a960d794a547eb604debe5f6dd3a8574bb9ccbabe0142038bc185778cd86
-    working_dir: /e2e
+  tester:
+    build:
+      dockerfile: cypress.Dockerfile
+      context: .
+    working_dir: /root/e2e
     environment:
-      - CYPRESS_BASE_URL=http://list:8080/
-      - CYPRESS_BROWSER=chrome
-      - CYPRESS_KEYCLOAK=http://keycloak:8080
+      CYPRESS_BASE_URL: http://list:8080/
+      CYPRESS_BROWSER: chrome
+      CYPRESS_KEYCLOAK_URL: http://keycloak:8080
+      CYPRESS_REDIRECT_URL: http://list:8080/
     depends_on:
       - list
       - loader
+      - keycloak
     volumes:
-      - ${PWD}:/e2e
+      - ${PWD}/frontend:/root/e2e
 
   fhir:
-    image: docker.io/hapiproject/hapi:v6.1.0@sha256:253f87bb1f5b7627f8e25f76a4b0aa7a83f31968c6e111ad74d3cc4ad9ae812e
+    image: docker.io/hapiproject/hapi:v6.2.1@sha256:8d1b4c1c8abd613f685267a3dda494d87aba4cff449eed39902a6ece2c086f3c
     environment:
       HAPI_FHIR_VALIDATION_REQUESTS_ENABLED: "true"
       HAPI_FHIR_SUBSCRIPTION_RESTHOOK_ENABLED: "true"
@@ -43,11 +47,14 @@ services:
       sh -c "curl -X POST -H 'Content-Type: application/fhir+json' --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 15 --data '@/data/sample-record-1.json' http://fhir:8080/fhir &&
              curl -X POST -H 'Content-Type: application/fhir+json' --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 15 --data '@/data/sample-record-2.json' http://fhir:8080/fhir &&
              curl -X POST -H 'Content-Type: application/fhir+json' --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 15 --data '@/data/sample-record-3.json' http://fhir:8080/fhir &&
-             curl -X POST -H 'Content-Type: application/fhir+json' --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 15 --data '@/data/sample-lists.json' http://fhir:8080/fhir"
+             curl -X POST -H 'Content-Type: application/fhir+json' --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 15 --data '@/data/sample-lists.json' http://fhir:8080/fhir &&
+             curl -X GET --retry-connrefuse --connect-timeout 30 --max-time 300 --retry 10 --retry-delay 15 http://keycloak:8080/"
     volumes:
-      - ${PWD}/deploy/data:/data:ro
+      - ${PWD}/frontend/deploy/data:/data:ro
     depends_on:
       - fhir
+      # not strictly required, but makes sure the keycloak service starts at this point
+      - keycloak
 
   keycloak:
     image: quay.io/keycloak/keycloak:15.1.1@sha256:abade9a9cf985b454b30a9119183e62a0018ec546c8fc4fbd8572457afb4a666
@@ -59,7 +66,7 @@ services:
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: admin
     volumes:
-      - ${PWD}/deploy/data/aio-export.json:/tmp/realm.json:ro
+      - ${PWD}/frontend/deploy/data/aio-export.json:/tmp/realm.json:ro
 
   jaeger:
     image: docker.io/jaegertracing/all-in-one:1.38@sha256:14cf2943199c15caa9547e488f4423f44941d45db8a99db229f70f1351425ac8

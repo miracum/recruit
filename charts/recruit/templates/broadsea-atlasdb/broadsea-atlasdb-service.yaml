@@ -1,0 +1,20 @@
+{{- if .Values.broadseaAtlasdb.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  # the name has to be fixed because it is hard-coded as a data source:
+  # https://github.com/OHDSI/Broadsea-Atlasdb/blob/main/100_populate_source_source_daimon.sql#L8
+  name: broadsea-atlasdb
+  labels:
+    {{- include "recruit.matchLabels" . | nindent 4 }}
+    app.kubernetes.io/component: broadsea-atlasdb
+spec:
+  ports:
+    - port: 5432
+      targetPort: tcp-postgresql
+      protocol: TCP
+      name: tcp-postgresql
+  selector:
+    {{- include "recruit.matchLabels" . | nindent 4 }}
+    app.kubernetes.io/component: broadsea-atlasdb
+{{- end }}

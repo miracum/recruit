@@ -9,13 +9,7 @@
           <template v-else>unbekannt</template></span
         ></b-table-column
       >
-      <b-table-column
-        v-slot="props"
-        field="performed"
-        label="Durchgeführt"
-        sortable
-        centered
-      >
+      <b-table-column v-slot="props" field="performed" label="Durchgeführt" sortable centered>
         <b-tag type="is-primary" class="procedure-performed"
           ><template v-if="props.row.performedDateTime">
             {{ new Date(props.row.performedDateTime).toLocaleDateString() }}
@@ -58,10 +52,7 @@ export default {
       return this.items.map((procedure) => {
         const normalizedProcedure = procedure;
 
-        const performedDateTime = fhirpath.evaluate(
-          procedure,
-          "performedDateTime | performedPeriod.start"
-        )[0];
+        const performedDateTime = fhirpath.evaluate(procedure, "performedDateTime | performedPeriod.start")[0];
 
         normalizedProcedure.performedDateTime = performedDateTime;
 
@@ -69,10 +60,7 @@ export default {
           normalizedProcedure.code = {};
         }
 
-        const display = fhirpath.evaluate(
-          procedure,
-          "code.text | code.coding.display | code.coding.code"
-        )[0];
+        const display = fhirpath.evaluate(procedure, "code.text | code.coding.display | code.coding.code")[0];
 
         if (display) {
           normalizedProcedure.code.text = display;

@@ -18,13 +18,7 @@
             <template v-else>unbekannt</template></b-tag
           >
         </b-table-column>
-        <b-table-column
-          v-slot="props"
-          field="effectiveDateTime"
-          label="Zeitpunkt"
-          sortable
-          centered
-        >
+        <b-table-column v-slot="props" field="effectiveDateTime" label="Zeitpunkt" sortable centered>
           <b-tag type="is-primary" class="medication-statement-effective"
             ><template v-if="props.row.effectiveDateTime">
               {{ new Date(props.row.effectiveDateTime).toLocaleDateString() }}
@@ -32,13 +26,7 @@
             <template v-else>unbekannt</template></b-tag
           >
         </b-table-column>
-        <b-table-column
-          v-slot="props"
-          field="recordedDate"
-          label="Dokumentationszeitpunkt"
-          sortable
-          centered
-        >
+        <b-table-column v-slot="props" field="recordedDate" label="Dokumentationszeitpunkt" sortable centered>
           <span class="tag is-success">
             <template v-if="props.row.recordedDate">
               {{ new Date(props.row.recordedDate).toLocaleDateString() }}
@@ -59,9 +47,7 @@
       </b-table>
     </div>
     <div class="medication-administration">
-      <h2 class="title is-5">
-        Während des Aufenthalts verabreichte Medikation
-      </h2>
+      <h2 class="title is-5">Während des Aufenthalts verabreichte Medikation</h2>
       <b-table
         :paginated="true"
         :per-page="10"
@@ -78,13 +64,7 @@
             <template v-else>unbekannt</template></b-tag
           ></b-table-column
         >
-        <b-table-column
-          v-slot="props"
-          field="effectiveDateTime"
-          label="Zeitpunkt"
-          sortable
-          centered
-        >
+        <b-table-column v-slot="props" field="effectiveDateTime" label="Zeitpunkt" sortable centered>
           <b-tag type="is-primary" class="medication-administration-effective"
             ><template v-if="props.row.effectiveDateTime">
               {{ new Date(props.row.effectiveDateTime).toLocaleDateString() }}
@@ -92,17 +72,9 @@
             <template v-else>unbekannt</template></b-tag
           >
         </b-table-column>
-        <b-table-column
-          v-slot="props"
-          field="authoredOn"
-          label="Dokumentationszeitpunkt"
-          sortable
-          centered
-        >
+        <b-table-column v-slot="props" field="authoredOn" label="Dokumentationszeitpunkt" sortable centered>
           <b-tag type="is-primary">
-            <b-tag
-              type="is-primary"
-              class="medication-administration-authored-on"
+            <b-tag type="is-primary" class="medication-administration-authored-on"
               ><template v-if="props.row.authoredOn">
                 {{ new Date(props.row.authoredOn).toLocaleDateString() }}
               </template>
@@ -151,10 +123,7 @@ export default {
       resources.map((medicationStatement) => {
         const normalizedMedicationStatement = medicationStatement;
 
-        const effectiveDateTime = fhirpath.evaluate(
-          medicationStatement,
-          "effectiveDateTime | effectivePeriod.start"
-        )[0];
+        const effectiveDateTime = fhirpath.evaluate(medicationStatement, "effectiveDateTime | effectivePeriod.start")[0];
 
         normalizedMedicationStatement.effectiveDateTime = effectiveDateTime;
 

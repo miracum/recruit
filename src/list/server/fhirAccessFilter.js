@@ -1,7 +1,6 @@
 const logger = require("pino")({ level: process.env.LOG_LEVEL || "info" });
 
-const URL_LIST_BELONGS_TO_STUDY_EXTENSION =
-  "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy";
+const URL_LIST_BELONGS_TO_STUDY_EXTENSION = "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy";
 
 const getAccessibleStudyAcronymsForUser = (user, trialsConfig) => {
   const accessibleStudyAcronyms = [];
@@ -15,10 +14,7 @@ const getAccessibleStudyAcronymsForUser = (user, trialsConfig) => {
     // Check if the current user's username or email is part of the accessibleBy
     // configuration. accessibleBy.users could contain either usernames or emails of
     // allowed users.
-    if (
-      trial.accessibleBy?.users?.includes(user.preferred_username) ||
-      trial.accessibleBy?.users?.includes(user.email)
-    ) {
+    if (trial.accessibleBy?.users?.includes(user.preferred_username) || trial.accessibleBy?.users?.includes(user.email)) {
       accessibleStudyAcronyms.push(trial.acronym);
       return;
     }
@@ -52,16 +48,10 @@ const getEntriesToKeepFromBundle = (bundle, accessibleStudyAcronyms) =>
       if (!belongsToStudyAcronym) {
         logger
           .child({ fullUrl: entry.fullUrl })
-          .error(
-            "The List resource does not contain a reference to the study acronym. " +
-              "Denying access by default."
-          );
+          .error("The List resource does not contain a reference to the study acronym. " + "Denying access by default.");
         return false;
       }
-      if (
-        accessibleStudyAcronyms.includes("*") ||
-        accessibleStudyAcronyms.includes(belongsToStudyAcronym)
-      ) {
+      if (accessibleStudyAcronyms.includes("*") || accessibleStudyAcronyms.includes(belongsToStudyAcronym)) {
         logger.debug(`User is authorized to access the ${belongsToStudyAcronym} study`);
         return true;
       }
@@ -87,9 +77,7 @@ exports.createAccessFilter = (trialsConfig, authConfig) => (resource, user) => {
 
   const accessibleStudyAcronyms = getAccessibleStudyAcronymsForUser(user, trialsConfig);
 
-  logger
-    .child({ username: user.preferred_username, accessibleStudyAcronyms })
-    .debug("User can access these studies");
+  logger.child({ username: user.preferred_username, accessibleStudyAcronyms }).debug("User can access these studies");
 
   const handleBundle = (bundle) => {
     if (!bundle.entry) {

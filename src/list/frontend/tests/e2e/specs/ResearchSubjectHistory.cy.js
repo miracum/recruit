@@ -9,8 +9,11 @@ describe("ResearchSubjectHistory", () => {
   });
   context("after loading lists from server", () => {
     beforeEach(() => {
-      cy.server();
-      cy.route("GET", subjectRequestUrl).as("getSubject");
+      cy.intercept({
+        method: "GET",
+        path: subjectRequestUrl,
+      }).as("getSubject");
+
       cy.visit("/subjects/784/history", {
         onBeforeLoad: (win) => {
           // eslint-disable-next-line no-param-reassign

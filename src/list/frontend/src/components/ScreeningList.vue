@@ -11,8 +11,11 @@
             </b-button>
           </template>
 
-          <b-dropdown-item v-for="(deFilterStatus, enFilterStatus) in recruitmentStatusOptions" :key="deFilterStatus"
-            :value="enFilterStatus">
+          <b-dropdown-item
+            v-for="(deFilterStatus, enFilterStatus) in recruitmentStatusOptions"
+            :key="deFilterStatus"
+            :value="enFilterStatus"
+          >
             <span class="status-option-container">
               <b-icon pack="fas" size="is-small" icon="circle" :type="getTypeFromStatus(enFilterStatus)"></b-icon>
 
@@ -28,8 +31,16 @@
       </div>
     </nav>
     <section>
-      <b-table :data="filteredSubjects" :loading="isLoading" :mobile-cards="true" sort-icon="menu-up" :striped="true"
-        :hoverable="true" default-sort="date" default-sort-direction="desc">
+      <b-table
+        :data="filteredSubjects"
+        :loading="isLoading"
+        :mobile-cards="true"
+        sort-icon="menu-up"
+        :striped="true"
+        :hoverable="true"
+        default-sort="date"
+        default-sort-direction="desc"
+      >
         <b-table-column v-slot="props" label="Vorschlagsdatum" field="date" sortable :visible="!hideRecommendationDate">
           <p class="subject-recommendation-date">
             <span v-if="props.row.date">
@@ -44,37 +55,48 @@
             {{ props.row.mrNumber }}
           </p>
 
-          <recommendation-markers :all-recommended-studies="props.row.allRecommendedStudies"
+          <recommendation-markers
+            :all-recommended-studies="props.row.allRecommendedStudies"
             :participating-studies="props.row.participatingStudies"
-            :is-no-longer-eligible="props.row.isNoLongerEligible" :is-loading="props.row.markerIsLoading"
-            :error-message="props.row.markerErrorMessage"></recommendation-markers>
+            :is-no-longer-eligible="props.row.isNoLongerEligible"
+            :is-loading="props.row.markerIsLoading"
+            :error-message="props.row.markerErrorMessage"
+          ></recommendation-markers>
         </b-table-column>
 
-        <b-table-column v-slot="props" label="Demografie" field="subject.individual.birthDate" sortable
-          :visible="!hideDemographics">
+        <b-table-column
+          v-slot="props"
+          label="Demografie"
+          field="subject.individual.birthDate"
+          sortable
+          :visible="!hideDemographics"
+        >
           <span>
             geb.
             {{
-                props.row.subject.individual.birthDate
-                  ? new Date(props.row.subject.individual.birthDate).getFullYear()
-                  : "unbekannt"
+              props.row.subject.individual.birthDate
+                ? new Date(props.row.subject.individual.birthDate).getFullYear()
+                : "unbekannt"
             }},
             {{
-                props.row.subject.individual
-                  ? props.row.subject.individual.gender === "male"
-                    ? "m"
-                    : props.row.subject.individual.gender === "female"
-                      ? "w"
-                      : "u"
+              props.row.subject.individual
+                ? props.row.subject.individual.gender === "male"
+                  ? "m"
+                  : props.row.subject.individual.gender === "female"
+                  ? "w"
                   : "u"
+                : "u"
             }}
           </span>
         </b-table-column>
 
         <b-table-column v-slot="props" label="Letzter Aufenthalt" :visible="!hideLastVisit">
-          <last-stay :subject="props.row.subject" :latest-encounter-and-location="
-            props.row.latestEncounterAndLocation
-          " :is-loading="props.row.lastStayIsLoading" :error-message="props.row.lastStayErrorMessage"></last-stay>
+          <last-stay
+            :subject="props.row.subject"
+            :latest-encounter-and-location="props.row.latestEncounterAndLocation"
+            :is-loading="props.row.lastStayIsLoading"
+            :error-message="props.row.lastStayErrorMessage"
+          ></last-stay>
         </b-table-column>
         <b-table-column v-slot="props" label="Notiz" field="note">
           <b-field>
@@ -84,13 +106,14 @@
 
         <b-table-column v-slot="props" label="Status" field="subject.status" sortable>
           <b-dropdown v-model="props.row.subject.status">
-            <b-button slot="trigger" :class="[
-              'button',
-              'recruitment-status-select',
-              getTypeFromStatus(props.row.subject.status),
-            ]" type="button" size="is-small" icon-right="sort-down">{{
-    recruitmentStatusOptions[props.row.subject.status]
-}}</b-button>
+            <b-button
+              slot="trigger"
+              :class="['button', 'recruitment-status-select', getTypeFromStatus(props.row.subject.status)]"
+              type="button"
+              size="is-small"
+              icon-right="sort-down"
+              >{{ recruitmentStatusOptions[props.row.subject.status] }}</b-button
+            >
             <b-dropdown-item v-for="option in Object.keys(recruitmentStatusOptions)" :key="option" :value="option">
               <span class="status-option-container">
                 <b-icon pack="fas" size="is-small" icon="circle" :type="getTypeFromStatus(option)"></b-icon>
@@ -104,8 +127,14 @@
           <div class="columns is-mobile">
             <div class="column">
               <b-tooltip label="Änderungen Speichern" position="is-bottom">
-                <b-button class="save-status" type="is-primary" size="is-small" icon-left="save"
-                  @click="onSaveRowChanges($event, props.row)">Speichern</b-button>
+                <b-button
+                  class="save-status"
+                  type="is-primary"
+                  size="is-small"
+                  icon-left="save"
+                  @click="onSaveRowChanges($event, props.row)"
+                  >Speichern</b-button
+                >
               </b-tooltip>
             </div>
           </div>
@@ -113,18 +142,34 @@
           <div class="columns is-vcentered">
             <div class="column">
               <b-tooltip v-if="!hideEhrButton" label="Patientenakte anzeigen" position="is-bottom" class="mr-2">
-                <b-button tag="router-link" :to="{
-                  name: 'patient-record',
-                  params: { patientId: props.row.subject.individual.id },
-                }" type="is-primary" size="is-small" icon-left="notes-medical" outlined target="_blank"
-                  rel="noopener noreferrer"></b-button>
+                <b-button
+                  tag="router-link"
+                  :to="{
+                    name: 'patient-record',
+                    params: { patientId: props.row.subject.individual.id },
+                  }"
+                  type="is-primary"
+                  size="is-small"
+                  icon-left="notes-medical"
+                  outlined
+                  target="_blank"
+                  rel="noopener noreferrer"
+                ></b-button>
               </b-tooltip>
               <b-tooltip label="Änderungshistorie anzeigen" position="is-bottom">
-                <b-button tag="router-link" :to="{
-                  name: 'researchsubject-history',
-                  params: { subjectId: props.row.id },
-                }" type="is-primary" size="is-small" icon-left="history" outlined target="_blank"
-                  rel="noopener noreferrer"></b-button>
+                <b-button
+                  tag="router-link"
+                  :to="{
+                    name: 'researchsubject-history',
+                    params: { subjectId: props.row.id },
+                  }"
+                  type="is-primary"
+                  size="is-small"
+                  icon-left="history"
+                  outlined
+                  target="_blank"
+                  rel="noopener noreferrer"
+                ></b-button>
               </b-tooltip>
             </div>
           </div>
@@ -210,21 +255,13 @@ export default {
           }
         )[0];
 
-        const note = fhirpath.evaluate(
-          subject,
-          "ResearchSubject.extension(%noteExtensionUrl).valueString",
-          {
-            noteExtensionUrl: Constants.URL_NOTE_EXTENSION,
-          }
-        )[0];
+        const note = fhirpath.evaluate(subject, "ResearchSubject.extension(%noteExtensionUrl).valueString", {
+          noteExtensionUrl: Constants.URL_NOTE_EXTENSION,
+        })[0];
 
-        const statusCode = fhirpath.evaluate(
-          entry,
-          "flag.coding.where(system=%subjectStatus).code",
-          {
-            subjectStatus: Constants.SYSTEM_DETERMINED_SUBJECT_STATUS,
-          }
-        )[0];
+        const statusCode = fhirpath.evaluate(entry, "flag.coding.where(system=%subjectStatus).code", {
+          subjectStatus: Constants.SYSTEM_DETERMINED_SUBJECT_STATUS,
+        })[0];
 
         const isNoLongerEligible = statusCode === "ineligible";
 
@@ -235,70 +272,40 @@ export default {
           isNoLongerEligible,
           subject,
           note,
-          latestEncounterAndLocation:
-            this.latestEncounterAndLocationLookup[subject.individual.id]
-              ?.latestEncounterAndLocation,
-          lastStayIsLoading:
-            this.latestEncounterAndLocationLookup[subject.individual.id]
-              ?.lastStayIsLoading,
-          lastStayErrorMessage:
-            this.latestEncounterAndLocationLookup[subject.individual.id]
-              ?.lastStayErrorMessage,
-          allRecommendedStudies:
-            this.recommendationMarkerLookup[subject.individual.id]
-              ?.allRecommendedStudies,
-          participatingStudies:
-            this.recommendationMarkerLookup[subject.individual.id]
-              ?.participatingStudies,
-          markerIsLoading:
-            this.recommendationMarkerLookup[subject.individual.id]
-              ?.markerIsLoading,
-          markerErrorMessage:
-            this.recommendationMarkerLookup[subject.individual.id]
-              ?.markerErrorMessage,
+          latestEncounterAndLocation: this.latestEncounterAndLocationLookup[subject.individual.id]?.latestEncounterAndLocation,
+          lastStayIsLoading: this.latestEncounterAndLocationLookup[subject.individual.id]?.lastStayIsLoading,
+          lastStayErrorMessage: this.latestEncounterAndLocationLookup[subject.individual.id]?.lastStayErrorMessage,
+          allRecommendedStudies: this.recommendationMarkerLookup[subject.individual.id]?.allRecommendedStudies,
+          participatingStudies: this.recommendationMarkerLookup[subject.individual.id]?.participatingStudies,
+          markerIsLoading: this.recommendationMarkerLookup[subject.individual.id]?.markerIsLoading,
+          markerErrorMessage: this.recommendationMarkerLookup[subject.individual.id]?.markerErrorMessage,
         };
       });
     },
     filteredSubjects() {
-      return this.patientViewModel.filter(
-        (entry) => !this.selectedFilterOptions.includes(entry.subject.status)
-      );
+      return this.patientViewModel.filter((entry) => !this.selectedFilterOptions.includes(entry.subject.status));
     },
   },
   async mounted() {
     this.items.map(async (element) => {
       let latestEncounterAndLocation = {};
       try {
-        this.$set(
-          this.latestEncounterAndLocationLookup,
-          element.item.individual.id,
-          {
-            lastStayIsLoading: true,
-          }
-        );
-        latestEncounterAndLocation = await Api.fetchLatestEncounterWithLocation(
-          element.item.individual.id
-        );
+        this.$set(this.latestEncounterAndLocationLookup, element.item.individual.id, {
+          lastStayIsLoading: true,
+        });
+        latestEncounterAndLocation = await Api.fetchLatestEncounterWithLocation(element.item.individual.id);
 
-        this.$set(
-          this.latestEncounterAndLocationLookup,
-          element.item.individual.id,
-          {
-            latestEncounterAndLocation,
-            lastStayIsLoading: false,
-            lastStayErrorMessage: "",
-          }
-        );
+        this.$set(this.latestEncounterAndLocationLookup, element.item.individual.id, {
+          latestEncounterAndLocation,
+          lastStayIsLoading: false,
+          lastStayErrorMessage: "",
+        });
       } catch (exc) {
-        this.$set(
-          this.latestEncounterAndLocationLookup,
-          element.item.individual.id,
-          {
-            latestEncounterAndLocation,
-            lastStayIsLoading: false,
-            lastStayErrorMessage: exc,
-          }
-        );
+        this.$set(this.latestEncounterAndLocationLookup, element.item.individual.id, {
+          latestEncounterAndLocation,
+          lastStayIsLoading: false,
+          lastStayErrorMessage: exc,
+        });
       }
     });
 
@@ -309,15 +316,11 @@ export default {
         this.$set(this.recommendationMarkerLookup, element.item.individual.id, {
           markerIsLoading: true,
         });
-        let allRecommendations = await Api.fetchAllRecommendationsByPatientId(
-          element.item.individual.id
-        );
+        let allRecommendations = await Api.fetchAllRecommendationsByPatientId(element.item.individual.id);
 
         // ignore all subjects that refer to the same study as the one currently shown in this screening list
         allRecommendations = allRecommendations.filter(
-          (resource) =>
-            resource.resourceType === "ResearchSubject" &&
-            resource.study.id !== element.item.study.id
+          (resource) => resource.resourceType === "ResearchSubject" && resource.study.id !== element.item.study.id
         );
 
         // include only subjects/studies where the patient is not ineligible or withdrawn from
@@ -327,18 +330,12 @@ export default {
         allRecommendedStudies = allRecommendations
           .filter(
             (resource) =>
-              resource.resourceType === "ResearchSubject" &&
-              resource.status !== "ineligible" &&
-              resource.status !== "withdrawn"
+              resource.resourceType === "ResearchSubject" && resource.status !== "ineligible" && resource.status !== "withdrawn"
           )
           .map((researchSubject) => researchSubject.study);
 
         participatingStudies = allRecommendations
-          .filter(
-            (resource) =>
-              resource.resourceType === "ResearchSubject" &&
-              resource.status === "on-study"
-          )
+          .filter((resource) => resource.resourceType === "ResearchSubject" && resource.status === "on-study")
           .map((researchSubject) => researchSubject.study);
 
         this.$set(this.recommendationMarkerLookup, element.item.individual.id, {
@@ -392,12 +389,12 @@ export default {
 </script>
 
 <style scoped>
-.status-option-container>.icon {
+.status-option-container > .icon {
   vertical-align: middle;
   margin-right: 1rem;
 }
 
-.status-option-container>span {
+.status-option-container > span {
   vertical-align: middle;
 }
 

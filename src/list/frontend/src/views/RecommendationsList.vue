@@ -3,14 +3,12 @@
     <b-loading :active="isLoading" :is-full-page="true" />
     <template v-if="!isLoading">
       <b-message v-if="failedToLoad" type="is-danger">
-        Rekrutierungsvorschläge konnten nicht geladen werden. Ggf. sind Sie für
-        den Zugriff auf diese Rekrutierungsvorschläge nicht freigeschalten.
+        Rekrutierungsvorschläge konnten nicht geladen werden. Ggf. sind Sie für den Zugriff auf diese Rekrutierungsvorschläge
+        nicht freigeschalten.
         <br />
         <pre>{{ errorMessage }}</pre>
       </b-message>
-      <b-message v-else-if="noList" type="is-warning"
-        >Keine Rekrutierungsvorschläge vorhanden.</b-message
-      >
+      <b-message v-else-if="noList" type="is-warning">Keine Rekrutierungsvorschläge vorhanden.</b-message>
       <template v-else>
         <header class="study-description-header">
           <h1 class="title is-3">
@@ -90,21 +88,13 @@ export default {
   },
   methods: {
     getStudyDisplayFromList(list) {
-      const study = fhirpath.evaluate(
-        list,
-        "List.extension(%url).valueReference",
-        {
-          url: Constants.URL_LIST_BELONGS_TO_STUDY_EXTENSION,
-        }
-      )[0];
+      const study = fhirpath.evaluate(list, "List.extension(%url).valueReference", {
+        url: Constants.URL_LIST_BELONGS_TO_STUDY_EXTENSION,
+      })[0];
 
-      const acronym = fhirpath.evaluate(
-        study,
-        "ResearchStudy.extension(%acronymSystem).valueString",
-        {
-          acronymSystem: Constants.SYSTEM_STUDY_ACRONYM,
-        }
-      )[0];
+      const acronym = fhirpath.evaluate(study, "ResearchStudy.extension(%acronymSystem).valueString", {
+        acronymSystem: Constants.SYSTEM_STUDY_ACRONYM,
+      })[0];
 
       return acronym || study?.title || study?.description || "unbekannt";
     },

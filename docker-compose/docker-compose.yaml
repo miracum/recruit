@@ -37,8 +37,6 @@ services:
     cap_drop:
       - ALL
     read_only: true
-    tmpfs:
-      - /tmp
     privileged: false
     environment:
       JAEGER_SERVICE_NAME: recruit-query
@@ -64,6 +62,11 @@ services:
       QUERY_FORCE_UPDATE_SCREENING_LIST: ${QUERY_FORCE_UPDATE_SCREENING_LIST:-false}
       QUERY_ONLY_CREATE_PATIENTS_IF_NOT_EXIST: ${QUERY_ONLY_CREATE_PATIENTS_IF_NOT_EXIST:-false}
       QUERY_COHORTSIZETHRESHOLD: ${QUERY_COHORTSIZETHRESHOLD:-100}
+    volumes:
+      - type: tmpfs
+        target: /tmp
+        tmpfs:
+          size: 1024
 
   notify:
     image: ghcr.io/miracum/recruit/notify:v3.2.5 # x-release-please-version
@@ -74,8 +77,6 @@ services:
     cap_drop:
       - ALL
     read_only: true
-    tmpfs:
-      - /tmp
     privileged: false
     environment:
       JAEGER_SERVICE_NAME: recruit-notify
@@ -88,4 +89,8 @@ services:
       SPRING_MAIL_USERNAME: ${NOTIFY_MAIL_USERNAME}
       SPRING_MAIL_PASSWORD: ${NOTIFY_MAIL_PASSWORD}
     volumes:
+      - type: tmpfs
+        target: /tmp
+        tmpfs:
+          size: 1024
       - ${NOTIFY_RULES_CONFIG_PATH:?}:/opt/notify/config/application.yml:ro

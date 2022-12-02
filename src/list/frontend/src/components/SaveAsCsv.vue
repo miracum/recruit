@@ -1,8 +1,6 @@
 <template>
   <div class="save-as-csv">
-    <b-button size="is-small" icon-left="file-csv" @click="saveAsCsvFile">
-      Vorschläge als CSV-Datei herunterladen
-    </b-button>
+    <b-button size="is-small" icon-left="file-csv" @click="saveAsCsvFile"> Vorschläge als CSV-Datei herunterladen </b-button>
   </div>
 </template>
 
@@ -19,13 +17,9 @@ export default {
     saveAsCsvFile() {
       const csvData = this.rows.map((patientViewModel) => ({
         id: patientViewModel.id,
-        Vorschlagszeit: patientViewModel.date
-          ? new Date(patientViewModel.date).toLocaleDateString()
-          : "unbekannt",
+        Vorschlagszeit: patientViewModel.date ? new Date(patientViewModel.date).toLocaleDateString() : "unbekannt",
         Patientennummer: patientViewModel.mrNumber,
-        "Letzter Aufenthalt":
-          patientViewModel.latestEncounterAndLocation?.locationEntry?.location
-            ?.name,
+        "Letzter Aufenthalt": patientViewModel.latestEncounterAndLocation?.locationEntry?.location?.name,
         Notizen: patientViewModel.note,
         Geburtsdatum: patientViewModel.subject?.individual?.birthDate,
         Geschlecht: patientViewModel.subject?.individual?.gender,

@@ -7,7 +7,6 @@ import requests
 from fhirclient import client
 from fhirclient.models.device import Device
 from fhirclient.models.domainresource import DomainResource
-from fhirclient.models.encounter import Encounter
 from fhirclient.models.list import List
 from fhirclient.models.patient import Patient
 from fhirclient.models.researchstudy import ResearchStudy
@@ -16,12 +15,14 @@ from requests.adapters import HTTPAdapter
 from retrying import retry
 from urllib3.util.retry import Retry
 
+# TODO: re-add, see below TODO. from fhirclient.models.encounter import Encounter
+
 EXPECTED_RESOURCE_COUNTS = [
-    (ResearchStudy, 2),
-    (List, 2),
-    (Patient, 10),
-    (ResearchSubject, 10),
-    (Encounter, 27),
+    (ResearchStudy, 1),
+    (List, 1),
+    (Patient, 100),
+    (ResearchSubject, 100),
+    # (Encounter, 27), # TODO: re-count expected encounters
     (Device, 1),
 ]
 

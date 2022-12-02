@@ -63,12 +63,18 @@ var expectedMessageCountOption = new Option<int>(
             description: "The expected number of messages.");
 expectedMessageCountOption.SetDefaultValue(5);
 
+var retriesOption = new Option<int>(
+            name: "--retries",
+            description: "The number of times to re-assert the number of messages present compared to the expected");
+retriesOption.SetDefaultValue(10);
+
 var assertCommand = new Command("assert", "Verify that the expected number of mails were received.")
 {
     mailHogApiBaseUrlOption,
     expectedMessageCountOption,
+    retriesOption,
 };
-assertCommand.SetHandler(RunAssert, mailHogApiBaseUrlOption, expectedMessageCountOption);
+assertCommand.SetHandler(RunAssert, mailHogApiBaseUrlOption, expectedMessageCountOption, retriesOption);
 rootCommand.AddCommand(assertCommand);
 
 return await rootCommand.InvokeAsync(args);
@@ -126,7 +132,7 @@ static async System.Threading.Tasks.Task RunDeleteMessages(Uri mailHogServerBase
     Console.WriteLine("Done.");
 }
 
-static async System.Threading.Tasks.Task RunAssert(Uri mailHogServerBaseUrl, int expectedMessageCount)
+static async System.Threading.Tasks.Task RunAssert(Uri mailHogServerBaseUrl, int expectedMessageCount, int retries)
 {
     Console.WriteLine($"Using MailHog base URL: {mailHogServerBaseUrl}");
 
@@ -135,14 +141,28 @@ static async System.Threading.Tasks.Task RunAssert(Uri mailHogServerBaseUrl, int
         BaseAddress = mailHogServerBaseUrl,
     };
 
-    var response = await client.GetFromJsonAsync<MailHogMessages>("v2/messages") ??
-        throw new Exception("Getting messages from MailHog failed");
-
-    Console.WriteLine($"Expected message count is {expectedMessageCount}. Actual: {response.Total}");
-
-    if (expectedMessageCount != response.Total)
+    for (int i = 0; i < retries; i++)
     {
-        throw new Exception($"response.Total ({response.Total}) is not the expected {expectedMessageCount}.");
+        MailHogMessages response;
+        try
+        {
+            response = await client.GetFromJsonAsync<MailHogMessages>("v2/messages") ??
+                throw new Exception("Getting messages from MailHog failed");
+        }
+        catch (Exception exc)
+        {
+            Console.WriteLine($"Failed to get response from MailHog: {exc.Message}");
+            continue;
+        }
+
+        Console.WriteLine($"Expected message count is {expectedMessageCount}. Actual: {response.Total}. Attempt: {i + 1}");
+
+        if (expectedMessageCount != response.Total && i == retries)
+        {
+            throw new Exception($"response.Total ({response.Total}) is not the expected {expectedMessageCount}.");
+        }
+
+        await System.Threading.Tasks.Task.Delay(TimeSpan.FromMinutes(1));
     }
 }
 

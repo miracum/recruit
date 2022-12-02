@@ -9,9 +9,16 @@ describe("Recommendations ", () => {
   });
   context("after loading recommendations", () => {
     beforeEach(() => {
-      cy.server();
-      cy.route("GET", listRequestUrl).as("getList");
-      cy.route("PATCH", "**/ResearchSubject/**").as("patchSubject");
+      cy.intercept({
+        method: "GET",
+        path: listRequestUrl,
+      }).as("getList");
+
+      cy.intercept({
+        method: "PATCH",
+        path: "**/ResearchSubject/**",
+      }).as("patchSubject");
+
       cy.visit("/recommendations/796", {
         onBeforeLoad: (win) => {
           // eslint-disable-next-line no-param-reassign
@@ -26,25 +33,15 @@ describe("Recommendations ", () => {
     });
 
     it("displays correct total recommendations and participating studies count", () => {
-      cy.get(":nth-child(1) > [data-label='Patientennummer'] .all-recommendations-count").should(
-        "contain.text",
-        "1"
-      );
-      cy.get(":nth-child(1) > [data-label='Patientennummer'] .participating-studies-count").should(
-        "contain.text",
-        "1"
-      );
-      cy.get(":nth-child(1) > [data-label='Patientennummer'] .is-no-longer-eligible").should(
-        "exist"
-      );
+      cy.get(":nth-child(1) > [data-label='Patientennummer'] .all-recommendations-count").should("contain.text", "1");
+      cy.get(":nth-child(1) > [data-label='Patientennummer'] .participating-studies-count").should("contain.text", "1");
+      cy.get(":nth-child(1) > [data-label='Patientennummer'] .is-no-longer-eligible").should("exist");
     });
 
     it("can update and save recruitment status", () => {
       cy.get(":nth-child(1) > [data-label='Status'] > .dropdown > .dropdown-trigger > .button")
         .click()
-        .get(
-          ":nth-child(1) > [data-label='Status'] > .dropdown > .dropdown-menu > .dropdown-content > :nth-child(4)"
-        )
+        .get(":nth-child(1) > [data-label='Status'] > .dropdown > .dropdown-menu > .dropdown-content > :nth-child(4)")
         .click()
         .get(":nth-child(1) > [data-label='Aktionen'] .save-status")
         .click();
@@ -56,9 +53,9 @@ describe("Recommendations ", () => {
       cy.wait(5000);
       cy.reload();
 
-      cy.get(
-        ":nth-child(1) > [data-label='Status'] > .dropdown > .dropdown-trigger > .button"
-      ).contains("Wurde eingeschlossen");
+      cy.get(":nth-child(1) > [data-label='Status'] > .dropdown > .dropdown-trigger > .button").contains(
+        "Wurde eingeschlossen"
+      );
     });
   });
 });

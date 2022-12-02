@@ -21,6 +21,8 @@ jobs:
           extra-files: |
             src/list/Dockerfile
             src/buildSrc/src/main/groovy/org.miracum.recruit.java-common-conventions.gradle
+            src/notify/src/main/resources/application.yml
+            src/query/src/main/resources/application.yml
             docker-compose/docker-compose.yaml
           changelog-types: |
             [

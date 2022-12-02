@@ -24,13 +24,10 @@
         <br />
       </template>
       <p v-if="latestEncounterLocation">
-        <span class="has-text-weight-semibold">{{
-            latestEncounterLocation.name
-        }}</span>
+        <span class="has-text-weight-semibold">{{ latestEncounterLocation.name }}</span>
         <br />
         <span v-for="(telecom, index) in latestEncounterLocation.telecom" :key="index">
-          <b-icon pack="fas" :icon="getIconNameFromContactPointSystem(telecom.system)" size="is-small">
-          </b-icon>
+          <b-icon pack="fas" :icon="getIconNameFromContactPointSystem(telecom.system)" size="is-small"> </b-icon>
           {{ telecom.value }}
           <br />
         </span>
@@ -71,12 +68,8 @@ export default {
     // In general, Encounter.location.period may be more accurate, so if available, use it.
     // Fallback to Encounter.period otherwise.
     encounterPeriod() {
-      const locationEntryComponent =
-        this.latestEncounterAndLocation?.locationEntry;
-      return (
-        locationEntryComponent?.period ||
-        this.latestEncounterAndLocation?.encounter?.period
-      );
+      const locationEntryComponent = this.latestEncounterAndLocation?.locationEntry;
+      return locationEntryComponent?.period || this.latestEncounterAndLocation?.encounter?.period;
     },
     latestEncounterLocation() {
       return this.latestEncounterAndLocation?.locationEntry?.location;
@@ -84,10 +77,7 @@ export default {
   },
   methods: {
     getIconNameFromContactPointSystem(system) {
-      return (
-        this.contactPointSystemToIcon[system] ||
-        this.contactPointSystemToIcon.default
-      );
+      return this.contactPointSystemToIcon[system] || this.contactPointSystemToIcon.default;
     },
   },
 };

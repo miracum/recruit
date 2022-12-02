@@ -1,0 +1,88 @@
+fhirserver:
+  postgresql:
+    auth:
+      postgresPassword: fhir
+
+query:
+  # run every minute
+  schedule: "* * * * *"
+  cohortSelectorLabels: []
+  omop:
+    host: broadsea-atlasdb
+    port: 5432
+    database: postgres
+    username: postgres
+    password: mypass
+    resultsSchema: demo_cdm_results
+    cdmSchema: demo_cdm
+  webAPI:
+    dataSource: EUNOMIA
+  extraEnv:
+    - name: QUERY_WEBAPI_COHORT_CACHE_SCHEMA
+      value: webapi
+
+list: {}
+
+notify:
+  ha:
+    enabled: true
+  rules:
+    schedules:
+      everyMorning: "0 0 8 1/1 * ? *"
+
+    trials:
+      - acronym: "*"
+        subscriptions:
+          - email: "everything@example.com"
+
+      - acronym: "SAMPLE"
+        accessibleBy:
+          users:
+            - "user1"
+            - "user.two@example.com"
+        subscriptions:
+          - email: "everyMorning@example.com"
+            notify: "everyMorning"
+
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: recruit-notify-ha
+
+ohdsi:
+  postgresql:
+    enabled: false
+  webApi:
+    db:
+      host: broadsea-atlasdb
+      port: 5432
+      database: "postgres"
+      username: "postgres"
+      password: "mypass"
+      schema: "webapi"
+    extraEnv:
+      - name: FLYWAY_SCHEMAS
+        value: webapi
+      - name: FLYWAY_BASELINEONMIGRATE
+        value: "true"
+      - name: FLYWAY_TABLE
+        value: schema_history
+      - name: flyway_baselineVersionAsString
+        value: "2.2.5.20180212152023"
+      - name: FLYWAY_BASELINEDESCRIPTION
+        value: "Base Migration"
+      - name: FLYWAY_LOCATIONS
+        value: "classpath:db/migration/postgresql"
+      - name: FLYWAY_PLACEHOLDERS_OHDSISCHEMA
+        value: "webapi"
+  cdmInitJob:
+    enabled: false
+  achilles:
+    schemas:
+      cdm: "demo_cdm"
+      vocab: "demo_cdm"
+      res: "demo_cdm_results"
+    sourceName: "EUNOMIA"
+
+broadseaAtlasdb:
+  enabled: true

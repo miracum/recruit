@@ -9,7 +9,7 @@ permissions: read-all
 
 jobs:
   prepare-artifacts:
-    name: Prepare Artifacts
+    name: prepare artifacts
     runs-on: ubuntu-22.04
     container: ghcr.io/chgl/kube-powertools:v1.22.2@sha256:a8a2649b29be23756d830bb98a5ac71cca515e35886df90b3116293c03bfc0fc
     outputs:
@@ -19,6 +19,8 @@ jobs:
         uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
 
       # TODO: replace tags with digests in compose - requires waiting for ci/build to be completed
+      #       turn this workflow into a reusable one and call it at the end of ci.yaml
+      #       yq '(.services[].image | select(. == "ghcr.io/miracum/recruit/list:*")) += "@sha256:123456"'  docker-compose/docker-compose.yaml
       - name: Build Docker Compose deployment bundle
         run: |
           mkdir -p dist/

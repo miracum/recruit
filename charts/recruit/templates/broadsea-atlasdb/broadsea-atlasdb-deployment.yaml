@@ -1,0 +1,28 @@
+{{- if .Values.broadseaAtlasdb.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "recruit.fullname" . }}-broadsea-atlasdb
+  labels:
+    {{- include "recruit.labels" . | nindent 4 }}
+    app.kubernetes.io/component: broadsea-atlasdb
+spec:
+  selector:
+    matchLabels:
+      {{- include "recruit.matchLabels" . | nindent 6 }}
+      app.kubernetes.io/component: broadsea-atlasdb
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        {{- include "recruit.matchLabels" . | nindent 8 }}
+        app.kubernetes.io/component: broadsea-atlasdb
+    spec:
+      containers:
+      - name: atlasdb
+        image: docker.io/ohdsi/broadsea-atlasdb:2.0.0@sha256:0256a9e1ec75e6f0f48689c4d6a7dc8952d82b4ed7a055953e271d1c17850f6b
+        imagePullPolicy: IfNotPresent
+        ports:
+            - name: tcp-postgresql
+              containerPort: 5432
+{{- end }}

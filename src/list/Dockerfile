@@ -1,4 +1,4 @@
-FROM docker.io/library/node:18.12.1@sha256:c47a2c61e635eb4938fcd56a1139b552300624b53e3eca06b5554a577f1842cf AS base
+FROM docker.io/library/node:18.12.1@sha256:9ebe9845301ca70e879f22180dfff496b856bb5f2ec52397462a9f5f903ee654 AS base
 WORKDIR /app
 
 COPY package.json ./
@@ -14,6 +14,7 @@ COPY frontend/ ./frontend/
 ARG VERSION=0.0.0 # x-release-please-version
 ENV VUE_APP_VERSION=${VERSION} \
     NODE_ENV=production
+
 RUN npm run build --workspace=frontend
 
 FROM build-frontend AS test
@@ -42,17 +43,3 @@ COPY --from=build-frontend /app/frontend/dist dist
 # included for vulnerability scans
 COPY package.json ./
 COPY package-lock.json ./
-
-ARG VERSION=0.0.0
-ARG GIT_REF=""
-LABEL maintaner="miracum.org" \
-    org.opencontainers.image.authors="miracum.org" \
-    org.opencontainers.image.vendor="miracum.org" \
-    org.opencontainers.image.source="https://github.com/miracum/recruit" \
-    org.opencontainers.image.url="https://miracum.github.io/recruit/" \
-    org.opencontainers.image.documentation="https://miracum.github.io/recruit/" \
-    org.opencontainers.image.version=${VERSION} \
-    org.opencontainers.image.licenses="AGPL-3.0" \
-    org.opencontainers.image.revision=${GIT_REF} \
-    org.opencontainers.image.title="list" \
-    org.opencontainers.image.description="Container image for the list module of the recruIT infrastructure"

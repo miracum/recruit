@@ -51,6 +51,10 @@ dependencies {
     implementation 'io.micrometer:micrometer-registry-prometheus:1.9.3'
     implementation 'io.micrometer:micrometer-core:1.9.3'
 
+    constraints {
+        implementation('org.apache.commons:commons-text:1.10.0')
+    }
+
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -66,6 +70,24 @@ jar {
     enabled = false
 }
 
+bootJar {
+    layered {
+        application {
+            intoLayer("spring-boot-loader") {
+                include("org/springframework/boot/loader/**")
+            }
+            intoLayer("application")
+        }
+        dependencies {
+            intoLayer("module-dependencies") {
+                include("org.miracum:*:*")
+            }
+            intoLayer("dependencies")
+        }
+        layerOrder = [ "dependencies", "spring-boot-loader", "module-dependencies", "application" ]
+    }
+}
+
 jacoco {
 }
 
@@ -77,14 +99,14 @@ jacocoTestReport {
     }
 }
 
-spotless {
-    java {
-        importOrder()
-        removeUnusedImports()
-        googleJavaFormat()
-        toggleOffOn()
-    }
-}
+// spotless {
+//     java {
+//         importOrder()
+//         removeUnusedImports()
+//         googleJavaFormat()
+//         toggleOffOn()
+//     }
+// }
 
 checkstyle {
     toolVersion '10.3.3'

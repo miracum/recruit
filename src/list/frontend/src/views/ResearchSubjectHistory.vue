@@ -94,13 +94,9 @@ export default {
   },
   methods: {
     getHistoryNote(researchSubject) {
-      return fhirpath.evaluate(
-        researchSubject,
-        "ResearchSubject.extension(%noteExtensionUrl).valueString",
-        {
-          noteExtensionUrl: Constants.URL_NOTE_EXTENSION,
-        }
-      )[0];
+      return fhirpath.evaluate(researchSubject, "ResearchSubject.extension(%noteExtensionUrl).valueString", {
+        noteExtensionUrl: Constants.URL_NOTE_EXTENSION,
+      })[0];
     },
     translateSubjectStatus(status) {
       return Constants.STATUS_TRANSLATION[status];

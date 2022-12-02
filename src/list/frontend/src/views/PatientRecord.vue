@@ -9,25 +9,13 @@
       </b-message>
       <template v-else>
         <header class="has-text-centered">
-          <h1 class="title is-3">
-            Patient {{ mrNumber || record.patient.id }}
-          </h1>
+          <h1 class="title is-3">Patient {{ mrNumber || record.patient.id }}</h1>
           <h2 class="subtitle is-5">
             <span>
               geb.
+              {{ record.patient.birthDate ? new Date(record.patient.birthDate).getFullYear() : "unbekannt" }},
               {{
-                record.patient.birthDate
-                  ? new Date(record.patient.birthDate).getFullYear()
-                  : "unbekannt"
-              }},
-              {{
-                record.patient
-                  ? record.patient.gender === "male"
-                    ? "m"
-                    : record.patient.gender === "female"
-                    ? "w"
-                    : "u"
-                  : "u"
+                record.patient ? (record.patient.gender === "male" ? "m" : record.patient.gender === "female" ? "w" : "u") : "u"
               }}
             </span>
           </h2>
@@ -58,10 +46,7 @@
               <b-icon icon="pills"></b-icon>
               <span>
                 Medikation
-                <b-tag rounded>{{
-                  record.medicationStatements.length +
-                  record.medicationAdministrations.length
-                }}</b-tag>
+                <b-tag rounded>{{ record.medicationStatements.length + record.medicationAdministrations.length }}</b-tag>
               </span>
             </template>
             <medication-list
@@ -135,35 +120,17 @@ export default {
     try {
       const record = await Api.fetchPatientRecord(this.patientId);
       if (record.length !== 0) {
-        [this.record.patient] = fhirpath.evaluate(
-          record,
-          "where(resourceType='Patient')"
-        );
+        [this.record.patient] = fhirpath.evaluate(record, "where(resourceType='Patient')");
 
-        this.record.conditions = fhirpath.evaluate(
-          record,
-          "where(resourceType='Condition')"
-        );
+        this.record.conditions = fhirpath.evaluate(record, "where(resourceType='Condition')");
 
-        this.record.medicationAdministrations = fhirpath.evaluate(
-          record,
-          "where(resourceType='MedicationAdministration')"
-        );
+        this.record.medicationAdministrations = fhirpath.evaluate(record, "where(resourceType='MedicationAdministration')");
 
-        this.record.medicationStatements = fhirpath.evaluate(
-          record,
-          "where(resourceType='MedicationStatement')"
-        );
+        this.record.medicationStatements = fhirpath.evaluate(record, "where(resourceType='MedicationStatement')");
 
-        this.record.procedures = fhirpath.evaluate(
-          record,
-          "where(resourceType='Procedure')"
-        );
+        this.record.procedures = fhirpath.evaluate(record, "where(resourceType='Procedure')");
 
-        this.record.observations = fhirpath.evaluate(
-          record,
-          "where(resourceType='Observation')"
-        );
+        this.record.observations = fhirpath.evaluate(record, "where(resourceType='Observation')");
       } else {
         this.noData = true;
       }

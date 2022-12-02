@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   fhir:
-    image: docker.io/hapiproject/hapi:v6.0.1
+    image: docker.io/hapiproject/hapi:v6.2.1@sha256:8d1b4c1c8abd613f685267a3dda494d87aba4cff449eed39902a6ece2c086f3c
     environment:
       HAPI_FHIR_VALIDATION_REQUESTS_ENABLED: "true"
       HAPI_FHIR_SUBSCRIPTION_RESTHOOK_ENABLED: "true"
@@ -26,7 +26,7 @@ services:
       - fhir
 
   jaeger:
-    image: jaegertracing/all-in-one:1.37
+    image: docker.io/jaegertracing/all-in-one:1.38@sha256:14cf2943199c15caa9547e488f4423f44941d45db8a99db229f70f1351425ac8
     environment:
       COLLECTOR_OTLP_ENABLED: "true"
     ports:
@@ -36,7 +36,7 @@ services:
       - 4317:4317
 
   keycloak:
-    image: quay.io/keycloak/keycloak:15.1.1
+    image: quay.io/keycloak/keycloak:15.1.1@sha256:abade9a9cf985b454b30a9119183e62a0018ec546c8fc4fbd8572457afb4a666
     command:
       - -Dkeycloak.migration.action=import
       - -Dkeycloak.migration.provider=singleFile
@@ -50,7 +50,7 @@ services:
       - 8083:8080
 
   fhir-pseudonymizer:
-    image: ghcr.io/miracum/fhir-pseudonymizer:v2.12.0
+    image: ghcr.io/miracum/fhir-pseudonymizer:v2.14.1@sha256:88ce9e7e6fed73374b309f85b8a09011d815df2598c8926e7e9ebd4bf8f8d20b
     environment:
       APIKEY: "fhir-pseudonymizer-api-key"
       TRACING__ENABLED: "true"

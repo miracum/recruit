@@ -9,8 +9,11 @@ describe("PatientRecord", () => {
   });
   context("after loading lists from server", () => {
     beforeEach(() => {
-      cy.server();
-      cy.route("GET", patientRequestUrl).as("getRecord");
+      cy.intercept({
+        method: "GET",
+        path: patientRequestUrl,
+      }).as("getRecord");
+
       cy.visit("/patients/1/record", {
         onBeforeLoad: (win) => {
           // eslint-disable-next-line no-param-reassign

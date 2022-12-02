@@ -1,10 +1,10 @@
 const oidcConfig = {
-  root: Cypress.env("KEYCLOAK") || "http://localhost:8083",
+  root: Cypress.env("KEYCLOAK_URL") || "http://localhost:8083",
   realm: "MIRACUM",
   username: "user1",
   password: "user1",
   client_id: "uc1-screeninglist",
-  redirect_uri: "http://list:8080/",
+  redirect_uri: Cypress.env("REDIRECT_URL") || "http://localhost:8080/",
 };
 
 // using the object spread operator causes the following error:

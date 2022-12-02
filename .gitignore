@@ -446,3 +446,6 @@ cython_debug/
 .kpt-pipeline/
 
 obj/
+
+**/tests/e2e/screenshots
+**/tests/e2e/videos

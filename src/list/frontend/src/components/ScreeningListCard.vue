@@ -3,16 +3,16 @@
     <div class="card-content">
       <div class="media">
         <div class="media-left">
-          <b-tag type="is-primary" size="is-large" rounded>{{
-              numberOfResearchSubjects
-          }}</b-tag>
+          <b-tag type="is-primary" size="is-large" rounded>{{ numberOfResearchSubjects }}</b-tag>
         </div>
         <div class="media-content">
           <div class="content">
-            <router-link :to="{
-              name: 'patient-recommendations-by-id',
-              params: { listId: list.id },
-            }">
+            <router-link
+              :to="{
+                name: 'patient-recommendations-by-id',
+                params: { listId: list.id },
+              }"
+            >
               <h4 class="title is-4 mb-0">
                 {{ displayName }}
               </h4>
@@ -21,9 +21,7 @@
         </div>
         <div v-if="showActiveToggle" class="media-right">
           <b-field>
-            <b-switch :value="isActive" @click.native.prevent="onInput">{{
-                isActive ? "Aktiv" : "Inaktiv"
-            }}</b-switch>
+            <b-switch :value="isActive" @click.native.prevent="onInput">{{ isActive ? "Aktiv" : "Inaktiv" }}</b-switch>
           </b-field>
         </div>
         <div v-if="!isActive">
@@ -32,7 +30,6 @@
             </b-button>
           </b-tooltip>
         </div>
-
       </div>
     </div>
   </div>
@@ -61,21 +58,13 @@ export default {
   },
   computed: {
     displayName() {
-      const study = fhirpath.evaluate(
-        this.list,
-        "List.extension(%url).valueReference",
-        {
-          url: Constants.URL_LIST_BELONGS_TO_STUDY_EXTENSION,
-        }
-      )[0];
+      const study = fhirpath.evaluate(this.list, "List.extension(%url).valueReference", {
+        url: Constants.URL_LIST_BELONGS_TO_STUDY_EXTENSION,
+      })[0];
 
-      const acronym = fhirpath.evaluate(
-        study,
-        "ResearchStudy.extension(%acronymSystem).valueString",
-        {
-          acronymSystem: Constants.SYSTEM_STUDY_ACRONYM,
-        }
-      )[0];
+      const acronym = fhirpath.evaluate(study, "ResearchStudy.extension(%acronymSystem).valueString", {
+        acronymSystem: Constants.SYSTEM_STUDY_ACRONYM,
+      })[0];
 
       return acronym || study.title || study.description;
     },
@@ -92,10 +81,9 @@ export default {
     },
     deleteStudy() {
       this.$emit("deleteList", { list: this.list });
-    }
+    },
   },
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

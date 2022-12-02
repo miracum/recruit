@@ -12,8 +12,11 @@ describe("ScreeningListOverview as a regular user", () => {
   });
   context("after loading lists from server", () => {
     beforeEach(() => {
-      cy.server();
-      cy.route("GET", listRequestUrl).as("getLists");
+      cy.intercept({
+        method: "GET",
+        path: listRequestUrl,
+      }).as("getLists");
+
       cy.visit("/", {
         onBeforeLoad: (win) => {
           // eslint-disable-next-line no-param-reassign
@@ -58,8 +61,11 @@ describe("ScreeningListOverview as an admin user", () => {
   });
   context("after loading lists from server", () => {
     beforeEach(() => {
-      cy.server();
-      cy.route("GET", listRequestUrl).as("getLists");
+      cy.intercept({
+        method: "GET",
+        path: listRequestUrl,
+      }).as("getLists");
+
       cy.visit("/", {
         onBeforeLoad: (win) => {
           // eslint-disable-next-line no-param-reassign
@@ -78,18 +84,14 @@ describe("ScreeningListOverview as an admin user", () => {
     });
 
     it("moves inactive study to list of active ones when clicking the toggle button", () => {
-      cy.get(
-        ".inactive-screening-lists > .screening-list-card > .card-content > .media > .media-right > .field"
-      ).click();
+      cy.get(".inactive-screening-lists > .screening-list-card > .card-content > .media > .media-right > .field").click();
 
       cy.get(".active-screening-lists > .card", { timeout: 30000 }).should("have.length", 4);
       cy.get(".inactive-screening-lists > .card", { timeout: 30000 }).should("have.length", 0);
     });
 
     it("moves active study back to list of inactive ones when clicking the toggle button", () => {
-      cy.get(
-        ".active-screening-lists > :nth-child(5) > .card-content > .media > .media-right > .field > .switch"
-      ).click();
+      cy.get(".active-screening-lists > :nth-child(5) > .card-content > .media > .media-right > .field > .switch").click();
 
       cy.get(".active-screening-lists > .card", { timeout: 30000 }).should("have.length", 3);
       cy.get(".inactive-screening-lists > .card", { timeout: 30000 }).should("have.length", 1);

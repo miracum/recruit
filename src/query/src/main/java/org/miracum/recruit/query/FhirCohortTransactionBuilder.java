@@ -59,7 +59,7 @@ public class FhirCohortTransactionBuilder {
 
   private final CodeableConcept markedAsNoLongerEligibleBySystemConcept;
 
-  @Value("${app.version}")
+  @Value("${query.version}")
   private String appVersion;
 
   public FhirCohortTransactionBuilder(

@@ -1,6 +1,8 @@
 # Configuration file for MegaLinter
 # See all available variables at https://oxsecurity.github.io/megalinter/configuration/ and in linters documentation
 
+IGNORE_GITIGNORED_FILES: true
+
 APPLY_FIXES: none # all, none, or list of linter keys
 DISABLE_LINTERS:
   - MARKDOWN_MARKDOWN_TABLE_FORMATTER
@@ -16,6 +18,8 @@ DISABLE_LINTERS:
   - JAVA_PMD
   - JAVA_CHECKSTYLE
   - PYTHON_PYRIGHT
+  # error - python package "--hash" is available for public registration. /github/workspace/src/query/tests/e2e/requirements.txt
+  - REPOSITORY_DUSTILOCK
 
 SHOW_ELAPSED_TIME: true
 FILEIO_REPORTER: false
@@ -36,3 +40,4 @@ JAVA_CHECKSTYLE_CONFIG_FILE: src/config/checkstyle/checkstyle.xml
 
 REPOSITORY_TRIVY_ARGUMENTS:
   - "--severity='MEDIUM,HIGH,CRITICAL'"
+  - "--ignore-unfixed"
