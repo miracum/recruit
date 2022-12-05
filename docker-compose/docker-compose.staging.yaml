@@ -99,7 +99,7 @@ services:
       - "traefik.http.routers.ohdsi-atlas.entrypoints=web"
 
   fhir:
-    image: docker.io/hapiproject/hapi:v6.2.1@sha256:8d1b4c1c8abd613f685267a3dda494d87aba4cff449eed39902a6ece2c086f3c
+    image: docker.io/hapiproject/hapi:v6.2.2@sha256:9c4e8af94d81ac0049dbb589e4cd855bf78c9c13be6f6844e814c63d63545b44
     restart: unless-stopped
     cap_drop:
       - ALL
