@@ -98,18 +98,6 @@ public class Startup {
     retryListenerSupport();
     createSubscription(retryTemplate);
     loadReceiverList(retryTemplate);
-
-    informAboutMessagesInErrorState();
-  }
-
-  private void informAboutMessagesInErrorState() {
-    List<CommunicationRequest> errorMessages = fhirServerProvider.getErrorMessages();
-
-    for (CommunicationRequest messageInErrorState : errorMessages) {
-      LOG.warn(
-          "communication resource in error state: {}, please reset manually to \"active\"",
-          messageInErrorState.getIdElement().getIdPart());
-    }
   }
 
   private void retryListenerSupport() {

@@ -218,11 +218,6 @@ public class FhirServerProvider {
     return allMessages;
   }
 
-  /** Query top 100 communication resources with state ONHOLD. */
-  public List<CommunicationRequest> getErrorMessages() {
-    return getCommunicationRequestsIncludingRecipientsByStatus(CommunicationRequestStatus.ONHOLD);
-  }
-
   /**
    * Query communication resources from target fhir server and with given fhir system that are in
    * state active to be delivered.
@@ -236,7 +231,6 @@ public class FhirServerProvider {
   }
 
   public void executeSingleConditionalCreate(List<Practitioner> practitioners) {
-
     for (Practitioner practitioner : practitioners) {
       var contactPoint = PractitionerUtils.getFirstEmailFromPractitioner(practitioner);
       if (contactPoint.isPresent()) {

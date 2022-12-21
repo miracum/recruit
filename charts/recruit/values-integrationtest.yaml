@@ -36,7 +36,7 @@ notify:
         subscriptions:
           - email: "everything@example.com"
 
-      - acronym: "SAMPLE"
+      - acronym: "Demo new users of diclofenac"
         accessibleBy:
           users:
             - "user1"
@@ -44,6 +44,7 @@ notify:
         subscriptions:
           - email: "everyMorning@example.com"
             notify: "everyMorning"
+          - email: "demo@example.com"
 
 postgresql:
   enabled: true

@@ -15,7 +15,7 @@ spec:
           - /opt/chaos-tester/tester.dll
         args:
           - "assert"
-          - "--expected-number-of-messages=1"
+          - "--expected-number-of-messages=2"
           - "--mailhog-api-base-url=http://recruit-mailhog:8025/api/"
           - "--retries=10"
         securityContext:
