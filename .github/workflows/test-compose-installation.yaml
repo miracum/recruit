@@ -1,15 +1,11 @@
-name: test-deployments
+name: test-docker-compose
 on:
-  pull_request:
-    paths:
-      - "docker-compose/**"
-    branches:
-      - master
+  workflow_call: {}
 
 permissions: read-all
 
 jobs:
-  test-compose-deployment:
+  test:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0

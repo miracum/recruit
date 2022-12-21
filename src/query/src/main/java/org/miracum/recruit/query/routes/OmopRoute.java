@@ -159,7 +159,8 @@ public class OmopRoute extends RouteBuilder {
 
     from(CLEAR_CACHE)
         .log("clear cohort cache")
-        .to("sql:TRUNCATE TABLE {{query.webapi.cohort-cache.schema}}.generation_cache CONTINUE IDENTITY RESTRICT;")
+        .to(
+            "sql:TRUNCATE TABLE {{query.webapi.cohort-cache.schema}}.generation_cache CONTINUE IDENTITY RESTRICT;")
         .log("done clearing cohort cache");
   }
 }

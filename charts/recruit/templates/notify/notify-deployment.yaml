@@ -165,7 +165,7 @@ spec:
             {{- end }}
           volumeMounts:
             - name: notification-configuration-file
-              mountPath: /opt/notify/config/notify-rules/application.yaml
+              mountPath: /app/config/notify-rules/application.yaml
               subPath: application.yaml
               readOnly: true
             - mountPath: /tmp

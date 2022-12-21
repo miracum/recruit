@@ -84,3 +84,7 @@ annotations:
         Mostly required for integration testing where the notify module may be unavailble
         before the query module creates first recommendations therefore causing the FHIR server
         to not be able to trigger the subscription webhook of notify.
+    - kind: changed
+      description: |
+        mount the notify-rules config at the `/app` path instead of `/opt/notify` due to standardizing the base
+        directory for all containers to `/app`.

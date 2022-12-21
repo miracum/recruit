@@ -1,8 +1,7 @@
 extends: default
 
 ignore: |
-  node_modules/
-  charts/**/templates/
+  charts/**/templates/**
 
 rules:
   line-length: disable

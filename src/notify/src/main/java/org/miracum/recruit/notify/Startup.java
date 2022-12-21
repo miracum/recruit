@@ -8,7 +8,6 @@ import java.net.URL;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CommunicationRequest;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Practitioner;

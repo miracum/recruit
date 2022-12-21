@@ -41,3 +41,5 @@ JAVA_CHECKSTYLE_CONFIG_FILE: src/config/checkstyle/checkstyle.xml
 REPOSITORY_TRIVY_ARGUMENTS:
   - "--severity='MEDIUM,HIGH,CRITICAL'"
   - "--ignore-unfixed"
+
+YAML_YAMLLINT_CONFIG_FILE: .yamllint.yaml
