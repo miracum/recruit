@@ -13,7 +13,9 @@ npm install
 docker-compose -f deploy/docker-compose.dev.yml up
 ```
 
-The patient identifiers in [sample-record-1.json](deploy/data/sample-record-1.json) have been encrypted to show how de-pseudonymization works.
+The patient identifiers in [sample-record-1.json](deploy/data/sample-record-1.json) have been encrypted to show how
+de-pseudonymization works.
+
 The `docker-compose.dev.yml` contains the fhir-pseudonymizer service configured to decrypt these identifiers.
 
 You can then enabled it by setting `DE_PSEUDONYMIZATION_ENABLED=1` before running `npm run server:watch`.
@@ -99,19 +101,25 @@ You can find screenshots and videos of the E2E tests inside the [tests/e2e](test
 
 ### Keycloak
 
-For development, a Keycloak server with a pre-configured test realm called "MIRACUM" is included in `docker-compose.dev.yaml`. It sets up a `uc1-screeninglist` client, representing this application. It also includes a few sample users to test the access control:
+For development, a Keycloak server with a pre-configured test realm called "MIRACUM" is included in
+`docker-compose.dev.yaml`.
+It sets up a `uc1-screeninglist` client, representing this application. It also includes a few sample users to test the
+access control:
 
 - name: admin, password: admin (Keycloak Admin)
 - name: user1, password: user1
 - name: user2, password: user2
 - name: user3, password: user3
-- name: uc1-admin, password: admin (has the `admin` role in the `uc1-screeninglist` client and therefore allowed to access everything)
+- name: uc1-admin, password: admin (has the `admin` role in the `uc1-screeninglist` client and therefore allowed to
+  access everything)
 
-The repo also contains a set of sample authorization rules in [notify-rules.dev.yaml](notify-rules.dev.yaml) which are automatically loaded for development.
+The repo also contains a set of sample authorization rules in [notify-rules.dev.yaml](../notify-rules.dev.yaml) which
+are automatically loaded for development.
 
 #### Disable Keycloak
 
-For testing and development, it might be easier to disable Keycloak entirely. When running with `npm run serve`, you'll need to modify [config-dev.json](public/config-dev.json) and set `isKeycloakDisabled` to `true`.
+For testing and development, it might be easier to disable Keycloak entirely. When running with `npm run serve`, you'll
+need to modify [config-dev.json](public/config-dev.json) and set `isKeycloakDisabled` to `true`.
 When running the server, you'll need to set the env var `KEYCLOAK_DISABLED=true`.
 
 #### Export Keycloak realm config
@@ -133,5 +141,7 @@ When you make changes to the test realm, you can do the following to keep the in
 
 ### Configure Table Columns
 
-Editing the shown tablecolumns is possible. When running with `npm run serve`, you'll need to modify [config-dev.json](public/config-dev.json) and set `hideDemographics`, `hideLastVisit` and/or `hideEhrButton` to `true`.
+Editing the shown tablecolumns is possible. When running with `npm run serve`, you'll need to modify
+[config-dev.json](public/config-dev.json) and set `hideDemographics`, `hideLastVisit` and/or `hideEhrButton` to `true`.
+
 When running the server, you'll need to set the env vars `HIDE_DEMOGRAPHICS=true`, `HIDE_LAST_VISIT=true`, `HIDE_EHR_BUTTON=true`.

@@ -21,7 +21,7 @@ and newly installing version 9.
 
 We assume that the chart was initially installed as follows:
 
-> ⚠️ [docs/migrations/v8-to-v9/values-v8.yaml](docs/migrations/v8-to-v9/values-v8.yaml) has enabled the notify module's HA-mode.
+> ⚠️ [docs/migrations/v8-to-v9/values-v8.yaml](migrations/v8-to-v9/values-v8.yaml) has enabled the notify module's HA-mode.
 > Since this is a recent feature, disabled by default, you most likely have not enabled it and may want to set
 > `notify.ha.enabled=false` and `postgresql.enabled=false` to keep HA disabled.
 

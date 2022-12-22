@@ -27,8 +27,6 @@ USER 65532:65532
 ENV DOTNET_ENVIRONMENT="Production" \
     DOTNET_CLI_TELEMETRY_OPTOUT=1
 
-# https://github.com/hadolint/hadolint/pull/815 isn't yet in mega-linter
-# hadolint ignore=DL3022
 COPY --from=docker.io/bitnami/kubectl:1.24.8@sha256:539065b76186a6091e814296a98965c65bc16eed9b6edd647628979d2a1eece5 /opt/bitnami/kubectl/bin/kubectl /usr/bin/kubectl
 
 COPY ./sample-list-bundle.json /tmp/

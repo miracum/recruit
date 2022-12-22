@@ -20,6 +20,8 @@ DISABLE_LINTERS:
   - PYTHON_PYRIGHT
   # error - python package "--hash" is available for public registration. /github/workspace/src/query/tests/e2e/requirements.txt
   - REPOSITORY_DUSTILOCK
+  # seems to ignore yamllint config file entirely
+  - YAML_YAMLLINT
 
 SHOW_ELAPSED_TIME: true
 FILEIO_REPORTER: false
@@ -41,5 +43,3 @@ JAVA_CHECKSTYLE_CONFIG_FILE: src/config/checkstyle/checkstyle.xml
 REPOSITORY_TRIVY_ARGUMENTS:
   - "--severity='MEDIUM,HIGH,CRITICAL'"
   - "--ignore-unfixed"
-
-YAML_YAMLLINT_CONFIG_FILE: .yamllint.yaml
