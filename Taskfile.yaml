@@ -12,7 +12,7 @@ tasks:
       - skaffold build --tag={{ .IMAGE_TAG }}
       - docker build -t ghcr.io/miracum/recruit/tester:v1 ../tests/chaos/tester
 
-  e2e-k8s-prepare:
+  helm-add-repos:
     cmds:
       - helm repo add argo https://argoproj.github.io/argo-helm
       - helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -20,6 +20,11 @@ tasks:
       - helm repo add chgl https://chgl.github.io/charts
       - helm repo add hapifhir https://hapifhir.github.io/hapi-fhir-jpaserver-starter
       - helm repo add miracum https://miracum.github.io/charts
+
+  e2e-k8s-prepare:
+    deps:
+      - helm-add-repos
+    cmds:
       - kind create cluster
       - kubectl create namespace recruit
       - |

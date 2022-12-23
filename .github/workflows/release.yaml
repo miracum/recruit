@@ -1,49 +1,92 @@
 name: release
 
 on:
-  release:
-    types:
-      - created
+  workflow_call: {}
 
 permissions: read-all
 
 jobs:
+  publish-helm-chart:
+    name: publish helm chart
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+
+      - name: Install Task
+        uses: arduino/setup-task@d665c6beebae46ff3f699d7b2fd3f1959de7153c # tag=1.0.2
+
+      - name: Add helm repos and update deps
+        run: |
+          task helm-add-repos
+          helm dep build charts/recruit
+
+      # TODO: package it, and push it at least to an OCI registry.
+      #       maybe create a PR to miracum/charts with just the one folder's changes.
+      - name: Package Helm chart
+        run: |
+          CHART_VERSION=$(yq .version charts/recruit/Chart.yaml)
+          helm package charts/recruit/
+          cp "recruit-${CHART_VERSION}.tgz" recruit-helm-chart.tgz
+
+      - uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3.1.0
+        with:
+          name: release-assets
+          path: |
+            recruit-helm-chart.tgz
+
   prepare-artifacts:
     name: prepare artifacts
     runs-on: ubuntu-22.04
     container: ghcr.io/chgl/kube-powertools:v1.22.2@sha256:a8a2649b29be23756d830bb98a5ac71cca515e35886df90b3116293c03bfc0fc
+    needs:
+      - publish-helm-chart
     outputs:
       hashes: ${{ steps.hash.outputs.hashes }}
     steps:
       - name: Checkout
         uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
 
+      - name: Download Helm chart
+        uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 # tag=v3
+        with:
+          name: release-assets
+
+      - name: Create dist dir
+        run: |
+          mkdir -p dist/
+
+      - name: Add Helm chart to dist
+        run: |
+          cp release-assets/recruit-helm-chart.tgz dist/
+
       # TODO: replace tags with digests in compose - requires waiting for ci/build to be completed
       #       turn this workflow into a reusable one and call it at the end of ci.yaml
       #       yq '(.services[].image | select(. == "ghcr.io/miracum/recruit/list:*")) += "@sha256:123456"'  docker-compose/docker-compose.yaml
       - name: Build Docker Compose deployment bundle
         run: |
-          mkdir -p dist/
           cp -r docker-compose/ dist/
-          tar -C dist -zcvf dist/recruit-docker-compose.tar.gz docker-compose/
+          tar -C dist -zcvf dist/recruit-docker-compose.tgz docker-compose/
 
       - name: Build SBOM bundle from container images
         run: |
           ./.github/generate-sboms.sh
           cp -r sboms/ dist/
-          tar -C dist -zcvf dist/recruit-container-sboms.tar.gz sboms/
+          tar -C dist -zcvf dist/recruit-container-sboms.tgz sboms/
 
-      - name: Generate SLSA subject for Docker Compose and SBOM bundles
+      - name: Generate SLSA subject for release assets
         id: hash
         working-directory: dist
         run: |
-          sha256sum recruit-docker-compose.tar.gz recruit-container-sboms.tar.gz > recruit-hashes.sha256
+          sha256sum recruit-docker-compose.tgz recruit-container-sboms.tgz recruit-helm-chart.tgz > recruit-hashes.sha256
           echo "hashes=$(base64 -w0 < recruit-hashes.sha256)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3.1.0
         with:
           name: release-assets
-          path: dist/*.tar.gz
+          path: |
+            dist/*.tgz
+            dist/*.sha256
 
   provenance:
     needs:
@@ -69,16 +112,15 @@ jobs:
         with:
           name: "${{ needs.provenance.outputs.attestation-name }}"
 
-      - name: Download docker-compose
+      - name: Download assets
         uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 # tag=v3
         with:
           name: release-assets
 
-      # TODO: upload helm chart
       - name: upload attestation to release
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # tag=v1
         with:
           files: |
             "${{ needs.provenance.outputs.attestation-name }}"
-            release-assets/recruit-docker-compose.tar.gz
-            release-assets/recruit-container-sboms.tar.gz
+            release-assets/*.tgz
+            release-assets/*.sha256

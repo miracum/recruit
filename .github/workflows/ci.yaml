@@ -57,7 +57,7 @@ jobs:
     with:
       image-tag: ${{ needs.build.outputs.image-tag }}
 
-  test-docker-compose:
+  docker-compose-tests:
     # the docker compose image tags only change on releases, so
     # it's sufficient to just run tests then.
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
@@ -65,3 +65,12 @@ jobs:
       - build
       - test
     uses: ./.github/workflows/test-compose-installation.yaml
+
+  release:
+    # the docker compose image tags only change on releases, so
+    # it's sufficient to just run tests then.
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    needs:
+      - integration-tests
+      - docker-compose-tests
+    uses: ./.github/workflows/release.yaml
