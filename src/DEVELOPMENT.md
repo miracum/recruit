@@ -5,7 +5,31 @@
 From the `/src` directory:
 
 ```sh
-docker compose -f docker-compose.dev.yaml --profile=list-dev --profile=traefik up
+docker compose -f hack/docker-compose.yaml up
+```
+
+This will start all development dependencies:
+
+- OHDSI WebAPI
+- OHDSI ATLAS
+- Broadsea Atlasdb - a pre-filled OMOP database
+- Traefik
+- HAPI FHIR JPA Server
+- Jaeger
+- MailDev
+
+If you want to start any of the recruIT modules as containers, you can specify the corresponding `--profile` switch.
+For example, when working on the query module, it might be useful to run the screening list and the notify module
+for debugging. The following will start all development dependencies as well as build and run the list and notify containers:
+
+```sh
+docker compose -f hack/docker-compose.yaml --profile=notify --profile=list up
+```
+
+You can then start the query module via gradle by running
+
+```sh
+./gradlew :query:bootRun
 ```
 
 ## Building Container Images

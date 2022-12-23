@@ -1,4 +1,7 @@
-build/
 .gradle/
-bin/
+**/build/
+**/bin/
 list/
+gradle/
+hack/
+tests/

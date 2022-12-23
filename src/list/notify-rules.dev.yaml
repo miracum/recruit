@@ -11,12 +11,14 @@ notify:
       # user1 and user2 are allowed to access screening recommendations for
       # the 'PROSa' study
       - acronym: "PROSa"
+        subscriptions: []
         accessibleBy:
           users:
             - "user1"
             - "user2"
 
       - acronym: "SECRET"
+        subscriptions: []
         accessibleBy:
           users:
             - "user1"
