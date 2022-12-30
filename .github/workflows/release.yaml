@@ -9,9 +9,18 @@ jobs:
   publish-helm-chart:
     name: publish helm chart
     runs-on: ubuntu-22.04
+    permissions:
+      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b # tag=v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Task
         uses: arduino/setup-task@d665c6beebae46ff3f699d7b2fd3f1959de7153c # tag=1.0.2
@@ -21,12 +30,15 @@ jobs:
           task helm-add-repos
           helm dep build charts/recruit
 
-      # TODO: package it, and push it at least to an OCI registry.
-      #       maybe create a PR to miracum/charts with just the one folder's changes.
+      # TODO: maybe create a PR to miracum/charts with just the one folder's changes.
+      # TODO: maybe replace image tags in values.yaml with digests before packaging
       - name: Package Helm chart
         run: |
           CHART_VERSION=$(yq .version charts/recruit/Chart.yaml)
+
           helm package charts/recruit/
+          helm push "recruit-${CHART_VERSION}.tgz" oci://ghcr.io/${{ github.repository }}/charts
+
           cp "recruit-${CHART_VERSION}.tgz" recruit-helm-chart.tgz
 
       - uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3.1.0
@@ -107,17 +119,14 @@ jobs:
       contents: write
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
-        with:
-          name: "${{ needs.provenance.outputs.attestation-name }}"
+      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
 
       - name: Download assets
         uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 # tag=v3
         with:
           name: release-assets
 
-      - name: upload attestation to release
+      - name: upload assets to release
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # tag=v1
         with:
           files: |

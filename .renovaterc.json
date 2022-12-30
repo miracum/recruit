@@ -13,5 +13,8 @@
       "extends": ["schedule:daily"]
     }
   ],
-  "ignorePaths": ["**/node_modules/**", "**/bower_components/**"]
+  "ignorePaths": ["**/node_modules/**", "**/bower_components/**"],
+  "pip-compile": {
+    "fileMatch": ["(^|/|\\.)requirements\\.in$"]
+  }
 }

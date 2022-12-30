@@ -163,9 +163,15 @@ static async System.Threading.Tasks.Task RunAssert(Uri mailHogServerBaseUrl, int
 
         Console.WriteLine($"Expected message count is {expectedMessageCount}. Actual: {response.Total}. Attempt: {i + 1}");
 
-        if (expectedMessageCount != response.Total && i == retries - 1)
+        if (expectedMessageCount == response.Total)
         {
-            throw new Exception($"response.Total ({response.Total}) is not the expected {expectedMessageCount}.");
+            Console.WriteLine("✅ Found expected message count!");
+            break;
+        }
+
+        if (i == retries - 1)
+        {
+            throw new Exception($"response.Total ({response.Total}) is not the expected {expectedMessageCount} after {i + 1} attempts.");
         }
 
         await System.Threading.Tasks.Task.Delay(TimeSpan.FromMinutes(1));

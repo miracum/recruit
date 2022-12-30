@@ -30,14 +30,14 @@ dependencies:
   - condition: mailhog.enabled
     name: mailhog
     repository: https://codecentric.github.io/helm-charts
-    version: 5.2.1
+    version: 5.2.2
   - condition: postgresql.enabled
     name: postgresql
     version: 12.1.2
     repository: https://charts.bitnami.com/bitnami
   - condition: fhir-pseudonymizer.enabled
     name: fhir-pseudonymizer
-    version: 0.3.2
+    version: 0.3.3
     repository: https://miracum.github.io/charts
 # x-release-please-start-version
 version: 10.0.0
@@ -77,14 +77,17 @@ annotations:
     - kind: changed
       description: "⚠️ BREAKING CHANGE: updated included hapi-fhir-jpaserver chart to v0.11.0, which internally uses a v12 postgresql chart based on PostgreSQL 15.1"
     - kind: changed
-      description: "updated included fhir-pseudonymizer chart to v0.3.2"
+      description: "updated fhir-pseudonymizer sub-chart to v0.3.3"
+    - kind: changed
+      description: "updated mailhog sub-chart to v5.2.2"
     - kind: changed
       description: |
-        added an init container to wait for the notify module to the query deployment.
-        Mostly required for integration testing where the notify module may be unavailble
+        "added an init container to the query module deployment to wait for the notify module to be ready.
+        Required for integration testing where the notify module may be unavailable
         before the query module creates first recommendations therefore causing the FHIR server
         to not be able to trigger the subscription webhook of notify.
+        Can be disabled by setting `query.shouldWaitForNotify=false`."
     - kind: changed
       description: |
         mount the notify-rules config at the `/app` path instead of `/opt/notify` due to standardizing the base
-        directory for all containers to `/app`.
+        working directory for all containers to `/app`.

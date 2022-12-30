@@ -5,9 +5,9 @@
 ## TL;DR;
 
 ```console
-$ helm repo add {{ .Repository.Name }} {{ .Repository.URL }}
-$ helm repo update
-$ helm install {{ .Release.Name }} {{ .Repository.Name }}/{{ .Chart.Name }} -n {{ .Release.Namespace }}
+helm repo add {{ .Repository.Name }} {{ .Repository.URL }}
+helm repo update
+helm install {{ .Release.Name }} {{ .Repository.Name }}/{{ .Chart.Name }} -n {{ .Release.Namespace }}
 ```
 
 You can find more exhaustive documentation at the {{ .Project.Name }} documentation site: <https://miracum.github.io/recruit/deployment/kubernetes>.
@@ -30,7 +30,7 @@ See [UPGRADING.md](./docs/UPGRADING.md) for information on breaking changes intr
 To install the chart with the release name `{{ .Release.Name }}`:
 
 ```console
-$ helm install {{ .Release.Name }} {{ .Repository.Name }}/{{ .Chart.Name }} -n {{ .Release.Namespace }}
+helm install {{ .Release.Name }} {{ .Repository.Name }}/{{ .Chart.Name }} -n {{ .Release.Namespace }}
 ```
 
 The command deploys {{ .Project.App }} on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -42,7 +42,7 @@ The command deploys {{ .Project.App }} on the Kubernetes cluster in the default 
 To uninstall/delete the `{{ .Release.Name }}`:
 
 ```console
-$ helm delete {{ .Release.Name }} -n {{ .Release.Namespace }}
+helm delete {{ .Release.Name }} -n {{ .Release.Namespace }}
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
@@ -56,14 +56,14 @@ The following table lists the configurable parameters of the `{{ .Chart.Name }}`
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install {{ .Release.Name }} {{ .Repository.Name }}/{{ .Chart.Name }} -n {{ .Release.Namespace }} --set {{ .Chart.ValuesExample }}
+helm install {{ .Release.Name }} {{ .Repository.Name }}/{{ .Chart.Name }} -n {{ .Release.Namespace }} --set {{ .Chart.ValuesExample }}
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```console
-$ helm install {{ .Release.Name }} {{ .Repository.Name }}/{{ .Chart.Name }} -n {{ .Release.Namespace }} --values values.yaml
+helm install {{ .Release.Name }} {{ .Repository.Name }}/{{ .Chart.Name }} -n {{ .Release.Namespace }} --values values.yaml
 ```
 
 ## Configure Notifcation Rules

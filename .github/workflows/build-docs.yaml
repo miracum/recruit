@@ -21,7 +21,7 @@ jobs:
       - uses: actions/setup-python@5ccb29d8773c3f3f653e1705f474dfaa8a06a912 # v4.4.0
         with:
           python-version: 3.x
-      - run: pip install mkdocs-material==8.*
+      - run: pip install mkdocs-material==9.*
       - run: mkdocs build --strict --verbose --site-dir=./site
 
       # - name: build FHIR IG
