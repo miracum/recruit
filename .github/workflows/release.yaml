@@ -11,12 +11,12 @@ jobs:
   prepare-artifacts:
     name: Prepare Artifacts
     runs-on: ubuntu-22.04
-    container: ghcr.io/chgl/kube-powertools:v1.21.15@sha256:1e03ae35e7ca2f73686b1a74aed5720214d08e94eb039c7c62e9cbf286a47a38
+    container: ghcr.io/chgl/kube-powertools:v1.22.2@sha256:a8a2649b29be23756d830bb98a5ac71cca515e35886df90b3116293c03bfc0fc
     outputs:
       hashes: ${{ steps.hash.outputs.hashes }}
     steps:
       - name: Checkout
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
 
       - name: Build Docker Compose deployment bundle
         run: |
@@ -66,7 +66,7 @@ jobs:
       - provenance
     steps:
       - name: Checkout
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
         with:
           fetch-depth: 0
 
