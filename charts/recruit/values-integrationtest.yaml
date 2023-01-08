@@ -22,8 +22,6 @@ query:
     - name: QUERY_WEBAPI_COHORT_CACHE_SCHEMA
       value: webapi
 
-list: {}
-
 notify:
   ha:
     enabled: true

@@ -6,9 +6,21 @@ on:
   push:
     branches:
       - master
+  release:
+    types:
+      # If you want a workflow to run when stable and pre-releases publish, subscribe to published instead of released and prereleased.
+      # <https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#release>
+      - published
+
+permissions: read-all
 
 jobs:
   build:
+    permissions:
+      actions: read
+      contents: read
+      id-token: write # for creating OIDC tokens for signing.
+      packages: write # for uploading container images, signatures, and attestations.
     strategy:
       matrix:
         include:
@@ -49,28 +61,32 @@ jobs:
           image-tag: ${{ needs.build.outputs.image-tag }}
           e2e-test-directory: ${{ matrix.e2e-test-directory }}
 
-  integration-tests:
+  k8s-test:
     needs:
       - build
       - test
-    uses: ./.github/workflows/integration-test.yaml
+    uses: ./.github/workflows/test-k8s-installation.yaml
     with:
       image-tag: ${{ needs.build.outputs.image-tag }}
 
-  docker-compose-tests:
-    # the docker compose image tags only change on releases, so
-    # it's sufficient to just run tests then.
-    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+  docker-compose-test:
     needs:
       - build
       - test
     uses: ./.github/workflows/test-compose-installation.yaml
+    with:
+      image-tag: ${{ needs.build.outputs.image-tag }}
 
   release:
     # the docker compose image tags only change on releases, so
     # it's sufficient to just run tests then.
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    permissions:
+      actions: read
+      contents: write # for release notes
+      id-token: write # for creating OIDC tokens for signing.
+      packages: write # for uploading container images, signatures, and attestations.
     needs:
-      - integration-tests
-      - docker-compose-tests
+      - k8s-test
+      - docker-compose-test
     uses: ./.github/workflows/release.yaml

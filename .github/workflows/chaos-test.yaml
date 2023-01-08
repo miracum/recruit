@@ -32,12 +32,6 @@ jobs:
         with:
           cluster_name: kind
 
-      - name: Download container images
-        uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 # tag=v3.0.0
-        with:
-          name: tester-image-artifacts
-          path: /tmp
-
       - name: Load images into KinD
         run: |
           kind load docker-image ghcr.io/miracum/recruit/chaos-tester:v1

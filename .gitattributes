@@ -1,13 +1,8 @@
 * text=auto
-
-*.env text eol=lf
-
-*.sh text eol=lf
-
 gradlew text eol=lf
-
-*.bat text eol=crlf
-
+*.env text eol=lf
+*.sh text eol=lf
+*.shellcheckrc text eol=lf
+*.java text eol=lf
 *Dockerfile text eol=lf
-
-.java text eol=lf
+*.bat text eol=crlf

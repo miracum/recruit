@@ -11,7 +11,7 @@ services:
     read_only: true
     user: 65532:65532
     command: >
-      sh -euxc "curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://fhir:8080/fhir/metadata &&
+      sh -euxc "curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://fhir:8080/fhir/metadata?_summary=true &&
                 curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://query:8080/actuator/health &&
                 curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://notify:8080/actuator/health &&
                 curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://list:8080/api/health/readiness &&

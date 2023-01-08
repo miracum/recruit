@@ -1,6 +1,6 @@
 services:
   query:
-    image: ghcr.io/miracum/recruit/query:${IMAGE_TAG}
+    image: ${IMAGE_NAME:-ghcr.io/miracum/recruit/query}:${IMAGE_TAG}
     pull_policy: never
     environment:
       FHIR_URL: http://fhir:8080/fhir

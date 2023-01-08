@@ -1,16 +1,12 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>miracum/.github//renovate/default"],
-  "ignoreDeps": ["docker.io/library/postgres"],
+  "ignoreDeps": ["docker.io/library/postgres", "postgresql"],
   "packageRules": [
     {
       "updateTypes": ["minor", "patch", "pin", "digest"],
       "automerge": true,
       "requiredStatusChecks": null
-    },
-    {
-      "matchPackagePatterns": ["^ghcr\\.io\\/miracum\\/recruit"],
-      "extends": ["schedule:daily"]
     }
   ],
   "ignorePaths": ["**/node_modules/**", "**/bower_components/**"],

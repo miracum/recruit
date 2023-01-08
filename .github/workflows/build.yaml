@@ -1,7 +1,10 @@
 name: "build container image"
 
 permissions:
+  actions: read
   contents: read
+  id-token: write # for creating OIDC tokens for signing.
+  packages: write # for uploading container images, signatures, and attestations.
 
 on:
   workflow_call:
@@ -25,6 +28,9 @@ env:
 
 jobs:
   build:
+    permissions:
+      contents: read
+      packages: write
     runs-on: ubuntu-22.04
     outputs:
       image: ${{ env.IMAGE_NAME }}
@@ -51,7 +57,7 @@ jobs:
           images: |
             ${{ env.IMAGE_NAME }}
           labels: |
-            org.opencontainers.image.created=""
+            org.opencontainers.image.created=1970-01-01T00:00:00Z
 
       - name: Build image
         id: build
@@ -59,10 +65,10 @@ jobs:
         with:
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          push: false
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.container_meta.outputs.tags }}
           labels: ${{ steps.container_meta.outputs.labels }}
-          load: true
+          load: ${{ github.event_name == 'pull_request' }}
           context: ${{ inputs.context }}
           build-args: |
             MODULE_NAME=${{ inputs.module-name }}
@@ -121,7 +127,7 @@ jobs:
     needs:
       - build
     permissions:
-      actions: read # for detecting the Github Actions environment.
+      actions: read
       id-token: write # for creating OIDC tokens for signing.
       packages: write # for uploading attestations.
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
@@ -172,6 +178,5 @@ jobs:
 
       - name: Attest image vulnerability report
         run: |
-          ls -lsaR /tmp
           echo "Attest vulnerability report for '$IMAGE' using keyless approach"
           cosign attest --type vuln --predicate /tmp/trivy-vuln-attestation.json "$IMAGE"
