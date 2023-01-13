@@ -1,6 +1,8 @@
 # recruIT
 
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/miracum/recruit/badge)](https://api.securityscorecards.dev/projects/github.com/miracum/recruit)
+[![SLSA 3](https://slsa.dev/images/gh-badge-level3.svg)](https://slsa.dev)
+![License](https://img.shields.io/github/license/miracum/recruit)
 
 See the documentation site at <https://miracum.github.io/recruit> for more information.
 

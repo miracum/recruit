@@ -1,0 +1,195 @@
+{{- if .Values.notify.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "recruit.fullname" . }}-notify
+  labels:
+    {{- include "recruit.labels" . | nindent 4 }}
+    app.kubernetes.io/component: notify
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.notify.replicaCount }}
+  revisionHistoryLimit: {{ .Values.notify.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      {{- include "recruit.matchLabels" . | nindent 6 }}
+      app.kubernetes.io/component: notify
+  template:
+    metadata:
+      labels:
+        {{- include "recruit.podLabels" . | nindent 8 }}
+        app.kubernetes.io/component: notify
+        {{- with .Values.notify.extraPodLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/notify/notify-cm.yaml") . | sha256sum | quote }}
+        {{- with .Values.podAnnotations }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      securityContext:
+        {{- toYaml .Values.notify.podSecurityContext | nindent 8 }}
+      initContainers:
+        {{- if .Values.notify.ha.enabled }}
+        - name: wait-for-ha-db
+          image: {{ include "recruit.waitforDB.image" . }}
+          imagePullPolicy: {{ .Values.waitForPostgresInitContainer.image.pullPolicy }}
+          {{- with .Values.restrictedContainerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: PGHOST
+              value: {{ include "recruit.notify.database.host" $ | quote }}
+            - name: PGPORT
+              value: {{ include "recruit.notify.database.port" $ | quote }}
+            - name: PGUSER
+              value: {{ include "recruit.notify.database.username" $ | quote }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              until pg_isready; do
+                echo "Waiting for DB ${PGUSER}@${PGHOST}:${PGPORT} to be up";
+                sleep 15;
+              done;
+        {{- end }}
+        - name: wait-for-fhir-server
+          image: "{{ .Values.curl.image.registry }}/{{ .Values.curl.image.repository }}:{{ .Values.curl.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          {{- with .Values.restrictedContainerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: FHIR_URL
+              value: {{ template "recruit.fhirserver.url" . }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              until [ "$(curl -s -o /dev/null -L -w '%{http_code}' "$FHIR_URL/metadata")" == "200" ]; do
+                echo "$(date): Waiting for FHIR server to be up";
+                sleep 15;
+              done;
+      containers:
+        - name: notify
+          image: "{{ .Values.notify.image.registry }}/{{ .Values.notify.image.repository }}:{{ .Values.notify.image.tag }}"
+          securityContext:
+            {{- toYaml .Values.notify.securityContext | nindent 12 }}
+          imagePullPolicy: {{ .Values.notify.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: http-metrics
+              containerPort: 8081
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: http
+            initialDelaySeconds: {{ .Values.notify.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.notify.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.notify.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.notify.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.notify.livenessProbe.failureThreshold }}
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            initialDelaySeconds: {{ .Values.notify.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.notify.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.notify.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.notify.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.notify.readinessProbe.failureThreshold }}
+          resources:
+            {{- toYaml .Values.notify.resources | nindent 12 }}
+          env:
+            - name: FHIR_URL
+              value: {{ template "recruit.fhirserver.url" . }}
+            - name: WEBHOOK_ENDPOINT
+              value: {{ template "recruit.notify.webhookEndpointUrl" . }}
+            - name: NOTIFY_MAILER_LINKTEMPLATE
+              value: {{ template "recruit.notify.mail.screeningListLinkTemplate" . }}
+            - name: NOTIFY_MAILER_FROM
+              value: {{ .Values.notify.mail.from | quote }}
+            - name: SPRING_MAIL_HOST
+              {{- if .Values.mailhog.enabled }}
+              value: {{ template "recruit.mailhog.fullname" . }}
+              {{- else }}
+              value: {{ .Values.notify.mail.server.host | quote }}
+              {{- end }}
+            - name: SPRING_MAIL_PORT
+              {{- if .Values.mailhog.enabled }}
+              value: "1025"
+              {{- else }}
+              value: {{ .Values.notify.mail.server.port | quote }}
+              {{- end }}
+            - name: SPRING_MAIL_USERNAME
+              {{- if .Values.mailhog.enabled }}
+              value: "mailhog"
+              {{- else }}
+              value: {{ .Values.notify.mail.server.username | quote }}
+              {{- end }}
+            - name: SPRING_MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "recruit.mail.server.secretName" . }}
+                  key: smtp-password
+            {{- if .Values.notify.ha.enabled }}
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod,ha"
+            - name: SPRING_DATASOURCE_URL
+              value: {{ include "recruit.notify.database.jdbcUrl" . }}
+            - name: SPRING_DATASOURCE_USERNAME
+              value: {{ include "recruit.notify.database.username" . }}
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "recruit.notify.database.secretName" . }}
+                  key: {{ include "recruit.notify.database.secretKey" . }}
+            {{- end }}
+            - name: MANAGEMENT_ENDPOINT_HEALTH_PROBES_ADD_ADDITIONAL_PATHS
+              value: "true"
+            - name: MANAGEMENT_SERVER_PORT
+              value: "8081"
+            {{- if .Values.notify.extraEnv }}
+            {{ toYaml .Values.notify.extraEnv | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            - name: notification-configuration-file
+              mountPath: /app/config/notify-rules/application.yaml
+              subPath: application.yaml
+              readOnly: true
+            - mountPath: /tmp
+              name: tmp-volume
+      {{- with .Values.notify.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.notify.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.notify.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.notify.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      volumes:
+        - name: notification-configuration-file
+          configMap:
+            name: {{ template "recruit.fullname" . }}-notify-rules
+        - name: tmp-volume
+          emptyDir: {}
+{{- end }}

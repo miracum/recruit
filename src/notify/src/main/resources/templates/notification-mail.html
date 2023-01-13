@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <!-- djlint:off H017 -->
+    <meta charset="utf-8" />
+    <meta content="width=device-width" name="viewport" />
+    <meta content="IE=edge" http-equiv="X-UA-Compatible" />
+    <meta content="text/html charset=UTF-8" http-equiv="Content-Type" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <meta name="description" content="recruIT Email Notification" />
+    <meta
+      name="keywords"
+      content="MIRACUM, FHIR, CTRSS, patient recruitment, clinical trials, notification"
+    />
+    <title>
+      MIRACUM Rekrutierungsunterstützung - Neue Rekrutierungsvorschläge
+    </title>
+    <style>
+      /* What it does: Remove spaces around the email design added by some email clients. */
+      /* Beware: It can remove the padding / margin and add a background color to the compose a reply window. */
+      html,
+      body {
+        margin: 0 auto !important;
+        padding: 0 !important;
+        height: 100% !important;
+        width: 100% !important;
+        background: #f1f1f1;
+      }
+
+      /* What it does: Stops email clients resizing small text. */
+      * {
+        -ms-text-size-adjust: 100%;
+        -webkit-text-size-adjust: 100%;
+      }
+
+      /* What it does: Centers email on Android 4.4 */
+      div[style*="margin: 16px 0"] {
+        margin: 0 !important;
+      }
+
+      /* What it does: Stops Outlook from adding extra spacing to tables. */
+      table,
+      td {
+        mso-table-lspace: 0pt !important;
+        mso-table-rspace: 0pt !important;
+      }
+
+      /* What it does: Fixes webkit padding issue. */
+      table {
+        border-spacing: 0 !important;
+        border-collapse: collapse !important;
+        table-layout: fixed !important;
+        margin: 0 auto !important;
+      }
+
+      /* What it does: Uses a better rendering method when resizing images in IE. */
+      img {
+        -ms-interpolation-mode: bicubic;
+      }
+
+      /* What it does: Prevents Windows 10 Mail from underlining links despite inline CSS. Styles for underlined links should be inline. */
+      a {
+        text-decoration: none;
+      }
+
+      /* What it does: A work-around for email clients meddling in triggered links. */
+      *[x-apple-data-detectors], /* iOS */
+    .unstyle-auto-detected-links *,
+    .aBn {
+        border-bottom: 0 !important;
+        cursor: default !important;
+        color: inherit !important;
+        text-decoration: none !important;
+        font-size: inherit !important;
+        font-family: inherit !important;
+        font-weight: inherit !important;
+        line-height: inherit !important;
+      }
+
+      /* What it does: Prevents Gmail from displaying a download button on large, non-linked images. */
+      .a6S {
+        display: none !important;
+        opacity: 0.01 !important;
+      }
+
+      /* What it does: Prevents Gmail from changing the text color in conversation threads. */
+      .im {
+        color: inherit !important;
+      }
+
+      /* If the above doesn't work, add a .g-img class to any image in question. */
+      img.g-img + div {
+        display: none !important;
+      }
+
+      /* What it does: Removes right gutter in Gmail iOS app: https://github.com/TedGoas/Cerberus/issues/89  */
+      /* Create one of these media queries for each additional viewport size you'd like to fix */
+      /* iPhone 4, 4S, 5, 5S, 5C, and 5SE */
+      @media only screen and (min-device-width: 320px) and (max-device-width: 374px) {
+        u ~ div .email-container {
+          min-width: 320px !important;
+        }
+      }
+
+      /* iPhone 6, 6S, 7, 8, and X */
+      @media only screen and (min-device-width: 375px) and (max-device-width: 413px) {
+        u ~ div .email-container {
+          min-width: 375px !important;
+        }
+      }
+
+      /* iPhone 6+, 7+, and 8+ */
+      @media only screen and (min-device-width: 414px) {
+        u ~ div .email-container {
+          min-width: 414px !important;
+        }
+      }
+    </style>
+    <style>
+      .primary {
+        background: #f5564e;
+      }
+
+      .bg-white {
+        background: #ffffff;
+      }
+
+      .bg-light {
+        background: #fafafa;
+      }
+
+      .bg-primary {
+        background: #1b2259;
+      }
+
+      .bg-dark {
+        background: rgba(0, 0, 0, 0.8);
+      }
+
+      .email-section {
+        padding: 2.5em;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        font-family: "Segoe UI", "Open Sans", sans-serif;
+        color: #000000;
+        margin-top: 0;
+      }
+
+      body {
+        font-family: "Segoe UI", "Open Sans", sans-serif;
+        font-weight: 400;
+        font-size: 15px;
+        line-height: 1.8;
+        color: rgba(0, 0, 0, 0.4);
+      }
+
+      a {
+        color: #f5564e;
+      }
+
+      table {
+      }
+
+      .logo h1 {
+        margin: 0;
+        color: #000;
+        font-size: 20px;
+        font-family: "Segoe UI", "Open Sans", sans-serif;
+      }
+
+      .navigation {
+        padding: 0;
+      }
+
+      .navigation li {
+        list-style: none;
+        display: inline-block;
+        margin-left: 5px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      .navigation li a {
+        color: rgba(0, 0, 0, 0.6);
+      }
+
+      .heading-section {
+      }
+
+      .heading-section h2 {
+        color: #ffffff;
+        font-size: 24px;
+        margin-top: 0;
+        line-height: 1.4;
+        font-weight: 700;
+      }
+
+      .heading-section .subheading {
+        margin-bottom: 20px !important;
+        display: inline-block;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: #ffffff;
+        position: relative;
+      }
+
+      .heading-section .subheading::after {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -10px;
+        content: "";
+        width: 100%;
+        height: 2px;
+        background: #f5564e;
+        margin: 0 auto;
+      }
+
+      .heading-section-white .subheading {
+        margin-bottom: 0;
+        display: inline-block;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: rgba(255, 255, 255, 0.4);
+      }
+
+      .footer {
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      .footer .heading {
+        color: #ffffff;
+        font-size: 20px;
+      }
+
+      @media screen and (max-width: 500px) {
+        .icon {
+          text-align: left;
+        }
+
+        .text-services {
+          padding-left: 0;
+          padding-right: 20px;
+          text-align: left;
+        }
+      }
+    </style>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0 !important;
+      mso-line-height-rule: exactly;
+      background-color: #f1f1f1;
+    "
+    width="100%"
+  >
+    <!-- djlint:off H021 -->
+    <center style="width: 100%; background-color: #f1f1f1">
+      <div class="email-container" style="max-width: 600px; margin: 0 auto">
+        <table
+          align="center"
+          border="0"
+          cellpadding="0"
+          cellspacing="0"
+          role="presentation"
+          style="margin: auto"
+          width="100%"
+        >
+          <tr>
+            <td class="bg-white" style="padding: 1em 2.5em" valign="top">
+              <table
+                border="0"
+                cellpadding="0"
+                cellspacing="0"
+                role="presentation"
+                width="100%"
+              >
+                <tr>
+                  <td class="logo" style="text-align: left">
+                    <h1 style="margin: 0; mso-line-height-rule: exactly">
+                      MIRACUM Rekrutierungsunterstützung
+                    </h1>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td
+              class="bg-primary email-section"
+              style="text-align: center; padding: 2.5em"
+            >
+              <div class="heading-section heading-section-white">
+                <h2
+                  style="
+                    margin: 0;
+                    mso-line-height-rule: exactly;
+                    color: #ffffff;
+                  "
+                >
+                  Neue Rekrutierungsvorschläge für die
+                  <b th:text="${studyName}">Studien-Akronym</b>
+                  Studie.
+                </h2>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="bg-white">
+              <table
+                border="0"
+                cellpadding="0"
+                cellspacing="0"
+                role="presentation"
+                width="100%"
+              >
+                <tr>
+                  <td class="bg-white">
+                    <table
+                      border="0"
+                      cellpadding="0"
+                      cellspacing="0"
+                      role="presentation"
+                      width="100%"
+                    >
+                      <tr>
+                        <td
+                          class="bg-white email-section"
+                          style="text-align: center; padding: 2.5em"
+                        >
+                          <div
+                            class="heading-section"
+                            style="text-align: center; padding: 0 30px"
+                          >
+                            <p>
+                              <a
+                                style="
+                                  padding: 0.75em 1.25em;
+                                  border-radius: 0.5em;
+                                  background: #f5564e;
+                                  color: #ffffff;
+                                "
+                                th:href="${screeningListUrl}"
+                                >Hier klicken um die Vorschläge anzusehen</a
+                              >
+                            </p>
+                            <p>
+                              Sollte der obige Link nicht funktionieren, bitte
+                              stattdessen folgendes in die Adresszeile Ihres
+                              Browsers einfügen:
+                            </p>
+                            <a
+                              th:href="${screeningListUrl}"
+                              th:text="${screeningListUrl}"
+                            >
+                              Screening-List URL
+                            </a>
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+        <table
+          align="center"
+          border="0"
+          cellpadding="0"
+          cellspacing="0"
+          role="presentation"
+          style="margin: auto"
+          width="100%"
+        >
+          <tr>
+            <td
+              class="bg-primary footer email-section"
+              style="padding: 2.5em"
+              valign="middle"
+            >
+              <table>
+                <tr>
+                  <td valign="top" width="33.333%">
+                    <table
+                      border="0"
+                      cellpadding="0"
+                      cellspacing="0"
+                      role="presentation"
+                      width="100%"
+                    >
+                      <tr>
+                        <td style="text-align: left; padding-right: 10px">
+                          <p>© 2021 miracum.org</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </center>
+  </body>
+</html>

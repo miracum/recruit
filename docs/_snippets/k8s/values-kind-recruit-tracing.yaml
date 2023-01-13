@@ -1,7 +1,7 @@
 query:
   extraEnv:
     - name: JAVA_TOOL_OPTIONS
-      value: "-javaagent:/opt/query/opentelemetry-javaagent.jar"
+      value: "-javaagent:/app/opentelemetry-javaagent.jar"
     - name: OTEL_METRICS_EXPORTER
       value: "none"
     - name: OTEL_LOGS_EXPORTER
@@ -27,7 +27,7 @@ list:
 notify:
   extraEnv:
     - name: JAVA_TOOL_OPTIONS
-      value: "-javaagent:/opt/notify/opentelemetry-javaagent.jar"
+      value: "-javaagent:/app/opentelemetry-javaagent.jar"
     - name: OTEL_METRICS_EXPORTER
       value: "none"
     - name: OTEL_LOGS_EXPORTER

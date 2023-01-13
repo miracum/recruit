@@ -1,0 +1,86 @@
+{{- if or .Values.list.enabled (or .Values.query.enabled .Values.notify.enabled)}}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "recruit.fullname" . }}-test-health-probes"
+  labels:
+    {{- include "recruit.labels" . | nindent 4 }}
+    app.kubernetes.io/component: test-health-probes
+  annotations:
+    helm.sh/hook: test-success
+spec:
+  restartPolicy: Never
+  containers:
+  {{- if .Values.list.enabled }}
+    - name: check-list-health
+      image: "{{ .Values.curl.image.registry }}/{{ .Values.curl.image.repository }}:{{ .Values.curl.image.tag }}"
+      imagePullPolicy: IfNotPresent
+      command: ["curl", "--fail-with-body"]
+      args: ["http://{{ include "recruit.fullname" . }}-list:{{ .Values.list.service.port }}/api/health/readiness"]
+      {{- with .Values.restrictedContainerSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      resources:
+        limits:
+          cpu: 50m
+          memory: 64Mi
+        requests:
+          cpu: 50m
+          memory: 64Mi
+      livenessProbe:
+        exec:
+          command: ["true"]
+      readinessProbe:
+        exec:
+          command: ["true"]
+  {{- end }}
+  {{- if .Values.query.enabled }}
+    - name: check-query-health
+      image: "{{ .Values.curl.image.registry }}/{{ .Values.curl.image.repository }}:{{ .Values.curl.image.tag }}"
+      imagePullPolicy: IfNotPresent
+      command: ["curl", "--fail-with-body"]
+      args: ["http://{{ include "recruit.fullname" . }}-query:{{ .Values.query.service.metricsPort }}/actuator/health"]
+      {{- with .Values.restrictedContainerSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      resources:
+        limits:
+          cpu: 50m
+          memory: 64Mi
+        requests:
+          cpu: 50m
+          memory: 64Mi
+      livenessProbe:
+        exec:
+          command: ["true"]
+      readinessProbe:
+        exec:
+          command: ["true"]
+  {{- end }}
+  {{- if .Values.notify.enabled }}
+    - name: check-notify-health
+      image: "{{ .Values.curl.image.registry }}/{{ .Values.curl.image.repository }}:{{ .Values.curl.image.tag }}"
+      imagePullPolicy: IfNotPresent
+      command: ["curl", "--fail-with-body"]
+      args: ["http://{{ include "recruit.fullname" . }}-notify:{{ .Values.notify.service.metricsPort }}/actuator/health"]
+      {{- with .Values.restrictedContainerSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      resources:
+        limits:
+          cpu: 50m
+          memory: 64Mi
+        requests:
+          cpu: 50m
+          memory: 64Mi
+      livenessProbe:
+        exec:
+          command: ["true"]
+      readinessProbe:
+        exec:
+          command: ["true"]
+  {{- end }}
+{{- end }}

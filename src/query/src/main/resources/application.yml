@@ -1,0 +1,120 @@
+query:
+  version: "10.0.0" # x-release-please-version
+  cohortSizeThreshold: 100
+  schedule:
+    enable: true
+    unixCron: "0 * * * *"
+  excludePatientParameters:
+    demographics: false
+    encounter: false
+  # if true, instead of overwriting the contents of the List for each cohort based on what
+  # the last generation run returned, append to this list
+  append-recommendations-to-existing-list: false
+  # if true, always send a List resource as part of the transaction even if nothing changed
+  force-update-screening-list: false
+  # if true, send Patient resources as "conditional-creates" on their first identifier instead of
+  # using "conditional-update". Useful if the server is already filled with Patient resources from a
+  # different system
+  only-create-patients-if-not-exist: false
+  selector:
+    matchLabels:
+      - "UC1"
+  webapi:
+    base-url: ${atlas.url}
+    auth:
+      enabled: false
+      login-path: "/user/login/db"
+      username: ""
+      password: ""
+    cohort-cache:
+      # should-clear: true # TODO: not yet implemented
+      schema: ohdsi
+
+atlas:
+  url: ""
+  cohortStatusCheckBackoffTime: 10000
+  dataSource: "CDS-CDMV5"
+
+omop:
+  jdbcUrl: ""
+  username: ""
+  password: ""
+  resultsSchema: "cds_results"
+  cdmSchema: "cds_cdm"
+
+fhir:
+  url: ""
+  server:
+    # call, connect, read, and write timeout to the FHIR server in seconds
+    timeout-in-seconds: 300
+  systems:
+    omopSubjectIdentifier: "http://ohdsi.org/omop/fhir/subject-identifier"
+    omopCohortIdentifier: "http://ohdsi.org/omop/fhir/cohort-identifier"
+    screeningListIdentifier: "https://fhir.miracum.org/uc1/NamingSystem/screeningListId"
+    screeningListStudyReferenceExtension: "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy"
+    researchStudyAcronym: "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym"
+    screeningListCoding: "https://fhir.miracum.org/uc1/CodeSystem/screeningList"
+    studySource: "https://fhir.miracum.org/uc1/recruit/generatedByQueryModule"
+    localIdentifier: "https://fhir.miracum.org/core/NamingSystem/patientId"
+    patient-id: ${fhir.systems.localIdentifier}
+    encounter-id: "https://fhir.miracum.org/identifiers/encounter-id"
+    sub-encounter-id: "https://fhir.miracum.org/identifiers/sub-encounter-id"
+    identifier-type: "http://terminology.hl7.org/CodeSystem/v2-0203"
+    act-encounter-code: "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+    list-order: "http://terminology.hl7.org/CodeSystem/list-order"
+    device-id: "https://fhir.miracum.org/uc1/identifiers/recruit-module-id"
+    system-determined-subject-status: "https://fhir.miracum.org/uc1/CodeSystem/system-determined-subject-status"
+
+camel:
+  component:
+    servlet:
+      mapping:
+        contextpath: "/query/*"
+    micrometer:
+      enabled: true
+  springboot:
+    name: Query
+    jmx-enabled: false
+    main-run-controller: true
+
+# to configure logging levels
+logging:
+  level:
+    org:
+      springframework: "INFO"
+      apache:
+        camel:
+          spring:
+            boot: "INFO"
+          impl: "INFO"
+      miracum:
+        recruit:
+          query: "INFO"
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:%5p}) %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m %X %n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
+
+spring:
+  profiles:
+    active: dev
+  application:
+    name: query
+
+management:
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+server:
+  shutdown: graceful
+
+opentracing:
+  jaeger:
+    log-spans: false
+    include-jaeger-env-tags: true
+    enabled: false

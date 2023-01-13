@@ -1,0 +1,316 @@
+services:
+  traefik:
+    image: docker.io/library/traefik:v2.9.5@sha256:ac1480ce3203541705b01d6dce40ef4bf563cdb29d5b00db88cc396fa9fa9cd5
+    restart: unless-stopped
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    read_only: true
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "127.0.0.1:80:80"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+
+  fhir:
+    image: docker.io/hapiproject/hapi:v6.2.2@sha256:9c4e8af94d81ac0049dbb589e4cd855bf78c9c13be6f6844e814c63d63545b44
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    deploy:
+      resources:
+        limits:
+          memory: 2048m
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/target
+    privileged: false
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://fhir-db:5432/fhir?currentSchema=public"
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
+      spring.jpa.properties.hibernate.dialect: ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect
+      HAPI_FHIR_VALIDATION_REQUESTS_ENABLED: "true"
+      HAPI_FHIR_USE_APACHE_ADDRESS_STRATEGY: "true"
+      HAPI_FHIR_ENFORCE_REFERENTIAL_INTEGRITY_ON_DELETE: "false"
+      HAPI_FHIR_ENFORCE_REFERENTIAL_INTEGRITY_ON_WRITE: "false"
+      HAPI_FHIR_SUBSCRIPTION_RESTHOOK_ENABLED: "true"
+      HAPI_FHIR_ALLOW_MULTIPLE_DELETE: "true"
+      JAVA_TOOL_OPTIONS: "-javaagent:/app/opentelemetry-javaagent.jar"
+      OTEL_METRICS_EXPORTER: "none"
+      OTEL_LOGS_EXPORTER: "none"
+      OTEL_TRACES_EXPORTER: "jaeger"
+      OTEL_SERVICE_NAME: "hapi-fhir-jpaserver"
+      OTEL_EXPORTER_JAEGER_ENDPOINT: "http://jaeger:14250"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.fhir.loadbalancer.server.port=8080"
+      - "traefik.http.routers.fhir.rule=Host(`recruit-fhir-server.127.0.0.1.nip.io`)"
+      - "traefik.http.routers.fhir.entrypoints=web"
+
+  fhir-db:
+    image: docker.io/library/postgres:15.1@sha256:10d6e725f9b2f5531617d93164f4fc85b1739e04cab62cbfbfb81ccd866513b8
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+    ipc: private
+    security_opt:
+      - "no-new-privileges:true"
+    privileged: false
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fhir
+
+  broadsea-atlasdb:
+    image: docker.io/ohdsi/broadsea-atlasdb:2.0.0@sha256:0256a9e1ec75e6f0f48689c4d6a7dc8952d82b4ed7a055953e271d1c17850f6b
+    ports:
+      - "127.0.0.1:25432:5432"
+
+  ohdsi-webapi:
+    image: docker.io/ohdsi/webapi:2.12.0@sha256:4d951a05245cedad4d666874fb71f182bd2140aab5ece4f1621d028cf10d0823
+    restart: unless-stopped
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    deploy:
+      resources:
+        limits:
+          memory: 4096m
+    read_only: true
+    tmpfs:
+      - /tmp
+    privileged: false
+    environment:
+      DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
+      DATASOURCE_URL: jdbc:postgresql://broadsea-atlasdb:5432/postgres
+      DATASOURCE_USERNAME: postgres
+      DATASOURCE_PASSWORD: mypass
+      DATASOURCE_OHDSI_SCHEMA: webapi
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: webapi
+      SPRING_BATCH_REPOSITORY_TABLEPREFIX: webapi.BATCH_
+      FLYWAY_DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
+      FLYWAY_DATASOURCE_URL: jdbc:postgresql://broadsea-atlasdb:5432/postgres
+      FLYWAY_DATASOURCE_USERNAME: postgres
+      FLYWAY_DATASOURCE_PASSWORD: mypass
+      FLYWAY_LOCATIONS: classpath:db/migration/postgresql
+      FLYWAY_PLACEHOLDERS_OHDSISCHEMA: webapi
+      FLYWAY_SCHEMAS: webapi
+      FLYWAY_BASELINEONMIGRATE: "true"
+      FLYWAY_TABLE: schema_history
+      flyway_baselineVersionAsString: "2.2.5.20180212152023" # this env var is case sensitive
+      FLYWAY_BASELINEDESCRIPTION: Base Migration
+      SECURITY_CORS_ENABLED: "true"
+      SECURITY_ORIGIN: "*"
+      # SECURITY_PROVIDER: "AtlasRegularSecurity"
+      # SECURITY_DB_DATASOURCE_URL: jdbc:postgresql://broadsea-atlasdb:5432/postgres
+      # SECURITY_DB_DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
+      # SECURITY_DB_DATASOURCE_SCHEMA: webapi
+      # SECURITY_DB_DATASOURCE_USERNAME: postgres
+      # SECURITY_DB_DATASOURCE_PASSWORD: mypass
+      # SECURITY_DB_DATASOURCE_AUTHENTICATIONQUERY: >-
+      #   SELECT password, first_name AS firstname, middle_name AS middlename, last_name AS lastname, username FROM webapi.basic_security_users WHERE username = ?
+      JAVA_OPTS: "-javaagent:/var/lib/ohdsi/webapi/opentelemetry-javaagent.jar"
+      OTEL_TRACES_EXPORTER: "jaeger"
+      OTEL_METRICS_EXPORTER: "prometheus"
+      OTEL_LOGS_EXPORTER: "none"
+      OTEL_SERVICE_NAME: "ohdsi-webapi"
+      OTEL_EXPORTER_JAEGER_ENDPOINT: "http://jaeger:14250"
+    depends_on:
+      - broadsea-atlasdb
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ohdsi-webapi.rule=Host(`recruit-ohdsi.127.0.0.1.nip.io`) && PathPrefix(`/WebAPI`)"
+      - "traefik.http.routers.ohdsi-webapi.entrypoints=web"
+
+  ohdsi-atlas:
+    image: docker.io/ohdsi/atlas:2.12.0@sha256:96431e12cba41643117a904f14c3c6d50a0af63a9a293ed61cd56d5bcffb723a
+    restart: unless-stopped
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+          cpus: "1"
+    privileged: false
+    volumes:
+      - ./config-local.js:/usr/share/nginx/html/atlas/js/config-local.js
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ohdsi-atlas.rule=Host(`recruit-ohdsi.127.0.0.1.nip.io`) && PathPrefix(`/atlas`)"
+      - "traefik.http.routers.ohdsi-atlas.entrypoints=web"
+
+  list:
+    build:
+      context: ../list
+    profiles:
+      - list
+    restart: unless-stopped
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    read_only: true
+    privileged: false
+    environment:
+      FHIR_URL: "http://fhir:8080/fhir"
+      KEYCLOAK_DISABLED: "true"
+      TRACING_ENABLED: "true"
+      OTEL_SERVICE_NAME: "list"
+      OTEL_EXPORTER_JAEGER_AGENT_HOST: "jaeger"
+    ports:
+      - "127.0.0.1:8085:8080"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.recruit-list.loadbalancer.server.port=8080"
+      - "traefik.http.routers.recruit-list.rule=Host(`recruit-list.127.0.0.1.nip.io`)"
+      - "traefik.http.routers.recruit-list.entrypoints=web"
+
+  notify:
+    build:
+      context: ..
+      args:
+        MODULE_NAME: notify
+    profiles:
+      - notify
+    restart: unless-stopped
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    read_only: true
+    privileged: false
+    tmpfs:
+      - /tmp
+    environment:
+      FHIR_URL: "http://fhir:8080/fhir"
+      WEBHOOK_ENDPOINT: http://notify:8080/on-list-change
+      NOTIFY_MAILER_LINKTEMPLATE: http://recruit-list.127.0.0.1.nip.io/recommendations/[list_id]
+      NOTIFY_MAILER_FROM: recruit-dev@example.com
+      SPRING_MAIL_HOST: maildev
+      SPRING_MAIL_PORT: "1025"
+      SPRING_MAIL_USERNAME: user
+      SPRING_MAIL_PASSWORD: pass
+      JAVA_TOOL_OPTIONS: "-javaagent:/app/opentelemetry-javaagent.jar"
+      OTEL_METRICS_EXPORTER: "none"
+      OTEL_LOGS_EXPORTER: "none"
+      OTEL_TRACES_EXPORTER: "jaeger"
+      OTEL_SERVICE_NAME: "recruit-notify"
+      OTEL_EXPORTER_JAEGER_ENDPOINT: "http://jaeger:14250"
+    volumes:
+      - ../list/notify-rules.dev.yaml:/app/config/notify-rules/application.yaml:ro
+
+  query:
+    build:
+      context: ..
+      args:
+        MODULE_NAME: query
+    profiles:
+      - query
+    restart: unless-stopped
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    read_only: true
+    privileged: false
+    tmpfs:
+      - /tmp
+    environment:
+      FHIR_URL: "http://fhir:8080/fhir"
+      OMOP_JDBCURL: jdbc:postgresql://broadsea-atlasdb:5432/postgres
+      OMOP_USERNAME: postgres
+      OMOP_PASSWORD: mypass
+      OMOP_RESULTSSCHEMA: demo_cdm_results
+      OMOP_CDMSCHEMA: demo_cdm
+      QUERY_WEBAPI_BASE_URL: http://ohdsi-webapi:8080/WebAPI
+      QUERY_WEBAPI_COHORT_CACHE_SCHEMA: webapi
+      ATLAS_DATASOURCE: EUNOMIA
+      QUERY_SCHEDULE_UNIXCRON: "* * * * *"
+      QUERY_SELECTOR_MATCHLABELS: ""
+      JAVA_TOOL_OPTIONS: "-javaagent:/app/opentelemetry-javaagent.jar"
+      OTEL_METRICS_EXPORTER: "none"
+      OTEL_LOGS_EXPORTER: "none"
+      OTEL_TRACES_EXPORTER: "jaeger"
+      OTEL_SERVICE_NAME: "recruit-query"
+      OTEL_EXPORTER_JAEGER_ENDPOINT: "http://jaeger:14250"
+
+  jaeger:
+    image: docker.io/jaegertracing/all-in-one:1.40.0@sha256:fa8c1fc551ac31e161a7f729dbaf17e46aaccb0dbd5fbd772aeeb209802cb2a0
+    ports:
+      - "127.0.0.1:16686:16686"
+      - "127.0.0.1:6831:6831/udp"
+      - "127.0.0.1:6832:6832/udp"
+      - "127.0.0.1:14250:14250/tcp"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.jaeger.loadbalancer.server.port=16686"
+      - "traefik.http.routers.jaeger.rule=Host(`recruit-jaeger.127.0.0.1.nip.io`)"
+      - "traefik.http.routers.jaeger.entrypoints=web"
+
+  maildev:
+    image: docker.io/maildev/maildev:2.0.5@sha256:082ec5ee92266c6e17493998ff1bf1c3eb70604b159fbeeaa435ee777f5cc953
+    restart: unless-stopped
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    privileged: false
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+    read_only: true
+    tmpfs:
+      - /tmp
+    ports:
+      - "127.0.0.1:3025:1025"
+      - "127.0.0.1:2080:1080"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.maildev.loadbalancer.server.port=1080"
+      - "traefik.http.routers.maildev.rule=Host(`recruit-maildev.127.0.0.1.nip.io`)"
+      - "traefik.http.routers.maildev.entrypoints=web"
+
+  notify-ha-db:
+    image: docker.io/library/postgres:15.1@sha256:10d6e725f9b2f5531617d93164f4fc85b1739e04cab62cbfbfb81ccd866513b8
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+    ipc: private
+    security_opt:
+      - "no-new-privileges:true"
+    privileged: false
+    environment:
+      POSTGRES_PASSWORD: postgres # pragma: allowlist secret
+      POSTGRES_DB: recruit_notify_jobs
+    ports:
+      - "127.0.0.1:6432:5432"

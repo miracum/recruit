@@ -1,0 +1,57 @@
+# ⚠️ Still experimental and just used for testing; not yet integrated in ci
+version: "3"
+
+vars:
+  IMAGE_REPOSITORY: miracum/recruit
+  IMAGE_TAG: latest
+
+tasks:
+  build-all-images:
+    dir: src/
+    cmds:
+      - skaffold build --tag={{ .IMAGE_TAG }}
+      - docker build -t ghcr.io/miracum/recruit/tester:v1 ../tests/chaos/tester
+
+  helm-add-repos:
+    cmds:
+      - helm repo add argo https://argoproj.github.io/argo-helm
+      - helm repo add bitnami https://charts.bitnami.com/bitnami
+      - helm repo add codecentric https://codecentric.github.io/helm-charts
+      - helm repo add chgl https://chgl.github.io/charts
+      - helm repo add hapifhir https://hapifhir.github.io/hapi-fhir-jpaserver-starter
+      - helm repo add miracum https://miracum.github.io/charts
+
+  e2e-k8s-prepare:
+    deps:
+      - helm-add-repos
+    cmds:
+      - kind create cluster
+      - kubectl create namespace recruit
+      - |
+        helm upgrade --install argo-workflows argo/argo-workflows \
+          --create-namespace \
+          -n argo-workflows \
+          -f tests/chaos/argo-workflows-values.yaml \
+          --version 0.22.3
+
+  e2e-k8s:
+    cmds:
+      - |
+        kind load docker-image \
+          ghcr.io/miracum/recruit/tester:v1 \
+          ghcr.io/{{ .IMAGE_REPOSITORY }}/query:{{ .IMAGE_TAG }} \
+          ghcr.io/{{ .IMAGE_REPOSITORY }}/notify:{{ .IMAGE_TAG }} \
+          ghcr.io/{{ .IMAGE_REPOSITORY }}/list:{{ .IMAGE_TAG }}
+      - |
+        helm upgrade --dependency-update  --install --create-namespace -n recruit \
+          --set query.image.repository={{ .IMAGE_REPOSITORY }}/query \
+          --set query.image.tag={{ .IMAGE_TAG }} \
+          --set notify.image.repository={{ .IMAGE_REPOSITORY }}/notify \
+          --set notify.image.tag={{ .IMAGE_TAG }} \
+          --set list.image.repository={{ .IMAGE_REPOSITORY }}/list \
+          --set list.image.tag={{ .IMAGE_TAG }} \
+          -f charts/recruit/values-integrationtest.yaml \
+          --wait --timeout=15m \
+          recruit charts/recruit/
+      - helm test -n recruit recruit
+      - argo submit tests/integration/argo-workflow.yaml -n recruit --wait --log

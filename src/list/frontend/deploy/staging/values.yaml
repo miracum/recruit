@@ -1,0 +1,31 @@
+deploymentAnnotations:
+  app.gitlab.com/app: miracum-uc1-recruit-list
+  app.gitlab.com/env: staging
+podAnnotations:
+  app.gitlab.com/app: miracum-uc1-recruit-list
+  app.gitlab.com/env: staging
+ohdsi:
+  enabled: false
+query:
+  enabled: false
+notify:
+  enabled: false
+mailhog:
+  enabled: false
+fhirserver:
+  postgresql:
+    postgresqlPassword: "fhir-server-postgres-password"
+list:
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      kubernetes.io/ingress.class: nginx
+    hosts:
+      - host: lists.recruit.miracum.org
+        paths:
+          - "/"
+    tls:
+      - secretName: lists.recruit.miracum.org-tls
+        hosts:
+          - lists.recruit.miracum.org

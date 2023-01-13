@@ -1,0 +1,50 @@
+omop:
+  jdbcUrl: "jdbc:postgresql://localhost:25432/postgres"
+  username: "postgres"
+  password: "mypass"
+  resultsSchema: "demo_cdm_results"
+  cdmSchema: "demo_cdm"
+
+query:
+  schedule:
+    unixCron: "* * * * *" # run every minute
+  cohortSizeThreshold: 500
+  webapi:
+    base-url: "http://recruit-ohdsi.127.0.0.1.nip.io/WebAPI"
+    auth:
+      enabled: false
+      login-path: "/user/login/db"
+      username: "recruit-query-module"
+      password: "pass123"
+    cohort-cache:
+      schema: webapi
+  selector:
+    # simply matches all cohorts
+    matchLabels: []
+
+  append-recommendations-to-existing-list: true
+
+fhir:
+  url: "http://recruit-fhir-server.127.0.0.1.nip.io/fhir"
+
+atlas:
+  dataSource: "EUNOMIA"
+
+# to configure logging levels
+logging:
+  level:
+    org:
+      springframework: "DEBUG"
+      apache:
+        camel:
+          spring:
+            boot: "INFO"
+          impl: "DEBUG"
+      miracum:
+        recruit:
+          query: "DEBUG"
+
+opentracing:
+  jaeger:
+    enabled: true
+    log-spans: true

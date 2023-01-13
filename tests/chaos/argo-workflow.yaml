@@ -1,0 +1,123 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/argoproj/argo-workflows/v3.4.3/api/jsonschema/schema.json
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: recruit-chaos-workflow-
+spec:
+  entrypoint: run-chaos-and-test
+  serviceAccountName: chaos-mesh-cluster-manager
+  templates:
+    - name: delete-existing-messages
+      container:
+        image: ghcr.io/miracum/recruit/chaos-tester:v1
+        imagePullPolicy: IfNotPresent
+        command:
+          - dotnet
+          - /opt/chaos-tester/tester.dll
+        args:
+          - "delete-messages"
+          - "--mailhog-api-base-url=http://recruit-mailhog:8025/api/"
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          runAsNonRoot: true
+
+    - name: test
+      container:
+        image: ghcr.io/miracum/recruit/chaos-tester:v1
+        imagePullPolicy: IfNotPresent
+        command:
+          - dotnet
+          - /opt/chaos-tester/tester.dll
+        args:
+          - "test"
+          - "--total-duration=00:05:00"
+          - "--send-count=10"
+          - "--fhir-server-base-url=http://recruit-fhirserver:8080/fhir"
+          - "--fhir-resource-bundle=/tmp/sample-list-bundle.json"
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          runAsNonRoot: true
+
+    - name: install-chaos
+      serviceAccountName: chaos-mesh-cluster-manager
+      container:
+        image: ghcr.io/miracum/recruit/chaos-tester:v1
+        imagePullPolicy: IfNotPresent
+        command:
+          - kubectl
+        args:
+          - apply
+          - -f
+          - /tmp/chaos.yaml
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          runAsNonRoot: true
+
+    - name: delete-chaos
+      serviceAccountName: chaos-mesh-cluster-manager
+      container:
+        image: ghcr.io/miracum/recruit/chaos-tester:v1
+        imagePullPolicy: IfNotPresent
+        command:
+          - kubectl
+        args:
+          - delete
+          - -f
+          - /tmp/chaos.yaml
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          runAsNonRoot: true
+
+    - name: assert
+      container:
+        image: ghcr.io/miracum/recruit/chaos-tester:v1
+        imagePullPolicy: IfNotPresent
+        command:
+          - dotnet
+          - /opt/chaos-tester/tester.dll
+        args:
+          - "assert"
+          - "--expected-number-of-messages=10"
+          - "--mailhog-api-base-url=http://recruit-mailhog:8025/api/"
+          - "--retries=1"
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          runAsNonRoot: true
+
+    - name: run-chaos-and-test
+      dag:
+        tasks:
+          - name: delete-existing-messages
+            template: delete-existing-messages
+          - name: test
+            depends: delete-existing-messages
+            template: test
+          - name: install-chaos
+            depends: delete-existing-messages
+            template: install-chaos
+          - name: delete-chaos
+            depends: "install-chaos && (test.Succeeded || test.Failed)"
+            template: delete-chaos
+          - name: assert
+            depends: delete-chaos
+            template: assert

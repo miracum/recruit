@@ -1,0 +1,23 @@
+{{- if .Values.query.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "recruit.fullname" . }}-query
+  labels:
+    {{- include "recruit.labels" . | nindent 4 }}
+    app.kubernetes.io/component: query
+spec:
+  type: {{ .Values.query.service.type }}
+  ports:
+    - port: {{ .Values.query.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: {{ .Values.query.service.metricsPort }}
+      targetPort: http-metrics
+      protocol: TCP
+      name: http-metrics
+  selector:
+    {{- include "recruit.matchLabels" . | nindent 4 }}
+    app.kubernetes.io/component: query
+{{- end -}}

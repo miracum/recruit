@@ -1,0 +1,23 @@
+{{- if .Values.notify.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "recruit.fullname" . }}-notify
+  labels:
+    {{- include "recruit.labels" . | nindent 4 }}
+    app.kubernetes.io/component: notify
+spec:
+  type: {{ .Values.notify.service.type }}
+  ports:
+    - port: {{ .Values.notify.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: {{ .Values.notify.service.metricsPort }}
+      targetPort: http-metrics
+      protocol: TCP
+      name: http-metrics
+  selector:
+    {{- include "recruit.matchLabels" . | nindent 4 }}
+    app.kubernetes.io/component: notify
+{{- end -}}

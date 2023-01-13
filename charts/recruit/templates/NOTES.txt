@@ -1,0 +1,22 @@
+1. Get the screening list URL by running these commands:
+{{- if .Values.list.ingress.enabled }}
+{{- range $host := .Values.list.ingress.hosts }}
+  {{- range .paths }}
+  http{{ if $.Values.list.ingress.tls }}s{{ end }}://{{ $host.host }}{{ . }}
+  {{- end }}
+{{- end }}
+{{- else if contains "LoadBalancer" .Values.list.service.type }}
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "recruit.fullname" . }}'
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "recruit.fullname" . }}-list --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP:{{ .Values.service.port }}
+{{- else if contains "ClusterIP" .Values.list.service.type }}
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=list" -o jsonpath="{.items[0].metadata.name}")
+  echo "Visit http://127.0.0.1:8080 to use your application"
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:{{ .Values.list.service.port }}
+{{- end }}
+
+{{- $errors := (include "recruit.validateValues" .) -}}
+{{- if $errors -}}
+{{-   printf "\nVALUES VALIDATION:\n%s" $errors -}}
+{{- end -}}

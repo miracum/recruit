@@ -1,0 +1,16 @@
+apiVersion: skaffold/v4beta1
+kind: Config
+metadata:
+  name: chaos
+build:
+  local:
+    push: false
+    useBuildkit: true
+  artifacts:
+    - image: ghcr.io/miracum/recruit/chaos-tester
+      context: tester
+      docker:
+        dockerfile: Dockerfile
+manifests:
+  rawYaml:
+    - "argo-workflow.yaml"

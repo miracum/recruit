@@ -1,0 +1,68 @@
+# first run:
+# kubectl apply -f https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.18/releases/cnpg-1.18.0.yaml
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: recruit-fhir-server-db-app-user
+type: kubernetes.io/basic-auth
+stringData:
+  password: recruit-fhir-server
+  username: fhir_server_user
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: recruit-fhir-server-db
+spec:
+  instances: 3
+  primaryUpdateStrategy: unsupervised
+  postgresql:
+    syncReplicaElectionConstraint:
+      enabled: true
+      nodeLabelsAntiAffinity:
+        - topology.kubernetes.io/zone
+  replicationSlots:
+    highAvailability:
+      enabled: true
+  storage:
+    size: 64Gi
+  bootstrap:
+    initdb:
+      database: fhir_server
+      owner: fhir_server_user
+      secret:
+        name: recruit-fhir-server-db-app-user
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: recruit-notify-db-app-user
+type: kubernetes.io/basic-auth
+stringData:
+  password: notify
+  username: notify_user
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: recruit-notify-db
+spec:
+  instances: 3
+  primaryUpdateStrategy: unsupervised
+  postgresql:
+    syncReplicaElectionConstraint:
+      enabled: true
+      nodeLabelsAntiAffinity:
+        - topology.kubernetes.io/zone
+  replicationSlots:
+    highAvailability:
+      enabled: true
+  storage:
+    size: 16Gi
+  bootstrap:
+    initdb:
+      database: notify_jobstore
+      owner: notify_user
+      secret:
+        name: recruit-notify-db-app-user

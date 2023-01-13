@@ -1,0 +1,66 @@
+notify:
+  version: "10.0.0" # x-release-please-version
+  retry:
+    backoffPeriodMs: 30000
+    maxAttempts: 10
+  mailer:
+    from: "rekrutierungsvorschlag@miracum.org"
+    link-template: "http://replace-host-name:8083/recommendations/[list_id]"
+    subject: "MIRACUM Rekrutierungsunterstützung: neue Vorschläge für die Studie [study_acronym]"
+  rules: {}
+
+spring:
+  application:
+    name: "notify"
+  mail:
+    host: ""
+    port: 25
+    username:
+    password:
+    properties:
+      mail:
+        debug: false
+  profiles:
+    active: dev
+  autoconfigure:
+    # a datasource is only required when running in HA mode, so disable any
+    # JDBC auto-configuration in the "normal" profile.
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+
+logging:
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:%5p}) %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m %X %n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
+
+webhook:
+  endpoint: "http://host.docker.internal:8080/on-list-change"
+
+fhir:
+  url: ""
+  subscription:
+    criteria: "List?code=https://fhir.miracum.org/uc1/CodeSystem/screeningList|screening-recommendations"
+    retry-count: 3
+  systems:
+    screening-list-reference: "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy"
+    study-acronym: "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym"
+    subscriber-id: "https://fhir.miracum.org/uc1/identifiers/notification-subscriber-id"
+    communication: "https://fhir.miracum.org/uc1/identifiers/notification-id"
+    communication-status-reason: "https://fhir.miracum.org/uc1/CodeSystem/notification-status-reason"
+    communication-category: "http://terminology.hl7.org/CodeSystem/communication-category"
+
+management:
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+opentracing:
+  jaeger:
+    log-spans: false
+    include-jaeger-env-tags: true
+    enabled: false

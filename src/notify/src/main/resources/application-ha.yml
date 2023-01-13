@@ -1,0 +1,30 @@
+spring:
+  autoconfigure:
+    exclude: []
+  datasource:
+    url: ""
+    username: ""
+    password: ""
+    driver-class-name: org.postgresql.Driver
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: always
+      schema: classpath:schemas/init-quartz.sql
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceId: AUTO
+            instanceName: recruitNotifyScheduler
+          jobStore:
+            # disabled due to: https://github.com/spring-projects/spring-boot/issues/28773
+            # class: org.quartz.impl.jdbcjobstore.JobStoreTX
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+            tablePrefix: QRTZ_
+            isClustered: true
+            # Indicates that JDBC JobStore stores all values in JobDataMaps as strings,
+            # so more complex objects can be stored as name-value pairs rather than
+            # serialized in BLOB columns.In the long run, this is safer because you
+            # avoid serializing non-String classes to BLOB class versions.
+            useProperties: false

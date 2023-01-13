@@ -1,0 +1,204 @@
+{{- if .Values.query.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "recruit.fullname" . }}-query
+  labels:
+    {{- include "recruit.labels" . | nindent 4 }}
+    app.kubernetes.io/component: query
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.query.replicaCount }}
+  revisionHistoryLimit: {{ .Values.query.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      {{- include "recruit.matchLabels" . | nindent 6 }}
+      app.kubernetes.io/component: query
+  template:
+    metadata:
+      labels:
+        {{- include "recruit.podLabels" . | nindent 8 }}
+        app.kubernetes.io/component: query
+        {{- with .Values.query.extraPodLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      securityContext:
+        {{- toYaml .Values.query.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: wait-for-omop-db
+          image: {{ include "recruit.waitforDB.image" . }}
+          imagePullPolicy: {{ .Values.waitForPostgresInitContainer.image.pullPolicy }}
+          {{- with .Values.restrictedContainerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: PGHOST
+              value: {{ include "recruit.omop.db.host" $ | quote }}
+            - name: PGPORT
+              value: {{ include "recruit.omop.db.port" $ | quote }}
+            - name: PGUSER
+              value: {{ include "recruit.omop.db.user" $ | quote }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              until pg_isready; do
+                echo "Waiting for DB ${PGUSER}@${PGHOST}:${PGPORT} to be up";
+                sleep 15;
+              done;
+        - name: wait-for-fhir-server
+          image: "{{ .Values.curl.image.registry }}/{{ .Values.curl.image.repository }}:{{ .Values.curl.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          {{- with .Values.restrictedContainerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: FHIR_URL
+              value: {{ include "recruit.fhirserver.url" . }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              until [ "$(curl -s -o /dev/null -L -w '%{http_code}' "$FHIR_URL/metadata")" == "200" ]; do
+                echo "$(date): Waiting for FHIR server @ $FHIR_URL to be up";
+                sleep 15;
+              done;
+        # waiting for the notify module to be up is only necessary
+        # for integration testing, where new recruitment recommendations may be
+        # created by the query module before the notification module is up causing
+        # attempts by the FHIR server to trigger the Subscriptions to fail
+        {{- if (and .Values.notify.enabled .Values.query.shouldWaitForNotify) }}
+        - name: wait-for-notify
+          image: "{{ .Values.curl.image.registry }}/{{ .Values.curl.image.repository }}:{{ .Values.curl.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          {{- with .Values.restrictedContainerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: NOTIFY_HEALTH_URL
+              value: "http://{{ include "recruit.fullname" . }}-notify:{{ .Values.notify.service.metricsPort }}/actuator/health"
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              until [ "$(curl -s -o /dev/null -L -w '%{http_code}' ${NOTIFY_HEALTH_URL})" == "200" ]; do
+                echo "$(date): Waiting for notify module @ ${NOTIFY_HEALTH_URL} to be up";
+                sleep 15;
+              done;
+        {{- end }}
+      containers:
+        - name: query
+          image: "{{ .Values.query.image.registry }}/{{ .Values.query.image.repository }}:{{ .Values.query.image.tag }}"
+          securityContext:
+            {{- toYaml .Values.query.securityContext | nindent 12 }}
+          imagePullPolicy: {{ .Values.query.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: http-metrics
+              containerPort: 8081
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: http
+            initialDelaySeconds: {{ .Values.query.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.query.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.query.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.query.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.query.livenessProbe.failureThreshold }}
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            initialDelaySeconds: {{ .Values.query.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.query.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.query.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.query.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.query.readinessProbe.failureThreshold }}
+          resources:
+            {{- toYaml .Values.query.resources | nindent 12 }}
+          env:
+            - name: FHIR_URL
+              value: {{ include "recruit.fhirserver.url" . }}
+            - name: OMOP_JDBCURL
+              value: {{ include "recruit.omop.jdbcUrl" . }}
+            - name: OMOP_USERNAME
+              value: {{ include "recruit.omop.db.user" . }}
+            - name: OMOP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "recruit.omopSecretName" . }}
+                  key: {{ include "recruit.omopSecretKey" . }}
+            - name: OMOP_CDMSCHEMA
+              value: {{ .Values.query.omop.cdmSchema | quote }}
+            - name: OMOP_RESULTSSCHEMA
+              value: {{ .Values.query.omop.resultsSchema | quote }}
+            - name: QUERY_WEBAPI_BASE_URL
+              value: {{ include "recruit.omop.webApiUrl" . | quote }}
+            - name: ATLAS_DATASOURCE
+              value: {{ .Values.query.webAPI.dataSource | quote }}
+            - name: QUERY_SELECTOR_MATCHLABELS
+              value: {{ include "recruit.utils.joinListWithComma" .Values.query.cohortSelectorLabels }}
+            - name: QUERY_SCHEDULE_UNIXCRON
+              value: {{ .Values.query.schedule | quote }}
+            {{- if .Values.query.webAPI.auth.enabled }}
+            - name: QUERY_WEBAPI_AUTH_ENABLED
+              value: "true"
+            - name: QUERY_WEBAPI_AUTH_LOGIN_PATH
+              value: "{{ .Values.query.webAPI.auth.loginPath }}"
+            - name: QUERY_WEBAPI_AUTH_USERNAME
+              value: "{{ .Values.query.webAPI.auth.username }}"
+            - name: QUERY_WEBAPI_AUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "recruit.webApiSecretName" . }}
+                  key: {{ include "recruit.webApiSecretKey" . }}
+            {{- end }}
+            - name: MANAGEMENT_ENDPOINT_HEALTH_PROBES_ADD_ADDITIONAL_PATHS
+              value: "true"
+            - name: MANAGEMENT_SERVER_PORT
+              value: "8081"
+            # disable Apache Camel health checks since some of the routes only appear as healthy after having run
+            # at least once. This delays the Helm tests or causes them to fail.
+            - name: CAMEL_HEALTH_ENABLED
+              value: "false"
+            {{- if .Values.query.extraEnv }}
+            {{ toYaml .Values.query.extraEnv | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp-volume
+      {{- with .Values.query.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.query.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.query.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.query.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      volumes:
+        - name: tmp-volume
+          emptyDir: {}
+{{- end }}

@@ -1,0 +1,54 @@
+version: "3.7"
+
+services:
+  notify:
+    image: ${IMAGE_NAME:-ghcr.io/miracum/recruit/notify}:${IMAGE_TAG}
+    pull_policy: never
+    environment:
+      FHIR_URL: "http://fhir:8080/fhir"
+      WEBHOOK_ENDPOINT: "http://notify:8080/on-list-change"
+      SPRING_MAIL_HOST: maildev
+      SPRING_MAIL_PORT: 1025
+      SPRING_MAIL_USERNAME: maildev
+      SPRING_MAIL_PASSWORD: maildev # pragma: allowlist secret
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres # pragma: allowlist secret
+      SPRING_DATASOURCE_URL: jdbc:postgresql://jobstore-db:5432/recruit_notify_jobs?ApplicationName=recruit-notify
+    volumes:
+      - ./rules.yaml:/opt/notify/config/application.yaml:ro
+    depends_on:
+      - fhir
+      - maildev
+
+  jobstore-db:
+    image: docker.io/library/postgres:14.5@sha256:f8816ada742348e1adfcec5c2a180b675bf6e4a294e0feb68bd70179451e1242
+    environment:
+      POSTGRES_PASSWORD: postgres # pragma: allowlist secret
+      POSTGRES_DB: recruit_notify_jobs
+
+  tester:
+    image: docker.io/curlimages/curl:7.87.0@sha256:f7f265d5c64eb4463a43a99b6bf773f9e61a50aaa7cefaf564f43e42549a01dd
+    command: >
+      -X GET
+      --fail
+      --retry-connrefuse
+      --connect-timeout 30
+      --max-time 120
+      --retry 10
+      --retry-delay 30
+      http://notify:8080/actuator/health
+    depends_on:
+      - notify
+
+  fhir:
+    image: docker.io/hapiproject/hapi:v6.0.1@sha256:63c98d8be3dadc77b47dca3115490f22bf99512f363f779f7bbcb42f569aeac3
+    environment:
+      HAPI_FHIR_VALIDATION_REQUESTS_ENABLED: "true"
+      HAPI_FHIR_SUBSCRIPTION_RESTHOOK_ENABLED: "true"
+      HAPI_FHIR_FHIR_VERSION: "R4"
+      HAPI_FHIR_CORS_ALLOWCREDENTIALS: "false"
+      HAPI_FHIR_CORS_ALLOWED_ORIGIN: "*"
+
+  maildev:
+    image: docker.io/maildev/maildev:2.0.5@sha256:082ec5ee92266c6e17493998ff1bf1c3eb70604b159fbeeaa435ee777f5cc953

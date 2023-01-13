@@ -1,0 +1,17 @@
+ohdsi:
+  postgresql:
+    postgresqlPassword: ohdsi
+  cdmInitJob:
+    enabled: true
+
+fhirserver:
+  postgresql:
+    postgresqlPassword: fhir
+
+notify:
+  ha:
+    enabled: true
+
+postgresql:
+  enabled: true
+  postgresqlPassword: notify-ha

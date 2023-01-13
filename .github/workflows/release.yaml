@@ -1,46 +1,116 @@
 name: release
 
 on:
-  push:
-    branches:
-      - master
+  workflow_call: {}
 
-permissions: read-all
+permissions:
+  packages: write
+  actions: read # To read the workflow path.
+  id-token: write # To sign the provenance.
+  contents: write # To add assets to a release.
 
 jobs:
+  publish-helm-chart:
+    name: publish helm chart
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      packages: write
+      # needed for cosign
+      id-token: write
+    env:
+      COSIGN_EXPERIMENTAL: "true"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b # tag=v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Task
+        uses: arduino/setup-task@d665c6beebae46ff3f699d7b2fd3f1959de7153c # tag=1.0.2
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@9becc617647dfa20ae7b1151972e9b3a2c338a2b # tag=v2.8.1
+
+      - name: Add helm repos and update deps
+        run: |
+          task helm-add-repos
+          helm dep build charts/recruit
+
+      # TODO: maybe create a PR to miracum/charts with just the one folder's changes.
+      # TODO: maybe replace image tags in values.yaml with digests before packaging
+      - name: Package, upload, and sign Helm chart
+        run: |
+          CHART_VERSION=$(yq .version charts/recruit/Chart.yaml)
+
+          helm package charts/recruit/
+          helm push "recruit-${CHART_VERSION}.tgz" oci://ghcr.io/${{ github.repository }}/charts
+
+          cp "recruit-${CHART_VERSION}.tgz" recruit-helm-chart.tgz
+
+          cosign sign "ghcr.io/${{ github.repository }}/charts/recruit:${CHART_VERSION}"
+
+      - uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3.1.0
+        with:
+          name: helm-chart
+          path: |
+            recruit-helm-chart.tgz
+
   prepare-artifacts:
-    name: Prepare Artifacts
+    name: prepare artifacts
     runs-on: ubuntu-22.04
     container: ghcr.io/chgl/kube-powertools:v1.22.2@sha256:a8a2649b29be23756d830bb98a5ac71cca515e35886df90b3116293c03bfc0fc
+    needs:
+      - publish-helm-chart
     outputs:
       hashes: ${{ steps.hash.outputs.hashes }}
+    permissions:
+      contents: write # to upload artifacts to the release
     steps:
       - name: Checkout
         uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
 
-      - name: Build Docker Compose deployment bundle
+      - name: Download Helm chart
+        uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 # tag=v3
+        with:
+          name: helm-chart
+          path: /tmp
+
+      - name: Create dist dir
         run: |
           mkdir -p dist/
-          cp -r docker-compose/ dist/
-          tar -C dist -zcvf dist/recruit-docker-compose.tar.gz docker-compose/
 
-      - name: Build SBOM bundle from container images
+      - name: Add Helm chart to dist
         run: |
-          ./.github/generate-sboms.sh
-          cp -r sboms/ dist/
-          tar -C dist -zcvf dist/recruit-container-sboms.tar.gz sboms/
+          ls -lsa /tmp
+          cp /tmp/recruit-helm-chart.tgz dist/
 
-      - name: Generate SLSA subject for Docker Compose and SBOM bundles
+      # TODO: replace tags with digests in compose - requires waiting for ci/build to be completed
+      #       turn this workflow into a reusable one and call it at the end of ci.yaml
+      #       yq '(.services[].image | select(. == "ghcr.io/miracum/recruit/list:*")) += "@sha256:123456"' docker-compose/docker-compose.yaml
+      - name: Build Docker Compose deployment bundle
+        run: |
+          cp -r docker-compose/ dist/
+          tar -C dist -zcvf dist/recruit-docker-compose.tgz docker-compose/
+
+      - name: Generate SLSA subject for release assets
         id: hash
         working-directory: dist
         run: |
-          sha256sum recruit-docker-compose.tar.gz recruit-container-sboms.tar.gz > recruit-hashes.sha256
-          echo "hashes=$(base64 -w0 < recruit-hashes.sha256)" >> "$GITHUB_OUTPUT"
+          sha256sum recruit-docker-compose.tgz recruit-helm-chart.tgz > checksums.sha256
+          echo "hashes=$(base64 -w0 < checksums.sha256)" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # v3.1.1
+      - name: upload assets to release
+        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # tag=v1
         with:
-          name: release-assets
-          path: dist/*.tar.gz
+          files: |
+            dist/*.tgz
+            dist/*.sha256
 
   provenance:
     needs:
@@ -54,29 +124,4 @@ jobs:
     with:
       base64-subjects: "${{ needs.prepare-artifacts.outputs.hashes }}"
       compile-generator: true # Workaround for https://github.com/slsa-framework/slsa-github-generator/issues/1163
-
-  release:
-    name: Release
-    runs-on: ubuntu-22.04
-    permissions:
-      contents: write
-      pull-requests: write
-    needs:
-      - prepare-artifacts
-      - provenance
-    steps:
-      - name: Checkout
-        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
-        with:
-          fetch-depth: 0
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@9782bd6a9848b53b110e712e20e42d89988822b7 # v3.0.1
-
-      - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@8f6ceb9d5aae5578b1dcda6af00008235204e7fa # v3.2.0
-        with:
-          extra_plugins: |
-            conventional-changelog-conventionalcommits@5.0.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      upload-assets: true

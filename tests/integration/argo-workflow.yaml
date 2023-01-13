@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/argoproj/argo-workflows/v3.4.3/api/jsonschema/schema.json
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: recruit-test-workflow-
+spec:
+  entrypoint: assert
+  templates:
+    - name: assert
+      container:
+        image: ghcr.io/miracum/recruit/tester:v1
+        imagePullPolicy: IfNotPresent
+        command:
+          - dotnet
+          - /opt/chaos-tester/tester.dll
+        args:
+          - "assert"
+          - "--expected-number-of-messages=2"
+          - "--mailhog-api-base-url=http://recruit-mailhog:8025/api/"
+          - "--retries=10"
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          runAsNonRoot: true

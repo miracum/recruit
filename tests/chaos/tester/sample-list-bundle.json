@@ -1,0 +1,217 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "Patient/0",
+      "resource": {
+        "resourceType": "Patient",
+        "identifier": [
+          {
+            "system": "http://ohdsi.org/omop/fhir/subject-identifier",
+            "value": "1"
+          }
+        ],
+        "name": [
+          {
+            "family": "Jones311",
+            "given": ["Bruce168"]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1987-04-25"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Patient",
+        "ifNoneExist": "identifier=http://ohdsi.org/omop/fhir/subject-identifier|1"
+      }
+    },
+    {
+      "fullUrl": "Patient/1",
+      "resource": {
+        "resourceType": "Patient",
+        "identifier": [
+          {
+            "system": "http://ohdsi.org/omop/fhir/subject-identifier",
+            "value": "2"
+          }
+        ],
+        "name": [
+          {
+            "family": "Tyla133",
+            "given": ["Phan898"]
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1977-01-15"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Patient",
+        "ifNoneExist": "identifier=http://ohdsi.org/omop/fhir/subject-identifier|2"
+      }
+    },
+    {
+      "fullUrl": "Patient/2",
+      "resource": {
+        "resourceType": "Patient",
+        "identifier": [
+          {
+            "system": "http://ohdsi.org/omop/fhir/subject-identifier",
+            "value": "3"
+          }
+        ],
+        "name": [
+          {
+            "family": "Zaine246",
+            "given": ["Wise067"]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1967-09-14"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Patient",
+        "ifNoneExist": "identifier=http://ohdsi.org/omop/fhir/subject-identifier|3"
+      }
+    },
+    {
+      "fullUrl": "ResearchSubject/2",
+      "resource": {
+        "resourceType": "ResearchSubject",
+        "status": "ineligible",
+        "study": {
+          "reference": "ResearchStudy/1"
+        },
+        "individual": {
+          "reference": "Patient/0"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "ResearchSubject"
+      }
+    },
+    {
+      "fullUrl": "ResearchSubject/3",
+      "resource": {
+        "resourceType": "ResearchSubject",
+        "status": "candidate",
+        "study": {
+          "reference": "ResearchStudy/1"
+        },
+        "individual": {
+          "reference": "Patient/1"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "ResearchSubject"
+      }
+    },
+    {
+      "fullUrl": "ResearchSubject/4",
+      "resource": {
+        "resourceType": "ResearchSubject",
+        "status": "withdrawn",
+        "study": {
+          "reference": "ResearchStudy/1"
+        },
+        "individual": {
+          "reference": "Patient/2"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "ResearchSubject"
+      }
+    },
+    {
+      "fullUrl": "List/1",
+      "resource": {
+        "resourceType": "List",
+        "status": "current",
+        "identifier": [
+          {
+            "system": "http://miracum.org/fhir/screening-list-cohort-identifier",
+            "value": "2"
+          }
+        ],
+        "extension": [
+          {
+            "url": "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy",
+            "valueReference": {
+              "reference": "ResearchStudy/1",
+              "display": "AMICA"
+            }
+          }
+        ],
+        "mode": "working",
+        "code": {
+          "coding": [
+            {
+              "system": "https://fhir.miracum.org/uc1/CodeSystem/screeningList",
+              "code": "screening-recommendations"
+            }
+          ]
+        },
+        "entry": [
+          {
+            "item": {
+              "reference": "ResearchSubject/2"
+            }
+          },
+          {
+            "item": {
+              "reference": "ResearchSubject/3"
+            }
+          },
+          {
+            "item": {
+              "reference": "ResearchSubject/4"
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "List?identifier=http://miracum.org/fhir/screening-list-cohort-identifier|2"
+      }
+    },
+    {
+      "fullUrl": "ResearchStudy/1",
+      "resource": {
+        "resourceType": "ResearchStudy",
+        "identifier": [
+          {
+            "use": "official",
+            "system": "http://clinicaltrials.gov/",
+            "value": "NCT03555877"
+          }
+        ],
+        "extension": [
+          {
+            "url": "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym",
+            "valueString": "AMICA"
+          }
+        ],
+        "title": "Antihormonelle Erhaltungstherapie [...]",
+        "description": "This is a multicenter, prospective, randomized, [...]",
+        "status": "active",
+        "relatedArtifact": [
+          {
+            "type": "documentation",
+            "url": "https://clinicaltrials.gov/ct2/show/NCT03555877"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "ResearchStudy",
+        "ifNoneExist": "identifier=http://clinicaltrials.gov/|NCT03555877"
+      }
+    }
+  ]
+}

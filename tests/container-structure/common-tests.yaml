@@ -1,0 +1,9 @@
+schemaVersion: "2.0.0"
+
+metadataTest:
+  labels:
+    - key: "org.opencontainers.image.licenses"
+      value: "AGPL-3.0"
+  exposedPorts: ["8080", "8081"]
+  workdir: "/app"
+  user: "65532:65532"

@@ -1,6 +1,6 @@
 services:
   list:
-    image: ghcr.io/miracum/recruit/list:v2.15.6@sha256:9c9ed72b32857cb1cccabc76a4d6fc75e7e9ea7359e02f51869ac91b9cccfa28
+    image: ${RECRUIT_IMAGE_BASE_NAME:-ghcr.io/miracum/recruit}/list:${RECRUIT_IMAGE_TAG:-v10.0.10} # x-release-please-version
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -29,7 +29,7 @@ services:
       - ${NOTIFY_RULES_CONFIG_PATH:?}:/etc/rules.yaml:ro
 
   query:
-    image: ghcr.io/miracum/recruit/query:v3.16.4@sha256:0080bef593de3e4d535cfcf93815588dbc9b6f07bd18c48770bce5d4f1fc2f65
+    image: ${RECRUIT_IMAGE_BASE_NAME:-ghcr.io/miracum/recruit}/query:${RECRUIT_IMAGE_TAG:-v10.0.10} # x-release-please-version
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -37,11 +37,8 @@ services:
     cap_drop:
       - ALL
     read_only: true
-    tmpfs:
-      - /tmp
     privileged: false
     environment:
-      JAEGER_SERVICE_NAME: recruit-query
       CAMEL_HEALTH_ENABLED: "false"
       FHIR_URL: ${FHIR_URL:?}
       OMOP_JDBCURL: ${OMOP_JDBCURL:?}
@@ -55,7 +52,6 @@ services:
       QUERY_SELECTOR_MATCHLABELS: ${QUERY_SELECTOR_MATCHLABELS:?}
       QUERY_EXCLUDEPATIENTPARAMETERS_DEMOGRAPHICS: ${HIDE_DEMOGRAPHICS:-false}
       QUERY_EXCLUDEPATIENTPARAMETERS_ENCOUNTER: ${HIDE_LAST_VISIT:-false}
-      OPENTRACING_JAEGER_ENABLED: ${OPENTRACING_JAEGER_ENABLED:-false}
       QUERY_WEBAPI_AUTH_ENABLED: ${QUERY_WEBAPI_AUTH_ENABLED:-false}
       QUERY_WEBAPI_AUTH_LOGIN_PATH: ${QUERY_WEBAPI_AUTH_LOGIN_PATH:-"/user/login/db"}
       QUERY_WEBAPI_AUTH_USERNAME: ${QUERY_WEBAPI_AUTH_USERNAME:-""}
@@ -64,9 +60,14 @@ services:
       QUERY_FORCE_UPDATE_SCREENING_LIST: ${QUERY_FORCE_UPDATE_SCREENING_LIST:-false}
       QUERY_ONLY_CREATE_PATIENTS_IF_NOT_EXIST: ${QUERY_ONLY_CREATE_PATIENTS_IF_NOT_EXIST:-false}
       QUERY_COHORTSIZETHRESHOLD: ${QUERY_COHORTSIZETHRESHOLD:-100}
+    volumes:
+      - type: tmpfs
+        target: /tmp
+        tmpfs:
+          size: 1024
 
   notify:
-    image: ghcr.io/miracum/recruit/notify:v3.2.5@sha256:ce34fbcff8564ab856579837d7ced1dcbc8d2ee105f2bccbf2a2e6107a84e41d
+    image: ${RECRUIT_IMAGE_BASE_NAME:-ghcr.io/miracum/recruit}/notify:${RECRUIT_IMAGE_TAG:-v10.0.10} # x-release-please-version
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -74,11 +75,8 @@ services:
     cap_drop:
       - ALL
     read_only: true
-    tmpfs:
-      - /tmp
     privileged: false
     environment:
-      JAEGER_SERVICE_NAME: recruit-notify
       FHIR_URL: ${FHIR_URL:?}
       NOTIFY_MAILER_LINKTEMPLATE: ${NOTIFY_MAILER_LINKTEMPLATE:?}
       NOTIFY_MAILER_FROM: ${NOTIFY_MAILER_FROM:?}
@@ -88,4 +86,8 @@ services:
       SPRING_MAIL_USERNAME: ${NOTIFY_MAIL_USERNAME}
       SPRING_MAIL_PASSWORD: ${NOTIFY_MAIL_PASSWORD}
     volumes:
+      - type: tmpfs
+        target: /tmp
+        tmpfs:
+          size: 1024
       - ${NOTIFY_RULES_CONFIG_PATH:?}:/opt/notify/config/application.yml:ro

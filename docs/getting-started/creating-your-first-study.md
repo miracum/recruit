@@ -2,7 +2,7 @@
 
 This will guide you through creating your first study using recruIT.
 
-recruIT uses the [OHDSI Atlas](https://www.ohdsi.org/atlas-a-unified-interface-for-the-ohdsi-tools/) tool to create
+recruIT uses the [OHDSI Atlas](https://ohdsi.github.io/TheBookOfOhdsi/OhdsiAnalyticsTools.html#atlas) tool to create
 cohorts that define the eligibility criteria for a clinical trial.
 
 Start by opening Atlas and clicking on `Define a New Cohort`:

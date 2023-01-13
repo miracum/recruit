@@ -1,0 +1,7 @@
+.gradle/
+**/build/
+**/bin/
+list/
+gradle/
+hack/
+tests/

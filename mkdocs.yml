@@ -7,7 +7,7 @@ repo_name: miracum/recruit
 repo_url: https://github.com/miracum/recruit
 edit_uri: ""
 
-copyright: Copyright &copy; 2022+ miracum.org
+copyright: Copyright &copy; 2023 miracum.org
 
 markdown_extensions:
   - attr_list
@@ -16,7 +16,8 @@ markdown_extensions:
   - pymdownx.superfences
   - md_in_html
   - pymdownx.snippets:
-      base_path: "docs"
+      base_path:
+        - "docs"
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
@@ -36,6 +37,7 @@ theme:
   features:
     - navigation.expand
     - navigation.sections
+    - content.code.copy
   palette:
     - scheme: default
       toggle:

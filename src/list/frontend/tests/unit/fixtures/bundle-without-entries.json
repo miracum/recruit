@@ -1,0 +1,11 @@
+{
+  "resourceType": "Bundle",
+  "type": "searchset",
+  "total": 0,
+  "link": [
+    {
+      "relation": "self",
+      "url": "http://localhost:8080/fhir/List/?_id=792&_include=List%3Aitem"
+    }
+  ]
+}

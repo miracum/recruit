@@ -1,0 +1,9 @@
+{
+  "name": "list",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "server"
+  ]
+}

@@ -1,0 +1,14 @@
+{{- if or .Values.notify.enabled .Values.list.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "recruit.fullname" . }}-notify-rules
+  labels:
+    {{- include "recruit.labels" . | nindent 4 }}
+    app.kubernetes.io/component: notify
+data:
+  application.yaml: |-
+    notify:
+      rules:
+{{ toYaml .Values.notify.rules | indent 8 }}
+{{- end }}

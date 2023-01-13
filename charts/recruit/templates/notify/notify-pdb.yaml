@@ -1,0 +1,20 @@
+{{- if .Values.notify.podDisruptionBudget.enabled }}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: {{ include "recruit.fullname" . }}-notify
+  labels:
+    {{- include "recruit.labels" . | nindent 4 }}
+    app.kubernetes.io/component: notify
+spec:
+  {{- if .Values.notify.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ .Values.notify.podDisruptionBudget.minAvailable }}
+  {{- end }}
+  {{- if .Values.notify.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ .Values.notify.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "recruit.matchLabels" . | nindent 6 }}
+      app.kubernetes.io/component: notify
+{{- end }}

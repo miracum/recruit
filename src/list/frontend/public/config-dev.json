@@ -1,0 +1,11 @@
+{
+  "authClientId": "uc1-screeninglist",
+  "authUrl": "http://localhost:8083/auth",
+  "authRealm": "MIRACUM",
+  "logoutRedirectUri": "/",
+  "isKeycloakDisabled": false,
+  "hideDemographics": false,
+  "hideLastVisit": false,
+  "hideEhrButton": false,
+  "hideRecommendationDate": false
+}

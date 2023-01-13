@@ -1,0 +1,146 @@
+{{- if .Values.list.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "recruit.fullname" . }}-list
+  labels:
+    {{- include "recruit.labels" . | nindent 4 }}
+    app.kubernetes.io/component: list
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.list.replicaCount }}
+  revisionHistoryLimit: {{ .Values.list.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      {{- include "recruit.matchLabels" . | nindent 6 }}
+      app.kubernetes.io/component: list
+  template:
+    metadata:
+      labels:
+        {{- include "recruit.podLabels" . | nindent 8 }}
+        app.kubernetes.io/component: list
+        {{- with .Values.list.extraPodLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/notify/notify-cm.yaml") . | sha256sum | quote }}
+        {{- with .Values.podAnnotations }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      securityContext:
+        {{- toYaml .Values.list.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: wait-for-fhir-server
+          image: "{{ .Values.curl.image.registry }}/{{ .Values.curl.image.repository }}:{{ .Values.curl.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          {{- with .Values.restrictedContainerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: FHIR_URL
+              value: {{ template "recruit.fhirserver.url" . }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              until [ "$(curl -s -o /dev/null -L -w '%{http_code}' "$FHIR_URL/metadata")" == "200" ]; do
+                echo "$(date): Waiting for FHIR server to be up";
+                sleep 15;
+              done;
+      containers:
+        - name: list
+          image: "{{ .Values.list.image.registry }}/{{ .Values.list.image.repository }}:{{ .Values.list.image.tag }}"
+          securityContext:
+            {{- toYaml .Values.list.securityContext | nindent 12 }}
+          imagePullPolicy: {{ .Values.list.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /api/health/liveness
+              port: http
+            initialDelaySeconds: {{ .Values.list.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.list.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.list.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.list.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.list.livenessProbe.failureThreshold }}
+          readinessProbe:
+            httpGet:
+              path: /api/health/readiness
+              port: http
+            initialDelaySeconds: {{ .Values.list.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.list.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.list.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.list.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.list.readinessProbe.failureThreshold }}
+          resources:
+            {{- toYaml .Values.list.resources | nindent 12 }}
+          env:
+            - name: FHIR_URL
+              value: {{ include "recruit.fhirserver.url" . }}
+            {{- if .Values.list.auth.enabled }}
+            - name: KEYCLOAK_AUTH_URL
+              value: {{ .Values.list.auth.keycloak.url }}
+            - name: KEYCLOAK_CLIENT_ID
+              value: {{ .Values.list.auth.keycloak.clientId }}
+            - name: KEYCLOAK_REALM
+              value: {{ .Values.list.auth.keycloak.realm }}
+            - name: RULES_FILE_PATH
+              value: "/etc/rules.yaml"
+            {{- else }}
+            - name: KEYCLOAK_DISABLED
+              value: "true"
+            {{- end }}
+            {{- if .Values.list.dePseudonymization.enabled }}
+            - name: DE_PSEUDONYMIZATION_ENABLED
+              value: "true"
+            - name: DE_PSEUDONYMIZATION_SERVICE_URL
+              value: {{ include "recruit.list.fhirPseudonymizer.serviceUrl" . }}
+            {{/* This isn't great, but there is no `toBool`: https://github.com/helm/helm/issues/10382 */}}
+            {{- if (eq (include "recruit.list.fhirPseudonymizer.isApiKeyAuthEnabled" .) "true") }}
+            - name: DE_PSEUDONYMIZATION_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "recruit.list.fhirPseudonymizer.apiKey.secretName" . }}
+                  key: {{ include "recruit.list.fhirPseudonymizer.apiKey.secretKey" . }}
+            {{- end }}
+            {{- end }}
+            {{- if .Values.list.extraEnv }}
+            {{ toYaml .Values.list.extraEnv | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            - name: notification-configuration-file
+              mountPath: /etc/rules.yaml
+              subPath: application.yaml
+              readOnly: true
+      {{- with .Values.list.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.list.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.list.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.list.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      volumes:
+        - name: notification-configuration-file
+          configMap:
+            name: {{ template "recruit.fullname" . }}-notify-rules
+{{- end }}

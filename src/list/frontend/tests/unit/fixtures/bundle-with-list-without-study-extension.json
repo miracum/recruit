@@ -1,0 +1,50 @@
+{
+  "resourceType": "Bundle",
+  "type": "searchset",
+  "total": 1,
+  "link": [
+    {
+      "relation": "self",
+      "url": "http://localhost:8080/fhir/List/?_id=792&_include=List%3Aitem"
+    }
+  ],
+  "entry": [
+    {
+      "fullUrl": "http://localhost:8080/fhir/List/792",
+      "resource": {
+        "resourceType": "List",
+        "id": "792",
+        "extension": [
+          {
+            "url": "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy",
+            "valueReference": {
+              "reference": "ResearchStudy/790"
+            }
+          }
+        ],
+        "identifier": [
+          {
+            "system": "http://miracum.org/fhir/screening-list-cohort-identifier",
+            "value": "1"
+          }
+        ]
+      },
+      "search": { "mode": "match" }
+    },
+    {
+      "fullUrl": "http://localhost:8080/fhir/List/792",
+      "resource": {
+        "resourceType": "List",
+        "id": "792",
+        "extension": [],
+        "identifier": [
+          {
+            "system": "http://miracum.org/fhir/screening-list-cohort-identifier",
+            "value": "1"
+          }
+        ]
+      },
+      "search": { "mode": "match" }
+    }
+  ]
+}
