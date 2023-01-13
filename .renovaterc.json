@@ -2,13 +2,6 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>miracum/.github//renovate/default"],
   "ignoreDeps": ["docker.io/library/postgres", "postgresql"],
-  "packageRules": [
-    {
-      "updateTypes": ["minor", "patch", "pin", "digest"],
-      "automerge": true,
-      "requiredStatusChecks": null
-    }
-  ],
   "ignorePaths": ["**/node_modules/**", "**/bower_components/**"],
   "pip-compile": {
     "fileMatch": ["(^|/|\\.)requirements\\.in$"]

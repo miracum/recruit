@@ -91,6 +91,7 @@ jobs:
           severity: "CRITICAL,HIGH"
           exit-code: "1"
           ignore-unfixed: "true"
+          timeout: 15m
 
       - name: Save Trivy vulnerability attestation
         uses: aquasecurity/trivy-action@9ab158e8597f3b310480b9a69402b419bc03dbd5 # tag=v0.8.0
@@ -99,6 +100,7 @@ jobs:
           exit-code: "0"
           format: cosign-vuln
           output: trivy-vuln-attestation.json
+          timeout: 15m
 
       - name: Upload image vulnerability attestation
         uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3.1.0
