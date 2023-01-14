@@ -1,10 +1,6 @@
 name: "build container image"
 
-permissions:
-  actions: read
-  contents: read
-  id-token: write # for creating OIDC tokens for signing.
-  packages: write # for uploading container images, signatures, and attestations.
+permissions: {}
 
 on:
   workflow_call:

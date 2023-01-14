@@ -5,9 +5,7 @@
 ## TL;DR;
 
 ```console
-helm repo add miracum https://miracum.github.io/charts
-helm repo update
-helm install recruit miracum/recruit -n recruit
+helm install recruit oci://ghcr.io/miracum/recruit/charts/recruit -n recruit
 ```
 
 You can find more exhaustive documentation at the recruIT documentation site: <https://miracum.github.io/recruit/deployment/kubernetes>.
@@ -30,7 +28,7 @@ See [UPGRADING.md](./docs/UPGRADING.md) for information on breaking changes intr
 To install the chart with the release name `recruit`:
 
 ```console
-helm install recruit miracum/recruit -n recruit
+helm install recruit oci://ghcr.io/miracum/recruit/charts/recruit -n recruit
 ```
 
 The command deploys the recruIT clinical trial recruitment support system on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -184,14 +182,14 @@ The following table lists the configurable parameters of the `recruit` chart and
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-helm install recruit miracum/recruit -n recruit --set fhirserver.postgresql.nameOverride="fhir-server-postgres"
+helm install recruit oci://ghcr.io/miracum/recruit/charts/recruit -n recruit --set fhirserver.postgresql.nameOverride="fhir-server-postgres"
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```console
-helm install recruit miracum/recruit -n recruit --values values.yaml
+helm install recruit oci://ghcr.io/miracum/recruit/charts/recruit -n recruit --values values.yaml
 ```
 
 ## Configure Notifcation Rules

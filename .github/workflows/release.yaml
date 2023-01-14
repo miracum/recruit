@@ -3,11 +3,7 @@ name: release
 on:
   workflow_call: {}
 
-permissions:
-  packages: write
-  actions: read # To read the workflow path.
-  id-token: write # To sign the provenance.
-  contents: write # To add assets to a release.
+permissions: {}
 
 jobs:
   publish-helm-chart:
