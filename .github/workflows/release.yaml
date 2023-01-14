@@ -1,7 +1,17 @@
 name: release
 
 on:
-  workflow_call: {}
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+  release:
+    types:
+      # If you want a workflow to run when stable and pre-releases publish, subscribe to published instead of released and prereleased.
+      # <https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#release>
+      - published
 
 permissions: {}
 
@@ -17,106 +27,19 @@ jobs:
     env:
       COSIGN_EXPERIMENTAL: "true"
     steps:
-      - name: Checkout
-        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b # tag=v2
+      - uses: actions/checkout@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          path: recruit-release-test
 
-      - name: Install Task
-        uses: arduino/setup-task@d665c6beebae46ff3f699d7b2fd3f1959de7153c # tag=1.0.2
-
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@9becc617647dfa20ae7b1151972e9b3a2c338a2b # tag=v2.8.1
-
-      - name: Add helm repos and update deps
-        run: |
-          task helm-add-repos
-          helm dep build charts/recruit
-
-      # TODO: maybe create a PR to miracum/charts with just the one folder's changes.
-      # TODO: maybe replace image tags in values.yaml with digests before packaging
-      - name: Package, upload, and sign Helm chart
-        run: |
-          CHART_VERSION=$(yq .version charts/recruit/Chart.yaml)
-
-          helm package charts/recruit/
-          helm push "recruit-${CHART_VERSION}.tgz" oci://ghcr.io/${{ github.repository }}/charts
-
-          cp "recruit-${CHART_VERSION}.tgz" recruit-helm-chart.tgz
-
-          cosign sign "ghcr.io/${{ github.repository }}/charts/recruit:${CHART_VERSION}"
-
-      - uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3.1.0
+      - uses: actions/checkout@v3
         with:
-          name: helm-chart
-          path: |
-            recruit-helm-chart.tgz
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: chgl/release-please-test
 
-  prepare-artifacts:
-    name: prepare artifacts
-    runs-on: ubuntu-22.04
-    needs:
-      - publish-helm-chart
-    outputs:
-      hashes: ${{ steps.hash.outputs.hashes }}
-    permissions:
-      contents: write # to upload artifacts to the release
-    steps:
-      - name: Checkout
-        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
+      - name: copy local helm chart to charts repo
+        run: |
+          cp -r recruit-release-test/charts/recruit charts/
 
-      - name: Download Helm chart
-        uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 # tag=v3
+      - uses: peter-evans/create-pull-request@v4
         with:
-          name: helm-chart
-          path: /tmp
-
-      - name: Create dist dir
-        run: |
-          mkdir -p dist/
-
-      - name: Add Helm chart to dist
-        run: |
-          ls -lsa /tmp
-          cp /tmp/recruit-helm-chart.tgz dist/
-
-      # TODO: replace tags with digests in compose - requires waiting for ci/build to be completed
-      #       turn this workflow into a reusable one and call it at the end of ci.yaml
-      #       yq '(.services[].image | select(. == "ghcr.io/miracum/recruit/list:*")) += "@sha256:123456"' docker-compose/docker-compose.yaml
-      - name: Build Docker Compose deployment bundle
-        run: |
-          cp -r docker-compose/ dist/
-          tar -C dist -zcvf dist/recruit-docker-compose.tgz docker-compose/
-
-      - name: Generate SLSA subject for release assets
-        id: hash
-        working-directory: dist
-        run: |
-          sha256sum recruit-docker-compose.tgz recruit-helm-chart.tgz > checksums.sha256
-          echo "hashes=$(base64 -w0 < checksums.sha256)" >> "$GITHUB_OUTPUT"
-
-      - name: upload assets to release
-        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # tag=v1
-        with:
-          files: |
-            dist/*.tgz
-            dist/*.sha256
-
-  provenance:
-    needs:
-      - prepare-artifacts
-    permissions:
-      actions: read # To read the workflow path.
-      id-token: write # To sign the provenance.
-      contents: write # To add assets to a release.
-    # can't be referenced by digest. See <https://github.com/slsa-framework/slsa-github-generator#verification-of-provenance>
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.4.0
-    with:
-      base64-subjects: "${{ needs.prepare-artifacts.outputs.hashes }}"
-      compile-generator: true # Workaround for https://github.com/slsa-framework/slsa-github-generator/issues/1163
-      upload-assets: true
+          token: ${{ secrets.GITHUB_TOKEN }}
