@@ -10,7 +10,7 @@ plugins {
 }
 
 group = 'org.miracum.recruit'
-version = '0.0.1' // x-release-please-version
+version = '10.0.0' // x-release-please-version
 sourceCompatibility = '17'
 targetCompatibility = '17'
 
