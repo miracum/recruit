@@ -12,12 +12,10 @@ DISABLE_LINTERS:
   - REPOSITORY_DEVSKIM
   - SPELL_PROSELINT
   - SPELL_CSPELL
-  - REPOSITORY_GITLEAKS
   - JAVASCRIPT_STANDARD
   - SQL_TSQLLINT
   - PYTHON_PYLINT
   - JAVA_PMD
-  - JAVA_CHECKSTYLE
   - PYTHON_PYRIGHT
   # error - python package "--hash" is available for public registration. /github/workspace/src/query/tests/e2e/requirements.txt
   - REPOSITORY_DUSTILOCK
