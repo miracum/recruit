@@ -21,6 +21,10 @@ tasks:
       - helm repo add hapifhir https://hapifhir.github.io/hapi-fhir-jpaserver-starter
       - helm repo add miracum https://miracum.github.io/charts
 
+  helm-update-dependencies:
+    cmds:
+      - find charts/ ! -path charts/ -maxdepth 1 -type d -exec helm dependency update {} \;
+
   e2e-k8s-prepare:
     deps:
       - helm-add-repos

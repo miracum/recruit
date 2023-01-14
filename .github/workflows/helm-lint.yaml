@@ -41,6 +41,7 @@ jobs:
       - name: Add helm repos and update deps
         run: |
           task helm-add-repos
+          task helm-update-dependencies
 
       - name: Run chart-testing (lint)
         run: ct lint --config .github/ct/ct.yaml
