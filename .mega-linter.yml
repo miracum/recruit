@@ -3,7 +3,8 @@
 
 IGNORE_GITIGNORED_FILES: true
 
-APPLY_FIXES: none # all, none, or list of linter keys
+# all, none, or list of linter keys
+APPLY_FIXES: none
 DISABLE_LINTERS:
   - MARKDOWN_MARKDOWN_TABLE_FORMATTER
   - MARKDOWN_MARKDOWN_LINK_CHECK

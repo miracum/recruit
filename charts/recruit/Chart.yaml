@@ -22,11 +22,11 @@ dependencies:
     alias: fhirserver
     name: hapi-fhir-jpaserver
     repository: https://hapifhir.github.io/hapi-fhir-jpaserver-starter
-    version: 0.11.0
+    version: 0.11.1
   - condition: ohdsi.enabled
     name: ohdsi
     repository: https://chgl.github.io/charts
-    version: 0.20.0
+    version: 0.20.1
   - condition: mailhog.enabled
     name: mailhog
     repository: https://codecentric.github.io/helm-charts
@@ -73,13 +73,15 @@ annotations:
     - kind: changed
       description: "⚠️ BREAKING CHANGE: updated included postgresql chart to v12, which is based on PostgreSQL 15.1"
     - kind: changed
-      description: "⚠️ BREAKING CHANGE: updated included ohdsi chart to v0.20.0, which internally uses a v12 postgresql chart based on PostgreSQL 15.1"
+      description: "⚠️ BREAKING CHANGE: updated included ohdsi chart to v0.20.1, which internally uses a v12 postgresql chart based on PostgreSQL 15.1"
     - kind: changed
-      description: "⚠️ BREAKING CHANGE: updated included hapi-fhir-jpaserver chart to v0.11.0, which internally uses a v12 postgresql chart based on PostgreSQL 15.1"
+      description: "⚠️ BREAKING CHANGE: updated included hapi-fhir-jpaserver chart to v0.11.1, which internally uses a v12 postgresql chart based on PostgreSQL 15.1"
     - kind: changed
       description: "updated fhir-pseudonymizer sub-chart to v0.3.3"
     - kind: changed
       description: "updated mailhog sub-chart to v5.2.2"
+    - kind: changed
+      description: "updated omop cdm init job to v3.3.2"
     - kind: changed
       description: |
         "added an init container to the query module deployment to wait for the notify module to be ready.

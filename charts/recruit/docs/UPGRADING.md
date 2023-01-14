@@ -1,5 +1,13 @@
 # Upgrading & Breaking Changes
 
+## v10
+
+Once more, all chart dependencies were updated to their latest major version. Particularly the HAPI FHIR and OHDSI chart
+had breaking changes in the form of majorly updating their PostgreSQL sub-chart to v12 (based on PostgreSQL v15).
+
+If you were using the included PostgreSQL databases, you will have to follow the instructions for [v9 below](#v9),
+manually changing the PostgreSQL image versions as appropriate for your current deployment.
+
 ## v9
 
 This updates all dependencies to their latest version. Both the included HAPI FHIR and the OHDSI sub-chart had breaking

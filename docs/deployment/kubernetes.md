@@ -93,7 +93,7 @@ featureGates:
   PodSecurity: true
 nodes:
   - role: control-plane
-    image: docker.io/kindest/node:v1.25.3@sha256:f1de3b0670462f43280114eccceab8bf1b9576d2afe0582f8f74529da6fd0365
+    image: docker.io/kindest/node:v1.26.0@sha256:45aa9ecb5f3800932e9e35e9a45c61324d656cf5bc5dd0d6adfc1b0f8168ec5f
     kubeadmConfigPatches:
       - |
         kind: InitConfiguration
@@ -110,11 +110,11 @@ nodes:
     labels:
       topology.kubernetes.io/zone: a
   - role: worker
-    image: docker.io/kindest/node:v1.25.3@sha256:f1de3b0670462f43280114eccceab8bf1b9576d2afe0582f8f74529da6fd0365
+    image: docker.io/kindest/node:v1.26.0@sha256:45aa9ecb5f3800932e9e35e9a45c61324d656cf5bc5dd0d6adfc1b0f8168ec5f
     labels:
       topology.kubernetes.io/zone: b
   - role: worker
-    image: docker.io/kindest/node:v1.25.3@sha256:f1de3b0670462f43280114eccceab8bf1b9576d2afe0582f8f74529da6fd0365
+    image: docker.io/kindest/node:v1.26.0@sha256:45aa9ecb5f3800932e9e35e9a45c61324d656cf5bc5dd0d6adfc1b0f8168ec5f
     labels:
       topology.kubernetes.io/zone: c
 EOF
@@ -123,7 +123,7 @@ EOF
 Install the NGINX ingress controller
 
 ```sh
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.5.1/deploy/static/provider/kind/deploy.yaml
 ```
 
 Wait until it's ready to process requests by running
@@ -140,7 +140,7 @@ Create a namespace for the new installation. Enable and enforce restricted pod s
 ```sh
 kubectl create namespace recruit
 kubectl label namespace recruit pod-security.kubernetes.io/enforce=restricted
-kubectl label namespace recruit pod-security.kubernetes.io/enforce-version=v1.25
+kubectl label namespace recruit pod-security.kubernetes.io/enforce-version=v1.26
 ```
 
 Add the MIRACUM chart repository

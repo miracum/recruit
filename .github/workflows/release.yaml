@@ -64,7 +64,6 @@ jobs:
   prepare-artifacts:
     name: prepare artifacts
     runs-on: ubuntu-22.04
-    container: ghcr.io/chgl/kube-powertools:v1.22.2@sha256:a8a2649b29be23756d830bb98a5ac71cca515e35886df90b3116293c03bfc0fc
     needs:
       - publish-helm-chart
     outputs:
