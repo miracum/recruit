@@ -1,5 +1,12 @@
 # Changelog
 
+## [10.0.1](https://github.com/miracum/recruit/compare/v10.0.0...v10.0.1) (2023-01-14)
+
+
+### CI/CD
+
+* fixed helm dependency update and possibly ci permissions ([#49](https://github.com/miracum/recruit/issues/49)) ([6e73191](https://github.com/miracum/recruit/commit/6e7319154eb9f4e7b0530fb9189dd9ef572ce8ac))
+
 ## [10.0.0](https://github.com/miracum/recruit/compare/v9.16.0...v10.0.0) (2023-01-14)
 
 
