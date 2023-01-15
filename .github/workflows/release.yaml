@@ -58,39 +58,6 @@ jobs:
           path: |
             recruit-helm-chart.tgz
 
-  sync-helm-chart-to-central-chart-repo:
-    name: sync helm chart to central chart repo
-    runs-on: ubuntu-22.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
-        with:
-          path: recruit
-
-      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          repository: miracum/charts
-          path: miracum-charts
-
-      - name: copy local helm chart to charts repo
-        run: |
-          cp -r recruit/charts/recruit miracum-charts/charts/
-
-      - name: get chart version
-        id: chart-version
-        run: |
-          CHART_VERSION=$(yq .version recruit/charts/recruit/Chart.yaml)
-          echo "version=${CHART_VERSION}" >> "$GITHUB_OUTPUT"
-
-      - uses: peter-evans/create-pull-request@2b011faafdcbc9ceb11414d64d0573f37c774b04 # tag=v4.2.3
-        with:
-          token: ${{ secrets.MIRACUM_BOT_SEMANTIC_RELEASE_TOKEN }}
-          path: miracum-charts
-          title: "chore(deps): updated recruit chart to ${{ steps.chart-version.outputs.version }}"
-          branch: sync-recruit-chart-from-source-repo
-
   prepare-artifacts:
     name: prepare artifacts
     runs-on: ubuntu-22.04
