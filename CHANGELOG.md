@@ -1,5 +1,12 @@
 # Changelog
 
+## [10.0.2](https://github.com/miracum/recruit/compare/v10.0.1...v10.0.2) (2023-01-15)
+
+
+### CI/CD
+
+* added job to sync chart to central chart repo ([#52](https://github.com/miracum/recruit/issues/52)) ([f07a089](https://github.com/miracum/recruit/commit/f07a089486439cd22da459ace9a0a412ebb34431))
+
 ## [10.0.1](https://github.com/miracum/recruit/compare/v10.0.0...v10.0.1) (2023-01-14)
 
 
