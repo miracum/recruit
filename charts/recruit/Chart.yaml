@@ -40,8 +40,8 @@ dependencies:
     version: 0.3.3
     repository: https://miracum.github.io/charts
 # x-release-please-start-version
-version: 10.0.2
-appVersion: 10.0.2
+version: 10.0.3
+appVersion: 10.0.3
 # x-release-please-end
 annotations:
   artifacthub.io/containsSecurityUpdates: "false"
@@ -69,7 +69,7 @@ annotations:
     # When using the list of objects option the valid supported kinds are
     # added, changed, deprecated, removed, fixed and security.
     - kind: changed
-      description: updated recruIT image tags to v10.0.2 # x-release-please-version
+      description: updated recruIT image tags to v10.0.3 # x-release-please-version
     - kind: changed
       description: "⚠️ BREAKING CHANGE: updated included postgresql chart to v12, which is based on PostgreSQL 15.1"
     - kind: changed
