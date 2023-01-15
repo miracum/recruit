@@ -1,5 +1,13 @@
 # Changelog
 
+## [10.0.4](https://github.com/miracum/recruit/compare/v10.0.3...v10.0.4) (2023-01-15)
+
+
+### CI/CD
+
+* moved helm chart sync job back to release ([30ec03d](https://github.com/miracum/recruit/commit/30ec03d91fc61652ddfc14b9101b4065b23c4ff3))
+* run chart sync on master for testing ([734beee](https://github.com/miracum/recruit/commit/734beeea74406d4fa48ca03496063ec7304b19d9))
+
 ## [10.0.3](https://github.com/miracum/recruit/compare/v10.0.2...v10.0.3) (2023-01-15)
 
 
