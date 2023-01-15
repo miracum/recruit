@@ -1,5 +1,12 @@
 # Changelog
 
+## [10.0.3](https://github.com/miracum/recruit/compare/v10.0.2...v10.0.3) (2023-01-15)
+
+
+### CI/CD
+
+* possibly fixed helm chart sync job ([51c1a87](https://github.com/miracum/recruit/commit/51c1a8751135db8036c9d7bfcda91b772bef382f))
+
 ## [10.0.2](https://github.com/miracum/recruit/compare/v10.0.1...v10.0.2) (2023-01-15)
 
 
