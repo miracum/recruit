@@ -81,7 +81,7 @@ jobs:
       - name: get chart version
         id: chart-version
         run: |
-          CHART_VERSION=$(yq .version charts/recruit/Chart.yaml)
+          CHART_VERSION=$(yq .version recruit/charts/recruit/Chart.yaml)
           echo "version=${CHART_VERSION}" >> "$GITHUB_OUTPUT"
 
       - uses: peter-evans/create-pull-request@2b011faafdcbc9ceb11414d64d0573f37c774b04 # tag=v4.2.3
