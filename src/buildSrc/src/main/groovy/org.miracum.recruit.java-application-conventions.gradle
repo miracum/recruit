@@ -109,8 +109,8 @@ spotless {
 }
 
 checkstyle {
-    toolVersion '10.3.3'
-    // configFile = file('../.checkstyle/checkstyle.xml')
+    toolVersion '10.6.0'
+    configFile = file('../config/checkstyle/checkstyle.xml')
 }
 
 jib {

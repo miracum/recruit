@@ -1,0 +1,5 @@
+[allowlist]
+description = "allow the keycloak aio export"
+paths = [
+  '''aio-export.json'''
+]
