@@ -61,7 +61,8 @@ jobs:
   sync-helm-chart-to-central-chart-repo:
     name: sync helm chart to central chart repo
     runs-on: ubuntu-22.04
-    permissions: read-all
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
         with:
