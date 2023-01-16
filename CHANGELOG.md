@@ -1,5 +1,17 @@
 # Changelog
 
+## [10.0.5](https://github.com/miracum/recruit/compare/v10.0.4...v10.0.5) (2023-01-16)
+
+
+### CI/CD
+
+* fixed sync helm chart permissions ([3c19e7b](https://github.com/miracum/recruit/commit/3c19e7bdf0f26471510da3de2b8da599bbc89b14))
+
+
+### Miscellaneous Chores
+
+* **deps:** refresh pip-compile outputs ([#56](https://github.com/miracum/recruit/issues/56)) ([efe24e6](https://github.com/miracum/recruit/commit/efe24e6a0c1af4bdb46f43a313434116cd0fb2b0))
+
 ## [10.0.4](https://github.com/miracum/recruit/compare/v10.0.3...v10.0.4) (2023-01-15)
 
 
