@@ -1,7 +1,11 @@
 name: release
 
 on:
-  workflow_call: {}
+  workflow_call:
+    secrets:
+      token:
+        description: Token used to create a PR against the miracum/charts repository
+        required: true
 
 permissions: {}
 
@@ -86,7 +90,7 @@ jobs:
 
       - uses: peter-evans/create-pull-request@2b011faafdcbc9ceb11414d64d0573f37c774b04 # tag=v4.2.3
         with:
-          token: ${{ secrets.MIRACUM_BOT_SEMANTIC_RELEASE_TOKEN }}
+          token: ${{ secrets.token }}
           path: miracum-charts
           title: "chore(deps): updated recruit chart to ${{ steps.chart-version.outputs.version }}"
           commit-message: "chore(deps): updated recruit chart to ${{ steps.chart-version.outputs.version }}"

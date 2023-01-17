@@ -91,3 +91,5 @@ jobs:
       - k8s-test
       - docker-compose-test
     uses: ./.github/workflows/release.yaml
+    secrets:
+      token: ${{ secrets.MIRACUM_BOT_SEMANTIC_RELEASE_TOKEN }}
