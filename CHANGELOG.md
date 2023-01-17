@@ -1,5 +1,12 @@
 # Changelog
 
+## [10.0.6](https://github.com/miracum/recruit/compare/v10.0.5...v10.0.6) (2023-01-17)
+
+
+### CI/CD
+
+* fix secret for helm sync job in reusable workflow ([e283cbb](https://github.com/miracum/recruit/commit/e283cbb7f21525973e299aadf2a54d71e0562185))
+
 ## [10.0.5](https://github.com/miracum/recruit/compare/v10.0.4...v10.0.5) (2023-01-16)
 
 
