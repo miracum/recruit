@@ -70,26 +70,3 @@ annotations:
     # added, changed, deprecated, removed, fixed and security.
     - kind: changed
       description: updated recruIT image tags to v10.0.6 # x-release-please-version
-    - kind: changed
-      description: "⚠️ BREAKING CHANGE: updated included postgresql chart to v12, which is based on PostgreSQL 15.1"
-    - kind: changed
-      description: "⚠️ BREAKING CHANGE: updated included ohdsi chart to v0.20.1, which internally uses a v12 postgresql chart based on PostgreSQL 15.1"
-    - kind: changed
-      description: "⚠️ BREAKING CHANGE: updated included hapi-fhir-jpaserver chart to v0.11.1, which internally uses a v12 postgresql chart based on PostgreSQL 15.1"
-    - kind: changed
-      description: "updated fhir-pseudonymizer sub-chart to v0.3.3"
-    - kind: changed
-      description: "updated mailhog sub-chart to v5.2.2"
-    - kind: changed
-      description: "updated omop cdm init job to v3.3.2"
-    - kind: changed
-      description: |
-        "added an init container to the query module deployment to wait for the notify module to be ready.
-        Required for integration testing where the notify module may be unavailable
-        before the query module creates first recommendations therefore causing the FHIR server
-        to not be able to trigger the subscription webhook of notify.
-        Can be disabled by setting `query.shouldWaitForNotify=false`."
-    - kind: changed
-      description: |
-        mount the notify-rules config at the `/app` path instead of `/opt/notify` due to standardizing the base
-        working directory for all containers to `/app`.
