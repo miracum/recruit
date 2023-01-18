@@ -131,7 +131,7 @@ query:
   image: # +doc-gen:ignore
     registry: ghcr.io
     repository: miracum/recruit/query
-    tag: v10.0.6 # x-release-please-version
+    tag: v10.0.7 # x-release-please-version
     pullPolicy: IfNotPresent
 
   metrics:
@@ -285,7 +285,7 @@ notify:
   image: # +doc-gen:ignore
     registry: ghcr.io
     repository: miracum/recruit/notify
-    tag: v10.0.6 # x-release-please-version
+    tag: v10.0.7 # x-release-please-version
     pullPolicy: IfNotPresent
 
   metrics:
@@ -460,7 +460,7 @@ list:
   image: # +doc-gen:ignore
     registry: ghcr.io
     repository: miracum/recruit/list
-    tag: v10.0.6 # x-release-please-version
+    tag: v10.0.7 # x-release-please-version
     pullPolicy: IfNotPresent
 
   # the service used to expose the list module web port

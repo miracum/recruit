@@ -1,5 +1,17 @@
 # Changelog
 
+## [10.0.7](https://github.com/miracum/recruit/compare/v10.0.6...v10.0.7) (2023-01-18)
+
+
+### Bug Fixes
+
+* **docker-compose:** mount path for the notify rules config file ([fc654b8](https://github.com/miracum/recruit/commit/fc654b856f3e29c18a12c712a1385e61e95b895a))
+
+
+### Miscellaneous Chores
+
+* **helm:** reset Chart.yaml changelog ([862cf89](https://github.com/miracum/recruit/commit/862cf899ae5d223838147d1b0a803492fea789c4))
+
 ## [10.0.6](https://github.com/miracum/recruit/compare/v10.0.5...v10.0.6) (2023-01-17)
 
 
