@@ -90,4 +90,4 @@ services:
         target: /tmp
         tmpfs:
           size: 1024
-      - ${NOTIFY_RULES_CONFIG_PATH:?}:/opt/notify/config/application.yml:ro
+      - ${NOTIFY_RULES_CONFIG_PATH:?}:/app/config/notify-rules/application.yaml:ro
