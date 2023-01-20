@@ -2,8 +2,10 @@
 
 ## Introduction
 
-A Helm chart for deploying recruIT on a Kubernetes cluster is located in the [MIRACUM charts](https://github.com/miracum/charts)
-repository. The chart can be used to deploy the application as well as all dependencies required for it to run ([OHDSI WebAPI](https://github.com/OHDSI/WebAPI),
+A Helm chart for deploying recruIT on a Kubernetes cluster is available in the main
+[repository's OCI registry](https://github.com/miracum/recruit/pkgs/container/recruit%2Fcharts%2Frecruit)
+and in the [MIRACUM charts](https://github.com/miracum/charts) repository. The chart can be used to deploy the application
+ as well as all dependencies required for it to run ([OHDSI WebAPI](https://github.com/OHDSI/WebAPI),
 [OHDSI Atlas](https://github.com/OHDSI/Atlas), [HAPI FHIR server](https://github.com/hapifhir/hapi-fhir-jpaserver-starter)).
 The chart also includes [MailHog](https://github.com/mailhog/MailHog), a mock mail server for testing email notifications.
 
@@ -18,20 +20,14 @@ Using the default values provided with the chart, all dependencies are installed
 
 ## Installation
 
-Add the MIRACUM Helm repository by running
-
-```sh
-helm repo add miracum https://miracum.github.io/charts
-```
-
-then deploy recruIT to a namespace called `recruit` by running
+Deploy recruIT to a namespace called `recruit` by running
 
 ```sh
 helm install -n recruit \
   --create-namespace \
   --render-subchart-notes \
   --set ohdsi.cdmInitJob.enabled=true \
-  recruit miracum/recruit
+  recruit oci://ghcr.io/miracum/recruit/charts/recruit
 ```
 
 !!! warning "Auto generated default passwords for the included databases"
@@ -143,12 +139,6 @@ kubectl label namespace recruit pod-security.kubernetes.io/enforce=restricted
 kubectl label namespace recruit pod-security.kubernetes.io/enforce-version=v1.26
 ```
 
-Add the MIRACUM chart repository
-
-```sh
-helm repo add miracum https://miracum.github.io/charts
-```
-
 Save the following as `values-kind-recruit.yaml`, or you can clone this repo and reference the file as `-f docs/_snippets/values-kind-recruit.yaml`.
 The `ohdsi.cdmInitJob.extraEnv` option `SETUP_SYNPUF=true` means that the OMOP database will be initialized with SynPUF
 1K sample patient data.
@@ -170,7 +160,7 @@ helm install -n recruit \
   -f values-kind-recruit.yaml \
   --set ohdsi.cdmInitJob.enabled=true \
   --set ohdsi.loadCohortDefinitionsJob.enabled=true \
-  recruit miracum/recruit
+  recruit oci://ghcr.io/miracum/recruit/charts/recruit
 ```
 
 !!! warning "CDM init job"
@@ -240,7 +230,7 @@ You can now update your release by combining the `values-kind-recruit.yaml` from
 helm upgrade -n recruit \
   -f values-kind-recruit.yaml \
   -f values-kind-recruit-enable-servicemonitors.yaml \
-  recruit miracum/recruit
+  recruit oci://ghcr.io/miracum/recruit/charts/recruit
 ```
 
 Opening the Grafana instance included with the `kube-prometheus-stack` chart will allow you to query the exposed metrics:
