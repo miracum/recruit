@@ -1,0 +1,42 @@
+name: reset Chart.yaml changelog annotations
+
+on:
+  release:
+    types:
+      # If you want a workflow to run when stable and pre-releases publish, subscribe to published instead of released and prereleased.
+      # <https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#release>
+      - published
+
+permissions: read-all
+
+jobs:
+  reset-commit-and-push:
+    name: reset changelog annotations, commit, and push
+    runs-on: ubuntu-22.04
+    container: ghcr.io/chgl/kube-powertools:v1.22.5@sha256:cf34211175652eed22aa9d2df28a14b495fc4d05e2e62bd0f408e61dcee6ed54
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+
+      # currently defaults to just the one chart, "recruit", needs to be updated if
+      # more charts are added in the future. See <https://github.com/chgl/kube-powertools/blob/master/scripts/generate-chart-changelog.sh>
+      # for an example script iterating over multiple charts and changelog annotations.
+      - name: reset Chart.yaml changelog annotations
+        run: |
+          # it's most likely impossible to do this in a single yq invocation, as 'annotations["artifacthub.io/changes"]' is
+          # a string and not an actual yaml array. So we first extract this string, read it back into yq which causes it
+          # to be parsed as a yaml array which can be indexed to get the first entry back.
+          # by convention, we assume the first changelog entry describes the version bump.
+          FIRST_CHANGELOG_ENTRY=$(yq '.annotations["artifacthub.io/changes"]' charts/recruit/Chart.yaml | yq '[.0]')
+          export FIRST_CHANGELOG_ENTRY
+
+          # FIRST_CHANGELOG_ENTRY is a string that looks like a yaml array with a single entry.
+          # use it to replace the entire changelog annotation with a single entry.
+          yq -i '.annotations["artifacthub.io/changes"] |= strenv(FIRST_CHANGELOG_ENTRY)' charts/recruit/Chart.yaml
+
+      - uses: EndBug/add-and-commit@61a88be553afe4206585b31aa72387c64295d08b # tag=v9.1.1
+        with:
+          add: "charts/"
+          message: "chore(helm): reset Chart.yaml changelog annotations"
