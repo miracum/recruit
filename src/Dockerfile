@@ -1,4 +1,4 @@
-FROM docker.io/library/gradle:7.6.0@sha256:adaf7d0ef536c90a1c4c6f4d4064a9c1099260e9f3bf0459f3a52a5893da513f AS build
+FROM docker.io/library/gradle:7.6.0@sha256:bd8852274c9e10ecd00549e5d3a73edf2549c1c6442d808ce27d1e4a04251ebd AS build
 WORKDIR /home/gradle/src
 ENV GRADLE_USER_HOME /gradle
 
