@@ -58,11 +58,9 @@ then no permissions are checked.
 
 If the [OHDSI WebAPI requires authentication](https://github.com/OHDSI/WebAPI/wiki/Security-Configuration),
 you need to configure the query module accordingly. The relevant environment variables to set start with
-`QUERY_WEBAPI_AUTH_` (see [the configuration overview](options.md)) and the end-to-end
-test of the query module includes an example configuration using [Basic Security Authentication](https://github.com/OHDSI/WebAPI/wiki/Basic-Security-Configuration):
-see [this docker-compose.yml](https://gitlab.miracum.org/miracum/uc1/recruit/query/-/blob/master/tests/e2e/docker-compose.yml).
-Instructions on how the basic security table is build are included in <https://gitlab.miracum.org/miracum/uc1/recruit/query#how-the-quayiomiracumomoptest-data-image-is-build>,
-step 4. Be sure to give the created user relevant roles to access the OMOP-CDMV5 source, access cohort definitions,
+`QUERY_WEBAPI_AUTH_` (see [the configuration overview](options.md)).
+
+Be sure to give the created user relevant roles to access the OMOP-CDMV5 source, access cohort definitions,
 and generate cohorts.
 
 You can also combine multiple authentication methods, for example use OpenID to allow users to login via the

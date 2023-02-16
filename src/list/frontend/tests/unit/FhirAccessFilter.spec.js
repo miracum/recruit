@@ -66,6 +66,12 @@ describe("fhirAccessFilter", () => {
 
     expect(filtered.entry).toHaveLength(0);
   });
+  it("should deny access if user is null", () => {
+    const filtered = filterAcessibleResources(singleList, null);
+
+    expect(filtered.total).toBe(0);
+    expect(filtered.entry).toHaveLength(0);
+  });
   it("should return empty list if bundle contains no entries", () => {
     const filtered = filterAcessibleResources(bundleWithoutEntries, userWithAdminRole);
 

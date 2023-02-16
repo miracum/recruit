@@ -5,7 +5,7 @@ const URL_LIST_BELONGS_TO_STUDY_EXTENSION = "https://fhir.miracum.org/uc1/Struct
 const getAccessibleStudyAcronymsForUser = (user, trialsConfig) => {
   const accessibleStudyAcronyms = [];
 
-  if (!user.preferred_username && !user.email) {
+  if (!user?.preferred_username && !user?.email) {
     logger.warn("either username and/or email aren't set for the user. Denying all access.");
     return [];
   }
@@ -14,7 +14,7 @@ const getAccessibleStudyAcronymsForUser = (user, trialsConfig) => {
     // Check if the current user's username or email is part of the accessibleBy
     // configuration. accessibleBy.users could contain either usernames or emails of
     // allowed users.
-    if (trial.accessibleBy?.users?.includes(user.preferred_username) || trial.accessibleBy?.users?.includes(user.email)) {
+    if (trial.accessibleBy?.users?.includes(user?.preferred_username) || trial.accessibleBy?.users?.includes(user?.email)) {
       accessibleStudyAcronyms.push(trial.acronym);
       return;
     }
@@ -22,7 +22,7 @@ const getAccessibleStudyAcronymsForUser = (user, trialsConfig) => {
     // Check if a subscription to receive notifications exists for the current user.
     // Every user that is configured to receive email notifications is allowed to access the
     // screening list.
-    if (trial.subscriptions?.map((subscription) => subscription.email).includes(user.email)) {
+    if (trial.subscriptions?.map((subscription) => subscription.email).includes(user?.email)) {
       accessibleStudyAcronyms.push(trial.acronym);
     }
   });
@@ -31,7 +31,7 @@ const getAccessibleStudyAcronymsForUser = (user, trialsConfig) => {
 };
 
 const userHasAdminRole = (user, authConfig) => {
-  if (!user.resource_access) {
+  if (!user?.resource_access) {
     return false;
   }
   const roles = user?.resource_access[authConfig?.clientId]?.roles;
@@ -71,13 +71,15 @@ exports.createDeleteFilter = (authConfig) => (user) => {
 };
 
 exports.createAccessFilter = (trialsConfig, authConfig) => (resource, user) => {
+  logger.child({ user: user }).debug("Access filter invoked");
+
   if (userHasAdminRole(user, authConfig)) {
     return resource;
   }
 
   const accessibleStudyAcronyms = getAccessibleStudyAcronymsForUser(user, trialsConfig);
 
-  logger.child({ username: user.preferred_username, accessibleStudyAcronyms }).debug("User can access these studies");
+  logger.child({ username: user?.preferred_username, accessibleStudyAcronyms }).debug("User can access these studies");
 
   const handleBundle = (bundle) => {
     if (!bundle.entry) {

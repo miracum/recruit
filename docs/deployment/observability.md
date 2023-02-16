@@ -15,6 +15,6 @@ See [Kubernetes/Metrics](./kubernetes.md#metrics) for how to setup monitoring on
 ## Tracing
 
 All modules support distributed tracing using OpenTelemetry.
-See <https://github.com/opentracing-contrib/java-spring-jaeger> for the `notify` and `query` module configuration and <https://gitlab.miracum.org/miracum/uc1/recruit/list/-/blob/master/server/config.js#L10>
+See <https://github.com/opentracing-contrib/java-spring-jaeger> for the `notify` and `query` module configuration and <https://github.com/miracum/recruit/blob/master/src/list/server/config.js#L8>
 and <https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/sdk-environment-variables.md>
 for the list module setup.

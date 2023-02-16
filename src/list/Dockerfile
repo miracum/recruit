@@ -26,7 +26,7 @@ COPY server/package.json ./server/
 RUN npm clean-install --workspace=server
 COPY server/*.js ./server/
 
-FROM gcr.io/distroless/nodejs:18@sha256:039aeeddc00d285be1a32d41648d3941cbdaab05cce03344a1267f49cce464d3
+FROM gcr.io/distroless/nodejs:18@sha256:e2fdfb66260c0690fb4b7168724f14c569317803dcd3edd54dc828d3570293eb
 WORKDIR /app
 USER 65532:65532
 # Port 8081 is currently not used, but exposed to make
