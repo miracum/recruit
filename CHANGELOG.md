@@ -1,5 +1,29 @@
 # Changelog
 
+## [10.0.8](https://github.com/miracum/recruit/compare/v10.0.7...v10.0.8) (2023-02-16)
+
+
+### Bug Fixes
+
+* **list:** handle unset user object in admin role check ([#66](https://github.com/miracum/recruit/issues/66)) ([bcc3e0c](https://github.com/miracum/recruit/commit/bcc3e0c2f0613640090ab6f1486ba1c42a6def2e))
+
+
+### Documentation
+
+* enable permalink support ([51aff32](https://github.com/miracum/recruit/commit/51aff3235ec9aba2ad33ad5b253600ee4865b514))
+* switch to OCI-based installation instructions for kubernetes ([0b5cbe6](https://github.com/miracum/recruit/commit/0b5cbe6da4408f40a5c846ced462a7f551128556))
+
+
+### CI/CD
+
+* added workflow to reset Chart.yaml changelog annotations on release ([7a8e7aa](https://github.com/miracum/recruit/commit/7a8e7aa730a8e7d576caf169aca7e8d361bc29fd))
+
+
+### Miscellaneous Chores
+
+* **deps:** update docker.io/bitnami/kubectl:1.24.8 docker digest to 9c1bd1f ([#61](https://github.com/miracum/recruit/issues/61)) ([d6d38ff](https://github.com/miracum/recruit/commit/d6d38ff2cf7b4cee93ab701061b4a4d4c9f8f970))
+* **deps:** update docker.io/library/gradle:7.6.0 docker digest to bd88522 ([#62](https://github.com/miracum/recruit/issues/62)) ([6d1317a](https://github.com/miracum/recruit/commit/6d1317a89ee0fda8a2989f6738ac5f8fa9d8b411))
+
 ## [10.0.7](https://github.com/miracum/recruit/compare/v10.0.6...v10.0.7) (2023-01-18)
 
 
