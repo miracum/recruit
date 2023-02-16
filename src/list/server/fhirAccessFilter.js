@@ -31,7 +31,7 @@ const getAccessibleStudyAcronymsForUser = (user, trialsConfig) => {
 };
 
 const userHasAdminRole = (user, authConfig) => {
-  if (!user.resource_access) {
+  if (!user?.resource_access) {
     return false;
   }
   const roles = user?.resource_access[authConfig?.clientId]?.roles;
