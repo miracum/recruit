@@ -8,7 +8,7 @@ ohdsi:
       # the password for the `postgres` admin user was moved from
       # `postgresql.postgresqlPassword` to `postgresql.auth.postgresPassword`
       postgresPassword: ohdsi
-  # the init job used, `harbor.miracum.org/miracum-etl/omop/init` isn't idempotent in its current version
+  # the init job used isn't idempotent in its current version
   # to avoid any trouble when updating an existing, already initialized database, we just disable it.
   # Generally, it should be disabled after the DB is initialized.
   cdmInitJob:
