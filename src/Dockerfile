@@ -24,7 +24,7 @@ ARG MODULE_NAME=query
 RUN gradle :${MODULE_NAME}:test && \
     gradle jacocoTestReport
 
-FROM gcr.io/distroless/java17-debian11:nonroot@sha256:175ff5298b6f613774445f81d623451f243b778a18cd0d915e6cfe5859e8cd2a
+FROM gcr.io/distroless/java17-debian11:nonroot@sha256:d5a7bb2b1bcd09d9b7ba7f7b13df39cbb2ab2ff73a0ab834a5769e59229af2f8
 WORKDIR /app
 
 COPY --from=build /home/gradle/src/opentelemetry-javaagent.jar ./opentelemetry-javaagent.jar
