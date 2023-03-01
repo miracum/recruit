@@ -1,12 +1,10 @@
 name: check links
 
 on:
-  pull_request:
-    branches:
-      - master
-  push:
-    branches:
-      - master
+  repository_dispatch:
+  workflow_dispatch:
+  schedule:
+    - cron: "00 18 * * *"
 
 permissions: read-all
 
@@ -16,11 +14,18 @@ jobs:
     steps:
       - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
 
-      - name: run lychee link checker
+      - name: Link Checker
         id: lychee
-        uses: lycheeverse/lychee-action@4dcb8bee2a0a4531cba1a1f392c54e8375d6dd81 # tag=v1.5.4
+        uses: lycheeverse/lychee-action@9ace499fe66cee282a29eaa628fdac2c72fa087f # tag=v1.6.1
         with:
-          fail: true
           args: "--config=.lychee.toml ."
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Create Issue From File
+        if: env.lychee_exit_code != 0
+        uses: peter-evans/create-issue-from-file@433e51abf769039ee20ba1293a088ca19d573b7f # tag=v4.0.1
+        with:
+          title: Link Checker Report
+          content-filepath: ./lychee/out.md
+          labels: report, automated issue

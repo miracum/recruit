@@ -56,6 +56,13 @@ fhirserver:
   postgresql:
     # overrides the chart's postgres server name to avoid conflicts with the included ohdsi chart
     nameOverride: "fhir-server-postgres"
+    primary: # +doc-gen:ignore
+      containerSecurityContext:
+        runAsNonRoot: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
   networkPolicy:
     # if enabled, access to the included FHIR server is limited to pods with the required labels. If set to `true`,
     # all pods of the recruIT chart will be automatically configured to be able to access the server.
@@ -79,7 +86,7 @@ mailhog:
   enabled: true
   image: # +doc-gen:ignore
     pullPolicy: IfNotPresent
-  containerSecurityContext:
+  containerSecurityContext: # +doc-gen:ignore
     runAsNonRoot: true
     seccompProfile:
       type: RuntimeDefault
@@ -90,6 +97,12 @@ ohdsi:
   postgresql:
     # overrides the chart's postgres server name to avoid conflicts with the included HAPI FHIR server chart
     nameOverride: "ohdsi-postgres"
+    primary: # +doc-gen:ignore
+      containerSecurityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
   cdmInitJob:
     # to make sure the job runs only once, set this to `false` after the first installation completed
     enabled: false
@@ -232,7 +245,7 @@ query:
   resources: {}
 
   # node labels for pod assignment
-  # see: <https://kubernetes.io/docs/user-guide/node-selection/>
+  # see: <https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/>
   nodeSelector: {}
 
   # tolerations for pod assignment
@@ -408,7 +421,7 @@ notify:
   resources: {}
 
   # node labels for pod assignment
-  # see: <https://kubernetes.io/docs/user-guide/node-selection/>
+  # see: <https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/>
   nodeSelector: {}
 
   # tolerations for pod assignment
@@ -559,7 +572,7 @@ list:
     timeoutSeconds: 5
 
   # node labels for pod assignment
-  # see: <https://kubernetes.io/docs/user-guide/node-selection/>
+  # see: <https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/>
   nodeSelector: {}
 
   # tolerations for pod assignment
