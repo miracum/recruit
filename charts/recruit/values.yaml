@@ -1,25 +1,25 @@
 # Default values for recruit.
 
-# image pull secrets used by all pods
+# -- image pull secrets used by all pods
 imagePullSecrets: []
 
-# partially override the release name
+# -- partially override the release name
 nameOverride: ""
 
-# fully override the release name
+# -- fully override the release name
 fullnameOverride: ""
 
-# Annotations to set on all Deployment resources
+# -- annotations to set on all Deployment resources
 deploymentAnnotations:
   {}
   # sidecar.jaegertracing.io/inject: "jaeger-prod"
 
-# Annotations to set on all Pod resources
+# -- annotations to set on all Pod resources
 podAnnotations:
   {}
   # linkerd.io/inject: "enabled"
 
-# additionally labels to apply to all deployments
+# -- additionally labels to apply to all deployments
 extraLabels: {}
 
 # configure the init container used to wait for postgres database connectivity
@@ -28,6 +28,7 @@ extraLabels: {}
 waitForPostgresInitContainer:
   # image to use for the init container which waits until the database
   # is ready to accept connections
+  # @ignore
   image: # +doc-gen:ignore
     registry: docker.io
     repository: bitnami/postgresql
@@ -36,6 +37,7 @@ waitForPostgresInitContainer:
 
 # container security context applied to init containers used by the query, list, and notify modules.
 # also used by the Helm test job pods
+# @ignore
 restrictedContainerSecurityContext: # +doc-gen:ignore
   allowPrivilegeEscalation: false
   readOnlyRootFilesystem: true
@@ -50,12 +52,13 @@ restrictedContainerSecurityContext: # +doc-gen:ignore
     type: RuntimeDefault
 
 fhirserver:
-  # Whether the included HAPI FHIR server should be used
+  # -- Whether the included HAPI FHIR server should be used
   # See <https://github.com/hapifhir/hapi-fhir-jpaserver-starter/tree/master/charts/hapi-fhir-jpaserver#values> for options.
   enabled: true
   postgresql:
-    # overrides the chart's postgres server name to avoid conflicts with the included ohdsi chart
+    # -- overrides the chart's postgres server name to avoid conflicts with the included ohdsi chart
     nameOverride: "fhir-server-postgres"
+    # @ignore
     primary: # +doc-gen:ignore
       containerSecurityContext:
         runAsNonRoot: true
@@ -64,10 +67,10 @@ fhirserver:
           drop:
             - ALL
   networkPolicy:
-    # if enabled, access to the included FHIR server is limited to pods with the required labels. If set to `true`,
+    # -- if enabled, access to the included FHIR server is limited to pods with the required labels. If set to `true`,
     # all pods of the recruIT chart will be automatically configured to be able to access the server.
     enabled: false
-  # extra environment variables set for the HAPI FHIR server
+  # -- extra environment variables set for the HAPI FHIR server
   extraEnv:
     # the recruit tool relies on the FHIR server subscription mechanism to create notifications.
     # if you overwrite `fhirserver.extraEnv`, make sure to keep this setting enabled.
@@ -77,26 +80,29 @@ fhirserver:
       value: "true"
 
 externalFhirServer:
-  # URL of an external FHIR Server - only used when `fhirserver.enabled` is set to `false`
+  # -- URL of an external FHIR Server - only used when `fhirserver.enabled` is set to `false`
   url: ""
 
 mailhog:
-  # Whether the included SMTP test server should be used. Not required for a production deployment.
+  # -- Whether the included SMTP test server should be used. Not required for a production deployment.
   # See <https://github.com/codecentric/helm-charts/blob/master/charts/mailhog/values.yaml> for available options.
   enabled: true
+  # @ignore
   image: # +doc-gen:ignore
     pullPolicy: IfNotPresent
+  # @ignore
   containerSecurityContext: # +doc-gen:ignore
     runAsNonRoot: true
     seccompProfile:
       type: RuntimeDefault
 ohdsi:
-  # Whether the included OHDSI chart should be installed.
+  # -- Whether the included OHDSI chart should be installed.
   # See <https://github.com/chgl/charts/tree/master/charts/ohdsi/values.yaml> for available options.
   enabled: true
   postgresql:
-    # overrides the chart's postgres server name to avoid conflicts with the included HAPI FHIR server chart
+    # -- overrides the chart's postgres server name to avoid conflicts with the included HAPI FHIR server chart
     nameOverride: "ohdsi-postgres"
+    # @ignore
     primary: # +doc-gen:ignore
       containerSecurityContext:
         allowPrivilegeEscalation: false
@@ -104,12 +110,14 @@ ohdsi:
           drop:
             - ALL
   cdmInitJob:
-    # to make sure the job runs only once, set this to `false` after the first installation completed
+    # -- to make sure the job runs only once, set this to `false` after the first installation completed
     enabled: false
+    # @ignore
     image: # +doc-gen:ignore
       registry: ghcr.io
       repository: miracum/recruit/omop/init
       tag: v3.3.2-cdm5.3.1@sha256:40521fabaa73f9d01daec43ba9d510fc0f89b73714515006b70333c4b043d52c
+    # @ignore
     securityContext: # +doc-gen:ignore
       allowPrivilegeEscalation: false
       capabilities:
@@ -124,6 +132,7 @@ ohdsi:
     # extraEnv:
     #   - name: SETUP_SYNPUF
     #     value: "true"
+  # @ignore
   achilles: # +doc-gen:ignore
     schemas:
       cdm: "cds_cdm"
@@ -132,15 +141,16 @@ ohdsi:
     sourceName: "CDS-CDMV5"
 
 query:
-  # Whether the query module should be enabled
+  # -- Whether the query module should be enabled
   enabled: true
-  # Number of replicas of the query module to run.
+  # -- Number of replicas of the query module to run.
   # Running more than one replica for this component is discouraged.
   replicaCount: 1
-  # specify how many old ReplicaSets for this Deployment you want to retain.
+  # -- specify how many old ReplicaSets for this Deployment you want to retain.
   revisionHistoryLimit: 5
 
   # the query module's image
+  # @ignore
   image: # +doc-gen:ignore
     registry: ghcr.io
     repository: miracum/recruit/query
@@ -149,91 +159,93 @@ query:
 
   metrics:
     serviceMonitor:
-      # if enabled, creates a ServiceMonitor instance for Prometheus Operator-based monitoring
+      # -- if enabled, creates a ServiceMonitor instance for Prometheus Operator-based monitoring
       enabled: false
-      # additional labels to apply the the ServiceMonitor object, eg. `release: prometheus`
+      # -- additional labels to apply the the ServiceMonitor object, eg. `release: prometheus`
       additionalLabels: {}
       # namespace: monitoring
       # interval: 30s
       # scrapeTimeout: 10s
 
-  # extra environment vars on the container
+  # -- extra environment vars on the container
   extraEnv: []
 
-  # specify additional labels to apply to the query pod
+  # -- specify additional labels to apply to the query pod
   extraPodLabels: {}
 
-  # the service used to expose the query module web port
+  # -- the service used to expose the query module web port
   service:
-    # the service type
+    # -- the service type
     type: ClusterIP
-    # the service port for the HTTP endpoint
+    # -- the service port for the HTTP endpoint
     port: 8080
-    # the service port for the actuator/metrics endpoint
+    # -- the service port for the actuator/metrics endpoint
     metricsPort: 8081
 
   webAPI:
-    # URL of the ATLAS WebAPI endpoint. Usually ends in /WebAPI.
+    # -- URL of the ATLAS WebAPI endpoint. Usually ends in /WebAPI.
     url: "http://example:8080/WebAPI"
-    # name of the OMOP datasource used to generate the cohorts from.
+    # -- name of the OMOP datasource used to generate the cohorts from.
     dataSource: "CDS-CDMV5"
-    # configure authentication settings for the WebAPI
+    # -- configure authentication settings for the WebAPI
     auth:
-      # set to true if the WebAPI requires authentication to access
+      # -- set to true if the WebAPI requires authentication to access
       enabled: false
-      # the login method/path to use. See <https://github.com/OHDSI/Atlas/blob/master/js/config/app.js#L20> for a list of possible values
+      # -- the login method/path to use. See <https://github.com/OHDSI/Atlas/blob/master/js/config/app.js#L20> for a list of possible values
       loginPath: "/user/login/db"
-      # the username to login as. Note that this user needs permissions to query and generate cohorts
+      # -- the username to login as. Note that this user needs permissions to query and generate cohorts
       username: ""
-      # the password used for login.
+      # -- the password used for login.
       password: ""
-      # use an existing secret to retrieve the login credentials from
+      # -- use an existing secret to retrieve the login credentials from
       existingSecret:
-        # name of an existing Kubernetes secret that contains the user password
+        # -- name of an existing Kubernetes secret that contains the user password
         name: ""
-        # the key containing the password
+        # -- the key containing the password
         key: "webApiAuthPassword"
 
-  # A UNIX cron expression defining the execution schedule of the query module
+  # -- a UNIX cron expression defining the execution schedule of the query module
   schedule: "*/5 * * * *"
 
   omop:
-    # hostname of the OHDSI OMOP db
+    # -- hostname of the OHDSI OMOP db
     host: "localhost"
-    # port of the db
+    # -- port of the db
     port: 5432
-    # name of the db
+    # -- name of the db
     database: OHDSI
-    # username to access the db
+    # -- username to access the db
     username: postgres
-    # password to access the db
+    # -- password to access the db
     password: postgres
-    # name of an existing secret to use instead of `omop.password`. Must include an `omop-password` key.
+    # -- name of an existing secret to use instead of `omop.password`. Must include an `omop-password` key.
     existingSecret: ""
-    # Name of the database schema containing the results of the cohort generation
+    # -- name of the database schema containing the results of the cohort generation
     resultsSchema: cds_results
-    # Name of the database schema containing the actual clinical data
+    # -- name of the database schema containing the actual clinical data
     cdmSchema: cds_cdm
 
-  # List of labels which must occur in a cohort's name or definition (enclosed in []-brackets) to be processed by the query module.
+  # -- list of labels which must occur in a cohort's name or definition (enclosed in []-brackets) to be processed by the query module.
   # Example:
   # --set cohortSelectorLabels[0]=UC1
   # --set cohortSelectorLabels[1]=Test
   cohortSelectorLabels:
     - "UC1"
 
-  # whether the query module should wait for the notification module to be up before starting.
+  # -- whether the query module should wait for the notification module to be up before starting.
   # implemented as an init container that waits on notify's `/actuator/health` endpoint
   shouldWaitForNotify: false
 
-  # Configuration for the container's readiness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # -- configuration for the container's readiness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # @ignore
   readinessProbe: # +doc-gen:ignore
     failureThreshold: 3
     initialDelaySeconds: 30
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 5
-  # Configuration for the container's liveness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # -- configuration for the container's liveness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # @ignore
   livenessProbe: # +doc-gen:ignore
     failureThreshold: 3
     initialDelaySeconds: 30
@@ -241,25 +253,26 @@ query:
     successThreshold: 1
     timeoutSeconds: 5
 
-  # resource requests and limits for the container
+  # -- resource requests and limits for the container
   resources: {}
 
-  # node labels for pod assignment
+  # -- node labels for pod assignment
   # see: <https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/>
   nodeSelector: {}
 
-  # tolerations for pod assignment
+  # -- tolerations for pod assignment
   # see: <https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/>
   tolerations: []
 
-  # affinity for pod assignment
+  # -- affinity for pod assignment
   # see: <https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity>
   affinity: {}
 
-  # security context for the pod
+  # -- security context for the pod
   podSecurityContext: {}
 
-  # security context for the container
+  # -- security context for the container
+  # @ignore
   securityContext: # +doc-gen:ignore
     privileged: false
     capabilities:
@@ -273,7 +286,7 @@ query:
     seccompProfile:
       type: RuntimeDefault
 
-  # pod topology spread configuration
+  # -- pod topology spread configuration
   # see: <https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#api>
   topologySpreadConstraints:
     []
@@ -286,15 +299,16 @@ query:
     #       app.kubernetes.io/instance: recruit
 
 notify:
-  # Whether the notification module should be enabled
+  # -- whether the notification module should be enabled
   enabled: true
-  # number of replicas for the notify component.
+  # -- number of replicas for the notify component.
   # should only be set to a number > 1 if `notify.ha.enabled=true`
   replicaCount: 1
-  # specify how many old ReplicaSets for this Deployment you want to retain.
+  # -- specify how many old ReplicaSets for this Deployment you want to retain.
   revisionHistoryLimit: 5
 
-  # the notify module's image
+  # -- the notify module's image
+  # @ignore
   image: # +doc-gen:ignore
     registry: ghcr.io
     repository: miracum/recruit/notify
@@ -303,91 +317,92 @@ notify:
 
   metrics:
     serviceMonitor:
-      # if enabled, creates a ServiceMonitor instance for Prometheus Operator-based monitoring
+      # -- if enabled, creates a ServiceMonitor instance for Prometheus Operator-based monitoring
       enabled: false
-      # additional labels to set on the ServiceMonitor object, e.g. `release: prometheus-operator`
+      # -- additional labels to set on the ServiceMonitor object, e.g. `release: prometheus-operator`
       additionalLabels: {}
       # namespace: monitoring
       # interval: 30s
       # scrapeTimeout: 10s
 
-  # extra environment vars on the container
+  # -- extra environment vars on the container
   extraEnv: []
 
-  # specify additional labels to apply to the notify pod
+  # -- specify additional labels to apply to the notify pod
   extraPodLabels: {}
 
   mail:
-    # Configure the mail server used to send notification emails
+    # -- configure the mail server used to send notification emails
     # All of these values are only used when mailhog.enabled is set to false
     server:
-      # Hostname of the external SMTP mail server
+      # -- hostname of the external SMTP mail server
       host: ""
-      # Mailserver port
+      # -- mailserver port
       port: 25
-      # Mailserver username
+      # -- Mailserver username
       username: ""
-      # Mailserver password
+      # -- Mailserver password
       password: ""
-      # Name of an existing secret containing an `smtp-password` key to use instead of the password value above
+      # -- Name of an existing secret containing an `smtp-password` key to use instead of the password value above
       existingSecret: ""
-    # Used to link back to the screening list web app from an email.
+    # -- Used to link back to the screening list web app from an email.
     # If the screening list ingress is enabled, it uses list.ingress.hosts.host to construct the URL, otherwise uses this value.
     # Should include a '[list_id]' which is replaced with the internal screening list id.
     screeningListLinkTemplate: "http://localhost:8080/recommendations/[list_id]"
-    # The sender email address for the created notification mails.
+    # -- The sender email address for the created notification mails.
     from: "recruit@example.com"
 
   ha:
-    # whether to enable high-availability mode for the notification module
+    # -- whether to enable high-availability mode for the notification module
     enabled: false
     database:
-      # hostname for the database used to store notification jobs
+      # -- hostname for the database used to store notification jobs
       # if `postgresql.enabled=true`, uses the included PostgreSQL database instead.
       host: ""
-      # database port
+      # -- database port
       port: 5432
-      # username to log into the database
+      # -- username to log into the database
       username: ""
-      # password for the database
+      # -- password for the database
       password: ""
-      # database name
+      # -- database name
       name: "recruit_notify_jobstore"
       existingSecret:
-        # name of an existing Kubernetes secret from which to retrieve the user's password.
+        # -- name of an existing Kubernetes secret from which to retrieve the user's password.
         name: ""
-        # key inside the existing secret
+        # -- key inside the existing secret
         key: "postgresql-password"
 
   podDisruptionBudget:
-    # uses policy/v1 of the PodDisruptionBudget resource requiring Kubernetes 1.21+
+    # -- enable creation of a PDB resource for the pod.
+    # Uses policy/v1 of the PodDisruptionBudget resource requiring Kubernetes 1.21+
     enabled: false
-    # Minimum available instances; ignored if there is no PodDisruptionBudget
+    # -- Minimum available instances; ignored if there is no PodDisruptionBudget
     minAvailable: 1
-    # Maximum unavailable instances; ignored if there is no PodDisruptionBudget
+    # -- Maximum unavailable instances; ignored if there is no PodDisruptionBudget
     maxUnavailable: ""
 
-  # Configure the Notification rules. See the [Configure Notifcation Rules](#configure-notifcation-rules) section below.
+  # -- configure the Notification rules. See the [Configure Notifcation Rules](#configure-notifcation-rules) section below.
   rules: {}
 
-  # the service used to expose the notify module web port
+  # -- the service used to expose the notify module web port
   service:
-    # service type
+    # -- service type
     type: ClusterIP
-    # service port for the HTTP endpoint
+    # -- service port for the HTTP endpoint
     port: 8080
-    # service port for the actuator/metrics endpoint
+    # -- service port for the actuator/metrics endpoint
     metricsPort: 8081
 
   ingress:
-    # if enabled, this ingress is used when setting up the webhook subscription in the FHIR server.
+    # -- if enabled, this ingress is used when setting up the webhook subscription in the FHIR server.
     # Setting this ingress is useful if the FHIR server is external to the cluster and can only be reached via this ingress.
     # The URL called by the external FHIR server with ingress enabled is as follows: "http(s)://ingress.hosts[0].host/on-list-change"
     # If ingress.enabled is false, then the notify.service is used to construct the URL invoked by the FHIR server.
     enabled: false
-    # name of the IngressClass resource to use for this ingress
+    # -- name of the IngressClass resource to use for this ingress
     ingressClassName: ""
-    # additional annotations for the Ingress resource
+    # -- additional annotations for the Ingress resource
     annotations:
       {}
       # kubernetes.io/ingress.class: nginx
@@ -396,20 +411,22 @@ notify:
       - host: notify.127.0.0.1.nip.io
         paths:
           - "/"
-    # TLS configuration
+    # -- TLS configuration
     tls: []
     #  - secretName: notify-example-tls
     #    hosts:
     #      - notify-example.local
 
-  # Configuration for the container's readiness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # -- configuration for the container's readiness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # @ignore
   readinessProbe: # +doc-gen:ignore
     failureThreshold: 5
     initialDelaySeconds: 30
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 10
-  # Configuration for the container's liveness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # -- configuration for the container's liveness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # @ignore
   livenessProbe: # +doc-gen:ignore
     failureThreshold: 3
     initialDelaySeconds: 30
@@ -417,22 +434,22 @@ notify:
     successThreshold: 1
     timeoutSeconds: 10
 
-  # resource requests and limits for the container
+  # -- resource requests and limits for the container
   resources: {}
 
-  # node labels for pod assignment
+  # -- node labels for pod assignment
   # see: <https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/>
   nodeSelector: {}
 
-  # tolerations for pod assignment
+  # -- tolerations for pod assignment
   # see: <https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/>
   tolerations: []
 
-  # affinity for pod assignment
+  # -- affinity for pod assignment
   # see: <https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity>
   affinity: {}
 
-  # pod topology spread configuration
+  # -- pod topology spread configuration
   # see: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#api
   topologySpreadConstraints:
     []
@@ -444,10 +461,11 @@ notify:
     #       app.kubernetes.io/component: notify
     #       app.kubernetes.io/instance: recruit
 
-  # security context for the pod
+  # -- security context for the pod
   podSecurityContext: {}
 
   # security context for the container
+  # @ignore
   securityContext: # +doc-gen:ignore
     privileged: false
     capabilities:
@@ -462,75 +480,76 @@ notify:
       type: RuntimeDefault
 
 list:
-  # Whether the list module should be enabled
+  # -- Whether the list module should be enabled
   enabled: true
-  # Number of replicas for the list module. A fault-tolerant number of replicas is recommended.
+  # -- Number of replicas for the list module. A fault-tolerant number of replicas is recommended.
   replicaCount: 1
-  # specify how many old ReplicaSets for this Deployment you want to retain.
+  # -- specify how many old ReplicaSets for this Deployment you want to retain.
   revisionHistoryLimit: 5
 
   # the list module's image
+  # @ignore
   image: # +doc-gen:ignore
     registry: ghcr.io
     repository: miracum/recruit/list
     tag: v10.0.8 # x-release-please-version
     pullPolicy: IfNotPresent
 
-  # the service used to expose the list module web port
+  # -- the service used to expose the list module web port
   service:
-    # service type
+    # -- service type
     type: ClusterIP
-    # service port
+    # -- service port
     port: 8080
 
   auth:
-    # if enabled, requires authentication before accessing the screening list
+    # -- if enabled, requires authentication before accessing the screening list
     enabled: false
     keycloak:
-      # the Keycloak client id
+      # -- the Keycloak client id
       clientId: "uc1-screeninglist"
-      # the Keycloak realm
+      # -- the Keycloak realm
       realm: "MIRACUM"
-      # the Keycloak auth URL. Should end in `/auth`.
+      # -- the Keycloak auth URL. Should end in `/auth`.
       url: "http://localhost:8083/auth"
 
   dePseudonymization:
-    # if enabled, all FHIR resource will first be processed by the fhir-pseudonymizer for de-pseudonymization before being displayed.
+    # -- if enabled, all FHIR resource will first be processed by the fhir-pseudonymizer for de-pseudonymization before being displayed.
     enabled: false
-    # API base URL of the FHIR pseudonymizer to use. If `fhir-pseudonymizer.enabled` is set to `true`, this URL will be auto-configured.
+    # -- API base URL of the FHIR pseudonymizer to use. If `fhir-pseudonymizer.enabled` is set to `true`, this URL will be auto-configured.
     serviceUrl: "http://fhir-pseudonymizer:8080/fhir"
-    # the API key to invoke the FHIR pseudonymizer
+    # -- the API key to invoke the FHIR pseudonymizer
     apiKey: ""
-    # use an existing Secret resource that contains the API key
+    # -- use an existing Secret resource that contains the API key
     existingApiKeySecret:
-      # name of an existing Kubernetes Secret that contains the API key.
+      # -- name of an existing Kubernetes Secret that contains the API key.
       # Leave empty to use `dePseudonymization.apiKey` instead.
       name: ""
-      # key of the Kubernetes Secret that contains the API key
+      # -- key of the Kubernetes Secret that contains the API key
       key: "fhir-pseudonymizer-api-key"
 
   metrics:
     serviceMonitor:
-      # if enabled, creates a ServiceMonitor instance for Prometheus Operator-based monitoring
+      # -- if enabled, creates a ServiceMonitor instance for Prometheus Operator-based monitoring
       enabled: false
-      # additional labels
+      # -- additional labels
       additionalLabels: {}
       # namespace: monitoring
       # interval: 30s
       # scrapeTimeout: 10s
 
-  # specify extra environment vars on the container
+  # -- specify extra environment vars on the container
   extraEnv: []
 
-  # specify additional labels to apply to the list pod
+  # -- specify additional labels to apply to the list pod
   extraPodLabels: {}
 
   ingress:
-    # if enabled, create an ingress resource to access the screening list
+    # -- if enabled, create an ingress resource to access the screening list
     enabled: false
-    # name of the IngressClass resource to use for this ingress
+    # -- name of the IngressClass resource to use for this ingress
     ingressClassName: ""
-    # additional annotations for the Ingress resource
+    # -- additional annotations for the Ingress resource
     annotations:
       {}
       # kubernetes.io/ingress.class: nginx
@@ -539,24 +558,25 @@ list:
       - host: list.127.0.0.1.nip.io
         paths:
           - "/"
-    # TLS configuration
+    # -- TLS configuration
     tls: []
     #  - secretName: notify-example-tls
     #    hosts:
     #      - notify-example.local
 
   podDisruptionBudget:
-    # uses policy/v1 of the PodDisruptionBudget resource requiring Kubernetes 1.21+
+    # -- uses policy/v1 of the PodDisruptionBudget resource requiring Kubernetes 1.21+
     enabled: false
-    # Minimum available instances; ignored if there is no PodDisruptionBudget
+    # -- Minimum available instances; ignored if there is no PodDisruptionBudget
     minAvailable: 1
-    # Maximum unavailable instances; ignored if there is no PodDisruptionBudget
+    # -- Maximum unavailable instances; ignored if there is no PodDisruptionBudget
     maxUnavailable: ""
 
-  # resource requests and limits for the container
+  # -- resource requests and limits for the container
   resources: {}
 
   # Configuration for the container's readiness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # @ignore
   readinessProbe: # +doc-gen:ignore
     failureThreshold: 3
     initialDelaySeconds: 20
@@ -564,6 +584,7 @@ list:
     successThreshold: 1
     timeoutSeconds: 5
   # Configuration for the container's liveness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # @ignore
   livenessProbe: # +doc-gen:ignore
     failureThreshold: 3
     initialDelaySeconds: 20
@@ -571,22 +592,22 @@ list:
     successThreshold: 1
     timeoutSeconds: 5
 
-  # node labels for pod assignment
+  # -- node labels for pod assignment
   # see: <https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/>
   nodeSelector: {}
 
-  # tolerations for pod assignment
+  # -- tolerations for pod assignment
   # see: <https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/>
   tolerations: []
 
-  # affinity for pod assignment
+  # -- affinity for pod assignment
   # see: <https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity>
   affinity: {}
 
-  # security context for the pod
+  # -- security context for the pod
   podSecurityContext: {}
 
-  # pod topology spread configuration
+  # -- pod topology spread configuration
   # see: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#api
   topologySpreadConstraints:
     []
@@ -598,7 +619,8 @@ list:
     #       app.kubernetes.io/component: list
     #       app.kubernetes.io/instance: recruit
 
-  # security context for the container
+  # -- security context for the container
+  # @ignore
   securityContext: # +doc-gen:ignore
     privileged: false
     allowPrivilegeEscalation: false
@@ -613,14 +635,15 @@ list:
       type: RuntimeDefault
 
 postgresql:
-  # enable the included postgres DB, currently used only by the notification module
+  # -- enable the included postgres DB, currently used only by the notification module
   # to store jobs when running in high-availability mode (`notify.ha.enabled=true`)
   enabled: false
-  # override the default name to avoid conflicts with the HAPI and OHDSI charts
+  # -- override the default name to avoid conflicts with the HAPI and OHDSI charts
   nameOverride: "recruit-postgres"
   auth:
-    # set the default database name to `recruit`
+    # -- set the default database name to `recruit`
     database: "recruit"
+  # @ignore
   primary:
     containerSecurityContext: # +doc-gen:ignore
       runAsNonRoot: true
@@ -631,17 +654,17 @@ postgresql:
       seccompProfile:
         type: RuntimeDefault
 
-# configuration for the optional fhir-pseudonymizer dependency
+# -- configuration for the optional fhir-pseudonymizer dependency
 fhir-pseudonymizer:
-  # install the included fhir-pseudonymizer chart. If set to `true`, the list module is auto-configured to use this service.
+  # -- install the included fhir-pseudonymizer chart. If set to `true`, the list module is auto-configured to use this service.
   enabled: false
-  # default to using Vfps as a pseudonym service. It is included as a dependency of the fhir-pseudonymizer.
+  # -- default to using Vfps as a pseudonym service. It is included as a dependency of the fhir-pseudonymizer.
   pseudonymizationService: Vfps
   vfps:
-    # enable the included Vfps service.
+    # -- enable the included Vfps service.
     enabled: true
 
-# @ignored
+# @ignore
 curl: # +doc-gen:ignore
   image:
     registry: docker.io
@@ -649,6 +672,6 @@ curl: # +doc-gen:ignore
     tag: 7.87.0@sha256:f7f265d5c64eb4463a43a99b6bf773f9e61a50aaa7cefaf564f43e42549a01dd
 
 broadseaAtlasdb:
-  # whether to deploy the OHDSI Broadsea Atlasdb (<https://github.com/OHDSI/Broadsea-Atlasdb>)
+  # -- whether to deploy the OHDSI Broadsea Atlasdb (<https://github.com/OHDSI/Broadsea-Atlasdb>)
   # currently only used by internal integration tests. See [./values-integrationtest.yaml](values-integrationtest.yaml)
   enabled: false
