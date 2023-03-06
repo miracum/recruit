@@ -1,8 +1,9 @@
 FROM docker.io/library/gradle:7.6.0@sha256:bd8852274c9e10ecd00549e5d3a73edf2549c1c6442d808ce27d1e4a04251ebd AS build
 WORKDIR /home/gradle/src
-ENV GRADLE_USER_HOME /gradle
+ENV GRADLE_USER_HOME /gradle \
+    TZ="UTC"
 
-ARG OPENTELEMETRY_JAVA_AGENT_VERSION=1.21.0
+ARG OPENTELEMETRY_JAVA_AGENT_VERSION=1.23.0
 RUN wget --quiet https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OPENTELEMETRY_JAVA_AGENT_VERSION}/opentelemetry-javaagent.jar
 
 COPY settings.gradle ./

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.util.BundleUtil;
 import java.time.LocalDate;
 import java.time.Month;
@@ -299,7 +300,8 @@ class FhirCohortTransactionBuilderTests {
     var patient = patients.get(0);
 
     assertThat(patient.getBirthDateElement().getYear()).isEqualTo(1976);
-    assertThat(patient.getBirthDateElement().getMonth()).isEqualTo(1); // the month is   0-based...
+    // the month is 0-based...
+    assertThat(patient.getBirthDateElement().getMonth()).isEqualTo(1);
     assertThat(patient.getBirthDateElement().getDay()).isEqualTo(12);
   }
 
@@ -315,12 +317,8 @@ class FhirCohortTransactionBuilderTests {
 
     var patient = patients.get(0);
 
-    // 1975-12-31T00:00:00
-    assertThat(patient.getBirthDateElement().getYear()).isEqualTo(1975);
-    assertThat(patient.getBirthDateElement().getMonth()).isEqualTo(11);
-    assertThat(patient.getBirthDateElement().getDay()).isEqualTo(31);
-    assertThat(patient.getBirthDateElement().getHour()).isZero();
-    assertThat(patient.getBirthDateElement().getMinute()).isZero();
+    assertThat(patient.getBirthDateElement().getYear()).isEqualTo(1976);
+    assertThat(patient.getBirthDateElement().getPrecision()).isEqualTo(TemporalPrecisionEnum.YEAR);
   }
 
   @Test
@@ -410,7 +408,8 @@ class FhirCohortTransactionBuilderTests {
   @Test
   void
       buildFromOmopCohort_withGivenPreviousScreeningListAndCohortContainingPreviousPersonAndNewPerson_shouldCreateListContainingPreviousAndNewSubjects() {
-    // previousPerson and previousPatient are the same since their identifier is identical:
+    // previousPerson and previousPatient are the same since their identifier is
+    // identical:
     // source_value=1 is used as an identifier for the Patient.
     var previousPatient =
         new Patient()
@@ -556,9 +555,11 @@ class FhirCohortTransactionBuilderTests {
     var previousSubject = new ResearchSubject().setIndividual(new Reference("Patient/1"));
     previousSubject.setId("1");
 
-    // pretend that this new person was previously in the cohort (thus generating the
+    // pretend that this new person was previously in the cohort (thus generating
+    // the
     // previousPatient resource)
-    // and was removed later (thus adding the "ineligible" flag) and is now included in the cohort
+    // and was removed later (thus adding the "ineligible" flag) and is now included
+    // in the cohort
     // again.
     var newPerson = Person.builder().personId(1L).sourceId("1").yearOfBirth(Year.of(2002)).build();
 
@@ -567,7 +568,8 @@ class FhirCohortTransactionBuilderTests {
     var previousList = new ListResource();
     var previousEntry = new Reference("ResearchSubject/1");
 
-    // we don't really care about the specific flag - although maybe we should - so just use
+    // we don't really care about the specific flag - although maybe we should - so
+    // just use
     // any coding
     previousList
         .addEntry()
