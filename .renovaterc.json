@@ -18,7 +18,7 @@
       "groupName": "github-actions"
     },
     {
-      "matchManagers": ["docker"],
+      "matchManagers": ["docker-compose", "dockerfile", "kubernetes"],
       "groupName": "container-images"
     },
     {
