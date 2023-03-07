@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: docker.io/library/traefik:v2.9.6@sha256:bb7be8d50edf73d8d3a812ac8873ef354a0fe9b40d7f3880747b43a3525855d2
+    image: docker.io/library/traefik:v2.9.8@sha256:33be12872fc90e3c889350a40ac31e107f8fbf9216a6fac0939a0ac06505579d
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -35,7 +35,7 @@ services:
           memory: 2048m
 
   ohdsi-webapi:
-    image: docker.io/ohdsi/webapi:2.12.0@sha256:4d951a05245cedad4d666874fb71f182bd2140aab5ece4f1621d028cf10d0823
+    image: docker.io/ohdsi/webapi:2.12.1@sha256:55e6316b9bdddcf8420d03c437a579ee29a478a8ca420a8c6488140d5f84aa87
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -76,7 +76,7 @@ services:
       - "traefik.http.routers.ohdsi-webapi.entrypoints=web"
 
   ohdsi-atlas:
-    image: docker.io/ohdsi/atlas:2.12.0@sha256:96431e12cba41643117a904f14c3c6d50a0af63a9a293ed61cd56d5bcffb723a
+    image: docker.io/ohdsi/atlas:2.12.1@sha256:2e510a1a6c6ec881db9144771988a463ee8c113a87c5934fa35f5253129e28f3
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -99,7 +99,7 @@ services:
       - "traefik.http.routers.ohdsi-atlas.entrypoints=web"
 
   fhir:
-    image: docker.io/hapiproject/hapi:v6.2.2@sha256:9c4e8af94d81ac0049dbb589e4cd855bf78c9c13be6f6844e814c63d63545b44
+    image: docker.io/hapiproject/hapi:v6.4.0@sha256:638b8df98fcfc074404520700923c07d313f62c5dcad49ca569cdb8041c7cc57
     restart: unless-stopped
     cap_drop:
       - ALL

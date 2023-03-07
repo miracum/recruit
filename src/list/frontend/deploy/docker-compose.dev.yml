@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   fhir:
-    image: docker.io/hapiproject/hapi:v6.2.1@sha256:8d1b4c1c8abd613f685267a3dda494d87aba4cff449eed39902a6ece2c086f3c
+    image: docker.io/hapiproject/hapi:v6.4.0@sha256:638b8df98fcfc074404520700923c07d313f62c5dcad49ca569cdb8041c7cc57
     environment:
       HAPI_FHIR_VALIDATION_REQUESTS_ENABLED: "true"
       HAPI_FHIR_SUBSCRIPTION_RESTHOOK_ENABLED: "true"
@@ -14,7 +14,7 @@ services:
       - 8082:8080
 
   loader:
-    image: docker.io/curlimages/curl:7.87.0@sha256:f7f265d5c64eb4463a43a99b6bf773f9e61a50aaa7cefaf564f43e42549a01dd
+    image: docker.io/curlimages/curl:7.88.1@sha256:48318407b8d98e8c7d5bd4741c88e8e1a5442de660b47f63ba656e5c910bc3da
     command: >
       sh -c "curl -X POST -H 'Content-Type:application/fhir+json' --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 5 --retry-delay 15 --data '@/data/sample-record-1.json' http://fhir:8080/fhir &&
              curl -X POST -H 'Content-Type:application/fhir+json' --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 5 --retry-delay 15 --data '@/data/sample-record-2.json' http://fhir:8080/fhir &&
@@ -26,7 +26,7 @@ services:
       - fhir
 
   jaeger:
-    image: docker.io/jaegertracing/all-in-one:1.38@sha256:14cf2943199c15caa9547e488f4423f44941d45db8a99db229f70f1351425ac8
+    image: docker.io/jaegertracing/all-in-one:1.42@sha256:7d32a4eddec7b9a6d8265d4320a224e06ab5fe0753869715e5852401e8e7d6eb
     environment:
       COLLECTOR_OTLP_ENABLED: "true"
     ports:
@@ -50,7 +50,7 @@ services:
       - 8083:8080
 
   fhir-pseudonymizer:
-    image: ghcr.io/miracum/fhir-pseudonymizer:v2.14.1@sha256:88ce9e7e6fed73374b309f85b8a09011d815df2598c8926e7e9ebd4bf8f8d20b
+    image: ghcr.io/miracum/fhir-pseudonymizer:v2.17.0@sha256:431a7f4516c1f641966c507941b87a997441665656572a1c00c44376ef08fe24
     environment:
       APIKEY: "fhir-pseudonymizer-api-key"
       TRACING__ENABLED: "true"
