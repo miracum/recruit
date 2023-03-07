@@ -22,17 +22,17 @@ jobs:
       COSIGN_EXPERIMENTAL: "true"
     steps:
       - name: Checkout
-        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b # tag=v2
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Task
-        uses: arduino/setup-task@d665c6beebae46ff3f699d7b2fd3f1959de7153c # tag=1.0.2
+        uses: arduino/setup-task@e26d8975574116b0097a1161e0fe16ba75d84c1c # v1.0.3
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -56,7 +56,7 @@ jobs:
 
           cosign sign "ghcr.io/${{ github.repository }}/charts/recruit:${CHART_VERSION}"
 
-      - uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3.1.0
+      - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
           name: helm-chart
           path: |
@@ -68,11 +68,11 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
         with:
           path: recruit
 
-      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: miracum/charts
@@ -107,10 +107,10 @@ jobs:
       contents: write # to upload artifacts to the release
     steps:
       - name: Checkout
-        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
 
       - name: Download Helm chart
-        uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 # tag=v3
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3
         with:
           name: helm-chart
           path: /tmp
@@ -154,7 +154,7 @@ jobs:
       id-token: write # To sign the provenance.
       contents: write # To add assets to a release.
     # can't be referenced by digest. See <https://github.com/slsa-framework/slsa-github-generator#verification-of-provenance>
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.4.0
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.5.0
     with:
       base64-subjects: "${{ needs.prepare-artifacts.outputs.hashes }}"
       compile-generator: true # Workaround for https://github.com/slsa-framework/slsa-github-generator/issues/1163

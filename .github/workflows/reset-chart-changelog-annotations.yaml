@@ -13,12 +13,12 @@ jobs:
   reset-commit-and-push:
     name: reset changelog annotations, commit, and push
     runs-on: ubuntu-22.04
-    container: ghcr.io/chgl/kube-powertools:v1.22.15@sha256:4e6920719e66d1fa19fc640cf9c36c2c88be647733e0cf4c0bec3889f4040211
+    container: ghcr.io/chgl/kube-powertools:v1.22.16@sha256:1363f7de15d193edecf9eed16ac361496808b4d09d887afd1fed4162b6dd7742
     permissions:
       contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
 
       # currently defaults to just the one chart, "recruit", needs to be updated if
       # more charts are added in the future. See <https://github.com/chgl/kube-powertools/blob/master/scripts/generate-chart-changelog.sh>
