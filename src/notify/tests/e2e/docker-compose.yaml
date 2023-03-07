@@ -28,7 +28,7 @@ services:
       POSTGRES_DB: recruit_notify_jobs
 
   tester:
-    image: docker.io/curlimages/curl:7.87.0@sha256:f7f265d5c64eb4463a43a99b6bf773f9e61a50aaa7cefaf564f43e42549a01dd
+    image: docker.io/curlimages/curl:7.88.1@sha256:48318407b8d98e8c7d5bd4741c88e8e1a5442de660b47f63ba656e5c910bc3da
     command: >
       -X GET
       --fail
@@ -42,7 +42,7 @@ services:
       - notify
 
   fhir:
-    image: docker.io/hapiproject/hapi:v6.0.1@sha256:63c98d8be3dadc77b47dca3115490f22bf99512f363f779f7bbcb42f569aeac3
+    image: docker.io/hapiproject/hapi:v6.4.0@sha256:638b8df98fcfc074404520700923c07d313f62c5dcad49ca569cdb8041c7cc57
     environment:
       HAPI_FHIR_VALIDATION_REQUESTS_ENABLED: "true"
       HAPI_FHIR_SUBSCRIPTION_RESTHOOK_ENABLED: "true"
