@@ -38,7 +38,7 @@
     "eslint": "8.29.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-vue": "9.8.0",
-    "jest": "29.3.1",
+    "jest": "29.5.0",
     "pino": "8.8.0",
     "sass": "1.56.2",
     "sass-loader": "13.2.0",
