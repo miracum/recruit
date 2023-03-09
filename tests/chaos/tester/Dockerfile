@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.4
-FROM mcr.microsoft.com/dotnet/sdk:7.0-jammy@sha256:60664521325f3a64d82ed352303aa22e60e5c1bbefefe045cac316079cee9296 AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0-jammy@sha256:2325094757ea8584c86de6ef049e8cd89d43abe158871155b558beb63e87fffc AS build
 WORKDIR /build
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 
@@ -21,7 +21,7 @@ dotnet publish tester.csproj \
     -o /build/publish
 EOF
 
-FROM mcr.microsoft.com/dotnet/nightly/runtime:7.0-jammy-chiseled@sha256:13b720fc1ec799338aec10cb9a7a92811fcdfdf12b2a31ad18179f63b3a5c599 AS runtime
+FROM mcr.microsoft.com/dotnet/nightly/runtime:7.0-jammy-chiseled@sha256:bc62da9ca38f1487bf5af0ece1c97ea7d00808de4b8b39178c5aa9f55d396564 AS runtime
 WORKDIR /opt/chaos-tester
 USER 65532:65532
 ENV DOTNET_ENVIRONMENT="Production" \
