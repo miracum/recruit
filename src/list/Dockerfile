@@ -1,4 +1,4 @@
-FROM docker.io/library/node:18.14.2@sha256:8b2c008211854f4ee9ca328910d1c6bff8f30fc9fdf834b48f7ea40992a2079a AS base
+FROM docker.io/library/node:18.15.0@sha256:8d9a875ee427897ef245302e31e2319385b092f1c3368b497e89790f240368f5 AS base
 WORKDIR /app
 
 COPY package.json ./
@@ -26,7 +26,7 @@ COPY server/package.json ./server/
 RUN npm clean-install --workspace=server
 COPY server/*.js ./server/
 
-FROM gcr.io/distroless/nodejs:18@sha256:54015ec9ef0710c06d6159da0913cbaf63ab730bc94f6c2c4e86aaa0e9e02cb5
+FROM gcr.io/distroless/nodejs:18@sha256:b534f9b5528e69baa7e8caf7bcc1d93ecf59faa15d289221decf5889a2ed3877
 WORKDIR /app
 USER 65532:65532
 # Port 8081 is currently not used, but exposed to make
