@@ -62,7 +62,7 @@ public class FhirRoute extends RouteBuilder {
         .log(
             LoggingLevel.INFO,
             log,
-            "[Cohort ${header.cohort.id}] adding ${body.size()} "
+            "cohort=${header.cohort.id} adding ${body.size()} "
                 + "patient(s) for cohort '${header.cohort.id} - ${header.cohort.name}'")
         .process(
             ex -> {

@@ -16,6 +16,8 @@ query:
   # using "conditional-update". Useful if the server is already filled with Patient resources from a
   # different system
   only-create-patients-if-not-exist: false
+  # if true, start the query module, generate all cohorts, send the results to the FHIR server, and exit
+  run-once-and-exit: false
   selector:
     matchLabels:
       - "UC1"

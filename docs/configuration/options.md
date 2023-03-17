@@ -56,6 +56,7 @@ using the `.staging.env` file.
 | QUERY_ONLY_CREATE_PATIENTS_IF_NOT_EXIST       | if true, send Patient resources as "conditional-creates" on their first identifier instead of using "conditional-update". Useful if the server is already filled with Patient resources from a different system | `false`                               |
 | QUERY_COHORTSIZETHRESHOLD                     | Maximum number of patients to be included in the generated screening list. A warning will appear on the screening list view if a list exceeded this count.                                                      | `100`                                 |
 | QUERY_WEBAPI_COHORT_CACHE_SCHEMA              | The name of the schema which contains the cohort definitions cache.                                                                                                                                             | `ohdsi`                               |
+| QUERY_RUN_ONCE_AND_EXIT              | If set to `true`, run the query module only once against all discovered cohort definitions and exit. Useful when running the module as part of a larger workflow.                                                                                                                                             | `false`                               |
 
 ¹: This is usually the same URL you configured in the `config-local.js` file when setting up the ATLAS server.
 

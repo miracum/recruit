@@ -6,3 +6,4 @@ CVE-2016-1000027
 
 # only present in hapi fhir r5 which is transitively included by camel but unused
 CVE-2023-24057
+CVE-2023-28465
