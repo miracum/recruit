@@ -70,9 +70,11 @@ Atlas UI but create a dedicated service account for the query module which uses 
 
 All released images are signed via [cosign](https://github.com/sigstore/cosign). To verify the integrity of the images, run:
 
+<!-- x-release-please-start-version -->
 ```sh
 cosign verify -key recruit-image-signing.pub ghcr.io/miracum/recruit/list:v2.10.1
 ```
+<!-- x-release-please-end -->
 
 where `recruit-image-signing.pub` is located in the root of the main repository.
 

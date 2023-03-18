@@ -150,7 +150,6 @@ jobs:
       id-token: write
       packages: write
     env:
-      COSIGN_EXPERIMENTAL: "true"
       IMAGE: "${{ needs.build.outputs.image }}@${{ needs.build.outputs.digest }}"
     steps:
       - name: Login to GitHub Container Registry
@@ -172,9 +171,9 @@ jobs:
       - name: Sign image
         run: |
           echo "Signing '$IMAGE' using keyless approach"
-          cosign sign "$IMAGE"
+          cosign sign --yes "$IMAGE"
 
       - name: Attest image vulnerability report
         run: |
           echo "Attest vulnerability report for '$IMAGE' using keyless approach"
-          cosign attest --type vuln --predicate /tmp/trivy-vuln-attestation.json "$IMAGE"
+          cosign attest --yes --type vuln --predicate /tmp/trivy-vuln-attestation.json "$IMAGE"

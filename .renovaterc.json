@@ -1,30 +1,13 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:base",
-    ":disableDependencyDashboard",
-    "helpers:pinGitHubActionDigests",
-    "docker:pinDigests",
-    "group:allNonMajor"
+  "extends": ["github>miracum/.github//renovate/default"],
+  "ignoreDeps": [
+    "docker.io/library/postgres",
+    "postgresql",
+    "docker.io/bitnami/postgresql"
   ],
+  "ignorePaths": ["**/node_modules/**", "**/bower_components/**"],
   "pip-compile": {
     "fileMatch": ["(^|/|\\.)requirements\\.in$"]
-  },
-  "ignoreDeps": ["docker.io/library/postgres", "postgresql"],
-  "ignorePaths": ["**/node_modules/**", "**/bower_components/**"],
-  "packageRules": [
-    {
-      "matchManagers": ["github-actions"],
-      "groupName": "github-actions"
-    },
-    {
-      "matchManagers": ["docker-compose", "dockerfile", "kubernetes"],
-      "groupName": "container-images"
-    },
-    {
-      "matchManagers": ["github-actions"],
-      "matchPackageNames": ["slsa-framework/slsa-github-generator"],
-      "pinDigests": false
-    }
-  ]
+  }
 }

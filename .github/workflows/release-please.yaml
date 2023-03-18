@@ -27,6 +27,7 @@ jobs:
             src/notify/src/main/resources/application.yml
             src/query/src/main/resources/application.yml
             docker-compose/docker-compose.yaml
+            docs/configuration/security.md
           changelog-types: |
             [
               { "type": "feat", "section": "Features" },
