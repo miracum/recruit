@@ -3,7 +3,7 @@ WORKDIR /home/gradle/src
 ENV GRADLE_USER_HOME /gradle \
     TZ="UTC"
 
-ARG OPENTELEMETRY_JAVA_AGENT_VERSION=1.23.0
+ARG OPENTELEMETRY_JAVA_AGENT_VERSION=1.24.0
 RUN wget --quiet https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OPENTELEMETRY_JAVA_AGENT_VERSION}/opentelemetry-javaagent.jar
 
 COPY settings.gradle ./

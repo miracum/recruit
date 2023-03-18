@@ -79,35 +79,6 @@ public class Router extends RouteBuilder {
           .autoStartup("{{query.schedule.enable}}")
           .log(LoggingLevel.INFO, "Running query module in scheduled mode")
           .to(START_COHORT_GENERATION);
-
-      // run via REST is only enabled if not running in "one-shot" mode
-      rest("/run")
-          // run all cohorts
-          .post()
-          .route()
-          .log(LoggingLevel.INFO, "Run Query module from external call")
-          .process(
-              ex -> {
-                var template = ex.getContext().createProducerTemplate();
-                template.asyncSendBody(START_COHORT_GENERATION, null);
-              })
-          .transform()
-          .constant("Successfully started Query Module")
-          .endRest()
-          // run a cohort from the omop cohort-id
-          .post("/{cohortId}")
-          .route()
-          .log(
-              LoggingLevel.INFO, "Run cohort ${header.cohortId} in query module from external call")
-          .process(
-              ex -> {
-                var template = ex.getContext().createProducerTemplate();
-                template.asyncSendBody(
-                    WebApiRoute.GET_COHORT_DEFINITION, ex.getIn().getHeader("cohortId"));
-              })
-          .transform()
-          .simple("Successfully started Query Module for cohort ${header.cohortId}")
-          .endRest();
     }
   }
 }
