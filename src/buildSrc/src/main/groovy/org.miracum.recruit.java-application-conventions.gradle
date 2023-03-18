@@ -89,14 +89,10 @@ bootJar {
 }
 
 jacoco {
+    toolVersion '0.8.8'
 }
 
 jacocoTestReport {
-    reports {
-        html.enabled true
-        xml.enabled false
-        csv.enabled true
-    }
 }
 
 spotless {
