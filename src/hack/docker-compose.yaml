@@ -155,8 +155,11 @@ services:
           memory: 64m
           cpus: "1"
     privileged: false
+    read_only: false
+    environment:
+      WEBAPI_URL: ""
     volumes:
-      - ./config-local.js:/usr/share/nginx/html/atlas/js/config-local.js
+      - ./config-local.js:/usr/share/nginx/html/atlas/js/config-local.js:ro
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.ohdsi-atlas.rule=Host(`recruit-ohdsi.127.0.0.1.nip.io`) && PathPrefix(`/atlas`)"
