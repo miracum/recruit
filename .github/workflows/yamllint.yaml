@@ -21,7 +21,7 @@ jobs:
     container: ghcr.io/chgl/kube-powertools:v1.22.16@sha256:1363f7de15d193edecf9eed16ac361496808b4d09d887afd1fed4162b6dd7742
     steps:
       - name: Checkout
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3.4.0
 
       - name: Run yamllint
         run: yamllint -c .yamllint.yaml .
