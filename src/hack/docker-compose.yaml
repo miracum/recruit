@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: docker.io/library/traefik:v2.9.8@sha256:33be12872fc90e3c889350a40ac31e107f8fbf9216a6fac0939a0ac06505579d
+    image: docker.io/library/traefik:v2.9.8@sha256:a29972da395acf3f186b01bca023985dd736545d1bccc55a33a7376adeee3495
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -261,7 +261,7 @@ services:
       OTEL_EXPORTER_JAEGER_ENDPOINT: "http://jaeger:14250"
 
   jaeger:
-    image: docker.io/jaegertracing/all-in-one:1.42.0@sha256:7d32a4eddec7b9a6d8265d4320a224e06ab5fe0753869715e5852401e8e7d6eb
+    image: docker.io/jaegertracing/all-in-one:1.43.0@sha256:6f73825b8ff6c2963dff5eead619d6f10935f1452b5a8d258de837e62a15eda2
     ports:
       - "127.0.0.1:16686:16686"
       - "127.0.0.1:6831:6831/udp"
