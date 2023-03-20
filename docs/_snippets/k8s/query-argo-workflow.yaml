@@ -1,0 +1,144 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/argoproj/argo-workflows/v3.4.3/api/jsonschema/schema.json
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: recruit-query-workflow-
+spec:
+  entrypoint: full-run
+  templates:
+    - name: omop-cdm-etl
+      container:
+        image: docker.io/docker/whalesay@sha256:178598e51a26abbc958b8a2e48825c90bc22e641de3d31e18aaf55f3258ba93b
+        command: [cowsay]
+        args: ["Running ETL Job from source to the OMOP CDM database"]
+        securityContext:
+          readOnlyRootFilesystem: true
+          runAsUser: 65532
+          runAsGroup: 65532
+          seccompProfile:
+            type: RuntimeDefault
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          runAsNonRoot: true
+
+    - name: ohdsi-achilles
+      # run for at most 1 hour before timing out to make sure the query module will run eventually
+      activeDeadlineSeconds: "3600"
+      container:
+        image: docker.io/ohdsi/broadsea-achilles:sha-bccd396@sha256:a881063aff6200d0d368ec30eb633381465fb8aa15e7d7138b7d48b6256a6feb
+        env:
+          - name: ACHILLES_DB_URI
+            value: >-
+              postgresql://broadsea-atlasdb:5432/postgres?ApplicationName=recruit-ohdsi-achilles
+          - name: ACHILLES_DB_USERNAME
+            value: postgres
+          - name: ACHILLES_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: recruit-ohdsi-webapi-db-secret
+                key: postgres-password
+          - name: ACHILLES_CDM_SCHEMA
+            value: demo_cdm
+          - name: ACHILLES_VOCAB_SCHEMA
+            value: demo_cdm
+          - name: ACHILLES_RES_SCHEMA
+            value: demo_cdm_results
+          - name: ACHILLES_CDM_VERSION
+            value: "5.3"
+          - name: ACHILLES_SOURCE
+            value: EUNOMIA
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          runAsNonRoot: true
+          runAsUser: 10001
+          runAsGroup: 10001
+          readOnlyRootFilesystem: true
+          seccompProfile:
+            type: RuntimeDefault
+        volumeMounts:
+          - name: achilles-workspace-volume
+            mountPath: /opt/achilles/workspace
+          - name: r-tempdir-volume
+            mountPath: /tmp
+      volumes:
+        - name: achilles-workspace-volume
+          emptyDir: {}
+        - name: r-tempdir-volume
+          emptyDir: {}
+
+    - name: recruit-query
+      container:
+        image: ghcr.io/miracum/recruit/query:v10.1.0 # x-release-please-version
+        env:
+          - name: QUERY_RUN_ONCE_AND_EXIT
+            value: "true"
+          - name: QUERY_SCHEDULE_ENABLED
+            value: "false"
+          - name: QUERY_SELECTOR_MATCHLABELS
+            value: ""
+          - name: FHIR_URL
+            value: http://recruit-fhirserver:8080/fhir
+          - name: OMOP_JDBCURL
+            value: >-
+              jdbc:postgresql://broadsea-atlasdb:5432/postgres?ApplicationName=recruit-query
+          - name: OMOP_USERNAME
+            value: postgres
+          - name: OMOP_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: recruit-ohdsi-webapi-db-secret
+                key: postgres-password
+          - name: OMOP_CDMSCHEMA
+            value: demo_cdm
+          - name: OMOP_RESULTSSCHEMA
+            value: demo_cdm_results
+          - name: QUERY_WEBAPI_BASE_URL
+            value: http://recruit-ohdsi-webapi:8080/WebAPI
+          - name: ATLAS_DATASOURCE
+            value: EUNOMIA
+          - name: MANAGEMENT_ENDPOINT_HEALTH_PROBES_ADD_ADDITIONAL_PATHS
+            value: "true"
+          - name: MANAGEMENT_SERVER_PORT
+            value: "8081"
+          - name: CAMEL_HEALTH_ENABLED
+            value: "false"
+          - name: QUERY_WEBAPI_COHORT_CACHE_SCHEMA
+            value: webapi
+        securityContext:
+          privileged: false
+          capabilities:
+            drop:
+              - ALL
+          runAsNonRoot: true
+          runAsUser: 65532
+          runAsGroup: 65532
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          seccompProfile:
+            type: RuntimeDefault
+        volumeMounts:
+          - name: tmp-volume
+            mountPath: /tmp
+      volumes:
+        - name: tmp-volume
+          emptyDir: {}
+
+    - name: full-run
+      dag:
+        tasks:
+          - name: run-omop-cdm-etl
+            template: omop-cdm-etl
+          - name: run-ohdsi-achilles
+            depends: run-omop-cdm-etl
+            template: ohdsi-achilles
+          - name: run-recruit-query
+            # doesn't really matter whether the achilles job failed or succeeded
+            depends: "run-omop-cdm-etl && (run-ohdsi-achilles.Succeeded || run-ohdsi-achilles.Failed)"
+            template: recruit-query
