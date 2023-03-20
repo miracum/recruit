@@ -5,7 +5,7 @@
 A Helm chart for deploying recruIT on a Kubernetes cluster is available in the main
 [repository's OCI registry](https://github.com/miracum/recruit/pkgs/container/recruit%2Fcharts%2Frecruit)
 and in the [MIRACUM charts](https://github.com/miracum/charts) repository. The chart can be used to deploy the application
- as well as all dependencies required for it to run ([OHDSI WebAPI](https://github.com/OHDSI/WebAPI),
+as well as all dependencies required for it to run ([OHDSI WebAPI](https://github.com/OHDSI/WebAPI),
 [OHDSI Atlas](https://github.com/OHDSI/Atlas), [HAPI FHIR server](https://github.com/hapifhir/hapi-fhir-jpaserver-starter)).
 The chart also includes [MailHog](https://github.com/mailhog/MailHog), a mock mail server for testing email notifications.
 
@@ -415,4 +415,39 @@ Finally, install the recruIT chart using the following updated values.yaml:
 
 ```yaml title="values-kind-recruit-with-cnpg.yaml"
 --8<-- "_snippets/k8s/values-kind-recruit-with-cnpg.yaml"
+```
+
+## Running the query module using Argo Workflows
+
+By default, the query module runs on a dedicated schedule. As of version `10.1.0`,
+the module can also be configured to run as a one-shot container. This is useful
+when integrating with existing containerized workflows, e.g. using
+[Airflow](https://airflow.apache.org/docs/apache-airflow/stable/administration-and-deployment/kubernetes.html)
+or [Argo Workflows](https://argoproj.github.io/argo-workflows/).
+
+Below you can find an example for running the query module as part of a larger workflow:
+
+```yaml title="query-argo-workflow.yaml"
+--8<-- "_snippets/k8s/query-argo-workflow.yaml"
+```
+
+You can run this workflow against the integration test setup of the recruIT Helm chart:
+
+```sh
+kubectl create namespace recruit
+
+helm repo add argo https://argoproj.github.io/argo-helm
+helm upgrade --install \
+  --create-namespace \
+  --namespace=argo-workflows \
+  -f tests/chaos/argo-workflows-values.yaml \
+  argo-workflows argo/argo-workflows
+
+helm upgrade --install \
+  --namespace=recruit \
+  -f charts/recruit/values-integrationtest.yaml \
+  --set query.enabled=false \
+  recruit charts/recruit/
+
+argo submit -n recruit --wait --log docs/_snippets/k8s/query-argo-workflow.yaml
 ```
