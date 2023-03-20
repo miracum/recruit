@@ -1,5 +1,42 @@
 # Changelog
 
+## [10.1.0](https://github.com/miracum/recruit/compare/v10.0.8...v10.1.0) (2023-03-18)
+
+
+### Features
+
+* **query:** allow running the query module as a one-shot container ([#90](https://github.com/miracum/recruit/issues/90)) ([5e0afa6](https://github.com/miracum/recruit/commit/5e0afa6f46b4a2ec9c7610ad6144240baab0a8c9))
+
+
+### Bug Fixes
+
+* **helm:** set some security context for postgresql sub-charts ([30045ca](https://github.com/miracum/recruit/commit/30045ca8686636b4ea26a92b910e27d23e57e7a0))
+
+
+### CI/CD
+
+* fix cosign and renovate config ([#98](https://github.com/miracum/recruit/issues/98)) ([0ce2d7d](https://github.com/miracum/recruit/commit/0ce2d7d40a3684d9ad3fa37ab1754b4b893216bc))
+* fixed cosign ([0ce2d7d](https://github.com/miracum/recruit/commit/0ce2d7d40a3684d9ad3fa37ab1754b4b893216bc))
+
+
+### Miscellaneous Chores
+
+* **deps:** update container-images ([#74](https://github.com/miracum/recruit/issues/74)) ([d993ca2](https://github.com/miracum/recruit/commit/d993ca21824a91a3d4aefee9285b4dd1fe8c8403))
+* **deps:** update container-images ([#88](https://github.com/miracum/recruit/issues/88)) ([758b066](https://github.com/miracum/recruit/commit/758b066a5cc6faac3a9dfad97cc913c8f5998974))
+* **deps:** update container-images ([#91](https://github.com/miracum/recruit/issues/91)) ([1039f99](https://github.com/miracum/recruit/commit/1039f9965f23f7a8e9c980f73e003d5fdd41ca2b))
+* **deps:** update dependency hl7.fhir.r4 to v5 ([#85](https://github.com/miracum/recruit/issues/85)) ([8b84274](https://github.com/miracum/recruit/commit/8b842748254186b9f14203fa90f1e346152e9ec6))
+* **deps:** update docker.io/bitnami/kubectl:1.26.2 docker digest to e3370de ([#75](https://github.com/miracum/recruit/issues/75)) ([9f7cfba](https://github.com/miracum/recruit/commit/9f7cfba111a1b34847c8349ba4050869ac492722))
+* **deps:** update github-actions ([#76](https://github.com/miracum/recruit/issues/76)) ([bfcf9c0](https://github.com/miracum/recruit/commit/bfcf9c0bab95590c468e50fef7d6ddbbdaebaa23))
+* **deps:** update github-actions ([#87](https://github.com/miracum/recruit/issues/87)) ([2affb57](https://github.com/miracum/recruit/commit/2affb57a8c847982d0ed01814b01bae4cf101fde))
+* **deps:** update github-actions ([#92](https://github.com/miracum/recruit/issues/92)) ([ed30103](https://github.com/miracum/recruit/commit/ed30103ba278f9daa0b60f69059593366d1805d3))
+* **deps:** update oxsecurity/megalinter action to v6.20.1 ([#81](https://github.com/miracum/recruit/issues/81)) ([dea798b](https://github.com/miracum/recruit/commit/dea798b7d6e00481767582ac373138a1c6193c52))
+* **deps:** updated all deps ([#99](https://github.com/miracum/recruit/issues/99)) ([9df82e2](https://github.com/miracum/recruit/commit/9df82e25700ad4679d987c6faf49f82ae522e38b))
+* fix renovate config ([de32b21](https://github.com/miracum/recruit/commit/de32b2176a60a565769d7900cc8dd4a0f7db22b7))
+* **helm:** switched to helm-docs ([30045ca](https://github.com/miracum/recruit/commit/30045ca8686636b4ea26a92b910e27d23e57e7a0))
+* test renovate with default config ([#71](https://github.com/miracum/recruit/issues/71)) ([30045ca](https://github.com/miracum/recruit/commit/30045ca8686636b4ea26a92b910e27d23e57e7a0))
+* use standard preset for renovate config again ([0ce2d7d](https://github.com/miracum/recruit/commit/0ce2d7d40a3684d9ad3fa37ab1754b4b893216bc))
+* use the omop cdm init container hosted on ghcr.io ([#67](https://github.com/miracum/recruit/issues/67)) ([2bd1de9](https://github.com/miracum/recruit/commit/2bd1de9a1b966bc3cf5cefff27c3088ff461a352))
+
 ## [10.0.8](https://github.com/miracum/recruit/compare/v10.0.7...v10.0.8) (2023-02-16)
 
 
