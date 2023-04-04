@@ -21,13 +21,13 @@ dotnet publish tester.csproj \
     -o /build/publish
 EOF
 
-FROM mcr.microsoft.com/dotnet/nightly/runtime:7.0-jammy-chiseled@sha256:5783706779020d0f6b8f76530208a3692f09ea313be9984022a4016604583613 AS runtime
+FROM mcr.microsoft.com/dotnet/nightly/runtime:7.0-jammy-chiseled@sha256:00e1bb8c8de1b4fb9d6e8aaf0633f49bdd9ad8dba8c08bb941bc128569517e55 AS runtime
 WORKDIR /opt/chaos-tester
 USER 65532:65532
 ENV DOTNET_ENVIRONMENT="Production" \
     DOTNET_CLI_TELEMETRY_OPTOUT=1
 
-COPY --from=docker.io/bitnami/kubectl:1.26.3@sha256:617efc9e044efbbaa02e9b93eeca3b9b9facb757b20789bcdbc7bf19a4d489d7 /opt/bitnami/kubectl/bin/kubectl /usr/bin/kubectl
+COPY --from=docker.io/bitnami/kubectl:1.26.3@sha256:54b0faf3f8ef9c4dfce25e40ab8c0c146a1354457eec77d987e67469d002a5c1 /opt/bitnami/kubectl/bin/kubectl /usr/bin/kubectl
 
 COPY ./sample-list-bundle.json /tmp/
 COPY ./chaos.yaml /tmp/
