@@ -72,3 +72,5 @@ annotations:
   artifacthub.io/changes: |-
     - kind: changed
       description: updated recruIT image tags to v10.1.0 # x-release-please-version
+    - kind: changed
+      description: updated curl image tag to v8
