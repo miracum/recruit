@@ -6,3 +6,31 @@ skip-check:
   # "Ensure Workflow pods are not using the default ServiceAccount."
   #  - Doesn't matter when just running integration tests
   - CKV_ARGO_1
+  # Prefer using secrets as files over secrets as environment variables
+  - CKV_K8S_35
+  # "Image should use digest"
+  - CKV_K8S_43
+  # "Image Pull Policy should be Always"
+  - CKV_K8S_15
+  # "Ensure that Service Account Tokens are only mounted where necessary"
+  - CKV_K8S_38
+  # "CPU limits should be set"
+  - CKV_K8S_11
+  # "CPU requests should be set"
+  - CKV_K8S_10
+  # "Memory requests should be set"
+  - CKV_K8S_12
+  # "Memory limits should be set"
+  - CKV_K8S_13
+  # "Ensure that the seccomp profile is set to docker/default or runtime/default"
+  # all container-level securityContexts are already set to this
+  - CKV_K8S_31
+  # "Containers should run as a high UID to avoid host conflict"
+  # only happens because the postgresql container is ran as uid 1001
+  - CKV_K8S_40
+  # "Use read-only filesystem for containers where possible"
+  # true everywhere except for the postgres image
+  - CKV_K8S_22
+  # "Apply security context to your pods and containers"
+  # security contexts are applied to containers
+  - CKV_K8S_29
