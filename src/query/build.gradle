@@ -12,17 +12,17 @@ plugins {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-    implementation 'org.apache.camel:camel-sql:3.20.2'
-    implementation 'org.apache.camel:camel-jackson:3.20.2'
-    implementation 'org.apache.camel:camel-jsonpath:3.20.2'
-    implementation 'org.apache.camel:camel-fhir:3.20.2'
-    implementation 'org.apache.camel:camel-http:3.20.2'
-    implementation 'org.apache.camel:camel-cron:3.20.2'
+    implementation 'org.apache.camel:camel-sql:3.20.3'
+    implementation 'org.apache.camel:camel-jackson:3.20.3'
+    implementation 'org.apache.camel:camel-jsonpath:3.20.3'
+    implementation 'org.apache.camel:camel-fhir:3.20.3'
+    implementation 'org.apache.camel:camel-http:3.20.3'
+    implementation 'org.apache.camel:camel-cron:3.20.3'
 
-    implementation 'org.apache.camel.springboot:camel-rest-starter:3.20.2'
-    implementation 'org.apache.camel.springboot:camel-servlet-starter:3.20.2'
-    implementation 'org.apache.camel.springboot:camel-spring-boot-starter:3.20.2'
-    implementation 'org.apache.camel.springboot:camel-micrometer-starter:3.20.2'
+    implementation 'org.apache.camel.springboot:camel-rest-starter:3.20.3'
+    implementation 'org.apache.camel.springboot:camel-servlet-starter:3.20.3'
+    implementation 'org.apache.camel.springboot:camel-spring-boot-starter:3.20.3'
+    implementation 'org.apache.camel.springboot:camel-micrometer-starter:3.20.3'
 
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.14.2'
 
