@@ -37,10 +37,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
 
-    implementation 'ca.uhn.hapi.fhir:hapi-fhir-base:6.4.3'
-    implementation 'ca.uhn.hapi.fhir:hapi-fhir-client:6.4.3'
-    implementation 'ca.uhn.hapi.fhir:hapi-fhir-structures-r4:6.4.3'
-    implementation 'ca.uhn.hapi.fhir:hapi-fhir-client-okhttp:6.4.3'
+    implementation 'ca.uhn.hapi.fhir:hapi-fhir-base:6.4.4'
+    implementation 'ca.uhn.hapi.fhir:hapi-fhir-client:6.4.4'
+    implementation 'ca.uhn.hapi.fhir:hapi-fhir-structures-r4:6.4.4'
+    implementation 'ca.uhn.hapi.fhir:hapi-fhir-client-okhttp:6.4.4'
 
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
 
@@ -89,7 +89,7 @@ bootJar {
 }
 
 jacoco {
-    toolVersion '0.8.8'
+    toolVersion '0.8.9'
 }
 
 jacocoTestReport {
@@ -105,7 +105,7 @@ spotless {
 }
 
 checkstyle {
-    toolVersion '10.9.1'
+    toolVersion '10.9.3'
     configFile = file('../config/checkstyle/checkstyle.xml')
 }
 

@@ -4,7 +4,7 @@ dependencies:
   version: 0.11.1
 - name: ohdsi
   repository: https://chgl.github.io/charts
-  version: 0.20.2
+  version: 0.21.0
 - name: mailhog
   repository: https://codecentric.github.io/helm-charts
   version: 5.2.3
@@ -13,6 +13,6 @@ dependencies:
   version: 12.1.2
 - name: fhir-pseudonymizer
   repository: https://miracum.github.io/charts
-  version: 0.3.3
-digest: sha256:1cfeca9a74f1b60f03eac1fd6bc987ae0470b4f58a09f5a0e06e32abc5d15541
-generated: "2023-03-17T23:15:18.273647485Z"
+  version: 0.3.6
+digest: sha256:a380a672087432de8d489ddf13644759d1f2afb9f44bfaac61aac1f78bad7dd0
+generated: "2023-04-06T08:07:06.985573273Z"
