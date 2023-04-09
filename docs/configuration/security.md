@@ -72,7 +72,7 @@ All released images are signed via [cosign](https://github.com/sigstore/cosign).
 
 <!-- x-release-please-start-version -->
 ```sh
-cosign verify -key recruit-image-signing.pub ghcr.io/miracum/recruit/list:v10.1.0
+cosign verify -key recruit-image-signing.pub ghcr.io/miracum/recruit/list:v10.1.1
 ```
 <!-- x-release-please-end -->
 
