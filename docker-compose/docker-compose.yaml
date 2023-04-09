@@ -11,6 +11,8 @@ services:
       - "127.0.0.1:38080:8080"
     read_only: true
     privileged: false
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       JAEGER_SERVICE_NAME: recruit-list
       FHIR_URL: ${FHIR_URL:?}
