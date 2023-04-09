@@ -19,7 +19,7 @@
     "core-js": "3.30.0",
     "csv-stringify": "6.3.0",
     "fhirclient": "2.5.2",
-    "fhirpath": "2.14.7",
+    "fhirpath": "3.3.1",
     "vue": "2.7.14",
     "vue-router": "3.6.5",
     "vuejs-logger": "1.5.5"
