@@ -1,5 +1,29 @@
 # Changelog
 
+## [10.1.1](https://github.com/miracum/recruit/compare/v10.1.0...v10.1.1) (2023-04-09)
+
+
+### Bug Fixes
+
+* **deps:** update dependency com.squareup.okhttp3:okhttp to v4 ([#94](https://github.com/miracum/recruit/issues/94)) ([25e4a0e](https://github.com/miracum/recruit/commit/25e4a0eea03b57a9fee7022c3a3403b055e28d21))
+
+
+### Documentation
+
+* added sample ArgoWorkflow for running query as a one-shot ([#100](https://github.com/miracum/recruit/issues/100)) ([10de301](https://github.com/miracum/recruit/commit/10de30109d6195c4ea4d63b1c8de9ffd78b9ef27))
+
+
+### Miscellaneous Chores
+
+* **deps:** update all non-major dependencies ([#73](https://github.com/miracum/recruit/issues/73)) ([ae05502](https://github.com/miracum/recruit/commit/ae055027dc44ec06332cae26e21ebd29ec1ea937))
+* **deps:** update container-images ([#102](https://github.com/miracum/recruit/issues/102)) ([aaf3609](https://github.com/miracum/recruit/commit/aaf360957f53d4ce32a657724f8cf3a92870a6b5))
+* **deps:** update container-images ([#93](https://github.com/miracum/recruit/issues/93)) ([c48c788](https://github.com/miracum/recruit/commit/c48c7880757f6046e345ba6853df04e04a16e0d5))
+* **deps:** update github-actions ([#103](https://github.com/miracum/recruit/issues/103)) ([9c7fa5c](https://github.com/miracum/recruit/commit/9c7fa5c8a40c51834ffc64f036a606101b28b3b3))
+* **deps:** updated fhirpath to v3 ([2c84fd0](https://github.com/miracum/recruit/commit/2c84fd01bbe8dd325fef88dc593ac4aa2a11bec5))
+* **deps:** updated fhirpath to v3 ([#104](https://github.com/miracum/recruit/issues/104)) ([2c84fd0](https://github.com/miracum/recruit/commit/2c84fd01bbe8dd325fef88dc593ac4aa2a11bec5))
+* **deps:** updated helm chart deps ([2c84fd0](https://github.com/miracum/recruit/commit/2c84fd01bbe8dd325fef88dc593ac4aa2a11bec5))
+* set host.docker.internal as an extra host to better run on linux ([2c84fd0](https://github.com/miracum/recruit/commit/2c84fd01bbe8dd325fef88dc593ac4aa2a11bec5))
+
 ## [10.1.0](https://github.com/miracum/recruit/compare/v10.0.8...v10.1.0) (2023-03-18)
 
 
