@@ -1,5 +1,12 @@
 # Changelog
 
+## [10.1.2](https://github.com/miracum/recruit/compare/v10.1.1...v10.1.2) (2023-04-10)
+
+
+### CI/CD
+
+* delete old recruit chart before syncing ([bea2188](https://github.com/miracum/recruit/commit/bea2188d67b5a7620dc8fa61734dd311eadad539))
+
 ## [10.1.1](https://github.com/miracum/recruit/compare/v10.1.0...v10.1.1) (2023-04-09)
 
 
