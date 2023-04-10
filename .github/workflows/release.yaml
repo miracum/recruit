@@ -78,6 +78,9 @@ jobs:
 
       - name: copy local helm chart to charts repo
         run: |
+          # delete the existing recruit chart first. Otherwise we wouldn't be able
+          # to sync file removals.
+          rm -rf miracum-charts/charts/recruit
           cp -r recruit/charts/recruit miracum-charts/charts/
 
       - name: get chart version
