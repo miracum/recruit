@@ -1,0 +1,65 @@
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: check-recruit-images
+  annotations:
+    policies.kyverno.io/title: >-
+      Verify signatures and SLSA Provenance for recruIT container images
+    policies.kyverno.io/category: Software Supply Chain Security
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/minversion: 1.9.2
+    kyverno.io/kyverno-version: 1.9.2
+    kyverno.io/kubernetes-version: "1.26"
+    policies.kyverno.io/description: >-
+      Provenance is used to identify how an artifact was produced
+      and from where it originated. SLSA provenance is an industry-standard
+      method of representing that provenance. This policy verifies that an
+      image has SLSA provenance and was signed by the expected subject and issuer
+      when produced through GitHub Actions. It requires configuration based upon
+      your own values.
+spec:
+  validationFailureAction: Enforce
+  webhookTimeoutSeconds: 30
+  rules:
+    - name: check-recruit-images
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      verifyImages:
+        - imageReferences:
+            - "ghcr.io/miracum/recruit/list:*"
+            - "ghcr.io/miracum/recruit/notify:*"
+            - "ghcr.io/miracum/recruit/query:*"
+          attestors:
+            - entries:
+                - keyless:
+                    subject: "https://github.com/miracum/recruit/.github/workflows/build.yaml@refs/tags/v*"
+                    issuer: "https://token.actions.githubusercontent.com"
+                    rekor:
+                      url: https://rekor.sigstore.dev
+                    additionalExtensions:
+                      githubWorkflowTrigger: release
+                      githubWorkflowName: ci
+                      githubWorkflowRepository: miracum/recruit
+          attestations:
+            - predicateType: https://slsa.dev/provenance/v0.2
+              attestors:
+                - count: 1
+                  entries:
+                    - keyless:
+                        subject: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@refs/tags/v*"
+                        issuer: "https://token.actions.githubusercontent.com"
+                        rekor:
+                          url: https://rekor.sigstore.dev
+              conditions:
+                - all:
+                    # This expression uses a regex pattern to ensure the builder.id in the attestation is equal to the official
+                    # SLSA provenance generator workflow and uses a tagged release in semver format. If using a specific SLSA
+                    # provenance generation workflow, you may need to adjust the first input as necessary.
+                    - key: "{{ regex_match('^https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@refs/tags/v[0-9]+.[0-9]+.[0-9]+$','{{ builder.id}}') }}"
+                      operator: Equals
+                      value: true
