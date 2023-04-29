@@ -2,11 +2,11 @@ package org.miracum.recruit.notify.message;
 
 import static net.logstash.logback.argument.StructuredArguments.kv;
 
+import jakarta.mail.MessagingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import javax.mail.MessagingException;
 import org.apache.logging.log4j.util.Strings;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -26,7 +26,7 @@ import org.miracum.recruit.notify.mailconfig.MailerConfig;
 import org.miracum.recruit.notify.mailconfig.UserConfig;
 import org.miracum.recruit.notify.mailconfig.UserConfig.Subscription;
 import org.miracum.recruit.notify.mailsender.MailInfo;
-import org.miracum.recruit.notify.mailsender.MailSender;
+import org.miracum.recruit.notify.mailsender.NotificationMailSender;
 import org.miracum.recruit.notify.mailsender.NotifyInfo;
 import org.miracum.recruit.notify.practitioner.PractitionerFilter;
 import org.miracum.recruit.notify.practitioner.PractitionerUtils;
@@ -337,7 +337,7 @@ public class MessageCreator {
           kv("to", mailInfo.getTo()),
           kv("subject", mailInfo.getSubject()));
 
-      var mailSender = new MailSender(javaMailSender, templateEngine);
+      var mailSender = new NotificationMailSender(javaMailSender, templateEngine);
       try {
         mailSender.sendMail(notifyInfo, mailInfo);
       } catch (MessagingException e) {
