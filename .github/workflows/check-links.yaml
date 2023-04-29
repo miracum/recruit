@@ -11,6 +11,8 @@ permissions: read-all
 jobs:
   check-links:
     runs-on: ubuntu-22.04
+    permissions:
+      issues: write
     steps:
       - uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3 # v3.5.0
 
@@ -22,10 +24,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
+      - name: Look for an existing issue
+        id: last-issue
+        uses: micalevisk/last-issue-action@044e1cb7e9a4dde20e22969cb67818bfca0797be # v2.0.0
+        with:
+          state: open
+          labels: link-check
+
       - name: Create Issue From File
-        if: env.lychee_exit_code != 0
+        if: ${{ env.lychee_exit_code != 0 }}
         uses: peter-evans/create-issue-from-file@433e51abf769039ee20ba1293a088ca19d573b7f # tag=v4.0.1
         with:
           title: Link Checker Report
           content-filepath: ./lychee/out.md
-          labels: report, automated issue
+          issue-number: ${{ steps.last-issue.outputs.issue_number }}
+          labels: report, automated issue, link-check
