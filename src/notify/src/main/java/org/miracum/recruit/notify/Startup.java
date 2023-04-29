@@ -2,11 +2,11 @@ package org.miracum.recruit.notify;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.util.HapiExtensions;
+import jakarta.annotation.PostConstruct;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
-import javax.annotation.PostConstruct;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.IntegerType;

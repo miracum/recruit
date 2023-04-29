@@ -4,12 +4,12 @@ import static java.util.stream.Collectors.toList;
 import static net.logstash.logback.argument.StructuredArguments.kv;
 
 import com.google.common.base.Strings;
+import jakarta.mail.MessagingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import javax.mail.MessagingException;
 import org.hl7.fhir.r4.model.CommunicationRequest;
 import org.hl7.fhir.r4.model.CommunicationRequest.CommunicationRequestStatus;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -18,7 +18,7 @@ import org.miracum.recruit.notify.fhirserver.MessageStatusUpdater;
 import org.miracum.recruit.notify.mailconfig.MailerConfig;
 import org.miracum.recruit.notify.mailconfig.UserConfig;
 import org.miracum.recruit.notify.mailsender.MailInfo;
-import org.miracum.recruit.notify.mailsender.MailSender;
+import org.miracum.recruit.notify.mailsender.NotificationMailSender;
 import org.miracum.recruit.notify.mailsender.NotifyInfo;
 import org.miracum.recruit.notify.practitioner.PractitionerUtils;
 import org.slf4j.Logger;
@@ -92,7 +92,8 @@ public class MessageDistributor {
   }
 
   private void sendMessageList(List<CommunicationRequest> openMessages) {
-    // TODO: strongly type this list by using the CommunicationRequest object instead of just the
+    // TODO: strongly type this list by using the CommunicationRequest object
+    // instead of just the
     // string id
     var messagesSentSuccessfully = new ArrayList<String>();
     var messagesSentFailed = new ArrayList<String>();
@@ -146,7 +147,7 @@ public class MessageDistributor {
             kv("to", mailInfo.getTo()),
             kv("subject", mailInfo.getSubject()));
 
-        var mailSender = new MailSender(appJavaMailSender, emailTemplateEngine);
+        var mailSender = new NotificationMailSender(appJavaMailSender, emailTemplateEngine);
         try {
           mailSender.sendMail(notifyInfo, mailInfo);
           messagesSentSuccessfully.add(message.getIdElement().getIdPart());

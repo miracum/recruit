@@ -1,18 +1,18 @@
 package org.miracum.recruit.notify.mailsender;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 /** Message will be prepared and will be sent by java mail sender and thymeleaf template. */
-public class MailSender {
+public class NotificationMailSender {
   private final JavaMailSender javaMailSender;
   private final TemplateEngine templateEngine;
 
-  public MailSender(JavaMailSender javaMailSender, TemplateEngine templateEngine) {
+  public NotificationMailSender(JavaMailSender javaMailSender, TemplateEngine templateEngine) {
     this.javaMailSender = javaMailSender;
     this.templateEngine = templateEngine;
   }
