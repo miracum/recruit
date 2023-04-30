@@ -47,7 +47,6 @@ jobs:
             e2e-test-directory: "tests/e2e/"
           - module: "notify"
             e2e-test-directory: "tests/e2e/"
-          # Disabled temporarily
           # - module: "list"
           #   e2e-test-directory: "frontend/tests/e2e/"
     env:

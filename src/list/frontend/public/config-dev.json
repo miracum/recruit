@@ -1,8 +1,9 @@
 {
-  "authClientId": "uc1-screeninglist",
-  "authUrl": "http://localhost:8083/auth",
-  "authRealm": "MIRACUM",
-  "logoutRedirectUri": "/",
+  "keycloak": {
+    "url": "http://localhost:8083/",
+    "realm": "recruIT",
+    "clientId": "recruit-list"
+  },
   "isKeycloakDisabled": false,
   "hideDemographics": false,
   "hideLastVisit": false,
