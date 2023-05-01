@@ -29,4 +29,7 @@ dependencies {
     implementation 'net.minidev:json-smart:2.4.10'
 
     implementation 'com.github.slugify:slugify:3.0.2'
+
+    testImplementation 'com.approvaltests:approvaltests:18.6.0'
+    testImplementation 'com.google.code.gson:gson:2.10.1'
 }

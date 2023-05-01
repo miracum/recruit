@@ -26,7 +26,7 @@ SHOW_ELAPSED_TIME: true
 FILEIO_REPORTER: false
 # DISABLE_ERRORS: true # Uncomment if you want MegaLinter to detect errors but not block CI to pass
 
-BASH_SHELLCHECK_FILTER_REGEX_EXCLUDE: (fhir-ig)
+BASH_SHELLCHECK_FILTER_REGEX_EXCLUDE: (fhir/ig)
 
 BASH_SHFMT_ARGUMENTS:
   - "--indent=2"
