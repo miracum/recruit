@@ -206,12 +206,11 @@ app.get("/config", (_req, res) =>
     hideEhrButton: config.ui.hideEhrButton,
     isKeycloakDisabled: config.auth.disabled,
     hideRecommendationDate: config.auth.hideRecommendationDate,
-    authClientId: config.auth.clientId,
-    authUrl: config.auth.url,
-    authRealm: config.auth.realm,
-    realm: config.auth.realm,
-    url: config.auth.url,
-    clientId: config.auth.clientId,
+    keycloak: {
+      clientId: config.auth.clientId,
+      url: config.auth.url,
+      realm: config.auth.realm,
+    },
     checkLoginIframeDisabled: config.auth.checkLoginIframeDisabled,
   })
 );

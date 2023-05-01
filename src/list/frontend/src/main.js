@@ -38,13 +38,14 @@ axios
   .get(process.env.VUE_APP_CONFIG_URL || "/config")
   .then((response) => {
     // handle success
-    Vue.$log.info("Using config: ", response.data);
-    if (!response.data.isKeycloakDisabled) {
+    const config = response.data;
+    Vue.$log.info("Using config: ", config);
+    if (!config.isKeycloakDisabled) {
       Vue.use(VueKeycloakJs, {
-        config: response.data,
+        config: config.keycloak,
         init: {
           onLoad: "login-required",
-          checkLoginIframe: !response.data.checkLoginIframeDisabled,
+          checkLoginIframe: !config.checkLoginIframeDisabled,
         },
         onReady: () => {
           new Vue({

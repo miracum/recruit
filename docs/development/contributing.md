@@ -19,12 +19,14 @@ This will start all development dependencies:
 - HAPI FHIR JPA Server
 - Jaeger
 - MailDev
+- Keycloak
 
 If you want to start any of the recruIT modules as containers, you can specify the corresponding `--profile` switch.
 For example, when working on the query module, it might be useful to run the screening list and the notify module
 for debugging. The following will start all development dependencies as well as build and run the list and notify containers:
 
 ```sh
+docker compose -f hack/docker-compose.yaml --profile=notify --profile=list build
 docker compose -f hack/docker-compose.yaml --profile=notify --profile=list up
 ```
 
