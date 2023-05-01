@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: docker.io/library/traefik:v2.9.9@sha256:7607abfb04839f13026b6f0698ab16cdeb8a66aa02045f3fde45dc71df5d2c59
+    image: docker.io/library/traefik:v2.10.1@sha256:2a1c328e239fa9cb3891a98c4c1beee300bf467fc7add316632e82de24529b49
     restart: unless-stopped
     ipc: none
     security_opt:

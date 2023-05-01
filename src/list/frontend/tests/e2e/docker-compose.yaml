@@ -69,4 +69,4 @@ services:
       - ${PWD}/frontend/deploy/data/aio-export.json:/tmp/realm.json:ro
 
   jaeger:
-    image: docker.io/jaegertracing/all-in-one:1.43@sha256:6f73825b8ff6c2963dff5eead619d6f10935f1452b5a8d258de837e62a15eda2
+    image: docker.io/jaegertracing/all-in-one:1.44@sha256:d0a97f79efec8e4e9513e2bea9345792b5b90a3e92240775831d328df4ca4ccf

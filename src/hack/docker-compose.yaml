@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: docker.io/library/traefik:v2.9.9@sha256:7607abfb04839f13026b6f0698ab16cdeb8a66aa02045f3fde45dc71df5d2c59
+    image: docker.io/library/traefik:v2.10.1@sha256:2a1c328e239fa9cb3891a98c4c1beee300bf467fc7add316632e82de24529b49
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -78,7 +78,7 @@ services:
       POSTGRES_DB: fhir
 
   broadsea-atlasdb:
-    image: docker.io/ohdsi/broadsea-atlasdb:2.0.0@sha256:0256a9e1ec75e6f0f48689c4d6a7dc8952d82b4ed7a055953e271d1c17850f6b
+    image: docker.io/ohdsi/broadsea-atlasdb:2.0.0@sha256:da28ed2179efe4f74f5d30da14b348b20acd792e90518e452f37748e89aec179
     ports:
       - "127.0.0.1:25432:5432"
 
@@ -264,7 +264,7 @@ services:
       OTEL_EXPORTER_JAEGER_ENDPOINT: "http://jaeger:14250"
 
   jaeger:
-    image: docker.io/jaegertracing/all-in-one:1.43.0@sha256:6f73825b8ff6c2963dff5eead619d6f10935f1452b5a8d258de837e62a15eda2
+    image: docker.io/jaegertracing/all-in-one:1.44.0@sha256:d0a97f79efec8e4e9513e2bea9345792b5b90a3e92240775831d328df4ca4ccf
     ports:
       - "127.0.0.1:16686:16686"
       - "127.0.0.1:6831:6831/udp"
