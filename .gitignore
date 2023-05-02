@@ -449,3 +449,7 @@ obj/
 
 **/tests/e2e/screenshots
 **/tests/e2e/videos
+
+# FHIR
+# ignored since we are pinning all dependencies anyways
+fhirpkg.lock.json
