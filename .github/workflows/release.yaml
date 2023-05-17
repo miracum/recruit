@@ -113,6 +113,7 @@ jobs:
         run: |
           VERSION=$(cat version.txt)
           kyverno oci push -i "ghcr.io/${{ github.repository }}/kyverno-policies:${VERSION}" --policy policies/
+          cosign sign --yes "ghcr.io/${{ github.repository }}/kyverno-policies:${VERSION}"
 
   prepare-artifacts:
     name: prepare artifacts
