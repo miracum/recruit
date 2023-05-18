@@ -17,8 +17,7 @@ metadata:
       and from where it originated. SLSA provenance is an industry-standard
       method of representing that provenance. This policy verifies that an
       image has SLSA provenance and was signed by the expected subject and issuer
-      when produced through GitHub Actions. It requires configuration based upon
-      your own values.
+      when produced through GitHub Actions.
 spec:
   validationFailureAction: Enforce
   webhookTimeoutSeconds: 30

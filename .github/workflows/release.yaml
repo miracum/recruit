@@ -97,6 +97,24 @@ jobs:
           commit-message: "chore(deps): updated recruit chart to ${{ steps.chart-version.outputs.version }}"
           branch: sync-recruit-chart-from-source-repo
 
+  # experimental
+  publish-kyverno-policies:
+    name: publish kyverno policies
+    runs-on: ubuntu-22.04
+    container: ghcr.io/chgl/kube-powertools:v1.23.2@sha256:0c2347c15a0bffea35a564d3c7b4e7db7975d3c559b6ea1c4cb3d2e96a57e891
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+
+      - name: Push policy folder
+        env:
+          KYVERNO_EXPERIMENTAL: "1"
+        run: |
+          VERSION=$(cat version.txt)
+          kyverno oci push -i "ghcr.io/${{ github.repository }}/kyverno-policies:${VERSION}" --policy policies/
+          cosign sign --yes "ghcr.io/${{ github.repository }}/kyverno-policies:${VERSION}"
+
   prepare-artifacts:
     name: prepare artifacts
     runs-on: ubuntu-22.04
