@@ -18,7 +18,7 @@ jobs:
   yamllint:
     runs-on: ubuntu-22.04
     # contains yamllint
-    container: ghcr.io/chgl/kube-powertools:v1.22.21@sha256:3e45248e0a88a26978341c7dc2b495020ad0cd75988ce19591f5d6f6d47685ac
+    container: ghcr.io/chgl/kube-powertools:v1.23.7@sha256:9fbd9806165d2d62a555ada53d458cd9e1b6595787b69b688f235b1fdaaba141
     steps:
       - name: Checkout
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
