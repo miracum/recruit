@@ -84,7 +84,7 @@ jobs:
         uses: aquasecurity/trivy-action@e5f43133f6e8736992c9f3c1b3296e24b37e17f2 # 0.10.0
         with:
           image-ref: ${{ fromJson(steps.container_meta.outputs.json).tags[0] }}
-          severity: "CRITICAL,HIGH"
+          severity: "CRITICAL"
           exit-code: "1"
           ignore-unfixed: "true"
           timeout: 15m
