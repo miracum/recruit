@@ -13,7 +13,7 @@ jobs:
   reset-commit-and-push:
     name: reset changelog annotations, commit, and push
     runs-on: ubuntu-22.04
-    container: ghcr.io/chgl/kube-powertools:v1.22.21@sha256:3e45248e0a88a26978341c7dc2b495020ad0cd75988ce19591f5d6f6d47685ac
+    container: ghcr.io/chgl/kube-powertools:v1.23.7@sha256:9fbd9806165d2d62a555ada53d458cd9e1b6595787b69b688f235b1fdaaba141
     permissions:
       contents: write
     steps:
@@ -36,7 +36,7 @@ jobs:
           # use it to replace the entire changelog annotation with a single entry.
           yq -i '.annotations["artifacthub.io/changes"] |= strenv(FIRST_CHANGELOG_ENTRY)' charts/recruit/Chart.yaml
 
-      - uses: EndBug/add-and-commit@b97a9fe893e2984b63d00feaee5922e16ab1cc1e # v9.1.2
+      - uses: EndBug/add-and-commit@1bad3abcf0d6ec49a5857d124b0bfb52dc7bb081 # v9.1.3
         with:
           add: "charts/"
           message: "chore(helm): reset Chart.yaml changelog annotations"

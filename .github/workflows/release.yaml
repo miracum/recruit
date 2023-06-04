@@ -35,7 +35,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@204a51a57a74d190b284a0ce69b44bc37201f343 # v3.0.3
+        uses: sigstore/cosign-installer@dd6b2e2b610a11fd73dd187a43d57cc1394e35f9 # v3.0.5
 
       - name: Add helm repos and update deps
         run: |
@@ -101,7 +101,7 @@ jobs:
   publish-kyverno-policies:
     name: publish kyverno policies
     runs-on: ubuntu-22.04
-    container: ghcr.io/chgl/kube-powertools:v1.23.2@sha256:0c2347c15a0bffea35a564d3c7b4e7db7975d3c559b6ea1c4cb3d2e96a57e891
+    container: ghcr.io/chgl/kube-powertools:v1.23.7@sha256:6d575cad3af3d4febf1789ba6c88b1fd80ba4b75ec792dbffba54868acb045e0
     continue-on-error: true
     steps:
       - name: Checkout
@@ -173,7 +173,7 @@ jobs:
       id-token: write # To sign the provenance.
       contents: write # To add assets to a release.
     # can't be referenced by digest. See <https://github.com/slsa-framework/slsa-github-generator#verification-of-provenance>
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.5.0
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.6.0
     with:
       base64-subjects: "${{ needs.prepare-artifacts.outputs.hashes }}"
       compile-generator: true # Workaround for https://github.com/slsa-framework/slsa-github-generator/issues/1163
