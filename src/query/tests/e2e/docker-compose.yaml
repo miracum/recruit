@@ -31,7 +31,7 @@ services:
       - query
 
   fhir:
-    image: docker.io/hapiproject/hapi:v6.4.0@sha256:638b8df98fcfc074404520700923c07d313f62c5dcad49ca569cdb8041c7cc57
+    image: docker.io/hapiproject/hapi:v6.6.0@sha256:c00367865ae5dad4e171cbb68bfc1c39818854079d1565bee4c86a45e78335d0
     environment:
       HAPI_FHIR_VALIDATION_REQUESTS_ENABLED: "true"
       HAPI_FHIR_SUBSCRIPTION_RESTHOOK_ENABLED: "true"

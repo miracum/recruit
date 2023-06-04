@@ -1,4 +1,4 @@
-FROM docker.io/library/gradle:8.1.1@sha256:3661c643af77b90c3ebc5e1dc907956a380b28bc182e8f9a1b5949ad73002875 AS build
+FROM docker.io/library/gradle:8.1.1@sha256:7fcf85eecab73a3889738cdd5bce8794083ceb3af977adff8ad62723886e0023 AS build
 WORKDIR /home/gradle/src
 ENV GRADLE_USER_HOME /gradle \
     TZ="UTC"
