@@ -23,22 +23,22 @@ dependencies:
     name: hapi-fhir-jpaserver
     repository: https://hapifhir.github.io/hapi-fhir-jpaserver-starter
     version: 0.11.1
-  - condition: ohdsi.enabled
-    name: ohdsi
-    repository: https://chgl.github.io/charts
-    version: 0.21.0
   - condition: mailhog.enabled
     name: mailhog
     repository: https://codecentric.github.io/helm-charts
     version: 5.2.3
-  - condition: postgresql.enabled
-    name: postgresql
-    version: 12.1.2
-    repository: https://charts.bitnami.com/bitnami
+  - condition: ohdsi.enabled
+    name: ohdsi
+    repository: oci://ghcr.io/chgl/charts
+    version: 0.21.4
+  - name: postgresql
+    version: 12.5.6
+    repository: oci://registry-1.docker.io/bitnamicharts
+    condition: postgresql.enabled
   - condition: fhir-pseudonymizer.enabled
     name: fhir-pseudonymizer
-    version: 0.3.8
-    repository: https://miracum.github.io/charts
+    version: 0.4.2
+    repository: oci://ghcr.io/miracum/charts
 # x-release-please-start-version
 version: 10.1.2
 appVersion: 10.1.2
@@ -73,4 +73,4 @@ annotations:
     - kind: changed
       description: updated recruIT image tags to v10.1.2 # x-release-please-version
     - kind: changed
-      description: updated curl image tag to v8
+      description: source sub-charts from OCI registries where available
