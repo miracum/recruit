@@ -7,12 +7,12 @@ dependencies:
   version: 5.2.3
 - name: ohdsi
   repository: oci://ghcr.io/chgl/charts
-  version: 0.21.5
+  version: 0.21.6
 - name: postgresql
   repository: oci://registry-1.docker.io/bitnamicharts
   version: 12.5.6
 - name: fhir-pseudonymizer
   repository: oci://ghcr.io/miracum/charts
   version: 0.4.3
-digest: sha256:be0c1ee70c87cd1878f2f9b68bc94de38df65aa64c7eb3cd2d3a0c0b778b16da
-generated: "2023-06-25T12:32:07.507634977Z"
+digest: sha256:10ccd12b5983692ea7001e0366163637c818acfc486121959656a80f6ed9045c
+generated: "2023-06-25T19:00:12.578071112Z"
