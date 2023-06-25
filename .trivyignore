@@ -1,4 +1,8 @@
 CVE-2016-1000027
+CVE-2022-46175
+
+# not affected by snakeyaml
+CVE-2022-1471
 
 # fast-xml-parser, not relevant since we aren't working with or exposing XML
 CVE-2023-34104
