@@ -25,6 +25,7 @@ public class OmopRoute extends RouteBuilder {
   private static final Logger logger = LoggerFactory.getLogger(OmopRoute.class);
   private final VisitOccurrenceRepository visitOccurrenceRepository;
   private final VisitDetailRepository visitDetailRepository;
+
   // catch SQL params from application.yml
   @Value("${query.excludePatientParameters.demographics}")
   private boolean excludePatientParams;
