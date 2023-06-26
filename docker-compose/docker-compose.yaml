@@ -1,6 +1,6 @@
 services:
   list:
-    image: ${RECRUIT_IMAGE_BASE_NAME:-ghcr.io/miracum/recruit}/list:${RECRUIT_IMAGE_TAG:-v10.1.2} # x-release-please-version
+    image: ${RECRUIT_IMAGE_BASE_NAME:-ghcr.io/miracum/recruit}/list:${RECRUIT_IMAGE_TAG:-v10.1.3} # x-release-please-version
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -31,7 +31,7 @@ services:
       - ${NOTIFY_RULES_CONFIG_PATH:?}:/etc/rules.yaml:ro
 
   query:
-    image: ${RECRUIT_IMAGE_BASE_NAME:-ghcr.io/miracum/recruit}/query:${RECRUIT_IMAGE_TAG:-v10.1.2} # x-release-please-version
+    image: ${RECRUIT_IMAGE_BASE_NAME:-ghcr.io/miracum/recruit}/query:${RECRUIT_IMAGE_TAG:-v10.1.3} # x-release-please-version
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -69,7 +69,7 @@ services:
           size: 1024
 
   notify:
-    image: ${RECRUIT_IMAGE_BASE_NAME:-ghcr.io/miracum/recruit}/notify:${RECRUIT_IMAGE_TAG:-v10.1.2} # x-release-please-version
+    image: ${RECRUIT_IMAGE_BASE_NAME:-ghcr.io/miracum/recruit}/notify:${RECRUIT_IMAGE_TAG:-v10.1.3} # x-release-please-version
     restart: unless-stopped
     ipc: none
     security_opt:

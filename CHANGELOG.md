@@ -1,5 +1,38 @@
 # Changelog
 
+## [10.1.3](https://github.com/miracum/recruit/compare/v10.1.2...v10.1.3) (2023-06-26)
+
+
+### Documentation
+
+* updated kyverno sample policy ([b078ba8](https://github.com/miracum/recruit/commit/b078ba8c975ddaff6ba7d294ea2215a6a09b3743))
+
+
+### CI/CD
+
+* fix check links workflow ([#109](https://github.com/miracum/recruit/issues/109)) ([700f14a](https://github.com/miracum/recruit/commit/700f14ab3ebb9362474865f67d8aa16225aecc13))
+* push kyverno policies to ghcr.io registry (experimental) ([#116](https://github.com/miracum/recruit/issues/116)) ([0c227cd](https://github.com/miracum/recruit/commit/0c227cde7c5767bb530dc35872a558bd625f439a))
+
+
+### Miscellaneous Chores
+
+* **deps:** fix pip lockfile refresh ([#128](https://github.com/miracum/recruit/issues/128)) ([21380a8](https://github.com/miracum/recruit/commit/21380a85c6d6c672024f901410159707029f0377))
+* **deps:** fixed dependency updates ([#127](https://github.com/miracum/recruit/issues/127)) ([386ad7f](https://github.com/miracum/recruit/commit/386ad7f932c01fdd6d4010711172d5fb25bae9b0))
+* **deps:** refresh pip-compile outputs ([#106](https://github.com/miracum/recruit/issues/106)) ([5ac8d9a](https://github.com/miracum/recruit/commit/5ac8d9abdbb53bc665facc7ecad21082813aef4e))
+* **deps:** refresh pip-compile outputs ([#115](https://github.com/miracum/recruit/issues/115)) ([ffe4949](https://github.com/miracum/recruit/commit/ffe49490ed5aa5d8ad39058d662ec97e53e3aa4d))
+* **deps:** update container-images ([#113](https://github.com/miracum/recruit/issues/113)) ([628e73d](https://github.com/miracum/recruit/commit/628e73d528a50182d975e50a6dfa487dde653969))
+* **deps:** update container-images ([#120](https://github.com/miracum/recruit/issues/120)) ([7d3f0d8](https://github.com/miracum/recruit/commit/7d3f0d89241ad911d5ce0e7789cd20397279aa46))
+* **deps:** update dependency requests to v2.31.0 [security] ([#117](https://github.com/miracum/recruit/issues/117)) ([5a8f113](https://github.com/miracum/recruit/commit/5a8f1137538b47a0dfd79e4ff530517340c7600f))
+* **deps:** update github-actions ([#112](https://github.com/miracum/recruit/issues/112)) ([9e6d17b](https://github.com/miracum/recruit/commit/9e6d17b3aa5724cc2e646c53ad88ad4f20f1bb06))
+* **deps:** update github-actions ([#121](https://github.com/miracum/recruit/issues/121)) ([fd4de81](https://github.com/miracum/recruit/commit/fd4de81ce571d49f786ed4d8a0f6d879fce002bc))
+* **deps:** update ohdsi docker tag to v0.21.6 ([#119](https://github.com/miracum/recruit/issues/119)) ([43be812](https://github.com/miracum/recruit/commit/43be812c96d89f8d7253c6b4870e01ef0d95f3ac))
+* **deps:** updated camel to v4 for Spring Boot v3 support ([8b9a2a3](https://github.com/miracum/recruit/commit/8b9a2a3084a9ced32034ffebdbd8dc727174539d))
+* **deps:** updated keycloak from v15 to v21 ([#111](https://github.com/miracum/recruit/issues/111)) ([2f98064](https://github.com/miracum/recruit/commit/2f98064cf28f4b0f27c791212a630d7afd43e40f))
+* **deps:** updated spring boot to 3.0.6 ([8b9a2a3](https://github.com/miracum/recruit/commit/8b9a2a3084a9ced32034ffebdbd8dc727174539d))
+* **deps:** updated spring boot to 3.0.6 ([#107](https://github.com/miracum/recruit/issues/107)) ([8b9a2a3](https://github.com/miracum/recruit/commit/8b9a2a3084a9ced32034ffebdbd8dc727174539d))
+* possibly fixed renovate updates for fhir packages and also fixed AVD-DS-0002 ([#123](https://github.com/miracum/recruit/issues/123)) ([56573ed](https://github.com/miracum/recruit/commit/56573ed3bf6ebc8e2867c689c0c283dc01bdb8e9))
+* updated sub-charts to use OCI registries where available ([#124](https://github.com/miracum/recruit/issues/124)) ([560baf0](https://github.com/miracum/recruit/commit/560baf0d9ca4cf75de0c64c2b25a94d9e5265374))
+
 ## [10.1.2](https://github.com/miracum/recruit/compare/v10.1.1...v10.1.2) (2023-04-10)
 
 
