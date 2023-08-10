@@ -6,7 +6,7 @@
     "postgresql",
     "docker.io/bitnami/postgresql"
   ],
-  "ignorePaths": ["**/node_modules/**", "**/bower_components/**"],
+  "ignorePaths": ["**/node_modules/**", "**/bower_components/**", "fhir/**"],
   "pip-compile": {
     "fileMatch": ["(^|/|\\.)requirements\\.in$"]
   }
