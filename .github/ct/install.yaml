@@ -1,10 +1,7 @@
 chart-dirs:
   - charts
 chart-repos:
-  - bitnami=https://charts.bitnami.com/bitnami
-  - chgl=https://chgl.github.io/charts
   - codecentric=https://codecentric.github.io/helm-charts
   - hapifhir=https://hapifhir.github.io/hapi-fhir-jpaserver-starter
-  - miracum=https://miracum.github.io/charts
 debug: true
 remote: origin
