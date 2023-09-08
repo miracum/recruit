@@ -1,5 +1,15 @@
 # Changelog
 
+## [10.1.4](https://github.com/miracum/recruit/compare/v10.1.3...v10.1.4) (2023-09-08)
+
+
+### Miscellaneous Chores
+
+* **deps:** aggregated renovate updates and addressed CVEs ([#136](https://github.com/miracum/recruit/issues/136)) ([d998071](https://github.com/miracum/recruit/commit/d99807176d4befcc4fb2fb0fa0c8274c53b8622e))
+* **deps:** refresh pip-compile outputs ([#125](https://github.com/miracum/recruit/issues/125)) ([ee8dfec](https://github.com/miracum/recruit/commit/ee8dfec7d720c2c0b197b68d23d96897ab344c51))
+* **deps:** update all non-major dependencies ([#135](https://github.com/miracum/recruit/issues/135)) ([0e6d5ea](https://github.com/miracum/recruit/commit/0e6d5eae8ca7e8ac1504566eb03e4dcc294a7513))
+* **renovate:** ignore fhir/ packages ([cdbee8e](https://github.com/miracum/recruit/commit/cdbee8e1800891b20b72125d7028ba64c4af6160))
+
 ## [10.1.3](https://github.com/miracum/recruit/compare/v10.1.2...v10.1.3) (2023-06-26)
 
 
