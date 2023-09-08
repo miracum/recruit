@@ -19,9 +19,6 @@ See [UPGRADING.md](./docs/UPGRADING.md) for information on breaking changes intr
 helm install recruit oci://ghcr.io/miracum/recruit/charts/recruit -n recruit
 ```
 
-> ⚠ By default, the included [PostgreSQL Helm chart](https://github.com/bitnami/charts/tree/main/bitnami/postgresql#upgrading)
-> auto-generates a random password for the database which may cause problems when upgrading the chart (see [here for details](https://github.com/bitnami/charts/tree/master/bitnami/postgresql#upgrading)).
-
 ## Values
 
 | Key                                               | Type   | Default                                                                                                                              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
