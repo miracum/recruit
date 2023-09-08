@@ -1,4 +1,4 @@
-FROM docker.io/library/node:18.16.0@sha256:8cdf7234449f35e579f7491137807ddb3a089f028862f7ab69af437cc9f47ff1 AS base
+FROM docker.io/library/node:18.17.1@sha256:933bcfad91e9052a02bc29eb5aa29033e542afac4174f9524b79066d97b23c24 AS base
 WORKDIR /app
 
 COPY package.json ./
