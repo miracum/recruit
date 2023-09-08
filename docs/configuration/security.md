@@ -81,7 +81,7 @@ is available for verification.
 
 ```sh
 # for example, verify the `list` module's container image. Same workflow applies to `query` and `notify`.
-IMAGE=ghcr.io/miracum/recruit/list:v10.1.4
+IMAGE=ghcr.io/miracum/recruit/list:v10.1.5
 DIGEST=$(crane digest "${IMAGE}")
 IMAGE_DIGEST_PINNED="ghcr.io/miracum/recruit/list@${DIGEST}"
 IMAGE_TAG="${IMAGE#*:}"
