@@ -59,8 +59,8 @@ jobs:
         id: build
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671 # v4.0.0
         with:
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache
+          cache-to: type=inline
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.container_meta.outputs.tags }}
           labels: ${{ steps.container_meta.outputs.labels }}

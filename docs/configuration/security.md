@@ -54,7 +54,7 @@ Any user with the `admin` role inside the screening list client in Keycloak is a
 You can disable authorization by not mounting the `notify-rules.yaml` inside the container; if no config is found,
 then no permissions are checked.
 
-## Configuring the Query Module to access a secured WebAPI Instance
+## Configuring the Query Module to access a secured WebAPI instance
 
 If the [OHDSI WebAPI requires authentication](https://github.com/OHDSI/WebAPI/wiki/Security-Configuration),
 you need to configure the query module accordingly. The relevant environment variables to set start with
@@ -66,17 +66,38 @@ and generate cohorts.
 You can also combine multiple authentication methods, for example use OpenID to allow users to login via the
 Atlas UI but create a dedicated service account for the query module which uses WebAPI basic security.
 
-## Verify container image integrity
+## Verify container image signatures and SLSA provenance
 
-All released images are signed via [cosign](https://github.com/sigstore/cosign). To verify the integrity of the images, run:
+Prerequisites:
+
+- [cosign](https://github.com/sigstore/cosign/releases)
+- [slsa-verifier](https://github.com/slsa-framework/slsa-verifier/releases)
+- [crane](https://github.com/google/go-containerregistry/releases)
+
+All released container images are signed using [cosign](https://github.com/sigstore/cosign) and SLSA Level 3 provenance
+is available for verification.
 
 <!-- x-release-please-start-version -->
+
 ```sh
-cosign verify -key recruit-image-signing.pub ghcr.io/miracum/recruit/list:v10.1.4
+# for example, verify the `list` module's container image. Same workflow applies to `query` and `notify`.
+IMAGE=ghcr.io/miracum/recruit/list:v10.1.4
+DIGEST=$(crane digest "${IMAGE}")
+IMAGE_DIGEST_PINNED="ghcr.io/miracum/recruit/list@${DIGEST}"
+IMAGE_TAG="${IMAGE#*:}"
+
+cosign verify \
+   --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
+   --certificate-identity="https://github.com/miracum/recruit/.github/workflows/build.yaml@refs/tags/${IMAGE_TAG}" \
+   "${IMAGE_DIGEST_PINNED}"
+
+slsa-verifier verify-image \
+    --source-uri github.com/miracum/recruit \
+    --source-tag ${IMAGE_TAG} \
+    "${IMAGE_DIGEST_PINNED}"
 ```
+
 <!-- x-release-please-end -->
 
-where `recruit-image-signing.pub` is located in the root of the main repository.
-
-Tools such as [connaisseur](https://github.com/sse-secure-systems/connaisseur) allow you to automatically verify these
-signatures when deploying to Kubernetes.
+See also <https://github.com/slsa-framework/slsa-github-generator/tree/main/internal/builders/container#verification>
+for details on verifying the image integrity using automated policy controllers.

@@ -6,6 +6,9 @@ on:
       # If you want a workflow to run when stable and pre-releases publish, subscribe to published instead of released and prereleased.
       # <https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#release>
       - published
+  pull_request:
+    branches:
+      - master
 
 permissions: read-all
 
@@ -17,8 +20,14 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Add workspace as safe directory
+        run: |
+          git config --global --add safe.directory /__w/recruit/recruit
+
       - name: Checkout
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+        with:
+          fetch-depth: 0
 
       # currently defaults to just the one chart, "recruit", needs to be updated if
       # more charts are added in the future. See <https://github.com/chgl/kube-powertools/blob/master/scripts/generate-chart-changelog.sh>
@@ -37,6 +46,8 @@ jobs:
           yq -i '.annotations["artifacthub.io/changes"] |= strenv(FIRST_CHANGELOG_ENTRY)' charts/recruit/Chart.yaml
 
       - uses: EndBug/add-and-commit@1bad3abcf0d6ec49a5857d124b0bfb52dc7bb081 # v9.1.3
+        # run everything above in PRs to make sure it works, but only actually commit it on releases
+        if: ${{ github.event_name != 'pull_request' }}
         with:
           add: "charts/"
           message: "chore(helm): reset Chart.yaml changelog annotations"
