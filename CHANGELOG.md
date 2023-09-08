@@ -1,5 +1,17 @@
 # Changelog
 
+## [10.1.5](https://github.com/miracum/recruit/compare/v10.1.4...v10.1.5) (2023-09-08)
+
+
+### Bug Fixes
+
+* attempt to fix release workflow ([#138](https://github.com/miracum/recruit/issues/138)) ([197c0b7](https://github.com/miracum/recruit/commit/197c0b7000b556c613eb21ca8600b1aeb60ad543))
+
+
+### Miscellaneous Chores
+
+* **deps:** update docker.io/bitnami/kubectl:1.27.5 docker digest to d7dfaa5 ([#134](https://github.com/miracum/recruit/issues/134)) ([4bff806](https://github.com/miracum/recruit/commit/4bff8061f4971b6d3a817421e6a9dc48a30c99b0))
+
 ## [10.1.4](https://github.com/miracum/recruit/compare/v10.1.3...v10.1.4) (2023-09-08)
 
 
