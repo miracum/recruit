@@ -21,6 +21,8 @@ DISABLE_LINTERS:
   - REPOSITORY_DUSTILOCK
   # too many false-positives and takes forever
   - YAML_V8R
+  # seems to ignore yamllint config file entirely
+  - YAML_YAMLLINT
 
 SHOW_ELAPSED_TIME: true
 FILEIO_REPORTER: false
