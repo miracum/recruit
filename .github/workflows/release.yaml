@@ -101,7 +101,7 @@ jobs:
   publish-kyverno-policies:
     name: publish kyverno policies
     runs-on: ubuntu-22.04
-    container: ghcr.io/chgl/kube-powertools:v1.23.7@sha256:6d575cad3af3d4febf1789ba6c88b1fd80ba4b75ec792dbffba54868acb045e0
+    container: ghcr.io/chgl/kube-powertools:v2.1.28@sha256:74c2ec2b1ac6d33891aaca488d5732a61668039fb0ccf2b9c883ed3df9ec463a
     continue-on-error: true
     steps:
       - name: Checkout

@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: docker.io/library/traefik:v2.10.1@sha256:7347d4d189642064337fe4eb615d14de2d44f287cb7e1189752fb7399a5ad843
+    image: docker.io/library/traefik:2.10.4@sha256:429f3398a3cd1aa7436aa4f59d809040d3903506a9d83bee61688bb1429c7693
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -151,7 +151,7 @@ services:
       POSTGRES_DB: fhir
 
   maildev:
-    image: docker.io/maildev/maildev:2.0.5@sha256:082ec5ee92266c6e17493998ff1bf1c3eb70604b159fbeeaa435ee777f5cc953
+    image: docker.io/maildev/maildev:2.1.0@sha256:f7429227b8f471b3fe761767d86a8794a2fc7488bccdcda46ea6d5ba5c2c7bf5
     restart: unless-stopped
     ipc: none
     security_opt:

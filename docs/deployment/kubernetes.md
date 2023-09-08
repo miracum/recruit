@@ -30,16 +30,6 @@ helm install -n recruit \
   recruit oci://ghcr.io/miracum/recruit/charts/recruit
 ```
 
-!!! warning "Auto generated default passwords for the included databases"
-
-    The included HAPI FHIR server, OHDSI, and - if high-availability is enabled - recruIT chart itself depend on the
-    [Bitnami PostgreSQL chart](https://github.com/bitnami/charts/tree/master/bitnami/postgresql). By default, this chart
-    generates a random password for the `postgres` user unless either `auth.postgresPassword` or `auth.existingSecret`
-    are set. Upgrading the release (or simply re-running `helm upgrade --install`) will generate a new password which
-    will result in credential errors and the PostgreSQL pod will fail to start. You should therefore overwrite these
-    parameters or set them after the initial install. The `--render-subchart-notes` flag above will also print this
-    note.
-
 As a quick check to make sure everything is running correctly, you can use the following to check the readiness of all services:
 
 ```sh

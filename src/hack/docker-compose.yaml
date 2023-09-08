@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: docker.io/library/traefik:v2.10.1@sha256:7347d4d189642064337fe4eb615d14de2d44f287cb7e1189752fb7399a5ad843
+    image: docker.io/library/traefik:2.10.4@sha256:429f3398a3cd1aa7436aa4f59d809040d3903506a9d83bee61688bb1429c7693
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -78,7 +78,7 @@ services:
       POSTGRES_DB: fhir
 
   broadsea-atlasdb:
-    image: docker.io/ohdsi/broadsea-atlasdb:2.0.0@sha256:da28ed2179efe4f74f5d30da14b348b20acd792e90518e452f37748e89aec179
+    image: docker.io/ohdsi/broadsea-atlasdb:2.1.0@sha256:99b4bd5515b3d82adb5bac9b14558b434df55fced6c194c965e3fb1371cb36c5
     ports:
       - "127.0.0.1:25432:5432"
 
@@ -269,7 +269,7 @@ services:
       OTEL_EXPORTER_JAEGER_ENDPOINT: "http://jaeger:14250"
 
   jaeger:
-    image: docker.io/jaegertracing/all-in-one:1.45.0@sha256:5d5c9d2d8c8cbb42f1db4aac1f1f8487bac63da6802004d0da8580fc0c7311a1
+    image: docker.io/jaegertracing/all-in-one:1.49.0@sha256:0edcea978eb4a631a0d9078f435908852f20013cf5d66908521c5ac2815aeb28
     ports:
       - "127.0.0.1:16686:16686"
       - "127.0.0.1:6831:6831/udp"
@@ -282,7 +282,7 @@ services:
       - "traefik.http.routers.jaeger.entrypoints=web"
 
   maildev:
-    image: docker.io/maildev/maildev:2.0.5@sha256:082ec5ee92266c6e17493998ff1bf1c3eb70604b159fbeeaa435ee777f5cc953
+    image: docker.io/maildev/maildev:2.1.0@sha256:f7429227b8f471b3fe761767d86a8794a2fc7488bccdcda46ea6d5ba5c2c7bf5
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -324,7 +324,7 @@ services:
       - "127.0.0.1:6432:5432"
 
   keycloak:
-    image: quay.io/keycloak/keycloak:21.1.1@sha256:8ebb3930c41e8a066c4246eaf351ac09cdc984e11b1f607d6ff4ce10d69dc808
+    image: quay.io/keycloak/keycloak:21.1.2@sha256:3408c186dde4a95c2b99ef1290721bf1d253d64ba3a1de0a46c667b8288051f0
     restart: unless-stopped
     ipc: none
     security_opt:

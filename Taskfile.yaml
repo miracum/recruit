@@ -14,12 +14,8 @@ tasks:
 
   helm-add-repos:
     cmds:
-      - helm repo add argo https://argoproj.github.io/argo-helm
-      - helm repo add bitnami https://charts.bitnami.com/bitnami
       - helm repo add codecentric https://codecentric.github.io/helm-charts
-      - helm repo add chgl https://chgl.github.io/charts
       - helm repo add hapifhir https://hapifhir.github.io/hapi-fhir-jpaserver-starter
-      - helm repo add miracum https://miracum.github.io/charts
 
   helm-update-dependencies:
     cmds:
@@ -32,11 +28,11 @@ tasks:
       - kind create cluster
       - kubectl create namespace recruit
       - |
-        helm upgrade --install argo-workflows argo/argo-workflows \
+        helm upgrade --install argo-workflows oci://ghcr.io/argoproj/argo-helm/argo-workflows \
           --create-namespace \
           -n argo-workflows \
           -f tests/chaos/argo-workflows-values.yaml \
-          --version 0.22.14
+          --version 0.33.2
 
   e2e-k8s:
     cmds:

@@ -42,7 +42,7 @@ services:
       HAPI_FHIR_CORS_ALLOWED_ORIGIN: "http://list:8080"
 
   loader:
-    image: docker.io/curlimages/curl:8.1.1@sha256:5af13420d29b7aa7007419347519984ce44778aaf89c475c25edc9b48ca125b2
+    image: docker.io/curlimages/curl:8.2.1@sha256:bb0843a1307b1aa73f65f24379d11dde881c16db62ba50810de0c64d48e740ed
     command: >
       sh -c "curl -X POST -H 'Content-Type: application/fhir+json' --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 15 --data '@/data/sample-record-1.json' http://fhir:8080/fhir &&
              curl -X POST -H 'Content-Type: application/fhir+json' --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 15 --data '@/data/sample-record-2.json' http://fhir:8080/fhir &&
@@ -69,4 +69,4 @@ services:
       - ${PWD}/frontend/deploy/data/aio-export.json:/tmp/realm.json:ro
 
   jaeger:
-    image: docker.io/jaegertracing/all-in-one:1.45@sha256:5d5c9d2d8c8cbb42f1db4aac1f1f8487bac63da6802004d0da8580fc0c7311a1
+    image: docker.io/jaegertracing/all-in-one:1.49@sha256:0edcea978eb4a631a0d9078f435908852f20013cf5d66908521c5ac2815aeb28

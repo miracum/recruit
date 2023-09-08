@@ -41,7 +41,7 @@ services:
       HAPI_FHIR_NARRATIVE_ENABLED: "false"
 
   broadsea-atlasdb:
-    image: docker.io/ohdsi/broadsea-atlasdb:2.0.0@sha256:da28ed2179efe4f74f5d30da14b348b20acd792e90518e452f37748e89aec179
+    image: docker.io/ohdsi/broadsea-atlasdb:2.1.0@sha256:99b4bd5515b3d82adb5bac9b14558b434df55fced6c194c965e3fb1371cb36c5
 
   ohdsi-webapi:
     image: docker.io/ohdsi/webapi:2.13.0@sha256:04313754fc79a6e362a8116ef462360e3891581a045924f4ec5ed404fbb9b837
