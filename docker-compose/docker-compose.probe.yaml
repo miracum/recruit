@@ -1,6 +1,6 @@
 services:
   health-probes:
-    image: docker.io/curlimages/curl:8.1.1@sha256:5af13420d29b7aa7007419347519984ce44778aaf89c475c25edc9b48ca125b2
+    image: docker.io/curlimages/curl:8.2.1@sha256:bb0843a1307b1aa73f65f24379d11dde881c16db62ba50810de0c64d48e740ed
     ipc: private
     security_opt:
       - "no-new-privileges:true"

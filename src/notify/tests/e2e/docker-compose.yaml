@@ -28,7 +28,7 @@ services:
       POSTGRES_DB: recruit_notify_jobs
 
   tester:
-    image: docker.io/curlimages/curl:8.1.1@sha256:5af13420d29b7aa7007419347519984ce44778aaf89c475c25edc9b48ca125b2
+    image: docker.io/curlimages/curl:8.2.1@sha256:bb0843a1307b1aa73f65f24379d11dde881c16db62ba50810de0c64d48e740ed
     command: >
       -X GET
       --fail
@@ -51,4 +51,4 @@ services:
       HAPI_FHIR_CORS_ALLOWED_ORIGIN: "*"
 
   maildev:
-    image: docker.io/maildev/maildev:2.0.5@sha256:082ec5ee92266c6e17493998ff1bf1c3eb70604b159fbeeaa435ee777f5cc953
+    image: docker.io/maildev/maildev:2.1.0@sha256:f7429227b8f471b3fe761767d86a8794a2fc7488bccdcda46ea6d5ba5c2c7bf5
