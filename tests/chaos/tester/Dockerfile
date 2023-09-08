@@ -27,7 +27,7 @@ USER 65532:65532
 ENV DOTNET_ENVIRONMENT="Production" \
     DOTNET_CLI_TELEMETRY_OPTOUT=1
 
-COPY --from=docker.io/bitnami/kubectl:1.27.5@sha256:de14320baddeead24f572b10b18df7dd66315ebc9b88f015d392f1c466b46211 /opt/bitnami/kubectl/bin/kubectl /usr/bin/kubectl
+COPY --from=docker.io/bitnami/kubectl:1.27.5@sha256:d7dfaa5268288fdf90f0ef91d48e2ecf8051923b472736c3344ada202aa0b0b0 /opt/bitnami/kubectl/bin/kubectl /usr/bin/kubectl
 
 COPY ./sample-list-bundle.json /tmp/
 COPY ./chaos.yaml /tmp/
