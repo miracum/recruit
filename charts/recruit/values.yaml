@@ -675,3 +675,13 @@ broadseaAtlasdb:
   # -- whether to deploy the OHDSI Broadsea Atlasdb (<https://github.com/OHDSI/Broadsea-Atlasdb>)
   # currently only used by internal integration tests. See [./values-integrationtest.yaml](values-integrationtest.yaml)
   enabled: false
+
+tests:
+  # -- configure the test pods resource requests and limits
+  resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
