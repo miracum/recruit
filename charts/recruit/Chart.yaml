@@ -30,7 +30,7 @@ dependencies:
   - condition: ohdsi.enabled
     name: ohdsi
     repository: oci://ghcr.io/chgl/charts
-    version: 0.21.7
+    version: 0.21.8
   - name: postgresql
     version: 12.5.6
     repository: oci://registry-1.docker.io/bitnamicharts
@@ -73,4 +73,4 @@ annotations:
     - kind: changed
       description: updated recruIT image tags to v10.1.5 # x-release-please-version
     - kind: changed
-      description: updated HAPI FHIR sub-chart to 0.12.0
+      description: updated OHDSI sub-chart to 0.21.8

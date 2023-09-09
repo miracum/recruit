@@ -60,6 +60,10 @@ fhirserver:
     nameOverride: "fhir-server-postgres"
     # @ignore
     primary: # +doc-gen:ignore
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
       containerSecurityContext:
         runAsNonRoot: true
         allowPrivilegeEscalation: false
@@ -645,6 +649,10 @@ postgresql:
     database: "recruit"
   # @ignore
   primary:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
     containerSecurityContext: # +doc-gen:ignore
       runAsNonRoot: true
       allowPrivilegeEscalation: false
