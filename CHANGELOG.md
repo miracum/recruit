@@ -1,5 +1,18 @@
 # Changelog
 
+## [10.1.6](https://github.com/miracum/recruit/compare/v10.1.5...v10.1.6) (2023-09-09)
+
+
+### CI/CD
+
+* possibly fixed chart annotations reset ([c4db6fa](https://github.com/miracum/recruit/commit/c4db6fa133cf43604c1ba44c905fab1e156b1705))
+
+
+### Miscellaneous Chores
+
+* **deps:** updated ohdsi sub-chart to latest ([c4db6fa](https://github.com/miracum/recruit/commit/c4db6fa133cf43604c1ba44c905fab1e156b1705))
+* updated chart resource quotas and fixed chart annotations reset workflow ([#140](https://github.com/miracum/recruit/issues/140)) ([c4db6fa](https://github.com/miracum/recruit/commit/c4db6fa133cf43604c1ba44c905fab1e156b1705))
+
 ## [10.1.5](https://github.com/miracum/recruit/compare/v10.1.4...v10.1.5) (2023-09-08)
 
 
