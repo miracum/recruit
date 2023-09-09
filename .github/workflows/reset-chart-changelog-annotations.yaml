@@ -28,6 +28,7 @@ jobs:
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
         with:
           fetch-depth: 0
+          ref: ${{ github.head_ref }}
 
       # currently defaults to just the one chart, "recruit", needs to be updated if
       # more charts are added in the future. See <https://github.com/chgl/kube-powertools/blob/master/scripts/generate-chart-changelog.sh>
@@ -51,3 +52,4 @@ jobs:
         with:
           add: "charts/"
           message: "chore(helm): reset Chart.yaml changelog annotations"
+          push: origin HEAD:${{ github.head_ref }}
