@@ -15,6 +15,7 @@ services:
     ports:
       - "127.0.0.1:80:80"
     volumes:
+      # kics-scan ignore-line
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     deploy:
       resources:
@@ -54,6 +55,7 @@ services:
       DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
       DATASOURCE_URL: jdbc:postgresql://omopdb:5432/ohdsi
       DATASOURCE_USERNAME: postgres
+      # kics-scan ignore-line
       DATASOURCE_PASSWORD: postgres
       DATASOURCE_OHDSI_SCHEMA: ohdsi
       SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
@@ -62,6 +64,7 @@ services:
       FLYWAY_DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
       FLYWAY_DATASOURCE_URL: jdbc:postgresql://omopdb:5432/ohdsi
       FLYWAY_DATASOURCE_USERNAME: postgres
+      # kics-scan ignore-line
       FLYWAY_DATASOURCE_PASSWORD: postgres
       FLYWAY_LOCATIONS: classpath:db/migration/postgresql
       FLYWAY_PLACEHOLDERS_OHDSISCHEMA: ohdsi
@@ -118,6 +121,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: "jdbc:postgresql://fhir-db:5432/fhir?currentSchema=public"
       SPRING_DATASOURCE_USERNAME: postgres
+      # kics-scan ignore-line
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
       spring.jpa.properties.hibernate.dialect: ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect
@@ -147,6 +151,7 @@ services:
       - "no-new-privileges:true"
     privileged: false
     environment:
+      # kics-scan ignore-line
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: fhir
 
@@ -191,6 +196,7 @@ services:
     privileged: false
     environment:
       KEYCLOAK_USER: admin
+      # kics-scan ignore-line
       KEYCLOAK_PASSWORD: admin
       KEYCLOAK_STATISTICS: "all"
     volumes:

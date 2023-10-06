@@ -1,6 +1,7 @@
 fhirserver:
   postgresql:
     auth:
+      # kics-scan ignore-line
       postgresPassword: fhir
 
 query:
@@ -13,6 +14,7 @@ query:
     port: 5432
     database: postgres
     username: postgres
+    # kics-scan ignore-line
     password: mypass
     resultsSchema: demo_cdm_results
     cdmSchema: demo_cdm
@@ -47,6 +49,7 @@ notify:
 postgresql:
   enabled: true
   auth:
+    # kics-scan ignore-line
     postgresPassword: recruit-notify-ha
 
 ohdsi:
@@ -58,6 +61,7 @@ ohdsi:
       port: 5432
       database: "postgres"
       username: "postgres"
+      # kics-scan ignore-line
       password: "mypass"
       schema: "webapi"
     extraEnv:

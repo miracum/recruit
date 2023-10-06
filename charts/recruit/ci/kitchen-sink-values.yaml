@@ -73,6 +73,7 @@ query:
 postgresql:
   enabled: true
   auth:
+    # kics-scan ignore-line
     postgresPassword: recruit-notify-ha
   primary:
     service:
@@ -86,6 +87,7 @@ ohdsi:
       - host: recruit-ohdsi.127.0.0.1.nip.io
   postgresql:
     auth:
+      # kics-scan ignore-line
       postgresPassword: ohdsi
     primary:
       service:
@@ -132,6 +134,7 @@ fhirserver:
         paths: ["/"]
   postgresql:
     auth:
+      # kics-scan ignore-line
       postgresPassword: fhir
     primary:
       service:

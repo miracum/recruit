@@ -6,6 +6,7 @@ services:
       FHIR_URL: http://fhir:8080/fhir
       OMOP_JDBCURL: jdbc:postgresql://broadsea-atlasdb:5432/postgres
       OMOP_USERNAME: postgres
+      # kics-scan ignore-line
       OMOP_PASSWORD: mypass
       OMOP_RESULTSSCHEMA: demo_cdm_results
       OMOP_CDMSCHEMA: demo_cdm
@@ -15,6 +16,7 @@ services:
       QUERY_WEBAPI_AUTH_ENABLED: "false" # TODO: re-enable when atlasdb supports/has been augmented with auth support.
       QUERY_WEBAPI_AUTH_LOGIN_PATH: "/user/login/db"
       QUERY_WEBAPI_AUTH_USERNAME: "recruit-query-module"
+      # kics-scan ignore-line
       QUERY_WEBAPI_AUTH_PASSWORD: "pass123"
       QUERY_WEBAPI_COHORT_CACHE_SCHEMA: "webapi"
       QUERY_SELECTOR_MATCHLABELS: ""
@@ -59,6 +61,7 @@ services:
       DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
       DATASOURCE_URL: jdbc:postgresql://broadsea-atlasdb:5432/postgres
       DATASOURCE_USERNAME: postgres
+      # kics-scan ignore-line
       DATASOURCE_PASSWORD: mypass
       DATASOURCE_OHDSI_SCHEMA: webapi
       SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
@@ -67,6 +70,7 @@ services:
       FLYWAY_DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
       FLYWAY_DATASOURCE_URL: jdbc:postgresql://broadsea-atlasdb:5432/postgres
       FLYWAY_DATASOURCE_USERNAME: postgres
+      # kics-scan ignore-line
       FLYWAY_DATASOURCE_PASSWORD: mypass
       FLYWAY_LOCATIONS: classpath:db/migration/postgresql
       FLYWAY_PLACEHOLDERS_OHDSISCHEMA: webapi
@@ -78,12 +82,13 @@ services:
       SECURITY_CORS_ENABLED: "true"
       SECURITY_ORIGIN: "*"
       # SECURITY_PROVIDER: "AtlasRegularSecurity"
-      # SECURITY_DB_DATASOURCE_URL: jdbc:postgresql://broadsea-atlasdb:5432/postgres
-      # SECURITY_DB_DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
-      # SECURITY_DB_DATASOURCE_SCHEMA: webapi
-      # SECURITY_DB_DATASOURCE_USERNAME: postgres
-      # SECURITY_DB_DATASOURCE_PASSWORD: mypass
-      # SECURITY_DB_DATASOURCE_AUTHENTICATIONQUERY: >-
-      #   SELECT password, first_name AS firstname, middle_name AS middlename, last_name AS lastname, username FROM webapi.basic_security_users WHERE username = ?
+      SECURITY_DB_DATASOURCE_URL: jdbc:postgresql://broadsea-atlasdb:5432/postgres
+      SECURITY_DB_DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
+      SECURITY_DB_DATASOURCE_SCHEMA: webapi
+      SECURITY_DB_DATASOURCE_USERNAME: postgres
+      # kics-scan ignore-line
+      SECURITY_DB_DATASOURCE_PASSWORD: mypass
+      SECURITY_DB_DATASOURCE_AUTHENTICATIONQUERY: >-
+        SELECT password, first_name AS firstname, middle_name AS middlename, last_name AS lastname, username FROM webapi.basic_security_users WHERE username = ?
     depends_on:
       - broadsea-atlasdb

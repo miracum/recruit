@@ -1,6 +1,7 @@
 omop:
   jdbcUrl: "jdbc:postgresql://localhost:25432/postgres"
   username: "postgres"
+  # kics-scan ignore-line
   password: "mypass"
   resultsSchema: "demo_cdm_results"
   cdmSchema: "demo_cdm"
@@ -15,6 +16,7 @@ query:
       enabled: false
       login-path: "/user/login/db"
       username: "recruit-query-module"
+      # kics-scan ignore-line
       password: "pass123"
     cohort-cache:
       schema: webapi

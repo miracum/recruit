@@ -18,6 +18,7 @@ checks:
   memoryLimitsMissing: ignore
 
   # security
+  # kics-scan ignore-line
   automountServiceAccountToken: ignore
   hostIPCSet: danger
   hostPIDSet: danger

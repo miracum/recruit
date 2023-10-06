@@ -24,20 +24,23 @@ rootCommand.AddCommand(deleteMessagesCommand);
 
 // test command
 var fileOption = new Option<FileInfo?>(
-            name: "--fhir-resource-bundle",
-            description: "The file containing the bundle of resources to send to the FHIR server.")
+    name: "--fhir-resource-bundle",
+    description: "The file containing the bundle of resources to send to the FHIR server."
+)
 {
     IsRequired = true,
 };
 
 var sendCountOption = new Option<int>(
-            name: "--send-count",
-            description: "The number of times the bundle should be sent to to FHIR server.");
+    name: "--send-count",
+    description: "The number of times the bundle should be sent to to FHIR server."
+);
 sendCountOption.SetDefaultValue(5);
 
 var fhirServerUrlOption = new Option<Uri>(
-            name: "--fhir-server-base-url",
-            description: "The base URL of the FHIR server.");
+    name: "--fhir-server-base-url",
+    description: "The base URL of the FHIR server."
+);
 fhirServerUrlOption.SetDefaultValue(new Uri("http://localhost:8082/fhir"));
 
 var durationOption = new Option<TimeSpan>(
@@ -46,26 +49,37 @@ var durationOption = new Option<TimeSpan>(
 );
 durationOption.SetDefaultValue(TimeSpan.FromSeconds(30));
 
-var testCommand = new Command("test", "Run the test by submitting the FHIR resource bundle to the server.")
+var testCommand = new Command(
+    "test",
+    "Run the test by submitting the FHIR resource bundle to the server."
+)
 {
     fileOption,
     fhirServerUrlOption,
     durationOption,
     sendCountOption,
 };
-testCommand.SetHandler((file, fhirServerUrl, totalDuration, sendCount) => RunTest(file!, fhirServerUrl, totalDuration, sendCount),
-    fileOption, fhirServerUrlOption, durationOption, sendCountOption);
+testCommand.SetHandler(
+    (file, fhirServerUrl, totalDuration, sendCount) =>
+        RunTest(file!, fhirServerUrl, totalDuration, sendCount),
+    fileOption,
+    fhirServerUrlOption,
+    durationOption,
+    sendCountOption
+);
 rootCommand.AddCommand(testCommand);
 
 // assert command
 var expectedMessageCountOption = new Option<int>(
-            name: "--expected-number-of-messages",
-            description: "The expected number of messages.");
+    name: "--expected-number-of-messages",
+    description: "The expected number of messages."
+);
 expectedMessageCountOption.SetDefaultValue(5);
 
 var retriesOption = new Option<int>(
-            name: "--retries",
-            description: "The number of times to re-assert the number of messages present compared to the expected");
+    name: "--retries",
+    description: "The number of times to re-assert the number of messages present compared to the expected"
+);
 retriesOption.SetDefaultValue(10);
 
 var assertCommand = new Command("assert", "Verify that the expected number of mails were received.")
@@ -74,15 +88,27 @@ var assertCommand = new Command("assert", "Verify that the expected number of ma
     expectedMessageCountOption,
     retriesOption,
 };
-assertCommand.SetHandler(RunAssert, mailHogApiBaseUrlOption, expectedMessageCountOption, retriesOption);
+assertCommand.SetHandler(
+    RunAssert,
+    mailHogApiBaseUrlOption,
+    expectedMessageCountOption,
+    retriesOption
+);
 rootCommand.AddCommand(assertCommand);
 
 return await rootCommand.InvokeAsync(args);
 
-static async System.Threading.Tasks.Task RunTest(FileInfo fhirResourceBundle, Uri fhirServerUrl, TimeSpan totalDuration, int sendCount)
+static async System.Threading.Tasks.Task RunTest(
+    FileInfo fhirResourceBundle,
+    Uri fhirServerUrl,
+    TimeSpan totalDuration,
+    int sendCount
+)
 {
-    Console.WriteLine($"Sending FHIR bundle from file {fhirResourceBundle.FullName} " +
-        $"to server {fhirServerUrl} {sendCount} times over a duration of {totalDuration} ({totalDuration.TotalSeconds}s)");
+    Console.WriteLine(
+        $"Sending FHIR bundle from file {fhirResourceBundle.FullName} "
+            + $"to server {fhirServerUrl} {sendCount} times over a duration of {totalDuration} ({totalDuration.TotalSeconds}s)"
+    );
 
     var fhirSerializerOptions = new JsonSerializerOptions().ForFhir(typeof(Bundle).Assembly);
 
@@ -99,11 +125,14 @@ static async System.Threading.Tasks.Task RunTest(FileInfo fhirResourceBundle, Ur
 
         var policy = Policy
             .Handle<HttpRequestException>()
-            .WaitAndRetry(3, retryAttempt =>
-            {
-                Console.WriteLine($"Failed to send the bundle. Attempt: {retryAttempt}");
-                return TimeSpan.FromSeconds(Math.Pow(2, retryAttempt));
-            });
+            .WaitAndRetry(
+                3,
+                retryAttempt =>
+                {
+                    Console.WriteLine($"Failed to send the bundle. Attempt: {retryAttempt}");
+                    return TimeSpan.FromSeconds(Math.Pow(2, retryAttempt));
+                }
+            );
 
         var response = policy.Execute(() => client.Transaction(bundle));
 
@@ -116,13 +145,11 @@ static async System.Threading.Tasks.Task RunDeleteMessages(Uri mailHogServerBase
 {
     Console.WriteLine("Deleting all previous messages");
 
-    var mailHogClient = new HttpClient
-    {
-        BaseAddress = mailHogServerBaseUrl,
-    };
+    var mailHogClient = new HttpClient { BaseAddress = mailHogServerBaseUrl, };
 
-    var messagesResponse = await mailHogClient.GetFromJsonAsync<MailHogMessages>("v2/messages") ??
-        throw new Exception("Getting messages from MailHog failed");
+    var messagesResponse =
+        await mailHogClient.GetFromJsonAsync<MailHogMessages>("v2/messages")
+        ?? throw new Exception("Getting messages from MailHog failed");
 
     Console.WriteLine($"A total of {messagesResponse.Total} messages already on the server.");
 
@@ -132,26 +159,30 @@ static async System.Threading.Tasks.Task RunDeleteMessages(Uri mailHogServerBase
     Console.WriteLine("Done.");
 }
 
-static async System.Threading.Tasks.Task RunAssert(Uri mailHogServerBaseUrl, int expectedMessageCount, int retries)
+static async System.Threading.Tasks.Task RunAssert(
+    Uri mailHogServerBaseUrl,
+    int expectedMessageCount,
+    int retries
+)
 {
     Console.WriteLine($"Using MailHog base URL: {mailHogServerBaseUrl}");
 
-    var client = new HttpClient
-    {
-        BaseAddress = mailHogServerBaseUrl,
-    };
+    var client = new HttpClient { BaseAddress = mailHogServerBaseUrl, };
 
     for (int i = 0; i < retries; i++)
     {
         MailHogMessages response;
         try
         {
-            response = await client.GetFromJsonAsync<MailHogMessages>("v2/messages") ??
-                throw new Exception("Getting messages from MailHog failed");
+            response =
+                await client.GetFromJsonAsync<MailHogMessages>("v2/messages")
+                ?? throw new Exception("Getting messages from MailHog failed");
         }
         catch (Exception exc)
         {
-            Console.WriteLine($"Failed to get response from MailHog: {exc.Message}. Attempt: {i + 1}");
+            Console.WriteLine(
+                $"Failed to get response from MailHog: {exc.Message}. Attempt: {i + 1}"
+            );
             if (i == retries - 1)
             {
                 throw;
@@ -161,7 +192,9 @@ static async System.Threading.Tasks.Task RunAssert(Uri mailHogServerBaseUrl, int
             continue;
         }
 
-        Console.WriteLine($"Expected message count is {expectedMessageCount}. Actual: {response.Total}. Attempt: {i + 1}");
+        Console.WriteLine(
+            $"Expected message count is {expectedMessageCount}. Actual: {response.Total}. Attempt: {i + 1}"
+        );
 
         if (expectedMessageCount == response.Total)
         {
@@ -171,7 +204,9 @@ static async System.Threading.Tasks.Task RunAssert(Uri mailHogServerBaseUrl, int
 
         if (i == retries - 1)
         {
-            throw new Exception($"response.Total ({response.Total}) is not the expected {expectedMessageCount} after {i + 1} attempts.");
+            throw new Exception(
+                $"response.Total ({response.Total}) is not the expected {expectedMessageCount} after {i + 1} attempts."
+            );
         }
 
         await System.Threading.Tasks.Task.Delay(TimeSpan.FromMinutes(1));

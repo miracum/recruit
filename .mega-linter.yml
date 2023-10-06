@@ -23,6 +23,7 @@ DISABLE_LINTERS:
   - YAML_V8R
   # seems to ignore yamllint config file entirely
   - YAML_YAMLLINT
+  - SPELL_LYCHEE
 
 SHOW_ELAPSED_TIME: true
 FILEIO_REPORTER: false
@@ -44,3 +45,11 @@ JAVA_CHECKSTYLE_CONFIG_FILE: src/config/checkstyle/checkstyle.xml
 REPOSITORY_TRIVY_ARGUMENTS:
   - "--severity=HIGH,CRITICAL"
   - "--ignore-unfixed"
+
+REPOSITORY_CHECKOV_ARGUMENTS:
+  - "--skip-path=tests/"
+
+REPOSITORY_KICS_ARGUMENTS:
+  - --fail-on=HIGH
+
+REPOSITORY_KICS_CONFIG_FILE: .kics.yaml

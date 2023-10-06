@@ -10,9 +10,11 @@ services:
       SPRING_MAIL_HOST: maildev
       SPRING_MAIL_PORT: 1025
       SPRING_MAIL_USERNAME: maildev
+      # kics-scan ignore-line
       SPRING_MAIL_PASSWORD: maildev # pragma: allowlist secret
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
       SPRING_DATASOURCE_USERNAME: postgres
+      # kics-scan ignore-line
       SPRING_DATASOURCE_PASSWORD: postgres # pragma: allowlist secret
       SPRING_DATASOURCE_URL: jdbc:postgresql://jobstore-db:5432/recruit_notify_jobs?ApplicationName=recruit-notify
     volumes:
@@ -24,6 +26,7 @@ services:
   jobstore-db:
     image: docker.io/library/postgres:14.5@sha256:f8816ada742348e1adfcec5c2a180b675bf6e4a294e0feb68bd70179451e1242
     environment:
+      # kics-scan ignore-line
       POSTGRES_PASSWORD: postgres # pragma: allowlist secret
       POSTGRES_DB: recruit_notify_jobs
 
