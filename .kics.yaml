@@ -1,0 +1,6 @@
+exclude-paths:
+  - "tests/"
+  - "docs/"
+  - "src/hack"
+  - "charts/recruit/docs"
+  - "charts/recruit/values.yaml"

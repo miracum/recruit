@@ -1,6 +1,7 @@
 ohdsi:
   postgresql:
     auth:
+      # kics-scan ignore-line
       postgresPassword: ohdsi
     primary:
       service:
@@ -17,6 +18,7 @@ ohdsi:
 fhirserver:
   postgresql:
     auth:
+      # kics-scan ignore-line
       postgresPassword: fhir
     primary:
       service:
@@ -73,6 +75,7 @@ notify:
 postgresql:
   enabled: true
   auth:
+    # kics-scan ignore-line
     postgresPassword: recruit-notify-ha
   primary:
     service:

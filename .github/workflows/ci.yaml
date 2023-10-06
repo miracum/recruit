@@ -19,7 +19,8 @@ jobs:
     permissions:
       actions: read
       contents: read
-      id-token: write # for creating OIDC tokens for signing.
+      # for creating OIDC tokens for signing.
+      id-token: write
       packages: write # for uploading container images, signatures, and attestations.
     strategy:
       matrix:
@@ -84,7 +85,8 @@ jobs:
     permissions:
       actions: read
       contents: write # for release notes
-      id-token: write # for creating OIDC tokens for signing.
+      # for creating OIDC tokens for signing.
+      id-token: write
       packages: write # for uploading container images, signatures, and attestations.
     needs:
       - k8s-test

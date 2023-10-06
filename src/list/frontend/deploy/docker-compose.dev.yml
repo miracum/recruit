@@ -43,6 +43,7 @@ services:
       - -Dkeycloak.migration.file=/tmp/realm.json
     environment:
       KEYCLOAK_USER: admin
+      # kics-scan ignore-line
       KEYCLOAK_PASSWORD: admin
     volumes:
       - ./data/aio-export.json:/tmp/realm.json

@@ -30,7 +30,9 @@ manifests:
         chartPath: ../charts/recruit
         skipBuildDependencies: true
         setValues:
+          # kics-scan ignore-line
           fhirserver.postgresql.auth.postgresPassword: fhir
+          # kics-scan ignore-line
           ohdsi.postgresql.auth.postgresPassword: ohdsi
         wait: true
     flags:
@@ -43,7 +45,9 @@ deploy:
         chartPath: helm
         skipBuildDependencies: true
         setValues:
+          # kics-scan ignore-line
           fhirserver.postgresql.auth.postgresPassword: fhir
+          # kics-scan ignore-line
           ohdsi.postgresql.auth.postgresPassword: ohdsi
     flags:
       install:

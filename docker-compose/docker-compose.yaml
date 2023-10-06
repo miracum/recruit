@@ -45,6 +45,7 @@ services:
       FHIR_URL: ${FHIR_URL:?}
       OMOP_JDBCURL: ${OMOP_JDBCURL:?}
       OMOP_USERNAME: ${OMOP_USERNAME:?}
+      # kics-scan ignore-line
       OMOP_PASSWORD: ${OMOP_PASSWORD:?}
       OMOP_RESULTSSCHEMA: ${OMOP_RESULTSSCHEMA:?}
       OMOP_CDMSCHEMA: ${OMOP_CDMSCHEMA:?}
@@ -86,6 +87,7 @@ services:
       SPRING_MAIL_HOST: ${NOTIFY_MAIL_HOST:?}
       SPRING_MAIL_PORT: ${NOTIFY_MAIL_SMTP_PORT:?}
       SPRING_MAIL_USERNAME: ${NOTIFY_MAIL_USERNAME}
+      # kics-scan ignore-line
       SPRING_MAIL_PASSWORD: ${NOTIFY_MAIL_PASSWORD}
     volumes:
       - type: tmpfs

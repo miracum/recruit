@@ -34,6 +34,13 @@ jobs:
           docker load --input /tmp/notify-build-artifacts/notify-image.tar
           docker image ls -a
 
+      - name: Delete downloaded artifacts
+        run: |
+          df -h
+          rm -rf /tmp/*-build-artifacts
+          rm -rf /tmp/*-attestations
+          df -h
+
       - name: Deploy using Docker Compose in staging mode
         run: |
           docker compose \

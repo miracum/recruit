@@ -40,11 +40,13 @@ spring:
   datasource:
     url: "jdbc:postgresql://localhost:6432/recruit_notify_jobs?ApplicationName=recruit-notify"
     username: "postgres"
+    # kics-scan ignore-line
     password: "postgres" # pragma: allowlist secret
   mail:
     host: localhost
     port: 3025
     username: noreply@test.de
+    # kics-scan ignore-line
     password: ""
     properties:
       mail:
