@@ -2,7 +2,7 @@ FROM docker.io/library/gradle:8.4.0-jdk17@sha256:e7d68f73bf6db644ca5947eb83588c1
 WORKDIR /home/gradle/src
 ENV GRADLE_USER_HOME="/gradle"
 
-ARG OPENTELEMETRY_JAVA_AGENT_VERSION=1.27.0
+ARG OPENTELEMETRY_JAVA_AGENT_VERSION=1.30.0
 RUN wget --quiet "https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OPENTELEMETRY_JAVA_AGENT_VERSION}/opentelemetry-javaagent.jar"
 
 COPY settings.gradle ./
@@ -24,7 +24,7 @@ ENV TZ="UTC"
 RUN gradle ":${MODULE_NAME}:test" && \
     gradle jacocoTestReport
 
-FROM gcr.io/distroless/java17-debian11:nonroot@sha256:6e9c1615972eaef182a0bc6cca02fbbf62ad6e160118461616ed1a688c3823ea
+FROM gcr.io/distroless/java17-debian12:nonroot@sha256:340af6ae4c452f0f68b2ea10c78ba42d9fd5faa687ac6b72cc703f849f8080b1
 WORKDIR /app
 
 COPY --from=build /home/gradle/src/opentelemetry-javaagent.jar ./opentelemetry-javaagent.jar
