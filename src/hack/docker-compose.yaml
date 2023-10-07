@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: docker.io/library/traefik:2.10.4@sha256:429f3398a3cd1aa7436aa4f59d809040d3903506a9d83bee61688bb1429c7693
+    image: docker.io/library/traefik:2.10.4@sha256:2392cd9aadfd514b0112186904e7a36fcb6a301fc1e637bab4ad2746877cde96
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -23,7 +23,7 @@ services:
           memory: 128m
 
   fhir:
-    image: docker.io/hapiproject/hapi:v6.6.0@sha256:c00367865ae5dad4e171cbb68bfc1c39818854079d1565bee4c86a45e78335d0
+    image: docker.io/hapiproject/hapi:v6.8.0@sha256:b376ef983c54757aff719b17e97301eab43198564d23f2aa9609e9b5f83fa85f
     restart: unless-stopped
     cap_drop:
       - ALL

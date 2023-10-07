@@ -1,4 +1,4 @@
-FROM docker.io/library/python:3.11.5-alpine@sha256:5d769f990397afbb2aca24b0655e404c0f2806d268f454b052e81e39d87abf42
+FROM docker.io/library/python:3.12.0-alpine@sha256:ae35274f417fc81ba6ee1fc84206e8517f28117566ee6a04a64f004c1409bdac
 WORKDIR /opt/tests
 
 COPY requirements.txt .
