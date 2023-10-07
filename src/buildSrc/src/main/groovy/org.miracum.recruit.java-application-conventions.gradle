@@ -37,10 +37,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
 
-    implementation 'ca.uhn.hapi.fhir:hapi-fhir-base:6.8.2'
-    implementation 'ca.uhn.hapi.fhir:hapi-fhir-client:6.8.2'
-    implementation 'ca.uhn.hapi.fhir:hapi-fhir-structures-r4:6.8.2'
-    implementation 'ca.uhn.hapi.fhir:hapi-fhir-client-okhttp:6.8.2'
+    implementation 'ca.uhn.hapi.fhir:hapi-fhir-base:6.8.3'
+    implementation 'ca.uhn.hapi.fhir:hapi-fhir-client:6.8.3'
+    implementation 'ca.uhn.hapi.fhir:hapi-fhir-structures-r4:6.8.3'
+    implementation 'ca.uhn.hapi.fhir:hapi-fhir-client-okhttp:6.8.3'
 
     implementation 'com.squareup.okhttp3:okhttp:4.11.0'
 
@@ -48,8 +48,8 @@ dependencies {
 
     implementation 'org.postgresql:postgresql:42.6.0'
 
-    implementation 'io.micrometer:micrometer-registry-prometheus:1.11.3'
-    implementation 'io.micrometer:micrometer-core:1.11.3'
+    implementation 'io.micrometer:micrometer-registry-prometheus:1.11.4'
+    implementation 'io.micrometer:micrometer-core:1.11.4'
 
     constraints {
         implementation('org.apache.commons:commons-text:1.10.0')
@@ -105,7 +105,7 @@ spotless {
 }
 
 checkstyle {
-    toolVersion '10.12.3'
+    toolVersion '10.12.4'
     configFile = file('../config/checkstyle/checkstyle.xml')
 }
 
