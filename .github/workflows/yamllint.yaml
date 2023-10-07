@@ -18,10 +18,10 @@ jobs:
   yamllint:
     runs-on: ubuntu-22.04
     # contains yamllint
-    container: ghcr.io/chgl/kube-powertools:v2.1.28@sha256:74c2ec2b1ac6d33891aaca488d5732a61668039fb0ccf2b9c883ed3df9ec463a
+    container: ghcr.io/chgl/kube-powertools:v2.2.7@sha256:10278eaefa090a009ad2b08b2147f2743ec3350be1e0a23a9b29b00430e2352b
     steps:
       - name: Checkout
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
 
       - name: Run yamllint
         run: yamllint -c .yamllint.yaml .
