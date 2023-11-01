@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.4
-FROM mcr.microsoft.com/dotnet/sdk:7.0-jammy@sha256:9341d0b266b5ad78c69d9d7ce13e0a08f9257602a2d9469c59a2fddf55932f42 AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0-jammy@sha256:6c413812cb79c6a7813129e810c324b2576623585c7fcfbc9784a51671b0eda8 AS build
 WORKDIR /build
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 
@@ -21,13 +21,13 @@ dotnet publish tester.csproj \
     -o /build/publish
 EOF
 
-FROM mcr.microsoft.com/dotnet/nightly/runtime:7.0-jammy-chiseled@sha256:ec44f5a31403c0a5b59605809965b8480195c830a2ba1dd2bca38b064dd1a860 AS runtime
+FROM mcr.microsoft.com/dotnet/nightly/runtime:7.0-jammy-chiseled@sha256:c1af45414ced858127e2650620c9f895050275a93373c5fff609b43397006119 AS runtime
 WORKDIR /opt/chaos-tester
 USER 65532:65532
 ENV DOTNET_ENVIRONMENT="Production" \
     DOTNET_CLI_TELEMETRY_OPTOUT=1
 
-COPY --from=docker.io/bitnami/kubectl:1.28.2@sha256:0b28a0ae15893822f211bb8501d192c7b52d1920c32e4b43734aa6d94d51477f /opt/bitnami/kubectl/bin/kubectl /usr/bin/kubectl
+COPY --from=docker.io/bitnami/kubectl:1.28.3@sha256:1364cda0798b2c44f327265397fbd34a32e66d80328d6e50a2d10377d7e2ff6d /opt/bitnami/kubectl/bin/kubectl /usr/bin/kubectl
 
 COPY ./sample-list-bundle.json /tmp/
 COPY ./chaos.yaml /tmp/
