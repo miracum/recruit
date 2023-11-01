@@ -30,7 +30,7 @@ jobs:
     steps:
       # Git Checkout
       - name: Checkout Code
-        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0 # If you use VALIDATE_ALL_CODEBASE = true, you can remove this line to improve performances
@@ -40,7 +40,7 @@ jobs:
         id: ml
         # You can override MegaLinter flavor used to have faster performances
         # More info at https://oxsecurity.github.io/megalinter/flavors/
-        uses: oxsecurity/megalinter@a87b2872713c6bdde46d2473c5d7ed23e5752dc2 # v7.4.0
+        uses: oxsecurity/megalinter@b48455a119cc28045eee8f1e9d0a542a85e71f4f # v7.5.0
         env:
           # All available variables are described in documentation
           # https://oxsecurity.github.io/megalinter/configuration/
