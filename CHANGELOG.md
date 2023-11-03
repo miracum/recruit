@@ -1,5 +1,38 @@
 # Changelog
 
+## [10.1.7](https://github.com/miracum/recruit/compare/v10.1.6...v10.1.7) (2023-11-03)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#144](https://github.com/miracum/recruit/issues/144)) ([298b6d9](https://github.com/miracum/recruit/commit/298b6d9254cc8511456eddae5c6f255a91d84aab))
+* **deps:** update all non-major dependencies ([#155](https://github.com/miracum/recruit/issues/155)) ([9973af5](https://github.com/miracum/recruit/commit/9973af5bbfca4f27cae6c1a010e5192928be4091))
+
+
+### Documentation
+
+* updated chart readme with latest helm-docs ([25ec6f5](https://github.com/miracum/recruit/commit/25ec6f5de8f9ea6eeda739adc5676f5651f9efb4))
+
+
+### Miscellaneous Chores
+
+* **deps:** container image updates ([#150](https://github.com/miracum/recruit/issues/150)) ([be965ad](https://github.com/miracum/recruit/commit/be965adeff73c475c20170334576ba75e00b2148))
+* **deps:** npm audit fix to address CVE-2023-45133 ([#159](https://github.com/miracum/recruit/issues/159)) ([d9fc7b8](https://github.com/miracum/recruit/commit/d9fc7b8dda5640620ba49798fed35b66a5205c28))
+* **deps:** refresh pip-compile outputs ([#132](https://github.com/miracum/recruit/issues/132)) ([08e7d15](https://github.com/miracum/recruit/commit/08e7d15f98fb7e588ae8732bb6f84771a6901eae))
+* **deps:** refresh pip-compile outputs ([#146](https://github.com/miracum/recruit/issues/146)) ([80cb3b6](https://github.com/miracum/recruit/commit/80cb3b619f84e5a2b9c50087620ea7ecefad17c6))
+* **deps:** refresh pip-compile outputs ([#152](https://github.com/miracum/recruit/issues/152)) ([03f23bc](https://github.com/miracum/recruit/commit/03f23bc2425c94cd1c5465b3f51f0e89f84c8e8d))
+* **deps:** update container-images ([#143](https://github.com/miracum/recruit/issues/143)) ([f960b17](https://github.com/miracum/recruit/commit/f960b17e9fe782e8142240b6b269874863761a5e))
+* **deps:** update container-images ([#153](https://github.com/miracum/recruit/issues/153)) ([56c6e93](https://github.com/miracum/recruit/commit/56c6e93829234218bc4e258d3a5aaca9a5e3ca1b))
+* **deps:** update dependency cypress to v13 ([#158](https://github.com/miracum/recruit/issues/158)) ([090acf8](https://github.com/miracum/recruit/commit/090acf871046b98b2b13679827af4882f0f93572))
+* **deps:** update dependency urllib3 to v2.0.7 [security] ([#151](https://github.com/miracum/recruit/issues/151)) ([746840c](https://github.com/miracum/recruit/commit/746840c41483454ca91a1e400efae8e60575a1c6))
+* **deps:** update github-actions ([#142](https://github.com/miracum/recruit/issues/142)) ([64d574b](https://github.com/miracum/recruit/commit/64d574b7d6fb3450c6e6779651626352046455a2))
+* **deps:** update github-actions ([#154](https://github.com/miracum/recruit/issues/154)) ([59db615](https://github.com/miracum/recruit/commit/59db615fa4afbd2c4b811f5d8b701855ccb66a0f))
+
+
+### CI/CD
+
+* updated megalinter to latest to stop trivy issue ([#148](https://github.com/miracum/recruit/issues/148)) ([bf49abf](https://github.com/miracum/recruit/commit/bf49abfa78211ea823e29e38bde374bdbb3c5f04))
+
 ## [10.1.6](https://github.com/miracum/recruit/compare/v10.1.5...v10.1.6) (2023-09-09)
 
 
