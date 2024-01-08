@@ -12,5 +12,16 @@
   "ignorePaths": ["**/node_modules/**", "**/bower_components/**", "fhir/**"],
   "pip-compile": {
     "fileMatch": ["(^|/|\\.)requirements\\.in$"]
-  }
+  },
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "groupName": "github-actions"
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": ["slsa-framework/slsa-github-generator"],
+      "pinDigests": false
+    }
+  ]
 }
