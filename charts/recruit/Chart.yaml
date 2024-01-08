@@ -40,8 +40,8 @@ dependencies:
     version: 0.5.7
     repository: oci://ghcr.io/miracum/charts
 # x-release-please-start-version
-version: 10.1.7
-appVersion: 10.1.7
+version: 10.1.8
+appVersion: 10.1.8
 # x-release-please-end
 annotations:
   artifacthub.io/containsSecurityUpdates: "false"
@@ -71,6 +71,6 @@ annotations:
   #     comment so the `reset-chart-changelog-annotations.yaml` correctly keeps that entry in place.
   artifacthub.io/changes: |-
     - kind: changed
-      description: updated recruIT image tags to v10.1.7 # x-release-please-version
+      description: updated recruIT image tags to v10.1.8 # x-release-please-version
     - kind: changed
       description: updated OHDSI sub-chart to 0.21.8
