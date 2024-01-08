@@ -24,7 +24,7 @@ ENV TZ="UTC"
 RUN gradle ":${MODULE_NAME}:test" && \
     gradle jacocoTestReport
 
-FROM gcr.io/distroless/java17-debian12:nonroot@sha256:53fe1e307bc2771f07e1eba524794c61baec237b15ca2224ba13a4fb1c06cde1
+FROM gcr.io/distroless/java17-debian12:nonroot@sha256:cbf2ec039cb3ad0f79f651ad945239bbb95fc40604444b056af9fe3562e0c314
 WORKDIR /app
 
 COPY --from=build /home/gradle/src/opentelemetry-javaagent.jar ./opentelemetry-javaagent.jar
