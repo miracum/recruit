@@ -1,5 +1,21 @@
 # Changelog
 
+## [10.1.8](https://github.com/miracum/recruit/compare/v10.1.7...v10.1.8) (2024-01-08)
+
+
+### Miscellaneous Chores
+
+* **deps:** refresh pip-compile outputs ([#160](https://github.com/miracum/recruit/issues/160)) ([9beb7c9](https://github.com/miracum/recruit/commit/9beb7c923f0c52fa60dc1780fce6a3708eb4448a))
+* **deps:** refresh pip-compile outputs ([#162](https://github.com/miracum/recruit/issues/162)) ([357c9ca](https://github.com/miracum/recruit/commit/357c9cafdf384e36e704bd906ebc3cb8a054313a))
+* **deps:** refresh pip-compile outputs ([#163](https://github.com/miracum/recruit/issues/163)) ([51bf59f](https://github.com/miracum/recruit/commit/51bf59f99df2f4955d531c05f17e0d64102fc8ab))
+* **deps:** refresh pip-compile outputs ([#168](https://github.com/miracum/recruit/issues/168)) ([0798ec2](https://github.com/miracum/recruit/commit/0798ec251528078f8d3e16a67a8945d29367a121))
+* **deps:** update docker.io/bitnami/kubectl:1.28.3 docker digest to 0defec7 ([#164](https://github.com/miracum/recruit/issues/164)) ([8553fef](https://github.com/miracum/recruit/commit/8553fef1be2ef5517e2a1a5fd0daf9e52aeea499))
+* **deps:** update docker.io/cypress/included:12.17.4 docker digest to 658c7ba ([#165](https://github.com/miracum/recruit/issues/165)) ([5f9ec71](https://github.com/miracum/recruit/commit/5f9ec710b450b387b2f590e52c4fa0ed0f028b3e))
+* **deps:** update docker.io/library/python:3.12.0-alpine docker digest to 3d2969e ([#166](https://github.com/miracum/recruit/issues/166)) ([aa14974](https://github.com/miracum/recruit/commit/aa1497449fdd2982686780b0b969da51bf8d5663))
+* **deps:** update gcr.io/distroless/java17-debian12:nonroot docker digest to 53fe1e3 ([#167](https://github.com/miracum/recruit/issues/167)) ([31f4f09](https://github.com/miracum/recruit/commit/31f4f092ea5bd065df358d5b451b1e000fcf27d1))
+* **deps:** update gcr.io/distroless/java17-debian12:nonroot docker digest to cbf2ec0 ([#183](https://github.com/miracum/recruit/issues/183)) ([9744c11](https://github.com/miracum/recruit/commit/9744c111b6a0a651cae8a4186bbe5250ce1368d2))
+* update .lychee.toml to ignore chnagelog.md ([b24a158](https://github.com/miracum/recruit/commit/b24a15878ef507394ddab002e705d48558e37d72))
+
 ## [10.1.7](https://github.com/miracum/recruit/compare/v10.1.6...v10.1.7) (2023-11-03)
 
 
