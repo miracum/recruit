@@ -18,7 +18,7 @@ jobs:
 
       - name: Link Checker
         id: lychee
-        uses: lycheeverse/lychee-action@ec3ed119d4f44ad2673a7232460dc7dff59d2421 # v1.8.0
+        uses: lycheeverse/lychee-action@c3089c702fbb949e3f7a8122be0c33c017904f9b # v1.9.1
         with:
           args: "--config=.lychee.toml ."
         env:
@@ -26,7 +26,7 @@ jobs:
 
       - name: Look for an existing issue
         id: last-issue
-        uses: micalevisk/last-issue-action@305829d9728f47beb0029417167a0af890edfd6e # v2.1.0
+        uses: micalevisk/last-issue-action@0d40124cc99ac8601c2516007f0c98ef3d27537b # v2.3.0
         with:
           state: open
           labels: link-check
