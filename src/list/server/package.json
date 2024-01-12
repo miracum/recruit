@@ -27,7 +27,7 @@
     "express-bearer-token": "2.4.0",
     "express-jwt": "8.4.1",
     "express-prom-bundle": "6.6.0",
-    "helmet": "6.2.0",
+    "helmet": "7.1.0",
     "http-proxy-middleware": "2.0.6",
     "js-yaml": "4.1.0",
     "jwks-rsa": "2.1.5",
