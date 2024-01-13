@@ -1,13 +1,11 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:best-practices",
-    "group:allNonMajor"
-  ],
+  "extends": ["config:best-practices", "group:allNonMajor"],
   "ignoreDeps": [
     "docker.io/library/postgres",
     "postgresql",
-    "docker.io/bitnami/postgresql"
+    "docker.io/bitnami/postgresql",
+    "ghcr.io/miracum/recruit/*"
   ],
   "ignorePaths": ["**/node_modules/**", "**/bower_components/**", "fhir/**"],
   "pip-compile": {

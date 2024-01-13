@@ -32,7 +32,7 @@ dependencies:
     repository: oci://ghcr.io/chgl/charts
     version: 0.21.9
   - name: postgresql
-    version: 12.5.6
+    version: 13.2.27
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: postgresql.enabled
   - condition: fhir-pseudonymizer.enabled
@@ -73,4 +73,4 @@ annotations:
     - kind: changed
       description: updated recruIT image tags to v10.1.8 # x-release-please-version
     - kind: changed
-      description: updated OHDSI sub-chart to 0.21.8
+      description: "⚠️: updated postgresql sub-chart to v13.2.27 which upgrades the internal PostgreSQL version from v15 to v16."

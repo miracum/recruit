@@ -26,16 +26,16 @@
     "express": "4.18.2",
     "express-bearer-token": "2.4.0",
     "express-jwt": "8.4.1",
-    "express-prom-bundle": "6.6.0",
+    "express-prom-bundle": "7.0.0",
     "helmet": "7.1.0",
     "http-proxy-middleware": "2.0.6",
     "js-yaml": "4.1.0",
     "jwks-rsa": "2.1.5",
     "node-http-proxy-json": "0.1.9",
     "path": "0.12.7",
-    "pino": "8.16.1",
-    "pino-http": "8.5.1",
-    "prom-client": "14.2.0",
-    "retry-axios": "2.6.0"
+    "pino": "8.17.2",
+    "pino-http": "9.0.0",
+    "prom-client": "15.1.0",
+    "retry-axios": "3.1.3"
   }
 }
