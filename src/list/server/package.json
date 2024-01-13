@@ -7,6 +7,7 @@
     "start": "node index.js",
     "watch": "nodemon index.js"
   },
+  "type": "module",
   "dependencies": {
     "@opentelemetry/api": "1.6.0",
     "@opentelemetry/exporter-jaeger": "1.17.1",

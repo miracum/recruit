@@ -1,22 +1,28 @@
-const path = require("path");
-const bearerToken = require("express-bearer-token");
-const promBundle = require("express-prom-bundle");
-const history = require("connect-history-api-fallback");
-const helmet = require("helmet");
-const pino = require("pino-http")();
-const modifyResponse = require("node-http-proxy-json");
-const logger = require("pino")({ level: process.env.LOG_LEVEL || "info" });
-const yaml = require("js-yaml");
-const fs = require("fs");
-const cors = require("cors");
+import { join } from "path";
+import bearerToken from "express-bearer-token";
+import promBundle from "express-prom-bundle";
+import history from "connect-history-api-fallback";
+import helmet from "helmet";
+import pino from "pino-http";
+import modifyResponse from "node-http-proxy-json";
+import { load } from "js-yaml";
+import { readFileSync } from "fs";
+import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 
-const { createProxyMiddleware } = require("http-proxy-middleware");
+import { createProxyMiddleware } from "http-proxy-middleware";
 
-const { createJwtCheck } = require("./auth");
-const { createAccessFilter, createPatchFilter, createDeleteFilter } = require("./fhirAccessFilter");
-const { setupTracing } = require("./tracing");
+import { createJwtCheck } from "./auth.js";
+import { createAccessFilter, createPatchFilter, createDeleteFilter } from "./fhirAccessFilter.js";
+import { setupTracing } from "./tracing.js";
 
-const { config } = require("./config");
+import config from "./config.js";
+
+const logger = pino({
+  name: "list",
+  level: process.env.LOG_LEVEL || "info",
+}).logger;
 
 if (!config.auth.disabled && (!config.auth.url || !config.auth.clientId || !config.auth.realm)) {
   logger.error("Keycloak is not configured correctly: URL, client id, and realm are required.");
@@ -33,8 +39,8 @@ let isDeleteAllowed = (_user) => true;
 
 try {
   logger.child({ path: config.rulesFilePath }).debug("Trying to load trials config");
-  const configString = fs.readFileSync(config.rulesFilePath, "utf8");
-  const rulesConfig = yaml.load(configString);
+  const configString = readFileSync(config.rulesFilePath, "utf8");
+  const rulesConfig = load(configString);
   if (!rulesConfig.notify?.rules?.trials) {
     throw new Error("Invalid configuration file structure. Should be: notify.rules.trials.");
   }
@@ -55,12 +61,12 @@ if (config.tracing.enabled) {
 
 // express is required to be imported after the OTEL SDK is setup so the plugins work correctly
 // eslint-disable-next-line import/order
-const express = require("express");
+import express from "express";
 
 // eslint-disable-next-line import/order
-const http = require("http");
+import { createServer } from "http";
 
-const dePseudonymizer = require("./dePseudonymizer");
+import { dePseudonymize } from "./dePseudonymizer.js";
 
 const metricsMiddleware = promBundle({
   includeMethod: true,
@@ -170,7 +176,7 @@ const proxy = createProxyMiddleware(proxyRequestFilter, {
         if (body.resourceType === "Patient") {
           logger.child({ resourceId: body.id }).debug("De-pseudonymizing Patient resource");
           try {
-            modifiedBody = await dePseudonymizer.dePseudonymize(config.pseudonymization, body);
+            modifiedBody = await dePseudonymize(config.pseudonymization, body);
           } catch (error) {
             logger.child({ error }).error("De-pseudonymization failed. Returning original resource.");
           }
@@ -221,10 +227,13 @@ app.get("/api/health/:probe", (req, res) => {
 
 app.use(history());
 
-app.use(express.static(path.join(__dirname, "..", "dist")));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use(express.static(join(__dirname, "..", "dist")));
 
 app.get("/", (_req, res) => {
-  res.render(path.join(__dirname, "..", "dist/index.html"));
+  res.render(join(__dirname, "..", "dist/index.html"));
 });
 
 const port = process.env.PORT || 8080;
@@ -237,7 +246,7 @@ function onError(error) {
   process.exit(1);
 }
 
-const server = http.createServer(app);
+const server = createServer(app);
 
 function onListening() {
   const addr = server.address();
@@ -263,4 +272,4 @@ server.listen(port);
 server.on("error", onError);
 server.on("listening", onListening);
 
-module.exports = app;
+export default app;

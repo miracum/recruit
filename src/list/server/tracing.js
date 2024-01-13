@@ -1,15 +1,15 @@
-const { NodeTracerProvider } = require("@opentelemetry/sdk-trace-node");
-const { BatchSpanProcessor } = require("@opentelemetry/sdk-trace-base");
-const { Resource } = require("@opentelemetry/resources");
-const { SemanticResourceAttributes } = require("@opentelemetry/semantic-conventions");
-const { JaegerExporter } = require("@opentelemetry/exporter-jaeger");
-const { OTLPTraceExporter } = require("@opentelemetry/exporter-trace-otlp-grpc");
-const { registerInstrumentations } = require("@opentelemetry/instrumentation");
-const { HttpInstrumentation } = require("@opentelemetry/instrumentation-http");
-const { ExpressInstrumentation } = require("@opentelemetry/instrumentation-express");
-const { PinoInstrumentation } = require("@opentelemetry/instrumentation-pino");
+import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
+import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
+import { Resource } from "@opentelemetry/resources";
+import { SemanticResourceAttributes } from "@opentelemetry/semantic-conventions";
+import { JaegerExporter } from "@opentelemetry/exporter-jaeger";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-grpc";
+import { registerInstrumentations } from "@opentelemetry/instrumentation";
+import { HttpInstrumentation } from "@opentelemetry/instrumentation-http";
+import { ExpressInstrumentation } from "@opentelemetry/instrumentation-express";
+import { PinoInstrumentation } from "@opentelemetry/instrumentation-pino";
 
-exports.setupTracing = (tracingConfig) => {
+export function setupTracing(tracingConfig) {
   const provider = new NodeTracerProvider({
     resource: new Resource({
       [SemanticResourceAttributes.SERVICE_NAME]: tracingConfig.serviceName,
@@ -37,4 +37,4 @@ exports.setupTracing = (tracingConfig) => {
       new PinoInstrumentation(),
     ],
   });
-};
+}
