@@ -1,4 +1,4 @@
-exports.config = {
+export default {
   pseudonymization: {
     enabled: process.env.DE_PSEUDONYMIZATION_ENABLED === "true" || process.env.DE_PSEUDONYMIZATION_ENABLED === "1",
     url: process.env.DE_PSEUDONYMIZATION_SERVICE_URL || "http://localhost:5000/fhir",

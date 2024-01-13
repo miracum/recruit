@@ -1,4 +1,9 @@
-const logger = require("pino")({ level: process.env.LOG_LEVEL || "info" });
+import pino from "pino";
+
+export const logger = pino({
+  name: "list",
+  level: process.env.LOG_LEVEL || "info",
+});
 
 const URL_LIST_BELONGS_TO_STUDY_EXTENSION = "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy";
 
@@ -66,52 +71,58 @@ const getEntriesToKeepFromBundle = (bundle, accessibleStudyAcronyms) =>
     return true;
   });
 
-exports.createDeleteFilter = (authConfig) => (user) => {
-  return userHasAdminRole(user, authConfig);
-};
+export function createDeleteFilter(authConfig) {
+  return (user) => {
+    return userHasAdminRole(user, authConfig);
+  };
+}
 
-exports.createAccessFilter = (trialsConfig, authConfig) => (resource, user) => {
-  logger.child({ user: user }).debug("Access filter invoked");
+export function createAccessFilter(trialsConfig, authConfig) {
+  return (resource, user) => {
+    logger.child({ user: user }).debug("Access filter invoked");
 
-  if (userHasAdminRole(user, authConfig)) {
-    return resource;
-  }
-
-  const accessibleStudyAcronyms = getAccessibleStudyAcronymsForUser(user, trialsConfig);
-
-  logger.child({ username: user?.preferred_username, accessibleStudyAcronyms }).debug("User can access these studies");
-
-  const handleBundle = (bundle) => {
-    if (!bundle.entry) {
-      logger.child({ bundleId: bundle.id }).warn("search result does not contain any entries.");
-      return true;
+    if (userHasAdminRole(user, authConfig)) {
+      return resource;
     }
 
-    const entriesToKeep = getEntriesToKeepFromBundle(bundle, accessibleStudyAcronyms);
+    const accessibleStudyAcronyms = getAccessibleStudyAcronymsForUser(user, trialsConfig);
 
-    // copies/clones the bundle
-    const modifiedBundle = { ...bundle };
+    logger.child({ username: user?.preferred_username, accessibleStudyAcronyms }).debug("User can access these studies");
 
-    logger.debug(
-      `Original bundle contained ${modifiedBundle.entry.length} entries. ` +
-        `Keeping ${entriesToKeep.length} entries after auth filtering`
-    );
+    const handleBundle = (bundle) => {
+      if (!bundle.entry) {
+        logger.child({ bundleId: bundle.id }).warn("search result does not contain any entries.");
+        return true;
+      }
 
-    modifiedBundle.entry = entriesToKeep;
-    modifiedBundle.total = entriesToKeep.length;
-    return modifiedBundle;
+      const entriesToKeep = getEntriesToKeepFromBundle(bundle, accessibleStudyAcronyms);
+
+      // copies/clones the bundle
+      const modifiedBundle = { ...bundle };
+
+      logger.debug(
+        `Original bundle contained ${modifiedBundle.entry.length} entries. ` +
+          `Keeping ${entriesToKeep.length} entries after auth filtering`
+      );
+
+      modifiedBundle.entry = entriesToKeep;
+      modifiedBundle.total = entriesToKeep.length;
+      return modifiedBundle;
+    };
+
+    if (resource.resourceType === "Bundle") {
+      return handleBundle(resource);
+    }
+
+    return resource;
   };
+}
 
-  if (resource.resourceType === "Bundle") {
-    return handleBundle(resource);
-  }
-
-  return resource;
-};
-
-exports.createPatchFilter = (authConfig) => (resourceType, user) => {
-  if (resourceType === "List") {
-    return userHasAdminRole(user, authConfig);
-  }
-  return true;
-};
+export function createPatchFilter(authConfig) {
+  return (resourceType, user) => {
+    if (resourceType === "List") {
+      return userHasAdminRole(user, authConfig);
+    }
+    return true;
+  };
+}

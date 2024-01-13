@@ -1,6 +1,6 @@
-const axios = require("axios");
-const promClient = require("prom-client");
-const rax = require("retry-axios");
+import axios from "axios";
+import * as promClient from "prom-client";
+import * as rax from "retry-axios";
 
 const dePseudonymizationDurationHistogram = new promClient.Histogram({
   name: "list_de_pseudonymization_duration_seconds",
@@ -9,7 +9,7 @@ const dePseudonymizationDurationHistogram = new promClient.Histogram({
 
 rax.attach();
 
-const dePseudonymize = async (config, resource) => {
+export async function dePseudonymize(config, resource) {
   const end = dePseudonymizationDurationHistogram.startTimer();
   const response = await axios.post(`${config.url}/$de-pseudonymize`, resource, {
     headers: { "x-api-key": config.apiKey, "Content-Type": "application/fhir+json" },
@@ -17,6 +17,4 @@ const dePseudonymize = async (config, resource) => {
   });
   end();
   return response.data;
-};
-
-exports.dePseudonymize = dePseudonymize;
+}
