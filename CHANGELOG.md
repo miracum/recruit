@@ -1,5 +1,14 @@
 # Changelog
 
+## [10.1.9](https://github.com/miracum/recruit/compare/v10.1.8...v10.1.9) (2024-01-14)
+
+
+### Bug Fixes
+
+* **deps:** update dependency com.approvaltests:approvaltests to v22 ([#210](https://github.com/miracum/recruit/issues/210)) ([b1dcf4d](https://github.com/miracum/recruit/commit/b1dcf4d0c77b56e62805e754b002ad8bce108328))
+* **deps:** update dependency helmet to v7 ([#212](https://github.com/miracum/recruit/issues/212)) ([15da605](https://github.com/miracum/recruit/commit/15da605bbebb64bad902a13dc167f238cd3f07e2))
+* **deps:** update dependency io.freefair.gradle:lombok-plugin to v8 ([#213](https://github.com/miracum/recruit/issues/213)) ([ebd54a5](https://github.com/miracum/recruit/commit/ebd54a5c5e6484343d7afcbbe5b6ffb0aaa0516e))
+
 ## [10.1.8](https://github.com/miracum/recruit/compare/v10.1.7...v10.1.8) (2024-01-08)
 
 
