@@ -1,4 +1,6 @@
 {
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "pull-request-title-pattern": "chore(release): release ${version}",
   "packages": {
     ".": {
       "changelog-path": "CHANGELOG.md",
@@ -9,5 +11,15 @@
       "prerelease": false
     }
   },
-  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
+  "extra-files": [
+    "charts/recruit/Chart.yaml",
+    "charts/recruit/values.yaml",
+    "src/list/Dockerfile",
+    "src/buildSrc/src/main/groovy/org.miracum.recruit.java-common-conventions.gradle",
+    "src/notify/src/main/resources/application.yml",
+    "src/query/src/main/resources/application.yml",
+    "docker-compose/docker-compose.yaml",
+    "docs/configuration/security.md",
+    "docs/_snippets/k8s/query-argo-workflow.yaml"
+  ]
 }
