@@ -16,7 +16,7 @@ jobs:
   reset-commit-and-push:
     name: reset changelog annotations, commit, and push
     runs-on: ubuntu-22.04
-    container: ghcr.io/chgl/kube-powertools:v2.2.30@sha256:f191b2e955d2b63995ee67d054b70699bee876024cff831fb6de163078e61e64
+    container: ghcr.io/chgl/kube-powertools:v2.2.32@sha256:f2d27b59839cec4dd73da763e354d6515a7a297aeebffa8f07fac4c977123f26
     permissions:
       contents: write
     steps:
