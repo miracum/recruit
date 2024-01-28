@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.6@sha256:ac85f380a63b13dfcefa89046420e1781752bab202122f8f50032edf31be0021
-FROM mcr.microsoft.com/dotnet/sdk:8.0-jammy@sha256:d1cba7177244e7f46eb425150e16ced633fdb1ea90c6b7f0346f7ad19f20e72a AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0-jammy@sha256:4f63cff30878af7c8a378e7c28e7bbe3d40838f0ff81e7aa4426d2af3f4d1696 AS build
 WORKDIR /build
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 
