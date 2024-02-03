@@ -26,7 +26,7 @@ COPY server/package.json ./server/
 RUN npm clean-install --workspace=server
 COPY server/*.js ./server/
 
-FROM gcr.io/distroless/nodejs20-debian12:nonroot@sha256:e49fade89401326ed40798d3ac2b5c1be033e0da2c4cd00a54331448d6bd9938
+FROM gcr.io/distroless/nodejs20-debian12:nonroot@sha256:78195721f6e2fb59c204642f0036607c8fc2cc1ba984688891f58542fe1759bf
 WORKDIR /app
 USER 65532:65532
 # Port 8081 is currently not used, but exposed to make
