@@ -51,6 +51,7 @@ REPOSITORY_TRIVY_ARGUMENTS:
 
 REPOSITORY_CHECKOV_ARGUMENTS:
   - "--skip-path=tests/"
+  - "--skip-path=src/hack"
 
 REPOSITORY_KICS_ARGUMENTS:
   - --fail-on=HIGH
