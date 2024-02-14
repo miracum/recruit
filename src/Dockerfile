@@ -37,4 +37,4 @@ COPY --from=build /home/gradle/src/${MODULE_NAME}/application/ .
 USER 65532:65532
 EXPOSE 8080/tcp 8081/tcp
 ENV SPRING_PROFILES_ACTIVE="prod"
-ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]
+ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
