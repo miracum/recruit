@@ -35,9 +35,9 @@ services:
     command: >
       -X GET
       --fail
-      --retry-connrefuse
       --connect-timeout 30
       --max-time 120
+      --retry-connrefused
       --retry 10
       --retry-delay 30
       http://notify:8080/actuator/health

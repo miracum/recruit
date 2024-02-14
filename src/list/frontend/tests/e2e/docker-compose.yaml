@@ -44,11 +44,11 @@ services:
   loader:
     image: docker.io/curlimages/curl:8.6.0@sha256:c3b8bee303c6c6beed656cfc921218c529d65aa61114eb9e27c62047a1271b9b
     command: >
-      sh -c "curl -X POST -H 'Content-Type: application/fhir+json' --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 15 --data '@/data/sample-record-1.json' http://fhir:8080/fhir &&
-             curl -X POST -H 'Content-Type: application/fhir+json' --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 15 --data '@/data/sample-record-2.json' http://fhir:8080/fhir &&
-             curl -X POST -H 'Content-Type: application/fhir+json' --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 15 --data '@/data/sample-record-3.json' http://fhir:8080/fhir &&
-             curl -X POST -H 'Content-Type: application/fhir+json' --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 15 --data '@/data/sample-lists.json' http://fhir:8080/fhir &&
-             curl -X GET --retry-connrefuse --connect-timeout 30 --max-time 300 --retry 10 --retry-delay 15 http://keycloak:8080/"
+      sh -c "curl -X POST -H 'Content-Type: application/fhir+json' --retry-connrefused --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 15 --data '@/data/sample-record-1.json' http://fhir:8080/fhir &&
+             curl -X POST -H 'Content-Type: application/fhir+json' --retry-connrefused --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 15 --data '@/data/sample-record-2.json' http://fhir:8080/fhir &&
+             curl -X POST -H 'Content-Type: application/fhir+json' --retry-connrefused --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 15 --data '@/data/sample-record-3.json' http://fhir:8080/fhir &&
+             curl -X POST -H 'Content-Type: application/fhir+json' --retry-connrefused --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 15 --data '@/data/sample-lists.json' http://fhir:8080/fhir &&
+             curl -X GET --retry-connrefused --connect-timeout 30 --max-time 300 --retry 10 --retry-delay 15 http://keycloak:8080/"
     volumes:
       - ${PWD}/frontend/deploy/data:/data:ro
     depends_on:
