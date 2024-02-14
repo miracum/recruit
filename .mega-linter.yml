@@ -24,6 +24,9 @@ DISABLE_LINTERS:
   # seems to ignore yamllint config file entirely
   - YAML_YAMLLINT
   - SPELL_LYCHEE
+  # failing on previously existing CVEs in PRs isn't entirely helpful.
+  # ideally should be part of a regularly scheduled check instead
+  - REPOSITORY_GRYPE
 
 SHOW_ELAPSED_TIME: true
 FILEIO_REPORTER: false

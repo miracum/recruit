@@ -1,6 +1,6 @@
 services:
   health-probes:
-    image: docker.io/curlimages/curl:8.4.0@sha256:4a3396ae573c44932d06ba33f8696db4429c419da87cbdc82965ee96a37dd0af
+    image: docker.io/curlimages/curl:8.6.0@sha256:c3b8bee303c6c6beed656cfc921218c529d65aa61114eb9e27c62047a1271b9b
     ipc: private
     security_opt:
       - "no-new-privileges:true"
@@ -11,14 +11,14 @@ services:
     read_only: true
     user: 65532:65532
     command: >
-      sh -euxc "curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://fhir:8080/fhir/metadata?_summary=true &&
-                curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://query:8080/actuator/health &&
-                curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://notify:8080/actuator/health &&
-                curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://list:8080/api/health/readiness &&
-                curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://maildev:1080/healthz &&
-                curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://ohdsi-webapi:8080/WebAPI/info &&
-                curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://ohdsi-atlas:8080/atlas/ &&
-                curl --fail --retry-connrefuse --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://keycloak:8080/"
+      sh -euxc "curl --fail --retry-connrefused --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://fhir:8080/fhir/metadata?_summary=true &&
+                curl --fail --retry-connrefused --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://query:8080/actuator/health &&
+                curl --fail --retry-connrefused --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://notify:8080/actuator/health &&
+                curl --fail --retry-connrefused --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://list:8080/api/health/readiness &&
+                curl --fail --retry-connrefused --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://maildev:1080/healthz &&
+                curl --fail --retry-connrefused --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://ohdsi-webapi:8080/WebAPI/info &&
+                curl --fail --retry-connrefused --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://ohdsi-atlas:8080/atlas/ &&
+                curl --fail --retry-connrefused --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 30 http://keycloak:8080/"
     depends_on:
       - fhir
       - query
