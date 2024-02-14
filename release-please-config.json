@@ -18,6 +18,19 @@
         "docker-compose/docker-compose.yaml",
         "docs/configuration/security.md",
         "docs/_snippets/k8s/query-argo-workflow.yaml"
+      ],
+      "changelog-sections": [
+        { "type": "feat", "section": "Features" },
+        { "type": "fix", "section": "Bug Fixes" },
+        { "type": "perf", "section": "Performance Improvements" },
+        { "type": "docs", "section": "Documentation", "hidden": false },
+        {
+          "type": "chore",
+          "section": "Miscellaneous Chores",
+          "hidden": false
+        },
+        { "type": "build", "section": "Build", "hidden": false },
+        { "type": "ci", "section": "CI/CD", "hidden": false }
       ]
     }
   }
