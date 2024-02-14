@@ -33,7 +33,7 @@ services:
       - query
 
   fhir:
-    image: docker.io/hapiproject/hapi:v6.8.3@sha256:6195f1116ebabfb0a608addde043b3e524c456c4d4f35b3d25025afd7dcd2e27
+    image: docker.io/hapiproject/hapi:v6.10.1@sha256:4eac1b3481180b028616d1fab7e657e368538063d75f7ed3be2032e34c657dd4
     environment:
       HAPI_FHIR_VALIDATION_REQUESTS_ENABLED: "true"
       HAPI_FHIR_SUBSCRIPTION_RESTHOOK_ENABLED: "true"
@@ -46,7 +46,7 @@ services:
     image: docker.io/ohdsi/broadsea-atlasdb:2.1.0@sha256:99b4bd5515b3d82adb5bac9b14558b434df55fced6c194c965e3fb1371cb36c5
 
   ohdsi-webapi:
-    image: docker.io/ohdsi/webapi:2.13.0@sha256:04313754fc79a6e362a8116ef462360e3891581a045924f4ec5ed404fbb9b837
+    image: docker.io/ohdsi/webapi:2.14.0@sha256:582b59b186fde5936081c1df6e41cba53e45e112d5b4875ddfda1e4dee4b2981
     restart: unless-stopped
     ipc: none
     security_opt:
