@@ -10,7 +10,7 @@ permissions: read-all
 jobs:
   lint:
     runs-on: ubuntu-22.04
-    container: ghcr.io/chgl/kube-powertools:v2.2.32@sha256:f2d27b59839cec4dd73da763e354d6515a7a297aeebffa8f07fac4c977123f26
+    container: ghcr.io/chgl/kube-powertools:v2.2.46@sha256:e659f4b3a207a77b738b82510e31a841259d8506d32512ce6d72ee2bf71e2feb
     steps:
       - name: Add workspace as safe directory
         run: |
@@ -63,7 +63,7 @@ jobs:
 
       - name: Cache kubeconform schemas
         id: cache-powerlint-kubeconform
-        uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
+        uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4.0.1
         with:
           path: /tmp
           key: ${{ runner.os }}-powerlint-kubeconform
