@@ -19,7 +19,7 @@ runs:
   using: composite
   steps:
     - name: Download artifact
-      uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+      uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
       if: ${{ github.event_name == 'pull_request' }}
       with:
         name: ${{ inputs.project-name }}-build-artifacts
