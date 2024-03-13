@@ -16,5 +16,5 @@ dependencies {
     implementation 'org.springframework.retry:spring-retry:2.0.5'
 
     // https://mvnrepository.com/artifact/jakarta.mail/jakarta.mail-api
-    implementation 'jakarta.mail:jakarta.mail-api:2.1.2'
+    implementation 'jakarta.mail:jakarta.mail-api:2.1.3'
 }

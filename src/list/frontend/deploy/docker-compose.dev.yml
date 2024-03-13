@@ -26,7 +26,7 @@ services:
       - fhir
 
   jaeger:
-    image: docker.io/jaegertracing/all-in-one:1.54@sha256:f4044964505c81bf12131c2dfd1f4ddf1d1421bbbd9d79f691221cac077599a8
+    image: docker.io/jaegertracing/all-in-one:1.55@sha256:f6b5d09073f14f76873d300f565a6691d815e81bea8e07e1dc3ff67e0596dd4e
     environment:
       COLLECTOR_OTLP_ENABLED: "true"
     ports:
@@ -51,7 +51,7 @@ services:
       - 8083:8080
 
   fhir-pseudonymizer:
-    image: ghcr.io/miracum/fhir-pseudonymizer:v2.21.5@sha256:3716c2f31a4d975dc5a301b5799f92a8d5ef126159110e4e57c3cac497bd45d2
+    image: ghcr.io/miracum/fhir-pseudonymizer:v2.21.7@sha256:1d933aed56c27ae3b850c05b2f765ef9d43ad8ce3e56ff5cb91145f977f58e86
     environment:
       APIKEY: "fhir-pseudonymizer-api-key"
       TRACING__ENABLED: "true"
