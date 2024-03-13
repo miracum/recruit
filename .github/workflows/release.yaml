@@ -89,7 +89,7 @@ jobs:
           CHART_VERSION=$(yq .version recruit/charts/recruit/Chart.yaml)
           echo "version=${CHART_VERSION}" >> "$GITHUB_OUTPUT"
 
-      - uses: peter-evans/create-pull-request@a4f52f8033a6168103c2538976c07b467e8163bc # v6.0.1
+      - uses: peter-evans/create-pull-request@70a41aba780001da0a30141984ae2a0c95d8704e # v6.0.2
         with:
           token: ${{ secrets.token }}
           path: miracum-charts
@@ -101,7 +101,7 @@ jobs:
   publish-kyverno-policies:
     name: publish kyverno policies
     runs-on: ubuntu-22.04
-    container: ghcr.io/chgl/kube-powertools:v2.2.46@sha256:e659f4b3a207a77b738b82510e31a841259d8506d32512ce6d72ee2bf71e2feb
+    container: ghcr.io/chgl/kube-powertools:v2.2.47@sha256:ccb039f6107558088b680fec1f33d93ce8d0126843f2cf7e0ba45fc62929c0b2
     continue-on-error: true
     steps:
       - name: Checkout
