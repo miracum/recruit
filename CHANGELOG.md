@@ -1,5 +1,20 @@
 # Changelog
 
+## [10.1.9](https://github.com/miracum/recruit/compare/v10.1.8...v10.1.9) (2024-03-22)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#251](https://github.com/miracum/recruit/issues/251)) ([7b8a168](https://github.com/miracum/recruit/commit/7b8a168984c7a61ff7e85d5bacb0b486bb5e4925))
+* **deps:** update all non-major dependencies ([#266](https://github.com/miracum/recruit/issues/266)) ([e87de1d](https://github.com/miracum/recruit/commit/e87de1d32fae2d481181acb5dddc52e3d1b6dec2))
+* **deps:** update dependency @opentelemetry/api to v1.8.0 ([#254](https://github.com/miracum/recruit/issues/254)) ([23cdae6](https://github.com/miracum/recruit/commit/23cdae63f944e08e034983bca790d34b0786b564))
+* **deps:** update dependency ca.uhn.hapi.fhir:hapi-fhir-client-okhttp to v7 ([#260](https://github.com/miracum/recruit/issues/260)) ([168be5e](https://github.com/miracum/recruit/commit/168be5ef532f5f41a6c7cfecf42396ba67fd8c9f))
+* **deps:** update dependency ca.uhn.hapi.fhir:hapi-fhir-structures-r4 to v7 ([#261](https://github.com/miracum/recruit/issues/261)) ([6ed5928](https://github.com/miracum/recruit/commit/6ed59283103f08eae8b45057a5c185db07301bc2))
+* **deps:** update dependency com.approvaltests:approvaltests to v22 ([#210](https://github.com/miracum/recruit/issues/210)) ([b1dcf4d](https://github.com/miracum/recruit/commit/b1dcf4d0c77b56e62805e754b002ad8bce108328))
+* **deps:** update dependency com.approvaltests:approvaltests to v23 ([#262](https://github.com/miracum/recruit/issues/262)) ([ad37330](https://github.com/miracum/recruit/commit/ad3733053c2a39b0cd00b2669b28ab75f8e14071))
+* **deps:** update dependency helmet to v7 ([#212](https://github.com/miracum/recruit/issues/212)) ([15da605](https://github.com/miracum/recruit/commit/15da605bbebb64bad902a13dc167f238cd3f07e2))
+* **deps:** update dependency io.freefair.gradle:lombok-plugin to v8 ([#213](https://github.com/miracum/recruit/issues/213)) ([ebd54a5](https://github.com/miracum/recruit/commit/ebd54a5c5e6484343d7afcbbe5b6ffb0aaa0516e))
+
 ## [10.1.8](https://github.com/miracum/recruit/compare/v10.1.7...v10.1.8) (2024-01-08)
 
 
