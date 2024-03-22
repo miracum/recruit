@@ -21,7 +21,7 @@ dotnet publish tester.csproj \
     -o /build/publish
 EOF
 
-FROM mcr.microsoft.com/dotnet/nightly/runtime:8.0-jammy-chiseled@sha256:52219ceee11d26c2bbeaad078933da1c19d1eeb486ef67cfc463f9480d43bf6d AS runtime
+FROM mcr.microsoft.com/dotnet/nightly/runtime:8.0-jammy-chiseled@sha256:d8cfc88a9276c9cef7e2a4a7c6108ccc0122ec50d3300c6688172cb614040fd1 AS runtime
 WORKDIR /opt/chaos-tester
 USER 65532:65532
 ENV DOTNET_ENVIRONMENT="Production" \
