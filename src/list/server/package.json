@@ -24,7 +24,7 @@
     "connect-history-api-fallback": "2.0.0",
     "cors": "2.8.5",
     "debug": "4.3.4",
-    "express": "4.18.3",
+    "express": "4.19.2",
     "express-bearer-token": "2.4.0",
     "express-jwt": "8.4.1",
     "express-prom-bundle": "7.0.0",
