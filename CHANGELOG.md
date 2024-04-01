@@ -1,5 +1,18 @@
 # Changelog
 
+## [10.1.11](https://github.com/miracum/recruit/compare/v10.1.10...v10.1.11) (2024-04-01)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency cypress to v13 ([#280](https://github.com/miracum/recruit/issues/280)) ([9e78f63](https://github.com/miracum/recruit/commit/9e78f6357d4f7002bd80c86eee3dce259ca70cc4))
+* **renovate:** don't pin helm manager deps ([5fd37ca](https://github.com/miracum/recruit/commit/5fd37cadcb7821c40701840fdef9f9290b06c12a))
+
+
+### CI/CD
+
+* fix add-and-commit ([910cc24](https://github.com/miracum/recruit/commit/910cc24c1c2fe0dd939925c4f33be56f023f57a6))
+
 ## [10.1.10](https://github.com/miracum/recruit/compare/v10.1.9...v10.1.10) (2024-04-01)
 
 
