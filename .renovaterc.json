@@ -20,6 +20,10 @@
       "matchManagers": ["github-actions"],
       "matchPackageNames": ["slsa-framework/slsa-github-generator"],
       "pinDigests": false
+    },
+    {
+      "matchManagers": ["helmv3"],
+      "pinDigests": false
     }
   ]
 }
