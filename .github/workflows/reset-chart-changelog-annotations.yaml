@@ -52,3 +52,4 @@ jobs:
         with:
           add: "charts/"
           message: "chore(helm): reset Chart.yaml changelog annotations"
+          push: origin HEAD:master
