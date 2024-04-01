@@ -454,7 +454,7 @@ notify:
   affinity: {}
 
   # -- pod topology spread configuration
-  # see: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#api
+  # see: <https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#api>
   topologySpreadConstraints:
     []
     # - maxSkew: 1
@@ -612,7 +612,7 @@ list:
   podSecurityContext: {}
 
   # -- pod topology spread configuration
-  # see: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#api
+  # see: <https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#api>
   topologySpreadConstraints:
     []
     # - maxSkew: 1

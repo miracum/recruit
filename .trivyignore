@@ -14,3 +14,6 @@ AVD-DS-0002
 # this is disputed by multiple parties because it is not plausible that untrusted
 # user input would reach the code location where injection must occur.
 CVE-2023-39017
+
+# only relevant during build/dev
+CVE-2024-29180
