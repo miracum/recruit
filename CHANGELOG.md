@@ -1,5 +1,20 @@
 # Changelog
 
+## [10.1.10](https://github.com/miracum/recruit/compare/v10.1.9...v10.1.10) (2024-04-01)
+
+
+### Miscellaneous Chores
+
+* **deps:** update gcr.io/distroless/java17-debian12:nonroot docker digest to 523c2d8 ([#274](https://github.com/miracum/recruit/issues/274)) ([640859f](https://github.com/miracum/recruit/commit/640859f5c0f6e383d54a798c2912205ca09fe0b4))
+* **deps:** update gcr.io/distroless/nodejs20-debian12:nonroot docker digest to 13fa526 ([#275](https://github.com/miracum/recruit/issues/275)) ([977c747](https://github.com/miracum/recruit/commit/977c7474b83cbfd8bcd63f8de5d632381a84360b))
+* **deps:** update github-actions ([#278](https://github.com/miracum/recruit/issues/278)) ([2947c5a](https://github.com/miracum/recruit/commit/2947c5a7ae69cbf0b161873cb6fee1ea1befe995))
+* **deps:** update mcr.microsoft.com/dotnet/sdk:8.0-jammy docker digest to c2c75cb ([#276](https://github.com/miracum/recruit/issues/276)) ([1dacfbe](https://github.com/miracum/recruit/commit/1dacfbe8fe5ff44e227e068e02c1e2cecf886040))
+
+
+### CI/CD
+
+* possibly fix add-and-commit for resetting chart changelog annotations ([debdec5](https://github.com/miracum/recruit/commit/debdec57e9e7a95509114097808a2aefe05e4939))
+
 ## [10.1.9](https://github.com/miracum/recruit/compare/v10.1.8...v10.1.9) (2024-04-01)
 
 
