@@ -1,11 +1,10 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:best-practices", "group:allNonMajor"],
+  "extends": ["config:best-practices", "group:allNonMajor", "schedule:monthly"],
   "ignoreDeps": [
     "docker.io/library/postgres",
     "postgresql",
-    "docker.io/bitnami/postgresql",
-    "ghcr.io/miracum/recruit/*"
+    "docker.io/bitnami/postgresql"
   ],
   "ignorePaths": ["**/node_modules/**", "**/bower_components/**", "fhir/**"],
   "pip-compile": {
@@ -23,6 +22,10 @@
     },
     {
       "matchManagers": ["helmv3"],
+      "pinDigests": false
+    },
+    {
+      "matchPackagePatterns": ["^ghcr.io/miracum/recruit"],
       "pinDigests": false
     }
   ]
