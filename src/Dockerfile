@@ -1,4 +1,4 @@
-FROM docker.io/library/gradle:8.6.0-jdk17@sha256:27ed98487dd9c155d555955084dfd33f32d9f7ac5a90a79b1323ab002a1a8b6e AS build
+FROM docker.io/library/gradle:8.7.0-jdk17@sha256:34362edcf64f346589c67384634e33e9e44314c6ef9a82d936335c9f8ca7b06c AS build
 WORKDIR /home/gradle/src
 ENV GRADLE_USER_HOME="/gradle"
 
@@ -24,7 +24,7 @@ ENV TZ="UTC"
 RUN gradle ":${MODULE_NAME}:test" && \
     gradle jacocoTestReport
 
-FROM gcr.io/distroless/java17-debian12:nonroot@sha256:523c2d8f415ab261694111186e56180e4f393e9843b1d8dade7ad5a17c9147b9
+FROM gcr.io/distroless/java17-debian12:nonroot@sha256:4a7f6fa8773acd31ec9fd76bc3f0e0edf0d25f69ce3221471b9786e0774833bc
 WORKDIR /app
 
 COPY --from=build /home/gradle/src/opentelemetry-javaagent.jar ./opentelemetry-javaagent.jar

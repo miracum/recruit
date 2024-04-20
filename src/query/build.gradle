@@ -26,10 +26,10 @@ dependencies {
 
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.17.0'
 
-    implementation 'net.minidev:json-smart:2.5.0'
+    implementation 'net.minidev:json-smart:2.5.1'
 
     implementation 'com.github.slugify:slugify:3.0.6'
 
-    testImplementation 'com.approvaltests:approvaltests:23.0.0'
+    testImplementation 'com.approvaltests:approvaltests:23.1.0'
     testImplementation 'com.google.code.gson:gson:2.10.1'
 }
