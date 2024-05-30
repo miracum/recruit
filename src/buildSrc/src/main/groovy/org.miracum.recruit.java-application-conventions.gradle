@@ -26,7 +26,7 @@ plugins {
 
 task downloadOpenTelemetryJavaAgent(type: Download) {
     src 'https://github.com/open-telemetry/opentelemetry-java-instrumentation' +
-        '/releases/download/v1.25.1/opentelemetry-javaagent.jar'
+        '/releases/download/v2.4.0/opentelemetry-javaagent.jar'
     dest '../'
     overwrite false
 }
