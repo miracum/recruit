@@ -48,8 +48,8 @@ dependencies {
 
     implementation 'org.postgresql:postgresql:42.7.3'
 
-    implementation 'io.micrometer:micrometer-registry-prometheus:1.12.5'
-    implementation 'io.micrometer:micrometer-core:1.12.5'
+    implementation 'io.micrometer:micrometer-registry-prometheus:1.13.0'
+    implementation 'io.micrometer:micrometer-core:1.13.0'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
@@ -101,7 +101,7 @@ spotless {
 }
 
 checkstyle {
-    toolVersion '10.15.0'
+    toolVersion '10.17.0'
     configFile = file('../config/checkstyle/checkstyle.xml')
 }
 
