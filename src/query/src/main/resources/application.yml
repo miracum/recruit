@@ -77,6 +77,8 @@ camel:
   main:
     name: Query
     jmx-enabled: false
+    autowired-enabled: true
+    load-statistics-enabled: true
   springboot:
     main-run-controller: true
 
