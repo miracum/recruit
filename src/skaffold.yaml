@@ -1,12 +1,8 @@
-apiVersion: skaffold/v3
+apiVersion: skaffold/v4beta11
 kind: Config
 metadata:
   name: recruit
 build:
-  local:
-    useBuildkit: true
-    push: false
-    tryImportMissing: true
   artifacts:
     - image: ghcr.io/miracum/recruit/query
       jib:
@@ -21,34 +17,36 @@ build:
       docker:
         dockerfile: Dockerfile
         buildArgs:
-          VERSION: skaffold
           GIT_REF: skaffold
+          VERSION: skaffold
+  local:
+    push: false
+    tryImportMissing: true
+    useBuildkit: true
 manifests:
   helm:
-    releases:
-      - name: recruit
-        chartPath: ../charts/recruit
-        skipBuildDependencies: true
-        setValues:
-          # kics-scan ignore-line
-          fhirserver.postgresql.auth.postgresPassword: fhir
-          # kics-scan ignore-line
-          ohdsi.postgresql.auth.postgresPassword: ohdsi
-        wait: true
     flags:
       install:
         - --timeout=15m
+    releases:
+      - name: recruit
+        chartPath: ../charts/recruit
+        createNamespace: true
+        namespace: recruit
+        valuesFiles:
+          - hack/k8s/values-dev.yaml
+        wait: true
+        skipBuildDependencies: true
 deploy:
   helm:
     releases:
       - name: recruit
         chartPath: helm
+        createNamespace: true
+        namespace: recruit
+        valuesFiles:
+          - hack/k8s/values-dev.yaml
         skipBuildDependencies: true
-        setValues:
-          # kics-scan ignore-line
-          fhirserver.postgresql.auth.postgresPassword: fhir
-          # kics-scan ignore-line
-          ohdsi.postgresql.auth.postgresPassword: ohdsi
     flags:
       install:
         - --timeout=15m
