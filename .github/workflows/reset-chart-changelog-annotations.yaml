@@ -16,7 +16,7 @@ jobs:
   reset-commit-and-push:
     name: reset changelog annotations, commit, and push
     runs-on: ubuntu-22.04
-    container: ghcr.io/chgl/kube-powertools:v2.2.58@sha256:f703685bb899eacf0f9d27cbf3f35dc4eabf4ff1ae774e7c116b1a20cf424246
+    container: ghcr.io/chgl/kube-powertools:v2.3.0@sha256:3322980b98ece030f4d5fa598ad8b9e152a8308f019175745ba392e396aff8a9
     permissions:
       contents: write
     steps:
@@ -25,7 +25,7 @@ jobs:
           git config --global --add safe.directory /__w/recruit/recruit
 
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
         with:
           fetch-depth: 0
           ref: ${{ github.head_ref }}
