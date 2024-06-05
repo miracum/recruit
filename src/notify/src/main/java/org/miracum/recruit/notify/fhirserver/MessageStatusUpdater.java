@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.hl7.fhir.r4.model.CommunicationRequest.CommunicationRequestStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /** Update CommunicationRequest resources as completed when they were sent successfully. */
@@ -17,7 +16,6 @@ public class MessageStatusUpdater {
 
   private final IGenericClient fhirClient;
 
-  @Autowired
   public MessageStatusUpdater(IGenericClient fhirClient) {
     this.fhirClient = fhirClient;
   }

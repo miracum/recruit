@@ -12,7 +12,6 @@ import org.miracum.recruit.query.repositories.VisitDetailRepository;
 import org.miracum.recruit.query.repositories.VisitOccurrenceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +29,6 @@ public class OmopRoute extends RouteBuilder {
   @Value("${query.excludePatientParameters.demographics}")
   private boolean excludePatientParams;
 
-  @Autowired
   public OmopRoute(
       VisitOccurrenceRepository visitOccurrenceRepository,
       VisitDetailRepository visitDetailRepository) {

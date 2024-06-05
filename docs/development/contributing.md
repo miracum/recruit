@@ -75,3 +75,22 @@ From the `/src/list` directory, run:
 ```sh
 docker build -t ghcr.io/miracum/recruit/list:local .
 ```
+
+## Skaffold
+
+You can also directly build and deploy to a Kubernetes cluster for development:
+
+Create a KinD cluster and install NGINX Ingress
+
+```sh
+kind create cluster --config=hack/k8s/kind-with-ingress-config.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/kind/deploy.yaml
+```
+
+Run `skaffold dev`:
+
+```sh
+helm dep up ../charts/recruit/
+
+skaffold dev
+```

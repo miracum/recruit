@@ -6,7 +6,6 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.miracum.recruit.notify.FhirServerProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /** Create list of practitioners in FHIR server if they don't exist yet. */
@@ -17,7 +16,6 @@ public class PractitionerTransmitter {
 
   private final FhirServerProvider fhirClient;
 
-  @Autowired
   public PractitionerTransmitter(FhirServerProvider fhirClient) {
     this.fhirClient = fhirClient;
   }

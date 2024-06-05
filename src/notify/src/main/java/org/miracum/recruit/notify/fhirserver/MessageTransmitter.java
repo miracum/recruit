@@ -10,7 +10,6 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.miracum.recruit.notify.FhirServerProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /** Create list of messages in FHIR server to store them temporary. */
@@ -21,7 +20,6 @@ public class MessageTransmitter {
 
   final FhirServerProvider fhirClient;
 
-  @Autowired
   public MessageTransmitter(FhirServerProvider fhirClient) {
     this.fhirClient = fhirClient;
   }

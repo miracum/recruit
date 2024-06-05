@@ -8,7 +8,6 @@ import jakarta.mail.MessagingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.CommunicationRequest;
 import org.hl7.fhir.r4.model.CommunicationRequest.CommunicationRequestStatus;
@@ -23,7 +22,6 @@ import org.miracum.recruit.notify.mailsender.NotifyInfo;
 import org.miracum.recruit.notify.practitioner.PractitionerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
@@ -41,7 +39,6 @@ public class MessageDistributor {
   private final MailerConfig mailerConfig;
 
   /** Prepare config items and email utils to distribute temporary stored messages. */
-  @Autowired
   public MessageDistributor(
       TemplateEngine emailTemplateEngine,
       JavaMailSender appJavaMailSender,
@@ -79,8 +76,7 @@ public class MessageDistributor {
 
     for (TransformedMessages transformedMessages : transformedMessageList) {
 
-      List<CommunicationRequest> listFhirCommunicationRequests =
-          new ArrayList<CommunicationRequest>();
+      List<CommunicationRequest> listFhirCommunicationRequests = new ArrayList<>();
 
       List<Message> messageList = transformedMessages.getMessages();
       for (Message message : messageList) {
@@ -221,11 +217,6 @@ public class MessageDistributor {
       }
     }
     return messagesToSend;
-  }
-
-  private Predicate<? super CommunicationRequest> distinctByStudyAndRecipient(Object object) {
-    // TODO Auto-generated method stub
-    return null;
   }
 
   private void updateMessageStatus(List<String> messages, CommunicationRequestStatus status) {

@@ -5,3 +5,4 @@ list/
 gradle/
 hack/
 tests/
+Dockerfile

@@ -13,7 +13,6 @@ import org.miracum.recruit.notify.mailconfig.UserConfig;
 import org.miracum.recruit.notify.mailconfig.UserConfig.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /** Create a list of FHIR Practitioners from the users config. */
@@ -24,7 +23,6 @@ public class PractitionerCreator {
   private final FhirSystemsConfig fhirSystems;
   private final UserConfig users;
 
-  @Autowired
   public PractitionerCreator(FhirSystemsConfig fhirSystems, UserConfig users) {
     this.fhirSystems = fhirSystems;
     this.users = users;

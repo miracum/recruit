@@ -2,7 +2,6 @@ package org.miracum.recruit.notify;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.hl7.fhir.r4.model.CapabilityStatement;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
@@ -13,7 +12,6 @@ public final class FhirServerHealthCheck implements HealthIndicator {
 
   private final IGenericClient fhirClient;
 
-  @Autowired
   FhirServerHealthCheck(final IGenericClient fhirClient) {
     this.fhirClient = fhirClient;
   }

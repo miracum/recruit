@@ -18,7 +18,6 @@ import org.miracum.recruit.query.LabelExtractor;
 import org.miracum.recruit.query.models.CohortDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -47,7 +46,6 @@ public class WebApiRoute extends RouteBuilder {
   @Value("${query.webapi.auth.login-path}")
   private String webApiAuthLoginPath;
 
-  @Autowired
   public WebApiRoute(CohortSelectorConfig selectorConfig, LabelExtractor labelExtractor) {
     this.matchLabels = selectorConfig.getMatchLabels();
     this.labelExtractor = labelExtractor;

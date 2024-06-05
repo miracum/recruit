@@ -1,7 +1,6 @@
 package org.miracum.recruit.notify.scheduler;
 
 import org.miracum.recruit.notify.message.MessageDistributor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /** Service that calls message distribution if timer event is fired. */
@@ -9,7 +8,6 @@ import org.springframework.stereotype.Service;
 public class NotifyMessageSchedulerService {
   private final MessageDistributor messageDistributor;
 
-  @Autowired
   public NotifyMessageSchedulerService(MessageDistributor messageDistributor) {
     this.messageDistributor = messageDistributor;
   }

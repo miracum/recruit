@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: docker.io/library/traefik:2.11.2@sha256:c6f6001dd1fc09fb0ae47ad2198102c40a8d9586c02d6040d561fd4fb7e91f45
+    image: docker.io/library/traefik:v2.11.3@sha256:d7862e301ff8ca47529f687c7cb08cf1dbb4d0690cd8524cfc76673b8cbd92c7
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -23,7 +23,7 @@ services:
           memory: 128m
 
   fhir:
-    image: docker.io/hapiproject/hapi:v7.0.3@sha256:73ff82fec42e5cbb7e66338d47af09ba91c140e98beeaee41a5459572d5ae1ce
+    image: docker.io/hapiproject/hapi:v7.2.0@sha256:9bcafa8342b572eee248cb7c48c496863d352bbd0347e1d98ea238d09620e89b
     restart: unless-stopped
     cap_drop:
       - ALL
@@ -270,7 +270,7 @@ services:
       OTEL_EXPORTER_JAEGER_ENDPOINT: "http://jaeger:14250"
 
   jaeger:
-    image: docker.io/jaegertracing/all-in-one:1.56.0@sha256:d2cd4c226624bdc116decd3106091b4df9882da8db42f8550293596cab79b8ea
+    image: docker.io/jaegertracing/all-in-one:1.57.0@sha256:8f165334f418ca53691ce358c19b4244226ed35c5d18408c5acf305af2065fb9
     ports:
       - "127.0.0.1:16686:16686"
       - "127.0.0.1:6831:6831/udp"
