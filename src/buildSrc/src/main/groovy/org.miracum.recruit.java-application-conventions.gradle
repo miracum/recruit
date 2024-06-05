@@ -37,7 +37,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
 
-    implementation 'ca.uhn.hapi.fhir:hapi-fhir-client:6.10.5'
+    implementation 'ca.uhn.hapi.fhir:hapi-fhir-client:7.2.1'
     implementation 'ca.uhn.hapi.fhir:hapi-fhir-base:7.2.1'
     implementation 'ca.uhn.hapi.fhir:hapi-fhir-structures-r4:6.10.5'
     implementation 'ca.uhn.hapi.fhir:hapi-fhir-client-okhttp:6.10.5'
