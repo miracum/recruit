@@ -68,6 +68,8 @@ fhir:
     system-determined-subject-status: "https://fhir.miracum.org/uc1/CodeSystem/system-determined-subject-status"
 
 camel:
+  metrics:
+    routePolicyLevel: route
   component:
     servlet:
       mapping:
