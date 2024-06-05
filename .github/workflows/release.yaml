@@ -20,10 +20,10 @@ jobs:
       id-token: write
     steps:
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3
+        uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -54,7 +54,7 @@ jobs:
 
           cosign sign --yes "ghcr.io/${{ github.repository }}/charts/recruit:${CHART_VERSION}"
 
-      - uses: actions/upload-artifact@1746f4ab65b179e0ea60a494b83293b640dd5bba # v4.3.2
+      - uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: helm-chart
           path: |
@@ -66,11 +66,11 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
         with:
           path: recruit
 
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: miracum/charts
@@ -89,7 +89,7 @@ jobs:
           CHART_VERSION=$(yq .version recruit/charts/recruit/Chart.yaml)
           echo "version=${CHART_VERSION}" >> "$GITHUB_OUTPUT"
 
-      - uses: peter-evans/create-pull-request@9153d834b60caba6d51c9b9510b087acf9f33f83 # v6.0.4
+      - uses: peter-evans/create-pull-request@6d6857d36972b65feb161a90e484f2984215f83e # v6.0.5
         with:
           token: ${{ secrets.token }}
           path: miracum-charts
@@ -101,11 +101,11 @@ jobs:
   publish-kyverno-policies:
     name: publish kyverno policies
     runs-on: ubuntu-22.04
-    container: ghcr.io/chgl/kube-powertools:v2.2.58@sha256:f703685bb899eacf0f9d27cbf3f35dc4eabf4ff1ae774e7c116b1a20cf424246
+    container: ghcr.io/chgl/kube-powertools:v2.3.0@sha256:3322980b98ece030f4d5fa598ad8b9e152a8308f019175745ba392e396aff8a9
     continue-on-error: true
     steps:
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
 
       - name: Push policy folder
         env:
@@ -126,10 +126,10 @@ jobs:
       contents: write # to upload artifacts to the release
     steps:
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
 
       - name: Download Helm chart
-        uses: actions/download-artifact@8caf195ad4b1dee92908e23f56eeb0696f1dd42d # v4
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4
         with:
           name: helm-chart
           path: /tmp
@@ -159,7 +159,7 @@ jobs:
           echo "hashes=$(base64 -w0 < checksums.sha256)" >> "$GITHUB_OUTPUT"
 
       - name: upload assets to release
-        uses: softprops/action-gh-release@9d7c94cfd0a1f3ed45544c887983e9fa900f0564 # v2
+        uses: softprops/action-gh-release@69320dbe05506a9a39fc8ae11030b214ec2d1f87 # v2
         with:
           files: |
             dist/*.tgz
