@@ -30,14 +30,14 @@ dependencies:
   - condition: ohdsi.enabled
     name: ohdsi
     repository: oci://ghcr.io/chgl/charts
-    version: 0.23.1
+    version: 0.23.2
   - name: postgresql
     version: 13.2.27
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: postgresql.enabled
   - condition: fhir-pseudonymizer.enabled
     name: fhir-pseudonymizer
-    version: 0.6.8
+    version: 0.6.10
     repository: oci://ghcr.io/miracum/charts
 # x-release-please-start-version
 version: 10.1.11
