@@ -19,7 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(classes = {FhirSystems.class})
 @EnableConfigurationProperties(value = {FhirSystems.class})
-public class FhirCohortTransactionBuilderFhirSnapshotTests {
+class FhirCohortTransactionBuilderFhirSnapshotTests {
   private static final FhirContext fhirContext = FhirContext.forR4();
   private static final IParser fhirParser = fhirContext.newJsonParser().setPrettyPrint(true);
 

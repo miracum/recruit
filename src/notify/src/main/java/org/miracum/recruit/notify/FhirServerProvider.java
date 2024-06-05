@@ -21,7 +21,6 @@ import org.miracum.recruit.notify.fhirserver.FhirSystemsConfig;
 import org.miracum.recruit.notify.practitioner.PractitionerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /** Provide search results from target fhir server. */
@@ -33,7 +32,6 @@ public class FhirServerProvider {
   private final FhirSystemsConfig fhirSystemsConfig;
 
   /** Constructor for Fhir Server providing search results. */
-  @Autowired
   public FhirServerProvider(IGenericClient fhirClient, FhirSystemsConfig fhirSystemsConfig) {
     this.fhirClient = fhirClient;
     this.fhirSystemsConfig = fhirSystemsConfig;

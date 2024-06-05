@@ -1,7 +1,6 @@
 package org.miracum.recruit.query.health;
 
 import java.net.URL;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
@@ -15,7 +14,6 @@ public class WebApiHealthIndicator implements HealthIndicator {
 
   private final URL webApiBaseUrl;
 
-  @Autowired
   public WebApiHealthIndicator(@Value("${query.webapi.base-url}") URL webApiBaseUrl) {
     this.webApiBaseUrl = webApiBaseUrl;
     this.webClient = WebClient.create(webApiBaseUrl.toString());

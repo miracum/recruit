@@ -21,7 +21,6 @@ import org.miracum.recruit.query.LabelExtractor;
 import org.miracum.recruit.query.ScreeningListResources;
 import org.miracum.recruit.query.models.CohortDefinition;
 import org.miracum.recruit.query.models.Person;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -39,7 +38,6 @@ public class FhirRoute extends RouteBuilder {
   private final boolean shouldAppendToExistingList;
   private final LabelExtractor labelExtractor;
 
-  @Autowired
   public FhirRoute(
       FhirCohortTransactionBuilder fhirBuilder,
       FhirContext fhirContext,

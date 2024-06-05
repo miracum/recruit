@@ -32,7 +32,6 @@ import org.miracum.recruit.notify.practitioner.PractitionerFilter;
 import org.miracum.recruit.notify.practitioner.PractitionerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
@@ -52,7 +51,6 @@ public class MessageCreator {
   private final FhirSystemsConfig fhirSystemConfig;
 
   /** Prepare config items and email utils to use when sending emails just in time (ad hoc). */
-  @Autowired
   public MessageCreator(
       JavaMailSender javaMailSender,
       TemplateEngine templateEngine,

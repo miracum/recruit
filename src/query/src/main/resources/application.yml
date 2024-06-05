@@ -74,9 +74,10 @@ camel:
         contextpath: "/query/*"
     micrometer:
       enabled: true
-  springboot:
+  main:
     name: Query
     jmx-enabled: false
+  springboot:
     main-run-controller: true
 
 # to configure logging levels

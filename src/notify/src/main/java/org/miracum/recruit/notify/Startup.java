@@ -17,7 +17,6 @@ import org.miracum.recruit.notify.mailconfig.UserConfig;
 import org.miracum.recruit.notify.practitioner.PractitionerCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
@@ -48,7 +47,6 @@ public class Startup {
    * Create util items needed for startup routine to add initial items to target fhir server and
    * prepare for receiving subscriptions.
    */
-  @Autowired
   public Startup(
       RetryTemplate retryTemplate,
       @Value("${webhook.endpoint}") URL webhookEndpoint,
