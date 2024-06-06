@@ -72,5 +72,3 @@ annotations:
   artifacthub.io/changes: |-
     - kind: changed
       description: updated recruIT image tags to v10.1.12 # x-release-please-version
-    - kind: changed
-      description: "⚠️: updated postgresql sub-chart to v13.2.27 which upgrades the internal PostgreSQL version from v15 to v16."
