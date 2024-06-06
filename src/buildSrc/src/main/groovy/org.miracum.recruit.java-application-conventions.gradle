@@ -40,7 +40,7 @@ dependencies {
     implementation 'ca.uhn.hapi.fhir:hapi-fhir-client:7.2.1'
     implementation 'ca.uhn.hapi.fhir:hapi-fhir-base:7.2.1'
     implementation 'ca.uhn.hapi.fhir:hapi-fhir-structures-r4:7.2.1'
-    implementation 'ca.uhn.hapi.fhir:hapi-fhir-client-okhttp:6.10.5'
+    implementation 'ca.uhn.hapi.fhir:hapi-fhir-client-okhttp:7.2.1'
 
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 
