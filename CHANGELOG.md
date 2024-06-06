@@ -1,5 +1,44 @@
 # Changelog
 
+## [10.1.12](https://github.com/miracum/recruit/compare/v10.1.11...v10.1.12) (2024-06-06)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#318](https://github.com/miracum/recruit/issues/318)) ([73610f7](https://github.com/miracum/recruit/commit/73610f77a2d47449c2cf2f8444878914f961d80b))
+* **deps:** update dependency ca.uhn.hapi.fhir:hapi-fhir-base to v7 ([#258](https://github.com/miracum/recruit/issues/258)) ([d019402](https://github.com/miracum/recruit/commit/d019402d1e981e48fc8721d0e92fb58577c20cff))
+* **deps:** update dependency ca.uhn.hapi.fhir:hapi-fhir-client to v7 ([#259](https://github.com/miracum/recruit/issues/259)) ([65ef85e](https://github.com/miracum/recruit/commit/65ef85eb2447af1e28f779044a10e3044067b94b))
+* **deps:** update dependency ca.uhn.hapi.fhir:hapi-fhir-client-okhttp to v7 ([#319](https://github.com/miracum/recruit/issues/319)) ([418ac3c](https://github.com/miracum/recruit/commit/418ac3c3751407512b98f5205bdfa4b17a78600d))
+* **deps:** update dependency ca.uhn.hapi.fhir:hapi-fhir-structures-r4 to v7 ([#320](https://github.com/miracum/recruit/issues/320)) ([771636d](https://github.com/miracum/recruit/commit/771636d939b1723172fa9504ad899327cf038dea))
+
+
+### Miscellaneous Chores
+
+* **deps:** aggregated dependency updates and fixes ([#288](https://github.com/miracum/recruit/issues/288)) ([d159db6](https://github.com/miracum/recruit/commit/d159db671d71c856848ac660841b33915695b0ed))
+* **deps:** list dep updates ([#322](https://github.com/miracum/recruit/issues/322)) ([03cddd4](https://github.com/miracum/recruit/commit/03cddd430858263dd99858ab3e1488e0f0abcb52))
+* **deps:** refresh pip-compile outputs ([#297](https://github.com/miracum/recruit/issues/297)) ([4cd0748](https://github.com/miracum/recruit/commit/4cd07482d9987f031aec2673d156219ba147d684))
+* **deps:** refresh pip-compile outputs ([#299](https://github.com/miracum/recruit/issues/299)) ([9754067](https://github.com/miracum/recruit/commit/9754067e23b7753d8d73a46fc53346c25ffa7d2f))
+* **deps:** refresh pip-compile outputs ([#309](https://github.com/miracum/recruit/issues/309)) ([4f725d7](https://github.com/miracum/recruit/commit/4f725d741466c672e7874faa872f97ae1b638d92))
+* **deps:** refresh pip-compile outputs ([#321](https://github.com/miracum/recruit/issues/321)) ([240094c](https://github.com/miracum/recruit/commit/240094c480251dddfe89a764d590e005cc0e1482))
+* **deps:** update all non-major dependencies ([#279](https://github.com/miracum/recruit/issues/279)) ([f412a22](https://github.com/miracum/recruit/commit/f412a227ffdea1aa6375fe4b6180d993153c4c2f))
+* **deps:** update all non-major dependencies ([#310](https://github.com/miracum/recruit/issues/310)) ([eeccde0](https://github.com/miracum/recruit/commit/eeccde03f3d2af077aa2d608aaa449dd168446f4))
+* **deps:** update dependency idna to v3.7 [security] ([#285](https://github.com/miracum/recruit/issues/285)) ([570fcf8](https://github.com/miracum/recruit/commit/570fcf88f3c189bb40fb0315803026efdbf93aa2))
+* **deps:** update docker.io/bitnami/kubectl:1.30.1 docker digest to cdca6c1 ([#312](https://github.com/miracum/recruit/issues/312)) ([88e6fc6](https://github.com/miracum/recruit/commit/88e6fc6712404fe7c117db11308dd2efee7cec23))
+* **deps:** update docker.io/library/python:3.12.3-alpine docker digest to 32385e6 ([#313](https://github.com/miracum/recruit/issues/313)) ([b6ef9da](https://github.com/miracum/recruit/commit/b6ef9da5c915361b0db802d342d7fb0ed8cb8363))
+* **deps:** update docker.io/library/traefik:v2.11.3 docker digest to bdda4dc ([#314](https://github.com/miracum/recruit/issues/314)) ([f70b2c7](https://github.com/miracum/recruit/commit/f70b2c7ffe972586e89a9e366870fe467aa8e95d))
+* **deps:** update gcr.io/distroless/nodejs20-debian12:nonroot docker digest to 370f577 ([#289](https://github.com/miracum/recruit/issues/289)) ([1813207](https://github.com/miracum/recruit/commit/18132077a77b887aaa51058c003aed6f268cf82d))
+* **deps:** update gcr.io/distroless/nodejs20-debian12:nonroot docker digest to 8fb7503 ([#315](https://github.com/miracum/recruit/issues/315)) ([c19253b](https://github.com/miracum/recruit/commit/c19253b4ad988ddaa20f59bedb3e3543b580e553))
+* **deps:** update github-actions ([#290](https://github.com/miracum/recruit/issues/290)) ([9b908d6](https://github.com/miracum/recruit/commit/9b908d6bee13080c7a75d1dad3b364b61596ceb2))
+* **deps:** update github-actions ([#311](https://github.com/miracum/recruit/issues/311)) ([6c58101](https://github.com/miracum/recruit/commit/6c58101840696a8b5b4fdd029feee77b2f9d2fcf))
+* **deps:** update mcr.microsoft.com/dotnet/nightly/runtime:8.0-jammy-chiseled docker digest to d81af72 ([#317](https://github.com/miracum/recruit/issues/317)) ([0d17f96](https://github.com/miracum/recruit/commit/0d17f96de8e6572f92bc26fe4e103ec44b1b855c))
+* **deps:** update mcr.microsoft.com/dotnet/sdk:8.0-jammy docker digest to 0eadc53 ([#316](https://github.com/miracum/recruit/issues/316)) ([da0a017](https://github.com/miracum/recruit/commit/da0a01702cffb1b8a5974e8b0fe50b6896d6634c))
+
+
+### CI/CD
+
+* update check-links.yaml ([d6e1d91](https://github.com/miracum/recruit/commit/d6e1d914bcd52cc498549b1ba2a851d631c2beff))
+* updated actions for consistency ([6f1a481](https://github.com/miracum/recruit/commit/6f1a481eca1a7f97bb240a43bd3871ac8097749e))
+
 ## [10.1.11](https://github.com/miracum/recruit/compare/v10.1.10...v10.1.11) (2024-04-01)
 
 
