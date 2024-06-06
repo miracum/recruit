@@ -15,7 +15,7 @@ jobs:
     container: ghcr.io/miracum/ig-build-tools:v2.0.59@sha256:afddfebd7a13b3f00fc127644190aa8024ae1e07e2d1b1ab1aeada3684adb9c2
     steps:
       - name: Checkout code
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
 
       - name: Restore FHIR package dependencies
         working-directory: fhir/
