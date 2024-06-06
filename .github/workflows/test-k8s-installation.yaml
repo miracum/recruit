@@ -16,15 +16,6 @@ jobs:
     steps:
       - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
 
-      - name: downgrade helm
-        shell: bash
-        run: |
-          rm /usr/local/bin/helm
-          curl -fsSL https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 > /tmp/helm.sh
-          chmod +x /tmp/helm.sh
-          /tmp/helm.sh --version v3.12.3
-          helm version
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@d70bba72b1f3fd22344832f00baa16ece964efeb # v3.3.0
 
