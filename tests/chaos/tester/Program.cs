@@ -10,9 +10,9 @@ var rootCommand = new RootCommand("recruIT chaos testing verifier");
 
 var mailHogApiBaseUrlOption = new Option<Uri>(
     name: "--mailhog-api-base-url",
+    getDefaultValue: () => new Uri("http://localhost:8025/api/"),
     description: "The base URL of the MailHog api endpoint."
 );
-mailHogApiBaseUrlOption.SetDefaultValue(new Uri("http://localhost:8025/api/"));
 
 // delete messages command
 var deleteMessagesCommand = new Command("delete-messages", "Delete all messages stored in MailHog")
@@ -112,9 +112,10 @@ static async System.Threading.Tasks.Task RunTest(
 
     var fhirSerializerOptions = new JsonSerializerOptions().ForFhir(typeof(Bundle).Assembly);
 
-    var bundleJson = File.ReadAllText(fhirResourceBundle.FullName);
-    var bundle = JsonSerializer.Deserialize<Bundle>(bundleJson, fhirSerializerOptions);
-
+    var bundleJson = await File.ReadAllTextAsync(fhirResourceBundle.FullName);
+    var bundle =
+        JsonSerializer.Deserialize<Bundle>(bundleJson, fhirSerializerOptions)
+        ?? throw new InvalidOperationException("Failed to Deserialize FHIR bundle");
     var client = new FhirClient(fhirServerUrl);
 
     var sleepBetween = totalDuration.TotalSeconds / sendCount;
@@ -134,7 +135,7 @@ static async System.Threading.Tasks.Task RunTest(
                 }
             );
 
-        var response = policy.Execute(() => client.Transaction(bundle));
+        await policy.Execute(async () => await client.TransactionAsync(bundle));
 
         Console.WriteLine($"Sleeping for {sleepBetween} s");
         await System.Threading.Tasks.Task.Delay(TimeSpan.FromSeconds(sleepBetween));
