@@ -34,8 +34,8 @@
     "jwks-rsa": "2.1.5",
     "node-http-proxy-json": "0.1.9",
     "path": "0.12.7",
-    "pino": "8.21.0",
-    "pino-http": "9.0.0",
+    "pino": "9.1.0",
+    "pino-http": "10.1.0",
     "prom-client": "15.1.2",
     "retry-axios": "3.1.3"
   }
