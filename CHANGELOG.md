@@ -1,5 +1,19 @@
 # Changelog
 
+## [10.1.13](https://github.com/miracum/recruit/compare/v10.1.12...v10.1.13) (2024-07-01)
+
+
+### Miscellaneous Chores
+
+* **deps:** refresh pip-compile outputs ([#327](https://github.com/miracum/recruit/issues/327)) ([993d001](https://github.com/miracum/recruit/commit/993d001450edec014899e7acb5cc332ad8f039e2))
+* **deps:** update dependency cypress to v13 ([#324](https://github.com/miracum/recruit/issues/324)) ([a5212f4](https://github.com/miracum/recruit/commit/a5212f4827b0515681479b57135071b794eb951a))
+* **deps:** update dependency urllib3 to v2.2.2 [security] ([#328](https://github.com/miracum/recruit/issues/328)) ([b2c31db](https://github.com/miracum/recruit/commit/b2c31dbcc9653e09c466d679b1a31aa2516101a6))
+* **deps:** update docker.io/cypress/included:13.11.0 docker digest to 8b88199 ([#330](https://github.com/miracum/recruit/issues/330)) ([48ced9c](https://github.com/miracum/recruit/commit/48ced9c703888ab3bff71761f8853e399c69b8a4))
+* **deps:** update docker.io/library/gradle:8.8.0-jdk21 docker digest to ea95b17 ([#331](https://github.com/miracum/recruit/issues/331)) ([0172bd1](https://github.com/miracum/recruit/commit/0172bd15322f46afdd5c045791504edd61bda088))
+* **deps:** update docker.io/library/traefik docker tag to v3 ([#325](https://github.com/miracum/recruit/issues/325)) ([7319a4f](https://github.com/miracum/recruit/commit/7319a4f63492363173cae744544bc588a8495836))
+* **deps:** update github-actions ([#323](https://github.com/miracum/recruit/issues/323)) ([0735524](https://github.com/miracum/recruit/commit/073552440060c9db2f76e96c5cd3f4ffa00a4f48))
+* **helm:** reset Chart.yaml changelog annotations ([90c7c3c](https://github.com/miracum/recruit/commit/90c7c3cfdfb2f1cc06d7f9ada7e83b99f10cfee4))
+
 ## [10.1.12](https://github.com/miracum/recruit/compare/v10.1.11...v10.1.12) (2024-06-06)
 
 
