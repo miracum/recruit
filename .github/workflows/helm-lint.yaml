@@ -10,14 +10,14 @@ permissions: read-all
 jobs:
   lint:
     runs-on: ubuntu-22.04
-    container: ghcr.io/chgl/kube-powertools:v2.3.0@sha256:3322980b98ece030f4d5fa598ad8b9e152a8308f019175745ba392e396aff8a9
+    container: ghcr.io/chgl/kube-powertools:v2.3.12@sha256:026468ae2827c50261b1245b0a2a6204f7e2793e086202aad433e6baa720204a
     steps:
       - name: Add workspace as safe directory
         run: |
           git config --global --add safe.directory /__w/recruit/recruit
 
       - name: Checkout
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           fetch-depth: 0
 
