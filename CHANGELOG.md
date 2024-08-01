@@ -1,5 +1,30 @@
 # Changelog
 
+## [10.1.13](https://github.com/miracum/recruit/compare/v10.1.12...v10.1.13) (2024-08-01)
+
+
+### Miscellaneous Chores
+
+* **deps:** refresh pip-compile outputs ([#327](https://github.com/miracum/recruit/issues/327)) ([993d001](https://github.com/miracum/recruit/commit/993d001450edec014899e7acb5cc332ad8f039e2))
+* **deps:** refresh pip-compile outputs ([#329](https://github.com/miracum/recruit/issues/329)) ([cd3b2ef](https://github.com/miracum/recruit/commit/cd3b2efab23e845ee9e709252f8e031b5b969f10))
+* **deps:** update all non-major dependencies ([#339](https://github.com/miracum/recruit/issues/339)) ([8a17429](https://github.com/miracum/recruit/commit/8a17429569d3f5f9314b6823ab7b8339d41c0c39))
+* **deps:** update dependency certifi to v2024.7.4 [security] ([#333](https://github.com/miracum/recruit/issues/333)) ([24afd8c](https://github.com/miracum/recruit/commit/24afd8ccd8407153762b8094d6192fff877d0f26))
+* **deps:** update dependency cypress to v13 ([#324](https://github.com/miracum/recruit/issues/324)) ([a5212f4](https://github.com/miracum/recruit/commit/a5212f4827b0515681479b57135071b794eb951a))
+* **deps:** update dependency urllib3 to v2.2.2 [security] ([#328](https://github.com/miracum/recruit/issues/328)) ([b2c31db](https://github.com/miracum/recruit/commit/b2c31dbcc9653e09c466d679b1a31aa2516101a6))
+* **deps:** update docker.io/cypress/included:13.11.0 docker digest to 8b88199 ([#330](https://github.com/miracum/recruit/issues/330)) ([48ced9c](https://github.com/miracum/recruit/commit/48ced9c703888ab3bff71761f8853e399c69b8a4))
+* **deps:** update docker.io/library/gradle:8.8.0-jdk21 docker digest to 62c8919 ([#334](https://github.com/miracum/recruit/issues/334)) ([6004ad8](https://github.com/miracum/recruit/commit/6004ad8a5bfd763fea910bdb1900280cf4f160d6))
+* **deps:** update docker.io/library/gradle:8.8.0-jdk21 docker digest to ea95b17 ([#331](https://github.com/miracum/recruit/issues/331)) ([0172bd1](https://github.com/miracum/recruit/commit/0172bd15322f46afdd5c045791504edd61bda088))
+* **deps:** update docker.io/library/traefik docker tag to v3 ([#325](https://github.com/miracum/recruit/issues/325)) ([7319a4f](https://github.com/miracum/recruit/commit/7319a4f63492363173cae744544bc588a8495836))
+* **deps:** update gcr.io/distroless/java21-debian12:nonroot docker digest to 5723ccd ([#335](https://github.com/miracum/recruit/issues/335)) ([df1c90a](https://github.com/miracum/recruit/commit/df1c90a8b6ba14b5d1e11eee5caf9912c8da0dcd))
+* **deps:** update gcr.io/distroless/nodejs22-debian12:nonroot docker digest to 0791089 ([#342](https://github.com/miracum/recruit/issues/342)) ([e18f477](https://github.com/miracum/recruit/commit/e18f477224992b42f7436e7c3d4a4ec758923e3c))
+* **deps:** update gcr.io/distroless/nodejs22-debian12:nonroot docker digest to 9f702c5 ([#336](https://github.com/miracum/recruit/issues/336)) ([07e1a18](https://github.com/miracum/recruit/commit/07e1a18cbbfc4ea862cb271fa83225cf658bdb2d))
+* **deps:** update github-actions ([#323](https://github.com/miracum/recruit/issues/323)) ([0735524](https://github.com/miracum/recruit/commit/073552440060c9db2f76e96c5cd3f4ffa00a4f48))
+* **deps:** update github-actions ([#340](https://github.com/miracum/recruit/issues/340)) ([424f07c](https://github.com/miracum/recruit/commit/424f07c9ea262287ec258d16ad492a0db3f16447))
+* **deps:** update mcr.microsoft.com/dotnet/nightly/runtime:8.0-jammy-chiseled docker digest to 9864dc9 ([#337](https://github.com/miracum/recruit/issues/337)) ([ff3de5b](https://github.com/miracum/recruit/commit/ff3de5bea999ce1b82c2fad7a67052437da15025))
+* **deps:** update mcr.microsoft.com/dotnet/nightly/runtime:8.0-jammy-chiseled docker digest to 9947dbb ([#343](https://github.com/miracum/recruit/issues/343)) ([a3ca4aa](https://github.com/miracum/recruit/commit/a3ca4aa511b5d920d97c8f34459d743504b5dfef))
+* **deps:** update mcr.microsoft.com/dotnet/sdk:8.0-jammy docker digest to aabefd2 ([#338](https://github.com/miracum/recruit/issues/338)) ([bdb6ebc](https://github.com/miracum/recruit/commit/bdb6ebcbfb5af1f521cb2b950f5525a6b723dde2))
+* **helm:** reset Chart.yaml changelog annotations ([90c7c3c](https://github.com/miracum/recruit/commit/90c7c3cfdfb2f1cc06d7f9ada7e83b99f10cfee4))
+
 ## [10.1.12](https://github.com/miracum/recruit/compare/v10.1.11...v10.1.12) (2024-06-06)
 
 
