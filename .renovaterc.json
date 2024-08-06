@@ -1,32 +1,52 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:best-practices", "group:allNonMajor", "schedule:monthly"],
+  "extends": [
+    "config:best-practices",
+    "group:allNonMajor",
+    "schedule:monthly"
+  ],
   "ignoreDeps": [
     "docker.io/library/postgres",
     "postgresql",
     "docker.io/bitnami/postgresql"
   ],
-  "ignorePaths": ["**/node_modules/**", "**/bower_components/**", "fhir/**"],
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/bower_components/**",
+    "fhir/**"
+  ],
   "pip-compile": {
-    "fileMatch": ["(^|/|\\.)requirements\\.txt$"]
+    "fileMatch": [
+      "(^|/|\\.)requirements\\.txt$"
+    ]
   },
   "packageRules": [
     {
-      "matchManagers": ["github-actions"],
+      "matchManagers": [
+        "github-actions"
+      ],
       "groupName": "github-actions"
     },
     {
-      "matchManagers": ["github-actions"],
-      "matchPackageNames": ["slsa-framework/slsa-github-generator"],
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchPackageNames": [
+        "slsa-framework/slsa-github-generator"
+      ],
       "pinDigests": false
     },
     {
-      "matchManagers": ["helmv3"],
+      "matchManagers": [
+        "helmv3"
+      ],
       "pinDigests": false
     },
     {
-      "matchPackagePatterns": ["^ghcr.io/miracum/recruit"],
-      "pinDigests": false
+      "pinDigests": false,
+      "matchPackageNames": [
+        "/^ghcr.io/miracum/recruit/"
+      ]
     }
   ]
 }
