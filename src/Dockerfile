@@ -19,7 +19,7 @@ gradle ":${MODULE_NAME}:test"
 gradle jacocoTestReport
 EOF
 
-FROM gcr.io/distroless/java21-debian12:nonroot@sha256:5723ccd77a896c16242057b788a3341b265329fc1cbcb5b0add34cfd97057554
+FROM gcr.io/distroless/java21-debian12:nonroot@sha256:c558ed3930fe2a7f955d9037d029d160aff004e5432871c31c31e7c71cf64167
 WORKDIR /app
 
 COPY --from=build /home/gradle/project/opentelemetry-javaagent.jar ./opentelemetry-javaagent.jar
