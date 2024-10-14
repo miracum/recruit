@@ -1,0 +1,12 @@
+:root > * {
+  --md-primary-fg-color: #1b2259;
+  --md-typeset-a-color: #1b2259;
+}
+
+.md-typeset a {
+  font-weight: bold;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-typeset-a-color: #4e5cc2;
+}
