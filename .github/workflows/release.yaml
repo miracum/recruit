@@ -12,7 +12,7 @@ permissions: {}
 jobs:
   publish-helm-chart:
     name: publish helm chart
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
@@ -62,7 +62,7 @@ jobs:
 
   sync-helm-chart-to-central-chart-repo:
     name: sync helm chart to central chart repo
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     steps:
@@ -89,7 +89,7 @@ jobs:
           CHART_VERSION=$(yq .version recruit/charts/recruit/Chart.yaml)
           echo "version=${CHART_VERSION}" >> "$GITHUB_OUTPUT"
 
-      - uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c # v6.1.0
+      - uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7.0.5
         with:
           token: ${{ secrets.token }}
           path: miracum-charts
@@ -100,7 +100,7 @@ jobs:
   # experimental
   publish-kyverno-policies:
     name: publish kyverno policies
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     container: ghcr.io/chgl/kube-powertools:v2.3.12@sha256:026468ae2827c50261b1245b0a2a6204f7e2793e086202aad433e6baa720204a
     continue-on-error: true
     steps:
@@ -117,7 +117,7 @@ jobs:
 
   prepare-artifacts:
     name: prepare artifacts
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs:
       - publish-helm-chart
     outputs:
