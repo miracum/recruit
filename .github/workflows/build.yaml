@@ -27,7 +27,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       image: ${{ env.IMAGE_NAME }}
       digest: ${{ steps.build.outputs.digest }}
@@ -57,7 +57,7 @@ jobs:
 
       - name: Build image
         id: build
-        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5.4.0
+        uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75 # v6.9.0
         with:
           cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache
           cache-to: type=inline
@@ -70,7 +70,7 @@ jobs:
             MODULE_NAME=${{ inputs.module-name }}
 
       - name: Run unit tests
-        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5.4.0
+        uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75 # v6.9.0
         with:
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -79,6 +79,11 @@ jobs:
           context: ${{ inputs.context }}
           build-args: |
             MODULE_NAME=${{ inputs.module-name }}
+
+      - name: Trivy Cache
+        uses: yogeshlonkar/trivy-cache-action@5e3c2d406dd3a13d95a3eabc520e0ac19ab729b5 # v0.1.8
+        with:
+          gh-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8 # 0.24.0
@@ -140,7 +145,7 @@ jobs:
 
   sign:
     name: sign image
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     if: ${{ github.event_name != 'pull_request' }}
     needs:
       - build

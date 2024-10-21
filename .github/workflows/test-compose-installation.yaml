@@ -11,7 +11,7 @@ permissions: read-all
 
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       RECRUIT_IMAGE_BASE_NAME: ghcr.io/${{ github.repository }}
       RECRUIT_IMAGE_TAG: ${{ inputs.image-tag }}
