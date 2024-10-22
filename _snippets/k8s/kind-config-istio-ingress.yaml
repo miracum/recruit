@@ -1,0 +1,30 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+featureGates:
+  PodSecurity: true
+nodes:
+  - role: control-plane
+    image: docker.io/kindest/node:v1.26.0@sha256:45aa9ecb5f3800932e9e35e9a45c61324d656cf5bc5dd0d6adfc1b0f8168ec5f
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      - containerPort: 30000
+        hostPort: 80
+        protocol: TCP
+      - containerPort: 30001
+        hostPort: 443
+        protocol: TCP
+    labels:
+      topology.kubernetes.io/zone: a
+  - role: worker
+    image: docker.io/kindest/node:v1.26.0@sha256:45aa9ecb5f3800932e9e35e9a45c61324d656cf5bc5dd0d6adfc1b0f8168ec5f
+    labels:
+      topology.kubernetes.io/zone: b
+  - role: worker
+    image: docker.io/kindest/node:v1.26.0@sha256:45aa9ecb5f3800932e9e35e9a45c61324d656cf5bc5dd0d6adfc1b0f8168ec5f
+    labels:
+      topology.kubernetes.io/zone: c
