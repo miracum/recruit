@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: docker.io/library/traefik:v3.1.1@sha256:9f68c02f50786068f6687128ae8e8632b0bc24bc806705c9ff9fcbe9e38d19ae
+    image: docker.io/library/traefik:v3.1.6@sha256:f703a2ac2ddf75f6e06c9cccac7f158765e2ab42d642b04e79e2e3d7355c2ddc
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -23,7 +23,7 @@ services:
           memory: 128m
 
   fhir:
-    image: docker.io/hapiproject/hapi:v7.2.0@sha256:9bcafa8342b572eee248cb7c48c496863d352bbd0347e1d98ea238d09620e89b
+    image: docker.io/hapiproject/hapi:v7.4.0@sha256:f34b41f5002665f384cf344da2d8e653025bd095aa37aa6f5a9d6dc0dac75684
     restart: unless-stopped
     cap_drop:
       - ALL
@@ -79,7 +79,7 @@ services:
       POSTGRES_DB: fhir
 
   broadsea-atlasdb:
-    image: docker.io/ohdsi/broadsea-atlasdb:2.1.0@sha256:99b4bd5515b3d82adb5bac9b14558b434df55fced6c194c965e3fb1371cb36c5
+    image: docker.io/ohdsi/broadsea-atlasdb:2.2.0@sha256:ec23023c756ed32426c922a2565af26718100e8cef09c927d0a7b9f07b204935
     ports:
       - "127.0.0.1:25432:5432"
 
@@ -270,7 +270,7 @@ services:
       OTEL_EXPORTER_JAEGER_ENDPOINT: "http://jaeger:14250"
 
   jaeger:
-    image: docker.io/jaegertracing/all-in-one:1.59.0@sha256:e369bd9a8e4a212bfed67aaff59b77ce0676df32828aaccca468a866efcb732b
+    image: docker.io/jaegertracing/all-in-one:1.62.0@sha256:836e9b69c88afbedf7683ea7162e179de63b1f981662e83f5ebb68badadc710f
     ports:
       - "127.0.0.1:16686:16686"
       - "127.0.0.1:6831:6831/udp"
