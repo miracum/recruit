@@ -7,7 +7,7 @@ repo_name: miracum/recruit
 repo_url: https://github.com/miracum/recruit
 edit_uri: ""
 
-copyright: Copyright &copy; 2023 miracum.org
+copyright: Copyright &copy; 2024 miracum.org
 
 markdown_extensions:
   - toc:
