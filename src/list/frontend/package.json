@@ -20,7 +20,7 @@
     "csv-stringify": "6.5.1",
     "fhirclient": "2.5.4",
     "fhirpath": "3.15.2",
-    "vue": "2.7.16",
+    "vue": "3.5.12",
     "vue-router": "3.6.5",
     "vuejs-logger": "1.5.5"
   },
