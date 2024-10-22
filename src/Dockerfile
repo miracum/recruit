@@ -1,4 +1,4 @@
-FROM docker.io/library/gradle:8.9.0-jdk21@sha256:0c13b320f227a67179fca5d5746ab889c011ed143023c80c5fc8520609fe427f AS build
+FROM docker.io/library/gradle:8.10.2-jdk21@sha256:68b2622349ffd414aee2f94901b2d0f6e7b309cfb5550904520e75f5e5ef1053 AS build
 WORKDIR /home/gradle/project
 ARG OPENTELEMETRY_JAVA_AGENT_VERSION=2.4.0
 RUN wget --quiet "https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OPENTELEMETRY_JAVA_AGENT_VERSION}/opentelemetry-javaagent.jar"
