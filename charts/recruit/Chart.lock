@@ -4,15 +4,15 @@ dependencies:
   version: 0.17.1
 - name: mailhog
   repository: https://codecentric.github.io/helm-charts
-  version: 5.2.3
+  version: 5.3.0
 - name: ohdsi
   repository: oci://ghcr.io/chgl/charts
-  version: 0.24.12
+  version: 0.24.26
 - name: postgresql
   repository: oci://registry-1.docker.io/bitnamicharts
   version: 13.2.27
 - name: fhir-pseudonymizer
   repository: oci://ghcr.io/miracum/charts
-  version: 0.7.15
-digest: sha256:339f783e0f48e30e27a655edbe42af4d6d3c09efcec91063a3ceacae577dbb6a
-generated: "2024-10-22T08:51:43.274845629Z"
+  version: 0.7.36
+digest: sha256:04b8e7f7e8990aa7e543d42e9810e4bfd35e38c618f63e0de96220a04f8ba660
+generated: "2024-12-01T10:38:51.50298615Z"
