@@ -26,18 +26,18 @@ dependencies:
   - condition: mailhog.enabled
     name: mailhog
     repository: https://codecentric.github.io/helm-charts
-    version: 5.2.3
+    version: 5.3.0
   - condition: ohdsi.enabled
     name: ohdsi
     repository: oci://ghcr.io/chgl/charts
-    version: 0.24.12
+    version: 0.24.26
   - name: postgresql
     version: 13.2.27
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: postgresql.enabled
   - condition: fhir-pseudonymizer.enabled
     name: fhir-pseudonymizer
-    version: 0.7.15
+    version: 0.7.36
     repository: oci://ghcr.io/miracum/charts
 # x-release-please-start-version
 version: 10.1.12
