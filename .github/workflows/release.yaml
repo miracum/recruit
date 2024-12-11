@@ -20,7 +20,7 @@ jobs:
       id-token: write
     steps:
       - name: Checkout
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
@@ -66,11 +66,11 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           path: recruit
 
-      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: miracum/charts
@@ -101,11 +101,11 @@ jobs:
   publish-kyverno-policies:
     name: publish kyverno policies
     runs-on: ubuntu-24.04
-    container: ghcr.io/chgl/kube-powertools:v2.3.27@sha256:2d1a6a5c0c42a29219550a616c5eeaa5ef9d057f28c40c9d83d048f73d57794b
+    container: ghcr.io/chgl/kube-powertools:v2.3.34@sha256:153b27c2b222c9f5f47e09aa3c56e284834c5221a8f59fd2aefd77c91180c2ae
     continue-on-error: true
     steps:
       - name: Checkout
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Push policy folder
         env:
@@ -126,7 +126,7 @@ jobs:
       contents: write # to upload artifacts to the release
     steps:
       - name: Checkout
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Download Helm chart
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
@@ -159,7 +159,7 @@ jobs:
           echo "hashes=$(base64 -w0 < checksums.sha256)" >> "$GITHUB_OUTPUT"
 
       - name: upload assets to release
-        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.8
+        uses: softprops/action-gh-release@7b4da11513bf3f43f9999e90eabced41ab8bb048 # v2.2.0
         with:
           files: |
             dist/*.tgz
