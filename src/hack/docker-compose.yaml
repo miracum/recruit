@@ -325,7 +325,7 @@ services:
       - "127.0.0.1:6432:5432"
 
   keycloak:
-    image: quay.io/keycloak/keycloak:21.1.2@sha256:3408c186dde4a95c2b99ef1290721bf1d253d64ba3a1de0a46c667b8288051f0
+    image: quay.io/keycloak/keycloak:26.1.4@sha256:044a457e04987e1fff756be3d2fa325a4ef420fa356b7034ecc9f1b693c32761
     restart: unless-stopped
     ipc: none
     security_opt:
