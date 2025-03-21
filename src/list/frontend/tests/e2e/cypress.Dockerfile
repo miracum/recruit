@@ -1,4 +1,4 @@
-FROM docker.io/cypress/included:13.16.0@sha256:f6ffa776b521615921f52e32ce8d4fc88e8d01b8217b9e7196ce4c79ebb23218
+FROM docker.io/cypress/included:13.17.0@sha256:128490f34f1f2f7c0bab4dd1dbc4eaf0435ba99fe3e0f538d8ecb98b92e34d0f
 WORKDIR /root
 ENV CI=1
 
