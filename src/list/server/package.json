@@ -29,7 +29,7 @@
     "express-jwt": "8.5.1",
     "express-prom-bundle": "8.0.0",
     "helmet": "8.1.0",
-    "http-proxy-middleware": "2.0.7",
+    "http-proxy-middleware": "3.0.3",
     "js-yaml": "4.1.0",
     "jwks-rsa": "2.1.5",
     "node-http-proxy-json": "0.1.9",
