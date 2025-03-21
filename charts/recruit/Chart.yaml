@@ -32,7 +32,7 @@ dependencies:
     repository: oci://ghcr.io/chgl/charts
     version: 0.24.63
   - name: postgresql
-    version: 13.2.27
+    version: 16.5.5
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: postgresql.enabled
   - condition: fhir-pseudonymizer.enabled
@@ -72,3 +72,5 @@ annotations:
   artifacthub.io/changes: |-
     - kind: changed
       description: updated recruIT image tags to v10.1.12 # x-release-please-version
+    - kind: changed
+      description: updated postgresql chart to v16.5.5
