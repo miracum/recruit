@@ -453,3 +453,5 @@ obj/
 # FHIR
 # ignored since we are pinning all dependencies anyways
 fhirpkg.lock.json
+
+charts/**/.helm_ls_cache
