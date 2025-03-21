@@ -1,0 +1,94 @@
+services:
+  query:
+    image: ${IMAGE_NAME:-ghcr.io/miracum/recruit/query}:${IMAGE_TAG}
+    pull_policy: never
+    environment:
+      FHIR_URL: http://fhir:8080/fhir
+      OMOP_JDBCURL: jdbc:postgresql://broadsea-atlasdb:5432/postgres
+      OMOP_USERNAME: postgres
+      # kics-scan ignore-line
+      OMOP_PASSWORD: mypass
+      OMOP_RESULTSSCHEMA: demo_cdm_results
+      OMOP_CDMSCHEMA: demo_cdm
+      ATLAS_DATASOURCE: EUNOMIA
+      QUERY_SCHEDULE_UNIXCRON: "* * * * *"
+      QUERY_WEBAPI_BASE_URL: http://ohdsi-webapi:8080/WebAPI
+      QUERY_WEBAPI_AUTH_ENABLED: "false" # TODO: re-enable when atlasdb supports/has been augmented with auth support.
+      QUERY_WEBAPI_AUTH_LOGIN_PATH: "/user/login/db"
+      QUERY_WEBAPI_AUTH_USERNAME: "recruit-query-module"
+      # kics-scan ignore-line
+      QUERY_WEBAPI_AUTH_PASSWORD: "pass123"
+      QUERY_WEBAPI_COHORT_CACHE_SCHEMA: "webapi"
+      QUERY_SELECTOR_MATCHLABELS: ""
+    depends_on:
+      - fhir
+      - broadsea-atlasdb
+      - ohdsi-webapi
+
+  tester:
+    build: .
+    environment:
+      FHIR_SERVER_URL: "http://fhir:8080/fhir"
+    depends_on:
+      - query
+
+  fhir:
+    image: docker.io/hapiproject/hapi:v7.6.0@sha256:4771a178e764896c83881c1b3a52bd487e53d06e1acc3653ea0db0c6f6b2b8a1
+    environment:
+      HAPI_FHIR_VALIDATION_REQUESTS_ENABLED: "true"
+      HAPI_FHIR_SUBSCRIPTION_RESTHOOK_ENABLED: "true"
+      HAPI_FHIR_FHIR_VERSION: "R4"
+      HAPI_FHIR_CORS_ALLOWCREDENTIALS: "false"
+      HAPI_FHIR_CORS_ALLOWED_ORIGIN: "*"
+      HAPI_FHIR_NARRATIVE_ENABLED: "false"
+
+  broadsea-atlasdb:
+    image: docker.io/ohdsi/broadsea-atlasdb:2.2.0@sha256:ec23023c756ed32426c922a2565af26718100e8cef09c927d0a7b9f07b204935
+
+  ohdsi-webapi:
+    image: docker.io/ohdsi/webapi:2.14.0@sha256:582b59b186fde5936081c1df6e41cba53e45e112d5b4875ddfda1e4dee4b2981
+    restart: unless-stopped
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+    privileged: false
+    environment:
+      DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
+      DATASOURCE_URL: jdbc:postgresql://broadsea-atlasdb:5432/postgres
+      DATASOURCE_USERNAME: postgres
+      # kics-scan ignore-line
+      DATASOURCE_PASSWORD: mypass
+      DATASOURCE_OHDSI_SCHEMA: webapi
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: webapi
+      SPRING_BATCH_REPOSITORY_TABLEPREFIX: webapi.BATCH_
+      FLYWAY_DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
+      FLYWAY_DATASOURCE_URL: jdbc:postgresql://broadsea-atlasdb:5432/postgres
+      FLYWAY_DATASOURCE_USERNAME: postgres
+      # kics-scan ignore-line
+      FLYWAY_DATASOURCE_PASSWORD: mypass
+      FLYWAY_LOCATIONS: classpath:db/migration/postgresql
+      FLYWAY_PLACEHOLDERS_OHDSISCHEMA: webapi
+      FLYWAY_SCHEMAS: webapi
+      FLYWAY_BASELINEONMIGRATE: "true"
+      FLYWAY_TABLE: schema_history
+      flyway_baselineVersionAsString: "2.2.5.20180212152023" # this env var is case sensitive
+      FLYWAY_BASELINEDESCRIPTION: Base Migration
+      SECURITY_CORS_ENABLED: "true"
+      SECURITY_ORIGIN: "*"
+      # SECURITY_PROVIDER: "AtlasRegularSecurity"
+      SECURITY_DB_DATASOURCE_URL: jdbc:postgresql://broadsea-atlasdb:5432/postgres
+      SECURITY_DB_DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
+      SECURITY_DB_DATASOURCE_SCHEMA: webapi
+      SECURITY_DB_DATASOURCE_USERNAME: postgres
+      # kics-scan ignore-line
+      SECURITY_DB_DATASOURCE_PASSWORD: mypass
+      SECURITY_DB_DATASOURCE_AUTHENTICATIONQUERY: >-
+        SELECT password, first_name AS firstname, middle_name AS middlename, last_name AS lastname, username FROM webapi.basic_security_users WHERE username = ?
+    depends_on:
+      - broadsea-atlasdb
