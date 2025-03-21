@@ -1,4 +1,4 @@
-query:
+query-fhir-trino:
   version: "10.1.12" # x-release-please-version
   cohortSizeThreshold: 100
   schedule:
@@ -21,28 +21,13 @@ query:
   selector:
     matchLabels:
       - "UC1"
-  webapi:
-    base-url: ${atlas.url}
-    auth:
-      enabled: false
-      login-path: "/user/login/db"
-      username: ""
-      password: ""
-    cohort-cache:
-      # should-clear: true # TODO: not yet implemented
-      schema: ohdsi
 
-atlas:
-  url: ""
-  cohortStatusCheckBackoffTime: 10000
-  dataSource: "CDS-CDMV5"
-
-omop:
-  jdbcUrl: ""
+trino:
+  jdbc-url: ""
   username: ""
   password: ""
-  resultsSchema: "cds_results"
-  cdmSchema: "cds_cdm"
+  catalog: "fhir"
+  schema: "default"
 
 fhir:
   url: ""
@@ -50,8 +35,6 @@ fhir:
     # call, connect, read, and write timeout to the FHIR server in seconds
     timeout-in-seconds: 300
   systems:
-    omopSubjectIdentifier: "http://ohdsi.org/omop/fhir/subject-identifier"
-    omopCohortIdentifier: "http://ohdsi.org/omop/fhir/cohort-identifier"
     screeningListIdentifier: "https://fhir.miracum.org/uc1/NamingSystem/screeningListId"
     screeningListStudyReferenceExtension: "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy"
     researchStudyAcronym: "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym"
@@ -67,24 +50,6 @@ fhir:
     device-id: "https://fhir.miracum.org/uc1/identifiers/recruit-module-id"
     system-determined-subject-status: "https://fhir.miracum.org/uc1/CodeSystem/system-determined-subject-status"
 
-camel:
-  metrics:
-    routePolicyLevel: route
-  component:
-    servlet:
-      mapping:
-        contextpath: "/query/*"
-    micrometer:
-      enabled: true
-  main:
-    name: Query
-    jmx-enabled: false
-    autowired-enabled: true
-    load-statistics-enabled: true
-  springboot:
-    main-run-controller: true
-
-# to configure logging levels
 logging:
   level:
     org:
@@ -104,7 +69,7 @@ spring:
   profiles:
     active: dev
   application:
-    name: query
+    name: query-fhir-trino
 
 management:
   endpoint:
@@ -119,9 +84,3 @@ management:
 
 server:
   shutdown: graceful
-
-opentracing:
-  jaeger:
-    log-spans: false
-    include-jaeger-env-tags: true
-    enabled: false
