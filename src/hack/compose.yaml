@@ -355,3 +355,238 @@ services:
       - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
       - "traefik.http.routers.keycloak.rule=Host(`recruit-keycloak.127.0.0.1.nip.io`)"
       - "traefik.http.routers.keycloak.entrypoints=web"
+
+  minio:
+    image: docker.io/bitnami/minio:2025.3.12@sha256:7c92dd1ba1f48e1009079c5e3f0a98e3c5a34387fc474007f1a887db7643e2c2
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    privileged: false
+    environment:
+      MINIO_UPDATE: "off"
+      MINIO_CALLHOME_ENABLE: "off"
+      MINIO_ROOT_USER: "admin"
+      # kics-scan ignore-line
+      MINIO_ROOT_PASSWORD: "miniopass" # gitleaks:allow
+      MINIO_DEFAULT_BUCKETS: "fhir"
+      MINIO_SCHEME: "http"
+    ports:
+      - "127.0.0.1:9001:9001"
+      - "127.0.0.1:9000:9000"
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+
+  wait-for-minio:
+    image: docker.io/curlimages/curl:8.12.0@sha256:94e9e444bcba979c2ea12e27ae39bee4cd10bc7041a472c4727a558e213744e6
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    privileged: false
+    restart: "no"
+    environment:
+      MINIO_ENDPOINT_URL: http://minio:9000
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        until [ "$(curl -s -o /dev/null -L -w "%{http_code}" "$$MINIO_ENDPOINT_URL/minio/health/live")" == "200" ]; do
+            echo "$(date): Waiting for minio server @ $$MINIO_ENDPOINT_URL to be up";
+            sleep 5;
+        done;
+    depends_on:
+      minio:
+        condition: service_started
+
+  pathling:
+    image: docker.io/aehrc/pathling:7.2.0@sha256:31b5ef50294e55136ae2278c2d0b8435a96a15b5da040ec785effb51875d08d3
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    privileged: false
+    environment:
+      JAVA_TOOL_OPTIONS: |
+        -Xmx12g
+        -Xss64m
+        -XX:G1HeapRegionSize=32M
+        -XX:+ExplicitGCInvokesConcurrent
+        -XX:+ExitOnOutOfMemoryError
+        -XX:+HeapDumpOnOutOfMemoryError
+        -Duser.timezone=UTC
+        --add-exports=java.base/sun.nio.ch=ALL-UNNAMED
+        --add-opens=java.base/java.net=ALL-UNNAMED
+        --add-opens=java.base/java.nio=ALL-UNNAMED
+        --add-opens=java.base/java.util=ALL-UNNAMED
+        --add-opens=java.base/java.lang.invoke=ALL-UNNAMED
+      pathling.storage.warehouseUrl: s3a://fhir
+      pathling.storage.cacheDatasets: "false"
+      pathling.query.cacheResults: "false"
+      pathling.import.allowableSources: file:///tmp/import/
+      pathling.terminology.enabled: "false"
+      pathling.terminology.serverUrl: http://localhost:8080/i-dont-exist
+      fs.s3a.endpoint: "http://minio:9000"
+      fs.s3a.access.key: "admin"
+      # kics-scan ignore-line
+      fs.s3a.secret.key: "miniopass" # gitleaks:allow
+      fs.s3a.impl: "org.apache.hadoop.fs.s3a.S3AFileSystem"
+      fs.s3a.path.style.access: "true"
+      spark.sql.parquet.compression.codec: "zstd"
+      spark.io.compression.codec: "zstd"
+      parquet.compression.codec.zstd.level: "9"
+      spark.serializer: "org.apache.spark.serializer.KryoSerializer"
+      spark.master: "local[*]"
+      spark.driver.memory: 10g
+    ports:
+      - "127.0.0.1:8082:8080"
+      - "127.0.0.1:4040:4040"
+    volumes:
+      - $PWD/synthea/output/bulk/fhir/:/tmp/import/:ro
+    depends_on:
+      wait-for-minio:
+        condition: service_completed_successfully
+
+  wait-for-pathling:
+    image: docker.io/curlimages/curl:8.12.1@sha256:94e9e444bcba979c2ea12e27ae39bee4cd10bc7041a472c4727a558e213744e6
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    privileged: false
+    restart: "no"
+    environment:
+      PATHLING_URL: http://pathling:8080
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        until [ "$(curl -s -o /dev/null -L -w "%{http_code}" "$$PATHLING_URL/fhir/metadata")" == "200" ]; do
+            echo "$(date): Waiting for pathling server @ $$PATHLING_URL to be up";
+            sleep 5;
+        done;
+    depends_on:
+      pathling:
+        condition: service_started
+
+  import-resources:
+    image: docker.io/curlimages/curl:8.12.1
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    privileged: false
+    restart: "no"
+    environment:
+      PATHLING_URL: http://pathling:8080
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        curl --fail -X POST --header 'Content-Type: application/fhir+json' --data @/tmp/pathling-import-request.json --url 'http://pathling:8080/fhir/$$import'
+    volumes:
+      - $PWD/pathling-import-request.json:/tmp/pathling-import-request.json:ro
+    depends_on:
+      wait-for-pathling:
+        condition: service_completed_successfully
+
+  warehousekeeper:
+    image: ghcr.io/miracum/util-images/warehousekeeper:v0.1.12@sha256:ba2b1169754da8d971a961f7318ee29b5ea04250cf4f921ed51d49f3bc24b18d
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    privileged: false
+    restart: "no"
+    environment:
+      AWS_ALLOW_HTTP: "1"
+      AWS_REGION: "eu-central-1"
+      AWS_ENDPOINT_URL: "http://minio:9000"
+      AWS_ACCESS_KEY_ID: "admin"
+      AWS_SECRET_ACCESS_KEY: "miniopass"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        python3 /opt/warehousekeeper/warehousekeeper.py register --bucket-name=fhir --database-name-prefix=default/ --hive-metastore=thrift://hive-metastore:9083
+        python3 /opt/warehousekeeper/warehousekeeper.py vacuum   --bucket-name=fhir --database-name-prefix=default/ --retention-hours=0 --dry-run=false --enforce-retention-duration=false
+    volumes:
+      - $PWD/config/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf:ro
+    depends_on:
+      import-resources:
+        condition: service_completed_successfully
+      hive-metastore:
+        condition: service_started
+      trino:
+        condition: service_started
+
+  metastore-db:
+    image: docker.io/bitnami/postgresql:17.4.0@sha256:a8a39ccbf84b527b470ace397c3b0bb0b8d97bad194b142f4a4128a20c1b8b32
+    ipc: private
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    privileged: false
+    restart: unless-stopped
+    environment:
+      POSTGRESQL_USERNAME: hive
+      POSTGRESQL_PASSWORD: hive
+      POSTGRESQL_DATABASE: metastore
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  hive-metastore:
+    image: ghcr.io/miracum/util-images/hive-metastore:v1.2.3@sha256:bcf828e2fbe6f14732390aee3bc2380cea5d4b3fb0c388f7b34ea80bddc64172
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    privileged: false
+    restart: unless-stopped
+    environment:
+      SERVICE_NAME: metastore
+      DB_DRIVER: postgres
+      SERVICE_OPTS: |
+        -Djavax.jdo.option.ConnectionUserName=hive
+        -Djavax.jdo.option.ConnectionPassword=hive
+      AWS_ACCESS_KEY_ID: "admin"
+      AWS_SECRET_ACCESS_KEY: "miniopass"
+      AWS_DEFAULT_REGION: "eu-central-1"
+    volumes:
+      - $PWD/config/hive-site.xml:/opt/hive/conf/hive-site.xml:ro
+    depends_on:
+      metastore-db:
+        condition: service_started
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  trino:
+    image: docker.io/trinodb/trino:472@sha256:cc9cab2afd71637176e94c729a05862d1b2d07f5b13b109f1ae041d3e78428dd
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    privileged: false
+    restart: unless-stopped
+    environment:
+      AWS_ACCESS_KEY_ID: "admin"
+      AWS_SECRET_ACCESS_KEY: "miniopass"
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - $PWD/config/trino/etc:/usr/lib/trino/etc:ro
+      - $PWD/config/trino/catalog:/etc/trino/catalog:ro
+    depends_on:
+      hive-metastore:
+        condition: service_started
