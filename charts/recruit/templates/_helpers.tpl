@@ -67,7 +67,7 @@ Get the FHIR server URL.
 */}}
 {{- define "recruit.fhirserver.url" -}}
 {{- if .Values.fhirserver.enabled }}
-    {{- $fullname := include "hapi-fhir-jpaserver.fullname" (index .Subcharts "hapi-fhir-jpaserver") -}}
+    {{- $fullname := include "hapi-fhir-jpaserver.fullname" (index .Subcharts "fhirserver") -}}
     {{ printf "http://%s:%d/fhir" $fullname 8080 }}
 {{- else -}}
     {{ .Values.externalFhirServer.url | quote }}
