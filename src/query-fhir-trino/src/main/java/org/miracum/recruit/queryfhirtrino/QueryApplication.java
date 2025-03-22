@@ -1,4 +1,4 @@
-package org.miracum.recruit.query;
+package org.miracum.recruit.queryfhirtrino;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

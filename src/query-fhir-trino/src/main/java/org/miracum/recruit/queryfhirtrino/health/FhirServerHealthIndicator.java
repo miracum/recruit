@@ -1,4 +1,4 @@
-package org.miracum.recruit.query.health;
+package org.miracum.recruit.queryfhirtrino.health;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.hl7.fhir.r4.model.CapabilityStatement;

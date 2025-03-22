@@ -1,0 +1,3 @@
+[sqlfluff]
+dialect = trino
+exclude_rules = references.from

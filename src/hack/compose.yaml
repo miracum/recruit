@@ -54,9 +54,9 @@ services:
       JAVA_TOOL_OPTIONS: "-javaagent:/app/opentelemetry-javaagent.jar"
       OTEL_METRICS_EXPORTER: "none"
       OTEL_LOGS_EXPORTER: "none"
-      OTEL_TRACES_EXPORTER: "jaeger"
+      OTEL_TRACES_EXPORTER: "otlp"
       OTEL_SERVICE_NAME: "hapi-fhir-jpaserver"
-      OTEL_EXPORTER_JAEGER_ENDPOINT: "http://jaeger:14250"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.fhir.loadbalancer.server.port=8080"
@@ -270,7 +270,7 @@ services:
       OTEL_EXPORTER_JAEGER_ENDPOINT: "http://jaeger:14250"
 
   jaeger:
-    image: docker.io/jaegertracing/all-in-one:1.67.0@sha256:34e3d18e0f2eeb9abd9bb53d0dc7abaf2a5b1c884fdca575093af3126811a9d3
+    image: docker.io/jaegertracing/jaeger:2.4.0@sha256:81afdc6ae85f52a5f063c80fcdb201798bb283d81067211121291b64026c19c2
     ports:
       - "127.0.0.1:16686:16686"
       - "127.0.0.1:6831:6831/udp"
@@ -325,7 +325,7 @@ services:
       - "127.0.0.1:6432:5432"
 
   keycloak:
-    image: quay.io/keycloak/keycloak:15.1.1@sha256:abade9a9cf985b454b30a9119183e62a0018ec546c8fc4fbd8572457afb4a666
+    image: quay.io/keycloak/keycloak:26.1.4@sha256:044a457e04987e1fff756be3d2fa325a4ef420fa356b7034ecc9f1b693c32761
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -341,8 +341,10 @@ services:
       - start-dev
       - --import-realm
     environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_METRICS_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
     volumes:
       - type: bind
         source: ./keycloak/recruit-realm-export.json
@@ -446,7 +448,7 @@ services:
       - "127.0.0.1:8082:8080"
       - "127.0.0.1:4040:4040"
     volumes:
-      - $PWD/synthea/output/bulk/fhir/:/tmp/import/:ro
+      - ./synthea/output/bulk/fhir/:/tmp/import/:ro
     depends_on:
       wait-for-minio:
         condition: service_completed_successfully
@@ -489,7 +491,7 @@ services:
       - |
         curl --fail -X POST --header 'Content-Type: application/fhir+json' --data @/tmp/pathling-import-request.json --url 'http://pathling:8080/fhir/$$import'
     volumes:
-      - $PWD/pathling-import-request.json:/tmp/pathling-import-request.json:ro
+      - ./pathling-import-request.json:/tmp/pathling-import-request.json:ro
     depends_on:
       wait-for-pathling:
         condition: service_completed_successfully
@@ -515,7 +517,7 @@ services:
         python3 /opt/warehousekeeper/warehousekeeper.py register --bucket-name=fhir --database-name-prefix=default/ --hive-metastore=thrift://hive-metastore:9083
         python3 /opt/warehousekeeper/warehousekeeper.py vacuum   --bucket-name=fhir --database-name-prefix=default/ --retention-hours=0 --dry-run=false --enforce-retention-duration=false
     volumes:
-      - $PWD/config/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf:ro
+      - ./config/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf:ro
     depends_on:
       import-resources:
         condition: service_completed_successfully
@@ -561,7 +563,7 @@ services:
       AWS_SECRET_ACCESS_KEY: "miniopass"
       AWS_DEFAULT_REGION: "eu-central-1"
     volumes:
-      - $PWD/config/hive-site.xml:/opt/hive/conf/hive-site.xml:ro
+      - ./config/hive-site.xml:/opt/hive/conf/hive-site.xml:ro
     depends_on:
       metastore-db:
         condition: service_started
@@ -585,8 +587,8 @@ services:
     ports:
       - "127.0.0.1:8080:8080"
     volumes:
-      - $PWD/config/trino/etc:/usr/lib/trino/etc:ro
-      - $PWD/config/trino/catalog:/etc/trino/catalog:ro
+      - ./config/trino/etc:/usr/lib/trino/etc:ro
+      - ./config/trino/catalog:/etc/trino/catalog:ro
     depends_on:
       hive-metastore:
         condition: service_started

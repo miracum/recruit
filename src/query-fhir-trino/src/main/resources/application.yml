@@ -4,30 +4,14 @@ query-fhir-trino:
   schedule:
     enable: true
     unixCron: "0 * * * *"
-  excludePatientParameters:
-    demographics: false
-    encounter: false
-  # if true, instead of overwriting the contents of the List for each cohort based on what
-  # the last generation run returned, append to this list
-  append-recommendations-to-existing-list: false
-  # if true, always send a List resource as part of the transaction even if nothing changed
-  force-update-screening-list: false
-  # if true, send Patient resources as "conditional-creates" on their first identifier instead of
-  # using "conditional-update". Useful if the server is already filled with Patient resources from a
-  # different system
-  only-create-patients-if-not-exist: false
-  # if true, start the query module, generate all cohorts, send the results to the FHIR server, and exit
-  run-once-and-exit: false
-  selector:
-    matchLabels:
-      - "UC1"
 
 trino:
-  jdbc-url: ""
-  username: ""
-  password: ""
-  catalog: "fhir"
-  schema: "default"
+  datasource:
+    url: ""
+    username: ""
+    password: ""
+    catalog: "fhir"
+    schema: "default"
 
 fhir:
   url: ""
@@ -51,17 +35,6 @@ fhir:
     system-determined-subject-status: "https://fhir.miracum.org/uc1/CodeSystem/system-determined-subject-status"
 
 logging:
-  level:
-    org:
-      springframework: "INFO"
-      apache:
-        camel:
-          spring:
-            boot: "INFO"
-          impl: "INFO"
-      miracum:
-        recruit:
-          query: "INFO"
   pattern:
     console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:%5p}) %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m %X %n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
 

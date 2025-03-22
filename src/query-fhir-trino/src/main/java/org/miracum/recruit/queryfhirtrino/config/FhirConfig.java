@@ -1,4 +1,4 @@
-package org.miracum.recruit.query.config;
+package org.miracum.recruit.queryfhirtrino.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.okhttp.client.OkHttpRestfulClientFactory;
