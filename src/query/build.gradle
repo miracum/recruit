@@ -11,6 +11,7 @@ plugins {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
 
     implementation 'org.apache.camel:camel-sql:4.10.2'
     implementation 'org.apache.camel:camel-jackson:4.10.2'

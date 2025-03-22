@@ -1,8 +1,11 @@
-trino:
+spring:
   datasource:
     url: "jdbc:trino://localhost:8080/fhir/default"
     username: "trino"
     password: ""
+
+server:
+  port: 8081
 
 fhir:
   url: "http://recruit-fhir-server.127.0.0.1.nip.io/fhir"
@@ -11,7 +14,7 @@ fhir:
 logging:
   level:
     org:
-      springframework: "DEBUG"
+      springframework: "INFO"
       miracum:
         recruit:
-          query: "DEBUG"
+          queryfhirtrino: "DEBUG"

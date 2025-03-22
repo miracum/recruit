@@ -5,14 +5,6 @@ query-fhir-trino:
     enable: true
     unixCron: "0 * * * *"
 
-trino:
-  datasource:
-    url: ""
-    username: ""
-    password: ""
-    catalog: "fhir"
-    schema: "default"
-
 fhir:
   url: ""
   server:
@@ -39,6 +31,11 @@ logging:
     console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:%5p}) %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m %X %n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
 
 spring:
+  datasource:
+    driver-class-name: io.trino.jdbc.TrinoDriver
+    url: ""
+    username: ""
+    password: ""
   profiles:
     active: dev
   application:

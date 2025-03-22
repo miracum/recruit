@@ -80,11 +80,15 @@ services:
 
   broadsea-atlasdb:
     image: docker.io/ohdsi/broadsea-atlasdb:2.2.0@sha256:ec23023c756ed32426c922a2565af26718100e8cef09c927d0a7b9f07b204935
+    profiles:
+      - omop
     ports:
       - "127.0.0.1:25432:5432"
 
   ohdsi-webapi:
     image: docker.io/ohdsi/webapi:2.14.0@sha256:582b59b186fde5936081c1df6e41cba53e45e112d5b4875ddfda1e4dee4b2981
+    profiles:
+      - omop
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -144,6 +148,8 @@ services:
 
   ohdsi-atlas:
     image: docker.io/ohdsi/atlas:2.14.1@sha256:bd095ed794a6619f877d72c13ecfc22c8bb8a863937392857866e4bd6015157f
+    profiles:
+      - omop
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -240,6 +246,7 @@ services:
         MODULE_NAME: query
     profiles:
       - query
+      - omop
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -360,6 +367,8 @@ services:
 
   minio:
     image: docker.io/bitnami/minio:2025.3.12@sha256:7c92dd1ba1f48e1009079c5e3f0a98e3c5a34387fc474007f1a887db7643e2c2
+    profiles:
+      - trino
     ipc: none
     security_opt:
       - "no-new-privileges:true"
@@ -384,6 +393,8 @@ services:
 
   wait-for-minio:
     image: docker.io/curlimages/curl:8.12.0@sha256:94e9e444bcba979c2ea12e27ae39bee4cd10bc7041a472c4727a558e213744e6
+    profiles:
+      - trino
     ipc: none
     security_opt:
       - "no-new-privileges:true"
@@ -406,6 +417,8 @@ services:
 
   pathling:
     image: docker.io/aehrc/pathling:7.2.0@sha256:31b5ef50294e55136ae2278c2d0b8435a96a15b5da040ec785effb51875d08d3
+    profiles:
+      - trino
     ipc: none
     security_opt:
       - "no-new-privileges:true"
@@ -455,6 +468,8 @@ services:
 
   wait-for-pathling:
     image: docker.io/curlimages/curl:8.12.1@sha256:94e9e444bcba979c2ea12e27ae39bee4cd10bc7041a472c4727a558e213744e6
+    profiles:
+      - trino
     ipc: none
     security_opt:
       - "no-new-privileges:true"
@@ -477,6 +492,8 @@ services:
 
   import-resources:
     image: docker.io/curlimages/curl:8.12.1@sha256:94e9e444bcba979c2ea12e27ae39bee4cd10bc7041a472c4727a558e213744e6
+    profiles:
+      - trino
     ipc: none
     security_opt:
       - "no-new-privileges:true"
@@ -498,6 +515,8 @@ services:
 
   warehousekeeper:
     image: ghcr.io/miracum/util-images/warehousekeeper:v0.1.12@sha256:ba2b1169754da8d971a961f7318ee29b5ea04250cf4f921ed51d49f3bc24b18d
+    profiles:
+      - trino
     ipc: none
     security_opt:
       - "no-new-privileges:true"
@@ -528,6 +547,8 @@ services:
 
   metastore-db:
     image: docker.io/bitnami/postgresql:17.4.0@sha256:a8a39ccbf84b527b470ace397c3b0bb0b8d97bad194b142f4a4128a20c1b8b32
+    profiles:
+      - trino
     ipc: private
     security_opt:
       - "no-new-privileges:true"
@@ -546,6 +567,8 @@ services:
 
   hive-metastore:
     image: ghcr.io/miracum/util-images/hive-metastore:v1.2.3@sha256:bcf828e2fbe6f14732390aee3bc2380cea5d4b3fb0c388f7b34ea80bddc64172
+    profiles:
+      - trino
     ipc: none
     security_opt:
       - "no-new-privileges:true"
@@ -574,6 +597,8 @@ services:
 
   trino:
     image: docker.io/trinodb/trino:473@sha256:b2a1eec47aae99a4cfa5f4104ae7055fbac8405370367297859c2482adb12254
+    profiles:
+      - trino
     ipc: none
     security_opt:
       - "no-new-privileges:true"
