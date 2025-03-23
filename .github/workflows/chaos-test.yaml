@@ -3,7 +3,8 @@ name: Chaos Testing
 on:
   workflow_call:
 
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   run-chaos-tests:

@@ -8,7 +8,8 @@ on:
   pull_request:
     branches: [master]
 
-permissions: read-all
+permissions:
+  contents: read
 
 env: # Comment env block if you do not want to apply fixes
   # Apply linter fixes configuration
