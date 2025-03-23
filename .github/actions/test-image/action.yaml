@@ -6,7 +6,7 @@ inputs:
     required: true
   e2e-test-directory:
     description: "Directory for running e2e tests via docker compose."
-    default: "tests/e2e/"
+    default: ""
     required: false
   image-name:
     description: "name of the image without a tag"
@@ -52,6 +52,7 @@ runs:
         ./container-structure-test-linux-amd64 test --image="${IMAGE_NAME}:${IMAGE_TAG}" --config=tests/container-structure/common-tests.yaml
 
     - name: Run isolated smoke test
+      if: ${{ inputs.e2e-test-directory != ''}}
       shell: bash
       working-directory: src/${{ inputs.project-name }}
       env:
@@ -61,9 +62,10 @@ runs:
         docker compose -f ${{ inputs.e2e-test-directory }}/docker-compose.yaml run tester
 
     - name: Print test logs and stop all running containers
-      if: ${{ always() }}
+      if: ${{ inputs.e2e-test-directory != '' && always()}}
       shell: bash
       working-directory: src/${{ inputs.project-name }}
+      continue-on-error: true
       env:
         IMAGE_TAG: ${{ inputs.image-tag }}
       run: |

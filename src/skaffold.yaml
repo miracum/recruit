@@ -8,6 +8,10 @@ build:
       jib:
         project: query
         type: gradle
+    - image: ghcr.io/miracum/recruit/query-fhir-trino
+      jib:
+        project: query-fhir-trino
+        type: gradle
     - image: ghcr.io/miracum/recruit/notify
       jib:
         project: notify

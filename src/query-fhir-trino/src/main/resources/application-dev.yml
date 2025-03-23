@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: "jdbc:trino://localhost:8080/fhir/default"
+    username: "trino"
+    password: ""
+
+query-fhir-trino:
+  schedule:
+    # every 5 seconds
+    cron: "*/5 * * * * *"
+
+server:
+  port: 8090
+
+fhir:
+  url: "http://recruit-fhir-server.127.0.0.1.nip.io/fhir"
+
+# to configure logging levels
+logging:
+  level:
+    org:
+      springframework: "INFO"
+      miracum:
+        recruit:
+          queryfhirtrino: "DEBUG"

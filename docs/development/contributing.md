@@ -7,7 +7,7 @@ All contributions are welcome!
 From the `/src` directory:
 
 ```sh
-docker compose -f hack/docker-compose.yaml up
+docker compose -f hack/compose.yaml --profile=omop up
 ```
 
 This will start all development dependencies:
@@ -26,8 +26,8 @@ For example, when working on the query module, it might be useful to run the scr
 for debugging. The following will start all development dependencies as well as build and run the list and notify containers:
 
 ```sh
-docker compose -f hack/docker-compose.yaml --profile=notify --profile=list build
-docker compose -f hack/docker-compose.yaml --profile=notify --profile=list up
+docker compose -f hack/compose.yaml --profile=omop --profile=notify --profile=list build
+docker compose -f hack/compose.yaml --profile=omop --profile=notify --profile=list up
 ```
 
 You can then start the query module via gradle by running
@@ -35,6 +35,52 @@ You can then start the query module via gradle by running
 ```sh
 ./gradlew :query:bootRun
 ```
+
+### Setup for the Trino SQL-based query module
+
+Use the `trino` profile to start the dependencies for using the Trino-based query module:
+
+- Traefik
+- HAPI FHIR JPA Server
+- Jaeger
+- MailDev
+- Keycloak
+- MinIO
+- Pathling
+- Hive Metastore
+- Warehousekeeper (VACUUMs the Delta Lake tables and registers them in the Hive Metastore)
+- Trino
+
+```sh
+docker compose -f hack/compose.yaml --profile=trino up
+```
+
+By default, this will also upload sample FHIR resources to the FHIR server and import the same
+resources via Pathling into Delta Lake tables.
+
+For development, you will also need to upload two FHIR SearchParameter resources required by the query module:
+
+```sh
+curl --fail-with-body -X POST -H "Content-Type: application/fhir+json" --data @hack/fhir/search-parameters-transaction.json "http://recruit-fhir-server.127.0.0.1.nip.io/fhir"
+```
+
+Afterwards you can upload a sample study with the associated SQL-encoded criteria:
+
+```sh
+curl --fail-with-body -X POST -H "Content-Type: application/fhir+json" --data @hack/fhir/trino-sql-study-transaction.json "http://recruit-fhir-server.127.0.0.1.nip.io/fhir"
+```
+
+Now, running
+
+```sh
+./gradlew :query-fhir-trino:bootRun
+```
+
+```sh
+curl --fail-with-body "http://recruit-fhir-server.127.0.0.1.nip.io/fhir/List"
+```
+
+should create all appropriated resources to appear in the screening list.
 
 ## Building Container Images
 
@@ -53,7 +99,7 @@ export MODULE_NAME=query
 docker build -t "ghcr.io/miracum/recruit/${MODULE_NAME}:local" --build-arg=MODULE_NAME=${MODULE_NAME} .
 ```
 
-The `--build-arg` `MODULE_NAME` must be either `notify` or `query` (default).
+The `--build-arg` `MODULE_NAME` can be either `notify`, `query-fhir-trino`, or `query` (default).
 
 #### Using jib
 

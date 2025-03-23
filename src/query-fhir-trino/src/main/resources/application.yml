@@ -1,0 +1,45 @@
+query-fhir-trino:
+  version: "10.1.12" # x-release-please-version
+  schedule:
+    # every 1 hour
+    cron: "@hourly"
+
+fhir:
+  url: ""
+  server:
+    # call, connect, read, and write timeout to the FHIR server in seconds
+    timeout-in-seconds: 300
+  systems:
+    screeningListIdentifier: "https://fhir.miracum.org/uc1/NamingSystem/screeningListId"
+    screening-list-study-reference-extension: "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy"
+    screening-list-code-system: "https://fhir.miracum.org/uc1/CodeSystem/screeningList"
+    eligibility-criteria-types: "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-criteria-types"
+
+logging:
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:%5p}) %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m %X %n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
+
+spring:
+  datasource:
+    driver-class-name: io.trino.jdbc.TrinoDriver
+    url: ""
+    username: ""
+    password: ""
+  profiles:
+    active: dev
+  application:
+    name: query-fhir-trino
+
+management:
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "health,prometheus"
+
+server:
+  shutdown: graceful

@@ -1,0 +1,36 @@
+{{- with .Values.queryFhirTrino -}}
+{{- if .enabled -}}
+{{- if .metrics.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "recruit.fullname" $ }}-query-fhir-trino
+  {{- if .metrics.serviceMonitor.namespace }}
+  namespace: {{ .metrics.serviceMonitor.namespace }}
+  {{- end }}
+  labels:
+    {{- include "recruit.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: query-fhir-trino
+    {{- if .metrics.serviceMonitor.additionalLabels }}
+    {{- toYaml .metrics.serviceMonitor.additionalLabels | nindent 4 }}
+    {{- end }}
+spec:
+  endpoints:
+    - port: http-metrics
+      path: /actuator/prometheus
+      {{- if .metrics.serviceMonitor.interval }}
+      interval: {{ .metrics.serviceMonitor.interval }}
+      {{- end }}
+      {{- if .metrics.serviceMonitor.scrapeTimeout }}
+      scrapeTimeout: {{ .metrics.serviceMonitor.scrapeTimeout }}
+      {{- end }}
+  namespaceSelector:
+    matchNames:
+      - {{ $.Release.Namespace }}
+  selector:
+    matchLabels:
+      {{- include "recruit.matchLabels" $ | nindent 6 }}
+      app.kubernetes.io/component: query-fhir-trino
+{{- end }}
+{{- end }}
+{{- end }}

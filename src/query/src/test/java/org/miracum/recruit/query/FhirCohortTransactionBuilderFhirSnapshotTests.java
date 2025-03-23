@@ -62,7 +62,7 @@ class FhirCohortTransactionBuilderFhirSnapshotTests {
 
     final var dateTimeScrubber =
         new RegExScrubber(
-            "(\"date\" : \")" + FHIR_DATETIME_REGEX, "\"date\": \"2000-01-01T11:11:11Z");
+            "(\"date\": \")" + FHIR_DATETIME_REGEX, "\"date\": \"2000-01-01T11:11:11Z");
     var scrubber = Scrubbers.scrubAll(dateTimeScrubber, new GuidScrubber());
     Approvals.verify(fhirJson, new Options(scrubber).forFile().withExtension(".fhir.json"));
   }

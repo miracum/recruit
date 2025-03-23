@@ -1,4 +1,5 @@
 {{- with .Values.query }}
+{{- if .enabled }}
 {{- if .metrics.serviceMonitor.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -30,5 +31,6 @@ spec:
     matchLabels:
       {{- include "recruit.matchLabels" $ | nindent 6 }}
       app.kubernetes.io/component: query
+{{- end }}
 {{- end }}
 {{- end }}

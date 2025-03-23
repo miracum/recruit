@@ -10,7 +10,8 @@ on:
     branches:
       - master
 
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   reset-commit-and-push:
@@ -29,6 +30,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.head_ref }}
+          persist-credentials: false
 
       # currently defaults to just the one chart, "recruit", needs to be updated if
       # more charts are added in the future. See <https://github.com/chgl/kube-powertools/blob/master/scripts/generate-chart-changelog.sh>

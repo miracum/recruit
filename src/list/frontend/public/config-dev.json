@@ -4,7 +4,7 @@
     "realm": "recruIT",
     "clientId": "recruit-list"
   },
-  "isKeycloakDisabled": false,
+  "isKeycloakDisabled": true,
   "hideDemographics": false,
   "hideLastVisit": false,
   "hideEhrButton": false,

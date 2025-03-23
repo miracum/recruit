@@ -11,8 +11,12 @@ plugins {
 
 group = 'org.miracum.recruit'
 version = '10.1.12' // x-release-please-version
-sourceCompatibility = '21'
-targetCompatibility = '21'
+
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(21)
+  }
+}
 
 repositories {
     // Use Maven Central for resolving dependencies.

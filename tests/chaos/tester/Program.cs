@@ -146,7 +146,7 @@ static async System.Threading.Tasks.Task RunDeleteMessages(Uri mailHogServerBase
 {
     Console.WriteLine("Deleting all previous messages");
 
-    var mailHogClient = new HttpClient { BaseAddress = mailHogServerBaseUrl, };
+    var mailHogClient = new HttpClient { BaseAddress = mailHogServerBaseUrl };
 
     var messagesResponse =
         await mailHogClient.GetFromJsonAsync<MailHogMessages>("v2/messages")
@@ -168,7 +168,7 @@ static async System.Threading.Tasks.Task RunAssert(
 {
     Console.WriteLine($"Using MailHog base URL: {mailHogServerBaseUrl}");
 
-    var client = new HttpClient { BaseAddress = mailHogServerBaseUrl, };
+    var client = new HttpClient { BaseAddress = mailHogServerBaseUrl };
 
     for (int i = 0; i < retries; i++)
     {

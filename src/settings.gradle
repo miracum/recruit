@@ -9,4 +9,4 @@
  */
 
 rootProject.name = 'recruit'
-include('notify', 'query')
+include('notify', 'query', 'query-fhir-trino')
