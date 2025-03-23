@@ -1,4 +1,3 @@
-import { join } from "path";
 import bearerToken from "express-bearer-token";
 import promBundle from "express-prom-bundle";
 import history from "connect-history-api-fallback";
@@ -8,10 +7,10 @@ import modifyResponse from "node-http-proxy-json";
 import { load } from "js-yaml";
 import { readFileSync } from "fs";
 import cors from "cors";
-import path from "path";
+import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
-import { createProxyMiddleware } from "http-proxy-middleware";
+import { legacyCreateProxyMiddleware } from "http-proxy-middleware";
 
 import { createJwtCheck } from "./auth.js";
 import { createAccessFilter, createPatchFilter, createDeleteFilter } from "./fhirAccessFilter.js";
@@ -96,10 +95,12 @@ app.use(bearerToken());
 app.use(express.json());
 app.use(metricsMiddleware);
 
+logger.info(config.fhirUrl);
+
 const allowedResourcesToPatch = /^\/\/(?<resourceType>ResearchSubject|List)/;
 
 const proxyRequestFilter = (_pathname, req) => req.method === "GET" || req.method === "PATCH" || req.method === "DELETE";
-const proxy = createProxyMiddleware(proxyRequestFilter, {
+const proxy = legacyCreateProxyMiddleware(proxyRequestFilter, {
   target: config.fhirUrl,
   changeOrigin: false,
   pathRewrite: {
@@ -228,7 +229,7 @@ app.get("/api/health/:probe", (req, res) => {
 app.use(history());
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(__filename);
 
 app.use(express.static(join(__dirname, "..", "dist")));
 
