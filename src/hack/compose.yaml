@@ -45,7 +45,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
       spring.jpa.properties.hibernate.dialect: ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect
-      HAPI_FHIR_VALIDATION_REQUESTS_ENABLED: "true"
+      HAPI_FHIR_VALIDATION_REQUESTS_ENABLED: "false"
       HAPI_FHIR_USE_APACHE_ADDRESS_STRATEGY: "true"
       HAPI_FHIR_ENFORCE_REFERENTIAL_INTEGRITY_ON_DELETE: "false"
       HAPI_FHIR_ENFORCE_REFERENTIAL_INTEGRITY_ON_WRITE: "false"
@@ -57,6 +57,11 @@ services:
       OTEL_TRACES_EXPORTER: "otlp"
       OTEL_SERVICE_NAME: "hapi-fhir-jpaserver"
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
+    depends_on:
+      traefik:
+        condition: service_started
+      fhir-db:
+        condition: service_started
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.fhir.loadbalancer.server.port=8080"
@@ -415,6 +420,37 @@ services:
       minio:
         condition: service_started
 
+  upload-to-fhir-server:
+    # the image if overkill, but it is the only one that has the necessary tools and is up-to-date
+    image: ghcr.io/chgl/kube-powertools:v2.3.48@sha256:458b38fb51d3ab6d056eb7627263a2749f6f55a86fb7a7130acf596cfdd8c5a5
+    profiles:
+      - trino
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    privileged: false
+    restart: "no"
+    environment:
+      FHIR_SERVER_BASE_URL: http://fhir:8080/fhir
+    entrypoint: ["/bin/bash", "-c"]
+    working_dir: /synthea/
+    command:
+      - |
+        until [ "$(curl -s -o /dev/null -L -w "%{http_code}" "$$FHIR_SERVER_BASE_URL/metadata")" == "200" ]; do
+            echo "$(date): Waiting for FHIR server @ $$FHIR_SERVER_BASE_URL to be up";
+            sleep 5;
+        done;
+        echo "Server is up. Sending resources.";
+        ls -lsa /synthea/
+        /synthea/post-transactions.sh
+    volumes:
+      - ./synthea/:/synthea/
+    depends_on:
+      fhir:
+        condition: service_started
+
   pathling:
     image: docker.io/aehrc/pathling:7.2.0@sha256:31b5ef50294e55136ae2278c2d0b8435a96a15b5da040ec785effb51875d08d3
     profiles:
@@ -461,7 +497,7 @@ services:
       - "127.0.0.1:8082:8080"
       - "127.0.0.1:4040:4040"
     volumes:
-      - ./synthea/output/bulk/fhir/:/tmp/import/:ro
+      - ./synthea/bulk/fhir/:/tmp/import/:ro
     depends_on:
       wait-for-minio:
         condition: service_completed_successfully
