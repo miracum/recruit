@@ -30,7 +30,7 @@ dependencies:
   - condition: ohdsi.enabled
     name: ohdsi
     repository: oci://ghcr.io/chgl/charts
-    version: 0.24.63
+    version: 0.24.65
   - name: postgresql
     version: 16.5.5
     repository: oci://registry-1.docker.io/bitnamicharts
