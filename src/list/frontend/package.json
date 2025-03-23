@@ -33,7 +33,7 @@
     "@vue/cli-service": "5.0.8",
     "@vue/eslint-config-airbnb": "6.0.0",
     "@vue/test-utils": "2.4.6",
-    "@vue/vue2-jest": "29.2.2",
+    "@vue/vue2-jest": "29.2.6",
     "cypress-keycloak": "2.0.2",
     "eslint": "8.57.1",
     "eslint-config-prettier": "9.1.0",
