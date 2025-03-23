@@ -3,15 +3,18 @@ package org.miracum.recruit.queryfhirtrino;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.util.BundleUtil;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.ListResource.ListStatus;
@@ -31,8 +34,6 @@ public class PollForStudies {
 
   private static final Logger log = LoggerFactory.getLogger(PollForStudies.class);
 
-  private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-
   private JdbcTemplate jdbcTemplate;
 
   private IGenericClient fhirClient;
@@ -46,19 +47,10 @@ public class PollForStudies {
     this.fhirSystems = fhirSystems;
   }
 
-  @Scheduled(fixedRate = 5000)
+  @Scheduled(cron = "${query-fhir-trino.schedule.cron}")
   public void pollForStudies() {
-    log.info("The time is now {}", dateFormat.format(new Date()));
-    // 1. get all FHIR ResearchStudy resources from the fhir server:
-    //
-    // http://recruit-fhir-server.127.0.0.1.nip.io/fhir/ResearchStudy?enrollment.code=trino-sql-encoded-eligibility-criteria&_include=ResearchStudy:enrollment&_include:iterate=Group:characteristic-reference
-    // 2. for each ResearchStudy resource, get the associated FHIR Group resource, and the
-    // assoaciated FHIR Library resource
-    // 3. for each Library resource, fetch the SQL query
-    // 4. finally, run this sql query against trino
-    // 5. for each returned patient id/row, create a new FHIR ResearchSubject resource, referencing
-    // the patient_id and the original ResearchStudy from above
-    // 6. post a FHIR List referencing all the ResearchSubject resources
+    log.info(
+        "Polling for ResearchStudy resources referencing a Group with trino-sql eligibility criteria");
 
     var studyBundle =
         fhirClient
@@ -70,12 +62,12 @@ public class PollForStudies {
                         "Group",
                         Group.CODE
                             .exactly()
-                            .systemAndCode(
-                                "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-criteria-types",
-                                "trino-sql-encoded-eligibility-criteria")))
+                            .systemAndCode(fhirSystems.eligibilityCriteriaTypes(), "trino-sql")))
             .include(new Include("ResearchStudy:enrollment"))
             .include(new Include("Group:characteristic-reference", true))
             .returnBundle(Bundle.class)
+            .encodedJson()
+            .withAdditionalHeader("Prefer", "handling=strict")
             .execute();
 
     for (var entry : studyBundle.getEntry()) {
@@ -90,7 +82,7 @@ public class PollForStudies {
 
         var library = (Library) group.getCharacteristicFirstRep().getValueReference().getResource();
 
-        byte[] decoded =
+        var decoded =
             Base64.getDecoder()
                 .decode(library.getContentFirstRep().getDataElement().asStringValue());
 
@@ -104,17 +96,8 @@ public class PollForStudies {
           log.info("Found patient with id: {}", row.get("patient_id"));
         }
 
-        var bundle =
-            createScreeningListBundle(
-                study, result.stream().map(r -> (String) r.get("patient_id")).toList());
-
-        var str =
-            fhirClient
-                .getFhirContext()
-                .newJsonParser()
-                .setPrettyPrint(true)
-                .encodeResourceToString(bundle);
-        log.info("Bundle: {}", str);
+        var patientIds = result.stream().map(r -> (String) r.get("patient_id")).distinct().toList();
+        var bundle = createScreeningListBundle(study, patientIds);
 
         fhirClient.transaction().withBundle(bundle).execute();
       }
@@ -126,17 +109,34 @@ public class PollForStudies {
     bundle.setType(Bundle.BundleType.TRANSACTION);
     bundle.setTimestamp(new Date());
 
+    var researchStudyReference = new Reference("ResearchStudy/" + study.getIdElement().getIdPart());
+
+    var screeningListCode = new CodeableConcept();
+    screeningListCode
+        .addCoding()
+        .setSystem(fhirSystems.screeningListCodeSystem())
+        .setCode("screening-recommendations");
     var screeningList =
-        new ListResource().setStatus(ListStatus.CURRENT).setMode(ListResource.ListMode.WORKING);
+        new ListResource()
+            .setStatus(ListStatus.CURRENT)
+            .setMode(ListResource.ListMode.WORKING)
+            .setCode(screeningListCode);
     screeningList
         .addIdentifier()
         .setSystem(fhirSystems.screeningListIdentifier())
         .setValue(study.getIdentifierFirstRep().getValue());
+    screeningList
+        .addExtension()
+        .setUrl(fhirSystems.screeningListStudyReferenceExtension())
+        .setValue(researchStudyReference);
+
+    // fetch previous screening list to retain List.entry.date
+    var previousScreeningList = fetchPreviousScreeningList(screeningList.getIdentifierFirstRep());
 
     for (var patientId : patientIds) {
       var subject =
           new ResearchSubject()
-              .setStudy(new Reference("ResearchStudy/" + study.getIdElement().getIdPart()))
+              .setStudy(researchStudyReference)
               .setIndividual(new Reference("Patient/" + patientId))
               .setStatus(ResearchSubject.ResearchSubjectStatus.CANDIDATE);
 
@@ -155,7 +155,35 @@ public class PollForStudies {
                       .setUrl(ResourceType.ResearchSubject.name()));
 
       bundle.addEntry(subjectEntry);
-      screeningList.addEntry().setItem(new Reference(subjectEntry.getFullUrl()));
+
+      // by default, the ListEntry date is the current date
+      var listEntry =
+          new ListResource.ListEntryComponent()
+              .setItem(new Reference(subjectEntry.getFullUrl()))
+              .setDate(new Date());
+
+      if (previousScreeningList.isPresent()) {
+        // check if there is an entry in the list with the same patient and study reference,
+        // i.e. the same ResearchSubject
+        var previousEntry =
+            previousScreeningList.get().getEntry().stream()
+                .filter(
+                    item ->
+                        ((ResearchSubject) item.getItem().getResource())
+                                .getIndividual()
+                                .getReference()
+                                .equals(subject.getIndividual().getReference())
+                            && ((ResearchSubject) item.getItem().getResource())
+                                .getStudy()
+                                .getReference()
+                                .equals(subject.getStudy().getReference()))
+                .findFirst();
+
+        if (previousEntry.isPresent() && previousEntry.get().hasDate()) {
+          listEntry.setDate(previousEntry.get().getDate());
+        }
+      }
+      screeningList.addEntry(listEntry);
     }
 
     bundle
@@ -172,5 +200,35 @@ public class PollForStudies {
                         + study.getIdentifierFirstRep().getValue()));
 
     return bundle;
+  }
+
+  private Optional<ListResource> fetchPreviousScreeningList(Identifier identifier) {
+    var previousListBundle =
+        fhirClient
+            .search()
+            .forResource(ListResource.class)
+            .where(
+                ListResource.IDENTIFIER
+                    .exactly()
+                    .systemAndIdentifier(identifier.getSystem(), identifier.getValue()))
+            .include(new Include("List:item"))
+            .returnBundle(Bundle.class)
+            .encodedJson()
+            .withAdditionalHeader("Prefer", "handling=strict")
+            .execute();
+
+    var listResources =
+        BundleUtil.toListOfResourcesOfType(
+            fhirClient.getFhirContext(), previousListBundle, ListResource.class);
+
+    if (listResources.isEmpty()) {
+      return Optional.empty();
+    }
+    if (listResources.size() > 1) {
+      throw new IllegalArgumentException(
+          "Found more than one List resource matching identifier " + identifier.getValue());
+    }
+
+    return Optional.of(listResources.getFirst());
   }
 }

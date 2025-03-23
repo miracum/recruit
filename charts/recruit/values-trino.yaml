@@ -1,0 +1,8 @@
+ohdsi:
+  enabled: false
+
+query:
+  enabled: false
+
+queryFhirTrino:
+  enabled: true

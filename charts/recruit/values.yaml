@@ -638,6 +638,154 @@ list:
     seccompProfile:
       type: RuntimeDefault
 
+queryFhirTrino:
+  # -- Whether the Trino SQL-based query module should be enabled
+  enabled: false
+  # -- Number of replicas of the query module to run.
+  # Running more than one replica for this component is discouraged.
+  replicaCount: 1
+  # -- specify how many old ReplicaSets for this Deployment you want to retain.
+  revisionHistoryLimit: 5
+
+  # the query module's image
+  # @ignore
+  image: # +doc-gen:ignore
+    registry: ghcr.io
+    repository: miracum/recruit/query-fhir-trino
+    tag: v10.1.12 # x-release-please-version
+    pullPolicy: IfNotPresent
+
+  metrics:
+    serviceMonitor:
+      # -- if enabled, creates a ServiceMonitor instance for Prometheus Operator-based monitoring
+      enabled: false
+      # -- additional labels to apply the the ServiceMonitor object, eg. `release: prometheus`
+      additionalLabels: {}
+      # namespace: monitoring
+      # interval: 30s
+      # scrapeTimeout: 10s
+
+  # -- extra environment vars on the container
+  extraEnv: []
+
+  # -- specify additional labels to apply to the query pod
+  extraPodLabels: {}
+
+  # -- the service used to expose the query module web port
+  service:
+    # -- the service type
+    type: ClusterIP
+    # -- the service port for the HTTP endpoint
+    port: 8080
+    # -- the service port for the actuator/metrics endpoint
+    metricsPort: 8081
+
+  trino:
+    # -- JDBC URL of the Trino server, e.g. `jdbc:trino://localhost:8080/fhir/default`
+    #    the URL can optionally include the catalog and schema, whether this is necessary depends
+    #    on how the SQL cohorts are written in the FHIR Library.
+    jdbcUrl: ""
+    auth:
+      # -- the username to login as.
+      username: ""
+      # -- the password used for login.
+      password: ""
+      # -- use an existing secret to retrieve the login credentials from
+      existingSecret:
+        # -- name of an existing Kubernetes secret that contains the user password
+        name: ""
+        # -- the key containing the password
+        key: "trino-password"
+
+  # -- a Spring cron expression defining the execution schedule of the query module
+  schedule: "@hourly"
+
+  # -- whether the query module should wait for the notification module to be up before starting.
+  # implemented as an init container that waits on notify's `/actuator/health` endpoint
+  shouldWaitForNotify: false
+
+  # @ignored
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /readyz
+      port: http
+    failureThreshold: 5
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
+
+  # @ignored
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /livez
+      port: http
+    failureThreshold: 10
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 10
+
+  # @ignored
+  startupProbe:
+    enabled: true
+    httpGet:
+      path: /livez
+      port: http
+    failureThreshold: 10
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 10
+
+  # -- resource requests and limits for the container
+  resources: {}
+
+  # -- node labels for pod assignment
+  # see: <https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/>
+  nodeSelector: {}
+
+  # -- tolerations for pod assignment
+  # see: <https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/>
+  tolerations: []
+
+  # -- affinity for pod assignment
+  # see: <https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity>
+  affinity: {}
+
+  # -- security context for the pod
+  podSecurityContext: {}
+
+  # -- security context for the container
+  # @ignore
+  securityContext: # +doc-gen:ignore
+    privileged: false
+    capabilities:
+      drop:
+        - ALL
+    runAsNonRoot: true
+    runAsUser: 65532
+    runAsGroup: 65532
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+
+  # -- pod topology spread configuration
+  # see: <https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#api>
+  topologySpreadConstraints:
+    []
+    # - maxSkew: 1
+    #   topologyKey: topology.kubernetes.io/zone
+    #   whenUnsatisfiable: ScheduleAnyway
+    #   labelSelector:
+    #     matchLabels:
+    #       app.kubernetes.io/component: query
+    #       app.kubernetes.io/instance: recruit
+
+
 postgresql:
   # -- enable the included postgres DB, currently used only by the notification module
   # to store jobs when running in high-availability mode (`notify.ha.enabled=true`)

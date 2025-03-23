@@ -1,9 +1,8 @@
 query-fhir-trino:
   version: "10.1.12" # x-release-please-version
-  cohortSizeThreshold: 100
   schedule:
-    enable: true
-    unixCron: "0 * * * *"
+    # every 1 hour
+    cron: "@hourly"
 
 fhir:
   url: ""
@@ -12,19 +11,9 @@ fhir:
     timeout-in-seconds: 300
   systems:
     screeningListIdentifier: "https://fhir.miracum.org/uc1/NamingSystem/screeningListId"
-    screeningListStudyReferenceExtension: "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy"
-    researchStudyAcronym: "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym"
-    screeningListCoding: "https://fhir.miracum.org/uc1/CodeSystem/screeningList"
-    studySource: "https://fhir.miracum.org/uc1/recruit/generatedByQueryModule"
-    localIdentifier: "https://fhir.miracum.org/core/NamingSystem/patientId"
-    patient-id: ${fhir.systems.localIdentifier}
-    encounter-id: "https://fhir.miracum.org/identifiers/encounter-id"
-    sub-encounter-id: "https://fhir.miracum.org/identifiers/sub-encounter-id"
-    identifier-type: "http://terminology.hl7.org/CodeSystem/v2-0203"
-    act-encounter-code: "http://terminology.hl7.org/CodeSystem/v3-ActCode"
-    list-order: "http://terminology.hl7.org/CodeSystem/list-order"
-    device-id: "https://fhir.miracum.org/uc1/identifiers/recruit-module-id"
-    system-determined-subject-status: "https://fhir.miracum.org/uc1/CodeSystem/system-determined-subject-status"
+    screening-list-study-reference-extension: "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy"
+    screening-list-code-system: "https://fhir.miracum.org/uc1/CodeSystem/screeningList"
+    eligibility-criteria-types: "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-criteria-types"
 
 logging:
   pattern:
@@ -50,7 +39,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: "health,prometheus"
 
 server:
   shutdown: graceful

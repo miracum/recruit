@@ -1,0 +1,153 @@
+{{- with .Values.queryFhirTrino -}}
+{{- if .enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "recruit.fullname" $ }}-query-fhir-trino
+  labels:
+    {{- include "recruit.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: query-fhir-trino
+  {{- with .deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .replicaCount }}
+  revisionHistoryLimit: {{ .revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      {{- include "recruit.matchLabels" $ | nindent 6 }}
+      app.kubernetes.io/component: query-fhir-trino
+  template:
+    metadata:
+      labels:
+        {{- include "recruit.podLabels" $ | nindent 8 }}
+        app.kubernetes.io/component: query-fhir-trino
+        {{- with .extraPodLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+    {{- with .imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      securityContext:
+        {{- toYaml .podSecurityContext | nindent 8 }}
+      initContainers:
+        # TODO: wait for trino to be up
+        - name: wait-for-fhir-server
+          image: "{{ $.Values.curl.image.registry }}/{{ $.Values.curl.image.repository }}:{{ $.Values.curl.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          {{- with $.Values.restrictedContainerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: FHIR_URL
+              value: {{ include "recruit.fhirserver.url" $ }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              until [ "$(curl -s -o /dev/null -L -w '%{http_code}' "$FHIR_URL/metadata")" == "200" ]; do
+                echo "$(date): Waiting for FHIR server @ $FHIR_URL to be up";
+                sleep 15;
+              done;
+        # waiting for the notify module to be up is only necessary
+        # for integration testing, where new recruitment recommendations may be
+        # created by the query module before the notification module is up causing
+        # attempts by the FHIR server to trigger the Subscriptions to fail
+        {{- if (and $.Values.notify.enabled .shouldWaitForNotify) }}
+        - name: wait-for-notify
+          image: "{{ $.Values.curl.image.registry }}/{{ $.Values.curl.image.repository }}:{{ $.Values.curl.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          {{- with $.Values.restrictedContainerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: NOTIFY_HEALTH_URL
+              value: "http://{{ include "recruit.fullname" $ }}-notify:{{ $.Values.notify.service.metricsPort }}/actuator/health"
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              until [ "$(curl -s -o /dev/null -L -w '%{http_code}' ${NOTIFY_HEALTH_URL})" == "200" ]; do
+                echo "$(date): Waiting for notify module @ ${NOTIFY_HEALTH_URL} to be up";
+                sleep 15;
+              done;
+        {{- end }}
+      containers:
+        - name: query-fhir-trino
+          image: "{{ .image.registry }}/{{ .image.repository }}:{{ .image.tag }}"
+          securityContext:
+            {{- toYaml .securityContext | nindent 12 }}
+          imagePullPolicy: {{ .image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: http-metrics
+              containerPort: 8081
+              protocol: TCP
+          {{- if .livenessProbe.enabled }}
+          livenessProbe:
+            {{- include "common.tplvalues.render" (dict "value" (omit .livenessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .readinessProbe.enabled }}
+          readinessProbe:
+            {{- include "common.tplvalues.render" (dict "value" (omit .readinessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .startupProbe.enabled }}
+          startupProbe:
+            {{- include "common.tplvalues.render" (dict "value" (omit .startupProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .resources | nindent 12 }}
+          env:
+            - name: FHIR_URL
+              value: {{ include "recruit.fhirserver.url" $ }}
+            - name: SPRING_DATASOURCE_URL
+              value: {{ .trino.jdbcUrl | quote }}
+            - name: SPRING_DATASOURCE_USERNAME
+              value: {{ .trino.auth.username | quote }}
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "recruit.trino.secret.name" $ }}
+                  key: {{ include "recruit.trino.secret.key" $ }}
+            - name: QUERY_FHIR_TRINO_SCHEDULE_CRON
+              value: {{ .schedule | quote }}
+            - name: MANAGEMENT_ENDPOINT_HEALTH_PROBES_ADD_ADDITIONAL_PATHS
+              value: "true"
+            - name: MANAGEMENT_SERVER_PORT
+              value: "8081"
+            {{- if .extraEnv }}
+            {{ toYaml .extraEnv | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp-volume
+      {{- with .nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      volumes:
+        - name: tmp-volume
+          emptyDir: {}
+{{- end }}
+{{- end }}

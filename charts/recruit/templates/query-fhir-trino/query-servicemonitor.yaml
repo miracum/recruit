@@ -1,16 +1,16 @@
-{{- with .Values.query }}
-{{- if .enabled }}
+{{- with .Values.queryFhirTrino -}}
+{{- if .enabled -}}
 {{- if .metrics.serviceMonitor.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "recruit.fullname" $ }}-query
+  name: {{ include "recruit.fullname" $ }}-query-fhir-trino
   {{- if .metrics.serviceMonitor.namespace }}
   namespace: {{ .metrics.serviceMonitor.namespace }}
   {{- end }}
   labels:
     {{- include "recruit.labels" $ | nindent 4 }}
-    app.kubernetes.io/component: query
+    app.kubernetes.io/component: query-fhir-trino
     {{- if .metrics.serviceMonitor.additionalLabels }}
     {{- toYaml .metrics.serviceMonitor.additionalLabels | nindent 4 }}
     {{- end }}
@@ -30,7 +30,7 @@ spec:
   selector:
     matchLabels:
       {{- include "recruit.matchLabels" $ | nindent 6 }}
-      app.kubernetes.io/component: query
+      app.kubernetes.io/component: query-fhir-trino
 {{- end }}
 {{- end }}
 {{- end }}

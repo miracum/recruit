@@ -95,3 +95,27 @@ services:
         tmpfs:
           size: 1024
       - ${NOTIFY_RULES_CONFIG_PATH:?}:/app/config/notify-rules/application.yaml:ro
+
+  query-fhir-trino:
+    image: ${RECRUIT_IMAGE_BASE_NAME:-ghcr.io/miracum/recruit}/query-fhir-trino:${RECRUIT_IMAGE_TAG:-v10.1.12} # x-release-please-version
+    profiles:
+      - trino
+    restart: unless-stopped
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    read_only: true
+    privileged: false
+    environment:
+      FHIR_URL: ${FHIR_URL:?}
+      SPRING_DATASOURCE_URL: ${TRINO_JDBC_URL:?}
+      SPRING_DATASOURCE_USERNAME: ${TRINO_USERNAME:?}
+      SPRING_DATASOURCE_PASSWORD: ${TRINO_PASSWORD:?}
+      QUERY_FHIR_TRINO_SCHEDULE_CRON: ${QUERY_FHIR_TRINO_SCHEDULE_CRON:-"@hourly"}
+    volumes:
+      - type: tmpfs
+        target: /tmp
+        tmpfs:
+          size: 1024

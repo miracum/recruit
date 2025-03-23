@@ -1,4 +1,4 @@
-SELECT patient.id AS patient_id
+SELECT DISTINCT patient.id AS patient_id
 FROM fhir.default.patient AS patient
 LEFT JOIN
     fhir.default.condition
@@ -6,4 +6,4 @@ LEFT JOIN
     UNNEST(condition.code.coding) AS condition_coding
 WHERE
     condition_coding.system = 'http://snomed.info/sct'
-    AND condition_coding.code IN ('73211009', '427089005', '44054006')
+    AND condition_coding.code IN ('10509002')

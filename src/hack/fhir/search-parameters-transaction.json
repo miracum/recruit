@@ -31,7 +31,7 @@
         "status": "active",
         "code": "characteristic-reference",
         "type": "reference",
-        "expression": "(Group.characteristic.value.ofType(Reference))",
+        "expression": "Group.characteristic.value.ofType(Reference)",
         "xpathUsage": "normal"
       },
       "request": {

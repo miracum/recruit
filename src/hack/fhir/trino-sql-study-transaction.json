@@ -9,11 +9,21 @@
         "identifier": [
           {
             "system": "https://miracum.github.io/recruit/fhir/identifiers/trino-sql-criteria-researchstudy-id",
-            "value": "diabetes"
+            "value": "bronchitis"
+          }
+        ],
+        "extension": [
+          {
+            "url": "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym",
+            "valueString": "DEMO-BRONCHITIS"
+          },
+          {
+            "url": "https://www.medizininformatik-initiative.de/fhir/modul-studie/StructureDefinition/mii-ex-studie-akronym",
+            "valueString": "DEMO-BRONCHITIS"
           }
         ],
         "status": "active",
-        "title": "Diabetes Study",
+        "title": "Bronchitis Demo Study",
         "enrollment": [
           {
             "reference": "urn:uuid:be24c1a6-b052-4360-871b-0a1b7b6bdfb4"
@@ -22,7 +32,7 @@
       },
       "request": {
         "method": "PUT",
-        "url": "ResearchStudy?identifier=https://miracum.github.io/recruit/fhir/identifiers/trino-sql-criteria-researchstudy-id|diabetes"
+        "url": "ResearchStudy?identifier=https://miracum.github.io/recruit/fhir/identifiers/trino-sql-criteria-researchstudy-id|bronchitis"
       }
     },
     {
@@ -32,7 +42,7 @@
         "identifier": [
           {
             "system": "https://miracum.github.io/recruit/fhir/identifiers/trino-sql-criteria-group-id",
-            "value": "diabetes"
+            "value": "bronchitis"
           }
         ],
         "actual": false,
@@ -42,7 +52,7 @@
           "coding": [
             {
               "system": "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-criteria-types",
-              "code": "trino-sql-encoded-eligibility-criteria"
+              "code": "trino-sql"
             }
           ],
           "text": "Trino SQL-encoded eligibility criteria"
@@ -56,7 +66,7 @@
               "coding": [
                 {
                   "system": "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-criteria-types",
-                  "code": "trino-sql-encoded-eligibility-criteria"
+                  "code": "trino-sql"
                 }
               ],
               "text": "Trino SQL-encoded eligibility criteria"
@@ -67,7 +77,7 @@
       },
       "request": {
         "method": "PUT",
-        "url": "Group?identifier=https://miracum.github.io/recruit/fhir/identifiers/trino-sql-criteria-group-id|diabetes"
+        "url": "Group?identifier=https://miracum.github.io/recruit/fhir/identifiers/trino-sql-criteria-group-id|bronchitis"
       }
     },
     {
@@ -77,7 +87,7 @@
         "identifier": [
           {
             "system": "https://miracum.github.io/recruit/fhir/identifiers/trino-sql-criteria-library-id",
-            "value": "diabetes"
+            "value": "bronchitis"
           }
         ],
         "status": "active",
@@ -91,13 +101,13 @@
         "content": [
           {
             "contentType": "text/x-trino",
-            "data": "U0VMRUNUIHBhdGllbnQuaWQgQVMgcGF0aWVudF9pZA0KRlJPTSBmaGlyLmRlZmF1bHQucGF0aWVudCBBUyBwYXRpZW50DQpMRUZUIEpPSU4NCiAgICBmaGlyLmRlZmF1bHQuY29uZGl0aW9uDQogICAgT04gY29uZGl0aW9uLnN1YmplY3QucmVmZXJlbmNlID0gQ09OQ0FUKCdQYXRpZW50LycsIHBhdGllbnQuaWQpLA0KICAgIFVOTkVTVChjb25kaXRpb24uY29kZS5jb2RpbmcpIEFTIGNvbmRpdGlvbl9jb2RpbmcNCldIRVJFDQogICAgY29uZGl0aW9uX2NvZGluZy5zeXN0ZW0gPSAnaHR0cDovL3Nub21lZC5pbmZvL3NjdCcNCiAgICBBTkQgY29uZGl0aW9uX2NvZGluZy5jb2RlIElOICgnNzMyMTEwMDknLCAnNDI3MDg5MDA1JywgJzQ0MDU0MDA2Jyk="
+            "data": "U0VMRUNUIERJU1RJTkNUIHBhdGllbnQuaWQgQVMgcGF0aWVudF9pZA0KRlJPTSBmaGlyLmRlZmF1bHQucGF0aWVudCBBUyBwYXRpZW50DQpMRUZUIEpPSU4NCiAgICBmaGlyLmRlZmF1bHQuY29uZGl0aW9uDQogICAgT04gY29uZGl0aW9uLnN1YmplY3QucmVmZXJlbmNlID0gQ09OQ0FUKCdQYXRpZW50LycsIHBhdGllbnQuaWQpLA0KICAgIFVOTkVTVChjb25kaXRpb24uY29kZS5jb2RpbmcpIEFTIGNvbmRpdGlvbl9jb2RpbmcNCldIRVJFDQogICAgY29uZGl0aW9uX2NvZGluZy5zeXN0ZW0gPSAnaHR0cDovL3Nub21lZC5pbmZvL3NjdCcNCiAgICBBTkQgY29uZGl0aW9uX2NvZGluZy5jb2RlIElOICgnMTA1MDkwMDInKQ=="
           }
         ]
       },
       "request": {
         "method": "PUT",
-        "url": "Library?identifier=https://miracum.github.io/recruit/fhir/identifiers/trino-sql-criteria-library-id|diabetes"
+        "url": "Library?identifier=https://miracum.github.io/recruit/fhir/identifiers/trino-sql-criteria-library-id|bronchitis"
       }
     }
   ]

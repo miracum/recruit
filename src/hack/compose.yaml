@@ -251,7 +251,6 @@ services:
         MODULE_NAME: query
     profiles:
       - query
-      - omop
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -274,12 +273,32 @@ services:
       ATLAS_DATASOURCE: EUNOMIA
       QUERY_SCHEDULE_UNIXCRON: "* * * * *"
       QUERY_SELECTOR_MATCHLABELS: ""
-      JAVA_TOOL_OPTIONS: "-javaagent:/app/opentelemetry-javaagent.jar"
-      OTEL_METRICS_EXPORTER: "none"
-      OTEL_LOGS_EXPORTER: "none"
-      OTEL_TRACES_EXPORTER: "jaeger"
-      OTEL_SERVICE_NAME: "recruit-query"
-      OTEL_EXPORTER_JAEGER_ENDPOINT: "http://jaeger:14250"
+
+  query-fhir-trino:
+    build:
+      context: ..
+      args:
+        MODULE_NAME: query-fhir-trino
+    profiles:
+      - query-fhir-trino
+    restart: unless-stopped
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    read_only: true
+    privileged: false
+    environment:
+      FHIR_URL: "http://fhir:8080/fhir"
+      SPRING_DATASOURCE_URL: "jdbc:trino://trino:8080/fhir/default"
+      SPRING_DATASOURCE_USERNAME: "trino"
+      SPRING_DATASOURCE_PASSWORD: ""
+    volumes:
+      - type: tmpfs
+        target: /tmp
+        tmpfs:
+          size: 1024
 
   jaeger:
     image: docker.io/jaegertracing/jaeger:2.4.0@sha256:81afdc6ae85f52a5f063c80fcdb201798bb283d81067211121291b64026c19c2
@@ -421,7 +440,7 @@ services:
         condition: service_started
 
   upload-to-fhir-server:
-    # the image if overkill, but it is the only one that has the necessary tools and is up-to-date
+    # the image is overkill, but it is the only one that has the necessary tools and is up-to-date
     image: ghcr.io/chgl/kube-powertools:v2.3.48@sha256:458b38fb51d3ab6d056eb7627263a2749f6f55a86fb7a7130acf596cfdd8c5a5
     profiles:
       - trino

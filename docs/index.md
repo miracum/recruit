@@ -10,6 +10,10 @@ a list to support manual screening.
 It supports querying [OMOP CDM databases](https://www.ohdsi.org/data-standardization/the-common-data-model/)
 and eligibility criteria can be defined using [OHDSI Atlas](https://ohdsi.github.io/TheBookOfOhdsi/OhdsiAnalyticsTools.html#atlas).
 
+!!! tip
+
+    Don't have or want to use the OHDSI stack? Check out the new way to [run recruIT directly on tabular FHIR data here](trino/index.md).
+
 Internally, the modules communicate using HL7 FHIR® via a central FHIR server.
 
 [Get Started 🚀](./getting-started/installation.md){ .md-button .md-button--primary}
