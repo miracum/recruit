@@ -64,6 +64,7 @@ jobs:
           kind load image-archive /tmp/query-build-artifacts/query-image.tar
           kind load image-archive /tmp/list-build-artifacts/list-image.tar
           kind load image-archive /tmp/notify-build-artifacts/notify-image.tar
+          kind load image-archive /tmp/query-fhir-trino-build-artifacts/query-fhir-trino-image.tar
 
       - name: Load tester image
         run: |
@@ -90,6 +91,8 @@ jobs:
             --set notify.image.tag=${{ inputs.image-tag }} \
             --set list.image.repository=${{ github.repository }}/list \
             --set list.image.tag=${{ inputs.image-tag }} \
+            --set queryFhirTrino.image.repository=${{ github.repository }}/query-fhir-trino \
+            --set queryFhirTrino.image.tag=${{ inputs.image-tag }} \
             -f charts/recruit/values-integrationtest.yaml \
             --wait --timeout=15m \
             recruit charts/recruit/
