@@ -48,13 +48,13 @@ jobs:
             e2e-test-directory: "tests/e2e/"
           - module: "notify"
             e2e-test-directory: "tests/e2e/"
-          # - module: "list"
-          #   e2e-test-directory: "frontend/tests/e2e/"
+          - module: "query-fhir-trino"
     env:
       IMAGE_NAME: ghcr.io/${{ github.repository }}/${{ matrix.module }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/test-image
         with:
           project-name: ${{ matrix.module }}
