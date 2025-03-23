@@ -785,7 +785,6 @@ queryFhirTrino:
     #       app.kubernetes.io/component: query
     #       app.kubernetes.io/instance: recruit
 
-
 postgresql:
   # -- enable the included postgres DB, currently used only by the notification module
   # to store jobs when running in high-availability mode (`notify.ha.enabled=true`)

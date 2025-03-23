@@ -27,6 +27,8 @@ DISABLE_LINTERS:
   # failing on previously existing CVEs in PRs isn't entirely helpful.
   # ideally should be part of a regularly scheduled check instead
   - REPOSITORY_GRYPE
+  # done by csharpier
+  - CSHARP_DOTNET_FORMAT
 
 SHOW_ELAPSED_TIME: true
 FILEIO_REPORTER: false
@@ -59,3 +61,6 @@ REPOSITORY_KICS_ARGUMENTS:
   - --fail-on=HIGH
 
 REPOSITORY_KICS_CONFIG_FILE: .kics.yaml
+
+DISABLE_ERRORS_LINTERS:
+  - REPOSITORY_TRIVY

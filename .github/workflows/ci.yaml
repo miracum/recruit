@@ -31,6 +31,8 @@ jobs:
             context: "src/"
           - module: "list"
             context: "src/list/"
+          - module: "query-fhir-trino"
+            context: "src/"
     uses: ./.github/workflows/build.yaml
     with:
       module-name: ${{ matrix.module }}

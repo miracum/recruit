@@ -9,7 +9,7 @@ find "./transaction/fhir/" -maxdepth 1 -name "*.put.json" -printf "%f\n" |
   while read -r filename; do
     file="./transaction/fhir/$filename"
     if [[ -f "$file" ]]; then
-      echo Sending $file
+      echo Sending "$file"
       curl --fail-with-body --retry-connrefused -X POST -H "Content-Type: application/fhir+json" --data @"$file" "$FHIR_SERVER_BASE_URL"
     fi
   done

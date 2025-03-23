@@ -6,6 +6,6 @@ for file in "./transaction/fhir/"*.json; do
     jq '.entry |= map(
       .request.method = "PUT" |
       .request.url = "\(.resource.resourceType)/\(.resource.id | sub("^urn:uuid:"; ""))"
-    )' "$file" > "${file%.json}.put.json"
+    )' "$file" >"${file%.json}.put.json"
   fi
 done
