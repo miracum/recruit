@@ -1,5 +1,90 @@
 # Changelog
 
+## [10.2.0](https://github.com/miracum/recruit/compare/v10.1.12...v10.2.0) (2025-03-23)
+
+
+### Features
+
+* initial support for querying FHIR resources directly ([#401](https://github.com/miracum/recruit/issues/401)) ([5d06207](https://github.com/miracum/recruit/commit/5d062079a37d682c7da4ad5a71ef774ad040c334))
+
+
+### Bug Fixes
+
+* **deps:** update dependency axios to v1.7.4 [security] ([#347](https://github.com/miracum/recruit/issues/347)) ([b99771f](https://github.com/miracum/recruit/commit/b99771f1a3266f472aff81de5744fcd754d4ad99))
+* **deps:** update dependency ca.uhn.hapi.fhir:hapi-fhir-base to v8 ([#385](https://github.com/miracum/recruit/issues/385)) ([b81c66b](https://github.com/miracum/recruit/commit/b81c66b28cc38ef6ed3cdd96c2448dcfa71abaf3))
+* **deps:** update dependency ca.uhn.hapi.fhir:hapi-fhir-client to v8 ([#386](https://github.com/miracum/recruit/issues/386)) ([fcc17ea](https://github.com/miracum/recruit/commit/fcc17ea3aac6e59b1ac9663376d2cd69da9e33ea))
+* **deps:** update dependency ca.uhn.hapi.fhir:hapi-fhir-client-okhttp to v8 ([#387](https://github.com/miracum/recruit/issues/387)) ([4dee23d](https://github.com/miracum/recruit/commit/4dee23d2c6353f1178f642505b65c95c03feb347))
+* **deps:** update dependency com.approvaltests:approvaltests to v24 ([#363](https://github.com/miracum/recruit/issues/363)) ([962553e](https://github.com/miracum/recruit/commit/962553eacf65ebb10c07963f99cd8f5b0b2fc1d7))
+* **deps:** update dependency com.diffplug.spotless:spotless-plugin-gradle to v7 ([#389](https://github.com/miracum/recruit/issues/389)) ([5be7a86](https://github.com/miracum/recruit/commit/5be7a8691e97da274d9a787f342716b9499ac129))
+* **deps:** update dependency express to v4.20.0 [security] ([#353](https://github.com/miracum/recruit/issues/353)) ([92d221f](https://github.com/miracum/recruit/commit/92d221f7547d56a23bea66b1ec651bf3f52f41ed))
+* **deps:** update dependency express-bearer-token to v3 ([#390](https://github.com/miracum/recruit/issues/390)) ([4ae7320](https://github.com/miracum/recruit/commit/4ae73206b9d137b80ebb6dd4fed20bc6cdba7e99))
+* **deps:** update dependency express-prom-bundle to v8 ([#364](https://github.com/miracum/recruit/issues/364)) ([a979b0e](https://github.com/miracum/recruit/commit/a979b0eb5323a7e9ac53bc043a2f1a8549d76058))
+* **deps:** update dependency fhirpath to v3.18.0 ([#383](https://github.com/miracum/recruit/issues/383)) ([fa9e0f5](https://github.com/miracum/recruit/commit/fa9e0f5f5fdd25b546b2004ea06c62c413529485))
+* **deps:** update dependency helmet to v8 ([#365](https://github.com/miracum/recruit/issues/365)) ([9518651](https://github.com/miracum/recruit/commit/951865184438d9f242aead47583b1a4e26762986))
+* **deps:** update dependency net.logstash.logback:logstash-logback-encoder to v8 ([#366](https://github.com/miracum/recruit/issues/366)) ([4d3b816](https://github.com/miracum/recruit/commit/4d3b81631ea0dbde373ce57755148de103ed48cb))
+* **deps:** update opentelemetry-js monorepo to v2 ([#398](https://github.com/miracum/recruit/issues/398)) ([c6b7521](https://github.com/miracum/recruit/commit/c6b7521357fabc0d286b989616386608983de709))
+
+
+### Documentation
+
+* minor maintenance ([#368](https://github.com/miracum/recruit/issues/368)) ([ed788b4](https://github.com/miracum/recruit/commit/ed788b4dc4f94d347063841a228ff74aa8247596))
+
+
+### Miscellaneous Chores
+
+* **config:** migrate config .renovaterc.json ([#345](https://github.com/miracum/recruit/issues/345)) ([9b695df](https://github.com/miracum/recruit/commit/9b695dff640c9c212bb661af5067bdcae607de23))
+* **deps:** aggregated dependency updates ([#382](https://github.com/miracum/recruit/issues/382)) ([9847737](https://github.com/miracum/recruit/commit/98477376f47fb0af2b3cbf493f8765599e893e2f))
+* **deps:** refresh pip-compile outputs ([#327](https://github.com/miracum/recruit/issues/327)) ([993d001](https://github.com/miracum/recruit/commit/993d001450edec014899e7acb5cc332ad8f039e2))
+* **deps:** refresh pip-compile outputs ([#329](https://github.com/miracum/recruit/issues/329)) ([cd3b2ef](https://github.com/miracum/recruit/commit/cd3b2efab23e845ee9e709252f8e031b5b969f10))
+* **deps:** refresh pip-compile outputs ([#344](https://github.com/miracum/recruit/issues/344)) ([81cd95b](https://github.com/miracum/recruit/commit/81cd95b49f3f5211f58e5261b84d6d9a9ae16ac9))
+* **deps:** refresh pip-compile outputs ([#346](https://github.com/miracum/recruit/issues/346)) ([8260058](https://github.com/miracum/recruit/commit/8260058e9edceb37f2277643fd8a633adb752e77))
+* **deps:** refresh pip-compile outputs ([#348](https://github.com/miracum/recruit/issues/348)) ([864d134](https://github.com/miracum/recruit/commit/864d134f1acf8a70677f5c4f9446df3c902fad49))
+* **deps:** refresh pip-compile outputs ([#352](https://github.com/miracum/recruit/issues/352)) ([cf6af79](https://github.com/miracum/recruit/commit/cf6af79d1b7e508a8d6cee9f75e53fd27622151b))
+* **deps:** refresh pip-compile outputs ([#359](https://github.com/miracum/recruit/issues/359)) ([2a14ef3](https://github.com/miracum/recruit/commit/2a14ef3407d81e14ca737853ee851a9cbac30b00))
+* **deps:** refresh pip-compile outputs ([#371](https://github.com/miracum/recruit/issues/371)) ([698b164](https://github.com/miracum/recruit/commit/698b1641523217be5e1dcd08d2d1b25fe923e719))
+* **deps:** refresh pip-compile outputs ([#373](https://github.com/miracum/recruit/issues/373)) ([ed757e9](https://github.com/miracum/recruit/commit/ed757e99f45f87d95101e5157beb9600b57a84e6))
+* **deps:** refresh pip-compile outputs ([#399](https://github.com/miracum/recruit/issues/399)) ([02b0fbf](https://github.com/miracum/recruit/commit/02b0fbf758d77d061b79baa7c5455705b51ba8ce))
+* **deps:** update all non-major dependencies ([#339](https://github.com/miracum/recruit/issues/339)) ([8a17429](https://github.com/miracum/recruit/commit/8a17429569d3f5f9314b6823ab7b8339d41c0c39))
+* **deps:** update all non-major dependencies ([#367](https://github.com/miracum/recruit/issues/367)) ([6033a6f](https://github.com/miracum/recruit/commit/6033a6f4ba850876dcae5a2cbce4669774c69b34))
+* **deps:** update all non-major dependencies ([#372](https://github.com/miracum/recruit/issues/372)) ([c0deda5](https://github.com/miracum/recruit/commit/c0deda583219682fd3a8815e7f1ded8b90c87495))
+* **deps:** update dependency certifi to v2024.7.4 [security] ([#333](https://github.com/miracum/recruit/issues/333)) ([24afd8c](https://github.com/miracum/recruit/commit/24afd8ccd8407153762b8094d6192fff877d0f26))
+* **deps:** update dependency cypress to v13 ([#324](https://github.com/miracum/recruit/issues/324)) ([a5212f4](https://github.com/miracum/recruit/commit/a5212f4827b0515681479b57135071b794eb951a))
+* **deps:** update dependency sass-loader to v16 ([#397](https://github.com/miracum/recruit/issues/397)) ([9ac98d6](https://github.com/miracum/recruit/commit/9ac98d6bc5c202228e08a94e4c07076805c45f48))
+* **deps:** update dependency urllib3 to v2.2.2 [security] ([#328](https://github.com/miracum/recruit/issues/328)) ([b2c31db](https://github.com/miracum/recruit/commit/b2c31dbcc9653e09c466d679b1a31aa2516101a6))
+* **deps:** update docker.io/bitnami/kubectl:1.30.3 docker digest to fc6e485 ([#349](https://github.com/miracum/recruit/issues/349)) ([08408ab](https://github.com/miracum/recruit/commit/08408ab9d442d49c1ac6709e7e7230d1ef73fdee))
+* **deps:** update docker.io/cypress/included docker tag to v14 ([#395](https://github.com/miracum/recruit/issues/395)) ([d414210](https://github.com/miracum/recruit/commit/d414210c4c9bc01fdd088e0a2b36f7ee6e6a1aa5))
+* **deps:** update docker.io/cypress/included:13.11.0 docker digest to 8b88199 ([#330](https://github.com/miracum/recruit/issues/330)) ([48ced9c](https://github.com/miracum/recruit/commit/48ced9c703888ab3bff71761f8853e399c69b8a4))
+* **deps:** update docker.io/hapiproject/hapi docker tag to v8 ([#384](https://github.com/miracum/recruit/issues/384)) ([315ad63](https://github.com/miracum/recruit/commit/315ad631f7ee0ad605e81cefb9adfdd2507ab2d9))
+* **deps:** update docker.io/library/gradle:8.8.0-jdk21 docker digest to 62c8919 ([#334](https://github.com/miracum/recruit/issues/334)) ([6004ad8](https://github.com/miracum/recruit/commit/6004ad8a5bfd763fea910bdb1900280cf4f160d6))
+* **deps:** update docker.io/library/gradle:8.8.0-jdk21 docker digest to ea95b17 ([#331](https://github.com/miracum/recruit/issues/331)) ([0172bd1](https://github.com/miracum/recruit/commit/0172bd15322f46afdd5c045791504edd61bda088))
+* **deps:** update docker.io/library/python:3.12.4-alpine docker digest to 63094ab ([#350](https://github.com/miracum/recruit/issues/350)) ([39fcb45](https://github.com/miracum/recruit/commit/39fcb4563dbb0b1e5eb4386266cdfed17cf2d448))
+* **deps:** update docker.io/library/traefik docker tag to v3 ([#325](https://github.com/miracum/recruit/issues/325)) ([7319a4f](https://github.com/miracum/recruit/commit/7319a4f63492363173cae744544bc588a8495836))
+* **deps:** update gcr.io/distroless/java21-debian12:nonroot docker digest to 2985410 ([#354](https://github.com/miracum/recruit/issues/354)) ([6cc3099](https://github.com/miracum/recruit/commit/6cc3099e10e91445f5e18303825af947d77862b7))
+* **deps:** update gcr.io/distroless/java21-debian12:nonroot docker digest to 5723ccd ([#335](https://github.com/miracum/recruit/issues/335)) ([df1c90a](https://github.com/miracum/recruit/commit/df1c90a8b6ba14b5d1e11eee5caf9912c8da0dcd))
+* **deps:** update gcr.io/distroless/java21-debian12:nonroot docker digest to c558ed3 ([#351](https://github.com/miracum/recruit/issues/351)) ([0c0c662](https://github.com/miracum/recruit/commit/0c0c662266a5ee4af9f7b6afd69fe5bd99c74900))
+* **deps:** update gcr.io/distroless/nodejs22-debian12:nonroot docker digest to 0791089 ([#342](https://github.com/miracum/recruit/issues/342)) ([e18f477](https://github.com/miracum/recruit/commit/e18f477224992b42f7436e7c3d4a4ec758923e3c))
+* **deps:** update gcr.io/distroless/nodejs22-debian12:nonroot docker digest to 9f0d01f ([#355](https://github.com/miracum/recruit/issues/355)) ([78b9874](https://github.com/miracum/recruit/commit/78b98746d12bb6369107220d6d80233586e8058b))
+* **deps:** update gcr.io/distroless/nodejs22-debian12:nonroot docker digest to 9f702c5 ([#336](https://github.com/miracum/recruit/issues/336)) ([07e1a18](https://github.com/miracum/recruit/commit/07e1a18cbbfc4ea862cb271fa83225cf658bdb2d))
+* **deps:** update gcr.io/distroless/nodejs22-debian12:nonroot docker digest to b821718 ([#360](https://github.com/miracum/recruit/issues/360)) ([baba99f](https://github.com/miracum/recruit/commit/baba99fa0a6b15b68f7515fca8ca2043998a5a59))
+* **deps:** update github-actions ([#323](https://github.com/miracum/recruit/issues/323)) ([0735524](https://github.com/miracum/recruit/commit/073552440060c9db2f76e96c5cd3f4ffa00a4f48))
+* **deps:** update github-actions ([#340](https://github.com/miracum/recruit/issues/340)) ([424f07c](https://github.com/miracum/recruit/commit/424f07c9ea262287ec258d16ad492a0db3f16447))
+* **deps:** update github-actions ([#357](https://github.com/miracum/recruit/issues/357)) ([2b6940a](https://github.com/miracum/recruit/commit/2b6940a55157602c61187e969d96ed2cc714d462))
+* **deps:** update github-actions (major) ([#358](https://github.com/miracum/recruit/issues/358)) ([bc58e8b](https://github.com/miracum/recruit/commit/bc58e8be6b2f866c3b3636a1e7b895314ff5c729))
+* **deps:** update helm release hapi-fhir-jpaserver to v0.19.0 ([#396](https://github.com/miracum/recruit/issues/396)) ([a274c3c](https://github.com/miracum/recruit/commit/a274c3cd9d0a0eb6ec1866dc3a10b03e62c42ed0))
+* **deps:** update mcr.microsoft.com/dotnet/nightly/runtime:8.0-jammy-chiseled docker digest to 844de06 ([#356](https://github.com/miracum/recruit/issues/356)) ([ed17d3b](https://github.com/miracum/recruit/commit/ed17d3bf2e20eecfc4f48e5c5a0eb0dd6525ad04))
+* **deps:** update mcr.microsoft.com/dotnet/nightly/runtime:8.0-jammy-chiseled docker digest to 9864dc9 ([#337](https://github.com/miracum/recruit/issues/337)) ([ff3de5b](https://github.com/miracum/recruit/commit/ff3de5bea999ce1b82c2fad7a67052437da15025))
+* **deps:** update mcr.microsoft.com/dotnet/nightly/runtime:8.0-jammy-chiseled docker digest to 9947dbb ([#343](https://github.com/miracum/recruit/issues/343)) ([a3ca4aa](https://github.com/miracum/recruit/commit/a3ca4aa511b5d920d97c8f34459d743504b5dfef))
+* **deps:** update mcr.microsoft.com/dotnet/sdk:8.0-jammy docker digest to 1a6f815 ([#361](https://github.com/miracum/recruit/issues/361)) ([0d2b158](https://github.com/miracum/recruit/commit/0d2b15804a7b09ff7f86cc72c1be7ae0c160edc3))
+* **deps:** update mcr.microsoft.com/dotnet/sdk:8.0-jammy docker digest to aabefd2 ([#338](https://github.com/miracum/recruit/issues/338)) ([bdb6ebc](https://github.com/miracum/recruit/commit/bdb6ebcbfb5af1f521cb2b950f5525a6b723dde2))
+* **deps:** updated list server deps ([#400](https://github.com/miracum/recruit/issues/400)) ([b52d820](https://github.com/miracum/recruit/commit/b52d820a84c107b34e6255887eb13841e23e1ae2))
+* **deps:** updated postgresql in chart ([c6a452b](https://github.com/miracum/recruit/commit/c6a452b749cd2d98676e489389d27ba966a5eb20))
+* **helm:** reset Chart.yaml changelog annotations ([90c7c3c](https://github.com/miracum/recruit/commit/90c7c3cfdfb2f1cc06d7f9ada7e83b99f10cfee4))
+
+
+### CI/CD
+
+* fix build-docs.yaml ([7d2cc88](https://github.com/miracum/recruit/commit/7d2cc88c21d23fd0aa67ace23b1b755adb9df8b8))
+
 ## [10.1.12](https://github.com/miracum/recruit/compare/v10.1.11...v10.1.12) (2024-06-06)
 
 
