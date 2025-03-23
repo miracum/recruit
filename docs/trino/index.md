@@ -13,7 +13,8 @@ in order for the query module to correctly link them.
 The advantage is that no semantic transformation from mapping FHIR resources to the OMOP CDM is necessary.
 
 To create the necessary tables, you can install a Pathling server and use the [`$import` operation](https://pathling.csiro.au/docs/server/operations/import)
-to import FHIR bulk exports. If you're using Kafka, then <https://github.com/bzkf/fhir-to-lakehouse> works as well.
+to import FHIR bulk exports. You can find a demo setup for this approach at <https://github.com/bzkf/trino-on-fhir> as well.
+If you're using Kafka, then <https://github.com/bzkf/fhir-to-lakehouse> is another way.
 
 Because the return values of an SQL query can be arbitrary, the `query-fhir-trino` module assumes that one of the result columns is called `patient_id`
 and contains the FHIR ID of the Patient ressource satisfying the eligibility criteria.
