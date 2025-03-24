@@ -42,7 +42,7 @@ dependencies:
   - name: common
     repository: oci://registry-1.docker.io/bitnamicharts
     version: 2.30.0
-version: 10.2.1
+version: 10.3.0
 appVersion: 10.1.12
 annotations:
   artifacthub.io/containsSecurityUpdates: 'false'
@@ -50,14 +50,14 @@ annotations:
   artifacthub.io/prerelease: 'false'
   artifacthub.io/license: AGPL-3.0-or-later
   artifacthub.io/recommendations: >
-    - url: https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack
+    - url:
+    https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack
 
     - url: https://artifacthub.io/packages/helm/bitnami/postgresql
 
     - url: https://artifacthub.io/packages/helm/chgl/fhir-server-exporter
 
     - url: https://artifacthub.io/packages/helm/jaegertracing/jaeger
-
   artifacthub.io/links: |
     - name: Deployment Instructions
       url: https://miracum.github.io/recruit/deployment/kubernetes/
@@ -72,4 +72,4 @@ annotations:
       url: https://miracum.github.io/recruit/_img/atlas-first-cohort/mailhog-opened.png
   artifacthub.io/changes: |-
     - kind: changed
-      description: updated recruIT image tags to v10.2.1 # x-release-please-version
+      description: updated recruIT image tags to v10.3.0 # x-release-please-version

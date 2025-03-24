@@ -1,5 +1,5 @@
 notify:
-  version: "10.2.1" # x-release-please-version
+  version: "10.3.0" # x-release-please-version
   retry:
     backoffPeriodMs: 30000
     maxAttempts: 10

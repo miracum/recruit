@@ -1,5 +1,17 @@
 # Changelog
 
+## [10.3.0](https://github.com/miracum/recruit/compare/v10.2.1...v10.3.0) (2025-03-24)
+
+
+### Features
+
+* **helm:** support for extra volume (mounts) ([#404](https://github.com/miracum/recruit/issues/404)) ([2c762e1](https://github.com/miracum/recruit/commit/2c762e14d7ed37d78040758ef6a83c03e3c27394))
+
+
+### Miscellaneous Chores
+
+* **helm:** reset Chart.yaml changelog annotations ([c63c31b](https://github.com/miracum/recruit/commit/c63c31bace18bdd32fe730948d9533167ab7200f))
+
 ## [10.2.1](https://github.com/miracum/recruit/compare/v10.2.0...v10.2.1) (2025-03-24)
 
 
