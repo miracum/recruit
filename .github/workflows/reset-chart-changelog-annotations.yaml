@@ -30,7 +30,8 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.head_ref }}
-          persist-credentials: false
+          # needed to commit the changes back
+          persist-credentials: true
 
       # currently defaults to just the one chart, "recruit", needs to be updated if
       # more charts are added in the future. See <https://github.com/chgl/kube-powertools/blob/master/scripts/generate-chart-changelog.sh>

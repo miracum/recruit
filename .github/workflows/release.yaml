@@ -78,7 +78,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: miracum/charts
           path: miracum-charts
-          persist-credentials: false
+          # required to push
+          persist-credentials: true
 
       - name: copy local helm chart to charts repo
         run: |
