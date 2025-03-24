@@ -50,14 +50,14 @@ annotations:
   artifacthub.io/prerelease: 'false'
   artifacthub.io/license: AGPL-3.0-or-later
   artifacthub.io/recommendations: >
-    - url:
-    https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack
+    - url: https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack
 
     - url: https://artifacthub.io/packages/helm/bitnami/postgresql
 
     - url: https://artifacthub.io/packages/helm/chgl/fhir-server-exporter
 
     - url: https://artifacthub.io/packages/helm/jaegertracing/jaeger
+
   artifacthub.io/links: |
     - name: Deployment Instructions
       url: https://miracum.github.io/recruit/deployment/kubernetes/
@@ -73,5 +73,3 @@ annotations:
   artifacthub.io/changes: |-
     - kind: changed
       description: updated recruIT image tags to v10.2.1 # x-release-please-version
-    - kind: changed
-      description: updated postgresql chart to v16.5.5
