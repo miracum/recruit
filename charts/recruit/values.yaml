@@ -782,8 +782,14 @@ queryFhirTrino:
     #   whenUnsatisfiable: ScheduleAnyway
     #   labelSelector:
     #     matchLabels:
-    #       app.kubernetes.io/component: query
+    #       app.kubernetes.io/component: query-fhir-trino
     #       app.kubernetes.io/instance: recruit
+
+  # -- extra volumes
+  extraVolumes: []
+
+  # -- extra volumes to mount inside the container
+  extraVolumeMounts: []
 
 postgresql:
   # -- enable the included postgres DB, currently used only by the notification module
