@@ -6,3 +6,12 @@ query:
 
 queryFhirTrino:
   enabled: true
+  extraVolumes:
+    - name: acme-root-ca
+      configMap:
+        name: acme-root-ca
+  extraVolumeMounts:
+    - name: acme-root-ca
+      mountPath: /etc/ssl/certs/acme-root-ca.crt
+      subPath: acme-root-ca.crt
+      readOnly: true
