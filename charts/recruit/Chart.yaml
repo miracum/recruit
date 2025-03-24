@@ -42,7 +42,7 @@ dependencies:
   - name: common
     repository: oci://registry-1.docker.io/bitnamicharts
     version: 2.30.0
-version: 10.2.0
+version: 10.2.1
 appVersion: 10.1.12
 annotations:
   artifacthub.io/containsSecurityUpdates: 'false'
@@ -72,6 +72,6 @@ annotations:
       url: https://miracum.github.io/recruit/_img/atlas-first-cohort/mailhog-opened.png
   artifacthub.io/changes: |-
     - kind: changed
-      description: updated recruIT image tags to v10.2.0 # x-release-please-version
+      description: updated recruIT image tags to v10.2.1 # x-release-please-version
     - kind: changed
       description: updated postgresql chart to v16.5.5
