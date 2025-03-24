@@ -1,5 +1,12 @@
 # Changelog
 
+## [10.2.1](https://github.com/miracum/recruit/compare/v10.2.0...v10.2.1) (2025-03-24)
+
+
+### Bug Fixes
+
+* **ci:** ignore e2e failure temporarily ([bd3521c](https://github.com/miracum/recruit/commit/bd3521c8b6751d303b5cc3b21f00f253fa9dd24d))
+
 ## [10.2.0](https://github.com/miracum/recruit/compare/v10.1.12...v10.2.0) (2025-03-23)
 
 
