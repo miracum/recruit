@@ -31,12 +31,14 @@ spec:
           {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-    {{- with .Values.imagePullSecrets }}
+      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
+      {{- end }}
       securityContext:
         {{- toYaml .Values.notify.podSecurityContext | nindent 8 }}
+      serviceAccountName: {{ include "recruit.serviceAccountName" (dict "context" .Values.notify "component" "notify") }}
+      automountServiceAccountToken: {{ .Values.notify.serviceAccount.automountServiceAccountToken }}
       initContainers:
         {{- if .Values.notify.ha.enabled }}
         - name: wait-for-ha-db
@@ -109,8 +111,11 @@ spec:
             timeoutSeconds: {{ .Values.notify.readinessProbe.timeoutSeconds }}
             successThreshold: {{ .Values.notify.readinessProbe.successThreshold }}
             failureThreshold: {{ .Values.notify.readinessProbe.failureThreshold }}
-          resources:
-            {{- toYaml .Values.notify.resources | nindent 12 }}
+          {{- if .Values.notify.resources }}
+          resources: {{- toYaml .Values.notify.resources | nindent 12 }}
+          {{- else if ne .Values.notify.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.notify.resourcesPreset) | nindent 12 }}
+          {{- end }}
           env:
             - name: FHIR_URL
               value: {{ template "recruit.fhirserver.url" . }}

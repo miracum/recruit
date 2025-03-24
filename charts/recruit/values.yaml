@@ -58,22 +58,6 @@ fhirserver:
   postgresql:
     # -- overrides the chart's postgres server name to avoid conflicts with the included ohdsi chart
     nameOverride: "fhir-server-postgres"
-    # @ignore
-    primary: # +doc-gen:ignore
-      resources:
-        requests:
-          cpu: 10m
-          memory: 32Mi
-      containerSecurityContext:
-        runAsNonRoot: true
-        allowPrivilegeEscalation: false
-        capabilities:
-          drop:
-            - ALL
-  networkPolicy:
-    # -- if enabled, access to the included FHIR server is limited to pods with the required labels. If set to `true`,
-    # all pods of the recruIT chart will be automatically configured to be able to access the server.
-    enabled: false
   # -- extra environment variables set for the HAPI FHIR server
   extraEnv:
     # the recruit tool relies on the FHIR server subscription mechanism to create notifications.
@@ -160,6 +144,17 @@ query:
     repository: miracum/recruit/query
     tag: v10.3.0 # x-release-please-version
     pullPolicy: IfNotPresent
+
+  serviceAccount:
+    # -- Specifies whether a service account should be created.
+    create: false
+    # -- Annotations to add to the service account
+    annotations: {}
+    # -- The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+    # -- whether to automount the SA token.
+    automountServiceAccountToken: false
 
   metrics:
     serviceMonitor:
@@ -257,6 +252,10 @@ query:
     successThreshold: 1
     timeoutSeconds: 5
 
+  # -- set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if primary.resources is set (primary.resources is recommended for production).
+  # More information: <https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15>
+  resourcesPreset: "medium"
+
   # -- resource requests and limits for the container
   resources: {}
 
@@ -319,6 +318,25 @@ notify:
     tag: v10.3.0 # x-release-please-version
     pullPolicy: IfNotPresent
 
+  serviceAccount:
+    # -- Specifies whether a service account should be created.
+    create: false
+    # -- Annotations to add to the service account
+    annotations: {}
+    # -- The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+    # -- whether to automount the SA token.
+    automountServiceAccountToken: false
+
+  podDisruptionBudget:
+    # -- create a PodDisruptionBudget resource
+    enabled: false
+    # -- Minimum available instances; ignored if there is no PodDisruptionBudget
+    minAvailable: 1
+    # -- Maximum unavailable instances; ignored if there is no PodDisruptionBudget
+    maxUnavailable: ""
+
   metrics:
     serviceMonitor:
       # -- if enabled, creates a ServiceMonitor instance for Prometheus Operator-based monitoring
@@ -377,15 +395,6 @@ notify:
         # -- key inside the existing secret
         key: "postgresql-password"
 
-  podDisruptionBudget:
-    # -- enable creation of a PDB resource for the pod.
-    # Uses policy/v1 of the PodDisruptionBudget resource requiring Kubernetes 1.21+
-    enabled: false
-    # -- Minimum available instances; ignored if there is no PodDisruptionBudget
-    minAvailable: 1
-    # -- Maximum unavailable instances; ignored if there is no PodDisruptionBudget
-    maxUnavailable: ""
-
   # -- configure the Notification rules. See the [Configure Notifcation Rules](#configure-notifcation-rules) section below.
   rules: {}
 
@@ -437,6 +446,10 @@ notify:
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 10
+
+  # -- set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if primary.resources is set (primary.resources is recommended for production).
+  # More information: <https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15>
+  resourcesPreset: "medium"
 
   # -- resource requests and limits for the container
   resources: {}
@@ -498,6 +511,25 @@ list:
     repository: miracum/recruit/list
     tag: v10.3.0 # x-release-please-version
     pullPolicy: IfNotPresent
+
+  serviceAccount:
+    # -- Specifies whether a service account should be created.
+    create: false
+    # -- Annotations to add to the service account
+    annotations: {}
+    # -- The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+    # -- whether to automount the SA token.
+    automountServiceAccountToken: false
+
+  podDisruptionBudget:
+    # -- create a PodDisruptionBudget resource
+    enabled: false
+    # -- Minimum available instances; ignored if there is no PodDisruptionBudget
+    minAvailable: 1
+    # -- Maximum unavailable instances; ignored if there is no PodDisruptionBudget
+    maxUnavailable: ""
 
   # -- the service used to expose the list module web port
   service:
@@ -568,13 +600,9 @@ list:
     #    hosts:
     #      - notify-example.local
 
-  podDisruptionBudget:
-    # -- uses policy/v1 of the PodDisruptionBudget resource requiring Kubernetes 1.21+
-    enabled: false
-    # -- Minimum available instances; ignored if there is no PodDisruptionBudget
-    minAvailable: 1
-    # -- Maximum unavailable instances; ignored if there is no PodDisruptionBudget
-    maxUnavailable: ""
+  # -- set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if primary.resources is set (primary.resources is recommended for production).
+  # More information: <https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15>
+  resourcesPreset: "small"
 
   # -- resource requests and limits for the container
   resources: {}
@@ -654,6 +682,17 @@ queryFhirTrino:
     repository: miracum/recruit/query-fhir-trino
     tag: v10.3.0 # x-release-please-version
     pullPolicy: IfNotPresent
+
+  serviceAccount:
+    # -- Specifies whether a service account should be created.
+    create: false
+    # -- Annotations to add to the service account
+    annotations: {}
+    # -- The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+    # -- whether to automount the SA token.
+    automountServiceAccountToken: false
 
   metrics:
     serviceMonitor:
@@ -740,6 +779,10 @@ queryFhirTrino:
     successThreshold: 1
     timeoutSeconds: 10
 
+  # -- set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if primary.resources is set (primary.resources is recommended for production).
+  # More information: <https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15>
+  resourcesPreset: "medium"
+
   # -- resource requests and limits for the container
   resources: {}
 
@@ -800,20 +843,6 @@ postgresql:
   auth:
     # -- set the default database name to `recruit`
     database: "recruit"
-  # @ignore
-  primary:
-    resources:
-      requests:
-        cpu: 10m
-        memory: 32Mi
-    containerSecurityContext: # +doc-gen:ignore
-      runAsNonRoot: true
-      allowPrivilegeEscalation: false
-      capabilities:
-        drop:
-          - ALL
-      seccompProfile:
-        type: RuntimeDefault
 
 # -- configuration for the optional fhir-pseudonymizer dependency
 fhir-pseudonymizer:
@@ -838,6 +867,11 @@ broadseaAtlasdb:
   enabled: false
 
 tests:
+  automountServiceAccountToken: false
+  # -- set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if primary.resources is set (primary.resources is recommended for production).
+  # More information: <https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15>
+  resourcesPreset: "nano"
+
   # -- configure the test pods resource requests and limits
   resources: {}
   # limits:

@@ -30,12 +30,14 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
-    {{- with .Values.imagePullSecrets }}
+      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
+      {{- end }}
       securityContext:
         {{- toYaml .Values.query.podSecurityContext | nindent 8 }}
+      serviceAccountName: {{ include "recruit.serviceAccountName" (dict "context" .Values.query "component" "query") }}
+      automountServiceAccountToken: {{ .Values.query.serviceAccount.automountServiceAccountToken }}
       initContainers:
         - name: wait-for-omop-db
           image: {{ include "recruit.waitforDB.image" . }}
@@ -129,8 +131,11 @@ spec:
             timeoutSeconds: {{ .Values.query.readinessProbe.timeoutSeconds }}
             successThreshold: {{ .Values.query.readinessProbe.successThreshold }}
             failureThreshold: {{ .Values.query.readinessProbe.failureThreshold }}
-          resources:
-            {{- toYaml .Values.query.resources | nindent 12 }}
+          {{- if .Values.query.resources }}
+          resources: {{- toYaml .Values.query.resources | nindent 12 }}
+          {{- else if ne .Values.query.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.query.resourcesPreset) | nindent 12 }}
+          {{- end }}
           env:
             - name: FHIR_URL
               value: {{ include "recruit.fhirserver.url" . }}

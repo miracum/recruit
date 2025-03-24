@@ -32,26 +32,15 @@ fhirserver:
           memory: 256Mi
           cpu: 250m
 
-query:
-  resources:
-    limits:
-      memory: 512Mi
-    requests:
-      memory: 512Mi
+query: {}
 
 list:
-  resources:
-    limits:
-      memory: 128Mi
-    requests:
-      memory: 128Mi
+  podDisruptionBudget:
+    enabled: true
 
 notify:
-  resources:
-    limits:
-      memory: 512Mi
-    requests:
-      memory: 512Mi
+  podDisruptionBudget:
+    enabled: true
   ha:
     enabled: true
   rules:
