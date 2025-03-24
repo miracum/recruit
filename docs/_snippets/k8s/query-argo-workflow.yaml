@@ -75,7 +75,7 @@ spec:
 
     - name: recruit-query
       container:
-        image: ghcr.io/miracum/recruit/query:v10.2.1 # x-release-please-version
+        image: ghcr.io/miracum/recruit/query:v10.3.0 # x-release-please-version
         env:
           - name: QUERY_RUN_ONCE_AND_EXIT
             value: "true"
