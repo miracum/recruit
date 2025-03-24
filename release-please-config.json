@@ -15,6 +15,7 @@
         "src/buildSrc/src/main/groovy/org.miracum.recruit.java-common-conventions.gradle",
         "src/notify/src/main/resources/application.yml",
         "src/query/src/main/resources/application.yml",
+        "src/query-fhir-trino/src/main/resources/application.yml",
         "docker-compose/docker-compose.yaml",
         "docs/configuration/security.md",
         "docs/_snippets/k8s/query-argo-workflow.yaml"
