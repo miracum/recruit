@@ -1,0 +1,20 @@
+{{- with .Values.list -}}
+{{- if .podDisruptionBudget.enabled }}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: {{ include "recruit.fullname" $ }}-list
+  labels:
+    {{- include "recruit.labels" $ | nindent 4 }}
+spec:
+  {{- if .podDisruptionBudget.minAvailable }}
+  minAvailable: {{ .podDisruptionBudget.minAvailable }}
+  {{- end }}
+  {{- if .podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ .podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "recruit.matchLabels" $ | nindent 6 }}
+{{- end }}
+{{- end }}

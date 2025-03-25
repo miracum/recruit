@@ -56,11 +56,18 @@ Extra labels to apply to every pod
 */}}
 {{- define "recruit.podLabels" -}}
 {{ include "recruit.matchLabels" . }}
-{{- if and .Values.fhirserver.enabled .Values.fhirserver.networkPolicy.enabled }}
-{{- $name := default "fhirserver" .Values.fhirserver.nameOverride }}
-{{ printf "%s-%s-client: \"true\"" .Release.Name ($name | trunc 63 | trimSuffix "-") }}
 {{- end -}}
-{{- end -}}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "recruit.serviceAccountName" -}}
+{{- if .context.serviceAccount.create }}
+{{- default (printf "%s-%s" (include "recruit.fullname" .) .component) .context.serviceAccount.name }}
+{{- else }}
+{{- default "default" .context.serviceAccount.name }}
+{{- end }}
+{{- end }}
 
 {{/*
 Get the FHIR server URL.

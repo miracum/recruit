@@ -1,0 +1,117 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:98d96608-475f-4386-b7b5-6ddc1eb57e71",
+      "resource": {
+        "resourceType": "ResearchStudy",
+        "id": "98d96608-475f-4386-b7b5-6ddc1eb57e71",
+        "identifier": [
+          {
+            "system": "https://miracum.github.io/recruit/fhir/identifiers/trino-sql-criteria-researchstudy-id",
+            "value": "bronchitis"
+          }
+        ],
+        "extension": [
+          {
+            "url": "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym",
+            "valueString": "DEMO-BRONCHITIS"
+          },
+          {
+            "url": "https://www.medizininformatik-initiative.de/fhir/modul-studie/StructureDefinition/mii-ex-studie-akronym",
+            "valueString": "DEMO-BRONCHITIS"
+          }
+        ],
+        "status": "active",
+        "title": "Bronchitis Demo Study",
+        "enrollment": [
+          {
+            "reference": "Group/be24c1a6-b052-4360-871b-0a1b7b6bdfb4"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ResearchStudy/98d96608-475f-4386-b7b5-6ddc1eb57e71"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:be24c1a6-b052-4360-871b-0a1b7b6bdfb4",
+      "resource": {
+        "resourceType": "Group",
+        "id": "be24c1a6-b052-4360-871b-0a1b7b6bdfb4",
+        "identifier": [
+          {
+            "system": "https://miracum.github.io/recruit/fhir/identifiers/trino-sql-criteria-group-id",
+            "value": "bronchitis"
+          }
+        ],
+        "actual": false,
+        "type": "person",
+        "active": true,
+        "code": {
+          "coding": [
+            {
+              "system": "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-criteria-types",
+              "code": "trino-sql"
+            }
+          ],
+          "text": "Trino SQL-encoded eligibility criteria"
+        },
+        "characteristic": [
+          {
+            "valueReference": {
+              "reference": "Library/bb4e037a-0a43-4fee-befc-b9ed598c3e64"
+            },
+            "code": {
+              "coding": [
+                {
+                  "system": "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-criteria-types",
+                  "code": "trino-sql"
+                }
+              ],
+              "text": "Trino SQL-encoded eligibility criteria"
+            },
+            "exclude": false
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Group/be24c1a6-b052-4360-871b-0a1b7b6bdfb4"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:bb4e037a-0a43-4fee-befc-b9ed598c3e64",
+      "resource": {
+        "resourceType": "Library",
+        "id": "bb4e037a-0a43-4fee-befc-b9ed598c3e64",
+        "identifier": [
+          {
+            "system": "https://miracum.github.io/recruit/fhir/identifiers/trino-sql-criteria-library-id",
+            "value": "bronchitis"
+          }
+        ],
+        "status": "active",
+        "type": {
+          "coding": [
+            {
+              "code": "logic-library"
+            }
+          ]
+        },
+        "content": [
+          {
+            "contentType": "text/x-trino",
+            "data": "U0VMRUNUIERJU1RJTkNUIHBhdGllbnQuaWQgQVMgcGF0aWVudF9pZA0KRlJPTSBmaGlyLmRlZmF1bHQucGF0aWVudCBBUyBwYXRpZW50DQpMRUZUIEpPSU4NCiAgICBmaGlyLmRlZmF1bHQuY29uZGl0aW9uDQogICAgT04gY29uZGl0aW9uLnN1YmplY3QucmVmZXJlbmNlID0gQ09OQ0FUKCdQYXRpZW50LycsIHBhdGllbnQuaWQpLA0KICAgIFVOTkVTVChjb25kaXRpb24uY29kZS5jb2RpbmcpIEFTIGNvbmRpdGlvbl9jb2RpbmcNCldIRVJFDQogICAgY29uZGl0aW9uX2NvZGluZy5zeXN0ZW0gPSAnaHR0cDovL3Nub21lZC5pbmZvL3NjdCcNCiAgICBBTkQgY29uZGl0aW9uX2NvZGluZy5jb2RlIElOICgnMTA1MDkwMDInKQ=="
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Library/bb4e037a-0a43-4fee-befc-b9ed598c3e64"
+      }
+    }
+  ]
+}
