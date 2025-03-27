@@ -1,5 +1,22 @@
 # Changelog
 
+## [10.4.0](https://github.com/miracum/recruit/compare/v10.3.0...v10.4.0) (2025-03-27)
+
+
+### Features
+
+* added config for upsert instead of conditional create to support Blaze ([#407](https://github.com/miracum/recruit/issues/407)) ([ab9d8fe](https://github.com/miracum/recruit/commit/ab9d8fec3abbb96ad95f967d639d636dddce2c23))
+
+
+### Bug Fixes
+
+* resource presets and pdb config ([#406](https://github.com/miracum/recruit/issues/406)) ([7c85a5d](https://github.com/miracum/recruit/commit/7c85a5d09beeba39d00e164664ef67b617f6fb5b))
+
+
+### Miscellaneous Chores
+
+* **helm:** reset Chart.yaml changelog annotations ([112453d](https://github.com/miracum/recruit/commit/112453d07bdedc0d9be6ea9d03fe3b8f6910300a))
+
 ## [10.3.0](https://github.com/miracum/recruit/compare/v10.2.1...v10.3.0) (2025-03-24)
 
 

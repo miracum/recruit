@@ -10,7 +10,7 @@ plugins {
 }
 
 group = 'org.miracum.recruit'
-version = '10.3.0' // x-release-please-version
+version = '10.4.0' // x-release-please-version
 
 java {
   toolchain {
