@@ -4,6 +4,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.util.BundleUtil;
+import com.google.common.hash.Hashing;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
@@ -25,6 +26,7 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.miracum.recruit.queryfhirtrino.config.FhirSystems;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -35,10 +37,11 @@ public class PollForStudies {
   private static final Logger log = LoggerFactory.getLogger(PollForStudies.class);
 
   private JdbcTemplate jdbcTemplate;
-
   private IGenericClient fhirClient;
-
   private FhirSystems fhirSystems;
+
+  @Value("${fhir.use-upsert-instead-of-conditional-update}")
+  private boolean useUpsertInsteadOfConditionalUpdate = false;
 
   public PollForStudies(
       JdbcTemplate jdbcTemplate, IGenericClient fhirClient, FhirSystems fhirSystems) {
@@ -70,37 +73,37 @@ public class PollForStudies {
             .withAdditionalHeader("Prefer", "handling=strict")
             .execute();
 
-    for (var entry : studyBundle.getEntry()) {
-      var resource = entry.getResource();
-      if (resource instanceof ResearchStudy study) {
-        log.info("Found ResearchStudy with id: {}", study.getId());
+    var researchStudies =
+        BundleUtil.toListOfResourcesOfType(
+            fhirClient.getFhirContext(), studyBundle, ResearchStudy.class);
 
-        var group = (Group) study.getEnrollmentFirstRep().getResource();
+    for (var study : researchStudies) {
+      log.info("Found ResearchStudy with id: {}", study.getId());
 
-        log.info(
-            "Found Group with id: {}, {}", group.getId(), group.getIdentifierFirstRep().getValue());
+      var group = (Group) study.getEnrollmentFirstRep().getResource();
 
-        var library = (Library) group.getCharacteristicFirstRep().getValueReference().getResource();
+      log.info(
+          "Found Group with id: {}, {}", group.getId(), group.getIdentifierFirstRep().getValue());
 
-        var decoded =
-            Base64.getDecoder()
-                .decode(library.getContentFirstRep().getDataElement().asStringValue());
+      var library = (Library) group.getCharacteristicFirstRep().getValueReference().getResource();
 
-        var contentString = new String(decoded, StandardCharsets.UTF_8);
+      var decoded =
+          Base64.getDecoder().decode(library.getContentFirstRep().getDataElement().asStringValue());
 
-        log.info("Found Library with id: {}, {}", library.getId(), contentString);
+      var contentString = new String(decoded, StandardCharsets.UTF_8);
 
-        var result = jdbcTemplate.queryForList(contentString);
+      log.info("Found Library with id: {}, {}", library.getId(), contentString);
 
-        for (var row : result) {
-          log.info("Found patient with id: {}", row.get("patient_id"));
-        }
+      var result = jdbcTemplate.queryForList(contentString);
 
-        var patientIds = result.stream().map(r -> (String) r.get("patient_id")).distinct().toList();
-        var bundle = createScreeningListBundle(study, patientIds);
-
-        fhirClient.transaction().withBundle(bundle).execute();
+      for (var row : result) {
+        log.info("Found patient with id: {}", row.get("patient_id"));
       }
+
+      var patientIds = result.stream().map(r -> (String) r.get("patient_id")).distinct().toList();
+      var bundle = createScreeningListBundle(study, patientIds);
+
+      fhirClient.transaction().withBundle(bundle).execute();
     }
   }
 
@@ -140,19 +143,34 @@ public class PollForStudies {
               .setIndividual(new Reference("Patient/" + patientId))
               .setStatus(ResearchSubject.ResearchSubjectStatus.CANDIDATE);
 
+      var entryRequestComponent = new BundleEntryRequestComponent();
+      if (useUpsertInsteadOfConditionalUpdate) {
+        var idValue =
+            "ResearchSubject?patient=Patient/"
+                + patientId
+                + "&study=ResearchStudy/"
+                + study.getIdElement().getIdPart();
+        var resourceId = Hashing.sha256().hashString(idValue, StandardCharsets.UTF_8).toString();
+        subject.setId(resourceId);
+        entryRequestComponent
+            .setMethod(Bundle.HTTPVerb.PUT)
+            .setUrl(ResourceType.ResearchSubject.name() + "/" + resourceId);
+      } else {
+        entryRequestComponent
+            .setMethod(Bundle.HTTPVerb.POST)
+            .setIfNoneExist(
+                "ResearchSubject?patient=Patient/"
+                    + patientId
+                    + "&study=ResearchStudy/"
+                    + study.getIdElement().getIdPart())
+            .setUrl(ResourceType.ResearchSubject.name());
+      }
+
       var subjectEntry =
           new Bundle.BundleEntryComponent()
               .setResource(subject)
               .setFullUrl(IdType.newRandomUuid().getValue())
-              .setRequest(
-                  new BundleEntryRequestComponent()
-                      .setMethod(Bundle.HTTPVerb.POST)
-                      .setIfNoneExist(
-                          "ResearchSubject?patient=Patient/"
-                              + patientId
-                              + "&study=ResearchStudy/"
-                              + study.getIdElement().getIdPart())
-                      .setUrl(ResourceType.ResearchSubject.name()));
+              .setRequest(entryRequestComponent);
 
       bundle.addEntry(subjectEntry);
 
@@ -186,18 +204,32 @@ public class PollForStudies {
       screeningList.addEntry(listEntry);
     }
 
+    var entryRequestComponent = new BundleEntryRequestComponent();
+    if (useUpsertInsteadOfConditionalUpdate) {
+      var identifierValue =
+          fhirSystems.screeningListIdentifier() + "|" + study.getIdentifierFirstRep().getValue();
+      var resourceId =
+          Hashing.sha256().hashString(identifierValue, StandardCharsets.UTF_8).toString();
+      screeningList.setId(resourceId);
+      entryRequestComponent
+          .setMethod(Bundle.HTTPVerb.PUT)
+          .setUrl(ResourceType.List.name() + "/" + resourceId);
+
+    } else {
+      entryRequestComponent
+          .setMethod(Bundle.HTTPVerb.PUT)
+          .setUrl(
+              "List?identifier="
+                  + fhirSystems.screeningListIdentifier()
+                  + "|"
+                  + study.getIdentifierFirstRep().getValue());
+    }
+
     bundle
         .addEntry()
         .setResource(screeningList)
         .setFullUrl(IdType.newRandomUuid().getValue())
-        .setRequest(
-            new BundleEntryRequestComponent()
-                .setMethod(Bundle.HTTPVerb.PUT)
-                .setUrl(
-                    "List?identifier="
-                        + fhirSystems.screeningListIdentifier()
-                        + "|"
-                        + study.getIdentifierFirstRep().getValue()));
+        .setRequest(entryRequestComponent);
 
     return bundle;
   }
