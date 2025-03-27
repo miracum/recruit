@@ -15,7 +15,7 @@ maintainers:
 sources:
   - https://github.com/miracum/recruit/tree/master/charts/recruit
 deprecated: false
-kubeVersion: '>= 1.21.0'
+kubeVersion: ">= 1.21.0"
 icon: https://miracum.github.io/recruit/_img/miracum-recruit-k8s-logo.png
 dependencies:
   - condition: fhirserver.enabled
@@ -45,9 +45,9 @@ dependencies:
 version: 10.3.0
 appVersion: 10.1.12
 annotations:
-  artifacthub.io/containsSecurityUpdates: 'false'
-  artifacthub.io/operator: 'false'
-  artifacthub.io/prerelease: 'false'
+  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/operator: "false"
+  artifacthub.io/prerelease: "false"
   artifacthub.io/license: AGPL-3.0-or-later
   artifacthub.io/recommendations: >
     - url: https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack
