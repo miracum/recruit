@@ -9,6 +9,7 @@ fhir:
   server:
     # call, connect, read, and write timeout to the FHIR server in seconds
     timeout-in-seconds: 300
+  use-upsert-instead-of-conditional-update: false
   systems:
     screeningListIdentifier: "https://fhir.miracum.org/uc1/NamingSystem/screeningListId"
     screening-list-study-reference-extension: "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy"
