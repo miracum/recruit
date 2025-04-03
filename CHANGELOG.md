@@ -1,5 +1,15 @@
 # Changelog
 
+## [10.4.1](https://github.com/miracum/recruit/compare/v10.4.0...v10.4.1) (2025-04-03)
+
+
+### Miscellaneous Chores
+
+* **deps:** update docker.io/bitnami/minio:2025.3.12 docker digest to 31d778a ([#409](https://github.com/miracum/recruit/issues/409)) ([8a6bb94](https://github.com/miracum/recruit/commit/8a6bb94310f3e2ddd93949306e79539c3f13ead2))
+* **deps:** update docker.io/curlimages/curl:8.12.0 docker digest to 3dfa70a ([#410](https://github.com/miracum/recruit/issues/410)) ([6424e85](https://github.com/miracum/recruit/commit/6424e854d2e322fa75ada8bfc139e626565d9c6a))
+* **deps:** update gcr.io/distroless/java21-debian12:nonroot docker digest to 8530efa ([#411](https://github.com/miracum/recruit/issues/411)) ([5611b62](https://github.com/miracum/recruit/commit/5611b627621cbeb4cfd33672373128c705737f0c))
+* **helm:** reset Chart.yaml changelog annotations ([e4b980b](https://github.com/miracum/recruit/commit/e4b980b01d100a15be66416b6ac1a4787972508b))
+
 ## [10.4.0](https://github.com/miracum/recruit/compare/v10.3.0...v10.4.0) (2025-03-27)
 
 
