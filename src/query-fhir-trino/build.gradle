@@ -13,7 +13,7 @@ dependencies {
     implementation 'com.github.slugify:slugify:3.0.7'
 
     // https://mvnrepository.com/artifact/io.trino/trino-jdbc
-    implementation 'io.trino:trino-jdbc:473'
+    implementation 'io.trino:trino-jdbc:475'
 
     testImplementation 'com.approvaltests:approvaltests:24.19.0'
     testImplementation 'com.google.code.gson:gson:2.12.1'
