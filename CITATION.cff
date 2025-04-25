@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "recruIT: A cloud-native clinical trial recruitment support system based on Health Level 7 Fast Healthcare Interoperability Resources (HL7 FHIR) and the Observational Medical Outcomes Partnership Common Data Model (OMOP CDM)"
+version: 10.4.0 # x-release-please-version
+doi: https://doi.org/10.1016/j.compbiomed.2024.108411
+date-released: 2024-04-06
+url: "https://github.com/miracum/recruit"
+preferred-citation:
+  type: article
+  authors:
+    - family-names: "Gulden"
+      given-names: "Christian"
+    - family-names: "Macho"
+      given-names: "Philipp"
+    - family-names: "Reinecke"
+      given-names: "Ines"
+    - family-names: "Strantz"
+      given-names: "Cosima"
+    - family-names: "Prokosch"
+      given-names: "Hans-Ulrich"
+    - family-names: "Blasini"
+      given-names: "Romina"
+  doi: "j.compbiomed.2024.108411"
+  journal: "Computers in Biology and Medicine"
+  month: 5
+  title: "recruIT: A cloud-native clinical trial recruitment support system based on Health Level 7 Fast Healthcare Interoperability Resources (HL7 FHIR) and the Observational Medical Outcomes Partnership Common Data Model (OMOP CDM)"
+  issue: 108411
+  volume: 174
+  year: 2024
