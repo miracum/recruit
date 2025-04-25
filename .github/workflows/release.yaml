@@ -37,7 +37,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@d7d6bc7722e3daa8354c50bcb52f4837da5e9b6a # v3.8.1
+        uses: sigstore/cosign-installer@3454372f43399081ed03b604cb2d021dabca52bb # v3.8.2
 
       - name: Add helm repos and update deps
         run: |
@@ -106,7 +106,7 @@ jobs:
   publish-kyverno-policies:
     name: publish kyverno policies
     runs-on: ubuntu-24.04
-    container: ghcr.io/chgl/kube-powertools:v2.3.48@sha256:458b38fb51d3ab6d056eb7627263a2749f6f55a86fb7a7130acf596cfdd8c5a5
+    container: ghcr.io/chgl/kube-powertools:v2.3.53@sha256:5d1bd8a0c865c06c3af437b1d0a9117a8cbcf3f3374a1b0ce1f2963cf0e225a5
     continue-on-error: true
     steps:
       - name: Checkout
@@ -138,7 +138,7 @@ jobs:
           persist-credentials: false
 
       - name: Download Helm chart
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: helm-chart
           path: /tmp
@@ -168,7 +168,7 @@ jobs:
           echo "hashes=$(base64 -w0 < checksums.sha256)" >> "$GITHUB_OUTPUT"
 
       - name: upload assets to release
-        uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2.2.1
+        uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2.2.2
         with:
           files: |
             dist/*.tgz
