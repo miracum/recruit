@@ -1,6 +1,11 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:best-practices", "group:allNonMajor", "schedule:monthly"],
+  "extends": [
+    "config:best-practices",
+    "group:allNonMajor",
+    "schedule:monthly",
+    "group:allDigest"
+  ],
   "ignoreDeps": [
     "docker.io/library/postgres",
     "postgresql",
