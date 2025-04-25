@@ -651,7 +651,7 @@ services:
           memory: 1G
 
   trino:
-    image: docker.io/trinodb/trino:473@sha256:b2a1eec47aae99a4cfa5f4104ae7055fbac8405370367297859c2482adb12254
+    image: docker.io/trinodb/trino:475@sha256:a04abba5e99d614dfe28dd16e0d5dec9e99dfea2a694cf8d0685f5c9e3c0df60
     profiles:
       - trino
     ipc: none
