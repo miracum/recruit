@@ -13,24 +13,24 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
 
-    implementation 'org.apache.camel:camel-sql:4.10.2'
-    implementation 'org.apache.camel:camel-jackson:4.10.2'
-    implementation 'org.apache.camel:camel-jsonpath:4.10.2'
-    implementation 'org.apache.camel:camel-fhir:4.10.2'
-    implementation 'org.apache.camel:camel-http:4.10.2'
-    implementation 'org.apache.camel:camel-cron:4.10.2'
+    implementation 'org.apache.camel:camel-sql:4.11.0'
+    implementation 'org.apache.camel:camel-jackson:4.11.0'
+    implementation 'org.apache.camel:camel-jsonpath:4.11.0'
+    implementation 'org.apache.camel:camel-fhir:4.11.0'
+    implementation 'org.apache.camel:camel-http:4.11.0'
+    implementation 'org.apache.camel:camel-cron:4.11.0'
 
-    implementation 'org.apache.camel.springboot:camel-rest-starter:4.10.2'
-    implementation 'org.apache.camel.springboot:camel-servlet-starter:4.10.2'
-    implementation 'org.apache.camel.springboot:camel-spring-boot-starter:4.10.2'
-    implementation 'org.apache.camel.springboot:camel-micrometer-starter:4.10.2'
+    implementation 'org.apache.camel.springboot:camel-rest-starter:4.11.0'
+    implementation 'org.apache.camel.springboot:camel-servlet-starter:4.11.0'
+    implementation 'org.apache.camel.springboot:camel-spring-boot-starter:4.11.0'
+    implementation 'org.apache.camel.springboot:camel-micrometer-starter:4.11.0'
 
-    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.18.3'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.19.0'
 
     implementation 'net.minidev:json-smart:2.5.2'
 
     implementation 'com.github.slugify:slugify:3.0.7'
 
-    testImplementation 'com.approvaltests:approvaltests:24.19.0'
-    testImplementation 'com.google.code.gson:gson:2.12.1'
+    testImplementation 'com.approvaltests:approvaltests:24.21.0'
+    testImplementation 'com.google.code.gson:gson:2.13.1'
 }

@@ -1,4 +1,4 @@
-FROM docker.io/library/node:22.14.0-slim@sha256:1c18d9ab3af4585870b92e4dbc5cac5a0dc77dd13df1a5905cea89fc720eb05b AS base
+FROM docker.io/library/node:22.15.0-slim@sha256:157c7ea6f8c30b630d6f0d892c4f961eab9f878e88f43dd1c00514f95ceded8a AS base
 WORKDIR /app
 
 COPY package.json ./
