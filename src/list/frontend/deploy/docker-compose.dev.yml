@@ -51,7 +51,7 @@ services:
       - 8083:8080
 
   fhir-pseudonymizer:
-    image: ghcr.io/miracum/fhir-pseudonymizer:v2.22.9@sha256:11edc8ed44bdf579b0a00e4ea744caa36d8a266b340fd455565e6d8a7fcd4b0d
+    image: ghcr.io/miracum/fhir-pseudonymizer:v2.22.9@sha256:c701d91b45a1ec3ec77b8e48bf8a45bdf130d48f352f924b7792f54530ad028d
     environment:
       APIKEY: "fhir-pseudonymizer-api-key"
       TRACING__ENABLED: "true"
