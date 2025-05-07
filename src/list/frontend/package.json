@@ -16,7 +16,7 @@
     "@fortawesome/vue-fontawesome": "2.0.10",
     "axios": "1.9.0",
     "buefy": "0.9.29",
-    "core-js": "3.41.0",
+    "core-js": "3.42.0",
     "csv-stringify": "6.5.2",
     "fhirclient": "2.5.5",
     "fhirpath": "3.18.0",
@@ -25,7 +25,7 @@
     "vuejs-logger": "1.5.5"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "7.27.0",
+    "@babel/eslint-parser": "7.27.1",
     "@vue/cli-plugin-babel": "5.0.8",
     "@vue/cli-plugin-eslint": "5.0.8",
     "@vue/cli-plugin-router": "5.0.8",

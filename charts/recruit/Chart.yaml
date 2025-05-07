@@ -30,7 +30,7 @@ dependencies:
   - condition: ohdsi.enabled
     name: ohdsi
     repository: oci://ghcr.io/chgl/charts
-    version: 0.24.68
+    version: 0.24.72
   - name: postgresql
     version: 16.5.5
     repository: oci://registry-1.docker.io/bitnamicharts
@@ -41,7 +41,7 @@ dependencies:
     repository: oci://ghcr.io/miracum/charts
   - name: common
     repository: oci://registry-1.docker.io/bitnamicharts
-    version: 2.30.0
+    version: 2.31.1
 version: 10.4.0
 appVersion: 10.1.12
 annotations:

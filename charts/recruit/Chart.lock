@@ -7,7 +7,7 @@ dependencies:
   version: 5.8.0
 - name: ohdsi
   repository: oci://ghcr.io/chgl/charts
-  version: 0.24.68
+  version: 0.24.72
 - name: postgresql
   repository: oci://registry-1.docker.io/bitnamicharts
   version: 16.5.5
@@ -16,6 +16,6 @@ dependencies:
   version: 0.7.86
 - name: common
   repository: oci://registry-1.docker.io/bitnamicharts
-  version: 2.30.0
-digest: sha256:2fd07457465ead3b81cb4dc06afe21772cb54fb297faee8733efa14362b89aa0
-generated: "2025-04-26T06:34:21.11257798Z"
+  version: 2.31.1
+digest: sha256:10727180849e2b4ef772efb381462b3f805c11be434d4077f14f478526cc36fb
+generated: "2025-05-07T20:09:25.037598374Z"
