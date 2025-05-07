@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: docker.io/library/traefik:v3.3.6@sha256:83f3c843133530e4aa45e6ddc415488583a8a01c88adc5022d415c6e97ceeaae
+    image: docker.io/library/traefik:v3.4.0@sha256:4cf907247939b5d20bf4eff73abd21cb413c339600dde76dbc94a874b2578a27
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -356,7 +356,7 @@ services:
       - "127.0.0.1:6432:5432"
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.2.1@sha256:9869b88191392727f0be7301e53573cc39c13c9d9b9b08492c97d1ea40366eae
+    image: quay.io/keycloak/keycloak:26.2.3@sha256:60f7adee39486c70607ca9b61394bcf7b9607f620efcef64b99f6fc5ffd031e2
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -441,7 +441,7 @@ services:
 
   upload-to-fhir-server:
     # the image is overkill, but it is the only one that has the necessary tools and is up-to-date
-    image: ghcr.io/chgl/kube-powertools:v2.3.55@sha256:e21f83670af400d59d20d4d700b4d180ec2b2b80a576c11ea34eda913384619b
+    image: ghcr.io/chgl/kube-powertools:v2.3.60@sha256:ba8b3c56b4839a8531dc361b538ec6c94906c05f3464ee7985a759cd33f057fd
     profiles:
       - trino
     ipc: none
