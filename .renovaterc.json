@@ -13,7 +13,7 @@
   ],
   "ignorePaths": ["**/node_modules/**", "**/bower_components/**", "fhir/**"],
   "pip-compile": {
-    "fileMatch": ["(^|/|\\.)requirements\\.txt$"]
+    "managerFilePatterns": ["/(^|/|\\.)requirements\\.txt$/"]
   },
   "packageRules": [
     {
