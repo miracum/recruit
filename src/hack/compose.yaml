@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: docker.io/library/traefik:v3.4.0@sha256:4cf907247939b5d20bf4eff73abd21cb413c339600dde76dbc94a874b2578a27
+    image: docker.io/library/traefik:v3.4.1@sha256:cd40ab7bc1f047731d5b22595203812343efcb6538014c4e93221cfc3a77217a
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -301,7 +301,7 @@ services:
           size: 1024
 
   jaeger:
-    image: docker.io/jaegertracing/jaeger:2.5.0@sha256:20d715ade1cf32e8c2be1a288317c2126376ce60811be71f0856793d7f849127
+    image: docker.io/jaegertracing/jaeger:2.6.0@sha256:9b29aad1b65cd61016428ec15f3e04d75d4969f3551977d4fbed5acc4c85ec8c
     ports:
       - "127.0.0.1:16686:16686"
       - "127.0.0.1:6831:6831/udp"
@@ -356,7 +356,7 @@ services:
       - "127.0.0.1:6432:5432"
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.2.3@sha256:60f7adee39486c70607ca9b61394bcf7b9607f620efcef64b99f6fc5ffd031e2
+    image: quay.io/keycloak/keycloak:26.2.4@sha256:4a81762677f8911c6266e3dea57a2d78fa17bd63408debbf23afd8cc46fe256e
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -390,7 +390,7 @@ services:
       - "traefik.http.routers.keycloak.entrypoints=web"
 
   minio:
-    image: docker.io/bitnami/minio:2025.4.22@sha256:50cec18ac4184af4671a78aedd5554942c8ae105d51a465fa82037949046da01
+    image: docker.io/bitnami/minio:2025.5.24@sha256:0e1ef607925724291bb672bd9019d0e6a4fb3685030efe7e8107548278a96315
     profiles:
       - trino
     ipc: none
@@ -441,7 +441,7 @@ services:
 
   upload-to-fhir-server:
     # the image is overkill, but it is the only one that has the necessary tools and is up-to-date
-    image: ghcr.io/chgl/kube-powertools:v2.3.60@sha256:ba8b3c56b4839a8531dc361b538ec6c94906c05f3464ee7985a759cd33f057fd
+    image: ghcr.io/chgl/kube-powertools:v2.3.61@sha256:42324e50c2a8270c343b762305933d9df4715b31358403d4c3479eb235e0d67f
     profiles:
       - trino
     ipc: none
@@ -569,7 +569,7 @@ services:
         condition: service_completed_successfully
 
   warehousekeeper:
-    image: ghcr.io/miracum/util-images/warehousekeeper:v0.1.12@sha256:ba2b1169754da8d971a961f7318ee29b5ea04250cf4f921ed51d49f3bc24b18d
+    image: ghcr.io/miracum/util-images/warehousekeeper:v0.1.13@sha256:7f2a1a86f9ee27d98682aaec4a5cfd3615c4278cef8906ffb3e81df57eb21cd9
     profiles:
       - trino
     ipc: none
