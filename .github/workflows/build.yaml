@@ -59,7 +59,7 @@ jobs:
 
       - name: Build image
         id: build
-        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0 # v6.17.0
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache
           cache-to: type=inline
@@ -72,7 +72,7 @@ jobs:
             MODULE_NAME=${{ inputs.module-name }}
 
       - name: Run unit tests
-        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0 # v6.17.0
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -88,7 +88,7 @@ jobs:
           gh-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5 # 0.30.0
+        uses: aquasecurity/trivy-action@76071ef0d7ec797419534a183b498b4d6366cf37 # 0.31.0
         with:
           image-ref: ${{ fromJson(steps.container_meta.outputs.json).tags[0] }}
           severity: "CRITICAL"
@@ -97,7 +97,7 @@ jobs:
           timeout: 15m
 
       - name: Save Trivy vulnerability attestation
-        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5 # 0.30.0
+        uses: aquasecurity/trivy-action@76071ef0d7ec797419534a183b498b4d6366cf37 # 0.31.0
         with:
           image-ref: ${{ fromJson(steps.container_meta.outputs.json).tags[0] }}
           exit-code: "0"
