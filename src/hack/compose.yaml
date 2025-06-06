@@ -356,7 +356,7 @@ services:
       - "127.0.0.1:6432:5432"
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.2.4@sha256:4a81762677f8911c6266e3dea57a2d78fa17bd63408debbf23afd8cc46fe256e
+    image: quay.io/keycloak/keycloak:26.2.5@sha256:4883630ef9db14031cde3e60700c9a9a8eaf1b5c24db1589d6a2d43de38ba2a9
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -441,7 +441,7 @@ services:
 
   upload-to-fhir-server:
     # the image is overkill, but it is the only one that has the necessary tools and is up-to-date
-    image: ghcr.io/chgl/kube-powertools:v2.3.61@sha256:42324e50c2a8270c343b762305933d9df4715b31358403d4c3479eb235e0d67f
+    image: ghcr.io/chgl/kube-powertools:v2.3.63@sha256:923f253e093bac8df4ba3b9a5d6062f9425fa61be687d8dfd56df605241c68fd
     profiles:
       - trino
     ipc: none
