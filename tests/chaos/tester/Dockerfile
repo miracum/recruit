@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0.300-noble@sha256:58fa5442c6da3bd654cab866fd6668de2713769511e412a3aa23c14368b84b16 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0.301-noble@sha256:4f50505b5344e9d8a76805d71bb4ba76da6b01656e17a66a8ce1e4c4dfaaec12 AS build
 WORKDIR /build
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 
@@ -20,7 +20,7 @@ dotnet publish tester.csproj \
     -o /build/publish
 EOF
 
-FROM mcr.microsoft.com/dotnet/aspnet:9.0.5-noble-chiseled@sha256:363d11f5c5979e7894c2eaaa878aed13946d52de68f5bef98d5bae11d2f242b1 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:9.0.6-noble-chiseled@sha256:65ac626d0095036e7c477e610ed32e59822992c0b207c95444ef22d455343f4a AS runtime
 WORKDIR /opt/chaos-tester
 USER 65532:65532
 ENV DOTNET_ENVIRONMENT="Production" \
