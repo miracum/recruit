@@ -1,10 +1,10 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0-jammy@sha256:b7c27d609d9331f6715bb1fddc0e8a87c42ef1f34dacd43c059921c5c5f91cb9 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0.300-noble@sha256:58fa5442c6da3bd654cab866fd6668de2713769511e412a3aa23c14368b84b16 AS build
 WORKDIR /build
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 
-COPY tester.csproj tester.csproj
+COPY packages.lock.json tester.csproj ./
 
-RUN dotnet restore --runtime=linux-x64 tester.csproj
+RUN dotnet restore --use-lock-file --runtime=linux-x64 tester.csproj
 
 COPY . .
 
@@ -20,7 +20,7 @@ dotnet publish tester.csproj \
     -o /build/publish
 EOF
 
-FROM mcr.microsoft.com/dotnet/nightly/runtime:8.0-jammy-chiseled@sha256:5120126442d53009f8fc6aa970dae766a502601cfd9e2f38ad51d98147d9da1e AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:9.0.5-noble-chiseled@sha256:363d11f5c5979e7894c2eaaa878aed13946d52de68f5bef98d5bae11d2f242b1 AS runtime
 WORKDIR /opt/chaos-tester
 USER 65532:65532
 ENV DOTNET_ENVIRONMENT="Production" \

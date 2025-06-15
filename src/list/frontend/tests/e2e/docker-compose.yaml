@@ -18,7 +18,7 @@ services:
 
   tester:
     build:
-      dockerfile: cypress.Dockerfile
+      dockerfile: Dockerfile
       context: .
     working_dir: /root/e2e
     environment:
