@@ -2,7 +2,9 @@ FROM docker.io/cypress/included:14.4.1@sha256:e770b8644d36ebd3a5c51833f0147e70d1
 WORKDIR /root
 ENV CI=1
 
-RUN npm install cypress-keycloak@1.9.0
+COPY package*.json .
+
+RUN npm clean-install
 
 WORKDIR /root/e2e
 # hadolint ignore=DL3002

@@ -1,0 +1,15 @@
+{
+  "name": "list-frontend-tests",
+  "version": "0.0.0",
+  "description": "recruIT e2e tests for the list frontend",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "github.com/miracum/recruit",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "cypress-keycloak": "1.9.0"
+  }
+}
