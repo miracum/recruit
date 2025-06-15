@@ -1,4 +1,4 @@
-FROM docker.io/library/node:22.16.0-slim@sha256:2f3571619daafc6b53232ebf2fcc0817c1e64795e92de317c1684a915d13f1a5 AS base
+FROM docker.io/library/node:22.16.0-slim@sha256:048ed02c5fd52e86fda6fbd2f6a76cf0d4492fd6c6fee9e2c463ed5108da0e34 AS base
 WORKDIR /app
 
 COPY package.json ./
@@ -26,7 +26,7 @@ COPY server/package.json ./server/
 RUN npm clean-install --workspace=server
 COPY server/*.js ./server/
 
-FROM gcr.io/distroless/nodejs22-debian12:nonroot@sha256:581893ba58980f0b4c7444d7a16b89f4e966cd89a89f3e0c6f26c482e312f008
+FROM gcr.io/distroless/nodejs22-debian12:nonroot@sha256:691f52bd14381c3f8b7ebfefa308fb34a2ad2bd1fea58d4dccb934f953632153
 WORKDIR /app
 USER 65532:65532
 # Port 8081 is currently not used, but exposed to make

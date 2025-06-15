@@ -390,7 +390,7 @@ services:
       - "traefik.http.routers.keycloak.entrypoints=web"
 
   minio:
-    image: docker.io/bitnami/minio:2025.5.24@sha256:69703ab18751142bf5487dae90fc5654cc426263e258610b0512cee00030369e
+    image: docker.io/bitnami/minio:2025.5.24@sha256:451fe6858cb770cc9d0e77ba811ce287420f781c7c1b806a386f6896471a349c
     profiles:
       - trino
     ipc: none
