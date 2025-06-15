@@ -11,6 +11,9 @@ on:
       # If you want a workflow to run when stable and pre-releases publish, subscribe to published instead of released and prereleased.
       # <https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#release>
       - published
+  merge_group:
+    types:
+      - checks_requested
 
 permissions:
   contents: read
