@@ -1,3 +1,4 @@
 charts/*/templates
 **/__snapshots__/
 src/hack/synthea/transaction/fhir/
+*.lock.json
