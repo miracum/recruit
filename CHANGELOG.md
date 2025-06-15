@@ -1,5 +1,12 @@
 # Changelog
 
+## [10.4.2](https://github.com/miracum/recruit/compare/v10.4.1...v10.4.2) (2025-06-15)
+
+
+### Miscellaneous Chores
+
+* **deps:** update all non-major dependencies ([#445](https://github.com/miracum/recruit/issues/445)) ([487723c](https://github.com/miracum/recruit/commit/487723c6da474980249aeb28b21c49dac43d9049))
+
 ## [10.4.1](https://github.com/miracum/recruit/compare/v10.4.0...v10.4.1) (2025-06-15)
 
 
