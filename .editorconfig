@@ -26,3 +26,6 @@ ignore = true
 
 [src/gradlew.bat]
 ignore = true
+
+[*.lock.json]
+insert_final_newline = unset
