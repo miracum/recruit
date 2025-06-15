@@ -301,7 +301,7 @@ services:
           size: 1024
 
   jaeger:
-    image: docker.io/jaegertracing/jaeger:2.6.0@sha256:9b29aad1b65cd61016428ec15f3e04d75d4969f3551977d4fbed5acc4c85ec8c
+    image: docker.io/jaegertracing/jaeger:2.7.0@sha256:8d8d36f079c7e2b3ea26132244238768a69abecb45aab0ed0218e2b8c40908cf
     ports:
       - "127.0.0.1:16686:16686"
       - "127.0.0.1:6831:6831/udp"
@@ -356,7 +356,7 @@ services:
       - "127.0.0.1:6432:5432"
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.2.4@sha256:4a81762677f8911c6266e3dea57a2d78fa17bd63408debbf23afd8cc46fe256e
+    image: quay.io/keycloak/keycloak:26.2.5@sha256:4883630ef9db14031cde3e60700c9a9a8eaf1b5c24db1589d6a2d43de38ba2a9
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -416,7 +416,7 @@ services:
           memory: 4G
 
   wait-for-minio:
-    image: docker.io/curlimages/curl:8.13.0@sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd
+    image: docker.io/curlimages/curl:8.14.1@sha256:9a1ed35addb45476afa911696297f8e115993df459278ed036182dd2cd22b67b
     profiles:
       - trino
     ipc: none
@@ -441,7 +441,7 @@ services:
 
   upload-to-fhir-server:
     # the image is overkill, but it is the only one that has the necessary tools and is up-to-date
-    image: ghcr.io/chgl/kube-powertools:v2.3.61@sha256:42324e50c2a8270c343b762305933d9df4715b31358403d4c3479eb235e0d67f
+    image: ghcr.io/chgl/kube-powertools:v2.3.64@sha256:31f0cd0afefc41bbe5fb8790475c5266e26114b6332f5965cfca39635d9ff12f
     profiles:
       - trino
     ipc: none
@@ -522,7 +522,7 @@ services:
         condition: service_completed_successfully
 
   wait-for-pathling:
-    image: docker.io/curlimages/curl:8.13.0@sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd
+    image: docker.io/curlimages/curl:8.14.1@sha256:9a1ed35addb45476afa911696297f8e115993df459278ed036182dd2cd22b67b
     profiles:
       - trino
     ipc: none
@@ -546,7 +546,7 @@ services:
         condition: service_started
 
   import-resources:
-    image: docker.io/curlimages/curl:8.13.0@sha256:d43bdb28bae0be0998f3be83199bfb2b81e0a30b034b6d7586ce7e05de34c3fd
+    image: docker.io/curlimages/curl:8.14.1@sha256:9a1ed35addb45476afa911696297f8e115993df459278ed036182dd2cd22b67b
     profiles:
       - trino
     ipc: none
