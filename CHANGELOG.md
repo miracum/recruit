@@ -1,5 +1,54 @@
 # Changelog
 
+## [10.4.1](https://github.com/miracum/recruit/compare/v10.4.0...v10.4.1) (2025-06-15)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#421](https://github.com/miracum/recruit/issues/421)) ([b1db5bd](https://github.com/miracum/recruit/commit/b1db5bd36fd2b4fc71fc901914738a3186047d7c))
+* **deps:** update all non-major dependencies ([#427](https://github.com/miracum/recruit/issues/427)) ([e5f69f4](https://github.com/miracum/recruit/commit/e5f69f43d6728cad8a0dbb62d5b29ce960dac092))
+* **deps:** update all non-major dependencies ([#432](https://github.com/miracum/recruit/issues/432)) ([5c93d60](https://github.com/miracum/recruit/commit/5c93d60150520983bbd267692186eb22a998b80a))
+* **deps:** update all non-major dependencies ([#435](https://github.com/miracum/recruit/issues/435)) ([d07bddc](https://github.com/miracum/recruit/commit/d07bddc4e8bd1a560ac8d22e515761e4a9516a4a))
+* **deps:** update dependency fhirpath to v4 ([#431](https://github.com/miracum/recruit/issues/431)) ([ad4bef5](https://github.com/miracum/recruit/commit/ad4bef51abd9a92344bb110139788f11f22357fb))
+* **deps:** update dependency http-proxy-middleware to v3 [security] ([#415](https://github.com/miracum/recruit/issues/415)) ([59d6b37](https://github.com/miracum/recruit/commit/59d6b370f902fa32d2765594965b92caf9496eb9))
+* **deps:** update dependency io.trino:trino-jdbc to v475 ([#420](https://github.com/miracum/recruit/issues/420)) ([fa4cc6e](https://github.com/miracum/recruit/commit/fa4cc6e851bca5d247a41f6942f7e34aedb7080d))
+* **deps:** update dependency io.trino:trino-jdbc to v476 ([#443](https://github.com/miracum/recruit/issues/443)) ([b551354](https://github.com/miracum/recruit/commit/b551354233a086179f33a00803843027fabeefcb))
+* pinned deps ([#444](https://github.com/miracum/recruit/issues/444)) ([0a9b1a3](https://github.com/miracum/recruit/commit/0a9b1a3c240966a3eef0554588d24ccbe65e4495))
+
+
+### Documentation
+
+* added citation file ([95b25e9](https://github.com/miracum/recruit/commit/95b25e9d86bbd7b32848e2fa0852f7f542bc44fa))
+
+
+### Miscellaneous Chores
+
+* **config:** migrate renovate config ([#428](https://github.com/miracum/recruit/issues/428)) ([72203a0](https://github.com/miracum/recruit/commit/72203a0790000d5bd989b36436dd6b57925c5145))
+* **deps:** refresh pip-compile outputs ([#414](https://github.com/miracum/recruit/issues/414)) ([bd36f82](https://github.com/miracum/recruit/commit/bd36f829eacc12e6b37df99d9fc333d3acf421a9))
+* **deps:** refresh pip-compile outputs ([#422](https://github.com/miracum/recruit/issues/422)) ([9494182](https://github.com/miracum/recruit/commit/949418283ad77b817453046d93168920cfb86e16))
+* **deps:** refresh pip-compile outputs ([#425](https://github.com/miracum/recruit/issues/425)) ([09d9b86](https://github.com/miracum/recruit/commit/09d9b86c026ea526336be21346c0ec6564206dee))
+* **deps:** update all digest updates ([#416](https://github.com/miracum/recruit/issues/416)) ([4173be2](https://github.com/miracum/recruit/commit/4173be266f71a3cd8c449a9098f1e6611c8af687))
+* **deps:** update all digest updates ([#423](https://github.com/miracum/recruit/issues/423)) ([84f4fa4](https://github.com/miracum/recruit/commit/84f4fa46ab6d7bcb361d8ea9ed44db6083bc8b33))
+* **deps:** update all digest updates ([#429](https://github.com/miracum/recruit/issues/429)) ([8765e1c](https://github.com/miracum/recruit/commit/8765e1c070563c38ff987b49da6a30a45377179f))
+* **deps:** update all digest updates ([#433](https://github.com/miracum/recruit/issues/433)) ([5d48a9e](https://github.com/miracum/recruit/commit/5d48a9e082f83a8c0c659c38bea62256b2c8f550))
+* **deps:** update all digest updates ([#440](https://github.com/miracum/recruit/issues/440)) ([f083d04](https://github.com/miracum/recruit/commit/f083d04781c334c7ff5b9021d05a21ac61fef2e9))
+* **deps:** update dependency csharpier to v1 ([#418](https://github.com/miracum/recruit/issues/418)) ([61832c9](https://github.com/miracum/recruit/commit/61832c9de8e2e8e3ec5793f415e4aa1513a68112))
+* **deps:** update dependency requests to v2.32.4 [security] ([#439](https://github.com/miracum/recruit/issues/439)) ([8105526](https://github.com/miracum/recruit/commit/8105526e2ae928028df7964e00ad7af36291119b))
+* **deps:** update docker.io/bitnami/minio:2025.3.12 docker digest to 31d778a ([#409](https://github.com/miracum/recruit/issues/409)) ([8a6bb94](https://github.com/miracum/recruit/commit/8a6bb94310f3e2ddd93949306e79539c3f13ead2))
+* **deps:** update docker.io/curlimages/curl:8.12.0 docker digest to 3dfa70a ([#410](https://github.com/miracum/recruit/issues/410)) ([6424e85](https://github.com/miracum/recruit/commit/6424e854d2e322fa75ada8bfc139e626565d9c6a))
+* **deps:** update docker.io/trinodb/trino docker tag to v475 ([#419](https://github.com/miracum/recruit/issues/419)) ([f6c9f82](https://github.com/miracum/recruit/commit/f6c9f8250f800040cad16b291f856970889b6ec3))
+* **deps:** update docker.io/trinodb/trino docker tag to v476 ([#442](https://github.com/miracum/recruit/issues/442)) ([85e80b9](https://github.com/miracum/recruit/commit/85e80b964aeb31501b34c1fe98d06b161d44f738))
+* **deps:** update gcr.io/distroless/java21-debian12:nonroot docker digest to 8530efa ([#411](https://github.com/miracum/recruit/issues/411)) ([5611b62](https://github.com/miracum/recruit/commit/5611b627621cbeb4cfd33672373128c705737f0c))
+* **deps:** update github-actions ([#417](https://github.com/miracum/recruit/issues/417)) ([d809115](https://github.com/miracum/recruit/commit/d80911571b9fd3428209a75798b6d4a4541871af))
+* **deps:** update github-actions ([#424](https://github.com/miracum/recruit/issues/424)) ([6b7e0df](https://github.com/miracum/recruit/commit/6b7e0df168b645113a430b85dbc6bd8d5c07b442))
+* **deps:** update github-actions ([#426](https://github.com/miracum/recruit/issues/426)) ([6d72b5a](https://github.com/miracum/recruit/commit/6d72b5a3fff9b0554a5e275f228f87c2a610fd60))
+* **deps:** update github-actions ([#430](https://github.com/miracum/recruit/issues/430)) ([6c4955d](https://github.com/miracum/recruit/commit/6c4955deb57913e2f096c3b0c3aa6b31ba37bd3e))
+* **deps:** update github-actions ([#434](https://github.com/miracum/recruit/issues/434)) ([7a03e38](https://github.com/miracum/recruit/commit/7a03e3896cb87927d9acdb276b2bfeef538e359a))
+* **deps:** update github-actions ([#441](https://github.com/miracum/recruit/issues/441)) ([990c68a](https://github.com/miracum/recruit/commit/990c68afd8a31748f322934c9863d063ac0a73fb))
+* **helm:** reset Chart.yaml changelog annotations ([e4b980b](https://github.com/miracum/recruit/commit/e4b980b01d100a15be66416b6ac1a4787972508b))
+* re-formatted Chart.yaml ([89dec37](https://github.com/miracum/recruit/commit/89dec37612e57326ca6ea712468f6bd1708adb3f))
+* **renovate:** group:allDigest ([9e5e048](https://github.com/miracum/recruit/commit/9e5e048d5cfd10dd60c7d193c52be52462d486c5))
+
 ## [10.4.0](https://github.com/miracum/recruit/compare/v10.3.0...v10.4.0) (2025-03-27)
 
 
