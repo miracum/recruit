@@ -1,5 +1,13 @@
 # Changelog
 
+## [10.4.2](https://github.com/miracum/recruit/compare/v10.4.1...v10.4.2) (2025-06-19)
+
+
+### Miscellaneous Chores
+
+* **deps:** update all non-major dependencies ([#445](https://github.com/miracum/recruit/issues/445)) ([487723c](https://github.com/miracum/recruit/commit/487723c6da474980249aeb28b21c49dac43d9049))
+* **deps:** update dependency urllib3 to v2.5.0 [security] ([#448](https://github.com/miracum/recruit/issues/448)) ([6c883aa](https://github.com/miracum/recruit/commit/6c883aa7a4960a48af587a650eb2e1c2d511334d))
+
 ## [10.4.1](https://github.com/miracum/recruit/compare/v10.4.0...v10.4.1) (2025-06-15)
 
 
