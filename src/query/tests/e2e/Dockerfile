@@ -1,4 +1,4 @@
-FROM docker.io/library/python:3.13.5-slim-bookworm@sha256:f2fdaec50160418e0c2867ba3e254755edd067171725886d5d303fd7057bbf81
+FROM docker.io/library/python:3.13.5-slim-bookworm@sha256:d8130429ac8488cd869c7e7710e733aedc87bdd0d4bf816af831925c74b86e3f
 WORKDIR /opt/tests
 
 COPY requirements.txt .
