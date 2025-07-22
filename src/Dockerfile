@@ -1,4 +1,4 @@
-FROM docker.io/library/gradle:8.14.2-jdk21@sha256:482cfc026939e7e7bf70d12640f8e10b3527268d4167e9e3a908c56c2987dc39 AS build
+FROM docker.io/library/gradle:8.14.2-jdk21@sha256:cf0caeaac06e2824fac26daa6a55728fcb0e0e0e2ff28a430d2292547fe84dff AS build
 WORKDIR /home/gradle/project
 
 COPY --chown=gradle:gradle . .
@@ -17,7 +17,7 @@ gradle ":${MODULE_NAME}:test"
 gradle jacocoTestReport
 EOF
 
-FROM gcr.io/distroless/java21-debian12:nonroot@sha256:59c3de3664ddf2a69b2accc04ed4650caa578c14e63863075f5d041fe6961369
+FROM gcr.io/distroless/java21-debian12:nonroot@sha256:d43d0ce3ea52041b8f0fbf5e5fe3519ec331c8271be37d815a10b8a47c07721d
 WORKDIR /app
 
 ARG MODULE_NAME=query
