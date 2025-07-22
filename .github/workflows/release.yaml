@@ -37,7 +37,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3.9.1
+        uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159 # v3.9.2
 
       - name: Add helm repos and update deps
         run: |
@@ -106,7 +106,7 @@ jobs:
   publish-kyverno-policies:
     name: publish kyverno policies
     runs-on: ubuntu-24.04
-    container: ghcr.io/chgl/kube-powertools:v2.3.67@sha256:cc54c6f1c342fbf2108d5e398370fefbcb25389f24800467a86f14a838156248
+    container: ghcr.io/chgl/kube-powertools:v2.3.68@sha256:9a0a5d10b58765cff42bf65e672d98f051d27b74eb555a8d954aea22ab9bb180
     continue-on-error: true
     steps:
       - name: Checkout
