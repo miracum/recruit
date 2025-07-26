@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: atlasdb
-        image: docker.io/ohdsi/broadsea-atlasdb:2.0.0@sha256:0256a9e1ec75e6f0f48689c4d6a7dc8952d82b4ed7a055953e271d1c17850f6b
+        image: "docker.io/ohdsi/broadsea-atlasdb:2.0.0@sha256:0256a9e1ec75e6f0f48689c4d6a7dc8952d82b4ed7a055953e271d1c17850f6b"
         imagePullPolicy: IfNotPresent
         ports:
             - name: tcp-postgresql

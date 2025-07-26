@@ -1,21 +1,21 @@
 dependencies:
 - name: hapi-fhir-jpaserver
   repository: https://hapifhir.github.io/hapi-fhir-jpaserver-starter
-  version: 0.19.0
+  version: 0.20.0
 - name: mailhog
   repository: https://codecentric.github.io/helm-charts
   version: 5.8.0
 - name: ohdsi
   repository: oci://ghcr.io/chgl/charts
-  version: 0.24.77
+  version: 0.24.85
 - name: postgresql
   repository: oci://registry-1.docker.io/bitnamicharts
   version: 16.5.5
 - name: fhir-pseudonymizer
   repository: oci://ghcr.io/miracum/charts
-  version: 0.7.89
+  version: 0.7.96
 - name: common
   repository: oci://registry-1.docker.io/bitnamicharts
   version: 2.31.3
-digest: sha256:e8b23ea843b1dfe2155d0152b80441011983fc5515f056771ba5937eb79e290b
-generated: "2025-06-15T21:30:32.045306776Z"
+digest: sha256:d8bd50c3d186f92de9441767480eeab7586a846ebcdae679c3437b24129b6888
+generated: "2025-07-26T04:57:47.924477039Z"

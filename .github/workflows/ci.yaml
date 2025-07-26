@@ -43,6 +43,7 @@ jobs:
       context: ${{ matrix.context }}
 
   test:
+    name: test
     runs-on: ubuntu-24.04
     needs:
       - build
@@ -100,3 +101,19 @@ jobs:
     uses: ./.github/workflows/release.yaml
     secrets:
       token: ${{ secrets.MIRACUM_BOT_SEMANTIC_RELEASE_TOKEN }}
+
+  lint:
+    uses: miracum/.github/.github/workflows/standard-lint.yaml@ca714dd2f958a70aa44fd62a7711321bf88b0236 # v1.16.19
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      security-events: write
+      actions: read
+    with:
+      enable-validate-gradle-wrapper: false
+      codeql-languages: '["python", "javascript", "java", "csharp"]'
+      enable-codeql: true
+      enable-verify-base-image-signature: false
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}

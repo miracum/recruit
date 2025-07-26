@@ -36,10 +36,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 
-    implementation 'ca.uhn.hapi.fhir:hapi-fhir-client:8.2.0'
-    implementation 'ca.uhn.hapi.fhir:hapi-fhir-base:8.2.0'
-    implementation 'ca.uhn.hapi.fhir:hapi-fhir-structures-r4:8.2.0'
-    implementation 'ca.uhn.hapi.fhir:hapi-fhir-client-okhttp:8.2.0'
+    implementation 'ca.uhn.hapi.fhir:hapi-fhir-client:8.2.1'
+    implementation 'ca.uhn.hapi.fhir:hapi-fhir-base:8.2.1'
+    implementation 'ca.uhn.hapi.fhir:hapi-fhir-structures-r4:8.2.1'
+    implementation 'ca.uhn.hapi.fhir:hapi-fhir-client-okhttp:8.2.1'
 
     implementation 'com.squareup.okhttp3:okhttp:5.1.0'
 
@@ -47,8 +47,8 @@ dependencies {
 
     implementation 'org.postgresql:postgresql:42.7.7'
 
-    implementation 'io.micrometer:micrometer-registry-prometheus:1.15.1'
-    implementation 'io.micrometer:micrometer-core:1.15.1'
+    implementation 'io.micrometer:micrometer-registry-prometheus:1.15.2'
+    implementation 'io.micrometer:micrometer-core:1.15.2'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
@@ -100,7 +100,7 @@ spotless {
 }
 
 checkstyle {
-    toolVersion = '10.25.0'
+    toolVersion = '10.26.1'
     configFile = file('../config/checkstyle/checkstyle.xml')
 }
 

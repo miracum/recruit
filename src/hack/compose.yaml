@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: docker.io/library/traefik:v3.4.1@sha256:cd40ab7bc1f047731d5b22595203812343efcb6538014c4e93221cfc3a77217a
+    image: docker.io/library/traefik:v3.5.0@sha256:4e7175cfe19be83c6b928cae49dde2f2788fb307189a4dc9550b67acf30c11a5
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -91,7 +91,7 @@ services:
       - "127.0.0.1:25432:5432"
 
   ohdsi-webapi:
-    image: docker.io/ohdsi/webapi:2.14.0@sha256:582b59b186fde5936081c1df6e41cba53e45e112d5b4875ddfda1e4dee4b2981
+    image: docker.io/ohdsi/webapi:2.15.0@sha256:884c104440cf69e1b1db8a46a293b81c829db0d694ec9b26ca7dbb7125e9843a
     profiles:
       - omop
     restart: unless-stopped
@@ -152,7 +152,7 @@ services:
       - "traefik.http.routers.ohdsi-webapi.entrypoints=web"
 
   ohdsi-atlas:
-    image: docker.io/ohdsi/atlas:2.14.1@sha256:bd095ed794a6619f877d72c13ecfc22c8bb8a863937392857866e4bd6015157f
+    image: docker.io/ohdsi/atlas:2.15.0@sha256:6814e8c5b5366b50bc197b1eb2881689e5852784742b91b9636eec514f5a555e
     profiles:
       - omop
     restart: unless-stopped
@@ -301,7 +301,7 @@ services:
           size: 1024
 
   jaeger:
-    image: docker.io/jaegertracing/jaeger:2.7.0@sha256:8d8d36f079c7e2b3ea26132244238768a69abecb45aab0ed0218e2b8c40908cf
+    image: docker.io/jaegertracing/jaeger:2.8.0@sha256:af1598dfd0a7800a370e88064e24c5d562cfcbbd2c2748e6ae1f1126be88dd4b
     ports:
       - "127.0.0.1:16686:16686"
       - "127.0.0.1:6831:6831/udp"
@@ -356,7 +356,7 @@ services:
       - "127.0.0.1:6432:5432"
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.2.5@sha256:4883630ef9db14031cde3e60700c9a9a8eaf1b5c24db1589d6a2d43de38ba2a9
+    image: quay.io/keycloak/keycloak:26.3.2@sha256:922e443a962b8ad0dffa3c17061e8136583d7bc59209a1d1fc059816467c3f69
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -390,7 +390,7 @@ services:
       - "traefik.http.routers.keycloak.entrypoints=web"
 
   minio:
-    image: docker.io/bitnami/minio:2025.5.24@sha256:451fe6858cb770cc9d0e77ba811ce287420f781c7c1b806a386f6896471a349c
+    image: docker.io/bitnami/minio:2025.7.23@sha256:8935e75fa5d11295c17171e4aa49efe390a1193cd7f12e4d21b92af9ffef09d7
     profiles:
       - trino
     ipc: none
@@ -416,7 +416,7 @@ services:
           memory: 4G
 
   wait-for-minio:
-    image: docker.io/curlimages/curl:8.14.1@sha256:9a1ed35addb45476afa911696297f8e115993df459278ed036182dd2cd22b67b
+    image: docker.io/curlimages/curl:8.15.0@sha256:4026b29997dc7c823b51c164b71e2b51e0fd95cce4601f78202c513d97da2922
     profiles:
       - trino
     ipc: none
@@ -441,7 +441,7 @@ services:
 
   upload-to-fhir-server:
     # the image is overkill, but it is the only one that has the necessary tools and is up-to-date
-    image: ghcr.io/chgl/kube-powertools:v2.3.64@sha256:31f0cd0afefc41bbe5fb8790475c5266e26114b6332f5965cfca39635d9ff12f
+    image: ghcr.io/chgl/kube-powertools:v2.3.70@sha256:8bf2078f5519fd96872195cc051c473b03488067cfc750a842ac195ff0f64177
     profiles:
       - trino
     ipc: none
@@ -522,7 +522,7 @@ services:
         condition: service_completed_successfully
 
   wait-for-pathling:
-    image: docker.io/curlimages/curl:8.14.1@sha256:9a1ed35addb45476afa911696297f8e115993df459278ed036182dd2cd22b67b
+    image: docker.io/curlimages/curl:8.15.0@sha256:4026b29997dc7c823b51c164b71e2b51e0fd95cce4601f78202c513d97da2922
     profiles:
       - trino
     ipc: none
@@ -546,7 +546,7 @@ services:
         condition: service_started
 
   import-resources:
-    image: docker.io/curlimages/curl:8.14.1@sha256:9a1ed35addb45476afa911696297f8e115993df459278ed036182dd2cd22b67b
+    image: docker.io/curlimages/curl:8.15.0@sha256:4026b29997dc7c823b51c164b71e2b51e0fd95cce4601f78202c513d97da2922
     profiles:
       - trino
     ipc: none
@@ -569,7 +569,7 @@ services:
         condition: service_completed_successfully
 
   warehousekeeper:
-    image: ghcr.io/miracum/util-images/warehousekeeper:v0.1.13@sha256:7f2a1a86f9ee27d98682aaec4a5cfd3615c4278cef8906ffb3e81df57eb21cd9
+    image: ghcr.io/miracum/util-images/warehousekeeper:v0.1.14@sha256:78b8944559c48b609fb0b0127bb19e39fe9eed915cb22e4de31f39bb0222191e
     profiles:
       - trino
     ipc: none
@@ -621,7 +621,7 @@ services:
           memory: 1G
 
   hive-metastore:
-    image: ghcr.io/miracum/util-images/hive-metastore:v1.2.4@sha256:d35d9dcb389953cff78171c36f40e7097aaee4bf97e5b09dbe8d0d90521fad5b
+    image: ghcr.io/miracum/util-images/hive-metastore:v1.2.5@sha256:1a36b317127f82813e558c28f6801dd8d5535f8daab8b286c631cc95778d138f
     profiles:
       - trino
     ipc: none

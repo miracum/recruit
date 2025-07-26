@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   test:
+    name: Test Compose installation
     runs-on: ubuntu-24.04
     env:
       RECRUIT_IMAGE_BASE_NAME: ghcr.io/${{ github.repository }}
