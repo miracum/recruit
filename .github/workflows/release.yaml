@@ -52,7 +52,7 @@ jobs:
           CHART_VERSION="$(yq .version charts/recruit/Chart.yaml)"
 
           helm package charts/recruit/
-          helm push "recruit-${CHART_VERSION}.tgz" oci://ghcr.io/${GITHUB_REPOSITORY}/charts
+          helm push "recruit-${CHART_VERSION}.tgz" "oci://ghcr.io/${GITHUB_REPOSITORY}/charts"
 
           cp "recruit-${CHART_VERSION}.tgz" recruit-helm-chart.tgz
 
