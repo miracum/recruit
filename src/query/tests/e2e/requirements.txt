@@ -122,7 +122,7 @@ pluggy==1.6.0 \
     --hash=sha256:7dcc130b76258d33b90f61b658791dede3486c3e6bfb003ee5c9bfb396dd22f3 \
     --hash=sha256:e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746
     # via pytest
-Pygments==2.19.2 \
+pygments==2.19.2 \
     --hash=sha256:636cb2477cec7f8952536970bc533bc43743542f70392ae026374600add5b887 \
     --hash=sha256:86540386c03d588bb81d44bc3928634ff26449851e99741617ecb9037ee5ec0b
     # via pytest
@@ -138,10 +138,6 @@ retrying==1.4.1 \
     --hash=sha256:4d206e0ed2aff5ef2f3cd867abb9511e9e8f31127c5aca20f1d5246e476903b0 \
     --hash=sha256:d736050c1adfc0a71fa022d9198ee130b0e66be318678a3fdd8b1b8872dc0997
     # via -r requirements.in
-six==1.17.0 \
-    --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
-    --hash=sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81
-    # via retrying
 urllib3==2.5.0 \
     --hash=sha256:3fc47733c7e419d4bc3f6b3dc2b4f890bb743906a30d56ba4a5bfa4bbff92760 \
     --hash=sha256:e6b01673c0fa6a13e374b50871808eb3bf7046c4b125b216f6bf1cc604cff0dc

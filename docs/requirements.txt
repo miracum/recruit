@@ -137,7 +137,7 @@ jinja2==3.1.6 \
     # via
     #   mkdocs
     #   mkdocs-material
-Markdown==3.8.2 \
+markdown==3.8.2 \
     --hash=sha256:247b9a70dd12e27f67431ce62523e675b866d254f900c4fe75ce3dda62237c45 \
     --hash=sha256:5c83764dbd4e00bdd94d85a19b8d55ccca20fe35b2e678a1422b380324dd5f24
     # via
@@ -247,7 +247,7 @@ platformdirs==4.3.8 \
     --hash=sha256:3d512d96e16bcb959a814c9f348431070822a6496326a4be0911c40b5a74c2bc \
     --hash=sha256:ff7059bb7eb1179e2685604f4aaf157cfd9535242bd23742eadc3c13542139b4
     # via mkdocs-get-deps
-Pygments==2.19.2 \
+pygments==2.19.2 \
     --hash=sha256:636cb2477cec7f8952536970bc533bc43743542f70392ae026374600add5b887 \
     --hash=sha256:86540386c03d588bb81d44bc3928634ff26449851e99741617ecb9037ee5ec0b
     # via mkdocs-material

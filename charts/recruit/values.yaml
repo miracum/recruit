@@ -865,6 +865,11 @@ broadseaAtlasdb:
   # -- whether to deploy the OHDSI Broadsea Atlasdb (<https://github.com/OHDSI/Broadsea-Atlasdb>)
   # currently only used by internal integration tests. See [./values-integrationtest.yaml](values-integrationtest.yaml)
   enabled: false
+  # @ignore
+  image: # +doc-gen:ignore
+    registry: docker.io
+    repository: ohdsi/broadsea-atlasdb
+    tag: 2.2.0@sha256:ec23023c756ed32426c922a2565af26718100e8cef09c927d0a7b9f07b204935
 
 tests:
   automountServiceAccountToken: false

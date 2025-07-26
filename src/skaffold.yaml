@@ -21,8 +21,7 @@ build:
       docker:
         dockerfile: Dockerfile
         buildArgs:
-          GIT_REF: skaffold
-          VERSION: skaffold
+          VERSION: "{{ .IMAGE_TAG }}"
   local:
     push: false
     tryImportMissing: true
