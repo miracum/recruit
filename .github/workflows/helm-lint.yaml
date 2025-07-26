@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   lint:
+    name: Lint Helm Chart
     runs-on: ubuntu-24.04
     container: ghcr.io/chgl/kube-powertools:v2.3.68@sha256:9a0a5d10b58765cff42bf65e672d98f051d27b74eb555a8d954aea22ab9bb180
     steps:

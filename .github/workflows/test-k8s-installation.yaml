@@ -13,6 +13,7 @@ permissions:
 
 jobs:
   test:
+    name: Test installation on k8s
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -82,17 +83,20 @@ jobs:
           helm dependency build charts/recruit
 
       - name: Install chart
+        env:
+          IMAGE_TAG: ${{ inputs.image-tag }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           # image.repository is set to make it easier to run in forks - particularly to test releases.
           helm install --create-namespace -n recruit \
-            --set query.image.repository=${{ github.repository }}/query \
-            --set query.image.tag=${{ inputs.image-tag }} \
-            --set notify.image.repository=${{ github.repository }}/notify \
-            --set notify.image.tag=${{ inputs.image-tag }} \
-            --set list.image.repository=${{ github.repository }}/list \
-            --set list.image.tag=${{ inputs.image-tag }} \
-            --set queryFhirTrino.image.repository=${{ github.repository }}/query-fhir-trino \
-            --set queryFhirTrino.image.tag=${{ inputs.image-tag }} \
+            --set "query.image.repository=${GITHUB_REPOSITORY}/query" \
+            --set "query.image.tag=${IMAGE_TAG}" \
+            --set "notify.image.repository=${GITHUB_REPOSITORY}/notify" \
+            --set "notify.image.tag=${IMAGE_TAG}" \
+            --set "list.image.repository=${GITHUB_REPOSITORY}/list" \
+            --set "list.image.tag=${IMAGE_TAG}" \
+            --set "queryFhirTrino.image.repository=${GITHUB_REPOSITORY}/query-fhir-trino" \
+            --set "queryFhirTrino.image.tag=${IMAGE_TAG}" \
             -f charts/recruit/values-integrationtest.yaml \
             --wait --timeout=25m \
             recruit charts/recruit/

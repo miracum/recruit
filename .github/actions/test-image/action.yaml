@@ -28,8 +28,10 @@ runs:
     - name: Load image
       shell: bash
       if: ${{ github.event_name == 'pull_request' }}
+      env:
+        PROJECT_NAME: ${{ inputs.project-name }}
       run: |
-        docker load --input /tmp/${{ inputs.project-name }}-image.tar
+        docker load --input "/tmp/${PROJECT_NAME}-image.tar"
         docker image ls -a
 
     - name: Pull image if not in PR
@@ -57,9 +59,10 @@ runs:
       working-directory: src/${{ inputs.project-name }}
       env:
         IMAGE_TAG: ${{ inputs.image-tag }}
+        E2E_TEST_DIRECTORY: ${{ inputs.e2e-test-directory }}
       run: |
-        docker compose -f ${{ inputs.e2e-test-directory }}/docker-compose.yaml build
-        docker compose -f ${{ inputs.e2e-test-directory }}/docker-compose.yaml run tester
+        docker compose -f "${E2E_TEST_DIRECTORY}/docker-compose.yaml" build
+        docker compose -f "${E2E_TEST_DIRECTORY}/docker-compose.yaml" run tester
 
     - name: Print test logs and stop all running containers
       if: ${{ inputs.e2e-test-directory != '' && always()}}
@@ -68,6 +71,7 @@ runs:
       continue-on-error: true
       env:
         IMAGE_TAG: ${{ inputs.image-tag }}
+        E2E_TEST_DIRECTORY: ${{ inputs.e2e-test-directory }}
       run: |
-        docker compose -f ${{ inputs.e2e-test-directory }}/docker-compose.yaml logs
-        docker compose -f ${{ inputs.e2e-test-directory }}/docker-compose.yaml down --volumes --remove-orphans
+        docker compose -f "${E2E_TEST_DIRECTORY}/docker-compose.yaml" logs
+        docker compose -f "${E2E_TEST_DIRECTORY}/docker-compose.yaml" down --volumes --remove-orphans

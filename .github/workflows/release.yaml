@@ -46,15 +46,17 @@ jobs:
 
       # TODO: maybe replace image tags in values.yaml with digests before packaging
       - name: Package, upload, and sign Helm chart
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           CHART_VERSION=$(yq .version charts/recruit/Chart.yaml)
 
           helm package charts/recruit/
-          helm push "recruit-${CHART_VERSION}.tgz" oci://ghcr.io/${{ github.repository }}/charts
+          helm push "recruit-${CHART_VERSION}.tgz" oci://ghcr.io/${GITHUB_REPOSITORY}/charts
 
           cp "recruit-${CHART_VERSION}.tgz" recruit-helm-chart.tgz
 
-          cosign sign --yes "ghcr.io/${{ github.repository }}/charts/recruit:${CHART_VERSION}"
+          cosign sign --yes "ghcr.io/${GITHUB_REPOSITORY}/charts/recruit:${CHART_VERSION}"
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -117,10 +119,11 @@ jobs:
       - name: Push policy folder
         env:
           KYVERNO_EXPERIMENTAL: "1"
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           VERSION=$(cat version.txt)
-          kyverno oci push -i "ghcr.io/${{ github.repository }}/kyverno-policies:${VERSION}" --policy policies/
-          cosign sign --yes "ghcr.io/${{ github.repository }}/kyverno-policies:${VERSION}"
+          kyverno oci push -i "ghcr.io/${GITHUB_REPOSITORY}/kyverno-policies:${VERSION}" --policy policies/
+          cosign sign --yes "ghcr.io/${GITHUB_REPOSITORY}/kyverno-policies:${VERSION}"
 
   prepare-artifacts:
     name: prepare artifacts
