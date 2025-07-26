@@ -42,7 +42,7 @@ dependencies:
   - name: common
     repository: oci://registry-1.docker.io/bitnamicharts
     version: 2.31.3
-version: 10.4.1
+version: 10.4.2
 appVersion: 10.1.12
 annotations:
   artifacthub.io/containsSecurityUpdates: 'false'
@@ -72,4 +72,4 @@ annotations:
       url: https://miracum.github.io/recruit/_img/atlas-first-cohort/mailhog-opened.png
   artifacthub.io/changes: |-
     - kind: changed
-      description: updated recruIT image tags to v10.4.1 # x-release-please-version
+      description: updated recruIT image tags to v10.4.2 # x-release-please-version

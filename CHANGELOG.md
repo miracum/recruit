@@ -1,5 +1,26 @@
 # Changelog
 
+## [10.4.2](https://github.com/miracum/recruit/compare/v10.4.1...v10.4.2) (2025-07-26)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#453](https://github.com/miracum/recruit/issues/453)) ([b3ce120](https://github.com/miracum/recruit/commit/b3ce1208e636dea015fe81d773058824dc42b9ed))
+* **deps:** update dependency com.approvaltests:approvaltests to v25 ([#454](https://github.com/miracum/recruit/issues/454)) ([295eeea](https://github.com/miracum/recruit/commit/295eeea49a11a176f5ad748b3638684a0eb1ae20))
+* **deps:** update dependency com.squareup.okhttp3:okhttp to v5 ([#455](https://github.com/miracum/recruit/issues/455)) ([ec2a858](https://github.com/miracum/recruit/commit/ec2a8584d5ef8911f4ab94777492cd73803b545a))
+
+
+### Miscellaneous Chores
+
+* **deps:** update all digest updates ([#449](https://github.com/miracum/recruit/issues/449)) ([603912d](https://github.com/miracum/recruit/commit/603912d448c424ab51ff097afb5c9bd25c9355ae))
+* **deps:** update all digest updates ([#451](https://github.com/miracum/recruit/issues/451)) ([211b94a](https://github.com/miracum/recruit/commit/211b94ab962bce63624bd3754dc6896fff5d7e64))
+* **deps:** update all non-major dependencies ([#445](https://github.com/miracum/recruit/issues/445)) ([487723c](https://github.com/miracum/recruit/commit/487723c6da474980249aeb28b21c49dac43d9049))
+* **deps:** update dependency urllib3 to v2.5.0 [security] ([#448](https://github.com/miracum/recruit/issues/448)) ([6c883aa](https://github.com/miracum/recruit/commit/6c883aa7a4960a48af587a650eb2e1c2d511334d))
+* **deps:** update docker.io/library/python:3.13.5-slim-bookworm docker digest to 4c2cf99 ([#457](https://github.com/miracum/recruit/issues/457)) ([1995f9d](https://github.com/miracum/recruit/commit/1995f9d3e97317a8d23092facaa437ef0d18bfe3))
+* **deps:** update github-actions ([#450](https://github.com/miracum/recruit/issues/450)) ([4d0a888](https://github.com/miracum/recruit/commit/4d0a8880f6b4a9872e6e4a89b3057437e1a6c30a))
+* **deps:** update github-actions ([#452](https://github.com/miracum/recruit/issues/452)) ([e8c9aa4](https://github.com/miracum/recruit/commit/e8c9aa42e487be2ac31bc3bf7a62a7894937a0b1))
+* **deps:** update github-actions ([#458](https://github.com/miracum/recruit/issues/458)) ([5558755](https://github.com/miracum/recruit/commit/5558755c7b83af5b025da80bc8cc29b3faf9229b))
+
 ## [10.4.1](https://github.com/miracum/recruit/compare/v10.4.0...v10.4.1) (2025-06-15)
 
 
