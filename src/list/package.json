@@ -5,5 +5,8 @@
   "workspaces": [
     "frontend",
     "server"
-  ]
+  ],
+  "devDependencies": {
+    "@vue/vue2-jest": "^27.0.0"
+  }
 }
