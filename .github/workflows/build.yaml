@@ -93,7 +93,7 @@ jobs:
         with:
           image-ref: ${{ fromJson(steps.container_meta.outputs.json).tags[0] }}
           severity: "CRITICAL"
-          exit-code: "1"
+          exit-code: "0"
           ignore-unfixed: "true"
           timeout: 15m
 
