@@ -42,7 +42,7 @@ services:
       HAPI_FHIR_CORS_ALLOWED_ORIGIN: "http://list:8080"
 
   loader:
-    image: docker.io/curlimages/curl:8.14.1@sha256:9a1ed35addb45476afa911696297f8e115993df459278ed036182dd2cd22b67b
+    image: docker.io/curlimages/curl:8.15.0@sha256:4026b29997dc7c823b51c164b71e2b51e0fd95cce4601f78202c513d97da2922
     command: >
       sh -c "curl -X POST -H 'Content-Type: application/fhir+json' --retry-connrefused --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 15 --data '@/data/sample-record-1.json' http://fhir:8080/fhir &&
              curl -X POST -H 'Content-Type: application/fhir+json' --retry-connrefused --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 15 --data '@/data/sample-record-2.json' http://fhir:8080/fhir &&

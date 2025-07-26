@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0.301-noble@sha256:4fd7d3e5aeb6cfb75e923a54cdb0b6e858b27ad3b517837917c57c2e632b5694 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0.303-noble@sha256:af75742bd2f6fd148504951b57a983bc410191729bf543eae467528d1bc175e5 AS build
 WORKDIR /build
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 
@@ -20,13 +20,13 @@ dotnet publish tester.csproj \
     -o /build/publish
 EOF
 
-FROM mcr.microsoft.com/dotnet/aspnet:9.0.6-noble-chiseled@sha256:65ac626d0095036e7c477e610ed32e59822992c0b207c95444ef22d455343f4a AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:9.0.7-noble-chiseled@sha256:519d28b1f35e7060f5ae53d0e43e9522b59522dab51ecef6465af60b94b3ad92 AS runtime
 WORKDIR /opt/chaos-tester
 USER 65532:65532
 ENV DOTNET_ENVIRONMENT="Production" \
     DOTNET_CLI_TELEMETRY_OPTOUT=1
 
-COPY --from=docker.io/bitnami/kubectl:1.33.1@sha256:9081a6f83f4febf47369fc46b6f0f7683c7db243df5b43fc9defe51b0471a950 /opt/bitnami/kubectl/bin/kubectl /usr/bin/kubectl
+COPY --from=docker.io/bitnami/kubectl:1.33.3@sha256:cd354d5b25562b195b277125439c23e4046902d7f1abc0dc3c75aad04d298c17 /opt/bitnami/kubectl/bin/kubectl /usr/bin/kubectl
 
 COPY ./sample-list-bundle.json /tmp/
 COPY ./chaos.yaml /tmp/

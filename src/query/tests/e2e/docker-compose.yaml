@@ -46,7 +46,7 @@ services:
     image: docker.io/ohdsi/broadsea-atlasdb:2.2.0@sha256:ec23023c756ed32426c922a2565af26718100e8cef09c927d0a7b9f07b204935
 
   ohdsi-webapi:
-    image: docker.io/ohdsi/webapi:2.14.0@sha256:582b59b186fde5936081c1df6e41cba53e45e112d5b4875ddfda1e4dee4b2981
+    image: docker.io/ohdsi/webapi:2.15.0@sha256:884c104440cf69e1b1db8a46a293b81c829db0d694ec9b26ca7dbb7125e9843a
     restart: unless-stopped
     ipc: none
     security_opt:
