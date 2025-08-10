@@ -1,5 +1,14 @@
 # Changelog
 
+## [10.4.3](https://github.com/miracum/recruit/compare/v10.4.2...v10.4.3) (2025-08-10)
+
+
+### Miscellaneous Chores
+
+* **deps:** refresh pip-compile outputs ([#462](https://github.com/miracum/recruit/issues/462)) ([04b24d3](https://github.com/miracum/recruit/commit/04b24d3f4bafffd97f7c0e2d90047471e7cfe396))
+* **deps:** update all digest updates ([#459](https://github.com/miracum/recruit/issues/459)) ([a65f56d](https://github.com/miracum/recruit/commit/a65f56dd46e52a31c8b561a3914d521293cc68a8))
+* **deps:** update github-actions ([#460](https://github.com/miracum/recruit/issues/460)) ([e8020ac](https://github.com/miracum/recruit/commit/e8020acf8046b1cb35d0b4bcbeb2c28119c43bac))
+
 ## [10.4.2](https://github.com/miracum/recruit/compare/v10.4.1...v10.4.2) (2025-07-26)
 
 
