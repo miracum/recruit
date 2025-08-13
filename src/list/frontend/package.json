@@ -46,6 +46,6 @@
   },
   "optionalDependencies": {
     "@vue/cli-plugin-e2e-cypress": "5.0.8",
-    "cypress": "13.11.0"
+    "cypress": "14.5.4"
   }
 }
