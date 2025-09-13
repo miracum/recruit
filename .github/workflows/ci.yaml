@@ -59,7 +59,7 @@ jobs:
     env:
       IMAGE_NAME: ghcr.io/${{ github.repository }}/${{ matrix.module }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
         with:
           persist-credentials: false
       - uses: ./.github/actions/test-image
@@ -103,7 +103,7 @@ jobs:
       token: ${{ secrets.MIRACUM_BOT_SEMANTIC_RELEASE_TOKEN }}
 
   lint:
-    uses: miracum/.github/.github/workflows/standard-lint.yaml@52d2994a0759e75692f8e331a3fcfc6de03d01ee # v1.16.21
+    uses: miracum/.github/.github/workflows/standard-lint.yaml@05947adeb93f393561f9f2cc7998f5c81670b7ac # v1.16.26
     permissions:
       contents: read
       pull-requests: write
