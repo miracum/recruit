@@ -1,5 +1,17 @@
 # Changelog
 
+## [10.4.3](https://github.com/miracum/recruit/compare/v10.4.2...v10.4.3) (2025-09-14)
+
+
+### Miscellaneous Chores
+
+* **deps:** refresh pip-compile outputs ([#462](https://github.com/miracum/recruit/issues/462)) ([04b24d3](https://github.com/miracum/recruit/commit/04b24d3f4bafffd97f7c0e2d90047471e7cfe396))
+* **deps:** refresh pip-compile outputs ([#463](https://github.com/miracum/recruit/issues/463)) ([9594e49](https://github.com/miracum/recruit/commit/9594e490a9640d738899b552d435809f844b8ae5))
+* **deps:** update all digest updates ([#459](https://github.com/miracum/recruit/issues/459)) ([a65f56d](https://github.com/miracum/recruit/commit/a65f56dd46e52a31c8b561a3914d521293cc68a8))
+* **deps:** update all digest updates ([#465](https://github.com/miracum/recruit/issues/465)) ([edbbb06](https://github.com/miracum/recruit/commit/edbbb06d6b9c9bba4971628361c6d02e70da215a))
+* **deps:** update github-actions ([#460](https://github.com/miracum/recruit/issues/460)) ([e8020ac](https://github.com/miracum/recruit/commit/e8020acf8046b1cb35d0b4bcbeb2c28119c43bac))
+* **deps:** update github-actions ([#466](https://github.com/miracum/recruit/issues/466)) ([baf111f](https://github.com/miracum/recruit/commit/baf111ff820cd949aa323223216880d57ebb3b7f))
+
 ## [10.4.2](https://github.com/miracum/recruit/compare/v10.4.1...v10.4.2) (2025-07-26)
 
 
