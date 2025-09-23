@@ -1,6 +1,6 @@
 fhirserver:
   resourcesPreset: "none"
-  postgresql:
+  postgres:
     auth:
       # kics-scan ignore-line
       postgresPassword: fhir
@@ -49,7 +49,7 @@ notify:
             notify: "everyMorning"
           - email: "demo@example.com"
 
-postgresql:
+postgres:
   resourcesPreset: "none"
   enabled: true
   auth:
@@ -57,7 +57,7 @@ postgresql:
     postgresPassword: recruit-notify-ha
 
 ohdsi:
-  postgresql:
+  postgres:
     enabled: false
   webApi:
     resourcesPreset: "none"

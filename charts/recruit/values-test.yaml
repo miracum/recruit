@@ -1,5 +1,5 @@
 ohdsi:
-  postgresql:
+  postgres:
     auth:
       # kics-scan ignore-line
       postgresPassword: ohdsi
@@ -16,7 +16,7 @@ ohdsi:
           cpu: 250m
 
 fhirserver:
-  postgresql:
+  postgres:
     auth:
       # kics-scan ignore-line
       postgresPassword: fhir
@@ -61,7 +61,7 @@ notify:
           - email: "everyMorning@example.com"
             notify: "everyMorning"
 
-postgresql:
+postgres:
   enabled: true
   auth:
     # kics-scan ignore-line

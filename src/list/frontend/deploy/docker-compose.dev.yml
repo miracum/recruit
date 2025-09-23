@@ -14,7 +14,7 @@ services:
       - 8082:8080
 
   loader:
-    image: docker.io/curlimages/curl:8.15.0@sha256:4026b29997dc7c823b51c164b71e2b51e0fd95cce4601f78202c513d97da2922
+    image: docker.io/curlimages/curl:8.16.0@sha256:463eaf6072688fe96ac64fa623fe73e1dbe25d8ad6c34404a669ad3ce1f104b6
     command: >
       sh -c "curl -X POST -H 'Content-Type:application/fhir+json' --retry-connrefused --connect-timeout 30 --max-time 60 --retry 5 --retry-delay 15 --data '@/data/sample-record-1.json' http://fhir:8080/fhir &&
              curl -X POST -H 'Content-Type:application/fhir+json' --retry-connrefused --connect-timeout 30 --max-time 60 --retry 5 --retry-delay 15 --data '@/data/sample-record-2.json' http://fhir:8080/fhir &&

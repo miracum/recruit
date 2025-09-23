@@ -28,21 +28,21 @@ Get the screening list link template
 {{- end -}}
 
 {{- define "recruit.notify.database.host" -}}
-{{- if .Values.postgresql.enabled -}}
-    {{ printf "%s-%s" .Release.Name .Values.postgresql.nameOverride }}
+{{- if .Values.postgres.enabled -}}
+    {{ printf "%s-%s" .Release.Name .Values.postgres.nameOverride }}
 {{- else -}}
     {{ .Values.notify.ha.database.host }}
 {{- end -}}
 {{- end -}}
 
 {{- define "recruit.notify.database.port" -}}
-{{- ternary "5432" .Values.notify.ha.database.port .Values.postgresql.enabled -}}
+{{- ternary "5432" .Values.notify.ha.database.port .Values.postgres.enabled -}}
 {{- end -}}
 
 {{- define "recruit.notify.database.username" -}}
-{{- if .Values.postgresql.enabled -}}
-    {{- if .Values.postgresql.auth.username -}}
-        {{ .Values.postgresql.auth.username | quote }}
+{{- if .Values.postgres.enabled -}}
+    {{- if .Values.postgres.auth.username -}}
+        {{ .Values.postgres.auth.username | quote }}
     {{- else -}}
         {{ "postgres" }}
     {{- end -}}
@@ -52,7 +52,7 @@ Get the screening list link template
 {{- end -}}
 
 {{- define "recruit.notify.database.name" -}}
-{{- ternary .Values.postgresql.auth.database .Values.notify.ha.database.name .Values.postgresql.enabled -}}
+{{- ternary .Values.postgres.auth.database .Values.notify.ha.database.name .Values.postgres.enabled -}}
 {{- end -}}
 
 {{/*
@@ -70,9 +70,9 @@ Create the JDBC URL from the host, port and database name.
 Get the name of the secret containing the DB password
 */}}
 {{- define "recruit.notify.database.secretName" -}}
-{{- if .Values.postgresql.enabled -}}
-    {{- if .Values.postgresql.auth.existingSecret -}}
-        {{ .Values.postgresql.auth.existingSecret | quote }}
+{{- if .Values.postgres.enabled -}}
+    {{- if .Values.postgres.auth.existingSecret -}}
+        {{ .Values.postgres.auth.existingSecret | quote }}
     {{- else -}}
         {{ ( include "recruit.postgresql.fullname" . ) }}
     {{- end -}}
@@ -88,9 +88,9 @@ Get the name of the secret containing the DB password
 Get the key inside the secret containing the DB user's password
 */}}
 {{- define "recruit.notify.database.secretKey" -}}
-{{- if .Values.postgresql.enabled -}}
-    {{- if (or .Values.postgresql.auth.username .Values.postgresql.auth.existingSecret ) -}}
-        {{ "password" }}
+{{- if .Values.postgres.enabled -}}
+    {{- if .Values.postgres.auth.existingSecret -}}
+        {{ default "postgres-password" .Values.postgres.auth.secretKeys.passwordKey }}
     {{- else -}}
         {{ "postgres-password" }}
     {{- end -}}

@@ -69,7 +69,7 @@ services:
       - "traefik.http.routers.fhir.entrypoints=web"
 
   fhir-db:
-    image: docker.io/bitnami/postgresql:17.4.0@sha256:a8a39ccbf84b527b470ace397c3b0bb0b8d97bad194b142f4a4128a20c1b8b32
+    image: docker.io/library/postgres:17.6@sha256:feff5b24fedd610975a1f5e743c51a4b360437f4dc3a11acf740dcd708f413f6
     restart: unless-stopped
     deploy:
       resources:
@@ -80,8 +80,8 @@ services:
       - "no-new-privileges:true"
     privileged: false
     environment:
-      POSTGRESQL_PASSWORD: postgres # pragma: allowlist secret
-      POSTGRESQL_DATABASE: fhir
+      POSTGRES_PASSWORD: postgres # pragma: allowlist secret
+      POSTGRES_DB: fhir
 
   broadsea-atlasdb:
     image: docker.io/ohdsi/broadsea-atlasdb:2.2.0@sha256:ec23023c756ed32426c922a2565af26718100e8cef09c927d0a7b9f07b204935
@@ -339,7 +339,7 @@ services:
       - "traefik.http.routers.maildev.entrypoints=web"
 
   notify-ha-db:
-    image: docker.io/bitnami/postgresql:17.4.0@sha256:a8a39ccbf84b527b470ace397c3b0bb0b8d97bad194b142f4a4128a20c1b8b32
+    image: docker.io/library/postgres:17.6@sha256:feff5b24fedd610975a1f5e743c51a4b360437f4dc3a11acf740dcd708f413f6
     restart: unless-stopped
     deploy:
       resources:
@@ -350,8 +350,8 @@ services:
       - "no-new-privileges:true"
     privileged: false
     environment:
-      POSTGRESQL_PASSWORD: postgres # pragma: allowlist secret
-      POSTGRESQL_DATABASE: recruit_notify_jobs
+      POSTGRES_PASSWORD: postgres # pragma: allowlist secret
+      POSTGRES_DB: recruit_notify_jobs
     ports:
       - "127.0.0.1:6432:5432"
 
@@ -390,7 +390,7 @@ services:
       - "traefik.http.routers.keycloak.entrypoints=web"
 
   minio:
-    image: docker.io/bitnami/minio:2025.7.23@sha256:6dabb4a2088c9a79908de3bc05f4586c23ad2182c8908e7e3acbf61c1467fb20
+    image: docker.io/minio/minio:RELEASE.2025-07-23T15-54-02Z@sha256:d249d1fb6966de4d8ad26c04754b545205ff15a62e4fd19ebd0f26fa5baacbc0
     profiles:
       - trino
     ipc: none
@@ -403,9 +403,9 @@ services:
       MINIO_UPDATE: "off"
       MINIO_CALLHOME_ENABLE: "off"
       MINIO_ROOT_USER: "admin"
+      MINIO_BROWSER: "on"
       # kics-scan ignore-line
       MINIO_ROOT_PASSWORD: "miniopass" # gitleaks:allow
-      MINIO_DEFAULT_BUCKETS: "fhir"
       MINIO_SCHEME: "http"
     ports:
       - "127.0.0.1:9001:9001"
@@ -416,7 +416,7 @@ services:
           memory: 4G
 
   wait-for-minio:
-    image: docker.io/curlimages/curl:8.15.0@sha256:4026b29997dc7c823b51c164b71e2b51e0fd95cce4601f78202c513d97da2922
+    image: docker.io/curlimages/curl:8.16.0@sha256:463eaf6072688fe96ac64fa623fe73e1dbe25d8ad6c34404a669ad3ce1f104b6
     profiles:
       - trino
     ipc: none
@@ -438,6 +438,24 @@ services:
     depends_on:
       minio:
         condition: service_started
+
+  create-bucket:
+    image: docker.io/minio/minio:RELEASE.2025-07-23T15-54-02Z@sha256:d249d1fb6966de4d8ad26c04754b545205ff15a62e4fd19ebd0f26fa5baacbc0
+    restart: on-failure
+    cap_drop:
+      - ALL
+    privileged: false
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        /usr/bin/mc alias set minio http://minio:9000 admin miniopass;
+        /usr/bin/mc mb --ignore-existing minio/fhir;
+    depends_on:
+      wait-for-minio:
+        condition: service_completed_successfully
 
   upload-to-fhir-server:
     # the image is overkill, but it is the only one that has the necessary tools and is up-to-date
@@ -522,7 +540,7 @@ services:
         condition: service_completed_successfully
 
   wait-for-pathling:
-    image: docker.io/curlimages/curl:8.15.0@sha256:4026b29997dc7c823b51c164b71e2b51e0fd95cce4601f78202c513d97da2922
+    image: docker.io/curlimages/curl:8.16.0@sha256:463eaf6072688fe96ac64fa623fe73e1dbe25d8ad6c34404a669ad3ce1f104b6
     profiles:
       - trino
     ipc: none
@@ -546,7 +564,7 @@ services:
         condition: service_started
 
   import-resources:
-    image: docker.io/curlimages/curl:8.15.0@sha256:4026b29997dc7c823b51c164b71e2b51e0fd95cce4601f78202c513d97da2922
+    image: docker.io/curlimages/curl:8.16.0@sha256:463eaf6072688fe96ac64fa623fe73e1dbe25d8ad6c34404a669ad3ce1f104b6
     profiles:
       - trino
     ipc: none
@@ -601,7 +619,7 @@ services:
         condition: service_started
 
   metastore-db:
-    image: docker.io/bitnami/postgresql:17.4.0@sha256:a8a39ccbf84b527b470ace397c3b0bb0b8d97bad194b142f4a4128a20c1b8b32
+    image: docker.io/library/postgres:17.6@sha256:feff5b24fedd610975a1f5e743c51a4b360437f4dc3a11acf740dcd708f413f6
     profiles:
       - trino
     ipc: private
@@ -612,9 +630,9 @@ services:
     privileged: false
     restart: unless-stopped
     environment:
-      POSTGRESQL_USERNAME: hive
-      POSTGRESQL_PASSWORD: hive
-      POSTGRESQL_DATABASE: metastore
+      POSTGRES_USER: hive
+      POSTGRES_PASSWORD: hive
+      POSTGRES_DB: metastore
     deploy:
       resources:
         limits:
