@@ -7,7 +7,7 @@ dependencies:
   version: 5.8.0
 - name: ohdsi
   repository: oci://ghcr.io/chgl/charts
-  version: 0.25.9
+  version: 0.25.10
 - name: postgres
   repository: oci://registry-1.docker.io/cloudpirates
   version: 0.5.0
@@ -17,5 +17,5 @@ dependencies:
 - name: common
   repository: oci://ghcr.io/miracum/charts
   version: 0.1.1
-digest: sha256:d1732cd8376a4931c72452d0ec70c992de86a31c1385c4bed7aa1a3f45443e88
-generated: "2025-09-23T17:23:12.465187572+02:00"
+digest: sha256:fbb7673247cefa45ec2daa7bfa9ccb26ac9daf64387d90fb043f263980c660f8
+generated: "2025-09-23T22:19:38.134665652+02:00"
