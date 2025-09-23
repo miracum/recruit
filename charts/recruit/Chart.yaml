@@ -49,7 +49,7 @@ annotations:
   artifacthub.io/operator: "false"
   artifacthub.io/prerelease: "false"
   artifacthub.io/license: AGPL-3.0-or-later
-  artifacthub.io/recommendations: >
+  artifacthub.io/recommendations: |
     - url: https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack
     - url: https://artifacthub.io/packages/helm/cloudpirates-postgres/postgres
     - url: https://artifacthub.io/packages/helm/chgl/fhir-server-exporter
