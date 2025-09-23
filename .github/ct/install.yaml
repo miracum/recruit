@@ -1,7 +1,6 @@
 chart-dirs:
   - charts
 chart-repos:
-  - codecentric=https://codecentric.github.io/helm-charts
   - hapifhir=https://hapifhir.github.io/hapi-fhir-jpaserver-starter
 debug: true
 remote: origin

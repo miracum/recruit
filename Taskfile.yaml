@@ -14,7 +14,6 @@ tasks:
 
   helm-add-repos:
     cmds:
-      - helm repo add codecentric https://codecentric.github.io/helm-charts
       - helm repo add hapifhir https://hapifhir.github.io/hapi-fhir-jpaserver-starter
 
   helm-update-dependencies:
