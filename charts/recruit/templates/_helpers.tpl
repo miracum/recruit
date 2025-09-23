@@ -232,7 +232,7 @@ Create a default fully qualified postgresql name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
 {{- define "recruit.postgresql.fullname" -}}
-{{- $name := default "postgres" .Values.postgresql.nameOverride -}}
+{{- $name := default "postgres" .Values.postgres.nameOverride -}}
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
