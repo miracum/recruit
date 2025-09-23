@@ -31,8 +31,8 @@ waitForPostgresInitContainer:
   # @ignore
   image: # +doc-gen:ignore
     registry: docker.io
-    repository: bitnami/postgresql
-    tag: 17.4.0-debian-12-r10@sha256:7b9af9dd759055265998bbf12368e6d7d6326e6fd23f8157be841fad0915c1a1
+    repository: library/postgres
+    tag: 17.6@sha256:feff5b24fedd610975a1f5e743c51a4b360437f4dc3a11acf740dcd708f413f6
     pullPolicy: IfNotPresent
 
 # container security context applied to init containers used by the query, list, and notify modules.
@@ -55,7 +55,7 @@ fhirserver:
   # -- Whether the included HAPI FHIR server should be used
   # See <https://github.com/hapifhir/hapi-fhir-jpaserver-starter/tree/master/charts/hapi-fhir-jpaserver#values> for options.
   enabled: true
-  postgresql:
+  postgres:
     # -- overrides the chart's postgres server name to avoid conflicts with the included ohdsi chart
     nameOverride: "fhir-server-postgres"
   # -- extra environment variables set for the HAPI FHIR server
@@ -87,16 +87,9 @@ ohdsi:
   # -- Whether the included OHDSI chart should be installed.
   # See <https://github.com/chgl/charts/tree/master/charts/ohdsi/values.yaml> for available options.
   enabled: true
-  postgresql:
+  postgres:
     # -- overrides the chart's postgres server name to avoid conflicts with the included HAPI FHIR server chart
     nameOverride: "ohdsi-postgres"
-    # @ignore
-    primary: # +doc-gen:ignore
-      containerSecurityContext:
-        allowPrivilegeEscalation: false
-        capabilities:
-          drop:
-            - ALL
   cdmInitJob:
     # -- to make sure the job runs only once, set this to `false` after the first installation completed
     enabled: false
@@ -117,6 +110,15 @@ ohdsi:
       runAsGroup: 10001
       seccompProfile:
         type: RuntimeDefault
+    resources:
+      limits:
+        cpu: 2000m
+        memory: 512Mi
+        ephemeral-storage: 16Gi
+      requests:
+        cpu: 2000m
+        memory: 512Mi
+        ephemeral-storage: 16Gi
     # extraEnv:
     #   - name: SETUP_SYNPUF
     #     value: "true"
@@ -379,7 +381,7 @@ notify:
     enabled: false
     database:
       # -- hostname for the database used to store notification jobs
-      # if `postgresql.enabled=true`, uses the included PostgreSQL database instead.
+      # if `postgres.enabled=true`, uses the included PostgreSQL database instead.
       host: ""
       # -- database port
       port: 5432
@@ -448,7 +450,7 @@ notify:
     timeoutSeconds: 10
 
   # -- set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if primary.resources is set (primary.resources is recommended for production).
-  # More information: <https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15>
+  # More information: <https://github.com/miracum/charts/blob/master/charts/common/templates/_resources.tpl#L1>
   resourcesPreset: "medium"
 
   # -- resource requests and limits for the container
@@ -601,7 +603,7 @@ list:
     #      - notify-example.local
 
   # -- set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if primary.resources is set (primary.resources is recommended for production).
-  # More information: <https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15>
+  # More information: <https://github.com/miracum/charts/blob/master/charts/common/templates/_resources.tpl#L1>
   resourcesPreset: "micro"
 
   # -- resource requests and limits for the container
@@ -780,7 +782,7 @@ queryFhirTrino:
     timeoutSeconds: 10
 
   # -- set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if primary.resources is set (primary.resources is recommended for production).
-  # More information: <https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15>
+  # More information: <https://github.com/miracum/charts/blob/master/charts/common/templates/_resources.tpl#L1>
   resourcesPreset: "medium"
 
   # -- resource requests and limits for the container
@@ -834,7 +836,7 @@ queryFhirTrino:
   # -- extra volumes to mount inside the container
   extraVolumeMounts: []
 
-postgresql:
+postgres:
   # -- enable the included postgres DB, currently used only by the notification module
   # to store jobs when running in high-availability mode (`notify.ha.enabled=true`)
   enabled: false
@@ -859,7 +861,7 @@ curl: # +doc-gen:ignore
   image:
     registry: docker.io
     repository: curlimages/curl
-    tag: 8.15.0@sha256:4026b29997dc7c823b51c164b71e2b51e0fd95cce4601f78202c513d97da2922
+    tag: 8.16.0@sha256:463eaf6072688fe96ac64fa623fe73e1dbe25d8ad6c34404a669ad3ce1f104b6
 
 broadseaAtlasdb:
   # -- whether to deploy the OHDSI Broadsea Atlasdb (<https://github.com/OHDSI/Broadsea-Atlasdb>)
@@ -869,7 +871,7 @@ broadseaAtlasdb:
 tests:
   automountServiceAccountToken: false
   # -- set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if primary.resources is set (primary.resources is recommended for production).
-  # More information: <https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15>
+  # More information: <https://github.com/miracum/charts/blob/master/charts/common/templates/_resources.tpl#L1>
   resourcesPreset: "nano"
 
   # -- configure the test pods resource requests and limits

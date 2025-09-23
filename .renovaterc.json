@@ -1,34 +1,11 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:best-practices",
-    "group:allNonMajor",
-    "schedule:monthly",
-    "group:allDigest"
-  ],
-  "ignoreDeps": [
-    "docker.io/library/postgres",
-    "postgresql",
-    "docker.io/bitnami/postgresql"
-  ],
+  "extends": ["github>miracum/.github//renovate/default"],
   "ignorePaths": ["**/node_modules/**", "**/bower_components/**", "fhir/**"],
   "pip-compile": {
     "managerFilePatterns": ["/(^|/|\\.)requirements\\.txt$/"]
   },
   "packageRules": [
-    {
-      "matchManagers": ["github-actions"],
-      "groupName": "github-actions"
-    },
-    {
-      "matchManagers": ["github-actions"],
-      "matchPackageNames": ["slsa-framework/slsa-github-generator"],
-      "pinDigests": false
-    },
-    {
-      "matchManagers": ["helmv3"],
-      "pinDigests": false
-    },
     {
       "pinDigests": false,
       "matchPackageNames": ["/^ghcr.io/miracum/recruit/"]
