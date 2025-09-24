@@ -1,5 +1,33 @@
 # Changelog
 
+## [10.4.3](https://github.com/miracum/recruit/compare/v10.4.2...v10.4.3) (2025-09-24)
+
+
+### Bug Fixes
+
+* **deps:** update dependency checkstyle to v11 ([#472](https://github.com/miracum/recruit/issues/472)) ([cf5718f](https://github.com/miracum/recruit/commit/cf5718fe507f7974e1ffa9f158caab712896f34c))
+* migrate away from bitnami images ([#468](https://github.com/miracum/recruit/issues/468)) ([c513715](https://github.com/miracum/recruit/commit/c513715d790322f6c8a8810e3719d625ffd0cfb8))
+
+
+### Miscellaneous Chores
+
+* **deps:** refresh pip-compile outputs ([#462](https://github.com/miracum/recruit/issues/462)) ([04b24d3](https://github.com/miracum/recruit/commit/04b24d3f4bafffd97f7c0e2d90047471e7cfe396))
+* **deps:** refresh pip-compile outputs ([#463](https://github.com/miracum/recruit/issues/463)) ([9594e49](https://github.com/miracum/recruit/commit/9594e490a9640d738899b552d435809f844b8ae5))
+* **deps:** refresh pip-compile outputs ([#467](https://github.com/miracum/recruit/issues/467)) ([4483615](https://github.com/miracum/recruit/commit/44836152a413f4887a2d2b12650a8b795b27cb1d))
+* **deps:** update all digest updates ([#459](https://github.com/miracum/recruit/issues/459)) ([a65f56d](https://github.com/miracum/recruit/commit/a65f56dd46e52a31c8b561a3914d521293cc68a8))
+* **deps:** update all digest updates ([#465](https://github.com/miracum/recruit/issues/465)) ([edbbb06](https://github.com/miracum/recruit/commit/edbbb06d6b9c9bba4971628361c6d02e70da215a))
+* **deps:** update docker.io/library/postgres docker tag to v17 ([#470](https://github.com/miracum/recruit/issues/470)) ([e1fc5c3](https://github.com/miracum/recruit/commit/e1fc5c3705d3865cf2a8563479987e56ebca1d27))
+* **deps:** update github-actions ([#460](https://github.com/miracum/recruit/issues/460)) ([e8020ac](https://github.com/miracum/recruit/commit/e8020acf8046b1cb35d0b4bcbeb2c28119c43bac))
+* **deps:** update github-actions ([#466](https://github.com/miracum/recruit/issues/466)) ([baf111f](https://github.com/miracum/recruit/commit/baf111ff820cd949aa323223216880d57ebb3b7f))
+* **deps:** update github-actions ([#469](https://github.com/miracum/recruit/issues/469)) ([69a106d](https://github.com/miracum/recruit/commit/69a106d1b0f6ed2e8d91f8da1369d1a19d553725))
+* **deps:** update github-actions ([#471](https://github.com/miracum/recruit/issues/471)) ([6a6eff0](https://github.com/miracum/recruit/commit/6a6eff0a8ed5dd765d2d8d972eab5fa3046934d4))
+* **deps:** update gradle to v9 ([#473](https://github.com/miracum/recruit/issues/473)) ([5b38ba5](https://github.com/miracum/recruit/commit/5b38ba522d0d50e7a7c1cf5a3c3384393f0b5b7d))
+
+
+### CI/CD
+
+* fixed release please ([#474](https://github.com/miracum/recruit/issues/474)) ([52da2c6](https://github.com/miracum/recruit/commit/52da2c6e7a0ee6229a7427bbe6541b21ea76ab87))
+
 ## [10.4.2](https://github.com/miracum/recruit/compare/v10.4.1...v10.4.2) (2025-07-26)
 
 
