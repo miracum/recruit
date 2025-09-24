@@ -70,4 +70,4 @@ annotations:
     - kind: changed
       description: updated recruIT image tags to v10.4.2 # x-release-please-version
     - kind: changed
-      description: dropped all bitnami charts and images # x-release-please-version
+      description: dropped all bitnami charts and images
