@@ -17,7 +17,7 @@ gradle ":${MODULE_NAME}:test"
 gradle jacocoTestReport
 EOF
 
-FROM gcr.io/distroless/java21-debian12:nonroot@sha256:dede40c80a5744086f1e0cd961f86b782317ce11a51fc9ba39d9c5d030978900
+FROM gcr.io/distroless/java21-debian12:nonroot@sha256:dfea876744f635b5fea3ea53099410cfc5d17aeea7b62887310512d78094f6f3
 WORKDIR /app
 
 ARG MODULE_NAME=query
