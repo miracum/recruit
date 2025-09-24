@@ -144,7 +144,7 @@ query:
   image: # +doc-gen:ignore
     registry: ghcr.io
     repository: miracum/recruit/query
-    tag: v10.4.2 # x-release-please-version
+    tag: v10.4.3 # x-release-please-version
     pullPolicy: IfNotPresent
 
   serviceAccount:
@@ -317,7 +317,7 @@ notify:
   image: # +doc-gen:ignore
     registry: ghcr.io
     repository: miracum/recruit/notify
-    tag: v10.4.2 # x-release-please-version
+    tag: v10.4.3 # x-release-please-version
     pullPolicy: IfNotPresent
 
   serviceAccount:
@@ -511,7 +511,7 @@ list:
   image: # +doc-gen:ignore
     registry: ghcr.io
     repository: miracum/recruit/list
-    tag: v10.4.2 # x-release-please-version
+    tag: v10.4.3 # x-release-please-version
     pullPolicy: IfNotPresent
 
   serviceAccount:
@@ -682,7 +682,7 @@ queryFhirTrino:
   image: # +doc-gen:ignore
     registry: ghcr.io
     repository: miracum/recruit/query-fhir-trino
-    tag: v10.4.2 # x-release-please-version
+    tag: v10.4.3 # x-release-please-version
     pullPolicy: IfNotPresent
 
   serviceAccount:
