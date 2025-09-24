@@ -103,7 +103,7 @@ jobs:
       token: ${{ secrets.MIRACUM_BOT_SEMANTIC_RELEASE_TOKEN }}
 
   lint:
-    uses: miracum/.github/.github/workflows/standard-lint.yaml@05947adeb93f393561f9f2cc7998f5c81670b7ac # v1.16.26
+    uses: miracum/.github/.github/workflows/standard-lint.yaml@a679a0cb5b2f41fa4f83fad2e9080bf6731d62ca # v1.16.27
     permissions:
       contents: read
       pull-requests: write
