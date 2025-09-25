@@ -15,6 +15,6 @@ dependencies {
     // https://mvnrepository.com/artifact/io.trino/trino-jdbc
     implementation 'io.trino:trino-jdbc:476'
 
-    testImplementation 'com.approvaltests:approvaltests:25.0.23'
-    testImplementation 'com.google.code.gson:gson:2.13.1'
+    testImplementation 'com.approvaltests:approvaltests:25.4.3'
+    testImplementation 'com.google.code.gson:gson:2.13.2'
 }
