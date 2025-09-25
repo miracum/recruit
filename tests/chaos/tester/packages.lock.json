@@ -22,9 +22,9 @@
       },
       "System.CommandLine": {
         "type": "Direct",
-        "requested": "[2.0.0-rc.1.25451.107, )",
-        "resolved": "2.0.0-rc.1.25451.107",
-        "contentHash": "j+0Yg2TZ5rwbGTRArdF9w993dGWCPRbD+lg3S0D6MLckrKQ3J70s52TlbxKlISsoXUP/X+e6uPocbkKjP3wSag=="
+        "requested": "[2.0.0-beta4.22272.1, )",
+        "resolved": "2.0.0-beta4.22272.1",
+        "contentHash": "1uqED/q2H0kKoLJ4+hI2iPSBSEdTuhfCYADeJrAqERmiGQ2NNacYKRNEQ+gFbU4glgVyK8rxI+ZOe1onEtr/Pg=="
       },
       "Fhir.Metrics": {
         "type": "Transitive",
