@@ -1,5 +1,24 @@
 # Changelog
 
+## [10.4.4](https://github.com/miracum/recruit/compare/v10.4.3...v10.4.4) (2025-09-27)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#477](https://github.com/miracum/recruit/issues/477)) ([1fd389f](https://github.com/miracum/recruit/commit/1fd389f3b1bedf3cbaa3612a19351bbf98a27a54))
+* **deps:** update dependency com.diffplug.spotless:spotless-plugin-gradle to v8 ([#479](https://github.com/miracum/recruit/issues/479)) ([08d02d8](https://github.com/miracum/recruit/commit/08d02d84cf1e5c263e07f9165f23cd39d7eec9b7))
+* **deps:** update dependency io.freefair.gradle:lombok-plugin to v9 ([#483](https://github.com/miracum/recruit/issues/483)) ([8300197](https://github.com/miracum/recruit/commit/8300197f049afa3a170a57e1cddc0ec62af92c04))
+* **deps:** update dependency io.trino:trino-jdbc to v477 ([#484](https://github.com/miracum/recruit/issues/484)) ([f126067](https://github.com/miracum/recruit/commit/f1260679723217980721c507743715dcf1ca4b76))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/cache action to v4.3.0 ([#476](https://github.com/miracum/recruit/issues/476)) ([5686a1a](https://github.com/miracum/recruit/commit/5686a1a232113014d0c98be39ab6e9820dedc48b))
+* **deps:** update all digest updates ([#475](https://github.com/miracum/recruit/issues/475)) ([a00a8bf](https://github.com/miracum/recruit/commit/a00a8bfd3dcf5fa96b9bfadfda1f3f610b7a23c6))
+* **deps:** update docker.io/library/postgres docker tag to v18 ([#481](https://github.com/miracum/recruit/issues/481)) ([c139c59](https://github.com/miracum/recruit/commit/c139c59e07d05427e4f73e60ff53f486a990715e))
+* **deps:** update docker.io/trinodb/trino docker tag to v477 ([#482](https://github.com/miracum/recruit/issues/482)) ([ced04af](https://github.com/miracum/recruit/commit/ced04af598bc4d5baa8f82c710a6a3d557f04b90))
+* **deps:** update gradle to v9 ([#478](https://github.com/miracum/recruit/issues/478)) ([ac22b69](https://github.com/miracum/recruit/commit/ac22b69fcfcb78130f841dfd1cf9dd48bc3d7cce))
+
 ## [10.4.3](https://github.com/miracum/recruit/compare/v10.4.2...v10.4.3) (2025-09-24)
 
 
