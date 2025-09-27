@@ -57,7 +57,7 @@ services:
       - keycloak
 
   keycloak:
-    image: quay.io/keycloak/keycloak:15.1.1@sha256:abade9a9cf985b454b30a9119183e62a0018ec546c8fc4fbd8572457afb4a666
+    image: quay.io/keycloak/keycloak:26.3.5@sha256:e5e169f6ef82b06d2f5b08e9ac80e6a6335900360f0767e04d6810a9b4bc3590
     command:
       - -Dkeycloak.migration.action=import
       - -Dkeycloak.migration.provider=singleFile
