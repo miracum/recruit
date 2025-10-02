@@ -1,5 +1,18 @@
 # Changelog
 
+## [10.4.5](https://github.com/miracum/recruit/compare/v10.4.4...v10.4.5) (2025-10-02)
+
+
+### Bug Fixes
+
+* **deps:** update dependency axios to v1.12.0 [security] ([#464](https://github.com/miracum/recruit/issues/464)) ([4f0f2d4](https://github.com/miracum/recruit/commit/4f0f2d41647eefefeefc8edeb17245729a9b1b07))
+
+
+### Miscellaneous Chores
+
+* **deps:** update all digest updates ([#486](https://github.com/miracum/recruit/issues/486)) ([d8e98fb](https://github.com/miracum/recruit/commit/d8e98fbd821f31d342e12f38d430e8d5332fb579))
+* **deps:** update github-actions ([#488](https://github.com/miracum/recruit/issues/488)) ([6018f9e](https://github.com/miracum/recruit/commit/6018f9eaf0d544f2f9cab74c4ade84d169029699))
+
 ## [10.4.4](https://github.com/miracum/recruit/compare/v10.4.3...v10.4.4) (2025-09-27)
 
 
