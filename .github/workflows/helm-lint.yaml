@@ -12,7 +12,7 @@ jobs:
   lint:
     name: Lint Helm Chart
     runs-on: ubuntu-24.04
-    container: ghcr.io/chgl/kube-powertools:v2.4.8@sha256:2b8d33be4770d43d0e03261f79cc4672d489d525839bfa1080c33c77429f0936
+    container: ghcr.io/chgl/kube-powertools:v2.4.10@sha256:ad9f9de13edc1b0c24b9ae69935833fb1af0b22719e9d7e867cdb0bb987e94f6
     steps:
       - name: Add workspace as safe directory
         run: |
