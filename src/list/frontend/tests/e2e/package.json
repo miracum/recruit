@@ -10,6 +10,6 @@
   "author": "github.com/miracum/recruit",
   "license": "Apache-2.0",
   "dependencies": {
-    "cypress-keycloak": "1.9.0"
+    "cypress-keycloak": "2.0.2"
   }
 }
