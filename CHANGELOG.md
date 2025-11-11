@@ -1,5 +1,28 @@
 # Changelog
 
+## [10.4.5](https://github.com/miracum/recruit/compare/v10.4.4...v10.4.5) (2025-11-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency axios to v1.12.0 [security] ([#464](https://github.com/miracum/recruit/issues/464)) ([4f0f2d4](https://github.com/miracum/recruit/commit/4f0f2d41647eefefeefc8edeb17245729a9b1b07))
+* **deps:** update dependency checkstyle to v12 ([#503](https://github.com/miracum/recruit/issues/503)) ([9075011](https://github.com/miracum/recruit/commit/9075011ef8d6e16fcd3017179e76f139a06afc00))
+* **deps:** update dependency io.trino:trino-jdbc to v478 ([#504](https://github.com/miracum/recruit/issues/504)) ([770d291](https://github.com/miracum/recruit/commit/770d291160974a9450b662f7499ce19c4cbf14dd))
+* **deps:** update dependency net.logstash.logback:logstash-logback-encoder to v9 ([#505](https://github.com/miracum/recruit/issues/505)) ([aec3ac5](https://github.com/miracum/recruit/commit/aec3ac5b546226e259eebf5059cebf039bdc085e))
+* **deps:** update dependency retry-axios to v4 ([#508](https://github.com/miracum/recruit/issues/508)) ([eced221](https://github.com/miracum/recruit/commit/eced2216a8bb1e8b1c9c3a672831ad42db1eb664))
+
+
+### Miscellaneous Chores
+
+* **deps:** update all digest updates ([#486](https://github.com/miracum/recruit/issues/486)) ([d8e98fb](https://github.com/miracum/recruit/commit/d8e98fbd821f31d342e12f38d430e8d5332fb579))
+* **deps:** update all digest updates ([#497](https://github.com/miracum/recruit/issues/497)) ([21d8fb9](https://github.com/miracum/recruit/commit/21d8fb9ac8b7b5ef09c9b7b7bbd89db7ebd678a8))
+* **deps:** update dependency hl7.fhir.r4 to v6 ([#499](https://github.com/miracum/recruit/issues/499)) ([49429b8](https://github.com/miracum/recruit/commit/49429b8f1739e849e8f9cef0177de4b1316c1164))
+* **deps:** update docker.io/trinodb/trino docker tag to v478 ([#500](https://github.com/miracum/recruit/issues/500)) ([e83f9f5](https://github.com/miracum/recruit/commit/e83f9f50c8f74cc20a4b2ea44bbdb72922558fa4))
+* **deps:** update github-actions ([#488](https://github.com/miracum/recruit/issues/488)) ([6018f9e](https://github.com/miracum/recruit/commit/6018f9eaf0d544f2f9cab74c4ade84d169029699))
+* **deps:** update github-actions ([#498](https://github.com/miracum/recruit/issues/498)) ([fbc0409](https://github.com/miracum/recruit/commit/fbc04090a9b2419fe0a5892fc993f2ae6aecf718))
+* **deps:** update github-actions ([#501](https://github.com/miracum/recruit/issues/501)) ([227e1cc](https://github.com/miracum/recruit/commit/227e1cc16c6df2daf7db6a14b8c786bf9a353f0a))
+* **deps:** update github-actions ([#509](https://github.com/miracum/recruit/issues/509)) ([26a6288](https://github.com/miracum/recruit/commit/26a6288e7c18289ed3b337f95e09e0d2cfcdb11b))
+
 ## [10.4.4](https://github.com/miracum/recruit/compare/v10.4.3...v10.4.4) (2025-09-27)
 
 
