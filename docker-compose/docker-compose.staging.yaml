@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: docker.io/library/traefik:v3.5.2@sha256:f0abbbd11ced29754d4d188c29e9320b613481ec162b6ea5d3a8b6bdd8e5fa54
+    image: docker.io/library/traefik:v3.6.1@sha256:fd5932c796f7e2db9fd6bff485ef693d53797f0ee8ad03dc68aa424ea6f21958
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -140,7 +140,7 @@ services:
       - "traefik.http.routers.fhir.entrypoints=web"
 
   fhir-db:
-    image: docker.io/library/postgres:18.0@sha256:1ffc019dae94eca6b09a49ca67d37398951346de3c3d0cfe23d8d4ca33da83fb
+    image: docker.io/library/postgres:18.1@sha256:41bfa2e5b168fff0847a5286694a86cff102bdc4d59719869f6b117bb30b3a24
     restart: unless-stopped
     deploy:
       resources:
