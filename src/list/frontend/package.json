@@ -11,9 +11,9 @@
   },
   "dependencies": {
     "@dsb-norge/vue-keycloak-js": "2.4.0",
-    "@fortawesome/fontawesome-svg-core": "1.2.36",
-    "@fortawesome/free-solid-svg-icons": "5.15.4",
-    "@fortawesome/vue-fontawesome": "2.0.10",
+    "@fortawesome/fontawesome-svg-core": "7.1.0",
+    "@fortawesome/free-solid-svg-icons": "7.1.0",
+    "@fortawesome/vue-fontawesome": "3.1.2",
     "axios": "1.12.0",
     "buefy": "0.9.29",
     "core-js": "3.45.1",
