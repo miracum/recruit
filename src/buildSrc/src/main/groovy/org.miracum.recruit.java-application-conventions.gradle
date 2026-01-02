@@ -106,8 +106,8 @@ checkstyle {
 
 jib {
     from {
-        image = 'gcr.io/distroless/java21-debian12:nonroot' +
-            '@sha256:0ba7333a0fb7cbcf90b18073132f4f445870608e8cdc179664f10ce4d00964c2'
+        image = 'gcr.io/distroless/java25-debian13:nonroot' +
+            '@sha256:fa9bfc14924fa3b43d43944d93887155d19843b3aa45610b659496f928fe2a9c'
     }
     to {
         image = "ghcr.io/miracum/recruit/${project.name}:${project.version}"
