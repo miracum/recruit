@@ -36,19 +36,19 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 
-    implementation 'ca.uhn.hapi.fhir:hapi-fhir-client:8.4.0'
-    implementation 'ca.uhn.hapi.fhir:hapi-fhir-base:8.4.0'
-    implementation 'ca.uhn.hapi.fhir:hapi-fhir-structures-r4:8.4.0'
-    implementation 'ca.uhn.hapi.fhir:hapi-fhir-client-okhttp:8.4.0'
+    implementation 'ca.uhn.hapi.fhir:hapi-fhir-client:8.6.1'
+    implementation 'ca.uhn.hapi.fhir:hapi-fhir-base:8.6.1'
+    implementation 'ca.uhn.hapi.fhir:hapi-fhir-structures-r4:8.6.1'
+    implementation 'ca.uhn.hapi.fhir:hapi-fhir-client-okhttp:8.6.1'
 
-    implementation 'com.squareup.okhttp3:okhttp:5.1.0'
+    implementation 'com.squareup.okhttp3:okhttp:5.3.2'
 
     implementation 'net.logstash.logback:logstash-logback-encoder:9.0'
 
     implementation 'org.postgresql:postgresql:42.7.8'
 
-    implementation 'io.micrometer:micrometer-registry-prometheus:1.15.4'
-    implementation 'io.micrometer:micrometer-core:1.15.4'
+    implementation 'io.micrometer:micrometer-registry-prometheus:1.16.1'
+    implementation 'io.micrometer:micrometer-core:1.16.1'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
@@ -84,7 +84,7 @@ bootJar {
 }
 
 jacoco {
-    toolVersion = '0.8.13'
+    toolVersion = '0.8.14'
 }
 
 jacocoTestReport {
@@ -100,7 +100,7 @@ spotless {
 }
 
 checkstyle {
-    toolVersion = '12.1.1'
+    toolVersion = '12.3.1'
     configFile = file('../config/checkstyle/checkstyle.xml')
 }
 
