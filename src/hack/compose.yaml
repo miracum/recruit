@@ -301,7 +301,7 @@ services:
           size: 1024
 
   jaeger:
-    image: docker.io/jaegertracing/jaeger:2.14.0@sha256:7da6b6e878760315130de8799887ebff012efaa18af2e20112c07feddeda7d52
+    image: docker.io/jaegertracing/jaeger:2.14.1@sha256:39317a963b8006d0664bb1fc4c0bbdbf7cb9dcd20b9b57c23b6ebc09ab4f3cd6
     ports:
       - "127.0.0.1:16686:16686"
       - "127.0.0.1:6831:6831/udp"
