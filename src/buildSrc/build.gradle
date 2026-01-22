@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-gradle-plugin:3.5.9'
+    implementation 'org.springframework.boot:spring-boot-gradle-plugin:4.0.2'
     implementation 'io.spring.gradle:dependency-management-plugin:1.1.7'
     implementation 'com.google.cloud.tools:jib-gradle-plugin:3.5.2'
     implementation 'com.diffplug.spotless:spotless-plugin-gradle:8.1.0'
