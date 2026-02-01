@@ -34,12 +34,12 @@ jobs:
       digest: ${{ steps.build.outputs.digest }}
       tag: ${{ steps.container_meta.outputs.version }}
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         if: ${{ github.event_name != 'pull_request' }}
         with:
           registry: ghcr.io
@@ -47,7 +47,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
       - name: Container meta
         id: container_meta
@@ -84,7 +84,7 @@ jobs:
             MODULE_NAME=${{ inputs.module-name }}
 
       - name: Trivy Cache
-        uses: yogeshlonkar/trivy-cache-action@fd624debc4ea81f07a4135683c237eb509713e8f # v0.1.16
+        uses: yogeshlonkar/trivy-cache-action@ed5a0132284e2c2d52921949acf5753cce4b6a2b # v0.1.17
         with:
           gh-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -161,7 +161,7 @@ jobs:
       IMAGE: "${{ needs.build.outputs.image }}@${{ needs.build.outputs.digest }}"
     steps:
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
