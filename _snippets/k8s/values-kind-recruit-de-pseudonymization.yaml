@@ -1,0 +1,26 @@
+list:
+  dePseudonymization:
+    enabled: true
+
+fhir-pseudonymizer:
+  enabled: true
+  auth:
+    apiKey:
+      # enable requiring an API key placed in the `x-api-key` header to
+      # authenticate against the fhir-pseudonymizer's `/fhir/$de-pseudonymize`
+      # endpoint.
+      enabled: true
+      # the API key required to be set when the list module invokes
+      # the FHIR Pseudonymizer's `$de-pseudonymize` endpoint.
+      # Note: instead of storing the key in plaintext in the values.yaml,
+      #       you might want to leverage the `existingSecret` option instead.
+      key: "demo-secret-api-key"
+  # the values below are the default values defined in <https://github.com/miracum/charts/blob/master/charts/recruit/values.yaml>
+  pseudonymizationService: Vfps
+  vfps:
+    enabled: true
+    postgresql:
+      enabled: true
+      auth:
+        database: vfps
+        postgresPassword: vfps
