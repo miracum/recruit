@@ -20,12 +20,12 @@ jobs:
       id-token: write
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -70,12 +70,12 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           path: recruit
           persist-credentials: false
 
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: miracum/charts
@@ -96,7 +96,7 @@ jobs:
           CHART_VERSION=$(yq .version recruit/charts/recruit/Chart.yaml)
           echo "version=${CHART_VERSION}" >> "$GITHUB_OUTPUT"
 
-      - uses: peter-evans/create-pull-request@98357b18bf14b5342f975ff684046ec3b2a07725 # v8.0.0
+      - uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
         with:
           token: ${{ secrets.token }}
           path: miracum-charts
@@ -108,11 +108,11 @@ jobs:
   publish-kyverno-policies:
     name: publish kyverno policies
     runs-on: ubuntu-24.04
-    container: ghcr.io/chgl/kube-powertools:v2.4.35@sha256:4fabe3f9bde3440ceb99ac1c471365f51c2ceeeb9e135b1764da79573b8c6f9a
+    container: ghcr.io/chgl/kube-powertools:v2.5.11@sha256:4059a370cdcd0e7a35143c08665f5de58d43de6e7804a88bbbafca43c9d1ded5
     continue-on-error: true
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
@@ -136,7 +136,7 @@ jobs:
       contents: write # to upload artifacts to the release
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 

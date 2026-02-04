@@ -12,14 +12,14 @@ jobs:
   lint:
     name: Lint Helm Chart
     runs-on: ubuntu-24.04
-    container: ghcr.io/chgl/kube-powertools:v2.4.35@sha256:4fabe3f9bde3440ceb99ac1c471365f51c2ceeeb9e135b1764da79573b8c6f9a
+    container: ghcr.io/chgl/kube-powertools:v2.5.11@sha256:4059a370cdcd0e7a35143c08665f5de58d43de6e7804a88bbbafca43c9d1ded5
     steps:
       - name: Add workspace as safe directory
         run: |
           git config --global --add safe.directory /__w/recruit/recruit
 
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -57,7 +57,7 @@ jobs:
 
       - name: Cache kubeconform schemas
         id: cache-powerlint-kubeconform
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: /tmp
           key: ${{ runner.os }}-powerlint-kubeconform
