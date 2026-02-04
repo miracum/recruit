@@ -69,7 +69,7 @@ services:
       - "traefik.http.routers.fhir.entrypoints=web"
 
   fhir-db:
-    image: docker.io/library/postgres:18.1@sha256:bfe50b2b0ddd9b55eadedd066fe24c7c6fe06626185b73358c480ea37868024d
+    image: docker.io/library/postgres:18.1@sha256:3bb77a07b9ce8b8de0fe6d9b063adf20b9cca1068a1bcdc054cac71a69ce0ca6
     restart: unless-stopped
     deploy:
       resources:
@@ -339,7 +339,7 @@ services:
       - "traefik.http.routers.maildev.entrypoints=web"
 
   notify-ha-db:
-    image: docker.io/library/postgres:18.1@sha256:bfe50b2b0ddd9b55eadedd066fe24c7c6fe06626185b73358c480ea37868024d
+    image: docker.io/library/postgres:18.1@sha256:3bb77a07b9ce8b8de0fe6d9b063adf20b9cca1068a1bcdc054cac71a69ce0ca6
     restart: unless-stopped
     deploy:
       resources:
@@ -619,7 +619,7 @@ services:
         condition: service_started
 
   metastore-db:
-    image: docker.io/library/postgres:18.1@sha256:bfe50b2b0ddd9b55eadedd066fe24c7c6fe06626185b73358c480ea37868024d
+    image: docker.io/library/postgres:18.1@sha256:3bb77a07b9ce8b8de0fe6d9b063adf20b9cca1068a1bcdc054cac71a69ce0ca6
     profiles:
       - trino
     ipc: private

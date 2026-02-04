@@ -30,7 +30,7 @@ waitForPostgresInitContainer:
   image: # +doc-gen:ignore
     registry: docker.io
     repository: library/postgres
-    tag: 18.1@sha256:bfe50b2b0ddd9b55eadedd066fe24c7c6fe06626185b73358c480ea37868024d
+    tag: 18.1@sha256:3bb77a07b9ce8b8de0fe6d9b063adf20b9cca1068a1bcdc054cac71a69ce0ca6
     pullPolicy: IfNotPresent
 
 # container security context applied to init containers used by the query, list, and notify modules.
