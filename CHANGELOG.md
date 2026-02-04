@@ -1,5 +1,49 @@
 # Changelog
 
+## [10.4.5](https://github.com/miracum/recruit/compare/v10.4.4...v10.4.5) (2026-02-04)
+
+
+### Bug Fixes
+
+* **deps:** update dependency axios to v1.12.0 [security] ([#464](https://github.com/miracum/recruit/issues/464)) ([4f0f2d4](https://github.com/miracum/recruit/commit/4f0f2d41647eefefeefc8edeb17245729a9b1b07))
+* **deps:** update dependency checkstyle to v12 ([#503](https://github.com/miracum/recruit/issues/503)) ([9075011](https://github.com/miracum/recruit/commit/9075011ef8d6e16fcd3017179e76f139a06afc00))
+* **deps:** update dependency checkstyle to v13 ([#532](https://github.com/miracum/recruit/issues/532)) ([50a08b1](https://github.com/miracum/recruit/commit/50a08b1192d90fb30beb2166c0811a63714fe947))
+* **deps:** update dependency com.approvaltests:approvaltests to v26 ([#533](https://github.com/miracum/recruit/issues/533)) ([82693ab](https://github.com/miracum/recruit/commit/82693ab70a50c50feb9b81ab7c392bd7db50d7d4))
+* **deps:** update dependency io.trino:trino-jdbc to v478 ([#504](https://github.com/miracum/recruit/issues/504)) ([770d291](https://github.com/miracum/recruit/commit/770d291160974a9450b662f7499ce19c4cbf14dd))
+* **deps:** update dependency io.trino:trino-jdbc to v479 ([#534](https://github.com/miracum/recruit/issues/534)) ([469a208](https://github.com/miracum/recruit/commit/469a208ebc89ff88ed340cf3e4de253f524fb138))
+* **deps:** update dependency js-yaml to v4.1.1 [security] ([#519](https://github.com/miracum/recruit/issues/519)) ([a476676](https://github.com/miracum/recruit/commit/a476676fa8d86ef2440efca7993dc665032c0bcf))
+* **deps:** update dependency net.logstash.logback:logstash-logback-encoder to v9 ([#505](https://github.com/miracum/recruit/issues/505)) ([aec3ac5](https://github.com/miracum/recruit/commit/aec3ac5b546226e259eebf5059cebf039bdc085e))
+* **deps:** update dependency pino to v10 ([#506](https://github.com/miracum/recruit/issues/506)) ([b0e206e](https://github.com/miracum/recruit/commit/b0e206ec071b48c1b0b89c3c09ea7501598a31f8))
+* **deps:** update dependency pino-http to v11 ([#507](https://github.com/miracum/recruit/issues/507)) ([f95bcf9](https://github.com/miracum/recruit/commit/f95bcf95c4114b51766c89c49f8c58be7c4bf511))
+* **deps:** update dependency retry-axios to v4 ([#508](https://github.com/miracum/recruit/issues/508)) ([eced221](https://github.com/miracum/recruit/commit/eced2216a8bb1e8b1c9c3a672831ad42db1eb664))
+
+
+### Miscellaneous Chores
+
+* **deps:** aggregated dep updates and maintenance ([#522](https://github.com/miracum/recruit/issues/522)) ([2c11876](https://github.com/miracum/recruit/commit/2c118760006e85eadb5515226ae9eef424e3bde0))
+* **deps:** bump @cypress/request ([#510](https://github.com/miracum/recruit/issues/510)) ([0f7c0c9](https://github.com/miracum/recruit/commit/0f7c0c96412413062359d2ed21d8df1048eaa255))
+* **deps:** update all digest updates ([#486](https://github.com/miracum/recruit/issues/486)) ([d8e98fb](https://github.com/miracum/recruit/commit/d8e98fbd821f31d342e12f38d430e8d5332fb579))
+* **deps:** update all digest updates ([#497](https://github.com/miracum/recruit/issues/497)) ([21d8fb9](https://github.com/miracum/recruit/commit/21d8fb9ac8b7b5ef09c9b7b7bbd89db7ebd678a8))
+* **deps:** update all digest updates ([#513](https://github.com/miracum/recruit/issues/513)) ([8fb9d3a](https://github.com/miracum/recruit/commit/8fb9d3a9910039c0d4da3a0b5035560efcf58f72))
+* **deps:** update all digest updates ([#526](https://github.com/miracum/recruit/issues/526)) ([431d839](https://github.com/miracum/recruit/commit/431d8398ac5445697477ecf050344812bbd48b75))
+* **deps:** update dependency backrefs to v6 ([#489](https://github.com/miracum/recruit/issues/489)) ([34e7f41](https://github.com/miracum/recruit/commit/34e7f41dbe5fde9115578c9e47f66b6f940d94e8))
+* **deps:** update dependency certifi to v2026 ([#528](https://github.com/miracum/recruit/issues/528)) ([9d404f0](https://github.com/miracum/recruit/commit/9d404f0d1fb8d30ab87437908c8f87ae46977679))
+* **deps:** update dependency hl7.fhir.r4 to v6 ([#499](https://github.com/miracum/recruit/issues/499)) ([49429b8](https://github.com/miracum/recruit/commit/49429b8f1739e849e8f9cef0177de4b1316c1164))
+* **deps:** update dependency packaging to v26 ([#529](https://github.com/miracum/recruit/issues/529)) ([fa51f3a](https://github.com/miracum/recruit/commit/fa51f3aabe0391f86aa9a4db7c6abf414eb29527))
+* **deps:** update dependency pathspec to v1 ([#530](https://github.com/miracum/recruit/issues/530)) ([0ce124b](https://github.com/miracum/recruit/commit/0ce124b7dafbeeb88bf3d7d02d5b913bd2dbaaa3))
+* **deps:** update dependency pytest to v9 ([#516](https://github.com/miracum/recruit/issues/516)) ([83d4eed](https://github.com/miracum/recruit/commit/83d4eed17fd56e108c06e24eea9d423bf64c3eec))
+* **deps:** update dependency urllib3 to v2.6.0 [security] ([#521](https://github.com/miracum/recruit/issues/521)) ([bd770b7](https://github.com/miracum/recruit/commit/bd770b77b36928d6f1d09c298bccb3248893699f))
+* **deps:** update dependency urllib3 to v2.6.3 [security] ([#525](https://github.com/miracum/recruit/issues/525)) ([f437987](https://github.com/miracum/recruit/commit/f437987a0daa7922c5454318f89fe9045501041e))
+* **deps:** update docker.io/trinodb/trino docker tag to v478 ([#500](https://github.com/miracum/recruit/issues/500)) ([e83f9f5](https://github.com/miracum/recruit/commit/e83f9f50c8f74cc20a4b2ea44bbdb72922558fa4))
+* **deps:** update docker.io/trinodb/trino docker tag to v479 ([#531](https://github.com/miracum/recruit/issues/531)) ([4501d46](https://github.com/miracum/recruit/commit/4501d46d60f252198f6a6b2784f409047a00a781))
+* **deps:** update github-actions ([#488](https://github.com/miracum/recruit/issues/488)) ([6018f9e](https://github.com/miracum/recruit/commit/6018f9eaf0d544f2f9cab74c4ade84d169029699))
+* **deps:** update github-actions ([#498](https://github.com/miracum/recruit/issues/498)) ([fbc0409](https://github.com/miracum/recruit/commit/fbc04090a9b2419fe0a5892fc993f2ae6aecf718))
+* **deps:** update github-actions ([#501](https://github.com/miracum/recruit/issues/501)) ([227e1cc](https://github.com/miracum/recruit/commit/227e1cc16c6df2daf7db6a14b8c786bf9a353f0a))
+* **deps:** update github-actions ([#509](https://github.com/miracum/recruit/issues/509)) ([26a6288](https://github.com/miracum/recruit/commit/26a6288e7c18289ed3b337f95e09e0d2cfcdb11b))
+* **deps:** update github-actions ([#514](https://github.com/miracum/recruit/issues/514)) ([2d065f0](https://github.com/miracum/recruit/commit/2d065f0032125a2991b541a1e936272cb82849b8))
+* **deps:** update github-actions ([#515](https://github.com/miracum/recruit/issues/515)) ([07fb2cc](https://github.com/miracum/recruit/commit/07fb2cca041b30d43d4831a1cbfaf116f26c9577))
+* **deps:** update github-actions ([#527](https://github.com/miracum/recruit/issues/527)) ([30b044e](https://github.com/miracum/recruit/commit/30b044e64fb5ce504e7d68d70f431cc9ae47cc00))
+
 ## [10.4.4](https://github.com/miracum/recruit/compare/v10.4.3...v10.4.4) (2025-09-27)
 
 
