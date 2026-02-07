@@ -12,7 +12,7 @@ services:
       - 8082:8080
 
   loader:
-    image: docker.io/curlimages/curl:8.17.0@sha256:935d9100e9ba842cdb060de42472c7ca90cfe9a7c96e4dacb55e79e560b3ff40
+    image: docker.io/curlimages/curl:8.18.0@sha256:d94d07ba9e7d6de898b6d96c1a072f6f8266c687af78a74f380087a0addf5d17
     command: >
       sh -c "curl -X POST -H 'Content-Type:application/fhir+json' --retry-connrefused --connect-timeout 30 --max-time 60 --retry 5 --retry-delay 15 --data '@/data/sample-record-1.json' http://fhir:8080/fhir &&
              curl -X POST -H 'Content-Type:application/fhir+json' --retry-connrefused --connect-timeout 30 --max-time 60 --retry 5 --retry-delay 15 --data '@/data/sample-record-2.json' http://fhir:8080/fhir &&
@@ -49,7 +49,7 @@ services:
       - 8083:8080
 
   fhir-pseudonymizer:
-    image: ghcr.io/miracum/fhir-pseudonymizer:v2.23.0@sha256:d3476eb7e53ed0fbfc1d139ee172e2cd7cd84b96330512779b00d497ff7ce3fb
+    image: ghcr.io/miracum/fhir-pseudonymizer:v2.24.0@sha256:14e66967493d84b43c4569e3367f410d5ddd3614974538be2b0e8912372d7cb2
     environment:
       APIKEY: "fhir-pseudonymizer-api-key"
       TRACING__ENABLED: "true"
