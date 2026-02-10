@@ -178,7 +178,7 @@ services:
       - "traefik.http.routers.maildev.entrypoints=web"
 
   keycloak:
-    image: quay.io/keycloak/keycloak:15.1.1@sha256:abade9a9cf985b454b30a9119183e62a0018ec546c8fc4fbd8572457afb4a666
+    image: quay.io/keycloak/keycloak:26.5.3@sha256:3cef99b816d23b48a5c3fdd58f235289fd234c835cbd7cb9ae836cecc8bfc759
     restart: unless-stopped
     cap_drop:
       - ALL
