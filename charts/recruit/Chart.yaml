@@ -22,7 +22,7 @@ dependencies:
     alias: fhirserver
     name: hapi-fhir-jpaserver
     repository: https://hapifhir.github.io/hapi-fhir-jpaserver-starter
-    version: 0.21.0
+    version: 0.22.0
   - condition: mailhog.enabled
     name: mailhog
     repository: oci://ghcr.io/codecentric/helm-charts
@@ -30,14 +30,14 @@ dependencies:
   - condition: ohdsi.enabled
     name: ohdsi
     repository: oci://ghcr.io/chgl/charts
-    version: 0.25.38
+    version: 0.25.47
   - name: postgres
-    version: 0.13.6
+    version: 0.15.5
     repository: oci://registry-1.docker.io/cloudpirates
     condition: postgres.enabled
   - condition: fhir-pseudonymizer.enabled
     name: fhir-pseudonymizer
-    version: 0.8.21
+    version: 0.8.28
     repository: oci://ghcr.io/miracum/charts
   - name: common
     repository: oci://ghcr.io/miracum/charts
