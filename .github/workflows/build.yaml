@@ -139,7 +139,7 @@ jobs:
       id-token: write
       packages: write # for uploading attestations.
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.1.0
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.1.0 # zizmor: ignore[unpinned-uses] the action requires non-pinning
     with:
       image: ${{ needs.build.outputs.image }}
       digest: ${{ needs.build.outputs.digest }}
