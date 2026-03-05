@@ -108,7 +108,7 @@ jobs:
   publish-kyverno-policies:
     name: publish kyverno policies
     runs-on: ubuntu-24.04
-    container: ghcr.io/chgl/kube-powertools:v2.5.11@sha256:4059a370cdcd0e7a35143c08665f5de58d43de6e7804a88bbbafca43c9d1ded5
+    container: ghcr.io/chgl/kube-powertools:v2.5.15@sha256:d7050c728f9f73b55531d71aa5e1be8509a7764d9dd1c3c8eed578aee3c2ac88
     continue-on-error: true
     steps:
       - name: Checkout
@@ -186,7 +186,7 @@ jobs:
       id-token: write
       contents: write # To add assets to a release.
     # can't be referenced by digest. See <https://github.com/slsa-framework/slsa-github-generator#verification-of-provenance>
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0 # zizmor: ignore[unpinned-uses] the action requires non-pinning
     with:
       base64-subjects: "${{ needs.prepare-artifacts.outputs.hashes }}"
       upload-assets: true
