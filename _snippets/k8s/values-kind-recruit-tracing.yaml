@@ -1,0 +1,87 @@
+query:
+  extraEnv:
+    - name: JAVA_TOOL_OPTIONS
+      value: "-javaagent:/app/opentelemetry-javaagent.jar"
+    - name: OTEL_METRICS_EXPORTER
+      value: "none"
+    - name: OTEL_LOGS_EXPORTER
+      value: "none"
+    - name: OTEL_TRACES_EXPORTER
+      value: "jaeger"
+    - name: OTEL_SERVICE_NAME
+      value: "recruit-query"
+    - name: OTEL_EXPORTER_JAEGER_ENDPOINT
+      value: "http://simplest-collector.observability.svc:14250"
+
+list:
+  extraEnv:
+    - name: TRACING_ENABLED
+      value: "true"
+    - name: OTEL_TRACES_EXPORTER
+      value: "jaeger"
+    - name: OTEL_SERVICE_NAME
+      value: "recruit-list"
+    - name: OTEL_EXPORTER_JAEGER_AGENT_HOST
+      value: "simplest-agent.observability.svc"
+
+notify:
+  extraEnv:
+    - name: JAVA_TOOL_OPTIONS
+      value: "-javaagent:/app/opentelemetry-javaagent.jar"
+    - name: OTEL_METRICS_EXPORTER
+      value: "none"
+    - name: OTEL_LOGS_EXPORTER
+      value: "none"
+    - name: OTEL_TRACES_EXPORTER
+      value: "jaeger"
+    - name: OTEL_SERVICE_NAME
+      value: "recruit-notify"
+    - name: OTEL_EXPORTER_JAEGER_ENDPOINT
+      value: "http://simplest-collector.observability.svc:14250"
+
+fhirserver:
+  extraEnv:
+    # the recruit tool relies on the FHIR server subscription mechanism to create notifications.
+    # if you overwrite `fhirserver.extraEnv`, make sure to keep this setting enabled.
+    - name: HAPI_FHIR_SUBSCRIPTION_RESTHOOK_ENABLED
+      value: "true"
+    - name: SPRING_FLYWAY_BASELINE_ON_MIGRATE
+      value: "true"
+    # OTel options
+    - name: JAVA_TOOL_OPTIONS
+      value: "-javaagent:/app/opentelemetry-javaagent.jar"
+    - name: OTEL_METRICS_EXPORTER
+      value: "none"
+    - name: OTEL_LOGS_EXPORTER
+      value: "none"
+    - name: OTEL_TRACES_EXPORTER
+      value: "jaeger"
+    - name: OTEL_SERVICE_NAME
+      value: "recruit-hapi-fhir-server"
+    - name: OTEL_EXPORTER_JAEGER_ENDPOINT
+      value: "http://simplest-collector.observability.svc:14250"
+
+fhir-pseudonymizer:
+  extraEnv:
+    - name: Tracing__Enabled
+      value: "true"
+    - name: Tracing__ServiceName
+      value: "recruit-fhir-pseudonymizer"
+    - name: Tracing__Jaeger__AgentHost
+      value: "simplest-agent.observability.svc"
+  vfps:
+    extraEnv:
+      - name: Tracing__IsEnabled
+        value: "true"
+      - name: Tracing__ServiceName
+        value: "recruit-vfps"
+      - name: Tracing__Jaeger__AgentHost
+        value: "simplest-agent.observability.svc"
+
+ohdsi:
+  webApi:
+    tracing:
+      enabled: true
+      jaeger:
+        protocol: "grpc"
+        endpoint: http://simplest-collector.observability.svc:14250
