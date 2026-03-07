@@ -21,7 +21,7 @@
     "fhirclient": "2.6.3",
     "fhirpath": "4.8.2",
     "vue": "2.7.16",
-    "vue-router": "3.6.5",
+    "vue-router": "5.0.3",
     "vuejs-logger": "1.5.5"
   },
   "devDependencies": {
