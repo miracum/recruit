@@ -30,7 +30,7 @@ waitForPostgresInitContainer:
   image: # +doc-gen:ignore
     registry: docker.io
     repository: library/postgres
-    tag: 18.1@sha256:1090bc3a8ccfb0b55f78a494d76f8d603434f7e4553543d6e807bc7bd6bbd17f
+    tag: 18.3@sha256:69e8582b781cb44fa4557b98ed586fe68361e320d9b12f9707494335634f4f3d
     pullPolicy: IfNotPresent
 
 # container security context applied to init containers used by the query, list, and notify modules.
@@ -853,7 +853,7 @@ curl: # +doc-gen:ignore
   image:
     registry: docker.io
     repository: curlimages/curl
-    tag: 8.17.0@sha256:935d9100e9ba842cdb060de42472c7ca90cfe9a7c96e4dacb55e79e560b3ff40
+    tag: 8.18.0@sha256:d94d07ba9e7d6de898b6d96c1a072f6f8266c687af78a74f380087a0addf5d17
 
 broadseaAtlasdb:
   # -- whether to deploy the OHDSI Broadsea Atlasdb (<https://github.com/OHDSI/Broadsea-Atlasdb>)
