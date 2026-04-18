@@ -22,7 +22,7 @@
         </header>
         <b-tabs position="is-centered">
           <b-tab-item>
-            <template slot="header">
+            <template #header>
               <b-icon icon="stethoscope"></b-icon>
               <span>
                 Diagnosen
@@ -32,7 +32,7 @@
             <condition-list :items="record.conditions" />
           </b-tab-item>
           <b-tab-item>
-            <template slot="header">
+            <template #header>
               <b-icon icon="procedures"></b-icon>
               <span>
                 Prozeduren
@@ -42,7 +42,7 @@
             <procedure-list :items="record.procedures" />
           </b-tab-item>
           <b-tab-item>
-            <template slot="header">
+            <template #header>
               <b-icon icon="pills"></b-icon>
               <span>
                 Medikation
@@ -55,7 +55,7 @@
             />
           </b-tab-item>
           <b-tab-item>
-            <template slot="header">
+            <template #header>
               <b-icon icon="vial"></b-icon>
               <span>
                 Labor & Vitalparameter
