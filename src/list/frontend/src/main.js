@@ -34,7 +34,6 @@ function createVueApp() {
   });
   app.use(VueLogger, loggerOptions);
   app.use(router);
-  app.mount("#app");
   return app;
 }
 
@@ -43,15 +42,8 @@ axios
   .then((response) => {
     const config = response.data;
     console.info("Using config: ", config);
+    const app = createVueApp();
     if (!config.isKeycloakDisabled) {
-      const app = createApp(App);
-      app.component("VueFontawesome", FontAwesomeIcon);
-      app.use(Buefy, {
-        defaultIconComponent: "vue-fontawesome",
-        defaultIconPack: "fas",
-      });
-      app.use(VueLogger, loggerOptions);
-      app.use(router);
       app.use(VueKeycloakJs, {
         config: config.keycloak,
         init: {
@@ -64,7 +56,7 @@ axios
         },
       });
     } else {
-      createVueApp();
+      app.mount("#app");
     }
   })
   .catch((error) => {
