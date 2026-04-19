@@ -66,12 +66,61 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-      - uses: ./.github/actions/test-image
+
+      - name: Download image
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          project-name: ${{ matrix.module }}
-          image-name: ${{ env.IMAGE_NAME }}
-          image-tag: ${{ needs.build.outputs.image-tag }}
-          e2e-test-directory: ${{ matrix.e2e-test-directory }}
+          name: ${{ needs.build.outputs.image-slug }}
+          path: /tmp
+
+      - name: Load image
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          docker load --input /tmp/image.tar
+          docker image ls
+
+      - name: Pull image if not in PR
+        shell: bash
+        if: ${{ github.event_name != 'pull_request' }}
+        env:
+          IMAGE_TAG: ${{ needs.build.outputs.image-version }}
+        run: |
+          docker pull "${IMAGE_NAME}:${IMAGE_TAG}"
+          docker image ls -a
+
+      - name: Run container structure tests
+        shell: bash
+        env:
+          IMAGE_TAG: ${{ needs.build.outputs.image-version }}
+        run: |
+          curl -LO https://github.com/GoogleContainerTools/container-structure-test/releases/download/v1.14.0/container-structure-test-linux-amd64
+          chmod +x container-structure-test-linux-amd64
+
+          ./container-structure-test-linux-amd64 test --image="${IMAGE_NAME}:${IMAGE_TAG}" --config=tests/container-structure/common-tests.yaml
+
+      - name: Run isolated smoke test
+        if: ${{ matrix.e2e-test-directory != ''}}
+        shell: bash
+        working-directory: src/${{ matrix.module }}
+        env:
+          IMAGE_TAG: ${{ needs.build.outputs.image-version }}
+          E2E_TEST_DIRECTORY: ${{ matrix.e2e-test-directory }}
+        run: |
+          docker compose -f "${E2E_TEST_DIRECTORY}/docker-compose.yaml" build
+          docker compose -f "${E2E_TEST_DIRECTORY}/docker-compose.yaml" run tester
+
+      - name: Print test logs and stop all running containers
+        if: ${{ matrix.e2e-test-directory != '' && always()}}
+        shell: bash
+        working-directory: src/${{ matrix.module }}
+        continue-on-error: true
+        env:
+          IMAGE_TAG: ${{ needs.build.outputs.image-version }}
+          E2E_TEST_DIRECTORY: ${{ matrix.e2e-test-directory }}
+        run: |
+          docker compose -f "${E2E_TEST_DIRECTORY}/docker-compose.yaml" logs
+          docker compose -f "${E2E_TEST_DIRECTORY}/docker-compose.yaml" down --volumes --remove-orphans
 
   k8s-test:
     needs:
@@ -79,7 +128,7 @@ jobs:
       - test
     uses: ./.github/workflows/test-k8s-installation.yaml
     with:
-      image-tag: ${{ needs.build.outputs.image-tag }}
+      image-tag: ${{ needs.build.outputs.image-slug }}
 
   docker-compose-test:
     needs:
@@ -87,7 +136,7 @@ jobs:
       - test
     uses: ./.github/workflows/test-compose-installation.yaml
     with:
-      image-tag: ${{ needs.build.outputs.image-tag }}
+      image-tag: ${{ needs.build.outputs.image-slug }}
 
   release:
     # the docker compose image tags only change on releases, so
