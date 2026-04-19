@@ -17,171 +17,22 @@ on:
     outputs:
       image-tag:
         description: "The image tag that was built"
-        value: ${{ jobs.build.outputs.tag }}
-
-env:
-  IMAGE_NAME: ghcr.io/${{ github.repository }}/${{ inputs.module-name }}
+        value: ${{ jobs.build.outputs.image-tags }}
 
 jobs:
   build:
     name: build container image
+    uses: miracum/.github/.github/workflows/standard-build.yaml@1478f7e298f11e96e4585dee4afdce8fabc2e162 # v1.20.5
     permissions:
-      contents: read
+      contents: write
+      id-token: write
       packages: write
-    runs-on: ubuntu-24.04
-    outputs:
-      image: ${{ env.IMAGE_NAME }}
-      digest: ${{ steps.build.outputs.digest }}
-      tag: ${{ steps.container_meta.outputs.version }}
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
-        if: ${{ github.event_name != 'pull_request' }}
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
-
-      - name: Container meta
-        id: container_meta
-        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
-        with:
-          images: |
-            ${{ env.IMAGE_NAME }}
-          labels: |
-            org.opencontainers.image.created=1970-01-01T00:00:00Z
-
-      - name: Build image
-        id: build
-        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
-        with:
-          cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache
-          cache-to: type=inline
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.container_meta.outputs.tags }}
-          labels: ${{ steps.container_meta.outputs.labels }}
-          load: ${{ github.event_name == 'pull_request' }}
-          context: ${{ inputs.context }} # zizmor: ignore[template-injection]
-          build-args: |
-            MODULE_NAME=${{ inputs.module-name }}
-
-      - name: Run unit tests
-        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
-        with:
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          push: false
-          target: test
-          context: ${{ inputs.context }} # zizmor: ignore[template-injection]
-          build-args: |
-            MODULE_NAME=${{ inputs.module-name }}
-
-      - name: Trivy Cache
-        uses: yogeshlonkar/trivy-cache-action@ed5a0132284e2c2d52921949acf5753cce4b6a2b # v0.1.17
-        with:
-          gh-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@97e0b3872f55f89b95b2f65b3dbab56962816478 # 0.34.2
-        with:
-          image-ref: ${{ fromJson(steps.container_meta.outputs.json).tags[0] }}
-          severity: "CRITICAL"
-          exit-code: "0"
-          ignore-unfixed: "true"
-          timeout: 15m
-
-      - name: Save Trivy vulnerability attestation
-        uses: aquasecurity/trivy-action@97e0b3872f55f89b95b2f65b3dbab56962816478 # 0.34.2
-        with:
-          image-ref: ${{ fromJson(steps.container_meta.outputs.json).tags[0] }}
-          exit-code: "0"
-          format: cosign-vuln
-          output: trivy-vuln-attestation.json
-          timeout: 15m
-
-      - name: Upload image vulnerability attestation
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-        with:
-          name: ${{ inputs.module-name }}-attestations
-          path: |
-            trivy-vuln-attestation.json
-
-      - name: Save container image as tar archives
-        if: ${{ github.event_name == 'pull_request' }}
-        shell: bash
-        env:
-          IMAGE: ${{ fromJson(steps.container_meta.outputs.json).tags[0] }}
-          MODULE_NAME: ${{ inputs.module-name }}
-        run: |
-          docker save "$IMAGE" -o "/tmp/${MODULE_NAME}-image.tar"
-
-      - name: Upload container image
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-        with:
-          name: ${{ inputs.module-name }}-build-artifacts
-          path: |
-            /tmp/${{ inputs.module-name }}-image.tar
-
-  provenance:
-    needs:
-      - build
-    permissions:
+      pull-requests: write
       actions: read
-      # for creating OIDC tokens for signing.
-      id-token: write
-      packages: write # for uploading attestations.
-    if: ${{ startsWith(github.ref, 'refs/tags/') }}
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.1.0 # zizmor: ignore[unpinned-uses] the action requires non-pinning
+      security-events: write
     with:
-      image: ${{ needs.build.outputs.image }}
-      digest: ${{ needs.build.outputs.digest }}
-      registry-username: ${{ github.actor }}
+      image: ghcr.io/${{ github.repository }}/${{ inputs.module-name }}
+      build-context: ${{ inputs.context }}
+      enable-build-test-layer: true
     secrets:
-      registry-password: ${{ secrets.GITHUB_TOKEN }}
-
-  sign:
-    name: sign image
-    runs-on: ubuntu-24.04
-    if: ${{ github.event_name != 'pull_request' }}
-    needs:
-      - build
-    permissions:
-      contents: read
-      id-token: write
-      packages: write
-    env:
-      IMAGE: "${{ needs.build.outputs.image }}@${{ needs.build.outputs.digest }}"
-    steps:
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Download attestations
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
-        with:
-          name: ${{ inputs.module-name }}-attestations
-          path: /tmp
-
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
-
-      - name: Sign image
-        run: |
-          echo "Signing '$IMAGE' using keyless approach"
-          cosign sign --yes "$IMAGE"
-
-      - name: Attest image vulnerability report
-        run: |
-          echo "Attest vulnerability report for '$IMAGE' using keyless approach"
-          cosign attest --yes --type vuln --predicate /tmp/trivy-vuln-attestation.json "$IMAGE"
+      github-token: ${{ secrets.GITHUB_TOKEN }}
