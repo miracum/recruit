@@ -24,6 +24,9 @@ jobs:
       contents: write
       pull-requests: write
       security-events: write
+      actions: read
+      packages: write
+      id-token: write
     strategy:
       matrix:
         include:
