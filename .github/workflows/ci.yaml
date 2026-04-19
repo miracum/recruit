@@ -35,10 +35,13 @@ jobs:
             context: "src/list/"
           - module: "query-fhir-trino"
             context: "src/"
-    uses: ./.github/workflows/build.yaml
+    uses: miracum/.github/.github/workflows/standard-build.yaml@1478f7e298f11e96e4585dee4afdce8fabc2e162 # v1.20.5
     with:
-      module-name: ${{ matrix.module }}
-      context: ${{ matrix.context }}
+      image: ghcr.io/${{ github.repository }}/${{ matrix.module }}
+      build-context: ${{ matrix.context }}
+      enable-build-test-layer: true
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
 
   test:
     name: test
