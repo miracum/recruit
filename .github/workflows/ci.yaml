@@ -21,11 +21,9 @@ permissions:
 jobs:
   build:
     permissions:
-      actions: read
-      contents: read
-      # for creating OIDC tokens for signing.
-      id-token: write
-      packages: write # for uploading container images, signatures, and attestations.
+      contents: write
+      pull-requests: write
+      security-events: write
     strategy:
       matrix:
         include:

@@ -17,7 +17,7 @@ on:
     outputs:
       image-tag:
         description: "The image tag that was built"
-        value: ${{ jobs.build.outputs.image-tags }}
+        value: ${{ jobs.build.outputs.image-slug }}
 
 jobs:
   build:
