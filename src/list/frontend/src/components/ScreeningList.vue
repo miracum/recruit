@@ -4,7 +4,7 @@
       <!-- Left side -->
       <div class="level-left">
         <b-dropdown v-model="selectedFilterOptions" multiple>
-          <template #trigger>
+        <template #trigger>
             <b-button type="is-primary" icon-right="sort-down">
               Vorschläge nach Status ausblenden:
               {{ selectedFilterOptions.length }}
@@ -106,14 +106,15 @@
 
         <b-table-column v-slot="props" label="Status" field="subject.status" sortable>
           <b-dropdown v-model="props.row.subject.status">
-            <b-button
-              slot="trigger"
-              :class="['button', 'recruitment-status-select', getTypeFromStatus(props.row.subject.status)]"
-              type="button"
-              size="is-small"
-              icon-right="sort-down"
-              >{{ recruitmentStatusOptions[props.row.subject.status] }}</b-button
-            >
+            <template #trigger>
+              <b-button
+                :class="['button', 'recruitment-status-select', getTypeFromStatus(props.row.subject.status)]"
+                type="button"
+                size="is-small"
+                icon-right="sort-down"
+                >{{ recruitmentStatusOptions[props.row.subject.status] }}</b-button
+              >
+            </template>
             <b-dropdown-item v-for="option in Object.keys(recruitmentStatusOptions)" :key="option" :value="option">
               <span class="status-option-container">
                 <b-icon pack="fas" size="is-small" icon="circle" :type="getTypeFromStatus(option)"></b-icon>
@@ -175,7 +176,7 @@
           </div>
         </b-table-column>
 
-        <template slot="empty">
+        <template #empty>
           <section class="section">
             <div class="content has-text-grey has-text-centered">
               <p>
@@ -290,22 +291,22 @@ export default {
     this.items.map(async (element) => {
       let latestEncounterAndLocation = {};
       try {
-        this.$set(this.latestEncounterAndLocationLookup, element.item.individual.id, {
+        this.latestEncounterAndLocationLookup[element.item.individual.id] = {
           lastStayIsLoading: true,
-        });
+        };
         latestEncounterAndLocation = await Api.fetchLatestEncounterWithLocation(element.item.individual.id);
 
-        this.$set(this.latestEncounterAndLocationLookup, element.item.individual.id, {
+        this.latestEncounterAndLocationLookup[element.item.individual.id] = {
           latestEncounterAndLocation,
           lastStayIsLoading: false,
           lastStayErrorMessage: "",
-        });
+        };
       } catch (exc) {
-        this.$set(this.latestEncounterAndLocationLookup, element.item.individual.id, {
+        this.latestEncounterAndLocationLookup[element.item.individual.id] = {
           latestEncounterAndLocation,
           lastStayIsLoading: false,
           lastStayErrorMessage: exc,
-        });
+        };
       }
     });
 
@@ -313,9 +314,9 @@ export default {
       let allRecommendedStudies = [];
       let participatingStudies = [];
       try {
-        this.$set(this.recommendationMarkerLookup, element.item.individual.id, {
+        this.recommendationMarkerLookup[element.item.individual.id] = {
           markerIsLoading: true,
-        });
+        };
         let allRecommendations = await Api.fetchAllRecommendationsByPatientId(element.item.individual.id);
 
         // ignore all subjects that refer to the same study as the one currently shown in this screening list
@@ -338,19 +339,19 @@ export default {
           .filter((resource) => resource.resourceType === "ResearchSubject" && resource.status === "on-study")
           .map((researchSubject) => researchSubject.study);
 
-        this.$set(this.recommendationMarkerLookup, element.item.individual.id, {
+        this.recommendationMarkerLookup[element.item.individual.id] = {
           allRecommendedStudies,
           participatingStudies,
           markerIsLoading: false,
           markerErrorMessage: "",
-        });
+        };
       } catch (exc) {
-        this.$set(this.recommendationMarkerLookup, element.item.individual.id, {
+        this.recommendationMarkerLookup[element.item.individual.id] = {
           allRecommendedStudies,
           participatingStudies,
           markerIsLoading: false,
           markerErrorMessage: exc,
-        });
+        };
       }
     });
   },

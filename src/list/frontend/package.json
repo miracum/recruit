@@ -10,22 +10,23 @@
     "test:unit": "vue-cli-service test:unit --coverage"
   },
   "dependencies": {
-    "@dsb-norge/vue-keycloak-js": "2.4.0",
-    "@fortawesome/fontawesome-svg-core": "1.2.36",
-    "@fortawesome/free-solid-svg-icons": "5.15.4",
-    "@fortawesome/vue-fontawesome": "2.0.10",
+    "@dsb-norge/vue-keycloak-js": "3.0.3",
+    "@fortawesome/fontawesome-svg-core": "6.7.2",
+    "@fortawesome/free-solid-svg-icons": "6.7.2",
+    "@fortawesome/vue-fontawesome": "3.2.0",
     "axios": "1.13.5",
-    "buefy": "0.9.29",
+    "buefy": "3.0.5",
     "core-js": "3.47.0",
     "csv-stringify": "6.6.0",
     "fhirclient": "2.6.3",
     "fhirpath": "4.8.2",
-    "vue": "2.7.16",
-    "vue-router": "3.6.5",
-    "vuejs-logger": "1.5.5"
+    "vue": "3.5.32",
+    "vue-router": "4.6.4",
+    "vuejs-logger": "1.10.2"
   },
   "devDependencies": {
     "@babel/eslint-parser": "7.28.5",
+    "@babel/plugin-proposal-class-static-block": "7.21.0",
     "@vue/cli-plugin-babel": "5.0.9",
     "@vue/cli-plugin-eslint": "5.0.9",
     "@vue/cli-plugin-router": "5.0.9",
@@ -33,16 +34,17 @@
     "@vue/cli-service": "5.0.9",
     "@vue/eslint-config-airbnb": "6.0.0",
     "@vue/test-utils": "2.4.6",
-    "@vue/vue2-jest": "29.2.6",
+    "@vue/vue3-jest": "29.2.6",
+    "babel-jest": "29.7.0",
     "cypress-keycloak": "2.0.2",
     "eslint": "8.57.1",
     "eslint-config-prettier": "9.1.2",
     "eslint-plugin-vue": "9.33.0",
+    "eslint-plugin-vuejs-accessibility": "2.5.0",
     "jest": "29.7.0",
+    "pino": "10.1.0",
     "sass": "1.97.1",
-    "sass-loader": "16.0.6",
-    "vue-template-compiler": "2.7.16",
-    "pino": "10.1.0"
+    "sass-loader": "16.0.6"
   },
   "optionalDependencies": {
     "@vue/cli-plugin-e2e-cypress": "5.0.9",

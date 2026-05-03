@@ -1,9 +1,10 @@
+/* eslint-disable no-console */
 import FHIR from "fhirclient";
 import fhirpath from "fhirpath";
-import Vue from "vue";
 import axios from "axios";
 
 import Constants from "@/const";
+import { getToken } from "@/auth";
 
 function createFhirClient() {
   let fhirUrl = process.env.VUE_APP_FHIR_URL;
@@ -15,7 +16,7 @@ function createFhirClient() {
   return FHIR.client({
     serverUrl: fhirUrl,
     tokenResponse: {
-      access_token: Vue.prototype.$keycloak?.token,
+      access_token: getToken(),
     },
   });
 }
@@ -188,14 +189,14 @@ const actions = {
         return 0;
       });
 
-    Vue.$log.debug(`Found ${encounters.length} encounters for Patient/${patientId}`);
+    console.debug(`Found ${encounters.length} encounters for Patient/${patientId}`);
 
     // eslint-disable-next-line no-restricted-syntax
     for (const encounter of encounters) {
       // if there's a location associated with the encounter then that's already a good sign
       // that this is the most recent encounter we can use for displaying
       if (encounter.location) {
-        Vue.$log.debug(`Found Encounter/${encounter.id} with location containing ${encounter.location?.length} entries`);
+        console.debug(`Found Encounter/${encounter.id} with location containing ${encounter.location?.length} entries`);
 
         // sort updates in-place
         encounter.location.sort((a, b) => {
@@ -214,7 +215,7 @@ const actions = {
             // get the actual Location resource via the lookup call
             const location = locationLookup.get(locationReference);
 
-            Vue.$log.debug(
+            console.debug(
               `Found location entry referencing location "${location.name}" with status "${locationEntry.status}"`
             );
 
@@ -227,7 +228,7 @@ const actions = {
           // if no reference is set, there still might be a display element we could use
           const locationDisplay = locationEntry.location.display;
           if (locationDisplay) {
-            Vue.$log.debug(`Found location entry with display "${locationDisplay}" with status "${locationEntry.status}"`);
+            console.debug(`Found location entry with display "${locationDisplay}" with status "${locationEntry.status}"`);
 
             // replace reference with a "Location" object where only the name is set
             // this makes it easier to work with later on, since we don't have to duplicate
@@ -240,7 +241,7 @@ const actions = {
           // if neither reference nor display are set, maybe there's still the identifier value we could use
           const locationIdentifier = locationEntry.location.identifier;
           if (locationIdentifier) {
-            Vue.$log.debug(
+            console.debug(
               `Found location entry with identifier "${locationIdentifier.value}" with status "${locationEntry.status}"`
             );
 
@@ -282,16 +283,16 @@ const actions = {
     });
 
     const studyReference = screeningList.extension[0].valueReference.reference;
-    Vue.$log.debug(`Found ${studyReference} for List/${listId}`);
+    console.debug(`Found ${studyReference} for List/${listId}`);
 
     answer = await client.delete(`List/${listId}`);
-    Vue.$log.debug(`Delete List ${listId} response:`, answer);
+    console.debug(`Delete List ${listId} response:`, answer);
 
     answer = await client.delete(`ResearchSubject/?study=${studyReference}`);
-    Vue.$log.debug(`Delete subjects for ${studyReference} response:`, answer);
+    console.debug(`Delete subjects for ${studyReference} response:`, answer);
 
     answer = await client.delete(studyReference);
-    Vue.$log.debug(`Delete ${studyReference} response:`, answer);
+    console.debug(`Delete ${studyReference} response:`, answer);
   },
 };
 
