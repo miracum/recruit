@@ -45,11 +45,14 @@ jobs:
         # only load images from artifacts on PRs, otherwise the image
         # is already pushed and tagged in the registry
         if: ${{ github.event_name == 'pull_request' }}
+        env:
+          IMAGE_TAG: ${{ inputs.image-tag }}
         run: |
           ls -lsa /tmp
-          docker load --input /tmp/query-build-artifacts/query-image.tar
-          docker load --input /tmp/list-build-artifacts/list-image.tar
-          docker load --input /tmp/notify-build-artifacts/notify-image.tar
+          docker load --input "/tmp/ghcr.io-miracum-recruit-list-${IMAGE_TAG}/image.tar"
+          docker load --input "/tmp/ghcr.io-miracum-recruit-notify-${IMAGE_TAG}/image.tar"
+          docker load --input "/tmp/ghcr.io-miracum-recruit-query-${IMAGE_TAG}/image.tar"
+          docker load --input "/tmp/ghcr.io-miracum-recruit-query-fhir-trino-${IMAGE_TAG}/image.tar"
           docker image ls -a
 
       - name: Delete downloaded artifacts

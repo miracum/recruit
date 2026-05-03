@@ -73,12 +73,14 @@ jobs:
 
       - name: Load container images
         if: ${{ github.event_name == 'pull_request' }}
+        env:
+          IMAGE_TAG: ${{ inputs.image-tag }}
         run: |
           ls -lsa /tmp
-          kind load image-archive /tmp/query-build-artifacts/query-image.tar
-          kind load image-archive /tmp/list-build-artifacts/list-image.tar
-          kind load image-archive /tmp/notify-build-artifacts/notify-image.tar
-          kind load image-archive /tmp/query-fhir-trino-build-artifacts/query-fhir-trino-image.tar
+          kind load image-archive "/tmp/ghcr.io-miracum-recruit-list-${IMAGE_TAG}/image.tar"
+          kind load image-archive "/tmp/ghcr.io-miracum-recruit-notify-${IMAGE_TAG}/image.tar"
+          kind load image-archive "/tmp/ghcr.io-miracum-recruit-query-${IMAGE_TAG}/image.tar"
+          kind load image-archive "/tmp/ghcr.io-miracum-recruit-query-fhir-trino-${IMAGE_TAG}/image.tar"
 
       - name: Load tester image
         run: |
