@@ -1,12 +1,12 @@
 FROM docker.io/library/gradle:9.2.1-jdk25@sha256:2212a01f25c1e5554be919dabfe1122821d814ac2cdf0c21b4a2e9bfdb08f3e9 AS build
+SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 WORKDIR /home/gradle/project
 
-COPY --chown=gradle:gradle . .
+COPY . .
 
 ARG MODULE_NAME=query
 RUN --mount=type=cache,target=/home/gradle/.gradle/caches <<EOF
-gradle clean ":${MODULE_NAME}:build" -x test --info --no-daemon
-gradle jacocoTestReport --no-daemon
+gradle clean ":${MODULE_NAME}:build" -x test --info
 java -Djarmode=layertools -jar ${MODULE_NAME}/build/libs/*.jar extract --destination "${MODULE_NAME}/"
 EOF
 

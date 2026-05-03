@@ -1,5 +1,3 @@
-version: "3.7"
-
 services:
   notify:
     image: ${IMAGE_NAME:-ghcr.io/miracum/recruit/notify}:${IMAGE_TAG}
