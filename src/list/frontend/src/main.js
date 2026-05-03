@@ -1,29 +1,16 @@
 /* eslint-disable no-console */
 import { createApp } from "vue";
 import Buefy from "buefy";
-import VueLogger from "vuejs-logger";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import VueKeycloakJs from "@dsb-norge/vue-keycloak-js";
+import VueKeyCloak from "@dsb-norge/vue-keycloak-js";
 import axios from "axios";
 import router from "./router";
 import App from "./App.vue";
 import { setKeycloak } from "./auth";
 
 library.add(fas);
-
-const isProduction = process.env.NODE_ENV === "production";
-
-const loggerOptions = {
-  isEnabled: true,
-  logLevel: isProduction ? "error" : "debug",
-  stringifyArguments: false,
-  showLogLevel: true,
-  showMethodName: false,
-  separator: ":",
-  showConsoleColors: true,
-};
 
 function createVueApp() {
   const app = createApp(App);
@@ -32,7 +19,6 @@ function createVueApp() {
     defaultIconComponent: "vue-fontawesome",
     defaultIconPack: "fas",
   });
-  app.use(VueLogger, loggerOptions);
   app.use(router);
   return app;
 }
@@ -43,8 +29,8 @@ axios
     const config = response.data;
     console.info("Using config: ", config);
     const app = createVueApp();
-    if (!config.isKeycloakDisabled) {
-      app.use(VueKeycloakJs, {
+    if (config.isKeycloakDisabled === false) {
+      app.use(VueKeyCloak, {
         config: config.keycloak,
         init: {
           onLoad: "login-required",

@@ -21,8 +21,7 @@
     "fhirclient": "2.6.3",
     "fhirpath": "4.8.2",
     "vue": "3.5.32",
-    "vue-router": "4.6.4",
-    "vuejs-logger": "1.10.2"
+    "vue-router": "4.6.4"
   },
   "devDependencies": {
     "@babel/eslint-parser": "7.28.5",

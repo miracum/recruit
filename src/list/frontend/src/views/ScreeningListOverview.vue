@@ -95,8 +95,6 @@ export default {
   },
   methods: {
     async onListStatusToggled(e) {
-      this.$log.debug(`List status toggled to ${e.event} for ${e.list}`, e.event);
-
       const newStatus = e.event ? "current" : "retired";
 
       try {
@@ -107,10 +105,8 @@ export default {
         });
 
         const listToUpdate = this.screeningLists.find((l) => l.id === e.list.id);
-        this.$log.debug(`Setting status for ${listToUpdate.id} to ${newStatus}`);
         listToUpdate.status = newStatus;
       } catch (exc) {
-        this.$log.error(exc);
         this.$buefy.toast.open({
           message: `Fehler beim Aktualisieren des Status: ${exc.message}.`,
           type: "is-danger",
@@ -119,8 +115,6 @@ export default {
       }
     },
     async onListDelete(e) {
-      this.$log.debug(`List deleted to for ${e.list}`, e.event);
-
       try {
         await Api.deleteList(e.list.id);
         this.$buefy.toast.open({
@@ -130,7 +124,6 @@ export default {
         const listIndex = this.screeningLists.findIndex((l) => l.id === e.list.id);
         this.screeningLists.splice(listIndex, 1);
       } catch (exc) {
-        this.$log.error(exc);
         if (`${exc.message}`.includes("Cannot DELETE")) {
           this.$buefy.toast.open({
             message: "Ihr FHIR-Server erlaubt diese Operation nicht",
