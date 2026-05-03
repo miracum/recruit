@@ -441,6 +441,8 @@ services:
 
   create-bucket:
     image: docker.io/minio/minio:RELEASE.2025-07-23T15-54-02Z@sha256:d249d1fb6966de4d8ad26c04754b545205ff15a62e4fd19ebd0f26fa5baacbc0
+    profiles:
+      - trino
     restart: on-failure
     cap_drop:
       - ALL
