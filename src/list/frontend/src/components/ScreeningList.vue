@@ -377,7 +377,6 @@ export default {
           type: "is-success",
         });
       } catch (exc) {
-        this.$log.error(exc);
         this.$buefy.toast.open({
           message: `Fehler beim setzen des Rekrutierungsstatus: ${exc.message}.`,
           type: "is-danger",
