@@ -29,7 +29,7 @@ axios
     const config = response.data;
     console.info("Using config: ", config);
     const app = createVueApp();
-    if (config.isKeycloakDisabled === false) {
+    if (config.isKeycloakDisabled !== true) {
       app.use(VueKeyCloak, {
         config: config.keycloak,
         init: {
