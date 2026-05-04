@@ -1,15 +1,13 @@
 FROM docker.io/library/node:24.12.0-slim@sha256:7326fb2dbdce998edd72140946851be64ef4a643e8715e138ca467e8e9d92c99 AS base
-ENV NO_UPDATE_NOTIFIER=true
 WORKDIR /app
 
-COPY package*.json ./
+COPY package.json ./
+COPY package-lock.json ./
 
 FROM base AS build-frontend
 COPY frontend/package.json ./frontend/package.json
 
-RUN --mount=type=cache,target=/root/.npm,sharing=locked <<EOF
-npm clean-install --workspace=frontend --no-audit --no-fund
-EOF
+RUN npm clean-install --workspace=frontend
 
 COPY frontend/ ./frontend/
 
@@ -25,11 +23,7 @@ RUN npm run test:unit --workspace=frontend
 
 FROM base AS build-server
 COPY server/package.json ./server/
-
-RUN --mount=type=cache,target=/root/.npm,sharing=locked <<EOF
-npm clean-install --workspace=server --omit=dev
-EOF
-
+RUN npm clean-install --workspace=server
 COPY server/*.js ./server/
 
 FROM gcr.io/distroless/nodejs24-debian13:nonroot@sha256:38792f83f35f2df89d403f49491782981dd13a853bbcb09ff978d79328263463
@@ -46,5 +40,4 @@ COPY --from=build-server /app/server server
 COPY --from=build-server /app/node_modules server/node_modules
 COPY --from=build-frontend /app/frontend/dist dist
 
-# included to help with SBOM-scanning
 COPY --from=base /app/package*.json /app
