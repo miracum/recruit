@@ -14,7 +14,7 @@
     "@fortawesome/fontawesome-svg-core": "6.7.2",
     "@fortawesome/free-solid-svg-icons": "6.7.2",
     "@fortawesome/vue-fontawesome": "3.2.0",
-    "axios": "1.15.0",
+    "axios": "1.13.5",
     "buefy": "3.0.5",
     "core-js": "3.47.0",
     "csv-stringify": "6.6.0",
