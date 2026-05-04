@@ -21,7 +21,7 @@
         </div>
         <div v-if="showActiveToggle" class="media-right">
           <b-field>
-            <b-switch :value="isActive" @click.prevent="onInput">{{ isActive ? "Aktiv" : "Inaktiv" }}</b-switch>
+            <b-switch :value="isActive" @click.native.prevent="onInput">{{ isActive ? "Aktiv" : "Inaktiv" }}</b-switch>
           </b-field>
         </div>
         <div v-if="!isActive">
@@ -56,7 +56,6 @@ export default {
       default: () => false,
     },
   },
-  emits: ["input", "delete-list"],
   computed: {
     displayName() {
       const study = fhirpath.evaluate(this.list, "List.extension(%url).valueReference", {
@@ -81,7 +80,7 @@ export default {
       this.$emit("input", { event: !this.isActive, list: this.list });
     },
     deleteStudy() {
-      this.$emit("delete-list", { list: this.list });
+      this.$emit("deleteList", { list: this.list });
     },
   },
 };

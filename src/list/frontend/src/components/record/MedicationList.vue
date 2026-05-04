@@ -25,7 +25,7 @@
             </template>
             <template v-else>unbekannt</template></span>
         </b-table-column>
-        <template #empty>
+        <template slot="empty">
           <section class="section">
             <div class="content has-text-grey has-text-centered">
               <p>
@@ -62,7 +62,7 @@ type="is-primary"
               </template>
               <template v-else>unbekannt</template></b-tag></b-tag>
         </b-table-column>
-        <template #empty>
+        <template slot="empty">
           <section class="section">
             <div class="content has-text-grey has-text-centered">
               <p>

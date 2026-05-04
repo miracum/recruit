@@ -1,12 +1,16 @@
-import { createRouter, createWebHistory } from "vue-router";
+import Vue from "vue";
+import Router from "vue-router";
 
 const ScreeningListOverview = () => import("./views/ScreeningListOverview.vue");
 const Recommendations = () => import("./views/RecommendationsList.vue");
 const ResearchSubjectHistory = () => import("./views/ResearchSubjectHistory.vue");
 const PatientRecord = () => import("./views/PatientRecord.vue");
 
-const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+Vue.use(Router);
+
+const router = new Router({
+  mode: "history",
+  base: process.env.BASE_URL,
   routes: [
     {
       path: "/",

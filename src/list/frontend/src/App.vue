@@ -34,7 +34,7 @@
         <router-view />
       </section>
     </main>
-    <footer class="footer" style="background-color: #f0f3fb">
+    <footer class="footer has-background-primary-muted">
       <div class="content has-text-centered is-size-7 has-text-grey-light">
         <p>{{ version }}</p>
       </div>
@@ -66,26 +66,63 @@ export default {
 </script>
 
 <style lang="scss">
-// Override Bulma primary color (HSL components for bulma 1.x)
-:root {
-  --bulma-primary-h: 233;
-  --bulma-primary-s: 53%;
-  --bulma-primary-l: 23%;
+// Import Bulma's core
+@import "~bulma/sass/utilities/_all";
 
-  --bulma-success-h: 164;
-  --bulma-success-s: 100%;
-  --bulma-success-l: 32%;
+// Set your colors
+$primary: #1b2259;
+$primary-invert: findColorInvert($primary);
 
-  --bulma-link-h: 233;
-  --bulma-link-s: 53%;
-  --bulma-link-l: 23%;
-}
+$primary-muted: #f0f3fb;
+$primary-muted-invert: findColorInvert($primary-muted);
 
-$fullhd: 1652px;
+$success: #00a579;
+$success-invert: findColorInvert($success);
+
+// Setup $colors to use as bulma classes (e.g. 'is-twitter')
+$colors: (
+  "white": ($white,
+    $black,
+  ),
+  "black": ($black,
+    $white,
+  ),
+  "light": ($light,
+    $light-invert,
+  ),
+  "dark": ($dark,
+    $dark-invert,
+  ),
+  "primary": ($primary,
+    $primary-invert,
+  ),
+  "primary-muted": ($primary-muted,
+    $primary-muted-invert,
+  ),
+  "info": ($info,
+    $info-invert,
+  ),
+  "success": ($success,
+    $success-invert,
+  ),
+  "warning": ($warning,
+    $warning-invert,
+  ),
+  "danger": ($danger,
+    $danger-invert,
+  ),
+);
+
+// Links
+$link: $primary;
+$link-invert: $primary-invert;
+$link-focus-border: $primary;
+
+$fullhd: 1652px + (2 * $gap);
 
 // Import Bulma and Buefy styles
-@import "bulma";
-@import "buefy/src/scss/buefy";
+@import "~bulma";
+@import "~buefy/src/scss/buefy";
 </style>
 
 <style>

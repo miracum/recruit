@@ -32,7 +32,7 @@
           :list="list"
           :show-active-toggle="isLoggedInAsAdmin"
           @input="onListStatusToggled"
-          @delete-list="onListDelete"
+          @deleteList="onListDelete"
         />
       </section>
     </div>

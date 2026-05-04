@@ -1,5 +1,4 @@
-/* eslint-disable no-console */
-import { createApp } from "vue";
+import Vue from "vue";
 import Buefy from "buefy";
 import VueLogger from "vuejs-logger";
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -9,13 +8,12 @@ import VueKeycloakJs from "@dsb-norge/vue-keycloak-js";
 import axios from "axios";
 import router from "./router";
 import App from "./App.vue";
-import { setKeycloak } from "./auth";
 
 library.add(fas);
 
 const isProduction = process.env.NODE_ENV === "production";
 
-const loggerOptions = {
+const options = {
   isEnabled: true,
   logLevel: isProduction ? "error" : "debug",
   stringifyArguments: false,
@@ -25,40 +23,44 @@ const loggerOptions = {
   showConsoleColors: true,
 };
 
-function createVueApp() {
-  const app = createApp(App);
-  app.component("VueFontawesome", FontAwesomeIcon);
-  app.use(Buefy, {
-    defaultIconComponent: "vue-fontawesome",
-    defaultIconPack: "fas",
-  });
-  app.use(VueLogger, loggerOptions);
-  app.use(router);
-  return app;
-}
+Vue.use(VueLogger, options);
+
+Vue.component("VueFontawesome", FontAwesomeIcon);
+
+Vue.use(Buefy, {
+  defaultIconComponent: "vue-fontawesome",
+  defaultIconPack: "fas",
+});
+
+Vue.config.productionTip = false;
 
 axios
   .get(process.env.VUE_APP_CONFIG_URL || "/config")
   .then((response) => {
+    // handle success
     const config = response.data;
-    console.info("Using config: ", config);
-    const app = createVueApp();
+    Vue.$log.info("Using config: ", config);
     if (!config.isKeycloakDisabled) {
-      app.use(VueKeycloakJs, {
+      Vue.use(VueKeycloakJs, {
         config: config.keycloak,
         init: {
           onLoad: "login-required",
           checkLoginIframe: !config.checkLoginIframeDisabled,
         },
-        onReady: (keycloak) => {
-          setKeycloak(keycloak);
-          app.mount("#app");
+        onReady: () => {
+          new Vue({
+            router,
+            render: (h) => h(App),
+          }).$mount("#app");
         },
       });
     } else {
-      app.mount("#app");
+      new Vue({
+        router,
+        render: (h) => h(App),
+      }).$mount("#app");
     }
   })
   .catch((error) => {
-    console.error("Failed to fetch config: ", error);
+    Vue.$log.error("Failed to fetch config: ", error);
   });
