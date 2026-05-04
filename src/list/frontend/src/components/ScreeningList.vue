@@ -4,7 +4,7 @@
       <!-- Left side -->
       <div class="level-left">
         <b-dropdown v-model="selectedFilterOptions" multiple>
-        <template #trigger>
+          <template #trigger>
             <b-button type="is-primary" icon-right="sort-down">
               Vorschläge nach Status ausblenden:
               {{ selectedFilterOptions.length }}
@@ -106,15 +106,14 @@
 
         <b-table-column v-slot="props" label="Status" field="subject.status" sortable>
           <b-dropdown v-model="props.row.subject.status">
-            <template #trigger>
-              <b-button
-                :class="['button', 'recruitment-status-select', getTypeFromStatus(props.row.subject.status)]"
-                type="button"
-                size="is-small"
-                icon-right="sort-down"
-                >{{ recruitmentStatusOptions[props.row.subject.status] }}</b-button
-              >
-            </template>
+            <b-button
+              slot="trigger"
+              :class="['button', 'recruitment-status-select', getTypeFromStatus(props.row.subject.status)]"
+              type="button"
+              size="is-small"
+              icon-right="sort-down"
+              >{{ recruitmentStatusOptions[props.row.subject.status] }}</b-button
+            >
             <b-dropdown-item v-for="option in Object.keys(recruitmentStatusOptions)" :key="option" :value="option">
               <span class="status-option-container">
                 <b-icon pack="fas" size="is-small" icon="circle" :type="getTypeFromStatus(option)"></b-icon>
@@ -176,7 +175,7 @@
           </div>
         </b-table-column>
 
-        <template #empty>
+        <template slot="empty">
           <section class="section">
             <div class="content has-text-grey has-text-centered">
               <p>
@@ -291,22 +290,22 @@ export default {
     this.items.map(async (element) => {
       let latestEncounterAndLocation = {};
       try {
-        this.latestEncounterAndLocationLookup[element.item.individual.id] = {
+        this.$set(this.latestEncounterAndLocationLookup, element.item.individual.id, {
           lastStayIsLoading: true,
-        };
+        });
         latestEncounterAndLocation = await Api.fetchLatestEncounterWithLocation(element.item.individual.id);
 
-        this.latestEncounterAndLocationLookup[element.item.individual.id] = {
+        this.$set(this.latestEncounterAndLocationLookup, element.item.individual.id, {
           latestEncounterAndLocation,
           lastStayIsLoading: false,
           lastStayErrorMessage: "",
-        };
+        });
       } catch (exc) {
-        this.latestEncounterAndLocationLookup[element.item.individual.id] = {
+        this.$set(this.latestEncounterAndLocationLookup, element.item.individual.id, {
           latestEncounterAndLocation,
           lastStayIsLoading: false,
           lastStayErrorMessage: exc,
-        };
+        });
       }
     });
 
@@ -314,9 +313,9 @@ export default {
       let allRecommendedStudies = [];
       let participatingStudies = [];
       try {
-        this.recommendationMarkerLookup[element.item.individual.id] = {
+        this.$set(this.recommendationMarkerLookup, element.item.individual.id, {
           markerIsLoading: true,
-        };
+        });
         let allRecommendations = await Api.fetchAllRecommendationsByPatientId(element.item.individual.id);
 
         // ignore all subjects that refer to the same study as the one currently shown in this screening list
@@ -339,19 +338,19 @@ export default {
           .filter((resource) => resource.resourceType === "ResearchSubject" && resource.status === "on-study")
           .map((researchSubject) => researchSubject.study);
 
-        this.recommendationMarkerLookup[element.item.individual.id] = {
+        this.$set(this.recommendationMarkerLookup, element.item.individual.id, {
           allRecommendedStudies,
           participatingStudies,
           markerIsLoading: false,
           markerErrorMessage: "",
-        };
+        });
       } catch (exc) {
-        this.recommendationMarkerLookup[element.item.individual.id] = {
+        this.$set(this.recommendationMarkerLookup, element.item.individual.id, {
           allRecommendedStudies,
           participatingStudies,
           markerIsLoading: false,
           markerErrorMessage: exc,
-        };
+        });
       }
     });
   },
@@ -377,6 +376,7 @@ export default {
           type: "is-success",
         });
       } catch (exc) {
+        this.$log.error(exc);
         this.$buefy.toast.open({
           message: `Fehler beim setzen des Rekrutierungsstatus: ${exc.message}.`,
           type: "is-danger",
