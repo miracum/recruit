@@ -1,5 +1,47 @@
 # Changelog
 
+## [10.5.0](https://github.com/miracum/recruit/compare/v10.4.5...v10.5.0) (2026-05-14)
+
+
+### Features
+
+* migrate list module frontend from Vue 2 to Vue 3 ([#554](https://github.com/miracum/recruit/issues/554)) ([a0682a3](https://github.com/miracum/recruit/commit/a0682a3ae4f98f63405fa2f9efd6d243e3a0346d))
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#487](https://github.com/miracum/recruit/issues/487)) ([218f6bc](https://github.com/miracum/recruit/commit/218f6bc0880811557c3bb9e11ed35149724c2b50))
+* **deps:** update dependency axios to v1.15.0 [security] ([#557](https://github.com/miracum/recruit/issues/557)) ([badd899](https://github.com/miracum/recruit/commit/badd899b00168752b5b39fe84f1a474fd764bd6e))
+* **deps:** update dependency axios to v1.15.0 [security] ([#564](https://github.com/miracum/recruit/issues/564)) ([5e332b1](https://github.com/miracum/recruit/commit/5e332b13d1a96836404f581687a7cb141348037e))
+* **deps:** update dependency axios to v1.15.2 [security] ([#566](https://github.com/miracum/recruit/issues/566)) ([c215989](https://github.com/miracum/recruit/commit/c21598941905a33a1241ead066952a553c6825c2))
+* **deps:** update dependency vue-router to v5 ([#544](https://github.com/miracum/recruit/issues/544)) ([bfff633](https://github.com/miracum/recruit/commit/bfff633b267a4cff99920d96edb4dd36d7a8e1b3))
+* revert vuejs upgrade ([#560](https://github.com/miracum/recruit/issues/560)) ([6973800](https://github.com/miracum/recruit/commit/6973800c328cb18388e88016de2e72f76450e170))
+* Vuejs upgrade fixes ([#559](https://github.com/miracum/recruit/issues/559)) ([9bf7f3d](https://github.com/miracum/recruit/commit/9bf7f3d098d6e74f4e40f04cde5c72c12ce6cc19))
+
+
+### Miscellaneous Chores
+
+* **deps:** bump pytest ([#571](https://github.com/miracum/recruit/issues/571)) ([e3a2663](https://github.com/miracum/recruit/commit/e3a266346468579482680caa1526fa2f1a19cf47))
+* **deps:** update dependency cypress to v15 ([#490](https://github.com/miracum/recruit/issues/490)) ([232b969](https://github.com/miracum/recruit/commit/232b9699e18f8068c6e1f6f0f179240a305ca364))
+* **deps:** update dependency pygments to v2.20.0 [security] ([#551](https://github.com/miracum/recruit/issues/551)) ([bae9479](https://github.com/miracum/recruit/commit/bae9479e82669d995b503ea3d7d4a0fcebbf787c))
+* **deps:** update dependency pygments to v2.20.0 [security] ([#562](https://github.com/miracum/recruit/issues/562)) ([ebb520d](https://github.com/miracum/recruit/commit/ebb520de6db236d07ef0496a14f439bab6572c13))
+* **deps:** update dependency pytest to v9.0.3 [security] ([#553](https://github.com/miracum/recruit/issues/553)) ([0b830cf](https://github.com/miracum/recruit/commit/0b830cfa91b8b06ba23bc8894057ca10fd0813f3))
+* **deps:** update dependency pytest to v9.0.3 [security] ([#561](https://github.com/miracum/recruit/issues/561)) ([c67219f](https://github.com/miracum/recruit/commit/c67219f0781221ec55ab51bd6b2ad543080e74e7))
+* **deps:** update dependency requests to v2.33.0 [security] ([#550](https://github.com/miracum/recruit/issues/550)) ([321f408](https://github.com/miracum/recruit/commit/321f40844ffbf53d945fda1bf4473b3a288a7496))
+* **deps:** update dependency requests to v2.33.0 [security] ([#563](https://github.com/miracum/recruit/issues/563)) ([d3259b0](https://github.com/miracum/recruit/commit/d3259b079e259266219383e79650a80132534ef8))
+* **deps:** update dependency urllib3 to v2.7.0 [security] ([#573](https://github.com/miracum/recruit/issues/573)) ([137e3c7](https://github.com/miracum/recruit/commit/137e3c7cf737990954c48253890cf1a4b66b7ffa))
+* **deps:** update docker.io/cypress/included docker tag to v15 ([#491](https://github.com/miracum/recruit/issues/491)) ([01f0bc7](https://github.com/miracum/recruit/commit/01f0bc7a0e318f014c5ddbcec3af45858f87ecaf))
+
+
+### Build
+
+* updated list dockerfile ([#558](https://github.com/miracum/recruit/issues/558)) ([985618f](https://github.com/miracum/recruit/commit/985618fd91124e47a69de9135c996916bd8360c5))
+
+
+### CI/CD
+
+* switch to standard image build ([#555](https://github.com/miracum/recruit/issues/555)) ([aa0440e](https://github.com/miracum/recruit/commit/aa0440e601a76e1b3571d1115d4fb3152194ed58))
+
 ## [10.4.5](https://github.com/miracum/recruit/compare/v10.4.4...v10.4.5) (2026-03-05)
 
 
