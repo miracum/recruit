@@ -25,12 +25,12 @@ dependencies {
     implementation 'org.apache.camel.springboot:camel-spring-boot-starter:4.16.0'
     implementation 'org.apache.camel.springboot:camel-micrometer-starter:4.16.0'
 
-    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.20'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.21'
 
     implementation 'net.minidev:json-smart:2.6.0'
 
     implementation 'com.github.slugify:slugify:3.0.7'
 
     testImplementation 'com.approvaltests:approvaltests:29.0.0'
-    testImplementation 'com.google.code.gson:gson:2.13.2'
+    testImplementation 'com.google.code.gson:gson:2.14.0'
 }
