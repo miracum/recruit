@@ -87,11 +87,11 @@ export default {
         });
       }
 
-      if (Object.prototype.hasOwnProperty.call(o, "valueBoolean")) {
+      if (Object.hasOwn(o, "valueBoolean")) {
         return !o.valueBoolean || o.valueBoolean === "false" ? "Negative" : "Positive";
       }
 
-      if (Object.prototype.hasOwnProperty.call(o, "valueCodeableConcept")) {
+      if (Object.hasOwn(o, "valueCodeableConcept")) {
         // see the comment in normalizedObservations for why this is unwrapped
         return fhirpath.evaluate(
           toRaw(o),
@@ -99,18 +99,18 @@ export default {
         )[0];
       }
 
-      if (Object.prototype.hasOwnProperty.call(o, "valueQuantity")) {
+      if (Object.hasOwn(o, "valueQuantity")) {
         let { value } = o.valueQuantity;
         const { unit } = o.valueQuantity;
 
-        if (!Number.isNaN(parseFloat(value))) {
+        if (!Number.isNaN(Number.parseFloat(value))) {
           value = Math.round(value * 100) / 100;
         }
 
         return `${value} ${unit}`;
       }
 
-      if (Object.prototype.hasOwnProperty.call(o, "valueRatio")) {
+      if (Object.hasOwn(o, "valueRatio")) {
         return `${o.valueRatio.numerator} / ${o.valueRatio.denominator}`;
       }
 

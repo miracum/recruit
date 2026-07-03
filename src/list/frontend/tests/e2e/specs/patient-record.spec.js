@@ -1,7 +1,8 @@
 import { test, expect } from "@playwright/test";
 
 const patientMrNumber =
-  "3354978E05D57044AA924A221928938F9C97179FD6D9E6E70CD199D4A31D9B21EFB5618A653B04DAA1E38D4FCE73BAD95DD26099C6C8F987F6332D8E21F6E48F";
+  "3354978E05D57044AA924A221928938F9C97179FD6D9E6E70CD199D" +
+  "4A31D9B21EFB5618A653B04DAA1E38D4FCE73BAD95DD26099C6C8F987F6332D8E21F6E48F";
 
 // The "patient record" button opens in a new tab (target="_blank"), so each test opens it
 // itself rather than sharing a beforeEach -- Playwright fixtures don't hand a popup page

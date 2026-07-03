@@ -191,7 +191,7 @@ const actions = {
 
     log.debug(`Found ${encounters.length} encounters for Patient/${patientId}`);
 
-     
+
     for (const encounter of encounters) {
       // if there's a location associated with the encounter then that's already a good sign
       // that this is the most recent encounter we can use for displaying
@@ -208,7 +208,7 @@ const actions = {
           return 0;
         });
 
-         
+
         for (const locationEntry of encounter.location) {
           const locationReference = locationEntry.location.reference;
           if (locationReference) {
