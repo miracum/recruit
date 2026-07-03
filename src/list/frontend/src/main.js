@@ -1,6 +1,5 @@
-import Vue from "vue";
+import { createApp } from "vue";
 import Buefy from "buefy";
-import VueLogger from "vuejs-logger";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -8,59 +7,44 @@ import VueKeycloakJs from "@dsb-norge/vue-keycloak-js";
 import axios from "axios";
 import router from "./router";
 import App from "./App.vue";
+import log from "./log";
 
 library.add(fas);
 
-const isProduction = process.env.NODE_ENV === "production";
+const app = createApp(App);
 
-const options = {
-  isEnabled: true,
-  logLevel: isProduction ? "error" : "debug",
-  stringifyArguments: false,
-  showLogLevel: true,
-  showMethodName: false,
-  separator: ":",
-  showConsoleColors: true,
-};
+app.config.globalProperties.$log = log;
 
-Vue.use(VueLogger, options);
+app.component("VueFontawesome", FontAwesomeIcon);
 
-Vue.component("VueFontawesome", FontAwesomeIcon);
-
-Vue.use(Buefy, {
+app.use(Buefy, {
   defaultIconComponent: "vue-fontawesome",
   defaultIconPack: "fas",
 });
 
-Vue.config.productionTip = false;
+app.use(router);
 
 axios
   .get(process.env.VUE_APP_CONFIG_URL || "/config")
   .then((response) => {
     // handle success
     const config = response.data;
-    Vue.$log.info("Using config: ", config);
+    log.info("Using config: ", config);
     if (!config.isKeycloakDisabled) {
-      Vue.use(VueKeycloakJs, {
+      app.use(VueKeycloakJs, {
         config: config.keycloak,
         init: {
           onLoad: "login-required",
           checkLoginIframe: !config.checkLoginIframeDisabled,
         },
         onReady: () => {
-          new Vue({
-            router,
-            render: (h) => h(App),
-          }).$mount("#app");
+          app.mount("#app");
         },
       });
     } else {
-      new Vue({
-        router,
-        render: (h) => h(App),
-      }).$mount("#app");
+      app.mount("#app");
     }
   })
   .catch((error) => {
-    Vue.$log.error("Failed to fetch config: ", error);
+    log.error("Failed to fetch config: ", error);
   });

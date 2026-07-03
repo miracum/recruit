@@ -21,7 +21,7 @@
         </div>
         <div v-if="showActiveToggle" class="media-right">
           <b-field>
-            <b-switch :value="isActive" @click.native.prevent="onInput">{{ isActive ? "Aktiv" : "Inaktiv" }}</b-switch>
+            <b-switch :model-value="isActive" @click.prevent="onInput">{{ isActive ? "Aktiv" : "Inaktiv" }}</b-switch>
           </b-field>
         </div>
         <div v-if="!isActive">

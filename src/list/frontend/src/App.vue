@@ -66,63 +66,21 @@ export default {
 </script>
 
 <style lang="scss">
-// Import Bulma's core
-@import "~bulma/sass/utilities/_all";
+// Set your colors and import Bulma's core + Buefy styles.
+// Bulma 1.x / Buefy 3.x are configured via the Sass module system (`@use ... with`)
+// instead of plain variable overrides before a classic `@import`.
+$brand-primary: #1b2259;
+$brand-success: #00a579;
 
-// Set your colors
-$primary: #1b2259;
-$primary-invert: findColorInvert($primary);
-
-$primary-muted: #f0f3fb;
-$primary-muted-invert: findColorInvert($primary-muted);
-
-$success: #00a579;
-$success-invert: findColorInvert($success);
-
-// Setup $colors to use as bulma classes (e.g. 'is-twitter')
-$colors: (
-  "white": ($white,
-    $black,
-  ),
-  "black": ($black,
-    $white,
-  ),
-  "light": ($light,
-    $light-invert,
-  ),
-  "dark": ($dark,
-    $dark-invert,
-  ),
-  "primary": ($primary,
-    $primary-invert,
-  ),
-  "primary-muted": ($primary-muted,
-    $primary-muted-invert,
-  ),
-  "info": ($info,
-    $info-invert,
-  ),
-  "success": ($success,
-    $success-invert,
-  ),
-  "warning": ($warning,
-    $warning-invert,
-  ),
-  "danger": ($danger,
-    $danger-invert,
-  ),
+@use "bulma/sass" with (
+  $primary: $brand-primary,
+  $link: $brand-primary,
+  $success: $brand-success,
+  $custom-colors: (
+    "primary-muted": #f0f3fb,
+  )
 );
-
-// Links
-$link: $primary;
-$link-invert: $primary-invert;
-$link-focus-border: $primary;
-
-$fullhd: 1652px + (2 * $gap);
-
-// Import Bulma and Buefy styles
-@import "~bulma";
-@import "~buefy/src/scss/buefy";
+@use "buefy/src/scss/buefy";
 </style>
 
 <style>
