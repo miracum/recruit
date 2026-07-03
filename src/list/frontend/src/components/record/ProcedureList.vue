@@ -32,6 +32,7 @@
 </template>
 
 <script>
+import { toRaw } from "vue";
 import fhirpath from "fhirpath";
 
 export default {
@@ -52,7 +53,10 @@ export default {
       return this.items.map((procedure) => {
         const normalizedProcedure = procedure;
 
-        const performedDateTime = fhirpath.evaluate(procedure, "performedDateTime | performedPeriod.start")[0];
+        // fhirpath sets non-configurable internal properties on the nodes it walks, which
+        // violates Vue 3's reactive Proxy invariants -- unwrap to a plain object first.
+        const rawProcedure = toRaw(procedure);
+        const performedDateTime = fhirpath.evaluate(rawProcedure, "performedDateTime | performedPeriod.start")[0];
 
         normalizedProcedure.performedDateTime = performedDateTime;
 
@@ -60,7 +64,7 @@ export default {
           normalizedProcedure.code = {};
         }
 
-        const display = fhirpath.evaluate(procedure, "code.text | code.coding.display | code.coding.code")[0];
+        const display = fhirpath.evaluate(rawProcedure, "code.text | code.coding.display | code.coding.code")[0];
 
         if (display) {
           normalizedProcedure.code.text = display;

@@ -192,6 +192,7 @@
 </template>
 
 <script>
+import { toRaw } from "vue";
 import fhirpath from "fhirpath";
 import Constants from "@/const";
 import Api from "@/api";
@@ -247,20 +248,23 @@ export default {
   computed: {
     patientViewModel() {
       return this.items.map((entry) => {
+        // fhirpath sets non-configurable internal properties on the nodes it walks, which
+        // violates Vue 3's reactive Proxy invariants -- unwrap to a plain object first.
+        const rawEntry = toRaw(entry);
         const subject = entry.item;
         const mrNumber = fhirpath.evaluate(
-          subject.individual,
+          toRaw(subject.individual),
           "Patient.identifier.where(type.coding.system=%identifierType and type.coding.code='MR').value",
           {
             identifierType: Constants.SYSTEM_IDENTIFIER_TYPE,
           }
         )[0];
 
-        const note = fhirpath.evaluate(subject, "ResearchSubject.extension(%noteExtensionUrl).valueString", {
+        const note = fhirpath.evaluate(toRaw(subject), "ResearchSubject.extension(%noteExtensionUrl).valueString", {
           noteExtensionUrl: Constants.URL_NOTE_EXTENSION,
         })[0];
 
-        const statusCode = fhirpath.evaluate(entry, "flag.coding.where(system=%subjectStatus).code", {
+        const statusCode = fhirpath.evaluate(rawEntry, "flag.coding.where(system=%subjectStatus).code", {
           subjectStatus: Constants.SYSTEM_DETERMINED_SUBJECT_STATUS,
         })[0];
 

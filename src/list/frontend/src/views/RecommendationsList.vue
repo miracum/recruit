@@ -37,6 +37,7 @@
 </template>
 
 <script>
+import { toRaw } from "vue";
 import fhirpath from "fhirpath";
 
 import Api from "@/api";
@@ -88,7 +89,9 @@ export default {
   },
   methods: {
     getStudyDisplayFromList(list) {
-      const study = fhirpath.evaluate(list, "List.extension(%url).valueReference", {
+      // fhirpath sets non-configurable internal properties on the nodes it walks, which
+      // violates Vue 3's reactive Proxy invariants -- unwrap to a plain object first.
+      const study = fhirpath.evaluate(toRaw(list), "List.extension(%url).valueReference", {
         url: Constants.URL_LIST_BELONGS_TO_STUDY_EXTENSION,
       })[0];
 

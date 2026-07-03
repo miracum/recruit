@@ -60,6 +60,7 @@
 </template>
 
 <script>
+import { toRaw } from "vue";
 import fhirpath from "fhirpath";
 import Constants from "@/const";
 
@@ -77,7 +78,8 @@ export default {
   },
   methods: {
     getAcronymFromStudy(study) {
-      return fhirpath.evaluate(study, "ResearchStudy.extension(%acronymSystem).valueString", {
+      // see the comment in ScreeningListCard.vue's displayName computed
+      return fhirpath.evaluate(toRaw(study), "ResearchStudy.extension(%acronymSystem).valueString", {
         acronymSystem: Constants.SYSTEM_STUDY_ACRONYM,
       })[0];
     },

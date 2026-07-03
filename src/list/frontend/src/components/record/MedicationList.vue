@@ -78,6 +78,7 @@ type="is-primary"
 </template>
 
 <script>
+import { toRaw } from "vue";
 import fhirpath from "fhirpath";
 
 export default {
@@ -111,7 +112,10 @@ export default {
       resources.map((medicationStatement) => {
         const normalizedMedicationStatement = medicationStatement;
 
-        const effectiveDateTime = fhirpath.evaluate(medicationStatement, "effectiveDateTime | effectivePeriod.start")[0];
+        // fhirpath sets non-configurable internal properties on the nodes it walks, which
+        // violates Vue 3's reactive Proxy invariants -- unwrap to a plain object first.
+        const rawMedicationStatement = toRaw(medicationStatement);
+        const effectiveDateTime = fhirpath.evaluate(rawMedicationStatement, "effectiveDateTime | effectivePeriod.start")[0];
 
         normalizedMedicationStatement.effectiveDateTime = effectiveDateTime;
 
@@ -120,7 +124,7 @@ export default {
         }
 
         const display = fhirpath.evaluate(
-          normalizedMedicationStatement,
+          rawMedicationStatement,
           "medicationCodeableConcept.text | medicationCodeableConcept.coding.display | medicationCodeableConcept.coding.code"
         )[0];
 
