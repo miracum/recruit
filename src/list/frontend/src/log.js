@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 // Minimal replacement for vuejs-logger, which has no Vue 3-compatible release.
 
 const isProduction = import.meta.env.PROD;

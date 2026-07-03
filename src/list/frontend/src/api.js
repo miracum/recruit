@@ -26,7 +26,7 @@ const actions = {
     return createFhirClient();
   },
   async fetchConfig() {
-    const response = await axios.get(process.env.VUE_APP_CONFIG_URL || "/config");
+    const response = await axios.get(import.meta.env.VITE_APP_CONFIG_URL || "/config");
     return response.data;
   },
   async updateResearchSubject(subjectId, note, status) {
@@ -191,7 +191,7 @@ const actions = {
 
     log.debug(`Found ${encounters.length} encounters for Patient/${patientId}`);
 
-    // eslint-disable-next-line no-restricted-syntax
+     
     for (const encounter of encounters) {
       // if there's a location associated with the encounter then that's already a good sign
       // that this is the most recent encounter we can use for displaying
@@ -208,7 +208,7 @@ const actions = {
           return 0;
         });
 
-        // eslint-disable-next-line no-restricted-syntax
+         
         for (const locationEntry of encounter.location) {
           const locationReference = locationEntry.location.reference;
           if (locationReference) {

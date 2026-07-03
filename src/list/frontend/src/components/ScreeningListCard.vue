@@ -56,6 +56,7 @@ export default {
       default: () => false,
     },
   },
+  emits: ["input", "deleteList"],
   computed: {
     displayName() {
       const study = fhirpath.evaluate(this.list, "List.extension(%url).valueReference", {
