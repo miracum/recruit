@@ -12,7 +12,7 @@ RUN npm clean-install --workspace=frontend
 COPY frontend/ ./frontend/
 
 ARG VERSION=v10.5.0 # x-release-please-version
-ENV VUE_APP_VERSION=${VERSION} \
+ENV VITE_APP_VERSION=${VERSION} \
     NODE_ENV=production
 
 RUN npm run build --workspace=frontend

@@ -25,7 +25,7 @@ app.use(Buefy, {
 app.use(router);
 
 axios
-  .get(process.env.VUE_APP_CONFIG_URL || "/config")
+  .get(import.meta.env.VITE_APP_CONFIG_URL || "/config")
   .then((response) => {
     // handle success
     const config = response.data;

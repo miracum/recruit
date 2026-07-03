@@ -7,7 +7,7 @@ import Constants from "@/const";
 import log from "@/log";
 
 function createFhirClient() {
-  let fhirUrl = process.env.VUE_APP_FHIR_URL;
+  let fhirUrl = import.meta.env.VITE_APP_FHIR_URL;
   if (!fhirUrl) {
     // this is an awkward workaround for FHIR.client not accepting relative paths as valid URLs
     fhirUrl = `${window.location.protocol}//${window.location.host}/fhir`;

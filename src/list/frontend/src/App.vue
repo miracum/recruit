@@ -46,7 +46,7 @@
 export default {
   name: "App",
   computed: {
-    version: () => process.env.VUE_APP_VERSION,
+    version: () => import.meta.env.VITE_APP_VERSION,
     username: function username() {
       return (this.$keycloak && this.$keycloak.fullName) || "Anonym";
     },

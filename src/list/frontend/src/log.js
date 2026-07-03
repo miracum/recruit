@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 // Minimal replacement for vuejs-logger, which has no Vue 3-compatible release.
 
-const isProduction = process.env.NODE_ENV === "production";
+const isProduction = import.meta.env.PROD;
 
 const levels = ["debug", "info", "warn", "error"];
 const minLevelIndex = levels.indexOf(isProduction ? "error" : "debug");

@@ -5,6 +5,8 @@
 </template>
 
 <script>
+// eslint-disable-next-line import/extensions, import/no-unresolved -- eslint-plugin-import's
+// resolver doesn't follow this package's "exports" subpath map yet; Vite resolves it fine.
 import { stringify } from "csv-stringify/browser/esm/sync";
 
 export default {
