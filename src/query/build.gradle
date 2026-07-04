@@ -21,7 +21,9 @@ dependencies {
     implementation 'org.apache.camel:camel-cron:4.20.0'
 
     implementation 'org.apache.camel.springboot:camel-rest-starter:4.20.0'
-    implementation 'org.apache.camel.springboot:camel-servlet-starter:4.20.0'
+    implementation('org.apache.camel.springboot:camel-servlet-starter:4.20.0') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-servlet'
+    }
     implementation 'org.apache.camel.springboot:camel-spring-boot-starter:4.20.0'
     implementation 'org.apache.camel.springboot:camel-micrometer-starter:4.20.0'
 
