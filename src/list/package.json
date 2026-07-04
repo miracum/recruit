@@ -2,6 +2,10 @@
   "name": "list",
   "version": "0.0.0",
   "private": true,
+  "scripts": {
+    "format": "npm run format --workspaces --if-present",
+    "format:check": "npm run format:check --workspaces --if-present"
+  },
   "workspaces": [
     "frontend",
     "server"

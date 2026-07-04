@@ -6,13 +6,17 @@
           <template v-if="props.row.code.text">
             {{ props.row.code.text }}
           </template>
-          <template v-else>unbekannt</template></span></b-table-column>
+          <template v-else>unbekannt</template></span
+        ></b-table-column
+      >
       <b-table-column v-slot="props" label="Wert">{{ getObservationValue(props.row) }}</b-table-column>
       <b-table-column v-slot="props" label="Zeitpunkt" centered>
-        <b-tag type="is-primary"><template v-if="props.row.effectiveDateTime">
+        <b-tag type="is-primary"
+          ><template v-if="props.row.effectiveDateTime">
             {{ new Date(props.row.effectiveDateTime).toLocaleDateString() }}
           </template>
-          <template v-else>unbekannt</template></b-tag>
+          <template v-else>unbekannt</template></b-tag
+        >
       </b-table-column>
       <template #empty>
         <section class="section">
@@ -110,8 +114,10 @@ export default {
         return `${o.valueRatio.numerator} / ${o.valueRatio.denominator}`;
       }
 
-      return fhirpath.evaluate(toRaw(o), "valueString | valueInteger | " +
-        "valueRange | valueTime | valueDateTime | valuePeriod")[0];
+      return fhirpath.evaluate(
+        toRaw(o),
+        "valueString | valueInteger | " + "valueRange | valueTime | valueDateTime | valuePeriod"
+      )[0];
     },
   },
 };

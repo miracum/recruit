@@ -83,8 +83,8 @@
                 ? props.row.subject.individual.gender === "male"
                   ? "m"
                   : props.row.subject.individual.gender === "female"
-                  ? "w"
-                  : "u"
+                    ? "w"
+                    : "u"
                 : "u"
             }}
           </span>

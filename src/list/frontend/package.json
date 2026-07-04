@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "build": "vite build",
+    "format": "oxfmt -c ../.oxfmtrc.json --write src tests/unit",
+    "format:check": "oxfmt -c ../.oxfmtrc.json --check src tests/unit",
     "lint": "eslint src tests/unit",
     "serve": "vite",
     "test:e2e": "npm --prefix tests/e2e test",
@@ -36,6 +38,7 @@
     "globals": "17.7.0",
     "js-yaml": "4.1.1",
     "jsdom": "29.1.1",
+    "oxfmt": "0.57.0",
     "sass": "1.97.1",
     "vite": "8.1.3",
     "vitest": "4.1.9",

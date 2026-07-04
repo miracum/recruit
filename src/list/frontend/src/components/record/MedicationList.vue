@@ -3,27 +3,36 @@
     <div class="medication-statement">
       <h2 class="title is-5">Anamnese / Medikationsplan</h2>
       <b-table
-:paginated="true" :per-page="10" :pagination-simple="true" :data="bormalizedMedicationStatements"
-        :striped="true" sort-icon="menu-up">
+        :paginated="true"
+        :per-page="10"
+        :pagination-simple="true"
+        :data="normalizedMedicationStatements"
+        :striped="true"
+        sort-icon="menu-up"
+      >
         <b-table-column v-slot="props" label="Medikament">
-          <b-tag type="is-primary" class="medication-statement-display"><template
-              v-if="props.row.medicationCodeableConcept.text">
+          <b-tag type="is-primary" class="medication-statement-display"
+            ><template v-if="props.row.medicationCodeableConcept.text">
               {{ props.row.medicationCodeableConcept.text }}
             </template>
-            <template v-else>unbekannt</template></b-tag>
+            <template v-else>unbekannt</template></b-tag
+          >
         </b-table-column>
         <b-table-column v-slot="props" field="effectiveDateTime" label="Zeitpunkt" sortable centered>
-          <b-tag type="is-primary" class="medication-statement-effective"><template v-if="props.row.effectiveDateTime">
+          <b-tag type="is-primary" class="medication-statement-effective"
+            ><template v-if="props.row.effectiveDateTime">
               {{ new Date(props.row.effectiveDateTime).toLocaleDateString() }}
             </template>
-            <template v-else>unbekannt</template></b-tag>
+            <template v-else>unbekannt</template></b-tag
+          >
         </b-table-column>
         <b-table-column v-slot="props" field="recordedDate" label="Dokumentationszeitpunkt" sortable centered>
           <span class="tag is-success">
             <template v-if="props.row.recordedDate">
               {{ new Date(props.row.recordedDate).toLocaleDateString() }}
             </template>
-            <template v-else>unbekannt</template></span>
+            <template v-else>unbekannt</template></span
+          >
         </b-table-column>
         <template #empty>
           <section class="section">
@@ -40,27 +49,38 @@
     <div class="medication-administration">
       <h2 class="title is-5">Während des Aufenthalts verabreichte Medikation</h2>
       <b-table
-:paginated="true" :per-page="10" :data="medicationAdministrations" :striped="true"
-        :pagination-simple="true" sort-icon="menu-up">
-        <b-table-column v-slot="props" label="Medikament"><b-tag
-type="is-primary"
-            class="medication-administration-display"><template v-if="props.row.medicationCodeableConcept.text">
+        :paginated="true"
+        :per-page="10"
+        :data="medicationAdministrations"
+        :striped="true"
+        :pagination-simple="true"
+        sort-icon="menu-up"
+      >
+        <b-table-column v-slot="props" label="Medikament"
+          ><b-tag type="is-primary" class="medication-administration-display"
+            ><template v-if="props.row.medicationCodeableConcept.text">
               {{ props.row.medicationCodeableConcept.text }}
             </template>
-            <template v-else>unbekannt</template></b-tag></b-table-column>
+            <template v-else>unbekannt</template></b-tag
+          ></b-table-column
+        >
         <b-table-column v-slot="props" field="effectiveDateTime" label="Zeitpunkt" sortable centered>
-          <b-tag type="is-primary" class="medication-administration-effective"><template
-              v-if="props.row.effectiveDateTime">
+          <b-tag type="is-primary" class="medication-administration-effective"
+            ><template v-if="props.row.effectiveDateTime">
               {{ new Date(props.row.effectiveDateTime).toLocaleDateString() }}
             </template>
-            <template v-else>unbekannt</template></b-tag>
+            <template v-else>unbekannt</template></b-tag
+          >
         </b-table-column>
         <b-table-column v-slot="props" field="authoredOn" label="Dokumentationszeitpunkt" sortable centered>
           <b-tag type="is-primary">
-            <b-tag type="is-primary" class="medication-administration-authored-on"><template v-if="props.row.authoredOn">
+            <b-tag type="is-primary" class="medication-administration-authored-on"
+              ><template v-if="props.row.authoredOn">
                 {{ new Date(props.row.authoredOn).toLocaleDateString() }}
               </template>
-              <template v-else>unbekannt</template></b-tag></b-tag>
+              <template v-else>unbekannt</template></b-tag
+            ></b-tag
+          >
         </b-table-column>
         <template #empty>
           <section class="section">

@@ -191,7 +191,6 @@ const actions = {
 
     log.debug(`Found ${encounters.length} encounters for Patient/${patientId}`);
 
-
     for (const encounter of encounters) {
       // if there's a location associated with the encounter then that's already a good sign
       // that this is the most recent encounter we can use for displaying
@@ -208,16 +207,13 @@ const actions = {
           return 0;
         });
 
-
         for (const locationEntry of encounter.location) {
           const locationReference = locationEntry.location.reference;
           if (locationReference) {
             // get the actual Location resource via the lookup call
             const location = locationLookup.get(locationReference);
 
-            log.debug(
-              `Found location entry referencing location "${location.name}" with status "${locationEntry.status}"`
-            );
+            log.debug(`Found location entry referencing location "${location.name}" with status "${locationEntry.status}"`);
 
             // replace reference with the actual location object
             locationEntry.location = location;

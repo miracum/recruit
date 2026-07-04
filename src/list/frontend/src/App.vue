@@ -19,11 +19,16 @@
             <span class="mr-3 ml-3 has-text-white">{{ username }}</span>
             <div class="buttons">
               <b-tooltip :label="isDarkTheme ? 'Helles Design aktivieren' : 'Dunkles Design aktivieren'" position="is-left">
-                <b-button outlined size="is-small" type="is-white" :icon-left="isDarkTheme ? 'sun' : 'moon'" @click="toggleTheme">
+                <b-button
+                  outlined
+                  size="is-small"
+                  type="is-white"
+                  :icon-left="isDarkTheme ? 'sun' : 'moon'"
+                  @click="toggleTheme"
+                >
                 </b-button>
               </b-tooltip>
-              <b-button v-if="isAuthenticated" outlined type="is-white" size="is-small" @click="logout">Ausloggen
-              </b-button>
+              <b-button v-if="isAuthenticated" outlined type="is-white" size="is-small" @click="logout">Ausloggen </b-button>
               <b-tooltip label="Benutzerhilfe öffnen" position="is-left">
                 <b-button tag="a" outlined size="is-small" type="is-white" icon-left="question" href="/help/manual.pdf">
                 </b-button>
@@ -97,7 +102,7 @@ $brand-success: #00a579;
 @use "bulma/sass" with (
   $primary: $brand-primary,
   $link: $brand-primary,
-  $success: $brand-success,
+  $success: $brand-success
 );
 @use "buefy/src/scss/buefy";
 </style>
@@ -116,7 +121,7 @@ main {
   margin-top: 15px;
 }
 
-.navbar-brand>.navbar-item>picture>img {
+.navbar-brand > .navbar-item > picture > img {
   border-radius: 50%;
   min-height: 3rem;
 }
