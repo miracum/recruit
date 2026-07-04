@@ -93,7 +93,7 @@ notify:
         name: "recruit-notify-db-app-user"
         key: "password"
 
-postgresql:
+postgres:
   enabled: false
 
 fhirserver:
@@ -104,7 +104,7 @@ fhirserver:
       cpu: "2500m"
     limits:
       memory: "2Gi"
-  postgresql:
+  postgres:
     enabled: false
   externalDatabase:
     host: "recruit-fhir-server-db-rw"
@@ -161,7 +161,7 @@ ohdsi:
         cpu: "250m"
       limits:
         memory: "2Gi"
-  postgresql:
+  postgres:
     auth:
       postgresPassword: ohdsi
     primary:

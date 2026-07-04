@@ -19,7 +19,7 @@ fhir-pseudonymizer:
   pseudonymizationService: Vfps
   vfps:
     enabled: true
-    postgresql:
+    postgres:
       enabled: true
       auth:
         database: vfps
