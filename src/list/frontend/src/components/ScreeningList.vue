@@ -149,10 +149,9 @@
                     name: 'patient-record',
                     params: { patientId: props.row.subject.individual.id },
                   }"
-                  type="is-primary"
+                  type="is-primary is-light"
                   size="is-small"
                   icon-left="notes-medical"
-                  outlined
                   target="_blank"
                   rel="noopener noreferrer"
                 ></b-button>
