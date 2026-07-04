@@ -5,5 +5,8 @@
   "workspaces": [
     "frontend",
     "server"
-  ]
+  ],
+  "overrides": {
+    "qs": "^6.15.2"
+  }
 }

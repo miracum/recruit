@@ -8,7 +8,9 @@ services:
       KEYCLOAK_DISABLED: "true"
       RULES_FILE_PATH: /etc/notify-rules.yaml
       TRACING_ENABLED: "false" # TODO: fix and re-enable
-      OTEL_EXPORTER_JAEGER_ENDPOINT: "jaeger"
+      # tracing.js exports via OTLP gRPC (Jaeger accepts OTLP natively since 1.35), not the
+      # deprecated OpenTelemetry Jaeger exporter -- this is the env var it actually reads.
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
     depends_on:
       - fhir
       - jaeger

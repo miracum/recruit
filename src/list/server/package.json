@@ -10,7 +10,6 @@
   "type": "module",
   "dependencies": {
     "@opentelemetry/api": "1.9.0",
-    "@opentelemetry/exporter-jaeger": "2.2.0",
     "@opentelemetry/exporter-trace-otlp-grpc": "0.208.0",
     "@opentelemetry/instrumentation": "0.208.0",
     "@opentelemetry/instrumentation-express": "0.57.1",
