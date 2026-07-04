@@ -25,7 +25,7 @@ COPY --from=build /home/gradle/project/tester/application/ ./
 
 COPY --from=docker.io/rancher/kubectl:v1.36.0@sha256:05d2b313e2f397e0ade252136aed47abd72d56ead11d1b027ac70f66362c8495 /bin/kubectl /usr/bin/kubectl
 
-COPY --from=fixtures chaos.yaml sample-list-bundle.json /tmp/
+COPY --from=build /home/gradle/project/tester/src/main/resources/ /tmp/
 
 USER 65532:65532
 ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
