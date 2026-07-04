@@ -89,9 +89,7 @@
         ],
         "address": [
           {
-            "line": [
-              "2344 BOSTON RD"
-            ],
+            "line": ["2344 BOSTON RD"],
             "city": "WILBRAHAM",
             "state": "MA",
             "postalCode": "01095-1104",
@@ -176,9 +174,7 @@
         ],
         "status": "active",
         "name": "Allgemein- und Viszeralchirurgie",
-        "alias": [
-          "Chirurgie"
-        ],
+        "alias": ["Chirurgie"],
         "mode": "instance",
         "telecom": [
           {
@@ -206,9 +202,7 @@
         ],
         "status": "active",
         "name": "Hämatologie und Internistische Onkologie",
-        "alias": [
-          "Med 5"
-        ],
+        "alias": ["Med 5"],
         "mode": "instance",
         "telecom": [
           {
@@ -241,9 +235,7 @@
         "name": [
           {
             "family": "Jones311",
-            "given": [
-              "Bruce168"
-            ]
+            "given": ["Bruce168"]
           }
         ],
         "gender": "male",
@@ -272,9 +264,7 @@
         "name": [
           {
             "family": "Tyla133",
-            "given": [
-              "Phan898"
-            ]
+            "given": ["Phan898"]
           }
         ],
         "gender": "female",
@@ -303,9 +293,7 @@
         "name": [
           {
             "family": "Zaine246",
-            "given": [
-              "Wise067"
-            ]
+            "given": ["Wise067"]
           }
         ],
         "gender": "male",
