@@ -6,7 +6,8 @@ COPY . .
 
 RUN --mount=type=cache,target=/home/gradle/.gradle/caches <<EOF
 gradle clean ":tester:build" -x test --info
-java -Djarmode=layertools -jar tester/build/libs/*.jar extract --destination "tester/"
+java -Djarmode=tools -jar tester/build/libs/*.jar extract --layers --launcher --force \
+    --destination "tester/"
 EOF
 
 FROM build AS test

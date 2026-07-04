@@ -7,7 +7,8 @@ COPY . .
 ARG MODULE_NAME=query
 RUN --mount=type=cache,target=/home/gradle/.gradle/caches <<EOF
 gradle clean ":${MODULE_NAME}:build" -x test --info
-java -Djarmode=layertools -jar ${MODULE_NAME}/build/libs/*.jar extract --destination "${MODULE_NAME}/"
+java -Djarmode=tools -jar ${MODULE_NAME}/build/libs/*.jar extract --layers --launcher --force \
+    --destination "${MODULE_NAME}/"
 EOF
 
 FROM build AS test

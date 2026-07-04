@@ -26,7 +26,7 @@ spring:
     # a datasource is only required when running in HA mode, so disable any
     # JDBC auto-configuration in the "normal" profile.
     exclude:
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
 
 logging:
   pattern:

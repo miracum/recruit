@@ -18,8 +18,12 @@ services:
     volumes:
       - ./rules.yaml:/opt/notify/config/application.yaml:ro
     depends_on:
-      - fhir
-      - maildev
+      fhir:
+        condition: service_started
+      maildev:
+        condition: service_started
+      jobstore-db:
+        condition: service_healthy
 
   jobstore-db:
     image: docker.io/library/postgres:18.3@sha256:7e32e9833a6fb1c92c32552794cb6ed569d51b445a54907d35fc112ef39684db
@@ -27,6 +31,11 @@ services:
       # kics-scan ignore-line
       POSTGRES_PASSWORD: postgres # pragma: allowlist secret
       POSTGRES_DB: recruit_notify_jobs
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d recruit_notify_jobs"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   tester:
     image: docker.io/curlimages/curl:8.20.0@sha256:b3f1fb2a51d923260350d21b8654bbc607164a987e2f7c84a0ac199a67df812a
