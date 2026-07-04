@@ -43,8 +43,6 @@ jobs:
           load: true
           context: src/
           file: src/tester/Dockerfile
-          build-contexts: |
-            fixtures=tests/chaos/tester
           # this image is never pushed to a registry anyway, so we can
           # hard-code it here.
           tags: |
