@@ -10,7 +10,7 @@ tasks:
     dir: src/
     cmds:
       - skaffold build --tag={{ .IMAGE_TAG }}
-      - docker build -t ghcr.io/miracum/recruit/tester:v1 ../tests/chaos/tester
+      - docker build --build-context fixtures=../tests/chaos/tester -f tester/Dockerfile -t ghcr.io/miracum/recruit/tester:v1 .
 
   helm-add-repos:
     cmds:
