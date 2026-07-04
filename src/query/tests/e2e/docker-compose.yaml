@@ -26,9 +26,17 @@ services:
       - ohdsi-webapi
 
   tester:
-    build: .
-    environment:
-      FHIR_SERVER_URL: "http://fhir:8080/fhir"
+    build:
+      context: ../../../
+      dockerfile: tester/Dockerfile
+    command:
+      - "assert-fhir-resource-counts"
+      - "--fhir-server-base-url=http://fhir:8080/fhir"
+      - "--expected-resource-counts.ResearchStudy=1"
+      - "--expected-resource-counts.List=1"
+      - "--expected-resource-counts.Patient=100"
+      - "--expected-resource-counts.ResearchSubject=100"
+      - "--expected-resource-counts.Device=1"
     depends_on:
       - query
 

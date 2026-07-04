@@ -24,9 +24,12 @@ jobs:
         with:
           push: false
           load: true
-          context: tests/chaos/tester
+          context: src/
+          file: src/tester/Dockerfile
+          build-contexts: |
+            fixtures=tests/chaos/tester
           tags: |
-            ghcr.io/miracum/recruit/chaos-tester:v1
+            ghcr.io/miracum/recruit/tester:v1
 
       - name: Create KinD cluster
         uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc # v1.14.0
@@ -35,7 +38,7 @@ jobs:
 
       - name: Load images into KinD
         run: |
-          kind load docker-image ghcr.io/miracum/recruit/chaos-tester:v1
+          kind load docker-image ghcr.io/miracum/recruit/tester:v1
 
       - name: List images in cluster
         run: docker exec kind-control-plane crictl images

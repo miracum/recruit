@@ -41,7 +41,8 @@ jobs:
         with:
           push: false
           load: true
-          context: tests/chaos/tester
+          context: src/
+          file: src/tester/Dockerfile
           # this image is never pushed to a registry anyway, so we can
           # hard-code it here.
           tags: |

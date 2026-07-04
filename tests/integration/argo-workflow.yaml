@@ -11,8 +11,8 @@ spec:
         image: ghcr.io/miracum/recruit/tester:v1
         imagePullPolicy: IfNotPresent
         command:
-          - dotnet
-          - /opt/chaos-tester/tester.dll
+          - java
+          - org.springframework.boot.loader.launch.JarLauncher
         args:
           - "assert"
           - "--expected-number-of-messages=2"
