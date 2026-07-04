@@ -41,6 +41,7 @@
 </template>
 
 <script>
+import { toRaw } from "vue";
 import fhirpath from "fhirpath";
 import Constants from "@/const";
 import Api from "@/api";
@@ -67,8 +68,10 @@ export default {
   },
   computed: {
     mrNumber() {
+      // fhirpath sets non-configurable internal properties on the nodes it walks, which
+      // violates Vue 3's reactive Proxy invariants -- unwrap to a plain object first.
       return fhirpath.evaluate(
-        this.subject,
+        toRaw(this.subject),
         "Patient.identifier.where(type.coding.system=%identifierType and type.coding.code='MR').value",
         {
           identifierType: Constants.SYSTEM_IDENTIFIER_TYPE,
@@ -94,7 +97,7 @@ export default {
   },
   methods: {
     getHistoryNote(researchSubject) {
-      return fhirpath.evaluate(researchSubject, "ResearchSubject.extension(%noteExtensionUrl).valueString", {
+      return fhirpath.evaluate(toRaw(researchSubject), "ResearchSubject.extension(%noteExtensionUrl).valueString", {
         noteExtensionUrl: Constants.URL_NOTE_EXTENSION,
       })[0];
     },

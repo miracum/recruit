@@ -83,8 +83,8 @@
                 ? props.row.subject.individual.gender === "male"
                   ? "m"
                   : props.row.subject.individual.gender === "female"
-                  ? "w"
-                  : "u"
+                    ? "w"
+                    : "u"
                 : "u"
             }}
           </span>
@@ -106,14 +106,15 @@
 
         <b-table-column v-slot="props" label="Status" field="subject.status" sortable>
           <b-dropdown v-model="props.row.subject.status">
-            <b-button
-              slot="trigger"
-              :class="['button', 'recruitment-status-select', getTypeFromStatus(props.row.subject.status)]"
-              type="button"
-              size="is-small"
-              icon-right="sort-down"
-              >{{ recruitmentStatusOptions[props.row.subject.status] }}</b-button
-            >
+            <template #trigger>
+              <b-button
+                :class="['button', 'recruitment-status-select', getTypeFromStatus(props.row.subject.status)]"
+                type="button"
+                size="is-small"
+                icon-right="sort-down"
+                >{{ recruitmentStatusOptions[props.row.subject.status] }}</b-button
+              >
+            </template>
             <b-dropdown-item v-for="option in Object.keys(recruitmentStatusOptions)" :key="option" :value="option">
               <span class="status-option-container">
                 <b-icon pack="fas" size="is-small" icon="circle" :type="getTypeFromStatus(option)"></b-icon>
@@ -148,10 +149,9 @@
                     name: 'patient-record',
                     params: { patientId: props.row.subject.individual.id },
                   }"
-                  type="is-primary"
+                  type="is-primary is-light"
                   size="is-small"
                   icon-left="notes-medical"
-                  outlined
                   target="_blank"
                   rel="noopener noreferrer"
                 ></b-button>
@@ -163,10 +163,9 @@
                     name: 'researchsubject-history',
                     params: { subjectId: props.row.id },
                   }"
-                  type="is-primary"
+                  type="is-primary is-light"
                   size="is-small"
                   icon-left="history"
-                  outlined
                   target="_blank"
                   rel="noopener noreferrer"
                 ></b-button>
@@ -175,7 +174,7 @@
           </div>
         </b-table-column>
 
-        <template slot="empty">
+        <template #empty>
           <section class="section">
             <div class="content has-text-grey has-text-centered">
               <p>
@@ -191,6 +190,7 @@
 </template>
 
 <script>
+import { toRaw } from "vue";
 import fhirpath from "fhirpath";
 import Constants from "@/const";
 import Api from "@/api";
@@ -246,20 +246,23 @@ export default {
   computed: {
     patientViewModel() {
       return this.items.map((entry) => {
+        // fhirpath sets non-configurable internal properties on the nodes it walks, which
+        // violates Vue 3's reactive Proxy invariants -- unwrap to a plain object first.
+        const rawEntry = toRaw(entry);
         const subject = entry.item;
         const mrNumber = fhirpath.evaluate(
-          subject.individual,
+          toRaw(subject.individual),
           "Patient.identifier.where(type.coding.system=%identifierType and type.coding.code='MR').value",
           {
             identifierType: Constants.SYSTEM_IDENTIFIER_TYPE,
           }
         )[0];
 
-        const note = fhirpath.evaluate(subject, "ResearchSubject.extension(%noteExtensionUrl).valueString", {
+        const note = fhirpath.evaluate(toRaw(subject), "ResearchSubject.extension(%noteExtensionUrl).valueString", {
           noteExtensionUrl: Constants.URL_NOTE_EXTENSION,
         })[0];
 
-        const statusCode = fhirpath.evaluate(entry, "flag.coding.where(system=%subjectStatus).code", {
+        const statusCode = fhirpath.evaluate(rawEntry, "flag.coding.where(system=%subjectStatus).code", {
           subjectStatus: Constants.SYSTEM_DETERMINED_SUBJECT_STATUS,
         })[0];
 
@@ -290,22 +293,22 @@ export default {
     this.items.map(async (element) => {
       let latestEncounterAndLocation = {};
       try {
-        this.$set(this.latestEncounterAndLocationLookup, element.item.individual.id, {
+        this.latestEncounterAndLocationLookup[element.item.individual.id] = {
           lastStayIsLoading: true,
-        });
+        };
         latestEncounterAndLocation = await Api.fetchLatestEncounterWithLocation(element.item.individual.id);
 
-        this.$set(this.latestEncounterAndLocationLookup, element.item.individual.id, {
+        this.latestEncounterAndLocationLookup[element.item.individual.id] = {
           latestEncounterAndLocation,
           lastStayIsLoading: false,
           lastStayErrorMessage: "",
-        });
+        };
       } catch (exc) {
-        this.$set(this.latestEncounterAndLocationLookup, element.item.individual.id, {
+        this.latestEncounterAndLocationLookup[element.item.individual.id] = {
           latestEncounterAndLocation,
           lastStayIsLoading: false,
           lastStayErrorMessage: exc,
-        });
+        };
       }
     });
 
@@ -313,9 +316,9 @@ export default {
       let allRecommendedStudies = [];
       let participatingStudies = [];
       try {
-        this.$set(this.recommendationMarkerLookup, element.item.individual.id, {
+        this.recommendationMarkerLookup[element.item.individual.id] = {
           markerIsLoading: true,
-        });
+        };
         let allRecommendations = await Api.fetchAllRecommendationsByPatientId(element.item.individual.id);
 
         // ignore all subjects that refer to the same study as the one currently shown in this screening list
@@ -338,19 +341,19 @@ export default {
           .filter((resource) => resource.resourceType === "ResearchSubject" && resource.status === "on-study")
           .map((researchSubject) => researchSubject.study);
 
-        this.$set(this.recommendationMarkerLookup, element.item.individual.id, {
+        this.recommendationMarkerLookup[element.item.individual.id] = {
           allRecommendedStudies,
           participatingStudies,
           markerIsLoading: false,
           markerErrorMessage: "",
-        });
+        };
       } catch (exc) {
-        this.$set(this.recommendationMarkerLookup, element.item.individual.id, {
+        this.recommendationMarkerLookup[element.item.individual.id] = {
           allRecommendedStudies,
           participatingStudies,
           markerIsLoading: false,
           markerErrorMessage: exc,
-        });
+        };
       }
     });
   },

@@ -21,7 +21,7 @@
           ><template v-else>unbekannt</template>
         </b-tag>
       </b-table-column>
-      <template slot="empty">
+      <template #empty>
         <section class="section">
           <div class="content has-text-grey has-text-centered">
             <p>
@@ -36,6 +36,7 @@
 </template>
 
 <script>
+import { toRaw } from "vue";
 import fhirpath from "fhirpath";
 
 export default {
@@ -56,7 +57,10 @@ export default {
       return this.items.map((condition) => {
         const normalizedCondition = condition;
 
-        const onsetDateTime = fhirpath.evaluate(condition, "onsetDateTime | onsetPeriod.start")[0];
+        // fhirpath sets non-configurable internal properties on the nodes it walks, which
+        // violates Vue 3's reactive Proxy invariants -- unwrap to a plain object first.
+        const rawCondition = toRaw(condition);
+        const onsetDateTime = fhirpath.evaluate(rawCondition, "onsetDateTime | onsetPeriod.start")[0];
 
         normalizedCondition.onsetDateTime = onsetDateTime;
 
@@ -64,7 +68,7 @@ export default {
           normalizedCondition.code = {};
         }
 
-        const display = fhirpath.evaluate(condition, "code.text | code.coding.display | code.coding.code")[0];
+        const display = fhirpath.evaluate(rawCondition, "code.text | code.coding.display | code.coding.code")[0];
 
         if (display) {
           normalizedCondition.code.text = display;

@@ -18,8 +18,17 @@
             <b-icon pack="fas" size="is-small" type="is-white" :icon="isAdmin ? 'user-cog' : 'user'"></b-icon>
             <span class="mr-3 ml-3 has-text-white">{{ username }}</span>
             <div class="buttons">
-              <b-button v-if="isAuthenticated" outlined type="is-white" size="is-small" @click="logout">Ausloggen
-              </b-button>
+              <b-tooltip :label="isDarkTheme ? 'Helles Design aktivieren' : 'Dunkles Design aktivieren'" position="is-left">
+                <b-button
+                  outlined
+                  size="is-small"
+                  type="is-white"
+                  :icon-left="isDarkTheme ? 'sun' : 'moon'"
+                  @click="toggleTheme"
+                >
+                </b-button>
+              </b-tooltip>
+              <b-button v-if="isAuthenticated" outlined type="is-white" size="is-small" @click="logout">Ausloggen </b-button>
               <b-tooltip label="Benutzerhilfe öffnen" position="is-left">
                 <b-button tag="a" outlined size="is-small" type="is-white" icon-left="question" href="/help/manual.pdf">
                 </b-button>
@@ -34,7 +43,7 @@
         <router-view />
       </section>
     </main>
-    <footer class="footer has-background-primary-muted">
+    <footer class="footer">
       <div class="content has-text-centered is-size-7 has-text-grey-light">
         <p>{{ version }}</p>
       </div>
@@ -45,8 +54,13 @@
 <script>
 export default {
   name: "App",
+  data() {
+    return {
+      isDarkTheme: false,
+    };
+  },
   computed: {
-    version: () => process.env.VUE_APP_VERSION,
+    version: () => import.meta.env.VITE_APP_VERSION,
     username: function username() {
       return (this.$keycloak && this.$keycloak.fullName) || "Anonym";
     },
@@ -57,72 +71,40 @@ export default {
       return this.isAuthenticated && this.$keycloak.hasResourceRole("admin");
     },
   },
+  created() {
+    const storedTheme = localStorage.getItem("theme");
+    this.isDarkTheme = storedTheme ? storedTheme === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    if (storedTheme) {
+      document.documentElement.dataset.theme = storedTheme;
+    }
+  },
   methods: {
     logout: function logout() {
       this.$keycloak.logoutFn();
+    },
+    toggleTheme: function toggleTheme() {
+      this.isDarkTheme = !this.isDarkTheme;
+      const theme = this.isDarkTheme ? "dark" : "light";
+      document.documentElement.dataset.theme = theme;
+      localStorage.setItem("theme", theme);
     },
   },
 };
 </script>
 
 <style lang="scss">
-// Import Bulma's core
-@import "~bulma/sass/utilities/_all";
+// Set your colors and import Bulma's core + Buefy styles.
+// Bulma 1.x / Buefy 3.x are configured via the Sass module system (`@use ... with`)
+// instead of plain variable overrides before a classic `@import`.
+$brand-primary: #1b2259;
+$brand-success: #00a579;
 
-// Set your colors
-$primary: #1b2259;
-$primary-invert: findColorInvert($primary);
-
-$primary-muted: #f0f3fb;
-$primary-muted-invert: findColorInvert($primary-muted);
-
-$success: #00a579;
-$success-invert: findColorInvert($success);
-
-// Setup $colors to use as bulma classes (e.g. 'is-twitter')
-$colors: (
-  "white": ($white,
-    $black,
-  ),
-  "black": ($black,
-    $white,
-  ),
-  "light": ($light,
-    $light-invert,
-  ),
-  "dark": ($dark,
-    $dark-invert,
-  ),
-  "primary": ($primary,
-    $primary-invert,
-  ),
-  "primary-muted": ($primary-muted,
-    $primary-muted-invert,
-  ),
-  "info": ($info,
-    $info-invert,
-  ),
-  "success": ($success,
-    $success-invert,
-  ),
-  "warning": ($warning,
-    $warning-invert,
-  ),
-  "danger": ($danger,
-    $danger-invert,
-  ),
+@use "bulma/sass" with (
+  $primary: $brand-primary,
+  $link: $brand-primary,
+  $success: $brand-success
 );
-
-// Links
-$link: $primary;
-$link-invert: $primary-invert;
-$link-focus-border: $primary;
-
-$fullhd: 1652px + (2 * $gap);
-
-// Import Bulma and Buefy styles
-@import "~bulma";
-@import "~buefy/src/scss/buefy";
+@use "buefy/src/scss/buefy";
 </style>
 
 <style>
@@ -131,7 +113,6 @@ $fullhd: 1652px + (2 * $gap);
   display: flex;
   min-height: 100vh;
   flex-direction: column;
-  background-color: #ffffff;
 }
 
 main {
@@ -140,7 +121,7 @@ main {
   margin-top: 15px;
 }
 
-.navbar-brand>.navbar-item>picture>img {
+.navbar-brand > .navbar-item > picture > img {
   border-radius: 50%;
   min-height: 3rem;
 }

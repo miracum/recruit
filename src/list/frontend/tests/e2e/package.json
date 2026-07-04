@@ -1,15 +1,15 @@
 {
-  "name": "list-frontend-tests",
+  "name": "list-frontend-e2e",
   "version": "0.0.0",
   "description": "recruIT e2e tests for the list frontend",
-  "main": "index.js",
   "private": true,
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "playwright test"
   },
   "author": "github.com/miracum/recruit",
   "license": "Apache-2.0",
-  "dependencies": {
-    "cypress-keycloak": "2.0.2"
+  "devDependencies": {
+    "@playwright/test": "1.61.1"
   }
 }

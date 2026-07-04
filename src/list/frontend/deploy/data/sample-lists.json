@@ -3,7 +3,7 @@
   "type": "transaction",
   "entry": [
     {
-      "fullUrl": "Encounter/0",
+      "fullUrl": "urn:uuid:14439613-0c30-5416-b218-4224ac252575",
       "resource": {
         "resourceType": "Encounter",
         "status": "finished",
@@ -13,7 +13,7 @@
           "system": "https://www.medizininformatik-initiative.de/fhir/core/CodeSystem/Versorgungsfallklasse"
         },
         "subject": {
-          "reference": "Patient/1"
+          "reference": "urn:uuid:436188dd-403b-5bd3-95f2-a68676e15fd1"
         },
         "identifier": [
           {
@@ -33,7 +33,7 @@
         "location": [
           {
             "location": {
-              "reference": "Location/1"
+              "reference": "urn:uuid:65b49b27-4822-595e-afb9-23e18c4dadd1"
             },
             "status": "completed",
             "period": {
@@ -103,7 +103,7 @@
       }
     },
     {
-      "fullUrl": "Encounter/1",
+      "fullUrl": "urn:uuid:63e07981-23a0-5616-b3e5-fbf68db626c2",
       "resource": {
         "resourceType": "Encounter",
         "status": "finished",
@@ -117,7 +117,7 @@
           "start": "2020-05-13T12:00:00+01:00"
         },
         "subject": {
-          "reference": "Patient/0"
+          "reference": "urn:uuid:fa823958-1966-5cb5-bf76-e045a66851f2"
         },
         "serviceType": {
           "coding": [
@@ -144,7 +144,7 @@
           },
           {
             "location": {
-              "reference": "Location/0"
+              "reference": "urn:uuid:27af5808-ca8f-561a-b90d-5bb22420dd17"
             },
             "status": "completed",
             "period": {
@@ -154,7 +154,7 @@
           }
         ],
         "partOf": {
-          "reference": "Encounter/0"
+          "reference": "urn:uuid:14439613-0c30-5416-b218-4224ac252575"
         }
       },
       "request": {
@@ -163,7 +163,7 @@
       }
     },
     {
-      "fullUrl": "Location/0",
+      "fullUrl": "urn:uuid:27af5808-ca8f-561a-b90d-5bb22420dd17",
       "resource": {
         "resourceType": "Location",
         "identifier": [
@@ -191,7 +191,7 @@
       }
     },
     {
-      "fullUrl": "Location/1",
+      "fullUrl": "urn:uuid:65b49b27-4822-595e-afb9-23e18c4dadd1",
       "resource": {
         "resourceType": "Location",
         "identifier": [
@@ -219,7 +219,7 @@
       }
     },
     {
-      "fullUrl": "Patient/0",
+      "fullUrl": "urn:uuid:fa823958-1966-5cb5-bf76-e045a66851f2",
       "resource": {
         "resourceType": "Patient",
         "identifier": [
@@ -248,7 +248,7 @@
       }
     },
     {
-      "fullUrl": "Patient/1",
+      "fullUrl": "urn:uuid:436188dd-403b-5bd3-95f2-a68676e15fd1",
       "resource": {
         "resourceType": "Patient",
         "identifier": [
@@ -277,7 +277,7 @@
       }
     },
     {
-      "fullUrl": "Patient/2",
+      "fullUrl": "urn:uuid:f95b7519-bef3-59cb-8fe5-b7fbcd1045e1",
       "resource": {
         "resourceType": "Patient",
         "identifier": [
@@ -306,15 +306,15 @@
       }
     },
     {
-      "fullUrl": "ResearchSubject/0",
+      "fullUrl": "urn:uuid:fe521bb9-e73c-5efb-83dc-fad0b359808f",
       "resource": {
         "resourceType": "ResearchSubject",
         "status": "on-study",
         "study": {
-          "reference": "ResearchStudy/0"
+          "reference": "urn:uuid:df30cc14-a26a-56b4-a6da-27ac32da223f"
         },
         "individual": {
-          "reference": "Patient/0"
+          "reference": "urn:uuid:fa823958-1966-5cb5-bf76-e045a66851f2"
         }
       },
       "request": {
@@ -323,15 +323,15 @@
       }
     },
     {
-      "fullUrl": "ResearchSubject/1",
+      "fullUrl": "urn:uuid:43af1075-a591-5640-945b-9bf46e0e107f",
       "resource": {
         "resourceType": "ResearchSubject",
         "status": "candidate",
         "study": {
-          "reference": "ResearchStudy/0"
+          "reference": "urn:uuid:df30cc14-a26a-56b4-a6da-27ac32da223f"
         },
         "individual": {
-          "reference": "Patient/1"
+          "reference": "urn:uuid:436188dd-403b-5bd3-95f2-a68676e15fd1"
         }
       },
       "request": {
@@ -340,15 +340,15 @@
       }
     },
     {
-      "fullUrl": "ResearchSubject/2",
+      "fullUrl": "urn:uuid:9d0f78f1-dc1e-565d-baa0-30522e9b573a",
       "resource": {
         "resourceType": "ResearchSubject",
         "status": "ineligible",
         "study": {
-          "reference": "ResearchStudy/1"
+          "reference": "urn:uuid:2ea1bdd1-052b-590d-b2aa-dd61b7258175"
         },
         "individual": {
-          "reference": "Patient/0"
+          "reference": "urn:uuid:fa823958-1966-5cb5-bf76-e045a66851f2"
         }
       },
       "request": {
@@ -357,15 +357,15 @@
       }
     },
     {
-      "fullUrl": "ResearchSubject/3",
+      "fullUrl": "urn:uuid:a0a289dd-6af3-534c-810a-736ce53f873c",
       "resource": {
         "resourceType": "ResearchSubject",
         "status": "candidate",
         "study": {
-          "reference": "ResearchStudy/1"
+          "reference": "urn:uuid:2ea1bdd1-052b-590d-b2aa-dd61b7258175"
         },
         "individual": {
-          "reference": "Patient/1"
+          "reference": "urn:uuid:436188dd-403b-5bd3-95f2-a68676e15fd1"
         }
       },
       "request": {
@@ -374,15 +374,15 @@
       }
     },
     {
-      "fullUrl": "ResearchSubject/4",
+      "fullUrl": "urn:uuid:40c4d8e1-e717-5508-80fc-90dc7ef31e4b",
       "resource": {
         "resourceType": "ResearchSubject",
         "status": "withdrawn",
         "study": {
-          "reference": "ResearchStudy/1"
+          "reference": "urn:uuid:2ea1bdd1-052b-590d-b2aa-dd61b7258175"
         },
         "individual": {
-          "reference": "Patient/2"
+          "reference": "urn:uuid:f95b7519-bef3-59cb-8fe5-b7fbcd1045e1"
         }
       },
       "request": {
@@ -391,7 +391,7 @@
       }
     },
     {
-      "fullUrl": "List/0",
+      "fullUrl": "urn:uuid:d493356d-b061-598f-8039-a59a7f8adcfd",
       "resource": {
         "resourceType": "List",
         "status": "current",
@@ -405,7 +405,7 @@
           {
             "url": "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy",
             "valueReference": {
-              "reference": "ResearchStudy/0",
+              "reference": "urn:uuid:df30cc14-a26a-56b4-a6da-27ac32da223f",
               "display": "PROSa"
             }
           }
@@ -427,12 +427,12 @@
         "entry": [
           {
             "item": {
-              "reference": "ResearchSubject/0"
+              "reference": "urn:uuid:fe521bb9-e73c-5efb-83dc-fad0b359808f"
             }
           },
           {
             "item": {
-              "reference": "ResearchSubject/1"
+              "reference": "urn:uuid:43af1075-a591-5640-945b-9bf46e0e107f"
             }
           }
         ]
@@ -443,7 +443,7 @@
       }
     },
     {
-      "fullUrl": "List/1",
+      "fullUrl": "urn:uuid:5deec514-e414-5470-9555-7575fa224b73",
       "resource": {
         "resourceType": "List",
         "status": "current",
@@ -457,7 +457,7 @@
           {
             "url": "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy",
             "valueReference": {
-              "reference": "ResearchStudy/1",
+              "reference": "urn:uuid:2ea1bdd1-052b-590d-b2aa-dd61b7258175",
               "display": "AMICA"
             }
           }
@@ -474,7 +474,7 @@
         "entry": [
           {
             "item": {
-              "reference": "ResearchSubject/2"
+              "reference": "urn:uuid:9d0f78f1-dc1e-565d-baa0-30522e9b573a"
             },
             "date": "2021-12-12T13:28:17-05:00",
             "flag": {
@@ -488,13 +488,13 @@
           },
           {
             "item": {
-              "reference": "ResearchSubject/3"
+              "reference": "urn:uuid:a0a289dd-6af3-534c-810a-736ce53f873c"
             },
             "date": "2021-12-01T00:00:00.000Z"
           },
           {
             "item": {
-              "reference": "ResearchSubject/4"
+              "reference": "urn:uuid:40c4d8e1-e717-5508-80fc-90dc7ef31e4b"
             },
             "date": "2021-11-01T00:00:00.000Z"
           }
@@ -506,7 +506,7 @@
       }
     },
     {
-      "fullUrl": "List/2",
+      "fullUrl": "urn:uuid:05241585-1d21-5415-9e55-63e697fde6a3",
       "resource": {
         "resourceType": "List",
         "status": "current",
@@ -520,7 +520,7 @@
           {
             "url": "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy",
             "valueReference": {
-              "reference": "ResearchStudy/2",
+              "reference": "urn:uuid:7d1857ba-c625-5953-a65e-ae45ce249dfb",
               "display": "SECRET"
             }
           }
@@ -541,7 +541,7 @@
       }
     },
     {
-      "fullUrl": "List/3",
+      "fullUrl": "urn:uuid:8bffda23-ffee-5a23-b8e4-0f2490bd1cb9",
       "resource": {
         "resourceType": "List",
         "status": "retired",
@@ -555,7 +555,7 @@
           {
             "url": "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy",
             "valueReference": {
-              "reference": "ResearchStudy/3",
+              "reference": "urn:uuid:8b45f838-729c-5253-b215-0a7bf5adbceb",
               "display": "RETIRED"
             }
           }
@@ -576,7 +576,7 @@
       }
     },
     {
-      "fullUrl": "ResearchStudy/0",
+      "fullUrl": "urn:uuid:df30cc14-a26a-56b4-a6da-27ac32da223f",
       "resource": {
         "resourceType": "ResearchStudy",
         "identifier": [
@@ -609,7 +609,7 @@
       }
     },
     {
-      "fullUrl": "ResearchStudy/1",
+      "fullUrl": "urn:uuid:2ea1bdd1-052b-590d-b2aa-dd61b7258175",
       "resource": {
         "resourceType": "ResearchStudy",
         "identifier": [
@@ -642,7 +642,7 @@
       }
     },
     {
-      "fullUrl": "ResearchStudy/2",
+      "fullUrl": "urn:uuid:7d1857ba-c625-5953-a65e-ae45ce249dfb",
       "resource": {
         "resourceType": "ResearchStudy",
         "identifier": [
@@ -675,7 +675,7 @@
       }
     },
     {
-      "fullUrl": "ResearchStudy/3",
+      "fullUrl": "urn:uuid:8b45f838-729c-5253-b215-0a7bf5adbceb",
       "resource": {
         "resourceType": "ResearchStudy",
         "identifier": [

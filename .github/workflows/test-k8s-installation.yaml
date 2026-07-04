@@ -66,17 +66,39 @@ jobs:
               -f tests/chaos/argo-workflows-values.yaml \
               --version 1.0.13
 
-      - name: Download all artifacts
+      - name: Download list image artifact
+        if: ${{ github.event_name == 'pull_request' }}
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
-          path: /tmp
+          name: ghcr.io-miracum-recruit-list-${{ inputs.image-tag }}
+          path: /tmp/ghcr.io-miracum-recruit-list-${{ inputs.image-tag }}
+
+      - name: Download notify image artifact
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          name: ghcr.io-miracum-recruit-notify-${{ inputs.image-tag }}
+          path: /tmp/ghcr.io-miracum-recruit-notify-${{ inputs.image-tag }}
+
+      - name: Download query image artifact
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          name: ghcr.io-miracum-recruit-query-${{ inputs.image-tag }}
+          path: /tmp/ghcr.io-miracum-recruit-query-${{ inputs.image-tag }}
+
+      - name: Download query-fhir-trino image artifact
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          name: ghcr.io-miracum-recruit-query-fhir-trino-${{ inputs.image-tag }}
+          path: /tmp/ghcr.io-miracum-recruit-query-fhir-trino-${{ inputs.image-tag }}
 
       - name: Load container images
         if: ${{ github.event_name == 'pull_request' }}
         env:
           IMAGE_TAG: ${{ inputs.image-tag }}
         run: |
-          ls -lsa /tmp
           kind load image-archive "/tmp/ghcr.io-miracum-recruit-list-${IMAGE_TAG}/image.tar"
           kind load image-archive "/tmp/ghcr.io-miracum-recruit-notify-${IMAGE_TAG}/image.tar"
           kind load image-archive "/tmp/ghcr.io-miracum-recruit-query-${IMAGE_TAG}/image.tar"

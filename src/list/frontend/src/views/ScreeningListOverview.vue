@@ -17,7 +17,7 @@
         <h1 class="title is-3">Laufende Studien</h1>
         <screening-list-card
           v-for="(list, index) in activeScreeningLists"
-          :key="'active-list-' + index"
+          :key="`active-list-${index}`"
           :list="list"
           :show-active-toggle="isLoggedInAsAdmin"
           @input="onListStatusToggled"
@@ -28,11 +28,11 @@
         <h1 class="title is-3">Inaktive Studien</h1>
         <screening-list-card
           v-for="(list, index) in inactiveScreeningLists"
-          :key="'inactive-list-' + index"
+          :key="`inactive-list-${index}`"
           :list="list"
           :show-active-toggle="isLoggedInAsAdmin"
           @input="onListStatusToggled"
-          @deleteList="onListDelete"
+          @delete-list="onListDelete"
         />
       </section>
     </div>

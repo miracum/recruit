@@ -35,11 +35,33 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Download all artifacts
+      - name: Download list image artifact
         if: ${{ github.event_name == 'pull_request' }}
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
-          path: /tmp
+          name: ghcr.io-miracum-recruit-list-${{ inputs.image-tag }}
+          path: /tmp/ghcr.io-miracum-recruit-list-${{ inputs.image-tag }}
+
+      - name: Download notify image artifact
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          name: ghcr.io-miracum-recruit-notify-${{ inputs.image-tag }}
+          path: /tmp/ghcr.io-miracum-recruit-notify-${{ inputs.image-tag }}
+
+      - name: Download query image artifact
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          name: ghcr.io-miracum-recruit-query-${{ inputs.image-tag }}
+          path: /tmp/ghcr.io-miracum-recruit-query-${{ inputs.image-tag }}
+
+      - name: Download query-fhir-trino image artifact
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          name: ghcr.io-miracum-recruit-query-fhir-trino-${{ inputs.image-tag }}
+          path: /tmp/ghcr.io-miracum-recruit-query-fhir-trino-${{ inputs.image-tag }}
 
       - name: Load container images
         # only load images from artifacts on PRs, otherwise the image
@@ -48,19 +70,11 @@ jobs:
         env:
           IMAGE_TAG: ${{ inputs.image-tag }}
         run: |
-          ls -lsa /tmp
           docker load --input "/tmp/ghcr.io-miracum-recruit-list-${IMAGE_TAG}/image.tar"
           docker load --input "/tmp/ghcr.io-miracum-recruit-notify-${IMAGE_TAG}/image.tar"
           docker load --input "/tmp/ghcr.io-miracum-recruit-query-${IMAGE_TAG}/image.tar"
           docker load --input "/tmp/ghcr.io-miracum-recruit-query-fhir-trino-${IMAGE_TAG}/image.tar"
           docker image ls -a
-
-      - name: Delete downloaded artifacts
-        run: |
-          df -h
-          rm -rf /tmp/*-build-artifacts
-          rm -rf /tmp/*-attestations
-          df -h
 
       - name: Deploy using Docker Compose in staging mode
         run: |

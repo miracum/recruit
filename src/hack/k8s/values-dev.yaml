@@ -3,10 +3,12 @@ list:
     enabled: true
 
 fhirserver:
-  postgresql:
+  postgres:
     auth:
       # kics-scan ignore-line
       postgresPassword: fhir
+  ingress:
+    enabled: true
 
 query:
   # run every minute
@@ -48,7 +50,7 @@ notify:
           - email: "demo@example.com"
 
 ohdsi:
-  postgresql:
+  postgres:
     enabled: false
   webApi:
     db:

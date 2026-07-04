@@ -30,7 +30,7 @@ list:
           app.kubernetes.io/instance: recruit
           app.kubernetes.io/component: list
 
-postgresql:
+postgres:
   enabled: true
   auth:
     postgresPassword: recruit-notify-ha

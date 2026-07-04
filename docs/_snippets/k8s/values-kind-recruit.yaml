@@ -18,7 +18,7 @@ fhirserver:
       cpu: "2500m"
     limits:
       memory: "3Gi"
-  postgresql:
+  postgres:
     auth:
       postgresPassword: fhir
   ingress:
@@ -95,7 +95,7 @@ ohdsi:
         cpu: "250m"
       limits:
         memory: "4Gi"
-  postgresql:
+  postgres:
     auth:
       postgresPassword: ohdsi
     primary:

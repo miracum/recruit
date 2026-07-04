@@ -1,5 +1,5 @@
 ohdsi:
-  postgresql:
+  postgres:
     enabled: false
   webApi:
     db:
@@ -13,7 +13,7 @@ ohdsi:
       schema: "ohdsi"
 
 fhirserver:
-  postgresql:
+  postgres:
     enabled: false
   externalDatabase:
     host: "recruit-fhir-server-db-rw"
@@ -37,13 +37,13 @@ notify:
         name: "recruit-notify-db-app-user"
         key: "password"
 
-postgresql:
+postgres:
   enabled: false
 
 fhir-pseudonymizer:
   enabled: true
   vfps:
-    postgresql:
+    postgres:
       enabled: false
     database:
       host: "vfps-db-rw"

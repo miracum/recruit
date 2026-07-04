@@ -1,0 +1,7 @@
+{
+  "trailingComma": "es5",
+  "arrowParens": "always",
+  "printWidth": 128,
+  "sortPackageJson": false,
+  "ignorePatterns": []
+}

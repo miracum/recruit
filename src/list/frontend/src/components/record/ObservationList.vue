@@ -18,7 +18,7 @@
           <template v-else>unbekannt</template></b-tag
         >
       </b-table-column>
-      <template slot="empty">
+      <template #empty>
         <section class="section">
           <div class="content has-text-grey has-text-centered">
             <p>
@@ -33,6 +33,7 @@
 </template>
 
 <script>
+import { toRaw } from "vue";
 import fhirpath from "fhirpath";
 
 export default {
@@ -53,8 +54,11 @@ export default {
       return this.items.map((observation) => {
         const normalizedObservation = observation;
 
+        // fhirpath sets non-configurable internal properties on the nodes it walks, which
+        // violates Vue 3's reactive Proxy invariants -- unwrap to a plain object first.
+        const rawObservation = toRaw(observation);
         const effectiveDateTime = fhirpath.evaluate(
-          observation,
+          rawObservation,
           "effectiveDateTime | effectivePeriod.start | effectiveInstant"
         )[0];
 
@@ -64,7 +68,7 @@ export default {
           normalizedObservation.code = {};
         }
 
-        const display = fhirpath.evaluate(observation, "code.text | code.coding.display | code.coding.code")[0];
+        const display = fhirpath.evaluate(rawObservation, "code.text | code.coding.display | code.coding.code")[0];
 
         if (display) {
           normalizedObservation.code.text = display;
@@ -83,33 +87,37 @@ export default {
         });
       }
 
-      if (Object.prototype.hasOwnProperty.call(o, "valueBoolean")) {
+      if (Object.hasOwn(o, "valueBoolean")) {
         return !o.valueBoolean || o.valueBoolean === "false" ? "Negative" : "Positive";
       }
 
-      if (Object.prototype.hasOwnProperty.call(o, "valueCodeableConcept")) {
+      if (Object.hasOwn(o, "valueCodeableConcept")) {
+        // see the comment in normalizedObservations for why this is unwrapped
         return fhirpath.evaluate(
-          o,
+          toRaw(o),
           "valueCodeableConcept.text | valueCodeableConcept.coding.display | valueCodeableConcept.coding.code"
         )[0];
       }
 
-      if (Object.prototype.hasOwnProperty.call(o, "valueQuantity")) {
+      if (Object.hasOwn(o, "valueQuantity")) {
         let { value } = o.valueQuantity;
         const { unit } = o.valueQuantity;
 
-        if (!Number.isNaN(parseFloat(value))) {
+        if (!Number.isNaN(Number.parseFloat(value))) {
           value = Math.round(value * 100) / 100;
         }
 
         return `${value} ${unit}`;
       }
 
-      if (Object.prototype.hasOwnProperty.call(o, "valueRatio")) {
+      if (Object.hasOwn(o, "valueRatio")) {
         return `${o.valueRatio.numerator} / ${o.valueRatio.denominator}`;
       }
 
-      return fhirpath.evaluate(o, "valueString | valueInteger | valueRange | valueTime | valueDateTime | valuePeriod")[0];
+      return fhirpath.evaluate(
+        toRaw(o),
+        "valueString | valueInteger | valueRange | valueTime | valueDateTime | valuePeriod"
+      )[0];
     },
   },
 };

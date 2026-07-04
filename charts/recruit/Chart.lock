@@ -1,7 +1,7 @@
 dependencies:
 - name: hapi-fhir-jpaserver
   repository: https://hapifhir.github.io/hapi-fhir-jpaserver-starter
-  version: 0.22.0
+  version: 0.23.0
 - name: mailhog
   repository: oci://ghcr.io/codecentric/helm-charts
   version: 5.8.0
@@ -17,5 +17,5 @@ dependencies:
 - name: common
   repository: oci://ghcr.io/miracum/charts
   version: 0.1.1
-digest: sha256:83501c113e34a5e66f7fd333f4439229874268822ec0ac453f715570eecdd100
-generated: "2026-05-14T05:14:59.229795042Z"
+digest: sha256:524ee7c5d3d68ec26f652cead2476bf18d984abc6cb78fbb23b561e3646bd7d8
+generated: "2026-07-04T14:58:23.694124004+02:00"

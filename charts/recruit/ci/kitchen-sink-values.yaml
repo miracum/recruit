@@ -70,7 +70,7 @@ query:
       additionalLabels:
         release: kube-prom-stack
 
-postgresql:
+postgres:
   enabled: true
   auth:
     # kics-scan ignore-line
@@ -85,7 +85,7 @@ ohdsi:
     enabled: true
     hosts:
       - host: recruit-ohdsi.127.0.0.1.nip.io
-  postgresql:
+  postgres:
     auth:
       # kics-scan ignore-line
       postgresPassword: ohdsi
@@ -132,7 +132,7 @@ fhirserver:
       - host: recruit-fhir-server.127.0.0.1.nip.io
         pathType: ImplementationSpecific
         paths: ["/"]
-  postgresql:
+  postgres:
     auth:
       # kics-scan ignore-line
       postgresPassword: fhir

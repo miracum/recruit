@@ -22,7 +22,7 @@ dependencies:
     alias: fhirserver
     name: hapi-fhir-jpaserver
     repository: https://hapifhir.github.io/hapi-fhir-jpaserver-starter
-    version: 0.22.0
+    version: 0.23.0
   - condition: mailhog.enabled
     name: mailhog
     repository: oci://ghcr.io/codecentric/helm-charts

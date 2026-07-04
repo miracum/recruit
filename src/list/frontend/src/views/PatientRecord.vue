@@ -22,7 +22,7 @@
         </header>
         <b-tabs position="is-centered">
           <b-tab-item>
-            <template slot="header">
+            <template #header>
               <b-icon icon="stethoscope"></b-icon>
               <span>
                 Diagnosen
@@ -32,7 +32,7 @@
             <condition-list :items="record.conditions" />
           </b-tab-item>
           <b-tab-item>
-            <template slot="header">
+            <template #header>
               <b-icon icon="procedures"></b-icon>
               <span>
                 Prozeduren
@@ -42,7 +42,7 @@
             <procedure-list :items="record.procedures" />
           </b-tab-item>
           <b-tab-item>
-            <template slot="header">
+            <template #header>
               <b-icon icon="pills"></b-icon>
               <span>
                 Medikation
@@ -55,7 +55,7 @@
             />
           </b-tab-item>
           <b-tab-item>
-            <template slot="header">
+            <template #header>
               <b-icon icon="vial"></b-icon>
               <span>
                 Labor & Vitalparameter
@@ -71,6 +71,7 @@
 </template>
 
 <script>
+import { toRaw } from "vue";
 import fhirpath from "fhirpath";
 import ConditionList from "@/components/record/ConditionList.vue";
 import MedicationList from "@/components/record/MedicationList.vue";
@@ -107,8 +108,10 @@ export default {
   },
   computed: {
     mrNumber() {
+      // fhirpath sets non-configurable internal properties on the nodes it walks, which
+      // violates Vue 3's reactive Proxy invariants -- unwrap to a plain object first.
       return fhirpath.evaluate(
-        this.record.patient,
+        toRaw(this.record.patient),
         "Patient.identifier.where(type.coding.system=%identifierType and type.coding.code='MR').value",
         {
           identifierType: Constants.SYSTEM_IDENTIFIER_TYPE,

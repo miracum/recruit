@@ -1,3 +1,4 @@
+import { resourceFromAttributes } from "@opentelemetry/resources";
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from "@opentelemetry/semantic-conventions";
@@ -13,12 +14,13 @@ export function setupTracing(tracingConfig) {
     [ATTR_SERVICE_VERSION]: process.env.VERSION || "0.0.0",
   });
 
+  // OpenTelemetry SDK v2 removed provider.addSpanProcessor(); span processors are
+  // configured via the constructor instead.
   const provider = new NodeTracerProvider({
     resource: resource,
+    spanProcessors: [new BatchSpanProcessor(new OTLPTraceExporter())],
   });
 
-  const exporter = new OTLPTraceExporter();
-  provider.addSpanProcessor(new BatchSpanProcessor(exporter));
   provider.register();
 
   registerInstrumentations({

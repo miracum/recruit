@@ -1,14 +1,14 @@
 podAnnotations:
   linkerd.io/inject: "enabled"
 
-postgresql:
+postgres:
   primary:
     service:
       annotations:
         config.linkerd.io/opaque-ports: "5432"
 
 ohdsi:
-  postgresql:
+  postgres:
     primary:
       service:
         annotations:
@@ -21,7 +21,7 @@ ohdsi:
       linkerd.io/inject: "enabled"
 
 fhirserver:
-  postgresql:
+  postgres:
     primary:
       service:
         annotations:
