@@ -188,7 +188,7 @@ jobs:
       actions: read
     with:
       enable-validate-gradle-wrapper: false
-      codeql-languages: '["python", "javascript", "java", "csharp"]'
+      codeql-languages: '["python", "javascript", "java"]'
       enable-codeql: true
       enable-verify-base-image-signature: false
     secrets:
