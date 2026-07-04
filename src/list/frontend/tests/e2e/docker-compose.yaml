@@ -7,13 +7,8 @@ services:
       # unauthenticated (admin-equivalent) view. See tests/e2e/specs/*.
       KEYCLOAK_DISABLED: "true"
       RULES_FILE_PATH: /etc/notify-rules.yaml
-      TRACING_ENABLED: "false" # TODO: fix and re-enable
-      # tracing.js exports via OTLP gRPC (Jaeger accepts OTLP natively since 1.35), not the
-      # deprecated OpenTelemetry Jaeger exporter -- this is the env var it actually reads.
-      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
     depends_on:
       - fhir
-      - jaeger
     volumes:
       - ${PWD}/notify-rules.dev.yaml:/etc/notify-rules.yaml:ro
 
@@ -50,6 +45,3 @@ services:
       - fhir
       # not strictly required, but makes sure the list service starts at this point
       - list
-
-  jaeger:
-    image: docker.io/jaegertracing/all-in-one:1.60@sha256:4fd2d70fa347d6a47e79fcb06b1c177e6079f92cba88b083153d56263082135e
