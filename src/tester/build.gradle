@@ -5,7 +5,7 @@ plugins {
 // this is a one-shot CLI tool, not a long-running web service, so it doesn't need most of what
 // java-application-conventions pulls in for the actual application modules.
 configurations.configureEach {
-    exclude group: 'org.springframework.boot', module: 'spring-boot-starter-web'
+    exclude group: 'org.springframework.boot', module: 'spring-boot-starter-webmvc'
     exclude group: 'org.springframework.boot', module: 'spring-boot-starter-actuator'
     exclude group: 'org.springframework.boot', module: 'spring-boot-starter-jdbc'
     exclude group: 'org.postgresql', module: 'postgresql'

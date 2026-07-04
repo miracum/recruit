@@ -32,7 +32,7 @@ task downloadOpenTelemetryJavaAgent(type: Download) {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 
@@ -47,8 +47,10 @@ dependencies {
 
     implementation 'org.postgresql:postgresql:42.7.11'
 
-    implementation 'io.micrometer:micrometer-registry-prometheus:1.16.5'
-    implementation 'io.micrometer:micrometer-core:1.16.5'
+    // let Spring Boot's dependency-management BOM pick the version compatible with the current
+    // Spring Boot release
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'io.micrometer:micrometer-core'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
