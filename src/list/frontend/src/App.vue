@@ -34,7 +34,7 @@
         <router-view />
       </section>
     </main>
-    <footer class="footer has-background-primary-muted">
+    <footer class="footer">
       <div class="content has-text-centered is-size-7 has-text-grey-light">
         <p>{{ version }}</p>
       </div>
@@ -76,9 +76,6 @@ $brand-success: #00a579;
   $primary: $brand-primary,
   $link: $brand-primary,
   $success: $brand-success,
-  $custom-colors: (
-    "primary-muted": #f0f3fb,
-  )
 );
 @use "buefy/src/scss/buefy";
 </style>
@@ -89,7 +86,6 @@ $brand-success: #00a579;
   display: flex;
   min-height: 100vh;
   flex-direction: column;
-  background-color: #ffffff;
 }
 
 main {

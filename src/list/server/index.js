@@ -93,6 +93,23 @@ app.use(
 app.use(cors());
 app.use(bearerToken());
 app.use(express.json());
+
+app.use((req, res, next) => {
+  if (req.path.endsWith("/metrics")) {
+    const expectedToken = config.metrics.bearerToken;
+    if (expectedToken) {
+      if (!req.token) {
+        return res.sendStatus(403);
+      }
+      if (req.token === expectedToken) {
+        return next();
+      }
+      return res.sendStatus(403);
+    }
+  }
+  return next();
+});
+
 app.use(metricsMiddleware);
 
 logger.info(config.fhirUrl);
@@ -188,23 +205,7 @@ const proxy = legacyCreateProxyMiddleware(proxyRequestFilter, {
   },
 });
 
-app.use((req, res, next) => {
-  if (req.path.endsWith("/metrics")) {
-    const expectedToken = config.metrics.bearerToken;
-    if (expectedToken) {
-      if (!req.token) {
-        return res.sendStatus(403);
-      }
-      if (req.token === expectedToken) {
-        return next();
-      }
-      return res.sendStatus(403);
-    }
-  }
-  return next();
-});
-
-app.use("^/fhir", checkJwt, proxy);
+app.use("/fhir", checkJwt, proxy);
 
 app.get("/config", (_req, res) =>
   res.json({
