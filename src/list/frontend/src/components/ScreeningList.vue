@@ -163,10 +163,9 @@
                     name: 'researchsubject-history',
                     params: { subjectId: props.row.id },
                   }"
-                  type="is-primary"
+                  type="is-primary is-light"
                   size="is-small"
                   icon-left="history"
-                  outlined
                   target="_blank"
                   rel="noopener noreferrer"
                 ></b-button>
