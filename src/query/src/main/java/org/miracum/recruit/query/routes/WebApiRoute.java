@@ -4,6 +4,7 @@ import static net.logstash.logback.argument.StructuredArguments.kv;
 
 import com.google.common.collect.Sets;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
@@ -73,8 +74,14 @@ public class WebApiRoute extends RouteBuilder {
     // @formatter:off
     // @spotless:off
     if (isWebApiAuthEnabled) {
-      var authUrl = new URL(baseUrl.getProtocol(), baseUrl.getHost(), baseUrl.getPort(),
-          baseUrl.getPath() + webApiAuthLoginPath, null);
+      var authUrl = URI.create(
+            String.format(
+              "%s://%s%s%s",
+              baseUrl.getProtocol(),
+              baseUrl.getAuthority(),
+              baseUrl.getPath(),
+              webApiAuthLoginPath))
+          .toURL();
 
       // via https://gist.github.com/rafaeltuelho/4d2449ac9b709fd29d79fa89acd8b48b
       from(GET_AUTH_TOKEN)
