@@ -101,19 +101,17 @@ public class TesterApplication implements ApplicationRunner {
   private void sendWithRetry(Bundle bundle) throws InterruptedException {
     final var maxAttempts = 3;
 
-    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+    for (var attempt = 1; attempt < maxAttempts; attempt++) {
       try {
         fhirClient.transaction().withBundle(bundle).execute();
         return;
       } catch (FhirClientConnectionException exc) {
-        if (attempt == maxAttempts) {
-          throw exc;
-        }
-
         log.warn("Failed to send the bundle. Attempt: {}", attempt, exc);
         Thread.sleep(Duration.ofSeconds((long) Math.pow(2, attempt)));
       }
     }
+
+    fhirClient.transaction().withBundle(bundle).execute();
   }
 
   private void runAssert() throws InterruptedException {
