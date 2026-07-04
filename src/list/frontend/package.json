@@ -39,7 +39,7 @@
     "eslint-plugin-vue": "10.9.2",
     "esbuild": "0.28.1",
     "globals": "17.7.0",
-    "js-yaml": "4.1.1",
+    "js-yaml": "4.2.0",
     "jsdom": "29.1.1",
     "oxfmt": "0.57.0",
     "oxlint": "1.72.0",
