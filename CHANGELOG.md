@@ -1,5 +1,22 @@
 # Changelog
 
+## [10.5.1](https://github.com/miracum/recruit/compare/v10.5.0...v10.5.1) (2026-07-04)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#587](https://github.com/miracum/recruit/issues/587)) ([bd23a00](https://github.com/miracum/recruit/commit/bd23a007f336a7608ac44eb79d7b8354d35ba670))
+* **deps:** update dependency axios to v1.16.0 [security] ([#580](https://github.com/miracum/recruit/issues/580)) ([274708f](https://github.com/miracum/recruit/commit/274708f97e937447d1ffcbc1dd2ee4075db83a73))
+* **deps:** update dependency js-yaml to v4.2.0 [security] ([#584](https://github.com/miracum/recruit/issues/584)) ([790611a](https://github.com/miracum/recruit/commit/790611a0d3a9bf965943cfeedc534493690438dc))
+* VueJS v2 -&gt; v3 and Cypress -&gt; Playwright migration ([#592](https://github.com/miracum/recruit/issues/592)) ([43d6d61](https://github.com/miracum/recruit/commit/43d6d61c9f2878e33d0c24135533a1cfef69aea0))
+
+
+### Miscellaneous Chores
+
+* **deps:** spring boot v4 upgrade ([#596](https://github.com/miracum/recruit/issues/596)) ([8351604](https://github.com/miracum/recruit/commit/83516042ca7d2b9937f1674b585fd90ccee309e4))
+* **deps:** update dependency idna to v3.15 [security] ([#576](https://github.com/miracum/recruit/issues/576)) ([3a996d9](https://github.com/miracum/recruit/commit/3a996d9bc81eb2858535a824c512ca62caecef6d))
+* **deps:** update dependency pymdown-extensions to v10.21.3 [security] ([#575](https://github.com/miracum/recruit/issues/575)) ([9717352](https://github.com/miracum/recruit/commit/9717352d1f18e037011898d1d4c52756dcb956a9))
+
 ## [10.5.0](https://github.com/miracum/recruit/compare/v10.4.5...v10.5.0) (2026-05-14)
 
 
