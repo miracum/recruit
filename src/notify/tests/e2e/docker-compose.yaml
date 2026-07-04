@@ -26,7 +26,7 @@ services:
         condition: service_healthy
 
   jobstore-db:
-    image: docker.io/library/postgres:18.2@sha256:a688ae5c99f86c1424e046ace0de890608cc0ddb5ec8ef72a6ff8305fdc8f4d2
+    image: docker.io/library/postgres:18.3@sha256:7e32e9833a6fb1c92c32552794cb6ed569d51b445a54907d35fc112ef39684db
     environment:
       # kics-scan ignore-line
       POSTGRES_PASSWORD: postgres # pragma: allowlist secret
