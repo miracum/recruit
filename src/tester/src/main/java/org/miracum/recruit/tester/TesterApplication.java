@@ -1,12 +1,19 @@
 package org.miracum.recruit.tester;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
 import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,13 +55,16 @@ public class TesterApplication implements ApplicationRunner {
     var commands = args.getNonOptionArgs();
     if (commands.size() != 1) {
       throw new IllegalArgumentException(
-          "Expected exactly one command (delete-messages, test, or assert), got: " + commands);
+          "Expected exactly one command (delete-messages, test, assert, or "
+              + "assert-fhir-resource-counts), got: "
+              + commands);
     }
 
     switch (commands.get(0)) {
       case "delete-messages" -> runDeleteMessages();
       case "test" -> runTest();
       case "assert" -> runAssert();
+      case "assert-fhir-resource-counts" -> runAssertFhirResourceCounts();
       default -> throw new IllegalArgumentException("Unknown command: " + commands.get(0));
     }
   }
@@ -152,6 +162,114 @@ public class TesterApplication implements ApplicationRunner {
       }
 
       Thread.sleep(Duration.ofMinutes(1));
+    }
+  }
+
+  private void runAssertFhirResourceCounts() throws InterruptedException {
+    var expectedCounts = properties.expectedResourceCounts();
+    if (expectedCounts == null || expectedCounts.isEmpty()) {
+      throw new IllegalArgumentException(
+          "No expected resource counts configured. Use "
+              + "--expected-resource-counts.<ResourceType>=<count>, e.g. "
+              + "--expected-resource-counts.Patient=100");
+    }
+
+    waitForFhirServerUp();
+
+    var failures = new ArrayList<String>();
+    for (var entry : expectedCounts.entrySet()) {
+      try {
+        assertResourceCountWithRetry(entry.getKey(), entry.getValue());
+      } catch (IllegalStateException exc) {
+        failures.add(exc.getMessage());
+      }
+    }
+
+    if (!failures.isEmpty()) {
+      throw new IllegalStateException(
+          "Some resource counts did not match the expected value:\n" + String.join("\n", failures));
+    }
+  }
+
+  private void waitForFhirServerUp() throws InterruptedException {
+    var httpClient = HttpClient.newHttpClient();
+    var metadataUrl = URI.create(properties.fhirServerBaseUrl() + "/metadata");
+    final var maxAttempts = 15;
+    var backoff = Duration.ofSeconds(5);
+    final var maxBackoff = Duration.ofSeconds(60);
+
+    log.info("Using FHIR server @ {}", properties.fhirServerBaseUrl());
+
+    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        var request = HttpRequest.newBuilder(metadataUrl).GET().build();
+        var response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+        if (response.statusCode() == 200) {
+          return;
+        }
+
+        log.warn(
+            "FHIR server responded with status {}. Attempt: {}/{}",
+            response.statusCode(),
+            attempt,
+            maxAttempts);
+      } catch (IOException exc) {
+        log.warn(
+            "Failed to reach the FHIR server: {}. Attempt: {}/{}",
+            exc.getMessage(),
+            attempt,
+            maxAttempts);
+      }
+
+      if (attempt == maxAttempts) {
+        throw new IllegalStateException("Failed to wait for the FHIR server to be up.");
+      }
+
+      Thread.sleep(backoff);
+      backoff =
+          backoff.multipliedBy(2).compareTo(maxBackoff) > 0 ? maxBackoff : backoff.multipliedBy(2);
+    }
+  }
+
+  private void assertResourceCountWithRetry(String resourceType, int expectedCount)
+      throws InterruptedException {
+    var deadline = Instant.now().plus(Duration.ofSeconds(120));
+    var backoff = Duration.ofSeconds(1);
+    final var maxBackoff = Duration.ofSeconds(10);
+
+    while (true) {
+      try {
+        var bundle =
+            fhirClient
+                .search()
+                .forResource(resourceType)
+                .summaryMode(SummaryEnum.COUNT)
+                .returnBundle(Bundle.class)
+                .execute();
+        var actualCount = bundle.getTotal();
+
+        log.info("{}: expected {}, actual {}", resourceType, expectedCount, actualCount);
+
+        if (actualCount == expectedCount) {
+          return;
+        }
+
+        if (Instant.now().isAfter(deadline)) {
+          throw new IllegalStateException(
+              "%s: expected count %d but got %d"
+                  .formatted(resourceType, expectedCount, actualCount));
+        }
+      } catch (FhirClientConnectionException exc) {
+        if (Instant.now().isAfter(deadline)) {
+          throw new IllegalStateException("Failed to query " + resourceType, exc);
+        }
+
+        log.warn("Failed to query {}: {}", resourceType, exc.getMessage());
+      }
+
+      Thread.sleep(backoff);
+      backoff =
+          backoff.multipliedBy(2).compareTo(maxBackoff) > 0 ? maxBackoff : backoff.multipliedBy(2);
     }
   }
 }

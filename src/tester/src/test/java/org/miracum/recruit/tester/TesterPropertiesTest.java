@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URI;
 import java.time.Duration;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -50,6 +51,26 @@ class TesterPropertiesTest {
               assertThat(properties.totalDuration()).isEqualTo(Duration.ofMinutes(5));
               assertThat(properties.sendCount()).isEqualTo(10);
               assertThat(properties.expectedNumberOfMessages()).isEqualTo(2);
+            });
+  }
+
+  @Test
+  void properties_withExpectedResourceCounts_shouldBindThemAsMap() {
+    contextRunner
+        .withPropertyValues(
+            "expected-resource-counts.ResearchStudy=1",
+            "expected-resource-counts.Patient=100",
+            "expected-resource-counts.ResearchSubject=100")
+        .run(
+            context -> {
+              var properties = context.getBean(TesterProperties.class);
+
+              assertThat(properties.expectedResourceCounts())
+                  .containsExactlyInAnyOrderEntriesOf(
+                      Map.of(
+                          "ResearchStudy", 1,
+                          "Patient", 100,
+                          "ResearchSubject", 100));
             });
   }
 

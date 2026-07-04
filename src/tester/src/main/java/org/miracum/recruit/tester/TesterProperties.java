@@ -2,6 +2,7 @@ package org.miracum.recruit.tester;
 
 import java.net.URI;
 import java.time.Duration;
+import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
@@ -13,4 +14,5 @@ public record TesterProperties(
     String fhirResourceBundle,
     @DefaultValue("http://localhost:8082/fhir") URI fhirServerBaseUrl,
     @DefaultValue("30s") Duration totalDuration,
-    @DefaultValue("5") int sendCount) {}
+    @DefaultValue("5") int sendCount,
+    Map<String, Integer> expectedResourceCounts) {}
