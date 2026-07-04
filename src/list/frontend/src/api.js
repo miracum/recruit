@@ -174,7 +174,7 @@ const actions = {
     // select the encounters so we only need to iterate over them
     const encounters = entries
       .filter((entry) => entry.resourceType === "Encounter")
-      .sort((e1, e2) => {
+      .toSorted((e1, e2) => {
         // in the rare case that multiple encounters start at the same time
         // order the encounter whose status is in-progress or without an end-date
         // before the other.

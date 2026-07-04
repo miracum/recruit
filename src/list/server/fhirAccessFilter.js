@@ -53,7 +53,7 @@ const getEntriesToKeepFromBundle = (bundle, accessibleStudyAcronyms) =>
       if (!belongsToStudyAcronym) {
         logger
           .child({ fullUrl: entry.fullUrl })
-          .error("The List resource does not contain a reference to the study acronym. " + "Denying access by default.");
+          .error("The List resource does not contain a reference to the study acronym. Denying access by default.");
         return false;
       }
       if (accessibleStudyAcronyms.includes("*") || accessibleStudyAcronyms.includes(belongsToStudyAcronym)) {

@@ -116,7 +116,7 @@ export default {
 
       return fhirpath.evaluate(
         toRaw(o),
-        "valueString | valueInteger | " + "valueRange | valueTime | valueDateTime | valuePeriod"
+        "valueString | valueInteger | valueRange | valueTime | valueDateTime | valuePeriod"
       )[0];
     },
   },
