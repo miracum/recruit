@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "format": "npm run format --workspaces --if-present",
-    "format:check": "npm run format:check --workspaces --if-present"
+    "format:check": "npm run format:check --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
   },
   "workspaces": [
     "frontend",

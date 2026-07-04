@@ -2,6 +2,7 @@ import js from "@eslint/js";
 import pluginVue from "eslint-plugin-vue";
 import vitest from "@vitest/eslint-plugin";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
+import oxlint from "eslint-plugin-oxlint";
 import globals from "globals";
 
 const isProduction = process.env.NODE_ENV === "production";
@@ -41,4 +42,6 @@ export default [
       },
     },
   },
+  // must stay last: turns off ESLint rules already covered by oxlint (see .oxlintrc.json)
+  ...oxlint.buildFromOxlintConfigFile("./.oxlintrc.json"),
 ];
