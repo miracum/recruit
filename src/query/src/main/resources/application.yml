@@ -1,5 +1,5 @@
 query:
-  version: "10.5.3" # x-release-please-version
+  version: "10.5.4" # x-release-please-version
   cohortSizeThreshold: 100
   schedule:
     enable: true

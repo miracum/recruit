@@ -1,5 +1,17 @@
 # Changelog
 
+## [10.5.4](https://github.com/miracum/recruit/compare/v10.5.3...v10.5.4) (2026-07-05)
+
+
+### Miscellaneous Chores
+
+* drop policies ([#612](https://github.com/miracum/recruit/issues/612)) ([ffdd92a](https://github.com/miracum/recruit/commit/ffdd92a5b7a8a196fe08c0e6f1dd842aae375031))
+
+
+### CI/CD
+
+* digest pin image artifacts ([#614](https://github.com/miracum/recruit/issues/614)) ([7326f59](https://github.com/miracum/recruit/commit/7326f59fc3dc9fe5242d5cef5c111223e25fc351))
+
 ## [10.5.3](https://github.com/miracum/recruit/compare/v10.5.2...v10.5.3) (2026-07-05)
 
 
