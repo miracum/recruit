@@ -1,5 +1,12 @@
 # Changelog
 
+## [10.5.5](https://github.com/miracum/recruit/compare/v10.5.4...v10.5.5) (2026-07-05)
+
+
+### Bug Fixes
+
+* bundle handling with no entries for non-admin users ([#615](https://github.com/miracum/recruit/issues/615)) ([9e5a267](https://github.com/miracum/recruit/commit/9e5a267f088b829b1302ff91da9f80b255523195))
+
 ## [10.5.4](https://github.com/miracum/recruit/compare/v10.5.3...v10.5.4) (2026-07-05)
 
 
