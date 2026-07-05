@@ -92,7 +92,7 @@ export function createAccessFilter(trialsConfig, authConfig) {
     const handleBundle = (bundle) => {
       if (!bundle.entry) {
         logger.child({ bundleId: bundle.id }).warn("search result does not contain any entries.");
-        return true;
+        return bundle;
       }
 
       const entriesToKeep = getEntriesToKeepFromBundle(bundle, accessibleStudyAcronyms);
