@@ -36,7 +36,7 @@
     "express-prom-bundle": "8.0.0",
     "helmet": "8.2.0",
     "http-proxy-middleware": "4.1.1",
-    "js-yaml": "4.3.0",
+    "js-yaml": "5.2.1",
     "jwks-rsa": "2.1.5",
     "node-http-proxy-json": "0.1.9",
     "path": "0.12.7",
