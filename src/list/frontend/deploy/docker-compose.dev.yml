@@ -34,17 +34,14 @@ services:
       - 4317:4317
 
   keycloak:
-    image: quay.io/keycloak/keycloak:15.1.1@sha256:abade9a9cf985b454b30a9119183e62a0018ec546c8fc4fbd8572457afb4a666
+    image: quay.io/keycloak/keycloak:26.6.4@sha256:0aae0de7fca85525f727d3354df17896092de8bb26ae4c12d89c77e5df8cbce4
     command:
-      - -Dkeycloak.migration.action=import
-      - -Dkeycloak.migration.provider=singleFile
-      - -Dkeycloak.migration.file=/tmp/realm.json
-    environment:
-      KEYCLOAK_USER: admin
-      # kics-scan ignore-line
-      KEYCLOAK_PASSWORD: admin
+      - start-dev
+      - --import-realm
     volumes:
-      - ./data/aio-export.json:/tmp/realm.json
+      # the export already contains a "master" realm with its own admin user, so no
+      # KC_BOOTSTRAP_ADMIN_* is set here -- it would collide with the imported one.
+      - ./data/aio-export.json:/opt/keycloak/data/import/aio-export.json:ro
     ports:
       - 8083:8080
 

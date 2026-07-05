@@ -543,8 +543,9 @@ list:
       clientId: "uc1-screeninglist"
       # -- the Keycloak realm
       realm: "MIRACUM"
-      # -- the Keycloak auth URL. Should end in `/auth`.
-      url: "http://localhost:8083/auth"
+      # -- the Keycloak auth URL. For Keycloak 17+, this is the base URL without a `/auth` suffix
+      # (unless the server has `KC_HTTP_RELATIVE_PATH=/auth` configured for backwards compatibility).
+      url: "http://localhost:8083"
 
   dePseudonymization:
     # -- if enabled, all FHIR resource will first be processed by the fhir-pseudonymizer for de-pseudonymization before being displayed.

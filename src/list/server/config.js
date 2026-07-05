@@ -15,7 +15,7 @@ export default {
   },
   fhirUrl: process.env.FHIR_URL || "http://localhost:8082/fhir",
   auth: {
-    url: process.env.KEYCLOAK_AUTH_URL || "http://localhost:8083/auth",
+    url: process.env.KEYCLOAK_AUTH_URL || "http://localhost:8083",
     clientId: process.env.KEYCLOAK_CLIENT_ID || "uc1-screeninglist",
     realm: process.env.KEYCLOAK_REALM || "MIRACUM",
     disabled: process.env.KEYCLOAK_DISABLED === "true" || process.env.KEYCLOAK_DISABLED === "1",
