@@ -18,11 +18,19 @@ jobs:
       packages: write
       # needed for cosign
       id-token: write
+    outputs:
+      # JSON object mapping each module name to its released image's resolved digest,
+      # e.g. {"list": "sha256:...", "query": "sha256:...", ...}. Shared with prepare-artifacts
+      # so the docker-compose bundle can be pinned to the same digests without re-resolving them.
+      image-digests: ${{ steps.digests.outputs.json }}
     steps:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
@@ -39,12 +47,38 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
+      - name: Resolve released image digests
+        id: digests
+        env:
+          IMAGE_BASE: ghcr.io/${{ github.repository }}
+          # the release job only runs for tag pushes, so this is the release version, e.g. v10.5.3
+          IMAGE_TAG: ${{ github.ref_name }}
+        run: |
+          json="{}"
+          for module in list query notify query-fhir-trino; do
+            digest="$(docker buildx imagetools inspect "${IMAGE_BASE}/${module}:${IMAGE_TAG}" --format '{{.Manifest.Digest}}')"
+            echo "resolved ${module}:${IMAGE_TAG} -> ${digest}"
+            json="$(jq -c --arg k "${module}" --arg v "${digest}" '. + {($k): $v}' <<<"${json}")"
+          done
+          echo "json=${json}" >> "$GITHUB_OUTPUT"
+
       - name: Add helm repos and update deps
         run: |
           task helm-add-repos
           helm dep build charts/recruit
 
-      # TODO: maybe replace image tags in values.yaml with digests before packaging
+      - name: Pin image tags in values.yaml to their resolved digests
+        env:
+          DIGESTS: ${{ steps.digests.outputs.json }}
+        run: |
+          # maps the values.yaml key for each module's image block to its module/repository name
+          declare -A key_for=( [list]=list [query]=query [notify]=notify [query-fhir-trino]=queryFhirTrino )
+          for module in "${!key_for[@]}"; do
+            key="${key_for[$module]}"
+            digest="$(jq -r --arg k "${module}" '.[$k]' <<<"${DIGESTS}")"
+            yq -i ".${key}.image.tag += \"@${digest}\"" charts/recruit/values.yaml
+          done
+
       - name: Package, upload, and sign Helm chart
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
@@ -115,9 +149,17 @@ jobs:
           ls -lsa /tmp
           cp /tmp/recruit-helm-chart.tgz dist/
 
-      # TODO: replace tags with digests in compose - requires waiting for ci/build to be completed
-      #       turn this workflow into a reusable one and call it at the end of ci.yaml
-      #       yq '(.services[].image | select(. == "ghcr.io/miracum/recruit/list:*")) += "@sha256:123456"' docker-compose/docker-compose.yaml
+      - name: Pin image tags in docker-compose.yaml to their resolved digests
+        env:
+          DIGESTS: ${{ needs.publish-helm-chart.outputs.image-digests }}
+        run: |
+          for module in list query notify query-fhir-trino; do
+            digest="$(jq -r --arg k "${module}" '.[$k]' <<<"${DIGESTS}")"
+            current="$(yq -r ".services.${module}.image" docker-compose/docker-compose.yaml)"
+            updated="$(sed -E "s/(RECRUIT_IMAGE_TAG:-[^}]*)/\1@${digest}/" <<<"${current}")"
+            yq -i ".services.${module}.image = \"${updated}\"" docker-compose/docker-compose.yaml
+          done
+
       - name: Build Docker Compose deployment bundle
         run: |
           cp -r docker-compose/ dist/
