@@ -38,7 +38,7 @@ jobs:
             context: "src/list/"
           - module: "query-fhir-trino"
             context: "src/"
-    uses: miracum/.github/.github/workflows/standard-build.yaml@602a4dd955cee8ab1e7e9c70761b5b4c9d678a95 # v1.21.4
+    uses: miracum/.github/.github/workflows/standard-build.yaml@6dd82c72c638213b8b8dac2e93fc71e06a7bf349 # v1.22.3
     with:
       image: ghcr.io/${{ github.repository }}/${{ matrix.module }}
       build-context: ${{ matrix.context }}
@@ -179,7 +179,7 @@ jobs:
       token: ${{ secrets.MIRACUM_BOT_SEMANTIC_RELEASE_TOKEN }}
 
   lint:
-    uses: miracum/.github/.github/workflows/standard-lint.yaml@602a4dd955cee8ab1e7e9c70761b5b4c9d678a95 # v1.21.4
+    uses: miracum/.github/.github/workflows/standard-lint.yaml@6dd82c72c638213b8b8dac2e93fc71e06a7bf349 # v1.22.3
     permissions:
       contents: read
       pull-requests: write
