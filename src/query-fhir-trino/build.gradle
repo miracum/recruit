@@ -10,7 +10,7 @@ plugins {
 }
 
 dependencies {
-    implementation 'com.github.slugify:slugify:3.0.7'
+    implementation 'com.github.slugify:slugify:4.0.0'
 
     // https://mvnrepository.com/artifact/io.trino/trino-jdbc
     implementation 'io.trino:trino-jdbc:479'
