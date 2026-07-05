@@ -78,4 +78,14 @@ describe("fhirAccessFilter", () => {
     expect(filtered.total).toBe(0);
     expect(filtered.entry).toBeUndefined();
   });
+  it("should return the bundle unmodified if it contains no entries, even for non-admin users", () => {
+    // a search returning zero matches has no `entry` property at all (as opposed to an empty
+    // array), which must not be confused with "nothing to filter, so just deny/hide everything".
+    const filtered = filterAcessibleResources(bundleWithoutEntries, userWithoutAnyAccess);
+
+    expect(filtered).toEqual(bundleWithoutEntries);
+    expect(filtered.resourceType).toBe("Bundle");
+    expect(filtered.total).toBe(0);
+    expect(filtered.entry).toBeUndefined();
+  });
 });
