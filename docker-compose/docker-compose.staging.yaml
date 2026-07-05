@@ -178,7 +178,7 @@ services:
       - "traefik.http.routers.maildev.entrypoints=web"
 
   keycloak:
-    image: quay.io/keycloak/keycloak:15.1.1@sha256:abade9a9cf985b454b30a9119183e62a0018ec546c8fc4fbd8572457afb4a666
+    image: quay.io/keycloak/keycloak:26.6.4@sha256:0aae0de7fca85525f727d3354df17896092de8bb26ae4c12d89c77e5df8cbce4
     restart: unless-stopped
     cap_drop:
       - ALL
@@ -190,17 +190,15 @@ services:
     security_opt:
       - "no-new-privileges:true"
     command:
-      - -Dkeycloak.migration.action=import
-      - -Dkeycloak.migration.provider=singleFile
-      - -Dkeycloak.migration.file=/tmp/realm.json
+      - start-dev
+      - --import-realm
     privileged: false
     environment:
-      KEYCLOAK_USER: admin
-      # kics-scan ignore-line
-      KEYCLOAK_PASSWORD: admin
-      KEYCLOAK_STATISTICS: "all"
+      KC_METRICS_ENABLED: "true"
     volumes:
-      - ./staging/aio-export.json:/tmp/realm.json:ro
+      # the export already contains a "master" realm with its own admin user, so no
+      # KC_BOOTSTRAP_ADMIN_* is set here -- it would collide with the imported one.
+      - ./staging/aio-export.json:/opt/keycloak/data/import/aio-export.json:ro
     ports:
       - "0.0.0.0:38086:8080"
     labels:
