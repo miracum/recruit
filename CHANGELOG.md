@@ -1,5 +1,24 @@
 # Changelog
 
+## [10.5.2](https://github.com/miracum/recruit/compare/v10.5.1...v10.5.2) (2026-07-05)
+
+
+### Bug Fixes
+
+* **deps:** update dependency com.approvaltests:approvaltests to v31 ([#602](https://github.com/miracum/recruit/issues/602)) ([3a8e55d](https://github.com/miracum/recruit/commit/3a8e55da30d106ecf1744a87e20da07cd7fa8387))
+* **deps:** update dependency com.github.slugify:slugify to v4 ([#603](https://github.com/miracum/recruit/issues/603)) ([393d833](https://github.com/miracum/recruit/commit/393d833036e2cd1873ecbc96e86af6ab03866ae2))
+* **deps:** update dependency io.trino:trino-jdbc to v481 ([#604](https://github.com/miracum/recruit/issues/604)) ([3f48bd1](https://github.com/miracum/recruit/commit/3f48bd1f5589666f10d26d878889e93e8259224f))
+* **deps:** update dependency js-yaml to v5 ([#605](https://github.com/miracum/recruit/issues/605)) ([239dfd7](https://github.com/miracum/recruit/commit/239dfd7e4dc552628eeba9d2e2883a43355697a1))
+
+
+### Miscellaneous Chores
+
+* **deps:** pin mcr.microsoft.com/playwright docker tag to 5b8f294 ([#597](https://github.com/miracum/recruit/issues/597)) ([338084f](https://github.com/miracum/recruit/commit/338084f354b0d82eceb8d2a5c069c14b974b9bb1))
+* **deps:** update all digest updates ([#598](https://github.com/miracum/recruit/issues/598)) ([1644d71](https://github.com/miracum/recruit/commit/1644d719d4cb4fb81daff5139308e10085de74c1))
+* **deps:** update docker.io/trinodb/trino docker tag to v481 ([#600](https://github.com/miracum/recruit/issues/600)) ([9cd69d9](https://github.com/miracum/recruit/commit/9cd69d9450d56acf529cef3b33bf76c1080c452f))
+* **deps:** update github-actions ([#607](https://github.com/miracum/recruit/issues/607)) ([d1c4cc2](https://github.com/miracum/recruit/commit/d1c4cc29aa89ba7e9388016a503f819dcf14973d))
+* **deps:** upgraded keycloak ([#606](https://github.com/miracum/recruit/issues/606)) ([71e7b11](https://github.com/miracum/recruit/commit/71e7b117adf82ceab66e9420f8d176411d8cc991))
+
 ## [10.5.1](https://github.com/miracum/recruit/compare/v10.5.0...v10.5.1) (2026-07-04)
 
 
