@@ -19,7 +19,14 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  # the build job is intentionally *not* a matrix: a matrix job's outputs (notably the
+  # per-module image-digest) are only visible to downstream jobs for the last matrix
+  # instance to complete, not all of them. Splitting into one job per module lets the
+  # release job reference each module's actual, unambiguous build-time digest directly,
+  # instead of having to re-resolve it from the registry later (which would leave a
+  # window for the tag to be repointed between build and release).
+  build-query:
+    name: build query
     permissions:
       contents: write
       pull-requests: write
@@ -28,24 +35,73 @@ jobs:
       packages: write
       id-token: write
       attestations: write
-    strategy:
-      matrix:
-        include:
-          - module: "query"
-            context: "src/"
-          - module: "notify"
-            context: "src/"
-          - module: "list"
-            context: "src/list/"
-          - module: "query-fhir-trino"
-            context: "src/"
     uses: miracum/.github/.github/workflows/standard-build.yaml@6dd82c72c638213b8b8dac2e93fc71e06a7bf349 # v1.22.3
     with:
-      image: ghcr.io/${{ github.repository }}/${{ matrix.module }}
-      build-context: ${{ matrix.context }}
+      image: ghcr.io/${{ github.repository }}/query
+      build-context: "src/"
       enable-build-test-layer: true
       build-args: |
-        MODULE_NAME=${{ matrix.module }}
+        MODULE_NAME=query
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  build-notify:
+    name: build notify
+    permissions:
+      contents: write
+      pull-requests: write
+      security-events: write
+      actions: read
+      packages: write
+      id-token: write
+      attestations: write
+    uses: miracum/.github/.github/workflows/standard-build.yaml@6dd82c72c638213b8b8dac2e93fc71e06a7bf349 # v1.22.3
+    with:
+      image: ghcr.io/${{ github.repository }}/notify
+      build-context: "src/"
+      enable-build-test-layer: true
+      build-args: |
+        MODULE_NAME=notify
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  build-list:
+    name: build list
+    permissions:
+      contents: write
+      pull-requests: write
+      security-events: write
+      actions: read
+      packages: write
+      id-token: write
+      attestations: write
+    uses: miracum/.github/.github/workflows/standard-build.yaml@6dd82c72c638213b8b8dac2e93fc71e06a7bf349 # v1.22.3
+    with:
+      image: ghcr.io/${{ github.repository }}/list
+      build-context: "src/list/"
+      enable-build-test-layer: true
+      build-args: |
+        MODULE_NAME=list
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  build-query-fhir-trino:
+    name: build query-fhir-trino
+    permissions:
+      contents: write
+      pull-requests: write
+      security-events: write
+      actions: read
+      packages: write
+      id-token: write
+      attestations: write
+    uses: miracum/.github/.github/workflows/standard-build.yaml@6dd82c72c638213b8b8dac2e93fc71e06a7bf349 # v1.22.3
+    with:
+      image: ghcr.io/${{ github.repository }}/query-fhir-trino
+      build-context: "src/"
+      enable-build-test-layer: true
+      build-args: |
+        MODULE_NAME=query-fhir-trino
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -53,7 +109,10 @@ jobs:
     name: test
     runs-on: ubuntu-24.04
     needs:
-      - build
+      - build-query
+      - build-notify
+      - build-list
+      - build-query-fhir-trino
     strategy:
       fail-fast: false
       matrix:
@@ -67,8 +126,8 @@ jobs:
           - module: "query-fhir-trino"
     env:
       IMAGE_NAME: ghcr.io/${{ github.repository }}/${{ matrix.module }}
-      # the image tag is the same for all modules, we can just use the last matrix job's output as they all share the same tag.
-      IMAGE_TAG: ${{ needs.build.outputs.image-version }}
+      # the image tag is the same for all modules, so it doesn't matter which build job we read it from.
+      IMAGE_TAG: ${{ needs.build-query.outputs.image-version }}
     steps:
       # <https://docs.docker.com/storage/containerd/>
       # via <https://github.com/docker/setup-buildx-action/issues/257>
@@ -148,19 +207,25 @@ jobs:
 
   k8s-test:
     needs:
-      - build
+      - build-query
+      - build-notify
+      - build-list
+      - build-query-fhir-trino
       - test
     uses: ./.github/workflows/test-k8s-installation.yaml
     with:
-      image-tag: ${{ needs.build.outputs.image-version }}
+      image-tag: ${{ needs.build-query.outputs.image-version }}
 
   docker-compose-test:
     needs:
-      - build
+      - build-query
+      - build-notify
+      - build-list
+      - build-query-fhir-trino
       - test
     uses: ./.github/workflows/test-compose-installation.yaml
     with:
-      image-tag: ${{ needs.build.outputs.image-version }}
+      image-tag: ${{ needs.build-query.outputs.image-version }}
 
   release:
     # the docker compose image tags only change on releases, so
@@ -175,7 +240,18 @@ jobs:
     needs:
       - k8s-test
       - docker-compose-test
+      # listed directly (even though they're already transitively required via k8s-test/
+      # docker-compose-test) so their per-module image-digest outputs are addressable here.
+      - build-query
+      - build-notify
+      - build-list
+      - build-query-fhir-trino
     uses: ./.github/workflows/release.yaml
+    with:
+      query-image-digest: ${{ needs.build-query.outputs.image-digest }}
+      notify-image-digest: ${{ needs.build-notify.outputs.image-digest }}
+      list-image-digest: ${{ needs.build-list.outputs.image-digest }}
+      query-fhir-trino-image-digest: ${{ needs.build-query-fhir-trino.outputs.image-digest }}
     secrets:
       token: ${{ secrets.MIRACUM_BOT_SEMANTIC_RELEASE_TOKEN }}
 
