@@ -1,5 +1,13 @@
 # Changelog
 
+## [10.5.3](https://github.com/miracum/recruit/compare/v10.5.2...v10.5.3) (2026-07-05)
+
+
+### Miscellaneous Chores
+
+* **deps:** update github-actions ([#610](https://github.com/miracum/recruit/issues/610)) ([cd55ee6](https://github.com/miracum/recruit/commit/cd55ee61e05ed5558bf0c80130d075d374c55204))
+* **deps:** update github-actions (major) ([#601](https://github.com/miracum/recruit/issues/601)) ([acf72ac](https://github.com/miracum/recruit/commit/acf72ac13e0fa2069edfd6c0c93e7d28b931cbb4))
+
 ## [10.5.2](https://github.com/miracum/recruit/compare/v10.5.1...v10.5.2) (2026-07-05)
 
 

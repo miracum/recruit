@@ -1,5 +1,5 @@
 query-fhir-trino:
-  version: "10.5.2" # x-release-please-version
+  version: "10.5.3" # x-release-please-version
   schedule:
     # every 1 hour
     cron: "@hourly"
