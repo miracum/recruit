@@ -2,6 +2,23 @@ name: release
 
 on:
   workflow_call:
+    inputs:
+      query-image-digest:
+        description: "Digest (sha256:...) of the released query image, as produced by its build job"
+        required: true
+        type: string
+      notify-image-digest:
+        description: "Digest (sha256:...) of the released notify image, as produced by its build job"
+        required: true
+        type: string
+      list-image-digest:
+        description: "Digest (sha256:...) of the released list image, as produced by its build job"
+        required: true
+        type: string
+      query-fhir-trino-image-digest:
+        description: "Digest (sha256:...) of the released query-fhir-trino image, as produced by its build job"
+        required: true
+        type: string
     secrets:
       token:
         description: Token used to create a PR against the miracum/charts repository
@@ -29,9 +46,6 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
-
       - name: Login to GitHub Container Registry
         uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
@@ -47,19 +61,23 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
-      - name: Resolve released image digests
+      - name: Collect image digests
         id: digests
+        # these come directly from each module's own build job output (docker/build-push-action's
+        # `digest` output), not from re-querying the registry -- that would leave a window between
+        # build and release for the tag to be repointed to a different image.
         env:
-          IMAGE_BASE: ghcr.io/${{ github.repository }}
-          # the release job only runs for tag pushes, so this is the release version, e.g. v10.5.3
-          IMAGE_TAG: ${{ github.ref_name }}
+          LIST_DIGEST: ${{ inputs.list-image-digest }}
+          QUERY_DIGEST: ${{ inputs.query-image-digest }}
+          NOTIFY_DIGEST: ${{ inputs.notify-image-digest }}
+          QUERY_FHIR_TRINO_DIGEST: ${{ inputs.query-fhir-trino-image-digest }}
         run: |
-          json="{}"
-          for module in list query notify query-fhir-trino; do
-            digest="$(docker buildx imagetools inspect "${IMAGE_BASE}/${module}:${IMAGE_TAG}" --format '{{.Manifest.Digest}}')"
-            echo "resolved ${module}:${IMAGE_TAG} -> ${digest}"
-            json="$(jq -c --arg k "${module}" --arg v "${digest}" '. + {($k): $v}' <<<"${json}")"
-          done
+          json="$(jq -cn \
+            --arg list "${LIST_DIGEST}" \
+            --arg query "${QUERY_DIGEST}" \
+            --arg notify "${NOTIFY_DIGEST}" \
+            --arg query_fhir_trino "${QUERY_FHIR_TRINO_DIGEST}" \
+            '{"list": $list, "query": $query, "notify": $notify, "query-fhir-trino": $query_fhir_trino}')"
           echo "json=${json}" >> "$GITHUB_OUTPUT"
 
       - name: Add helm repos and update deps
