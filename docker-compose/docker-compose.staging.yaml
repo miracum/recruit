@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: docker.io/library/traefik:v3.7.4@sha256:fcdef599e6259359833dd2e1d49f9e964f66825d69bd3dd468f51102ce013d03
+    image: docker.io/library/traefik:v3.7.5@sha256:e4d98158c01ad752fc1071d4e9573788747230d902cdde00a772516e692d07c9
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -36,7 +36,7 @@ services:
           memory: 2048m
 
   ohdsi-webapi:
-    image: docker.io/ohdsi/webapi:2.15.1@sha256:09a8af62f640b533bb308e5b18d2a2f55a916ebacbff139824fe042d9c94e88d
+    image: docker.io/ohdsi/webapi:2.15.2@sha256:bc5cffde0d6f29bccc994876bf3cb290e8c3f4e5c087ab28c7163343c0b67393
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -178,7 +178,7 @@ services:
       - "traefik.http.routers.maildev.entrypoints=web"
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.6.4@sha256:0aae0de7fca85525f727d3354df17896092de8bb26ae4c12d89c77e5df8cbce4
+    image: quay.io/keycloak/keycloak:26.7.0@sha256:2eb3cd316835c990e69e26ade292ffa78f6fb0db7d5fc6377463c162e1979ac0
     restart: unless-stopped
     cap_drop:
       - ALL

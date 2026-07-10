@@ -7,15 +7,15 @@ dependencies:
   version: 5.8.0
 - name: ohdsi
   repository: oci://ghcr.io/chgl/charts
-  version: 0.25.76
+  version: 0.25.78
 - name: postgres
   repository: oci://registry-1.docker.io/cloudpirates
   version: 0.19.5
 - name: fhir-pseudonymizer
   repository: oci://ghcr.io/miracum/charts
-  version: 0.9.1
+  version: 0.9.4
 - name: common
   repository: oci://ghcr.io/miracum/charts
   version: 0.1.1
-digest: sha256:973c102b4e244e9266c44c81a17fdef8fafeb5e0b496ffe7a9f0fb7a7aaa0bde
-generated: "2026-07-04T19:50:41.592598335Z"
+digest: sha256:33259279bf36ca96a332ac3c907b6be4c8acaf49adf4e7497db254899d67b25d
+generated: "2026-07-10T09:41:40.795150055Z"

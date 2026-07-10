@@ -30,14 +30,14 @@ dependencies:
   - condition: ohdsi.enabled
     name: ohdsi
     repository: oci://ghcr.io/chgl/charts
-    version: 0.25.76
+    version: 0.25.78
   - name: postgres
     version: 0.19.5
     repository: oci://registry-1.docker.io/cloudpirates
     condition: postgres.enabled
   - condition: fhir-pseudonymizer.enabled
     name: fhir-pseudonymizer
-    version: 0.9.1
+    version: 0.9.4
     repository: oci://ghcr.io/miracum/charts
   - name: common
     repository: oci://ghcr.io/miracum/charts
