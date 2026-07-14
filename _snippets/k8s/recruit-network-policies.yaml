@@ -1,0 +1,260 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: fhir-server-policy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: recruit
+      app.kubernetes.io/name: fhirserver
+  ingress:
+    # all modules are allowed to communicate with
+    # the FHIR server
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: recruit
+              app.kubernetes.io/component: list
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: recruit
+              app.kubernetes.io/component: notify
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: recruit
+              app.kubernetes.io/component: query
+      ports:
+        - port: http
+    - from:
+        # allow the FHIR server to be scraped by the Prometheus stack
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: kube-prometheus-stack-prometheus
+      ports:
+        - port: metrics
+    # allow the FHIR server to be accessed via the NGINX Ingress
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ingress-nginx
+      ports:
+        - port: http
+  egress:
+    # for subscriptions to work, the FHIR server must be allowed to
+    # initiate connections to the notify module
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: recruit
+              app.kubernetes.io/component: notify
+      ports:
+        - port: http
+    # allow the server access to its own database
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: recruit
+              app.kubernetes.io/component: primary
+              app.kubernetes.io/name: fhir-server-postgres
+      ports:
+        - port: tcp-postgresql
+    # allow DNS lookups
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: list-policy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: recruit
+      app.kubernetes.io/component: list
+  ingress:
+    - from:
+        # allow the list module to be scraped by the Prometheus stack
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: kube-prometheus-stack-prometheus
+        # allow the list module to be accessed via the NGINX Ingress
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ingress-nginx
+      ports:
+        - port: http
+  egress:
+    # allow the list module to initiate connections to the FHIR server
+    # for querying screening lists
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: recruit
+              app.kubernetes.io/name: fhirserver
+      ports:
+        - port: http
+    # allow DNS lookups
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: query-policy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: recruit
+      app.kubernetes.io/component: query
+  ingress:
+    # allow the query module to be scraped by the Prometheus stack
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: kube-prometheus-stack-prometheus
+      ports:
+        - port: http-metrics
+  egress:
+    # allow the query module to initiate connections to the FHIR server
+    # to transmit FHIR resources
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: recruit
+              app.kubernetes.io/name: fhirserver
+      ports:
+        - port: http
+    # allow the query module to initiate connections to the OHDSI WebAPI
+    # in the ohdsi namespace
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ohdsi
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: ohdsi
+              app.kubernetes.io/component: webapi
+      ports:
+        - port: http
+    # allow the query module to initiate connections to the OHDSI PostgreSQL DB
+    # in the ohdsi namespace
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ohdsi
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: postgresql
+              app.kubernetes.io/instance: ohdsi
+              app.kubernetes.io/component: primary
+      ports:
+        - port: tcp-postgresql
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: notify-policy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: recruit
+      app.kubernetes.io/component: notify
+  ingress:
+    # allow the notify module to be scraped by the Prometheus stack
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: kube-prometheus-stack-prometheus
+      ports:
+        - port: http-metrics
+    # allow the notify module to receive subscription invocations from the FHIR server
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: recruit
+              app.kubernetes.io/name: fhirserver
+      ports:
+        - port: http
+  egress:
+    # allow the notify module to initiate connections to the FHIR server
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: recruit
+              app.kubernetes.io/name: fhirserver
+      ports:
+        - port: http
+    # allow the notify module to access the SMTP server at
+    # 192.0.2.1. The `32` subnet prefix length limits egress
+    # to just this one address
+    - to:
+        - ipBlock:
+            cidr: 192.0.2.1/32
+      ports:
+        - protocol: TCP
+          port: 1025
+    # allow the notify module to initiate connections to its PostgreSQL db
+    # in case of HA
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: recruit-postgres
+              app.kubernetes.io/instance: recruit
+              app.kubernetes.io/component: primary
+      ports:
+        - port: tcp-postgresql
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP
