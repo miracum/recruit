@@ -1,8 +1,8 @@
 {
   "keycloak": {
     "url": "http://localhost:8083/",
-    "realm": "MIRACUM",
-    "clientId": "uc1-screeninglist"
+    "realm": "recruIT",
+    "clientId": "recruit-list"
   },
   "isKeycloakDisabled": true,
   "checkLoginIframeDisabled": true,
