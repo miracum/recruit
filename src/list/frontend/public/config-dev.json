@@ -1,10 +1,11 @@
 {
   "keycloak": {
     "url": "http://localhost:8083/",
-    "realm": "recruIT",
-    "clientId": "recruit-list"
+    "realm": "MIRACUM",
+    "clientId": "uc1-screeninglist"
   },
   "isKeycloakDisabled": true,
+  "checkLoginIframeDisabled": true,
   "hideDemographics": false,
   "hideLastVisit": false,
   "hideEhrButton": false,

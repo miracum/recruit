@@ -10,7 +10,7 @@
 npm install
 # starts a FHIR-server and other services for testing.
 # the FHIR-server comes preloaded with sample recommendations @ http://localhost:8082/fhir
-docker-compose -f deploy/docker-compose.dev.yml up
+docker compose -f deploy/docker-compose.dev.yml up
 ```
 
 The patient identifiers in [sample-record-1.json](deploy/data/sample-record-1.json) have been encrypted to show how
