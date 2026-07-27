@@ -1,5 +1,24 @@
 # Changelog
 
+## [10.5.6](https://github.com/miracum/recruit/compare/v10.5.5...v10.5.6) (2026-07-27)
+
+
+### Bug Fixes
+
+* **deps:** update dependency io.trino:trino-jdbc to v482 ([#623](https://github.com/miracum/recruit/issues/623)) ([4f39a79](https://github.com/miracum/recruit/commit/4f39a795932e8d517033c600e1b3ddece0015d5c))
+* **deps:** update dependency js-yaml to v5.2.2 [security] ([#625](https://github.com/miracum/recruit/issues/625)) ([28315d1](https://github.com/miracum/recruit/commit/28315d17aa7b7ce5fdf61ff3f9219f53dd5a634c))
+
+
+### Miscellaneous Chores
+
+* **deps:** update all digest updates ([#618](https://github.com/miracum/recruit/issues/618)) ([a6c3351](https://github.com/miracum/recruit/commit/a6c3351dc9f25ca8cccc04fd9aa504ebd5599fcd))
+* **deps:** update dependency backrefs to v7 ([#621](https://github.com/miracum/recruit/issues/621)) ([8503580](https://github.com/miracum/recruit/commit/8503580eec8b7e28c66ae5f6587d2a80e811b50d))
+* **deps:** update dependency pymdown-extensions to v11 ([#599](https://github.com/miracum/recruit/issues/599)) ([0f55523](https://github.com/miracum/recruit/commit/0f555233b9aff6b3d07157c10e1558610746f0a5))
+* **deps:** update docker.io/trinodb/trino docker tag to v482 ([#622](https://github.com/miracum/recruit/issues/622)) ([1f58b53](https://github.com/miracum/recruit/commit/1f58b537bb5df8f8fc6e7fd623a04d426d509773))
+* **deps:** update ghcr.io/chgl/kube-powertools docker tag to v2.5.55 ([#619](https://github.com/miracum/recruit/issues/619)) ([75fa634](https://github.com/miracum/recruit/commit/75fa63476751be47aacb545119875365ef675e71))
+* **deps:** update github-actions ([#620](https://github.com/miracum/recruit/issues/620)) ([2c60abc](https://github.com/miracum/recruit/commit/2c60abc265dd72386e32c48837487dc008a8d077))
+* **deps:** updated jwks lib and test setup ([#626](https://github.com/miracum/recruit/issues/626)) ([d43d620](https://github.com/miracum/recruit/commit/d43d62048b1e43617bc851c048a4a288f7d1a2b0))
+
 ## [10.5.5](https://github.com/miracum/recruit/compare/v10.5.4...v10.5.5) (2026-07-05)
 
 
