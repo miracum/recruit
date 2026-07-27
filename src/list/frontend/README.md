@@ -8,17 +8,21 @@
 
 ```sh
 npm install
-# starts a FHIR-server and other services for testing.
-# the FHIR-server comes preloaded with sample recommendations @ http://localhost:8082/fhir
-docker-compose -f deploy/docker-compose.dev.yml up
 ```
 
-The patient identifiers in [sample-record-1.json](deploy/data/sample-record-1.json) have been encrypted to show how
-de-pseudonymization works.
+This module's development dependencies (FHIR server, Keycloak, Jaeger, MailDev) are provided by the shared compose
+stack in [`src/hack`](../../hack), used by all recruIT modules. From the `src` directory:
 
-The `docker-compose.dev.yml` contains the fhir-pseudonymizer service configured to decrypt these identifiers.
+```sh
+docker compose -f hack/compose.yaml up
+```
 
-You can then enabled it by setting `DE_PSEUDONYMIZATION_ENABLED=1` before running `npm run server:watch`.
+This starts everything the list module needs — no `--profile` flag required. See
+[Contributing](../../../docs/development/contributing.md) for the other available profiles (e.g. `omop` or `trino`)
+used by other modules.
+
+The FHIR server is reachable at <http://recruit-fhir-server.127.0.0.1.nip.io/fhir>. It starts out empty; see
+[Loading sample recruitment-list data](#loading-sample-recruitment-list-data) below to populate it.
 
 ### Compiles and hot-reloads for development
 
@@ -101,16 +105,15 @@ You can find screenshots and videos of the E2E tests inside the [tests/e2e](test
 
 ### Keycloak
 
-For development, a Keycloak server with a pre-configured test realm called "MIRACUM" is included in
-`docker-compose.dev.yaml`.
-It sets up a `uc1-screeninglist` client, representing this application. It also includes a few sample users to test the
-access control:
+For development, this module uses the shared Keycloak instance started as part of the [`src/hack`](../../hack)
+compose stack, pre-configured with a `recruIT` realm (see
+[recruit-realm-export.json](../../hack/keycloak/recruit-realm-export.json)) and a `recruit-list` client representing
+this application. It includes a few sample users to test access control:
 
-- name: admin, password: admin (Keycloak Admin)
+- name: admin, password: admin (Keycloak Admin, master realm)
 - name: user1, password: user1
 - name: user2, password: user2
-- name: user3, password: user3
-- name: uc1-admin, password: admin (has the `admin` role in the `uc1-screeninglist` client and therefore allowed to
+- name: list-admin, password: list-admin (has the `admin` role in the `recruit-list` client and therefore allowed to
   access everything)
 
 The repo also contains a set of sample authorization rules in [notify-rules.dev.yaml](../notify-rules.dev.yaml) which
@@ -122,22 +125,42 @@ For testing and development, it might be easier to disable Keycloak entirely. Wh
 need to modify [config-dev.json](public/config-dev.json) and set `isKeycloakDisabled` to `true`.
 When running the server, you'll need to set the env var `KEYCLOAK_DISABLED=true`.
 
+#### Loading sample recruitment-list data
+
+The shared FHIR server starts out empty. To quickly populate the screening list UI without running the full
+OMOP/Atlas/query pipeline (see [Contributing](../../../docs/development/contributing.md)), POST the same static
+sample resources used by the E2E tests directly to it:
+
+```sh
+for f in deploy/data/sample-record-1.json deploy/data/sample-record-2.json \
+  deploy/data/sample-record-3.json deploy/data/sample-lists.json; do
+  curl --fail-with-body -X POST -H "Content-Type: application/fhir+json" \
+    --data "@${f}" "http://recruit-fhir-server.127.0.0.1.nip.io/fhir"
+done
+```
+
+The patient identifiers in [sample-record-1.json](deploy/data/sample-record-1.json) have been encrypted to show how
+de-pseudonymization works; see [De-pseudonymization demo](#de-pseudonymization-demo) below.
+
+#### De-pseudonymization demo
+
+`src/hack` doesn't include the fhir-pseudonymizer service, since it's specific to this module's demo. Run it
+standalone, alongside the shared stack:
+
+```sh
+docker run --rm --network=hack_default -p 5000:8080 \
+  -v "$(pwd)/deploy/anonymization.yaml:/etc/anonymization.yaml:ro" \
+  -e APIKEY=fhir-pseudonymizer-api-key \
+  ghcr.io/miracum/fhir-pseudonymizer:v2.28.0@sha256:71ae4c5b0353095d615775fb07863e23322f8fe7cf13e6ab80cf083c77e4c03b
+```
+
+Then set `DE_PSEUDONYMIZATION_ENABLED=1` before running `npm run server:watch`.
+
 #### Export Keycloak realm config
 
-When you make changes to the test realm, you can do the following to keep the included config up-to-date:
-
-1. Within the Keycloak container run:
-
-   ```sh
-   cd /opt/jboss/keycloak/bin/
-   standalone.sh -Dkeycloak.migration.action=export -Dkeycloak.migration.provider=singleFile -Dkeycloak.migration.file=/tmp/aio-export.json
-   ```
-
-1. Copy the export to the local FS/repo:
-
-   ```sh
-   docker cp deploy_keycloak_1:/tmp/aio-export.json ./deploy/data/aio-export.json
-   ```
+The Keycloak realm configuration is maintained centrally at
+[`src/hack/keycloak/recruit-realm-export.json`](../../hack/keycloak/recruit-realm-export.json). See
+[Contributing](../../../docs/development/contributing.md) for how to run the shared stack and make/export changes.
 
 ### Configure Table Columns
 

@@ -5,6 +5,7 @@
     "clientId": "recruit-list"
   },
   "isKeycloakDisabled": true,
+  "checkLoginIframeDisabled": true,
   "hideDemographics": false,
   "hideLastVisit": false,
   "hideEhrButton": false,
