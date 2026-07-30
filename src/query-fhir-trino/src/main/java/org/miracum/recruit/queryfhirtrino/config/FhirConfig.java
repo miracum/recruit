@@ -10,6 +10,7 @@ import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class FhirConfig {
@@ -36,8 +37,15 @@ public class FhirConfig {
   }
 
   @Bean
+  @Primary
   public IGenericClient fhirClient(
       FhirContext fhirContext, @Value("${fhir.url}") String fhirServerUrl) {
     return fhirContext.newRestfulGenericClient(fhirServerUrl);
+  }
+
+  @Bean
+  public IGenericClient sqlOnFhirClient(
+      FhirContext fhirContext, @Value("${sql-on-fhir.url}") String sqlOnFhirServerUrl) {
+    return fhirContext.newRestfulGenericClient(sqlOnFhirServerUrl);
   }
 }

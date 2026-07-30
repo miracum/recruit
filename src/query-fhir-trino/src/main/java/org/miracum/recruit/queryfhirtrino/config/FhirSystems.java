@@ -6,5 +6,4 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record FhirSystems(
     String screeningListIdentifier,
     String screeningListCodeSystem,
-    String screeningListStudyReferenceExtension,
-    String eligibilityCriteriaTypes) {}
+    String screeningListStudyReferenceExtension) {}

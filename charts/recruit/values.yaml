@@ -732,6 +732,12 @@ queryFhirTrino:
         # -- the key containing the password
         key: "trino-password"
 
+  sqlOnFhir:
+    # -- base URL of a sql-on-fhir server (e.g. Pathling) implementing the SQLQueryRun operation,
+    #    used for SQLQuery Library resources that depend on a ViewDefinition or use a SQL dialect
+    #    other than trino. e.g. `http://pathling:8080/fhir`
+    url: ""
+
   # -- a Spring cron expression defining the execution schedule of the query module
   schedule: "@hourly"
 

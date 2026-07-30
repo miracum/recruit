@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.util.BundleUtil;
 import com.google.common.hash.Hashing;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +26,6 @@ import org.miracum.recruit.queryfhirtrino.config.FhirSystems;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +34,11 @@ public class PollForStudies {
 
   private static final Logger log = LoggerFactory.getLogger(PollForStudies.class);
 
-  private JdbcTemplate jdbcTemplate;
+  private static final String SQL_QUERY_LIBRARY_TYPE_SYSTEM =
+      "https://sql-on-fhir.org/ig/CodeSystem/LibraryTypesCodes";
+  private static final String SQL_QUERY_LIBRARY_TYPE_CODE = "sql-query";
+
+  private SqlQueryExecutor sqlQueryExecutor;
   private IGenericClient fhirClient;
   private FhirSystems fhirSystems;
 
@@ -44,8 +46,8 @@ public class PollForStudies {
   private boolean useUpsertInsteadOfConditionalUpdate = false;
 
   public PollForStudies(
-      JdbcTemplate jdbcTemplate, IGenericClient fhirClient, FhirSystems fhirSystems) {
-    this.jdbcTemplate = jdbcTemplate;
+      SqlQueryExecutor sqlQueryExecutor, IGenericClient fhirClient, FhirSystems fhirSystems) {
+    this.sqlQueryExecutor = sqlQueryExecutor;
     this.fhirClient = fhirClient;
     this.fhirSystems = fhirSystems;
   }
@@ -53,7 +55,8 @@ public class PollForStudies {
   @Scheduled(cron = "${query-fhir-trino.schedule.cron}")
   public void pollForStudies() {
     log.info(
-        "Polling for ResearchStudy resources referencing a Group with trino-sql eligibility criteria");
+        "Polling for ResearchStudy resources referencing a Group with a SQLQuery Library"
+            + " characteristic");
 
     var studyBundle =
         fhirClient
@@ -63,14 +66,19 @@ public class PollForStudies {
                 new ReferenceClientParam("enrollment")
                     .hasChainedProperty(
                         "Group",
-                        Group.CODE
-                            .exactly()
-                            .systemAndCode(fhirSystems.eligibilityCriteriaTypes(), "trino-sql")))
+                        new ReferenceClientParam("characteristic-reference")
+                            .hasChainedProperty(
+                                "Library",
+                                Library.TYPE
+                                    .exactly()
+                                    .systemAndCode(
+                                        SQL_QUERY_LIBRARY_TYPE_SYSTEM,
+                                        SQL_QUERY_LIBRARY_TYPE_CODE))))
             .include(new Include("ResearchStudy:enrollment"))
             .include(new Include("Group:characteristic-reference", true))
+            .withAdditionalHeader("Prefer", "handling=strict")
             .returnBundle(Bundle.class)
             .encodedJson()
-            .withAdditionalHeader("Prefer", "handling=strict")
             .execute();
 
     var researchStudies =
@@ -87,20 +95,14 @@ public class PollForStudies {
 
       var library = (Library) group.getCharacteristicFirstRep().getValueReference().getResource();
 
-      var decoded =
-          Base64.getDecoder().decode(library.getContentFirstRep().getDataElement().asStringValue());
+      log.info("Found SQLQuery Library with id: {}", library.getId());
 
-      var contentString = new String(decoded, StandardCharsets.UTF_8);
+      var patientIds = sqlQueryExecutor.resolvePatientIds(library);
 
-      log.info("Found Library with id: {}, {}", library.getId(), contentString);
-
-      var result = jdbcTemplate.queryForList(contentString);
-
-      for (var row : result) {
-        log.info("Found patient with id: {}", row.get("patient_id"));
+      for (var patientId : patientIds) {
+        log.info("Found patient with id: {}", patientId);
       }
 
-      var patientIds = result.stream().map(r -> (String) r.get("patient_id")).distinct().toList();
       var bundle = createScreeningListBundle(study, patientIds);
 
       fhirClient.transaction().withBundle(bundle).execute();

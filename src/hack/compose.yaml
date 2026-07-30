@@ -294,11 +294,15 @@ services:
       SPRING_DATASOURCE_URL: "jdbc:trino://trino:8080/fhir/default"
       SPRING_DATASOURCE_USERNAME: "trino"
       SPRING_DATASOURCE_PASSWORD: ""
+      SQL_ON_FHIR_URL: "http://pathling:8080/fhir"
     volumes:
       - type: tmpfs
         target: /tmp
         tmpfs:
           size: 1024
+    depends_on:
+      wait-for-pathling:
+        condition: service_completed_successfully
 
   jaeger:
     image: docker.io/jaegertracing/jaeger:2.20.0@sha256:46a886260e04002d8f45e213fc39063fa11a50446048fdaa64786fc0840cb9f8
@@ -491,7 +495,7 @@ services:
         condition: service_started
 
   pathling:
-    image: docker.io/aehrc/pathling:7.2.0@sha256:31b5ef50294e55136ae2278c2d0b8435a96a15b5da040ec785effb51875d08d3
+    image: ghcr.io/aehrc/pathling:2.0.1@sha256:f173027daaa5383597badb52bc294645b657f2ebc2a74d1a2304edce179185e0
     profiles:
       - trino
     ipc: none

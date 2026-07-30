@@ -125,6 +125,8 @@ spec:
                   key: {{ include "recruit.trino.secret.key" $ }}
             - name: QUERY_FHIR_TRINO_SCHEDULE_CRON
               value: {{ .schedule | quote }}
+            - name: SQL_ON_FHIR_URL
+              value: {{ .sqlOnFhir.url | quote }}
             - name: MANAGEMENT_ENDPOINT_HEALTH_PROBES_ADD_ADDITIONAL_PATHS
               value: "true"
             - name: MANAGEMENT_SERVER_PORT

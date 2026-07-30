@@ -108,6 +108,10 @@ services:
       SPRING_DATASOURCE_USERNAME: ${TRINO_USERNAME:?}
       SPRING_DATASOURCE_PASSWORD: ${TRINO_PASSWORD:?}
       QUERY_FHIR_TRINO_SCHEDULE_CRON: ${QUERY_FHIR_TRINO_SCHEDULE_CRON:-"@hourly"}
+      # base URL of a sql-on-fhir server (e.g. Pathling) implementing the $sqlquery-run operation.
+      # only required if any polled SQLQuery Library depends on a ViewDefinition or uses a
+      # non-trino SQL dialect.
+      SQL_ON_FHIR_URL: ${SQL_ON_FHIR_URL:-}
     volumes:
       - type: tmpfs
         target: /tmp

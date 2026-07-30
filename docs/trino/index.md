@@ -32,3 +32,25 @@ These studies then reference the elgibility critera as a FHIR Library which incl
 encodes the study eligibility criteria.
 
 ![FHIR resource relationships](../_img/diagrams/clinfhir-recruit-trino.png)
+
+## SQL Query Encoding
+
+The eligibility criteria's SQL query is encoded using the
+[SQLQuery](https://build.fhir.org/ig/FHIR/sql-on-fhir-v2/StructureDefinition-SQLQuery.html) profile
+from the [SQL on FHIR v2](https://build.fhir.org/ig/FHIR/sql-on-fhir-v2/index.html) implementation
+guide: a FHIR `Library` resource whose `content` carries the Base64-encoded SQL, and whose
+`relatedArtifact` entries (if any) reference the `ViewDefinition` resources ("tables") that the
+query depends on.
+
+`query-fhir-trino` decides how to execute the query depending on the Library's content:
+
+- If the Library has **no** `relatedArtifact` entries (i.e. it doesn't depend on any
+  `ViewDefinition`) **and** it has a `content` entry with `contentType` set to
+  `application/sql;dialect=trino`, the SQL is executed directly against the configured Trino
+  database.
+- Otherwise (the query depends on one or more `ViewDefinition`s, or no `trino`-dialect content is
+  present), the whole Library resource is sent as the `queryResource` input parameter to the
+  [`$sqlquery-run`](https://build.fhir.org/ig/FHIR/sql-on-fhir-v2/OperationDefinition-SQLQueryRun.html)
+  operation of a configured sql-on-fhir server. For the development setup, this is a
+  [Pathling](https://pathling.csiro.au/) server, configured via the `sql-on-fhir.url` /
+  `SQL_ON_FHIR_URL` property.
