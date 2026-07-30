@@ -97,13 +97,14 @@
         "type": {
           "coding": [
             {
-              "code": "logic-library"
+              "system": "https://sql-on-fhir.org/ig/CodeSystem/LibraryTypesCodes",
+              "code": "sql-query"
             }
           ]
         },
         "content": [
           {
-            "contentType": "text/x-trino",
+            "contentType": "application/sql;dialect=trino",
             "data": "U0VMRUNUIERJU1RJTkNUIHBhdGllbnQuaWQgQVMgcGF0aWVudF9pZA0KRlJPTSBmaGlyLmRlZmF1bHQucGF0aWVudCBBUyBwYXRpZW50DQpMRUZUIEpPSU4NCiAgICBmaGlyLmRlZmF1bHQuY29uZGl0aW9uDQogICAgT04gY29uZGl0aW9uLnN1YmplY3QucmVmZXJlbmNlID0gQ09OQ0FUKCdQYXRpZW50LycsIHBhdGllbnQuaWQpLA0KICAgIFVOTkVTVChjb25kaXRpb24uY29kZS5jb2RpbmcpIEFTIGNvbmRpdGlvbl9jb2RpbmcNCldIRVJFDQogICAgY29uZGl0aW9uX2NvZGluZy5zeXN0ZW0gPSAnaHR0cDovL3Nub21lZC5pbmZvL3NjdCcNCiAgICBBTkQgY29uZGl0aW9uX2NvZGluZy5jb2RlIElOICgnMTA1MDkwMDInKQ=="
           }
         ]

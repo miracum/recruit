@@ -14,7 +14,12 @@ fhir:
     screeningListIdentifier: "https://fhir.miracum.org/uc1/NamingSystem/screeningListId"
     screening-list-study-reference-extension: "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy"
     screening-list-code-system: "https://fhir.miracum.org/uc1/CodeSystem/screeningList"
-    eligibility-criteria-types: "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-criteria-types"
+
+# base URL of a sql-on-fhir server (e.g. Pathling) implementing the $sqlquery-run operation.
+# only required if any of the polled SQLQuery Library resources depend on ViewDefinitions
+# (via relatedArtifact) or use a SQL dialect other than trino.
+sql-on-fhir:
+  url: ""
 
 logging:
   pattern:
