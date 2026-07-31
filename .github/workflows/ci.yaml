@@ -35,6 +35,7 @@ jobs:
       packages: write
       id-token: write
       attestations: write
+      artifact-metadata: write
     uses: miracum/.github/.github/workflows/standard-build.yaml@56f97afca6189a2fafd4e5d7cbabc6c9b83c8a85 # v1.22.4
     with:
       image: ghcr.io/${{ github.repository }}/query
@@ -55,6 +56,7 @@ jobs:
       packages: write
       id-token: write
       attestations: write
+      artifact-metadata: write
     uses: miracum/.github/.github/workflows/standard-build.yaml@56f97afca6189a2fafd4e5d7cbabc6c9b83c8a85 # v1.22.4
     with:
       image: ghcr.io/${{ github.repository }}/notify
@@ -75,6 +77,7 @@ jobs:
       packages: write
       id-token: write
       attestations: write
+      artifact-metadata: write
     uses: miracum/.github/.github/workflows/standard-build.yaml@56f97afca6189a2fafd4e5d7cbabc6c9b83c8a85 # v1.22.4
     with:
       image: ghcr.io/${{ github.repository }}/list
@@ -95,6 +98,7 @@ jobs:
       packages: write
       id-token: write
       attestations: write
+      artifact-metadata: write
     uses: miracum/.github/.github/workflows/standard-build.yaml@56f97afca6189a2fafd4e5d7cbabc6c9b83c8a85 # v1.22.4
     with:
       image: ghcr.io/${{ github.repository }}/query-fhir-trino
