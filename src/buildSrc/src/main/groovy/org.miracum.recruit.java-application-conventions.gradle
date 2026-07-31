@@ -45,7 +45,7 @@ dependencies {
 
     implementation 'net.logstash.logback:logstash-logback-encoder:9.0'
 
-    implementation 'org.postgresql:postgresql:42.7.11'
+    implementation 'org.postgresql:postgresql:42.7.13'
 
     // let Spring Boot's dependency-management BOM pick the version compatible with the current
     // Spring Boot release
@@ -102,7 +102,7 @@ spotless {
 }
 
 checkstyle {
-    toolVersion = '13.6.0'
+    toolVersion = '13.8.0'
     configFile = file('../config/checkstyle/checkstyle.xml')
 }
 
