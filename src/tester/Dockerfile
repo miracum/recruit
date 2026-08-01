@@ -17,7 +17,7 @@ gradle ":tester:test"
 gradle jacocoTestReport
 EOF
 
-FROM gcr.io/distroless/java25-debian13:nonroot@sha256:94dc1090200950a4bdc530a3c3dc4094b3a2cfbeb3ae3b77d1abe41641efecb0
+FROM gcr.io/distroless/java25-debian13:nonroot@sha256:2ce7f9eb870273fcb76131cf1e3b0f3e4ef48ee86679166cae1d53fe035c47aa
 WORKDIR /app
 
 COPY --from=build /home/gradle/project/tester/dependencies/ ./
