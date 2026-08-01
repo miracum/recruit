@@ -36,7 +36,7 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@3f358d1a3ecaf4121d6635a99819aac801980f6e # v1.22.7
+    uses: miracum/.github/.github/workflows/standard-build.yaml@7eaa603620c450f73fd25d6b68c37795ef4be999 # v1.22.8
     with:
       image: ghcr.io/${{ github.repository }}/query
       build-context: "src/"
@@ -57,7 +57,7 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@3f358d1a3ecaf4121d6635a99819aac801980f6e # v1.22.7
+    uses: miracum/.github/.github/workflows/standard-build.yaml@7eaa603620c450f73fd25d6b68c37795ef4be999 # v1.22.8
     with:
       image: ghcr.io/${{ github.repository }}/notify
       build-context: "src/"
@@ -78,7 +78,7 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@3f358d1a3ecaf4121d6635a99819aac801980f6e # v1.22.7
+    uses: miracum/.github/.github/workflows/standard-build.yaml@7eaa603620c450f73fd25d6b68c37795ef4be999 # v1.22.8
     with:
       image: ghcr.io/${{ github.repository }}/list
       build-context: "src/list/"
@@ -99,7 +99,7 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@3f358d1a3ecaf4121d6635a99819aac801980f6e # v1.22.7
+    uses: miracum/.github/.github/workflows/standard-build.yaml@7eaa603620c450f73fd25d6b68c37795ef4be999 # v1.22.8
     with:
       image: ghcr.io/${{ github.repository }}/query-fhir-trino
       build-context: "src/"
@@ -260,7 +260,7 @@ jobs:
       token: ${{ secrets.MIRACUM_BOT_SEMANTIC_RELEASE_TOKEN }}
 
   lint:
-    uses: miracum/.github/.github/workflows/standard-lint.yaml@3f358d1a3ecaf4121d6635a99819aac801980f6e # v1.22.7
+    uses: miracum/.github/.github/workflows/standard-lint.yaml@7eaa603620c450f73fd25d6b68c37795ef4be999 # v1.22.8
     permissions:
       contents: read
       pull-requests: write
