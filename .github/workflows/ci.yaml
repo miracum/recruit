@@ -237,6 +237,7 @@ jobs:
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
     permissions:
       actions: read
+      attestations: write
       contents: write # for release notes
       # for creating OIDC tokens for signing.
       id-token: write
