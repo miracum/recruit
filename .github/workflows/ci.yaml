@@ -36,7 +36,7 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@56f97afca6189a2fafd4e5d7cbabc6c9b83c8a85 # v1.22.4
+    uses: miracum/.github/.github/workflows/standard-build.yaml@3f358d1a3ecaf4121d6635a99819aac801980f6e # v1.22.7
     with:
       image: ghcr.io/${{ github.repository }}/query
       build-context: "src/"
@@ -57,7 +57,7 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@56f97afca6189a2fafd4e5d7cbabc6c9b83c8a85 # v1.22.4
+    uses: miracum/.github/.github/workflows/standard-build.yaml@3f358d1a3ecaf4121d6635a99819aac801980f6e # v1.22.7
     with:
       image: ghcr.io/${{ github.repository }}/notify
       build-context: "src/"
@@ -78,7 +78,7 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@56f97afca6189a2fafd4e5d7cbabc6c9b83c8a85 # v1.22.4
+    uses: miracum/.github/.github/workflows/standard-build.yaml@3f358d1a3ecaf4121d6635a99819aac801980f6e # v1.22.7
     with:
       image: ghcr.io/${{ github.repository }}/list
       build-context: "src/list/"
@@ -99,7 +99,7 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@56f97afca6189a2fafd4e5d7cbabc6c9b83c8a85 # v1.22.4
+    uses: miracum/.github/.github/workflows/standard-build.yaml@3f358d1a3ecaf4121d6635a99819aac801980f6e # v1.22.7
     with:
       image: ghcr.io/${{ github.repository }}/query-fhir-trino
       build-context: "src/"
@@ -146,7 +146,7 @@ jobs:
 
           docker info -f '{{ .DriverStatus }}'
 
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -260,7 +260,7 @@ jobs:
       token: ${{ secrets.MIRACUM_BOT_SEMANTIC_RELEASE_TOKEN }}
 
   lint:
-    uses: miracum/.github/.github/workflows/standard-lint.yaml@56f97afca6189a2fafd4e5d7cbabc6c9b83c8a85 # v1.22.4
+    uses: miracum/.github/.github/workflows/standard-lint.yaml@3f358d1a3ecaf4121d6635a99819aac801980f6e # v1.22.7
     permissions:
       contents: read
       pull-requests: write
