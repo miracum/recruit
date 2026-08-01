@@ -121,10 +121,10 @@ jobs:
     runs-on: ubuntu-24.04
     needs:
       - publish-helm-chart
-    outputs:
-      hashes: ${{ steps.hash.outputs.hashes }}
     permissions:
       contents: write # to upload artifacts to the release
+      id-token: write # to sign the attestation
+      attestations: write # to persist the attestation
     steps:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -162,12 +162,15 @@ jobs:
           cp -r docker-compose/ dist/
           tar -C dist -zcvf dist/recruit-docker-compose.tgz docker-compose/
 
-      - name: Generate SLSA subject for release assets
-        id: hash
+      - name: Generate checksums for release assets
         working-directory: dist
         run: |
           sha256sum recruit-docker-compose.tgz recruit-helm-chart.tgz > checksums.sha256
-          echo "hashes=$(base64 -w0 < checksums.sha256)" >> "$GITHUB_OUTPUT"
+
+      - name: Generate build provenance attestation
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
+        with:
+          subject-checksums: dist/checksums.sha256
 
       - name: upload assets to release
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2 # zizmor: ignore[superfluous-actions] upload release assets directly
@@ -175,17 +178,3 @@ jobs:
           files: |
             dist/*.tgz
             dist/*.sha256
-
-  provenance:
-    needs:
-      - prepare-artifacts
-    permissions:
-      actions: read # To read the workflow path.
-      # To sign the provenance.
-      id-token: write
-      contents: write # To add assets to a release.
-    # can't be referenced by digest. See <https://github.com/slsa-framework/slsa-github-generator#verification-of-provenance>
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0 # zizmor: ignore[unpinned-uses] the action requires non-pinning
-    with:
-      base64-subjects: "${{ needs.prepare-artifacts.outputs.hashes }}"
-      upload-assets: true
