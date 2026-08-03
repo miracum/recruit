@@ -1,5 +1,31 @@
 # Changelog
 
+## [10.5.7](https://github.com/miracum/recruit/compare/v10.5.6...v10.5.7) (2026-08-03)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#632](https://github.com/miracum/recruit/issues/632)) ([98cd682](https://github.com/miracum/recruit/commit/98cd682635e61f673679c77a305df66d06b3ba24))
+* **deps:** update all non-major dependencies ([#641](https://github.com/miracum/recruit/issues/641)) ([4163dae](https://github.com/miracum/recruit/commit/4163dae89d685b7e482de084524bb6df38465a5a))
+* **deps:** update dependency fhirpath to v5 ([#631](https://github.com/miracum/recruit/issues/631)) ([4fed93a](https://github.com/miracum/recruit/commit/4fed93a4dd15188cfbe65c19546938272f5581c2))
+
+
+### Miscellaneous Chores
+
+* **deps:** lockfile update ([#634](https://github.com/miracum/recruit/issues/634)) ([ce5e991](https://github.com/miracum/recruit/commit/ce5e99159ccb51ee06309785cecb4f174a331630))
+* **deps:** update all digest updates ([#628](https://github.com/miracum/recruit/issues/628)) ([38cf73a](https://github.com/miracum/recruit/commit/38cf73a25c8b409fe956315556e94cf43c51a357))
+* **deps:** update all non-major dependencies ([#637](https://github.com/miracum/recruit/issues/637)) ([6355207](https://github.com/miracum/recruit/commit/63552073db547f4a4e20ead7a9813de3f6023873))
+* **deps:** update dependency jsdom to v30 ([#630](https://github.com/miracum/recruit/issues/630)) ([2b7126e](https://github.com/miracum/recruit/commit/2b7126ef74de9d0dd248cf64c8202eee8c1ce948))
+* **deps:** update docker.io/trinodb/trino docker tag to v483 ([#639](https://github.com/miracum/recruit/issues/639)) ([024d435](https://github.com/miracum/recruit/commit/024d4356b352070def6167836d65a90c772fad87))
+* **deps:** update gcr.io/distroless/java25-debian13:nonroot docker digest to 2ce7f9e ([#636](https://github.com/miracum/recruit/issues/636)) ([9ada120](https://github.com/miracum/recruit/commit/9ada1204a42f30657794ab32e0cedf7b7936d8b1))
+* **deps:** update github-actions ([#629](https://github.com/miracum/recruit/issues/629)) ([ce9f836](https://github.com/miracum/recruit/commit/ce9f83639a9dcf05d897c6f3b7af032cdcdf7ae2))
+* **deps:** update github-actions ([#638](https://github.com/miracum/recruit/issues/638)) ([5a412cd](https://github.com/miracum/recruit/commit/5a412cda617d3b2744c1fcde254e27c111ae259b))
+
+
+### CI/CD
+
+* switch to actions/attest ([#640](https://github.com/miracum/recruit/issues/640)) ([62fe8b9](https://github.com/miracum/recruit/commit/62fe8b947795f6d004a642db59e1d6fe0e05664f))
+
 ## [10.5.6](https://github.com/miracum/recruit/compare/v10.5.5...v10.5.6) (2026-07-27)
 
 
