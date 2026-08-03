@@ -26,7 +26,7 @@
     "@opentelemetry/sdk-trace-base": "2.10.0",
     "@opentelemetry/sdk-trace-node": "2.10.0",
     "@opentelemetry/semantic-conventions": "1.43.0",
-    "axios": "1.18.1",
+    "axios": "1.19.0",
     "connect-history-api-fallback": "2.0.0",
     "cors": "2.8.6",
     "debug": "4.4.3",
