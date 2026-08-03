@@ -10,6 +10,6 @@
   "author": "github.com/miracum/recruit",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@playwright/test": "1.62.0"
+    "@playwright/test": "1.62.1"
   }
 }
