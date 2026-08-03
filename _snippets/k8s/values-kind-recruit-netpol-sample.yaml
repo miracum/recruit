@@ -1,0 +1,19 @@
+# helm upgrade --install -n ohdsi --set=postgresql.auth.password=ohdsi --set=ingress.enabled=true ohdsi charts/ohdsi/
+
+# helm upgrade --install -n recruit --create-namespace \
+#  -f docs/_snippets/values-kind-recruit.yaml \
+#  -f docs/_snippets/values-kind-recruit-enable-servicemonitors.yaml \
+#  -f docs/_snippets/values-kind-recruit-netpol-sample.yaml \
+#  recruit ../../miracum/charts/charts/recruit/
+
+ohdsi:
+  enabled: false
+
+query:
+  webAPI:
+    url: http://ohdsi-webapi.ohdsi.svc:8080/WebAPI
+  omop:
+    host: ohdsi-postgresql.ohdsi.svc
+    database: ohdsi
+    username: postgres
+    password: 8QWDgyJieP
