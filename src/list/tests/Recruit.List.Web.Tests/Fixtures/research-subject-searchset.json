@@ -1,0 +1,95 @@
+{
+  "resourceType": "Bundle",
+  "type": "searchset",
+  "total": 3,
+  "entry": [
+    {
+      "fullUrl": "http://fhir.example.test/fhir/ResearchSubject/1",
+      "resource": {
+        "resourceType": "ResearchSubject",
+        "id": "1",
+        "meta": { "lastUpdated": "2024-05-01T10:00:00Z" },
+        "status": "on-study",
+        "period": { "start": "2024-01-15T00:00:00Z" },
+        "study": { "reference": "ResearchStudy/study-1" },
+        "individual": { "reference": "Patient/patient-1" },
+        "extension": [
+          {
+            "url": "https://fhir.miracum.org/uc1/StructureDefinition/researchSubjectNote",
+            "valueString": "called the patient back"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://fhir.example.test/fhir/ResearchSubject/2",
+      "resource": {
+        "resourceType": "ResearchSubject",
+        "id": "2",
+        "meta": { "lastUpdated": "2024-05-02T10:00:00Z" },
+        "status": "candidate",
+        "study": { "reference": "ResearchStudy/study-1" },
+        "individual": { "reference": "Patient/patient-2" }
+      }
+    },
+    {
+      "fullUrl": "http://fhir.example.test/fhir/ResearchSubject/3",
+      "resource": {
+        "resourceType": "ResearchSubject",
+        "id": "3",
+        "meta": { "lastUpdated": "2024-05-03T10:00:00Z" },
+        "status": "withdrawn",
+        "study": { "reference": "ResearchStudy/study-2" },
+        "individual": { "reference": "Patient/patient-1" }
+      }
+    },
+    {
+      "fullUrl": "http://fhir.example.test/fhir/Patient/patient-1",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "patient-1",
+        "identifier": [
+          {
+            "system": "http://ohdsi.org/omop/fhir/subject-identifier",
+            "value": "1"
+          },
+          {
+            "system": "http://acme.example.org/mrn",
+            "type": {
+              "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/v2-0203", "code": "MR" }]
+            },
+            "value": "MRN-0001"
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1980-03-14"
+      }
+    },
+    {
+      "fullUrl": "http://fhir.example.test/fhir/Patient/patient-2",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "patient-2",
+        "gender": "male",
+        "birthDate": "1965-11-02"
+      }
+    },
+    {
+      "fullUrl": "http://fhir.example.test/fhir/ResearchStudy/study-1",
+      "resource": {
+        "resourceType": "ResearchStudy",
+        "id": "study-1",
+        "title": "Burden and Medical Care of Sarcoma in Germany",
+        "extension": [{ "url": "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym", "valueString": "PROSa" }]
+      }
+    },
+    {
+      "fullUrl": "http://fhir.example.test/fhir/ResearchStudy/study-2",
+      "resource": {
+        "resourceType": "ResearchStudy",
+        "id": "study-2",
+        "title": "AMICA study without an acronym extension"
+      }
+    }
+  ]
+}

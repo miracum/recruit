@@ -7,14 +7,13 @@ or the [ELK Stack](https://www.elastic.co/elastic-stack) to collect these logs a
 
 ## Metrics
 
-All components expose metrics in standard Prometheus format. The query and notification module do so on the
-`:8080/actuator/prometheus` endpoint and the list module on `:8080/metrics`.
+The query and notification module expose metrics in standard Prometheus format on the `:8080/actuator/prometheus`
+endpoint. The list module (a Blazor Server app) does not currently expose a `/metrics` endpoint or support
+OpenTelemetry tracing; its `list.metrics.serviceMonitor` Helm value has no effect until that's added.
 
 See [Kubernetes/Metrics](./kubernetes.md#metrics) for how to setup monitoring on Kubernetes.
 
 ## Tracing
 
-All modules support distributed tracing using OpenTelemetry.
-See <https://github.com/opentracing-contrib/java-spring-jaeger> for the `notify` and `query` module configuration and <https://github.com/miracum/recruit/blob/master/src/list/server/config.js#L8>
-and <https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/configuration/sdk-environment-variables.md>
-for the list module setup.
+The `notify` and `query` modules support distributed tracing using OpenTelemetry.
+See <https://github.com/opentracing-contrib/java-spring-jaeger> for their configuration.

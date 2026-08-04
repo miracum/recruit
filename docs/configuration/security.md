@@ -2,57 +2,21 @@
 
 ## Authentication and Authorization for the Screening List
 
-Access to the screening list can configured using Keycloak as an identity provider.
-Since the screening list is a Single-Page Application, no client secret needs to be provided.
-Instead, make sure the screening list is only accessible behind TLS and the redirect URLs in Keycloak are set accordingly.
+Access to the screening list can be configured using Keycloak as an identity provider. Because the `list` module is
+a Blazor Server app (server-rendered, not a Single-Page Application), the OIDC login is handled entirely server-side:
+configure it either as a public client (authorization code flow with PKCE, the default, no client secret required) or
+as a confidential client by additionally setting `KEYCLOAK_CLIENT_SECRET`. Either way, make sure the screening list
+is only accessible behind TLS and the redirect URLs in Keycloak are set accordingly.
 
-To limit the screening lists and screening recommendations individual users can see, the notification rule configuration
-is used.
-By default, every user with a configured notification subscription is allowed to access the corresponding screening list.
-This ensures that when one receives an email about new screening recommendations, they can access these recommendations
-without extra configuration. Further, a new `accessibleBy.users` has been added to the trials. This allows specifying
-additional users either by email or by username which can access the trial's screening recommendations.
+!!! warning "No per-study access control"
 
-```yaml
-notify:
-  rules:
-    schedules:
-      everyMorning: "0 0 8 1/1 * ? *"
-      everyMonday: "0 0 8 ? * MON *"
-      everyHour: "0 0 0/1 1/1 * ? *"
-      everyFiveMinutes: "0 0/5 * 1/1 * ? *"
-
-    # trials are identified by their acronym which corresponds to the cohort's title in Atlas or the "[acronym=XYZ]" tag
-    trials:
-      # By default, every user under 'subscriptions' is also allowed to access the corresponding screening list,
-      # in the special case of '*', the user with the everything@example.com address is allowed to access every
-      # list.
-      - acronym: "*"
-        subscriptions:
-          - email: "everything@example.com"
-
-      - acronym: "SAMPLE"
-        # the new "accessibleBy" key allows specifying users either by username or email address that
-        # are allowed to access the screening list
-        accessibleBy:
-          users:
-            - "user1"
-            - "user.two@example.com"
-        subscriptions:
-          - email: "everyMorning@example.com"
-
-      - acronym: "AMICA"
-        subscriptions:
-          - email: "everyHour1@example.com"
-            notify: "everyHour"
-```
-
-Any user with the `admin` role inside the screening list client in Keycloak is allowed to access all recommendations:
-
-![Keycloak configuration for an admin user](../_img/security/keycloak-admin-role.png)
-
-You can disable authorization by not mounting the `notify-rules.yaml` inside the container; if no config is found,
-then no permissions are checked.
+    As of `list` module version 11 (the Blazor Server rewrite), access control is all-or-nothing: any user who can
+    authenticate against the configured Keycloak realm can see and edit candidates for **every** study. The
+    previous per-study, subscription- and role-based filtering described below (via the notification rule
+    configuration and the `admin` client role) applied only to the old Node.js/Vue implementation and has not been
+    reimplemented. If you need to restrict individual users to specific studies, either front the module with your
+    own authorization proxy, or keep users who shouldn't see all studies out of the Keycloak realm/client entirely
+    until per-study access control is reimplemented.
 
 ## Configuring the Query Module to access a secured WebAPI instance
 

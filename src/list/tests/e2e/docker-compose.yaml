@@ -1,0 +1,44 @@
+services:
+  list:
+    build:
+      dockerfile: Dockerfile
+      context: ../..
+    image: ghcr.io/miracum/recruit/list:${IMAGE_TAG}
+    environment:
+      FHIR_URL: http://fhir:8080/fhir
+      # Keycloak is intentionally disabled for these tests; the app renders its
+      # unauthenticated view directly. See tests/e2e/specs/*.
+      KEYCLOAK_DISABLED: "true"
+    depends_on:
+      - fhir
+
+  tester:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    environment:
+      BASE_URL: http://list:8080/
+      CI: "true"
+    depends_on:
+      loader:
+        condition: service_completed_successfully
+
+  fhir:
+    image: docker.io/hapiproject/hapi:v8.0.0@sha256:bf6ecbb4492361ae258a2bde6d4daf4c505b1a98e0925745aa0689e95b2d157e
+    environment:
+      HAPI_FHIR_VALIDATION_REQUESTS_ENABLED: "true"
+      HAPI_FHIR_SUBSCRIPTION_RESTHOOK_ENABLED: "true"
+      HAPI_FHIR_FHIR_VERSION: "R4"
+      HAPI_FHIR_CORS_ALLOWED_ORIGIN: "http://list:8080"
+
+  loader:
+    image: docker.io/curlimages/curl:8.21.0@sha256:7c12af72ceb38b7432ab85e1a265cff6ae58e06f95539d539b654f2cfa64bb13
+    command: >
+      sh -c "curl -X POST -H 'Content-Type: application/fhir+json' --retry-connrefused --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 15 --data '@/data/sample-data.json' http://fhir:8080/fhir &&
+             curl --retry-connrefused --connect-timeout 30 --max-time 60 --retry 10 --retry-delay 15 http://list:8080/api/health/readiness"
+    volumes:
+      - ${PWD}/data:/data:ro
+    depends_on:
+      - fhir
+      # not strictly required, but makes sure the list service starts at this point
+      - list

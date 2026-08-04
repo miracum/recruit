@@ -12,12 +12,12 @@ Please create an issue if support for a non-HAPI FHIR server is desired.
 By default, the recruIT tool only needs clinical data from OMOP and Atlas and automatically creates FHIR Patient,
 Encounter, ResearchStudy, and ResearchSubject resources in the FHIR server to populate the screening list.
 
-If you have an existing FHIR server already filled with at least Patient and Encounter resources, you can use it to display
-additional information in the last known stay column of the screening list (contact details and a more detailed description
-of the last known stay location if the Encounter provides it).
+!!! warning ""
 
-Further, if the existing server contains Condition, Procedure, Observation, and MedicationStatement resources, a small
-integrated patient record is populated.
+    As of `list` module version 11 (the Blazor Server rewrite), the "last known stay" column and the integrated
+    patient record view described below are not implemented; the screening list only shows the fields derived from
+    the `Patient` and `ResearchSubject` resources themselves (identifier, year of birth, gender, study, status,
+    and note).
 
 To make sure the existing patient resources are correctly referenced within the screening list, you have to configure the
 patient identifier FHIR system in the query module. Add the following environment variable to the `query` service:

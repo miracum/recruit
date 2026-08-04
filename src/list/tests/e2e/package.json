@@ -1,0 +1,15 @@
+{
+  "name": "list-e2e",
+  "version": "0.0.0",
+  "description": "recruIT e2e smoke tests for the list module",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "author": "github.com/miracum/recruit",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@playwright/test": "1.62.1"
+  }
+}

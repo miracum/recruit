@@ -115,12 +115,22 @@ will attempt to push the image to the remote registry.
 
 ### list
 
-The list module is a NodeJS app with a Vue frontend and can be built via Dockerfile.
+The list module is a Blazor Server (.NET) app and can be built via Dockerfile.
 From the `/src/list` directory, run:
 
 ```sh
 docker build -t ghcr.io/miracum/recruit/list:local .
 ```
+
+For local development without Docker, run the ASP.NET Core app directly:
+
+```sh
+dotnet run --project src/Recruit.List.Web
+```
+
+Set `KEYCLOAK_DISABLED=true` to skip the Keycloak login during local development, and
+`FHIR_URL` to point at a running FHIR server. See `src/Recruit.List.Web/Program.cs` for
+the full list of supported environment variables.
 
 ## Skaffold
 

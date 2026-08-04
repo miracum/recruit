@@ -13,17 +13,6 @@ query:
     - name: OTEL_EXPORTER_JAEGER_ENDPOINT
       value: "http://simplest-collector.observability.svc:14250"
 
-list:
-  extraEnv:
-    - name: TRACING_ENABLED
-      value: "true"
-    - name: OTEL_TRACES_EXPORTER
-      value: "jaeger"
-    - name: OTEL_SERVICE_NAME
-      value: "recruit-list"
-    - name: OTEL_EXPORTER_JAEGER_AGENT_HOST
-      value: "simplest-agent.observability.svc"
-
 notify:
   extraEnv:
     - name: JAVA_TOOL_OPTIONS

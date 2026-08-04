@@ -7,7 +7,10 @@ By default, the `-XX:MaxRAMPercentage` options is set to `85` inside the contain
 [here](https://support.cloudbees.com/hc/en-us/articles/204859670-Java-Heap-settings-Best-Practice#modernplatform)
 and [here](https://focusedlabs.io/blog/the-no-nonsense-guide-to-jvm-14-memory-on-kubernetes-508m) for an explanation.
 
-The `list` module is a NodeJS ExpressJS application with a significantly smaller footprint.
+The `list` module is an ASP.NET Core Blazor Server application. As of version 11 (the Blazor Server rewrite), its
+memory footprint hasn't been re-benchmarked yet -- a managed .NET runtime typically needs somewhat more baseline
+memory than the previous Node.js/Express implementation did, so treat the existing `128m` limit mentioned below as a
+starting point to verify under your own load rather than a validated number for the new implementation.
 
 The staging Docker Compose deployment sets the container memory limit for `query` and `notify` to `512m` which is
 sufficient to handle small and moderately sized cohorts. The limit should be larger than `256m` to avoid

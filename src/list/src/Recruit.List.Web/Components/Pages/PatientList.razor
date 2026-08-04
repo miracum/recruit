@@ -1,0 +1,149 @@
+@page "/"
+@attribute [Authorize]
+@inject IFhirService FhirService
+@inject ISnackbar Snackbar
+
+<PageTitle>Patient List</PageTitle>
+
+<MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+    <MudText Typo="Typo.h4">Patients</MudText>
+    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+        <MudTextField T="string"
+                       Value="_searchText"
+                       ValueChanged="@((string value) => _searchText = value)"
+                       Placeholder="Search patient, study, note, status..."
+                       Adornment="Adornment.Start"
+                       AdornmentIcon="@Icons.Material.Filled.Search"
+                       Immediate="true"
+                       Clearable="true"
+                       Style="min-width: 320px" />
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Refresh" OnClick="LoadAsync" Disabled="_isLoading">
+            Reload
+        </MudButton>
+    </MudStack>
+</MudStack>
+
+@if (_loadError is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-4">@_loadError</MudAlert>
+}
+
+<MudDataGrid T="ResearchSubjectRow"
+             Items="@_rows"
+             Loading="@_isLoading"
+             Filterable="true"
+             SortMode="SortMode.Multiple"
+             QuickFilter="@QuickFilter"
+             Virtualize="true"
+             FixedHeader="true"
+             Height="calc(100vh - 220px)"
+             Hover="true"
+             Dense="true">
+    <Columns>
+        <PropertyColumn Property="x => x.EnrolledSince" Title="Enrolled" Format="yyyy-MM-dd" />
+        <PropertyColumn Property="x => x.DisplayId" Title="Patient" />
+        <PropertyColumn Property="x => x.StudyDisplay" Title="Study" />
+        <TemplateColumn Title="Demographics" SortBy="@(x => x.BirthYear ?? 0)">
+            <CellTemplate>
+                @(context.Item.BirthYear?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "unknown"), @(context.Item.Gender ?? "unknown")
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn Title="Status" SortBy="@(x => x.Status)">
+            <CellTemplate>
+                <MudSelect T="string"
+                           Value="@context.Item.Status"
+                           ValueChanged="@((string value) => context.Item.Status = value)"
+                           Dense="true"
+                           Margin="Margin.Dense">
+                    @foreach (var status in Statuses)
+                    {
+                        <MudSelectItem Value="@status">@status</MudSelectItem>
+                    }
+                </MudSelect>
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn Title="Note">
+            <CellTemplate>
+                <MudTextField T="string"
+                              Value="@context.Item.Note"
+                              ValueChanged="@((string value) => context.Item.Note = value)"
+                              Margin="Margin.Dense" />
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn Title="" Sortable="false" Filterable="false">
+            <CellTemplate>
+                <MudIconButton Icon="@Icons.Material.Filled.Save"
+                               Color="Color.Primary"
+                               Disabled="@_savingIds.Contains(context.Item.ResearchSubjectId)"
+                               OnClick="@(() => SaveAsync(context.Item))" />
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <NoRecordsContent>
+        <MudText>No patients found.</MudText>
+    </NoRecordsContent>
+    <LoadingContent>
+        <MudText>Loading patients&hellip;</MudText>
+    </LoadingContent>
+</MudDataGrid>
+
+@code {
+    private static readonly string[] Statuses = ["candidate", "screening", "eligible", "ineligible", "on-study", "withdrawn"];
+
+    private List<ResearchSubjectRow> _rows = [];
+    private readonly HashSet<string> _savingIds = [];
+    private bool _isLoading;
+    private string? _loadError;
+    private string _searchText = "";
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private bool QuickFilter(ResearchSubjectRow row)
+    {
+        if (string.IsNullOrWhiteSpace(_searchText))
+        {
+            return true;
+        }
+
+        return Matches(row.DisplayId) || Matches(row.StudyDisplay) || Matches(row.Note) || Matches(row.Status);
+
+        bool Matches(string? value) => value is not null && value.Contains(_searchText, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task LoadAsync()
+    {
+        _isLoading = true;
+        _loadError = null;
+        try
+        {
+            var rows = await FhirService.GetResearchSubjectsAsync();
+            _rows = rows.ToList();
+        }
+        catch (Exception ex)
+        {
+            _loadError = $"Failed to load patients from the FHIR server: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task SaveAsync(ResearchSubjectRow row)
+    {
+        _savingIds.Add(row.ResearchSubjectId);
+        try
+        {
+            await FhirService.UpdateResearchSubjectAsync(row.ResearchSubjectId, row.Status, row.Note);
+            Snackbar.Add($"Saved {row.DisplayId}.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Failed to save {row.DisplayId}: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _savingIds.Remove(row.ResearchSubjectId);
+        }
+    }
+}

@@ -36,10 +36,10 @@ them to a FHIR server for persistence.
 
 ### List Module
 
-The list module (`list`), reads the list of potentially eligible patients from the FHIR server and displays them to the user.
-It displays information including the patient identifier, year of birth, and the physical location of the last known stay.
-Users can interact with this list by changing the recruitment status for each recommendation and viewing a basic, pseudonymized
-patient record.
+The list module (`list`), reads the list of potentially eligible patients (FHIR `ResearchSubject` resources) from
+the FHIR server and displays them to the user in a filterable, sortable table, including the patient identifier,
+year of birth, gender, and the study they were recommended for. Users can interact with this list by changing the
+recruitment status and adding a note for each candidate.
 
 ### Notification Module
 

@@ -20,19 +20,21 @@ using the `.staging.env` file.
 
 ## Screening List
 
-| Variable                        | Description                                                                                                                                                                                | Staging Default Value                    |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
-| KEYCLOAK_DISABLED               | Disable Keycloak authentication for the screening list.                                                                                                                                    | `false`                                  |
-| KEYCLOAK_CLIENT_ID              | Keycloak client id for the screening list component.                                                                                                                                       | `uc1-screeninglist`                      |
-| KEYCLOAK_REALM                  | The Keycloak realm.                                                                                                                                                                        | `MIRACUM`                                |
-| KEYCLOAK_AUTH_URL               | Base URL of the Keycloak server (no `/auth` suffix for Keycloak 17+, unless the server has `KC_HTTP_RELATIVE_PATH=/auth` set for backwards compatibility).                                 | `http://host.docker.internal:38086`      |
-| DE_PSEUDONYMIZATION_ENABLED     | Whether or not the resources from the FHIR server should be de-pseudonymized before being displayed in the screening list. See [De-Pseudonymization for details](./de-pseudonymization.md) | `false`                                  |
-| DE_PSEUDONYMIZATION_SERVICE_URL | The URL to the [FHIR Pseudonymizer](https://github.com/miracum/fhir-pseudonymizer) service used for de-pseudonymization.                                                                   | `""`                                     |
-| DE_PSEUDONYMIZATION_API_KEY     | The API key used to authenticate against the FHIR Pseudonymizer                                                                                                                            | `""`                                     |
-| HIDE_DEMOGRAPHICS               | Don't show age and gender of the persons                                                                                                                                                   | `false`                                  |
-| HIDE_LAST_VISIT                 | Don't show the last visit information                                                                                                                                                      | `false`                                  |
-| HIDE_EHR_BUTTON                 | Don't show the button to show EHR information of the person                                                                                                                                | `false`                                  |
-| PROXY_IS_SECURE_BACKEND         | If `FHIR_URL` points to a server using HTTPS, then you should set this to `1` or `true`                                                                                                    | `false`                                  |
+!!! note ""
+
+    The `list` module is a Blazor Server (.NET) app as of `list` module version 11. It no longer supports
+    de-pseudonymization, hiding individual UI columns, or per-study List-based access filtering -- see the
+    module's `Program.cs` for the current, smaller set of environment variables.
+
+| Variable                        | Description                                                                                                                                                 | Staging Default Value               |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ |
+| KEYCLOAK_DISABLED                | Disable Keycloak authentication for the screening list.                                                                                                                                    | `false`                              |
+| KEYCLOAK_CLIENT_ID               | Keycloak client id for the screening list component.                                                                                                                                       | `uc1-screeninglist`                  |
+| KEYCLOAK_REALM                   | The Keycloak realm.                                                                                                                                                                        | `MIRACUM`                            |
+| KEYCLOAK_AUTH_URL                | Base URL of the Keycloak server (no `/auth` suffix for Keycloak 17+, unless the server has `KC_HTTP_RELATIVE_PATH=/auth` set for backwards compatibility).                                 | `http://host.docker.internal:38086`  |
+| KEYCLOAK_CLIENT_SECRET           | The client secret, if the Keycloak client is configured as confidential rather than public.                                                                                               | `""`                                 |
+| KEYCLOAK_REQUIRE_HTTPS_METADATA  | Whether the Keycloak discovery/JWKS endpoints must be served over HTTPS. Internal cluster traffic is often plain HTTP.                                                                     | `false`                              |
+| PORT                             | The port the app listens on.                                                                                                                                                               | `8080`                               |
 
 ## Query Module
 
@@ -73,11 +75,12 @@ the string `[UC1]` or `[Test]` in order to be processed by the query module.
 | NOTIFY_MAIL_SMTP_PORT      | SMTP port on the host.                                                                                                                       | `1025`                                                           |
 | NOTIFY_MAIL_USERNAME       | SMTP username.                                                                                                                               | `user`                                                           |
 | NOTIFY_MAIL_PASSWORD       | SMTP password.                                                                                                                               | `pass`                                                           |
-| NOTIFY_MAILER_LINKTEMPLATE | Template used to generate a clickable link in the notification emails. `[list_id]` is mandatory and is replaced with the lists internal id.⁴ | `http://recruit-list.127.0.0.1.nip.io/recommendations/[list_id]` |
+| NOTIFY_MAILER_LINKTEMPLATE | Template used to generate a clickable link in the notification emails.⁴                                                                      | `http://recruit-list.127.0.0.1.nip.io/`                          |
 | NOTIFY_MAILER_FROM         | The sender email address for the created notification mails.                                                                                 | `rekrutierung@miracum.org`                                       |
 
 ³: If your FHIR server is running on `fhir.example.com` and your notification module runs on `notify.example.com:8080`,
 then this value should be set to `http://notify.example.com:8080/on-list-change`. The default exposed port of the notification module is `38087`. This external port is used when the FHIR server can't access the notification module using the Docker-network internal host and port `notify:8080`.
 
-⁴: If your screening list is running on `https://list.example.com:38080/`, then this value should be set to
-`https://list.example.com:38080/recommendations/[list_id]`.
+⁴: Since `list` module version 11, the module shows a single patient list across all studies rather than one
+page per study, so `[list_id]` is no longer supported -- point this at the module's root URL, e.g.
+`https://list.example.com:38080/`.

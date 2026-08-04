@@ -1,5 +1,10 @@
 # De-Pseudonymization
 
+!!! warning ""
+
+    Not currently supported by the `list` module as of version 11 (the Blazor Server rewrite). The
+    `DE_PSEUDONYMIZATION_*` environment variables described below no longer have any effect on `list`.
+
 !!! note ""
 
     Requires at least version 2.1.0 of the [MIRACUM FHIR Pseudonymizer](https://github.com/miracum/fhir-pseudonymizer)

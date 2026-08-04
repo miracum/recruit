@@ -43,17 +43,26 @@ services running on your local machine on the following named URLs:
 | Service                | Ingress URL                                    | Note                                                                                          |
 | ---------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------- |
 | OHDSI Atlas            | <http://recruit-ohdsi.127.0.0.1.nip.io/atlas/> |                                                                                               |
-| recruIT Screening List | <http://recruit-list.127.0.0.1.nip.io>         | login with username: `user1` and password: `user1`; Or as `uc1-admin`/`admin` for full access |
+| recruIT Screening List | <http://recruit-list.127.0.0.1.nip.io>         | login with username: `user1` and password: `user1`, or `uc1-admin`/`admin` |
 | HAPI FHIR Server       | <http://recruit-fhir-server.127.0.0.1.nip.io>  |                                                                                               |
 | MailDev                | <http://maildev.127.0.0.1.nip.io>              |                                                                                               |
 | Keycloak               | <http://auth.127.0.0.1.nip.io/>                | login with username: `admin` and password: `admin`                                            |
 
 By default, the query module runs every 5 minutes to check for new study candidates. After some time, you should see
-the following when opening the screening list at <http://recruit-list.127.0.0.1.nip.io> and logging in as `uc1-admin`/`admin`:
+the candidates for the `SAMPLE M` study as rows when opening the screening list at
+<http://recruit-list.127.0.0.1.nip.io> and logging in as `uc1-admin`/`admin`.
+
+!!! warning "Access control"
+
+    As of `list` module version 11 (the Blazor Server rewrite), any authenticated Keycloak user can see and edit
+    candidates for **all** studies -- the previous per-study, subscription-based access filtering (configured via
+    the notify module's rules file) is not implemented in the new UI.
+
+!!! note ""
+
+    The screenshots below show the previous per-study UI and are kept here for historical context.
 
 ![Screening list overview](../_img/docker-compose/list-overview.png)
-
-Clicking on the list for the `SAMPLE M` study should show the list of candidates:
 
 ![Screening list for the sample study](../_img/docker-compose/list-sample-m.png)
 

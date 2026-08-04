@@ -56,7 +56,7 @@ REPOSITORY_CHECKOV_ARGUMENTS:
   - "--skip-path=tests/"
   - "--skip-path=src/hack/"
   - "--skip-path=docker-compose/"
-  - "--skip-path=src/list/frontend/deploy/data/"
+  - "--skip-path=src/list/tests/e2e/data/"
 
 REPOSITORY_KICS_ARGUMENTS:
   - --fail-on=HIGH

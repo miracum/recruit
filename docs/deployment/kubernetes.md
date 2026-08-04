@@ -223,11 +223,14 @@ helm upgrade -n recruit \
   recruit oci://ghcr.io/miracum/recruit/charts/recruit
 ```
 
-Opening the Grafana instance included with the `kube-prometheus-stack` chart will allow you to query the exposed metrics:
+Opening the Grafana instance included with the `kube-prometheus-stack` chart will allow you to query the exposed metrics
+from the `query` and `notify` modules. As of `list` module version 11 (the Blazor Server rewrite), `list` does not
+yet expose a `/metrics` endpoint, so its `metrics.serviceMonitor` setting has no effect (the screenshot below is
+from a previous version of the module):
 
 <figure markdown>
   ![Grafana Explore view of some metrics for the list module](_img/grafana-sample-metrics.png)
-  <figcaption>Grafana Explore view of some metrics for the list module</figcaption>
+  <figcaption>Grafana Explore view of some metrics for the list module (from a previous version of the module)</figcaption>
 </figure>
 
 ## High-Availability
@@ -344,7 +347,9 @@ metadata:
 EOF
 ```
 
-The following values enable tracing for the query, list, and notify module, the HAPI FHIR server and the OHDSI WebAPI:
+The following values enable tracing for the query and notify module, the HAPI FHIR server and the OHDSI WebAPI. As
+of `list` module version 11 (the Blazor Server rewrite), `list` does not yet support OpenTelemetry tracing, so it's
+no longer part of this example:
 
 ```yaml title="values-kind-recruit-tracing.yaml"
 --8<-- "_snippets/k8s/values-kind-recruit-tracing.yaml"
@@ -357,7 +362,7 @@ The following values enable tracing for the query, list, and notify module, the 
 
 <figure markdown>
   ![Jaeger Trace timeline for interacting with the screening list](_img/jaeger-trace-timeline.png)
-  <figcaption>Jaeger Trace timeline for interacting with the screening list</figcaption>
+  <figcaption>Jaeger Trace timeline for interacting with the screening list (from a previous version of the module)</figcaption>
 </figure>
 
 ## Screening List De-Pseudonymization

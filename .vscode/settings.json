@@ -6,6 +6,5 @@
     "tag:yaml.org,2002:python/name:pymdownx.superfences.fence_code_format"
   ],
   "java.configuration.updateBuildConfiguration": "automatic",
-  "java.compile.nullAnalysis.mode": "automatic",
-  "jest.rootPath": "src/list/frontend"
+  "java.compile.nullAnalysis.mode": "automatic"
 }

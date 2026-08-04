@@ -40,11 +40,15 @@ Add this label to either the title or the description and save the cohort again:
 
 After some time (depending on the module's `QUERY_SCHEDULE_UNIXCRON`/`query.schedule` setting) the `query` module should
 detect this cohort definition, generate the cohort, and transfer all candidate patients to the FHIR server. At this point,
-the study should appear in the screening list overview:
+the study's candidate patients should appear as rows in the `list` module's patient table (distinguishable via the
+"Study" column), alongside candidates from any other configured studies.
+
+!!! note ""
+
+    As of `list` module version 11 (the Blazor Server rewrite), there is no longer a separate overview page per
+    study -- the screenshots below show the previous per-study UI and are kept here for historical context.
 
 ![Screening list overview](../_img/atlas-first-cohort/list-overview-with-test-study.png)
-
-Clicking on it reveals the list of 8 candidate patients:
 
 ![Screening list for the 'Test' study](../_img/atlas-first-cohort/list-test-study.png)
 
