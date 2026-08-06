@@ -1,17 +1,20 @@
 @inherits LayoutComponentBase
 @implements IDisposable
 @inject BreadcrumbState BreadcrumbState
+@inject ScreeningListService ScreeningListService
+@inject IOptions<NotificationOptions> NotificationOptionsAccessor
 
-<BbSidebarProvider>
-    <BbSidebar>
+<BbSidebarProvider HeightClass="h-dvh" CookieKey="@((string?)null)">
+    <BbSidebar Collapsible="false">
         <BbSidebarHeader>
-            <BbSidebarHeaderContent>
-                <BbSidebarHeaderInfo>
-                    <span class="font-semibold">recruIT</span>
-                </BbSidebarHeaderInfo>
-            </BbSidebarHeaderContent>
+            <div class="flex h-12 items-center gap-2 px-3">
+                <div class="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                    <LucideIcon Name="clipboard-list" Size="16" />
+                </div>
+                <span class="text-sm font-semibold">recruIT</span>
+            </div>
         </BbSidebarHeader>
-        <BbSidebarContent>
+        <BbSidebarContent Class="flex-1 overflow-auto px-2">
             <BbSidebarGroup>
                 <BbSidebarMenu>
                     <BbSidebarMenuItem>
@@ -28,11 +31,69 @@
                     </BbSidebarMenuItem>
                 </BbSidebarMenu>
             </BbSidebarGroup>
+
+            @if (FilteredActiveTrials.Count > 0)
+            {
+                <BbSidebarGroup>
+                    <BbCollapsible DefaultOpen="true">
+                        <BbCollapsibleTrigger AsChild="false" Class="w-full">
+                            <BbSidebarGroupLabel Class="cursor-pointer rounded-md hover:bg-sidebar-accent/50">
+                                <LucideIcon Name="chevron-down" Size="14" Class="mr-1" />
+                                Active trials
+                            </BbSidebarGroupLabel>
+                        </BbCollapsibleTrigger>
+                        <BbCollapsibleContent>
+                            <BbSidebarMenu>
+                                @foreach (var trial in FilteredActiveTrials)
+                                {
+                                    <BbSidebarMenuItem>
+                                        <BbSidebarMenuButton Href="@($"/trials/{trial.ListId}/patients")" Class="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
+                                            <span class="h-2 w-2 shrink-0 rounded-full @TrialDotColor(trial.StudyAcronym)"></span>
+                                            <span>@trial.StudyAcronym</span>
+                                            @if (trial.PendingCount > 0)
+                                            {
+                                                <BbBadge Variant="BadgeVariant.Secondary" Class="ml-auto h-5 px-1.5 text-[10px]">@trial.PendingCount</BbBadge>
+                                            }
+                                        </BbSidebarMenuButton>
+                                    </BbSidebarMenuItem>
+                                }
+                            </BbSidebarMenu>
+                        </BbCollapsibleContent>
+                    </BbCollapsible>
+                </BbSidebarGroup>
+            }
+
+            @if (FilteredInactiveTrials.Count > 0)
+            {
+                <BbSidebarGroup>
+                    <BbCollapsible DefaultOpen="false">
+                        <BbCollapsibleTrigger AsChild="false" Class="w-full">
+                            <BbSidebarGroupLabel Class="cursor-pointer rounded-md hover:bg-sidebar-accent/50">
+                                <LucideIcon Name="chevron-down" Size="14" Class="mr-1" />
+                                Inactive trials
+                            </BbSidebarGroupLabel>
+                        </BbCollapsibleTrigger>
+                        <BbCollapsibleContent>
+                            <BbSidebarMenu>
+                                @foreach (var trial in FilteredInactiveTrials)
+                                {
+                                    <BbSidebarMenuItem>
+                                        <BbSidebarMenuButton Href="@($"/trials/{trial.ListId}/patients")" Class="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
+                                            <span class="h-2 w-2 shrink-0 rounded-full @TrialDotColor(trial.StudyAcronym)"></span>
+                                            <span>@trial.StudyAcronym</span>
+                                        </BbSidebarMenuButton>
+                                    </BbSidebarMenuItem>
+                                }
+                            </BbSidebarMenu>
+                        </BbCollapsibleContent>
+                    </BbCollapsible>
+                </BbSidebarGroup>
+            }
         </BbSidebarContent>
         <BbSidebarFooter>
             <AuthorizeView>
                 <Authorized>
-                    <div class="flex items-center justify-between gap-2 px-2 py-1">
+                    <div class="flex items-center justify-between gap-2 px-3 py-2">
                         <span class="truncate text-sm">@context.User.Identity?.Name</span>
                         <form method="post" action="/authentication/logout">
                             <BbButton Type="ButtonType.Submit" Variant="ButtonVariant.Ghost" Size="ButtonSize.Small">
@@ -42,21 +103,23 @@
                     </div>
                 </Authorized>
                 <NotAuthorized>
-                    <a href="/authentication/login" class="px-2 py-1 text-sm">Sign in</a>
+                    <a href="/authentication/login" class="px-3 py-2 text-sm">Sign in</a>
                 </NotAuthorized>
             </AuthorizeView>
         </BbSidebarFooter>
     </BbSidebar>
 
-    <BbSidebarInset>
-        <header class="flex items-center gap-2 border-b px-4 py-3">
-            <BbSidebarTrigger />
-            <div class="flex-1">
+    <BbSidebarInset Class="flex min-w-0 flex-col bg-background">
+        <header class="flex shrink-0 items-center justify-between border-b px-4 py-3">
+            <div class="flex items-center gap-2">
+                <BbSidebarTrigger Class="h-8 w-8 md:hidden">
+                    <LucideIcon Name="menu" Size="16" />
+                </BbSidebarTrigger>
                 <Breadcrumbs Items="BreadcrumbState.Items" />
             </div>
             <NotificationBell />
         </header>
-        <main class="flex-1 p-4">
+        <main class="min-h-0 flex-1 overflow-auto p-4">
             <ErrorBoundary>
                 <ChildContent>
                     @Body
@@ -83,7 +146,46 @@
 </div>
 
 @code {
-    protected override void OnInitialized() => BreadcrumbState.Changed += OnBreadcrumbChanged;
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    private static readonly string[] DotColors =
+    [
+        "bg-blue-500", "bg-green-500", "bg-orange-500", "bg-purple-500", "bg-pink-500", "bg-teal-500",
+    ];
+
+    private List<TrialSummaryDto> _trials = [];
+    private string _trialSearch = string.Empty;
+
+    private List<TrialSummaryDto> FilteredActiveTrials =>
+        [.. _trials.Where(t => t.ListStatus == "current" && MatchesSearch(t))];
+
+    private List<TrialSummaryDto> FilteredInactiveTrials =>
+        [.. _trials.Where(t => t.ListStatus != "current" && MatchesSearch(t))];
+
+    private bool MatchesSearch(TrialSummaryDto trial) =>
+        string.IsNullOrWhiteSpace(_trialSearch) || trial.StudyAcronym.Contains(_trialSearch, StringComparison.OrdinalIgnoreCase);
+
+    protected override async Task OnInitializedAsync()
+    {
+        BreadcrumbState.Changed += OnBreadcrumbChanged;
+
+        try
+        {
+            var user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
+            _trials = [.. await ScreeningListService.GetAccessibleTrialsAsync(user, NotificationOptionsAccessor.Value.NewSuggestionWindowDays)];
+        }
+        catch
+        {
+            // The sidebar trial list is a navigation convenience, not the source of truth - if it
+            // fails to load, pages that actually need trial data (Dashboard, PatientList) surface
+            // their own error there. Just leave the sidebar list empty.
+            _trials = [];
+        }
+    }
+
+    private static string TrialDotColor(string acronym) =>
+        DotColors[Math.Abs(acronym.GetHashCode()) % DotColors.Length];
 
     private void OnBreadcrumbChanged() => InvokeAsync(StateHasChanged);
 
