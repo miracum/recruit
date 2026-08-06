@@ -1,0 +1,12 @@
+<div class="flex flex-col gap-1">
+    <span class="text-xs text-muted-foreground">@Label</span>
+    <span class="text-2xl font-semibold">@Value</span>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = string.Empty;
+
+    [Parameter]
+    public int Value { get; set; }
+}

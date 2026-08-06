@@ -1,0 +1,53 @@
+<div class="h-full cursor-pointer transition-shadow hover:shadow-md" @onclick="NavigateToPatients">
+    <BbCard Class="flex h-full flex-col">
+        <BbCardHeader>
+            <div class="flex items-center justify-between gap-2">
+                <BbCardTitle>@Trial.StudyAcronym</BbCardTitle>
+                <BbBadge Variant="@(IsActive ? BadgeVariant.Secondary : BadgeVariant.Outline)">
+                    @(IsActive ? "Active" : "Inactive")
+                </BbBadge>
+            </div>
+        </BbCardHeader>
+        <BbCardContent Class="flex-1">
+            <div class="grid grid-cols-3 gap-4">
+                <MetricTile Label="Recruited" Value="Trial.RecruitedCount" />
+                <MetricTile Label="Pending" Value="Trial.PendingCount" />
+                <MetricTile Label="Not Recruited" Value="Trial.NotRecruitedCount" />
+            </div>
+        </BbCardContent>
+        <BbCardFooter Class="flex items-center justify-between">
+            <div class="flex items-center gap-1.5 text-xs text-muted-foreground" title="Since you last opened this trial">
+                <span class="h-2 w-2 rounded-full bg-primary"></span>
+                <LucideIcon Name="user" Size="14" />
+                <span>3 new suggestions</span>
+            </div>
+            @if (ShowAdminControls)
+            {
+                <div class="flex items-center gap-2" @onclick:stopPropagation="true">
+                    <BbSwitch Checked="IsActive" CheckedChanged="OnActiveToggled" />
+                    <span class="text-sm text-muted-foreground">Active</span>
+                </div>
+            }
+        </BbCardFooter>
+    </BbCard>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public required TrialSummaryDto Trial { get; set; }
+
+    [Parameter]
+    public bool ShowAdminControls { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnActiveChanged { get; set; }
+
+    [Inject]
+    private NavigationManager Navigation { get; set; } = default!;
+
+    private bool IsActive => Trial.ListStatus == "current";
+
+    private void NavigateToPatients() => Navigation.NavigateTo($"/trials/{Trial.ListId}/patients");
+
+    private async Task OnActiveToggled(bool active) => await OnActiveChanged.InvokeAsync(active);
+}

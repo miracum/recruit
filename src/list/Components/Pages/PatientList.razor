@@ -1,0 +1,197 @@
+@page "/trials/{ListId}/patients"
+@attribute [Authorize]
+@inject ScreeningListService ScreeningListService
+@inject PatientRecordService PatientRecordService
+@inject BreadcrumbState BreadcrumbState
+
+<PageTitle>@(_summary?.StudyAcronym ?? "Patients")</PageTitle>
+
+@if (_loading)
+{
+    <BbSkeleton Class="mb-4 h-8 w-64" />
+    <BbSkeleton Class="h-96 w-full" />
+}
+else if (_errorMessage is not null)
+{
+    <BbAlert Variant="AlertVariant.Danger">
+        <BbAlertTitle>Could not load this trial's recommendations</BbAlertTitle>
+        <BbAlertDescription>@_errorMessage</BbAlertDescription>
+    </BbAlert>
+}
+else if (_summary is not null)
+{
+    @if (!string.IsNullOrEmpty(_summary.StudyTitle))
+    {
+        <h2 class="text-lg font-medium">@_summary.StudyTitle</h2>
+    }
+
+    @if (!string.IsNullOrEmpty(_summary.StudyDescription))
+    {
+        <p class="mt-1 text-sm text-muted-foreground">@_summary.StudyDescription</p>
+    }
+
+    @if (_summary.LastUpdated is not null)
+    {
+        <p class="mb-4 mt-1 text-sm text-muted-foreground">Last updated @_summary.LastUpdated.Value.LocalDateTime.ToString("g")</p>
+    }
+
+    @if (!string.IsNullOrEmpty(_summary.TruncationNote))
+    {
+        <BbAlert Variant="AlertVariant.Warning" Class="mb-4">
+            <BbAlertDescription>@_summary.TruncationNote</BbAlertDescription>
+        </BbAlert>
+    }
+
+    @if (_patients.Count == 0)
+    {
+        <BbEmpty Title="No recommendations" Description="This trial has no recommended patients yet." />
+    }
+    else
+    {
+        <BbDataTable TData="PatientListEntryDto" Data="_patients" ShowPagination="true"
+                     PageSizes="new[] { 10, 25, 50, 100 }" InitialPageSize="25" IsLoading="false">
+            <Columns>
+                <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="Name" Property="p => p.Name ?? p.PatientId" Sortable="true">
+                    <CellTemplate Context="p">
+                        <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
+                            <span class="font-medium hover:underline">@(p.Name ?? p.PatientId)</span>
+                            @if (p.IsNew(NewSuggestionWindowDays))
+                            {
+                                <BbBadge Variant="BadgeVariant.Default" Class="ml-2">New</BbBadge>
+                            }
+                            @if (p.SystemDeterminedIneligible)
+                            {
+                                <BbBadge Variant="BadgeVariant.Outline" Class="ml-2">System: ineligible</BbBadge>
+                            }
+                        </div>
+                    </CellTemplate>
+                </BbDataTableColumn>
+                <BbDataTableColumn TData="PatientListEntryDto" TValue="int?" Header="Age" Property="p => p.Age" Sortable="true" Width="80px">
+                    <CellTemplate Context="p">
+                        <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">@p.Age</div>
+                    </CellTemplate>
+                </BbDataTableColumn>
+                <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="Gender" Property="p => p.Gender" Sortable="true" Width="100px">
+                    <CellTemplate Context="p">
+                        <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">@p.Gender</div>
+                    </CellTemplate>
+                </BbDataTableColumn>
+                <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="Last known location">
+                    <CellTemplate Context="p">
+                        <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
+                            @(p.LastKnownLocationLoaded ? p.LastKnownLocation ?? "Unknown" : "Loading...")
+                        </div>
+                    </CellTemplate>
+                </BbDataTableColumn>
+                <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="Recommended">
+                    <CellTemplate Context="p">
+                        <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
+                            @(p.RecommendedDate?.LocalDateTime.ToString("d") ?? "-")
+                        </div>
+                    </CellTemplate>
+                </BbDataTableColumn>
+                <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="Status">
+                    <CellTemplate Context="p">
+                        <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
+                            <StatusBadge Status="@p.Status" />
+                        </div>
+                    </CellTemplate>
+                </BbDataTableColumn>
+            </Columns>
+        </BbDataTable>
+    }
+
+    <PatientDialog Patient="_selectedPatient" PatientChanged="p => _selectedPatient = p" StudyAcronym="@_summary.StudyAcronym" />
+}
+
+@code {
+    [Parameter]
+    public string ListId { get; set; } = string.Empty;
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    [Inject]
+    private IOptions<NotificationOptions> NotificationOptionsAccessor { get; set; } = default!;
+
+    private TrialSummaryDto? _summary;
+    private List<PatientListEntryDto> _patients = [];
+    private bool _loading = true;
+    private string? _errorMessage;
+    private ClaimsPrincipal _user = new();
+
+    private PatientListEntryDto? _selectedPatient;
+
+    private int NewSuggestionWindowDays => NotificationOptionsAccessor.Value.NewSuggestionWindowDays;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
+        await LoadAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && _patients.Count > 0)
+        {
+            await LoadLocationsInBackgroundAsync();
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _errorMessage = null;
+        try
+        {
+            var (summary, patients) = await ScreeningListService.GetListWithPatientsAsync(ListId, _user);
+            _summary = summary;
+            _patients = [.. patients];
+            BreadcrumbState.Set(new BreadcrumbItem("All trials", "/"), new BreadcrumbItem(summary.StudyAcronym));
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        catch (FhirAccessException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        catch (Exception)
+        {
+            _errorMessage = "An unexpected error occurred while loading this trial's recommendations.";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task LoadLocationsInBackgroundAsync()
+    {
+        using var throttle = new SemaphoreSlim(8);
+        var tasks = _patients.Select(async patient =>
+        {
+            await throttle.WaitAsync();
+            try
+            {
+                var location = await PatientRecordService.GetLatestLocationAsync(patient.PatientId);
+                patient.LastKnownLocation = location?.LocationName;
+            }
+            catch
+            {
+                patient.LastKnownLocation = null;
+            }
+            finally
+            {
+                patient.LastKnownLocationLoaded = true;
+                throttle.Release();
+                await InvokeAsync(StateHasChanged);
+            }
+        });
+
+        await Task.WhenAll(tasks);
+    }
+
+    private void OpenPatient(PatientListEntryDto patient) => _selectedPatient = patient;
+}

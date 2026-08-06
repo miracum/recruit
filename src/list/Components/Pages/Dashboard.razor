@@ -1,0 +1,105 @@
+@page "/"
+@attribute [Authorize]
+@inject ScreeningListService ScreeningListService
+@inject IOptions<NotificationOptions> NotificationOptionsAccessor
+@inject ToastService Toast
+@inject BreadcrumbState BreadcrumbState
+
+<PageTitle>Dashboard</PageTitle>
+
+@if (_loading)
+{
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <BbSkeleton Class="h-40 w-full" />
+        <BbSkeleton Class="h-40 w-full" />
+        <BbSkeleton Class="h-40 w-full" />
+    </div>
+}
+else if (_errorMessage is not null)
+{
+    <BbAlert Variant="AlertVariant.Danger">
+        <BbAlertTitle>Could not load trials</BbAlertTitle>
+        <BbAlertDescription>@_errorMessage</BbAlertDescription>
+    </BbAlert>
+}
+else if (_trials.Count == 0)
+{
+    <BbEmpty Title="No recruitment recommendations"
+             Description="Either no trials have produced recommendations yet, or you aren't authorized to view any. Contact an administrator if you believe this is a mistake." />
+}
+else
+{
+    <BbTabs DefaultValue="active">
+        <BbTabsList>
+            <BbTabsTrigger Value="active">Active (@ActiveTrials.Count)</BbTabsTrigger>
+            <BbTabsTrigger Value="inactive">Inactive (@InactiveTrials.Count)</BbTabsTrigger>
+        </BbTabsList>
+        <BbTabsContent Value="active">
+            <TrialGrid Trials="ActiveTrials" ShowAdminControls="_isAdmin" EmptyMessage="No active trials." OnActiveChanged="OnActiveToggled" />
+        </BbTabsContent>
+        <BbTabsContent Value="inactive">
+            <TrialGrid Trials="InactiveTrials" ShowAdminControls="_isAdmin" EmptyMessage="No inactive trials." OnActiveChanged="OnActiveToggled" />
+        </BbTabsContent>
+    </BbTabs>
+}
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    private List<TrialSummaryDto> _trials = [];
+    private bool _loading = true;
+    private bool _isAdmin;
+    private string? _errorMessage;
+    private ClaimsPrincipal _user = new();
+
+    // TODO: once ResearchStudy.status is available, derive Active/Inactive (and finer states) from
+    // that instead of the FHIR List.status current/retired flag.
+    private List<TrialSummaryDto> ActiveTrials => [.. _trials.Where(t => t.ListStatus == "current")];
+
+    private List<TrialSummaryDto> InactiveTrials => [.. _trials.Where(t => t.ListStatus != "current")];
+
+    protected override async Task OnInitializedAsync()
+    {
+        BreadcrumbState.Set(new BreadcrumbItem("All trials"));
+
+        _user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
+        _isAdmin = TrialAccessService.IsAdmin(_user);
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            _trials = [.. await ScreeningListService.GetAccessibleTrialsAsync(_user, NotificationOptionsAccessor.Value.NewSuggestionWindowDays)];
+        }
+        catch (FhirAccessException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        catch (Exception)
+        {
+            _errorMessage = "An unexpected error occurred while loading the dashboard. Please try again later.";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task OnActiveToggled((TrialSummaryDto Trial, bool Active) e)
+    {
+        var newStatus = e.Active ? "current" : "retired";
+        try
+        {
+            await ScreeningListService.UpdateListStatusAsync(e.Trial.ListId, newStatus, _user);
+            Toast.Success($"{e.Trial.StudyAcronym} is now {(e.Active ? "active" : "inactive")}.", "Status updated");
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            Toast.Error(ex.Message, "Could not update trial status");
+        }
+    }
+}

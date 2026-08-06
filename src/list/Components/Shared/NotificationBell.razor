@@ -1,0 +1,44 @@
+@inject ScreeningListService ScreeningListService
+@inject NotificationDismissalService DismissalService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IOptions<NotificationOptions> NotificationOptionsAccessor
+
+<a href="/notifications" class="relative inline-flex items-center justify-center rounded-md p-2 hover:bg-accent" aria-label="Notifications">
+    <LucideIcon Name="bell" Size="18" />
+    @if (_count > 0)
+    {
+        <span class="absolute -top-1 -right-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-destructive-foreground">
+            @(_count > 9 ? "9+" : _count.ToString())
+        </span>
+    }
+</a>
+
+@code {
+    private int _count;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await RefreshAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task RefreshAsync()
+    {
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var events = await ScreeningListService.GetNewRecommendationEventsAsync(
+                authState.User, NotificationOptionsAccessor.Value.NewSuggestionWindowDays);
+            var active = await DismissalService.FilterActiveAsync(events);
+            _count = active.Count;
+        }
+        catch
+        {
+            // Best-effort - the bell simply shows no badge if it can't be computed (e.g. FHIR unreachable).
+            _count = 0;
+        }
+    }
+}

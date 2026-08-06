@@ -1,0 +1,98 @@
+@page "/notifications"
+@attribute [Authorize]
+@inject ScreeningListService ScreeningListService
+@inject NotificationDismissalService DismissalService
+@inject IOptions<NotificationOptions> NotificationOptionsAccessor
+@inject BreadcrumbState BreadcrumbState
+
+<PageTitle>Notifications</PageTitle>
+
+@if (_loading)
+{
+    <BbSkeleton Class="h-48 w-full" />
+}
+else if (_errorMessage is not null)
+{
+    <BbAlert Variant="AlertVariant.Danger">
+        <BbAlertTitle>Could not load notifications</BbAlertTitle>
+        <BbAlertDescription>@_errorMessage</BbAlertDescription>
+    </BbAlert>
+}
+else if (_events.Count == 0)
+{
+    <BbEmpty Title="You're all caught up" Description="There are no new recruitment suggestions to review." />
+}
+else
+{
+    <div class="space-y-3">
+        @foreach (var evt in _events)
+        {
+            <BbCard>
+                <BbCardContent>
+                    <div class="flex items-center justify-between gap-4">
+                        <div>
+                            <p class="font-medium">@evt.Message</p>
+                            <p class="text-sm text-muted-foreground">
+                                @evt.OccurredAt.LocalDateTime.ToString("g")
+                                &middot;
+                                <a href="/trials/@evt.ListId/patients" class="hover:underline">@evt.StudyAcronym</a>
+                            </p>
+                        </div>
+                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="@(() => DismissAsync(evt))">
+                            Dismiss
+                        </BbButton>
+                    </div>
+                </BbCardContent>
+            </BbCard>
+        }
+    </div>
+}
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    private List<NotificationEventDto> _events = [];
+    private bool _loading = true;
+    private bool _dismissalsApplied;
+    private string? _errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        BreadcrumbState.Set(new BreadcrumbItem("Notifications"));
+
+        try
+        {
+            var user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
+            _events = [.. await ScreeningListService.GetNewRecommendationEventsAsync(user, NotificationOptionsAccessor.Value.NewSuggestionWindowDays)];
+        }
+        catch (FhirAccessException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        catch (Exception)
+        {
+            _errorMessage = "An unexpected error occurred while loading notifications.";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_dismissalsApplied && _events.Count > 0)
+        {
+            _events = [.. await DismissalService.FilterActiveAsync(_events)];
+            _dismissalsApplied = true;
+            StateHasChanged();
+        }
+    }
+
+    private async Task DismissAsync(NotificationEventDto evt)
+    {
+        await DismissalService.DismissAsync(evt.Id);
+        _events.Remove(evt);
+    }
+}

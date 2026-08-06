@@ -30,6 +30,8 @@ services:
       HAPI_FHIR_SUBSCRIPTION_RESTHOOK_ENABLED: "true"
       HAPI_FHIR_FHIR_VERSION: "R4"
       HAPI_FHIR_CORS_ALLOWED_ORIGIN: "http://list:8080"
+    ports:
+      - "8082:8080"
 
   loader:
     image: docker.io/curlimages/curl:8.21.0@sha256:7c12af72ceb38b7432ab85e1a265cff6ae58e06f95539d539b654f2cfa64bb13
@@ -44,4 +46,4 @@ services:
     depends_on:
       - fhir
       # not strictly required, but makes sure the list service starts at this point
-      - list
+      # - list

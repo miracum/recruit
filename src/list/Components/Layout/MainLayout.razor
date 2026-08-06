@@ -1,0 +1,91 @@
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject BreadcrumbState BreadcrumbState
+
+<BbSidebarProvider>
+    <BbSidebar>
+        <BbSidebarHeader>
+            <BbSidebarHeaderContent>
+                <BbSidebarHeaderInfo>
+                    <span class="font-semibold">recruIT</span>
+                </BbSidebarHeaderInfo>
+            </BbSidebarHeaderContent>
+        </BbSidebarHeader>
+        <BbSidebarContent>
+            <BbSidebarGroup>
+                <BbSidebarMenu>
+                    <BbSidebarMenuItem>
+                        <BbSidebarMenuButton Href="/" Match="NavLinkMatch.All">
+                            <LucideIcon Name="layout-dashboard" Size="16" />
+                            Dashboard
+                        </BbSidebarMenuButton>
+                    </BbSidebarMenuItem>
+                    <BbSidebarMenuItem>
+                        <BbSidebarMenuButton Href="/notifications">
+                            <LucideIcon Name="bell" Size="16" />
+                            Notifications
+                        </BbSidebarMenuButton>
+                    </BbSidebarMenuItem>
+                </BbSidebarMenu>
+            </BbSidebarGroup>
+        </BbSidebarContent>
+        <BbSidebarFooter>
+            <AuthorizeView>
+                <Authorized>
+                    <div class="flex items-center justify-between gap-2 px-2 py-1">
+                        <span class="truncate text-sm">@context.User.Identity?.Name</span>
+                        <form method="post" action="/authentication/logout">
+                            <BbButton Type="ButtonType.Submit" Variant="ButtonVariant.Ghost" Size="ButtonSize.Small">
+                                Sign out
+                            </BbButton>
+                        </form>
+                    </div>
+                </Authorized>
+                <NotAuthorized>
+                    <a href="/authentication/login" class="px-2 py-1 text-sm">Sign in</a>
+                </NotAuthorized>
+            </AuthorizeView>
+        </BbSidebarFooter>
+    </BbSidebar>
+
+    <BbSidebarInset>
+        <header class="flex items-center gap-2 border-b px-4 py-3">
+            <BbSidebarTrigger />
+            <div class="flex-1">
+                <Breadcrumbs Items="BreadcrumbState.Items" />
+            </div>
+            <NotificationBell />
+        </header>
+        <main class="flex-1 p-4">
+            <ErrorBoundary>
+                <ChildContent>
+                    @Body
+                </ChildContent>
+                <ErrorContent>
+                    <BbAlert Variant="AlertVariant.Danger">
+                        <BbAlertTitle>Something went wrong</BbAlertTitle>
+                        <BbAlertDescription>
+                            This page ran into an unexpected error. Try reloading; if the problem persists, contact an administrator.
+                        </BbAlertDescription>
+                    </BbAlert>
+                </ErrorContent>
+            </ErrorBoundary>
+        </main>
+    </BbSidebarInset>
+</BbSidebarProvider>
+
+<BbPortalHost />
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+@code {
+    protected override void OnInitialized() => BreadcrumbState.Changed += OnBreadcrumbChanged;
+
+    private void OnBreadcrumbChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => BreadcrumbState.Changed -= OnBreadcrumbChanged;
+}

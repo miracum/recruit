@@ -1,0 +1,13 @@
+<BbBadge Variant="Variant">@Status</BbBadge>
+
+@code {
+    [Parameter, EditorRequired]
+    public required string Status { get; set; }
+
+    private BadgeVariant Variant => Status switch
+    {
+        "on-study" => BadgeVariant.Default,
+        "ineligible" or "withdrawn" => BadgeVariant.Destructive,
+        _ => BadgeVariant.Secondary,
+    };
+}

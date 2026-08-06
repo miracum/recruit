@@ -1,0 +1,179 @@
+@inject ResearchSubjectService ResearchSubjectService
+@inject ToastService Toast
+
+<BbDialog Open="Patient is not null" OpenChanged="HandleOpenChanged">
+    <BbDialogContent Class="sm:max-w-xl">
+        @if (Patient is not null)
+        {
+            <BbDialogHeader>
+                <BbDialogTitle>@(Patient.Name ?? Patient.PatientId)</BbDialogTitle>
+                <BbDialogDescription>
+                    @(Patient.Age is not null ? $"{Patient.Age} yo" : "Age unknown")
+                    &middot; @(Patient.Gender ?? "gender unknown")
+                    @if (!string.IsNullOrEmpty(Patient.LastKnownLocation))
+                    {
+                        <span> &middot; @Patient.LastKnownLocation</span>
+                    }
+                </BbDialogDescription>
+            </BbDialogHeader>
+
+            <div class="space-y-4">
+                <div>
+                    <BbFieldLabel For="status">Recruitment status</BbFieldLabel>
+                    <select id="status" class="mt-2 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                            value="@Patient.Status" @onchange="e => OnStatusChangedInternal((string)e.Value!)">
+                        @foreach (var status in StatusOptions)
+                        {
+                            <option value="@status">@status</option>
+                        }
+                    </select>
+                </div>
+
+                <BbSeparator />
+
+                <div>
+                    <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">Notes</span>
+
+                    <div class="mt-2 max-h-48 space-y-2 overflow-y-auto">
+                        @if (_loadingHistory)
+                        {
+                            <BbSkeleton Class="h-14 w-full" />
+                        }
+                        else if (_notes.Count == 0)
+                        {
+                            <p class="text-sm text-muted-foreground">No notes yet.</p>
+                        }
+                        else
+                        {
+                            @foreach (var note in _notes)
+                            {
+                                <div class="rounded border bg-muted/40 p-3">
+                                    <p class="text-xs text-muted-foreground">@note.LastUpdated.LocalDateTime.ToString("MMM d, yyyy 'at' HH:mm")</p>
+                                    <p class="text-sm">@note.Note</p>
+                                </div>
+                            }
+                        }
+                    </div>
+
+                    <BbTextarea @bind-Value="_noteDraft" Placeholder="Add a screening note..." Class="mt-3" />
+                </div>
+            </div>
+
+            <BbDialogFooter>
+                <BbButton Variant="ButtonVariant.Outline" OnClick="Close">Close</BbButton>
+                <BbButton Variant="ButtonVariant.Default" Disabled="string.IsNullOrWhiteSpace(_noteDraft)" OnClick="SaveNoteAsync">
+                    Add note
+                </BbButton>
+            </BbDialogFooter>
+        }
+    </BbDialogContent>
+</BbDialog>
+
+@code {
+    [Parameter]
+    public PatientListEntryDto? Patient { get; set; }
+
+    [Parameter]
+    public EventCallback<PatientListEntryDto?> PatientChanged { get; set; }
+
+    [Parameter, EditorRequired]
+    public required string StudyAcronym { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    private static readonly string[] StatusOptions = ["candidate", "screening", "eligible", "ineligible", "on-study", "withdrawn"];
+
+    private List<ResearchSubjectHistoryEntryDto> _notes = [];
+    private bool _loadingHistory;
+    private string _noteDraft = string.Empty;
+    private string? _loadedForSubjectId;
+    private ClaimsPrincipal _user = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
+
+        if (Patient is null)
+        {
+            _loadedForSubjectId = null;
+            return;
+        }
+
+        if (Patient.ResearchSubjectId != _loadedForSubjectId)
+        {
+            _loadedForSubjectId = Patient.ResearchSubjectId;
+            _noteDraft = string.Empty;
+            await LoadNotesAsync(Patient.ResearchSubjectId);
+        }
+    }
+
+    private async Task LoadNotesAsync(string researchSubjectId)
+    {
+        _loadingHistory = true;
+        try
+        {
+            var history = await ResearchSubjectService.GetHistoryAsync(researchSubjectId);
+            _notes = [.. history.Where(h => !string.IsNullOrWhiteSpace(h.Note)).OrderByDescending(h => h.LastUpdated)];
+        }
+        catch
+        {
+            // Best-effort - an empty notes list is preferable to blocking the dialog on a history-fetch failure.
+            _notes = [];
+        }
+        finally
+        {
+            _loadingHistory = false;
+        }
+    }
+
+    private async Task OnStatusChangedInternal(string newStatus)
+    {
+        if (Patient is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await ResearchSubjectService.UpdateStatusAsync(Patient.ResearchSubjectId, newStatus, StudyAcronym, _user);
+            Patient.Status = newStatus;
+            Toast.Success($"Status updated to \"{newStatus}\".", "Saved");
+        }
+        catch (Exception ex)
+        {
+            Toast.Error(ex.Message, "Could not update status");
+        }
+    }
+
+    private async Task SaveNoteAsync()
+    {
+        if (Patient is null || string.IsNullOrWhiteSpace(_noteDraft))
+        {
+            return;
+        }
+
+        try
+        {
+            await ResearchSubjectService.UpdateNoteAsync(Patient.ResearchSubjectId, _noteDraft, StudyAcronym, _user);
+            Patient.Note = _noteDraft;
+            Toast.Success("Note saved.", "Saved");
+            _noteDraft = string.Empty;
+            await LoadNotesAsync(Patient.ResearchSubjectId);
+        }
+        catch (Exception ex)
+        {
+            Toast.Error(ex.Message, "Could not save note");
+        }
+    }
+
+    private async Task Close() => await PatientChanged.InvokeAsync(null);
+
+    private async Task HandleOpenChanged(bool open)
+    {
+        if (!open)
+        {
+            await Close();
+        }
+    }
+}

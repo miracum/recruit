@@ -1,0 +1,30 @@
+notify:
+  rules:
+    trials:
+      # user3 with address 'user.three@example.com' and user1 are allowed
+      # to access all studies, since a subscription to the special '*'
+      # acronym matching everything is configured.
+      - acronym: "*"
+        subscriptions:
+          - email: "user.three@example.com"
+
+      # user1 and user2 are allowed to access screening recommendations for
+      # the 'PROSa' study
+      - acronym: "PROSa"
+        subscriptions: []
+        accessibleBy:
+          users:
+            - "user1"
+            - "user2"
+
+      - acronym: "SECRET"
+        subscriptions: []
+        accessibleBy:
+          users:
+            - "user1"
+
+      # user1 is allowed to access the 'AMICA' recommendations since
+      # a matching subscription exists.
+      - acronym: "AMICA"
+        subscriptions:
+          - email: "user.one@example.com"
