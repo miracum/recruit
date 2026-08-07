@@ -36,4 +36,12 @@ internal static class FhirBundleHelpers
 
     public static ResourceReference? GetReferenceExtension(this IExtendable element, string url) =>
         element.GetExtension(url)?.Value as ResourceReference;
+
+    /// <summary>All repeating extensions at the given url whose value is an Annotation (author/time/text).</summary>
+    public static IReadOnlyList<Annotation> GetAnnotationExtensions(this IExtendable element, string url) =>
+        (element.Extension ?? [])
+            .Where(e => e.Url == url)
+            .Select(e => e.Value as Annotation)
+            .OfType<Annotation>()
+            .ToList();
 }

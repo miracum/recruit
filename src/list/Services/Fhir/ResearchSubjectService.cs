@@ -3,6 +3,7 @@ using System.Text.Json;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
 using Hl7.Fhir.Utility;
+using list.Models;
 using list.Services.Access;
 using Task = System.Threading.Tasks.Task;
 
@@ -11,8 +12,6 @@ namespace list.Services.Fhir;
 public sealed class ResearchSubjectHistoryEntryDto
 {
     public required string Status { get; init; }
-
-    public string? Note { get; init; }
 
     public required DateTimeOffset LastUpdated { get; init; }
 
@@ -24,7 +23,8 @@ public sealed class ResearchSubjectService(
     TrialAccessService accessService,
     ILogger<ResearchSubjectService> logger)
 {
-    public async Task UpdateStatusAsync(
+    /// <returns>The subject's new meta.lastUpdated, as reported by the FHIR server's PATCH response.</returns>
+    public async Task<DateTimeOffset?> UpdateStatusAsync(
         string researchSubjectId, string newStatus, string studyAcronym, ClaimsPrincipal user, CancellationToken ct = default)
     {
         EnsureCanPatch(studyAcronym, user);
@@ -34,30 +34,92 @@ public sealed class ResearchSubjectService(
             new { op = "replace", path = "/status", value = newStatus },
         });
 
-        await PatchAsync(researchSubjectId, patch, ct).ConfigureAwait(false);
+        return await PatchAsync(researchSubjectId, patch, ct).ConfigureAwait(false);
     }
 
-    public async Task UpdateNoteAsync(
+    /// <summary>
+    /// Appends a new note to the subject's researchSubjectNote extension - a repeating FHIR
+    /// Annotation (author + time + text), never overwriting previous notes. This is the
+    /// FHIR-sanctioned way to add a field a resource doesn't natively have (R4 ResearchSubject has
+    /// no .note element), and keeps every note - with real authorship - directly on the resource
+    /// instead of relying on the server's _history endpoint (which may have limited retention).
+    /// </summary>
+    /// <returns>The subject's new meta.lastUpdated, as reported by the FHIR server's PATCH response.</returns>
+    public async Task<DateTimeOffset?> AddNoteAsync(
         string researchSubjectId, string note, string studyAcronym, ClaimsPrincipal user, CancellationToken ct = default)
     {
         EnsureCanPatch(studyAcronym, user);
 
-        var patch = JsonSerializer.Serialize(new object[]
+        var client = clientFactory.CreateClient();
+        ResearchSubject current;
+        try
         {
-            new
-            {
-                op = "add",
-                path = "/extension",
-                value = new object[]
-                {
-                    new { url = FhirConstants.UrlResearchSubjectNote, valueString = note },
-                },
-            },
-        });
+            current = await client.ReadAsync<ResearchSubject>($"ResearchSubject/{researchSubjectId}", ct: ct).ConfigureAwait(false)
+                ?? throw new FhirAccessException("This patient's record could not be found.");
+        }
+        catch (FhirAccessException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to read ResearchSubject/{ResearchSubjectId} before adding a note", researchSubjectId);
+            throw new FhirAccessException("This patient's record could not be loaded to add the note.", ex);
+        }
 
-        await PatchAsync(researchSubjectId, patch, ct).ConfigureAwait(false);
+        var annotation = new
+        {
+            url = FhirConstants.UrlResearchSubjectNote,
+            valueAnnotation = new
+            {
+                text = note,
+                time = DateTimeOffset.UtcNow.ToString("O"),
+                authorString = GetAuthorDisplayName(user),
+            },
+        };
+
+        // JSON Patch's "/extension/-" append syntax requires the array to already exist; if this is
+        // the subject's very first extension of any kind, the array itself must be created first.
+        var patch = current.Extension is { Count: > 0 }
+            ? JsonSerializer.Serialize(new object[] { new { op = "add", path = "/extension/-", value = annotation } })
+            : JsonSerializer.Serialize(new object[] { new { op = "add", path = "/extension", value = new[] { annotation } } });
+
+        return await PatchAsync(researchSubjectId, patch, ct).ConfigureAwait(false);
     }
 
+    /// <summary>All notes ever added to this subject, newest first.</summary>
+    public async Task<IReadOnlyList<PatientNoteDto>> GetNotesAsync(string researchSubjectId, CancellationToken ct = default)
+    {
+        var client = clientFactory.CreateClient();
+
+        ResearchSubject subject;
+        try
+        {
+            subject = await client.ReadAsync<ResearchSubject>($"ResearchSubject/{researchSubjectId}", ct: ct).ConfigureAwait(false)
+                ?? throw new FhirAccessException("This patient's record could not be found.");
+        }
+        catch (FhirAccessException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch notes for ResearchSubject/{ResearchSubjectId}", researchSubjectId);
+            throw new FhirAccessException("This patient's notes could not be loaded.", ex);
+        }
+
+        return subject.GetAnnotationExtensions(FhirConstants.UrlResearchSubjectNote)
+            .Select(a => new PatientNoteDto
+            {
+                Text = a.Text ?? string.Empty,
+                Author = (a.Author as FhirString)?.Value,
+                Time = DateTimeOffset.TryParse(a.Time, out var time) ? time : null,
+            })
+            .OrderByDescending(n => n.Time)
+            .ToList();
+    }
+
+    /// <summary>Status-only change history (who touched what note and when is now on the resource itself, see GetNotesAsync).</summary>
     public async Task<IReadOnlyList<ResearchSubjectHistoryEntryDto>> GetHistoryAsync(string researchSubjectId, CancellationToken ct = default)
     {
         var client = clientFactory.CreateClient();
@@ -80,7 +142,6 @@ public sealed class ResearchSubjectService(
             .Select(rs => new ResearchSubjectHistoryEntryDto
             {
                 Status = EnumUtility.GetLiteral(rs.Status) ?? "candidate",
-                Note = rs.GetStringExtension(FhirConstants.UrlResearchSubjectNote),
                 LastUpdated = rs.Meta!.LastUpdated!.Value,
                 VersionId = int.TryParse(rs.Meta.VersionId, out var v) ? v : 0,
             })
@@ -95,7 +156,13 @@ public sealed class ResearchSubjectService(
         }
     }
 
-    private async Task PatchAsync(string researchSubjectId, string patchDocument, CancellationToken ct)
+    private static string GetAuthorDisplayName(ClaimsPrincipal user) =>
+        user.FindFirst("preferred_username")?.Value
+        ?? user.FindFirst(ClaimTypes.Email)?.Value
+        ?? user.Identity?.Name
+        ?? "unknown";
+
+    private async Task<DateTimeOffset?> PatchAsync(string researchSubjectId, string patchDocument, CancellationToken ct)
     {
         var client = clientFactory.CreateClient();
         try
@@ -103,8 +170,9 @@ public sealed class ResearchSubjectService(
             // PatchAsync<TResource> builds the "{ResourceType}/{id}" path itself from TResource, so
             // the id argument must be bare (no "ResearchSubject/" prefix) or the two collide into an
             // invalid "ResearchSubject/ResearchSubject" path.
-            await client.PatchAsync<ResearchSubject>(researchSubjectId, patchDocument, ResourceFormat.Json, ct)
+            var updated = await client.PatchAsync<ResearchSubject>(researchSubjectId, patchDocument, ResourceFormat.Json, ct)
                 .ConfigureAwait(false);
+            return updated?.Meta?.LastUpdated;
         }
         catch (Exception ex)
         {

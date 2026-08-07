@@ -36,32 +36,26 @@ else if (_entry is not null)
                 <BbCardTitle>Recruitment status</BbCardTitle>
             </BbCardHeader>
             <BbCardContent>
-                <BbField>
-                    <BbFieldLabel For="status">Status</BbFieldLabel>
-                    <BbNativeSelect TValue="string" Id="status" Value="_entry.Status" ValueChanged="OnStatusChanged">
-                        @foreach (var status in StatusOptions)
-                        {
-                            <option value="@status">@status</option>
-                        }
-                    </BbNativeSelect>
-                </BbField>
-                <p class="mt-2 text-sm text-muted-foreground">
+                <div class="flex flex-wrap gap-x-6 gap-y-3">
+                    @foreach (var status in StatusOptions)
+                    {
+                        <label class="flex cursor-pointer items-center gap-2 text-sm">
+                            <input type="radio" name="recruitment-status-detail" value="@status" checked="@(_entry.Status == status)"
+                                   @onchange="() => OnStatusChanged(status)" class="h-4 w-4" style="accent-color: var(--primary);" />
+                            @status
+                        </label>
+                    }
+                </div>
+                <p class="mt-3 text-sm text-muted-foreground">
                     Last known location: @(_location?.LocationName ?? "unknown")
                 </p>
             </BbCardContent>
         </BbCard>
 
         <BbCard>
-            <BbCardHeader>
-                <BbCardTitle>Note</BbCardTitle>
-                <BbCardDescription>Visible to anyone with access to this trial.</BbCardDescription>
-            </BbCardHeader>
-            <BbCardContent>
-                <BbTextarea @bind-Value="_noteDraft" Placeholder="Add a note about this patient..." />
+            <BbCardContent Class="pt-6">
+                <PatientNotesSection Patient="_entry" StudyAcronym="@_trial!.StudyAcronym" />
             </BbCardContent>
-            <BbCardFooter>
-                <BbButton Variant="ButtonVariant.Default" OnClick="SaveNoteAsync">Save note</BbButton>
-            </BbCardFooter>
         </BbCard>
     </div>
 
@@ -72,8 +66,7 @@ else if (_entry is not null)
             <BbTimeline>
                 @foreach (var entry in _history)
                 {
-                    <BbTimelineItem Title="@entry.Status" Time="@entry.LastUpdated.LocalDateTime.ToString("g")"
-                                     Description="@(entry.Note is not null ? $"Note: {entry.Note}" : null)" />
+                    <BbTimelineItem Title="@entry.Status" Time="@entry.LastUpdated.LocalDateTime.ToString("g")" />
                 }
             </BbTimeline>
         </section>
@@ -174,7 +167,6 @@ else if (_entry is not null)
     private IReadOnlyList<ResearchSubjectHistoryEntryDto> _history = [];
     private LatestLocationDto? _location;
     private string? _mrNumber;
-    private string _noteDraft = string.Empty;
     private bool _loading = true;
     private string? _errorMessage;
     private ClaimsPrincipal _user = new();
@@ -189,7 +181,6 @@ else if (_entry is not null)
             _trial = trial;
             _entry = patients.FirstOrDefault(p => p.ResearchSubjectId == ResearchSubjectId)
                 ?? throw new FhirAccessException("This patient could not be found in the trial's recommendation list.");
-            _noteDraft = _entry.Note ?? string.Empty;
 
             BreadcrumbState.Set(
                 new BreadcrumbItem("All trials", "/"),
@@ -232,31 +223,14 @@ else if (_entry is not null)
 
         try
         {
-            await ResearchSubjectService.UpdateStatusAsync(ResearchSubjectId, newStatus, _trial.StudyAcronym, _user);
+            var updatedAt = await ResearchSubjectService.UpdateStatusAsync(ResearchSubjectId, newStatus, _trial.StudyAcronym, _user);
             _entry.Status = newStatus;
+            _entry.LastUpdated = updatedAt ?? DateTimeOffset.UtcNow;
             Toast.Success($"Status updated to \"{newStatus}\".", "Saved");
         }
         catch (Exception ex)
         {
             Toast.Error(ex.Message, "Could not update status");
-        }
-    }
-
-    private async Task SaveNoteAsync()
-    {
-        if (_entry is null || _trial is null)
-        {
-            return;
-        }
-
-        try
-        {
-            await ResearchSubjectService.UpdateNoteAsync(ResearchSubjectId, _noteDraft, _trial.StudyAcronym, _user);
-            Toast.Success("Note saved.", "Saved");
-        }
-        catch (Exception ex)
-        {
-            Toast.Error(ex.Message, "Could not save note");
         }
     }
 }

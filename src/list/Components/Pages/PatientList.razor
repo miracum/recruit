@@ -66,14 +66,13 @@ else if (_summary is not null)
                         </div>
                     </CellTemplate>
                 </BbDataTableColumn>
-                <BbDataTableColumn TData="PatientListEntryDto" TValue="int?" Header="Age" Property="p => p.Age" Sortable="true" Width="80px">
+                <BbDataTableColumn TData="PatientListEntryDto" TValue="int?" Header="Demographics" Width="140px">
                     <CellTemplate Context="p">
-                        <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">@p.Age</div>
-                    </CellTemplate>
-                </BbDataTableColumn>
-                <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="Gender" Property="p => p.Gender" Sortable="true" Width="100px">
-                    <CellTemplate Context="p">
-                        <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">@p.Gender</div>
+                        <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
+                            @(p.Age is not null ? p.Age.ToString() : "Age unknown")
+                            <span class="mx-1.5 text-muted-foreground">&middot;</span>
+                            @(p.Gender ?? "unknown")
+                        </div>
                     </CellTemplate>
                 </BbDataTableColumn>
                 <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="Last known location">
@@ -94,6 +93,13 @@ else if (_summary is not null)
                     <CellTemplate Context="p">
                         <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
                             <StatusBadge Status="@p.Status" />
+                        </div>
+                    </CellTemplate>
+                </BbDataTableColumn>
+                <BbDataTableColumn TData="PatientListEntryDto" TValue="DateTimeOffset?" Header="Updated" Property="p => p.LastUpdated" Sortable="true">
+                    <CellTemplate Context="p">
+                        <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
+                            @(p.LastUpdated?.LocalDateTime.ToString("g") ?? "-")
                         </div>
                     </CellTemplate>
                 </BbDataTableColumn>

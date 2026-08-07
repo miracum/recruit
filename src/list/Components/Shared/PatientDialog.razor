@@ -18,52 +18,44 @@
             </BbDialogHeader>
 
             <div class="space-y-4">
+                @if (!string.IsNullOrEmpty(Patient.Phone) || !string.IsNullOrEmpty(Patient.Email))
+                {
+                    <div>
+                        <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">Contact</span>
+                        <div class="mt-2 space-y-1 text-sm">
+                            @if (!string.IsNullOrEmpty(Patient.Phone))
+                            {
+                                <p>@Patient.Phone</p>
+                            }
+                            @if (!string.IsNullOrEmpty(Patient.Email))
+                            {
+                                <p>@Patient.Email</p>
+                            }
+                        </div>
+                    </div>
+                }
+
                 <div>
-                    <BbFieldLabel For="status">Recruitment status</BbFieldLabel>
-                    <select id="status" class="mt-2 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                            value="@Patient.Status" @onchange="e => OnStatusChangedInternal((string)e.Value!)">
+                    <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">Recruitment status</span>
+                    <div class="mt-3 flex flex-wrap gap-x-8 gap-y-3">
                         @foreach (var status in StatusOptions)
                         {
-                            <option value="@status">@status</option>
+                            <label class="flex cursor-pointer items-center gap-2 text-sm">
+                                <input type="radio" name="recruitment-status" value="@status" checked="@(Patient.Status == status)"
+                                       @onchange="() => OnStatusChangedInternal(status)" class="h-4 w-4" style="accent-color: var(--primary);" />
+                                @status
+                            </label>
                         }
-                    </select>
+                    </div>
                 </div>
 
                 <BbSeparator />
 
-                <div>
-                    <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">Notes</span>
-
-                    <div class="mt-2 max-h-48 space-y-2 overflow-y-auto">
-                        @if (_loadingHistory)
-                        {
-                            <BbSkeleton Class="h-14 w-full" />
-                        }
-                        else if (_notes.Count == 0)
-                        {
-                            <p class="text-sm text-muted-foreground">No notes yet.</p>
-                        }
-                        else
-                        {
-                            @foreach (var note in _notes)
-                            {
-                                <div class="rounded border bg-muted/40 p-3">
-                                    <p class="text-xs text-muted-foreground">@note.LastUpdated.LocalDateTime.ToString("MMM d, yyyy 'at' HH:mm")</p>
-                                    <p class="text-sm">@note.Note</p>
-                                </div>
-                            }
-                        }
-                    </div>
-
-                    <BbTextarea @bind-Value="_noteDraft" Placeholder="Add a screening note..." Class="mt-3" />
-                </div>
+                <PatientNotesSection Patient="Patient" StudyAcronym="@StudyAcronym" />
             </div>
 
             <BbDialogFooter>
                 <BbButton Variant="ButtonVariant.Outline" OnClick="Close">Close</BbButton>
-                <BbButton Variant="ButtonVariant.Default" Disabled="string.IsNullOrWhiteSpace(_noteDraft)" OnClick="SaveNoteAsync">
-                    Add note
-                </BbButton>
             </BbDialogFooter>
         }
     </BbDialogContent>
@@ -84,47 +76,11 @@
 
     private static readonly string[] StatusOptions = ["candidate", "screening", "eligible", "ineligible", "on-study", "withdrawn"];
 
-    private List<ResearchSubjectHistoryEntryDto> _notes = [];
-    private bool _loadingHistory;
-    private string _noteDraft = string.Empty;
-    private string? _loadedForSubjectId;
     private ClaimsPrincipal _user = new();
 
     protected override async Task OnParametersSetAsync()
     {
         _user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
-
-        if (Patient is null)
-        {
-            _loadedForSubjectId = null;
-            return;
-        }
-
-        if (Patient.ResearchSubjectId != _loadedForSubjectId)
-        {
-            _loadedForSubjectId = Patient.ResearchSubjectId;
-            _noteDraft = string.Empty;
-            await LoadNotesAsync(Patient.ResearchSubjectId);
-        }
-    }
-
-    private async Task LoadNotesAsync(string researchSubjectId)
-    {
-        _loadingHistory = true;
-        try
-        {
-            var history = await ResearchSubjectService.GetHistoryAsync(researchSubjectId);
-            _notes = [.. history.Where(h => !string.IsNullOrWhiteSpace(h.Note)).OrderByDescending(h => h.LastUpdated)];
-        }
-        catch
-        {
-            // Best-effort - an empty notes list is preferable to blocking the dialog on a history-fetch failure.
-            _notes = [];
-        }
-        finally
-        {
-            _loadingHistory = false;
-        }
     }
 
     private async Task OnStatusChangedInternal(string newStatus)
@@ -136,34 +92,14 @@
 
         try
         {
-            await ResearchSubjectService.UpdateStatusAsync(Patient.ResearchSubjectId, newStatus, StudyAcronym, _user);
+            var updatedAt = await ResearchSubjectService.UpdateStatusAsync(Patient.ResearchSubjectId, newStatus, StudyAcronym, _user);
             Patient.Status = newStatus;
+            Patient.LastUpdated = updatedAt ?? DateTimeOffset.UtcNow;
             Toast.Success($"Status updated to \"{newStatus}\".", "Saved");
         }
         catch (Exception ex)
         {
             Toast.Error(ex.Message, "Could not update status");
-        }
-    }
-
-    private async Task SaveNoteAsync()
-    {
-        if (Patient is null || string.IsNullOrWhiteSpace(_noteDraft))
-        {
-            return;
-        }
-
-        try
-        {
-            await ResearchSubjectService.UpdateNoteAsync(Patient.ResearchSubjectId, _noteDraft, StudyAcronym, _user);
-            Patient.Note = _noteDraft;
-            Toast.Success("Note saved.", "Saved");
-            _noteDraft = string.Empty;
-            await LoadNotesAsync(Patient.ResearchSubjectId);
-        }
-        catch (Exception ex)
-        {
-            Toast.Error(ex.Message, "Could not save note");
         }
     }
 

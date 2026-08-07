@@ -7,7 +7,7 @@ else
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         @foreach (var trial in Trials)
         {
-            <TrialCard Trial="trial" ShowAdminControls="ShowAdminControls" OnActiveChanged="active => OnActiveChanged.InvokeAsync((trial, active))" />
+            <TrialCard Trial="trial" />
         }
     </div>
 }
@@ -17,11 +17,5 @@ else
     public required IReadOnlyList<TrialSummaryDto> Trials { get; set; }
 
     [Parameter]
-    public bool ShowAdminControls { get; set; }
-
-    [Parameter]
     public string EmptyMessage { get; set; } = "No trials.";
-
-    [Parameter]
-    public EventCallback<(TrialSummaryDto Trial, bool Active)> OnActiveChanged { get; set; }
 }

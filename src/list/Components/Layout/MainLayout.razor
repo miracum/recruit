@@ -4,8 +4,8 @@
 @inject ScreeningListService ScreeningListService
 @inject IOptions<NotificationOptions> NotificationOptionsAccessor
 
-<BbSidebarProvider HeightClass="h-dvh" CookieKey="@((string?)null)">
-    <BbSidebar Collapsible="false">
+<BbSidebarProvider>
+    <BbSidebar>
         <BbSidebarHeader>
             <div class="flex h-12 items-center gap-2 px-3">
                 <div class="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
@@ -31,64 +31,6 @@
                     </BbSidebarMenuItem>
                 </BbSidebarMenu>
             </BbSidebarGroup>
-
-            @if (FilteredActiveTrials.Count > 0)
-            {
-                <BbSidebarGroup>
-                    <BbCollapsible DefaultOpen="true">
-                        <BbCollapsibleTrigger AsChild="false" Class="w-full">
-                            <BbSidebarGroupLabel Class="cursor-pointer rounded-md hover:bg-sidebar-accent/50">
-                                <LucideIcon Name="chevron-down" Size="14" Class="mr-1" />
-                                Active trials
-                            </BbSidebarGroupLabel>
-                        </BbCollapsibleTrigger>
-                        <BbCollapsibleContent>
-                            <BbSidebarMenu>
-                                @foreach (var trial in FilteredActiveTrials)
-                                {
-                                    <BbSidebarMenuItem>
-                                        <BbSidebarMenuButton Href="@($"/trials/{trial.ListId}/patients")" Class="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
-                                            <span class="h-2 w-2 shrink-0 rounded-full @TrialDotColor(trial.StudyAcronym)"></span>
-                                            <span>@trial.StudyAcronym</span>
-                                            @if (trial.PendingCount > 0)
-                                            {
-                                                <BbBadge Variant="BadgeVariant.Secondary" Class="ml-auto h-5 px-1.5 text-[10px]">@trial.PendingCount</BbBadge>
-                                            }
-                                        </BbSidebarMenuButton>
-                                    </BbSidebarMenuItem>
-                                }
-                            </BbSidebarMenu>
-                        </BbCollapsibleContent>
-                    </BbCollapsible>
-                </BbSidebarGroup>
-            }
-
-            @if (FilteredInactiveTrials.Count > 0)
-            {
-                <BbSidebarGroup>
-                    <BbCollapsible DefaultOpen="false">
-                        <BbCollapsibleTrigger AsChild="false" Class="w-full">
-                            <BbSidebarGroupLabel Class="cursor-pointer rounded-md hover:bg-sidebar-accent/50">
-                                <LucideIcon Name="chevron-down" Size="14" Class="mr-1" />
-                                Inactive trials
-                            </BbSidebarGroupLabel>
-                        </BbCollapsibleTrigger>
-                        <BbCollapsibleContent>
-                            <BbSidebarMenu>
-                                @foreach (var trial in FilteredInactiveTrials)
-                                {
-                                    <BbSidebarMenuItem>
-                                        <BbSidebarMenuButton Href="@($"/trials/{trial.ListId}/patients")" Class="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
-                                            <span class="h-2 w-2 shrink-0 rounded-full @TrialDotColor(trial.StudyAcronym)"></span>
-                                            <span>@trial.StudyAcronym</span>
-                                        </BbSidebarMenuButton>
-                                    </BbSidebarMenuItem>
-                                }
-                            </BbSidebarMenu>
-                        </BbCollapsibleContent>
-                    </BbCollapsible>
-                </BbSidebarGroup>
-            }
         </BbSidebarContent>
         <BbSidebarFooter>
             <AuthorizeView>
@@ -117,7 +59,6 @@
                 </BbSidebarTrigger>
                 <Breadcrumbs Items="BreadcrumbState.Items" />
             </div>
-            <NotificationBell />
         </header>
         <main class="min-h-0 flex-1 overflow-auto p-4">
             <ErrorBoundary>

@@ -35,10 +35,10 @@ else
             <BbTabsTrigger Value="inactive">Inactive (@InactiveTrials.Count)</BbTabsTrigger>
         </BbTabsList>
         <BbTabsContent Value="active">
-            <TrialGrid Trials="ActiveTrials" ShowAdminControls="_isAdmin" EmptyMessage="No active trials." OnActiveChanged="OnActiveToggled" />
+            <TrialGrid Trials="ActiveTrials" EmptyMessage="No active trials." />
         </BbTabsContent>
         <BbTabsContent Value="inactive">
-            <TrialGrid Trials="InactiveTrials" ShowAdminControls="_isAdmin" EmptyMessage="No inactive trials." OnActiveChanged="OnActiveToggled" />
+            <TrialGrid Trials="InactiveTrials" EmptyMessage="No inactive trials." />
         </BbTabsContent>
     </BbTabs>
 }
@@ -85,21 +85,6 @@ else
         finally
         {
             _loading = false;
-        }
-    }
-
-    private async Task OnActiveToggled((TrialSummaryDto Trial, bool Active) e)
-    {
-        var newStatus = e.Active ? "current" : "retired";
-        try
-        {
-            await ScreeningListService.UpdateListStatusAsync(e.Trial.ListId, newStatus, _user);
-            Toast.Success($"{e.Trial.StudyAcronym} is now {(e.Active ? "active" : "inactive")}.", "Status updated");
-            await LoadAsync();
-        }
-        catch (Exception ex)
-        {
-            Toast.Error(ex.Message, "Could not update trial status");
         }
     }
 }

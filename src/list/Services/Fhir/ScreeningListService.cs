@@ -265,10 +265,13 @@ public sealed class ScreeningListService(
                 Name = FormatPatientName(patient),
                 BirthDate = patient?.BirthDate is { } bd && DateTimeOffset.TryParse(bd, out var birthDate) ? birthDate : null,
                 Gender = EnumUtility.GetLiteral(patient?.Gender),
+                Phone = patient?.Telecom?.FirstOrDefault(t => t.System == ContactPoint.ContactPointSystem.Phone)?.Value,
+                Email = patient?.Telecom?.FirstOrDefault(t => t.System == ContactPoint.ContactPointSystem.Email)?.Value,
                 Status = status,
                 Note = subject.GetStringExtension(FhirConstants.UrlResearchSubjectNote),
                 RecommendedDate = recommendedDate,
                 SystemDeterminedIneligible = isFlaggedIneligible,
+                LastUpdated = subject.Meta?.LastUpdated,
             });
         }
 
