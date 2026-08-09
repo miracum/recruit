@@ -1,25 +1,43 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0@sha256:72dd743782f2ae7e5476fd64f6a460045e3998dc862218b80e6944cba79a01b0 AS build
-WORKDIR /src
+FROM docker.io/library/node:24.18.0-slim@sha256:6f7b03f7c2c8e2e784dcf9295400527b9b1270fd37b7e9a7285cf83b6951452d AS base
+WORKDIR /app
 
-COPY list.csproj ./
-RUN dotnet restore ./list.csproj
+COPY package.json ./
+COPY package-lock.json ./
 
-COPY . .
+FROM base AS build-frontend
+COPY frontend/package.json ./frontend/package.json
+
+RUN npm clean-install --workspace=frontend
+
+COPY frontend/ ./frontend/
 
 ARG VERSION=v10.5.7 # x-release-please-version
-RUN dotnet publish ./list.csproj \
-    -c Release \
-    -o /app/publish \
-    -p:Version=${VERSION#v} \
-    --no-restore
+ENV VITE_APP_VERSION=${VERSION} \
+    NODE_ENV=production
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0@sha256:f1126d438ccc359f51cc6d4701a8deae513856cf10f5fe645d29ea6403dcac6b
+RUN npm run build --workspace=frontend
+
+FROM build-frontend AS test
+COPY server/ ./server/
+RUN npm run test:unit --workspace=frontend
+
+FROM base AS build-server
+COPY server/package.json ./server/
+RUN npm clean-install --workspace=server
+COPY server/*.js ./server/
+
+FROM gcr.io/distroless/nodejs24-debian13:nonroot@sha256:af85d11ce7ef10172855a6e3649e3e8125b1b9e3ca41849ec2918036f05cb212
 WORKDIR /app
-USER $APP_UID
+USER 65532:65532
+# Port 8081 is currently not used, but exposed to make
+# container-structure-tests across Spring Boot/Node JS
+# more sharable. It might eventually be used to expose
+# metrics on a dedicated port.
+EXPOSE 8080/tcp 8081/tcp
+CMD [ "/app/server/index.js" ]
 
-ENV ASPNETCORE_HTTP_PORTS=8080
-EXPOSE 8080/tcp
+COPY --from=build-server /app/server server
+COPY --from=build-server /app/node_modules server/node_modules
+COPY --from=build-frontend /app/frontend/dist dist
 
-COPY --from=build /app/publish .
-
-ENTRYPOINT ["dotnet", "list.dll"]
+COPY --from=base /app/package*.json /app

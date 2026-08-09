@@ -1,6 +1,2 @@
-bin/
-obj/
-**/bin/
-**/obj/
-.vs/
-*.user
+dist/
+node_modules/
