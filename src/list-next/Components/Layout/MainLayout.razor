@@ -5,6 +5,7 @@
 @inject IOptions<NotificationOptions> NotificationOptionsAccessor
 @inject IStringLocalizer<SharedResources> Localizer
 @inject NavigationManager Navigation
+@inject ThemeService ThemeService
 
 <BbSidebarProvider>
     <BbSidebar>
@@ -43,13 +44,50 @@
         <BbSidebarFooter>
             <AuthorizeView>
                 <Authorized>
-                    <div class="flex items-center justify-between gap-2 px-3 py-2">
-                        <span class="truncate text-sm">@context.User.Identity?.Name</span>
-                        <form method="post" action="/authentication/logout">
-                            <BbButton Type="ButtonType.Submit" Variant="ButtonVariant.Ghost" Size="ButtonSize.Small">
-                                @Localizer["App.Nav.SignOut"]
-                            </BbButton>
-                        </form>
+                    <div class="px-3 py-2">
+                        <BbDropdownMenu>
+                            <BbDropdownMenuTrigger AsChild="false" Class="flex w-full min-w-0 items-center gap-2 rounded-md p-1 text-left hover:bg-accent hover:text-accent-foreground">
+                                <BbAvatar Size="AvatarSize.Small">
+                                    <BbAvatarFallback>@GetInitials(context.User)</BbAvatarFallback>
+                                </BbAvatar>
+                                <span class="min-w-0 flex-1 truncate text-sm">@GetFullName(context.User)</span>
+                            </BbDropdownMenuTrigger>
+                            <BbDropdownMenuContent Side="PopoverSide.Top" Align="PopoverAlign.Start" Class="w-64">
+                                <BbDropdownMenuLabel>
+                                    <div class="flex flex-col">
+                                        <span class="truncate text-sm font-medium">@GetFullName(context.User)</span>
+                                        <span class="truncate text-xs font-normal text-muted-foreground">@GetEmail(context.User)</span>
+                                    </div>
+                                </BbDropdownMenuLabel>
+                                <BbDropdownMenuSeparator />
+                                <BbDropdownMenuLabel Class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                                    @Localizer["App.User.Roles"]
+                                </BbDropdownMenuLabel>
+                                <div class="px-2 pb-2">
+                                    @{
+                                        var roles = GetRoles(context.User);
+                                    }
+                                    @if (roles.Count == 0)
+                                    {
+                                        <span class="text-xs text-muted-foreground">@Localizer["App.User.NoRoles"]</span>
+                                    }
+                                    else
+                                    {
+                                        <div class="flex flex-wrap gap-1">
+                                            @foreach (var role in roles)
+                                            {
+                                                <BbBadge Variant="BadgeVariant.Secondary">@role</BbBadge>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                                <BbDropdownMenuSeparator />
+                                <BbDropdownMenuItem OnClick="SignOut">
+                                    <Icon><LucideIcon Name="log-out" Size="16" /></Icon>
+                                    <ChildContent>@Localizer["App.Nav.SignOut"]</ChildContent>
+                                </BbDropdownMenuItem>
+                            </BbDropdownMenuContent>
+                        </BbDropdownMenu>
                     </div>
                 </Authorized>
                 <NotAuthorized>
@@ -57,14 +95,23 @@
                 </NotAuthorized>
             </AuthorizeView>
             <div class="flex items-center justify-between gap-2 px-3 py-2 text-xs text-muted-foreground">
-                <span>@Localizer["App.Language.Label"]</span>
+                <button type="button" @onclick="ToggleTheme"
+                        class="rounded p-1 hover:bg-accent hover:text-accent-foreground"
+                        aria-label="@(ThemeService.IsDarkMode ? Localizer["App.Theme.SwitchToLight"] : Localizer["App.Theme.SwitchToDark"])">
+                    <LucideIcon Name="@(ThemeService.IsDarkMode ? "sun" : "moon")" Size="16" />
+                </button>
                 <div class="flex items-center gap-1">
-                    @foreach (var culture in SupportedCultures)
+                    @for (var i = 0; i < SupportedCultures.Length; i++)
                     {
+                        var culture = SupportedCultures[i];
                         <a href="@BuildCultureUrl(culture)" data-enhance-nav="false"
                            class="rounded px-1.5 py-0.5 uppercase hover:bg-accent hover:text-accent-foreground @(IsCurrentCulture(culture) ? "font-semibold text-foreground" : "")">
                             @culture
                         </a>
+                        @if (i < SupportedCultures.Length - 1)
+                        {
+                            <span aria-hidden="true">|</span>
+                        }
                     }
                 </div>
             </div>
@@ -110,7 +157,7 @@
     [CascadingParameter]
     private Task<AuthenticationState>? AuthStateTask { get; set; }
 
-    private static readonly string[] SupportedCultures = ["en", "de"];
+    private static readonly string[] SupportedCultures = ["de", "en"];
 
     private static readonly string[] DotColors =
     [
@@ -150,6 +197,24 @@
     private static string TrialDotColor(string acronym) =>
         DotColors[Math.Abs(acronym.GetHashCode()) % DotColors.Length];
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // JS interop (localStorage/system-preference detection) isn't available during the
+            // static prerender pass, only once the interactive circuit is attached - hence here
+            // rather than OnInitializedAsync.
+            await ThemeService.InitializeAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task ToggleTheme()
+    {
+        await ThemeService.ToggleDarkModeAsync();
+        StateHasChanged();
+    }
+
     private bool IsCurrentCulture(string culture) =>
         string.Equals(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName, culture, StringComparison.OrdinalIgnoreCase);
 
@@ -161,6 +226,45 @@
     }
 
     private void OnBreadcrumbChanged() => InvokeAsync(StateHasChanged);
+
+    // forceLoad is required: a Blazor Server circuit has no HTTP response of its own to attach a
+    // Set-Cookie header to, so signing out has to happen via a real navigation to the endpoint
+    // that calls SignOutAsync (see Program.cs's /authentication/logout).
+    private void SignOut() => Navigation.NavigateTo("/authentication/logout", forceLoad: true);
+
+    private static string GetFullName(ClaimsPrincipal user) =>
+        user.FindFirst("name")?.Value
+        ?? user.FindFirst(ClaimTypes.Name)?.Value
+        ?? user.Identity?.Name
+        ?? string.Empty;
+
+    private static string GetEmail(ClaimsPrincipal user) =>
+        user.FindFirst("email")?.Value
+        ?? user.FindFirst(ClaimTypes.Email)?.Value
+        ?? string.Empty;
+
+    private static List<string> GetRoles(ClaimsPrincipal user)
+    {
+        var roleClaimType = (user.Identity as ClaimsIdentity)?.RoleClaimType ?? ClaimTypes.Role;
+        return [.. user.Claims.Where(c => c.Type == roleClaimType).Select(c => c.Value).Distinct()];
+    }
+
+    private static string GetInitials(ClaimsPrincipal user)
+    {
+        var source = GetFullName(user);
+        if (string.IsNullOrWhiteSpace(source))
+        {
+            return "?";
+        }
+
+        var parts = source.Split([' ', '.', '_', '-'], StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length switch
+        {
+            0 => "?",
+            1 => parts[0][..1].ToUpperInvariant(),
+            _ => (parts[0][..1] + parts[^1][..1]).ToUpperInvariant(),
+        };
+    }
 
     public void Dispose() => BreadcrumbState.Changed -= OnBreadcrumbChanged;
 }

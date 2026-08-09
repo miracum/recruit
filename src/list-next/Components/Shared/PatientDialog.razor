@@ -2,13 +2,13 @@
 @inject ToastService Toast
 @inject IStringLocalizer<SharedResources> Localizer
 
-<BbDialog Open="Patient is not null" OpenChanged="HandleOpenChanged">
-    <BbDialogContent Class="sm:max-w-xl">
+<BbSheet Open="Patient is not null" OpenChanged="HandleOpenChanged" Side="SheetSide.Right">
+    <BbSheetContent Class="w-full overflow-y-auto" style="max-width: 46rem;" ShowClose="true">
         @if (Patient is not null)
         {
-            <BbDialogHeader>
-                <BbDialogTitle>@(Patient.Name ?? Patient.PatientId)</BbDialogTitle>
-                <BbDialogDescription>
+            <BbSheetHeader>
+                <BbSheetTitle>@(Patient.Name ?? Patient.PatientId)</BbSheetTitle>
+                <BbSheetDescription>
                     @(Patient.Age is not null ? Localizer["App.PatientDialog.AgeYo", Patient.Age] : Localizer["App.Common.AgeUnknown"])
                     &middot; @(Patient.Gender is not null ? Localizer[GenderDisplay.GetKey(Patient.Gender)].Value : Localizer["App.Common.GenderUnknown"].Value)
                     @if (!string.IsNullOrEmpty(Patient.LastKnownLocation))
@@ -17,8 +17,8 @@
                     }
                     <br />
                     <span class="font-medium text-foreground">@StudyAcronym</span>
-                </BbDialogDescription>
-            </BbDialogHeader>
+                </BbSheetDescription>
+            </BbSheetHeader>
 
             <BbTabs DefaultValue="details">
                 <BbTabsList>
@@ -67,13 +67,9 @@
                     <PatientHistorySection Patient="Patient" />
                 </BbTabsContent>
             </BbTabs>
-
-            <BbDialogFooter>
-                <BbButton Variant="ButtonVariant.Outline" OnClick="Close">@Localizer["App.Common.Close"]</BbButton>
-            </BbDialogFooter>
         }
-    </BbDialogContent>
-</BbDialog>
+    </BbSheetContent>
+</BbSheet>
 
 @code {
     [Parameter]

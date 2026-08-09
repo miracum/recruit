@@ -91,9 +91,6 @@
   <data name="App.Nav.SignIn" xml:space="preserve">
     <value>Anmelden</value>
   </data>
-  <data name="App.Language.Label" xml:space="preserve">
-    <value>Sprache</value>
-  </data>
   <data name="App.Language.English" xml:space="preserve">
     <value>Englisch</value>
   </data>
@@ -543,5 +540,17 @@
   </data>
   <data name="Alert.Dismiss" xml:space="preserve">
     <value>Verwerfen</value>
+  </data>
+  <data name="App.Theme.SwitchToDark" xml:space="preserve">
+    <value>Zu dunklem Modus wechseln</value>
+  </data>
+  <data name="App.Theme.SwitchToLight" xml:space="preserve">
+    <value>Zu hellem Modus wechseln</value>
+  </data>
+  <data name="App.User.Roles" xml:space="preserve">
+    <value>Rollen</value>
+  </data>
+  <data name="App.User.NoRoles" xml:space="preserve">
+    <value>Keine Rollen zugewiesen</value>
   </data>
 </root>

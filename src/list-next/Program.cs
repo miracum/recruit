@@ -75,10 +75,16 @@ else
         oidcSection.Bind(options);
         options.ResponseType = OpenIdConnectResponseType.Code;
         options.ResponseMode = OpenIdConnectResponseMode.Query;
-        options.UsePkce = true;
         options.SaveTokens = true;
         options.MapInboundClaims = false;
         options.GetClaimsFromUserInfoEndpoint = true;
+        // Only relax to plain-HTTP metadata/issuer for local development (e.g. a local Keycloak
+        // without TLS) - production authorities must always be HTTPS.
+        options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
+        // Opt-in only: ASP.NET Core defaults to using Pushed Authorization Requests whenever the
+        // IdP advertises the endpoint, which added an extra failure mode against this app's
+        // Keycloak setup for no real benefit at this app's size.
+        options.PushedAuthorizationBehavior = PushedAuthorizationBehavior.Disable;
         options.Scope.Clear();
         options.Scope.Add("openid");
         options.Scope.Add("profile");
@@ -129,7 +135,10 @@ if (!authDisabled)
             new Microsoft.AspNetCore.Authentication.AuthenticationProperties { RedirectUri = returnUrl ?? "/" },
             [OpenIdConnectDefaults.AuthenticationScheme]));
 
-    authGroup.MapPost("/logout", (string? returnUrl) =>
+    // GET is needed because Blazor Server's NavigationManager.NavigateTo(forceLoad: true) - the
+    // only way to trigger a real HTTP request (and thus an auth-cookie-clearing response) from an
+    // interactive circuit - always issues a GET.
+    authGroup.MapMethods("/logout", ["GET", "POST"], (string? returnUrl) =>
         Results.SignOut(
             new Microsoft.AspNetCore.Authentication.AuthenticationProperties { RedirectUri = returnUrl ?? "/" },
             [CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme]));
