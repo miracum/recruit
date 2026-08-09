@@ -2,7 +2,9 @@ using System.Security.Claims;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Utility;
 using list.Models;
+using list.Resources;
 using list.Services.Access;
+using Microsoft.Extensions.Localization;
 using FhirList = Hl7.Fhir.Model.List;
 using Task = System.Threading.Tasks.Task;
 
@@ -11,6 +13,7 @@ namespace list.Services.Fhir;
 public sealed class ScreeningListService(
     FhirClientFactory clientFactory,
     TrialAccessService accessService,
+    IStringLocalizer<SharedResources> localizer,
     ILogger<ScreeningListService> logger)
 {
     public async Task<IReadOnlyList<TrialSummaryDto>> GetAccessibleTrialsAsync(
@@ -33,7 +36,7 @@ public sealed class ScreeningListService(
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to fetch screening lists from the FHIR server");
-            throw new FhirAccessException("The list of clinical trials could not be loaded from the FHIR server.", ex);
+            throw new FhirAccessException(localizer["App.Errors.TrialsLoadFailed"], ex);
         }
 
         var researchSubjectsById = resources.OfType<ResearchSubject>().ToDictionary(rs => rs.Id!, rs => rs);
@@ -128,7 +131,7 @@ public sealed class ScreeningListService(
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to fetch screening lists for the patient overview");
-            throw new FhirAccessException("The patient overview could not be loaded from the FHIR server.", ex);
+            throw new FhirAccessException(localizer["App.Errors.PatientOverviewLoadFailed"], ex);
         }
 
         var subjectsById = resources.OfType<ResearchSubject>().ToDictionary(rs => rs.Id!, rs => rs);
@@ -233,7 +236,7 @@ public sealed class ScreeningListService(
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to fetch screening lists for notifications");
-            throw new FhirAccessException("Notifications could not be loaded from the FHIR server.", ex);
+            throw new FhirAccessException(localizer["App.Errors.NotificationsLoadFailed"], ex);
         }
 
         var subjectsById = resources.OfType<ResearchSubject>().ToDictionary(rs => rs.Id!, rs => rs);
@@ -260,7 +263,7 @@ public sealed class ScreeningListService(
                 var subject = subjectId is not null && subjectsById.TryGetValue(subjectId, out var s) ? s : null;
                 var patientId = subject?.Individual?.Reference?.Split('/').LastOrDefault();
                 var patient = patientId is not null && patientsById.TryGetValue(patientId, out var p) ? p : null;
-                var patientName = FormatPatientName(patient) ?? patientId ?? "unknown patient";
+                var patientName = FormatPatientName(patient) ?? patientId ?? localizer["App.Notifications.UnknownPatient"].Value;
 
                 events.Add(new NotificationEventDto
                 {
@@ -270,7 +273,7 @@ public sealed class ScreeningListService(
                     StudyAcronym = acronym,
                     PatientId = patientId,
                     PatientName = patientName,
-                    Message = $"{patientName} was newly recommended for {acronym}",
+                    Message = localizer["App.Notifications.MessageFormat", patientName, acronym],
                     OccurredAt = recommendedDate,
                 });
             }
@@ -294,17 +297,17 @@ public sealed class ScreeningListService(
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to fetch List/{ListId} from the FHIR server", listId);
-            throw new FhirAccessException("The patient list could not be loaded from the FHIR server.", ex);
+            throw new FhirAccessException(localizer["App.Errors.PatientListLoadFailed"], ex);
         }
 
         var list = resources.OfType<FhirList>().FirstOrDefault()
-            ?? throw new FhirAccessException("No list was found for the given id.");
+            ?? throw new FhirAccessException(localizer["App.Errors.ListNotFound"]);
 
         var belongsToStudyRef = list.GetReferenceExtension(FhirConstants.UrlListBelongsToStudy);
         var acronym = belongsToStudyRef?.Display;
         if (string.IsNullOrEmpty(acronym) || !accessService.CanAccessStudy(user, acronym))
         {
-            throw new UnauthorizedAccessException("You are not authorized to access this trial's recommendations.");
+            throw new UnauthorizedAccessException(localizer["App.Errors.NotAuthorizedTrial"]);
         }
 
         // The acronym comes from the extension's display text (no _include exists for arbitrary
@@ -414,7 +417,7 @@ public sealed class ScreeningListService(
     {
         if (!accessService.CanPatchList(user))
         {
-            throw new UnauthorizedAccessException("Only administrators may change a trial's active/inactive status.");
+            throw new UnauthorizedAccessException(localizer["App.Errors.AdminOnlyTrialStatus"]);
         }
 
         var client = clientFactory.CreateClient();
@@ -430,7 +433,7 @@ public sealed class ScreeningListService(
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to update status for List/{ListId}", listId);
-            throw new FhirAccessException("The trial's status could not be updated.", ex);
+            throw new FhirAccessException(localizer["App.Errors.TrialStatusUpdateFailed"], ex);
         }
     }
 

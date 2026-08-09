@@ -5,12 +5,14 @@ using list.Options;
 using list.Services.Access;
 using list.Services.Auth;
 using list.Services.Fhir;
+using list.Services.Localization;
 using list.Services.Navigation;
 using list.Services.Notifications;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,7 +20,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddLocalization();
 builder.Services.AddBlazorBlueprintComponents();
+builder.Services.AddScoped<IBbLocalizer, AppBbLocalizer>();
+
+var supportedCultures = new[] { "en", "de" };
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.SetDefaultCulture(supportedCultures[0])
+        .AddSupportedCultures(supportedCultures)
+        .AddSupportedUICultures(supportedCultures);
+});
 
 builder.Services.Configure<FhirOptions>(builder.Configuration.GetSection(FhirOptions.SectionName));
 builder.Services.Configure<AuthOptions>(builder.Configuration.GetSection(AuthOptions.SectionName));
@@ -95,6 +107,8 @@ builder.Services.AddScoped<BreadcrumbState>();
 
 var app = builder.Build();
 
+app.UseRequestLocalization();
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
@@ -120,6 +134,18 @@ if (!authDisabled)
             new Microsoft.AspNetCore.Authentication.AuthenticationProperties { RedirectUri = returnUrl ?? "/" },
             [CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme]));
 }
+
+app.MapGet("/culture/set", (string culture, string? redirectUri, HttpContext ctx) =>
+{
+    var resolvedCulture = supportedCultures.Contains(culture) ? culture : supportedCultures[0];
+
+    ctx.Response.Cookies.Append(
+        CookieRequestCultureProvider.DefaultCookieName,
+        CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(resolvedCulture)),
+        new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1), IsEssential = true });
+
+    return Results.LocalRedirect(string.IsNullOrEmpty(redirectUri) ? "/" : redirectUri);
+});
 
 app.UseAntiforgery();
 

@@ -4,8 +4,9 @@
 @inject IOptions<NotificationOptions> NotificationOptionsAccessor
 @inject ToastService Toast
 @inject BreadcrumbState BreadcrumbState
+@inject IStringLocalizer<SharedResources> Localizer
 
-<PageTitle>Trials</PageTitle>
+<PageTitle>@Localizer["App.Nav.Trials"]</PageTitle>
 
 @if (_loading)
 {
@@ -18,40 +19,40 @@
 else if (_errorMessage is not null)
 {
     <BbAlert Variant="AlertVariant.Danger">
-        <BbAlertTitle>Could not load trials</BbAlertTitle>
+        <BbAlertTitle>@Localizer["App.Dashboard.LoadErrorTitle"]</BbAlertTitle>
         <BbAlertDescription>@_errorMessage</BbAlertDescription>
     </BbAlert>
 }
 else if (_trials.Count == 0)
 {
-    <BbEmpty Title="No recruitment recommendations"
-             Description="Either no trials have produced recommendations yet, or you aren't authorized to view any. Contact an administrator if you believe this is a mistake." />
+    <BbEmpty Title="@Localizer["App.Dashboard.EmptyTitle"]"
+             Description="@Localizer["App.Dashboard.EmptyDescription"]" />
 }
 else
 {
     <div class="mb-4 grid grid-cols-2 gap-4 sm:max-w-md">
         <BbCard>
             <BbCardContent Class="pt-6">
-                <MetricTile Label="New suggestions" Value="TotalNewSuggestions" />
+                <MetricTile Label="@Localizer["App.Dashboard.NewSuggestions"]" Value="TotalNewSuggestions" />
             </BbCardContent>
         </BbCard>
         <BbCard>
             <BbCardContent Class="pt-6">
-                <MetricTile Label="Stalled leads" Value="TotalStalledLeads" />
+                <MetricTile Label="@Localizer["App.Dashboard.StalledLeads"]" Value="TotalStalledLeads" />
             </BbCardContent>
         </BbCard>
     </div>
 
     <BbTabs DefaultValue="active">
         <BbTabsList>
-            <BbTabsTrigger Value="active">Active (@ActiveTrials.Count)</BbTabsTrigger>
-            <BbTabsTrigger Value="inactive">Inactive (@InactiveTrials.Count)</BbTabsTrigger>
+            <BbTabsTrigger Value="active">@Localizer["App.Dashboard.ActiveTab"] (@ActiveTrials.Count)</BbTabsTrigger>
+            <BbTabsTrigger Value="inactive">@Localizer["App.Dashboard.InactiveTab"] (@InactiveTrials.Count)</BbTabsTrigger>
         </BbTabsList>
         <BbTabsContent Value="active">
-            <TrialGrid Trials="ActiveTrials" EmptyMessage="No active trials." />
+            <TrialGrid Trials="ActiveTrials" EmptyMessage="@Localizer["App.Dashboard.NoActiveTrials"]" />
         </BbTabsContent>
         <BbTabsContent Value="inactive">
-            <TrialGrid Trials="InactiveTrials" EmptyMessage="No inactive trials." />
+            <TrialGrid Trials="InactiveTrials" EmptyMessage="@Localizer["App.Dashboard.NoInactiveTrials"]" />
         </BbTabsContent>
     </BbTabs>
 }
@@ -80,7 +81,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        BreadcrumbState.Set(new BreadcrumbItem("All trials"));
+        BreadcrumbState.Set(new BreadcrumbItem(Localizer["App.Common.AllTrialsBreadcrumb"]));
 
         _user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
         _isAdmin = TrialAccessService.IsAdmin(_user);
@@ -99,7 +100,7 @@ else
         }
         catch (Exception)
         {
-            _errorMessage = "An unexpected error occurred while loading the dashboard. Please try again later.";
+            _errorMessage = Localizer["App.Dashboard.LoadErrorFallback"];
         }
         finally
         {

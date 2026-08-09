@@ -2,8 +2,9 @@
 @attribute [Authorize]
 @inject ScreeningListService ScreeningListService
 @inject BreadcrumbState BreadcrumbState
+@inject IStringLocalizer<SharedResources> Localizer
 
-<PageTitle>Patients</PageTitle>
+<PageTitle>@Localizer["App.Nav.Patients"]</PageTitle>
 
 @if (_loading)
 {
@@ -13,38 +14,38 @@
 else if (_errorMessage is not null)
 {
     <BbAlert Variant="AlertVariant.Danger">
-        <BbAlertTitle>Could not load patients</BbAlertTitle>
+        <BbAlertTitle>@Localizer["App.PatientsPage.LoadErrorTitle"]</BbAlertTitle>
         <BbAlertDescription>@_errorMessage</BbAlertDescription>
     </BbAlert>
 }
 else if (_patients.Count == 0)
 {
-    <BbEmpty Title="No patients" Description="Either no trials have produced recommendations yet, or you aren't authorized to view any." />
+    <BbEmpty Title="@Localizer["App.PatientsPage.EmptyTitle"]" Description="@Localizer["App.PatientsPage.EmptyDescription"]" />
 }
 else
 {
     <BbDataTable TData="PatientOverviewDto" Data="_patients" ShowPagination="true"
                  PageSizes="new[] { 10, 25, 50, 100 }" InitialPageSize="25" IsLoading="false">
         <Columns>
-            <BbDataTableColumn TData="PatientOverviewDto" TValue="string" Header="Name" Property="p => p.Name ?? p.PatientId" Sortable="true">
+            <BbDataTableColumn TData="PatientOverviewDto" TValue="string" Header="@Localizer["App.PatientList.ColumnName"]" Property="p => p.Name ?? p.PatientId" Sortable="true">
                 <CellTemplate Context="p">
                     <span class="font-medium">@(p.Name ?? p.PatientId)</span>
                 </CellTemplate>
             </BbDataTableColumn>
-            <BbDataTableColumn TData="PatientOverviewDto" TValue="int?" Header="Demographics" Width="140px">
+            <BbDataTableColumn TData="PatientOverviewDto" TValue="int?" Header="@Localizer["App.PatientList.ColumnDemographics"]" Width="140px">
                 <CellTemplate Context="p">
-                    @(p.Age is not null ? p.Age.ToString() : "Age unknown")
+                    @(p.Age is not null ? p.Age.ToString() : Localizer["App.Common.AgeUnknown"].Value)
                     <span class="mx-1.5 text-muted-foreground">&middot;</span>
-                    @(p.Gender ?? "unknown")
+                    @(p.Gender is not null ? Localizer[GenderDisplay.GetKey(p.Gender)].Value : Localizer["App.Common.Unknown"].Value)
                 </CellTemplate>
             </BbDataTableColumn>
-            <BbDataTableColumn TData="PatientOverviewDto" TValue="int" Header="Potentially fitting studies">
+            <BbDataTableColumn TData="PatientOverviewDto" TValue="int" Header="@Localizer["App.PatientsPage.ColumnStudies"]">
                 <CellTemplate Context="p">
                     <div class="flex flex-wrap gap-1.5">
                         @foreach (var membership in p.Trials)
                         {
                             <div class="-m-0.5 flex cursor-pointer items-center gap-1 rounded-md p-0.5 hover:bg-accent"
-                                 @onclick="() => GoToTrial(membership)">
+                                 @onclick="() => OpenPatient(membership)">
                                 <span class="text-sm font-medium">@membership.StudyAcronym</span>
                                 <StatusBadge Status="@membership.Status" />
                             </div>
@@ -52,7 +53,7 @@ else
                     </div>
                 </CellTemplate>
             </BbDataTableColumn>
-            <BbDataTableColumn TData="PatientOverviewDto" TValue="DateTimeOffset?" Header="Updated"
+            <BbDataTableColumn TData="PatientOverviewDto" TValue="DateTimeOffset?" Header="@Localizer["App.PatientList.ColumnUpdated"]"
                                Property="p => p.Trials.Max(t => t.LastUpdated)" Sortable="true">
                 <CellTemplate Context="p">
                     @(p.Trials.Max(t => t.LastUpdated)?.LocalDateTime.ToString("g") ?? "-")
@@ -60,22 +61,23 @@ else
             </BbDataTableColumn>
         </Columns>
     </BbDataTable>
+
+    <PatientDialog Patient="_selectedPatient" PatientChanged="p => _selectedPatient = p" StudyAcronym="@(_selectedPatient?.StudyAcronym ?? string.Empty)" />
 }
 
 @code {
     [CascadingParameter]
     private Task<AuthenticationState>? AuthStateTask { get; set; }
 
-    [Inject]
-    private NavigationManager Navigation { get; set; } = default!;
-
     private List<PatientOverviewDto> _patients = [];
     private bool _loading = true;
     private string? _errorMessage;
 
+    private PatientListEntryDto? _selectedPatient;
+
     protected override async Task OnInitializedAsync()
     {
-        BreadcrumbState.Set(new BreadcrumbItem("Patients"));
+        BreadcrumbState.Set(new BreadcrumbItem(Localizer["App.Nav.Patients"]));
 
         try
         {
@@ -88,7 +90,7 @@ else
         }
         catch (Exception)
         {
-            _errorMessage = "An unexpected error occurred while loading patients.";
+            _errorMessage = Localizer["App.PatientsPage.LoadErrorFallback"];
         }
         finally
         {
@@ -96,5 +98,5 @@ else
         }
     }
 
-    private void GoToTrial(PatientListEntryDto membership) => Navigation.NavigateTo($"/trials/{membership.ListId}/patients");
+    private void OpenPatient(PatientListEntryDto membership) => _selectedPatient = membership;
 }

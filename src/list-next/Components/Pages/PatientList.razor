@@ -3,8 +3,9 @@
 @inject ScreeningListService ScreeningListService
 @inject PatientRecordService PatientRecordService
 @inject BreadcrumbState BreadcrumbState
+@inject IStringLocalizer<SharedResources> Localizer
 
-<PageTitle>@(_summary?.StudyAcronym ?? "Patients")</PageTitle>
+<PageTitle>@(_summary?.StudyAcronym ?? Localizer["App.Nav.Patients"])</PageTitle>
 
 @if (_loading)
 {
@@ -14,7 +15,7 @@
 else if (_errorMessage is not null)
 {
     <BbAlert Variant="AlertVariant.Danger">
-        <BbAlertTitle>Could not load this trial's recommendations</BbAlertTitle>
+        <BbAlertTitle>@Localizer["App.PatientList.LoadErrorTitle"]</BbAlertTitle>
         <BbAlertDescription>@_errorMessage</BbAlertDescription>
     </BbAlert>
 }
@@ -32,7 +33,7 @@ else if (_summary is not null)
 
     @if (_summary.LastUpdated is not null)
     {
-        <p class="mb-4 mt-1 text-sm text-muted-foreground">Last updated @_summary.LastUpdated.Value.LocalDateTime.ToString("g")</p>
+        <p class="mb-4 mt-1 text-sm text-muted-foreground">@Localizer["App.PatientList.LastUpdated", _summary.LastUpdated.Value.LocalDateTime.ToString("g")]</p>
     }
 
     @if (!string.IsNullOrEmpty(_summary.TruncationNote))
@@ -44,43 +45,43 @@ else if (_summary is not null)
 
     @if (_patients.Count == 0)
     {
-        <BbEmpty Title="No recommendations" Description="This trial has no recommended patients yet." />
+        <BbEmpty Title="@Localizer["App.PatientList.EmptyTitle"]" Description="@Localizer["App.PatientList.EmptyDescription"]" />
     }
     else
     {
         <BbDataTable TData="PatientListEntryDto" Data="_patients" ShowPagination="true"
                      PageSizes="new[] { 10, 25, 50, 100 }" InitialPageSize="25" IsLoading="false">
             <Columns>
-                <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="Name" Property="p => p.Name ?? p.PatientId" Sortable="true">
+                <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="@Localizer["App.PatientList.ColumnName"]" Property="p => p.Name ?? p.PatientId" Sortable="true">
                     <CellTemplate Context="p">
                         <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
                             <span class="font-medium hover:underline">@(p.Name ?? p.PatientId)</span>
                             @if (p.IsNew(NewSuggestionWindowDays))
                             {
-                                <BbBadge Variant="BadgeVariant.Default" Class="ml-2">New</BbBadge>
+                                <BbBadge Variant="BadgeVariant.Default" Class="ml-2">@Localizer["App.PatientList.NewBadge"]</BbBadge>
                             }
                             @if (p.SystemDeterminedIneligible)
                             {
-                                <BbBadge Variant="BadgeVariant.Outline" Class="ml-2">System: ineligible</BbBadge>
+                                <BbBadge Variant="BadgeVariant.Outline" Class="ml-2">@Localizer["App.PatientList.SystemIneligibleBadge"]</BbBadge>
                             }
                         </div>
                     </CellTemplate>
                 </BbDataTableColumn>
-                <BbDataTableColumn TData="PatientListEntryDto" TValue="int?" Header="Demographics" Width="140px">
+                <BbDataTableColumn TData="PatientListEntryDto" TValue="int?" Header="@Localizer["App.PatientList.ColumnDemographics"]" Width="140px">
                     <CellTemplate Context="p">
                         <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
-                            @(p.Age is not null ? p.Age.ToString() : "Age unknown")
+                            @(p.Age is not null ? p.Age.ToString() : Localizer["App.Common.AgeUnknown"].Value)
                             <span class="mx-1.5 text-muted-foreground">&middot;</span>
-                            @(p.Gender ?? "unknown")
+                            @(p.Gender is not null ? Localizer[GenderDisplay.GetKey(p.Gender)].Value : Localizer["App.Common.Unknown"].Value)
                         </div>
                     </CellTemplate>
                 </BbDataTableColumn>
-                <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="Last known location">
+                <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="@Localizer["App.PatientList.ColumnLocation"]">
                     <CellTemplate Context="p">
                         <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
                             @if (p.LastKnownLocationLoaded)
                             {
-                                @(p.LastKnownLocation ?? "Unknown")
+                                @(p.LastKnownLocation ?? Localizer["App.Common.Unknown"].Value)
                             }
                             else
                             {
@@ -89,21 +90,21 @@ else if (_summary is not null)
                         </div>
                     </CellTemplate>
                 </BbDataTableColumn>
-                <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="Recommended">
+                <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="@Localizer["App.PatientList.ColumnRecommended"]">
                     <CellTemplate Context="p">
                         <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
                             @(p.RecommendedDate?.LocalDateTime.ToString("d") ?? "-")
                         </div>
                     </CellTemplate>
                 </BbDataTableColumn>
-                <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="Status">
+                <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="@Localizer["App.PatientList.ColumnStatus"]">
                     <CellTemplate Context="p">
                         <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
                             <StatusBadge Status="@p.Status" />
                         </div>
                     </CellTemplate>
                 </BbDataTableColumn>
-                <BbDataTableColumn TData="PatientListEntryDto" TValue="DateTimeOffset?" Header="Updated" Property="p => p.LastUpdated" Sortable="true">
+                <BbDataTableColumn TData="PatientListEntryDto" TValue="DateTimeOffset?" Header="@Localizer["App.PatientList.ColumnUpdated"]" Property="p => p.LastUpdated" Sortable="true">
                     <CellTemplate Context="p">
                         <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
                             @(p.LastUpdated?.LocalDateTime.ToString("g") ?? "-")
@@ -153,7 +154,7 @@ else if (_summary is not null)
                 ListId, _user, NotificationOptionsAccessor.Value.NewSuggestionWindowDays, NotificationOptionsAccessor.Value.StalledLeadWindowDays);
             _summary = summary;
             _patients = [.. patients];
-            BreadcrumbState.Set(new BreadcrumbItem("All trials", "/"), new BreadcrumbItem(summary.StudyAcronym));
+            BreadcrumbState.Set(new BreadcrumbItem(Localizer["App.Common.AllTrialsBreadcrumb"], "/"), new BreadcrumbItem(summary.StudyAcronym));
 
             // Fire-and-forget rather than gating on OnAfterRenderAsync(firstRender): when
             // GetListWithPatientsAsync resolves fast enough (e.g. a warm connection from in-app
@@ -175,7 +176,7 @@ else if (_summary is not null)
         }
         catch (Exception)
         {
-            _errorMessage = "An unexpected error occurred while loading this trial's recommendations.";
+            _errorMessage = Localizer["App.PatientList.LoadErrorFallback"];
         }
         finally
         {

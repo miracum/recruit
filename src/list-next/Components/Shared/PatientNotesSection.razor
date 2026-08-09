@@ -1,8 +1,9 @@
 @inject ResearchSubjectService ResearchSubjectService
 @inject ToastService Toast
+@inject IStringLocalizer<SharedResources> Localizer
 
 <div>
-    <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">Notes</span>
+    <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.Patient.Notes"]</span>
 
     <div class="mt-2 max-h-48 space-y-2 overflow-y-auto">
         @if (_loading)
@@ -11,7 +12,7 @@
         }
         else if (_notes.Count == 0)
         {
-            <p class="text-sm text-muted-foreground">No notes yet.</p>
+            <p class="text-sm text-muted-foreground">@Localizer["App.PatientNotes.Empty"]</p>
         }
         else
         {
@@ -19,7 +20,7 @@
             {
                 <div class="rounded border bg-muted/40 p-3">
                     <p class="text-xs text-muted-foreground">
-                        @(note.Time?.LocalDateTime.ToString("MMM d, yyyy 'at' HH:mm") ?? "Unknown time")
+                        @(note.Time?.LocalDateTime.ToString("g") ?? Localizer["App.PatientNotes.UnknownTime"])
                         @if (!string.IsNullOrEmpty(note.Author))
                         {
                             <span> &middot; @note.Author</span>
@@ -31,10 +32,10 @@
         }
     </div>
 
-    <BbTextarea @bind-Value="_noteDraft" UpdateTiming="UpdateTiming.Immediate" Placeholder="Add a screening note..." Class="mt-3" />
+    <BbTextarea @bind-Value="_noteDraft" UpdateTiming="UpdateTiming.Immediate" Placeholder="@Localizer["App.PatientNotes.Placeholder"]" Class="mt-3" />
     <div class="mt-2 flex justify-end">
         <BbButton Variant="ButtonVariant.Default" Disabled="string.IsNullOrWhiteSpace(_noteDraft)" OnClick="SaveNoteAsync">
-            Add note
+            @Localizer["App.PatientNotes.AddButton"]
         </BbButton>
     </div>
 </div>
@@ -97,13 +98,13 @@
             var updatedAt = await ResearchSubjectService.AddNoteAsync(Patient.ResearchSubjectId, _noteDraft, StudyAcronym, _user);
             Patient.Note = _noteDraft;
             Patient.LastUpdated = updatedAt ?? DateTimeOffset.UtcNow;
-            Toast.Success("Note saved.", "Saved");
+            Toast.Success(Localizer["App.Toast.NoteSaved"], Localizer["App.Common.Saved"]);
             _noteDraft = string.Empty;
             await LoadNotesAsync();
         }
         catch (Exception ex)
         {
-            Toast.Error(ex.Message, "Could not save note");
+            Toast.Error(ex.Message, Localizer["App.Toast.NoteSaveError"]);
         }
     }
 }

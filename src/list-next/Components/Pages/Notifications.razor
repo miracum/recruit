@@ -4,8 +4,9 @@
 @inject NotificationDismissalService DismissalService
 @inject IOptions<NotificationOptions> NotificationOptionsAccessor
 @inject BreadcrumbState BreadcrumbState
+@inject IStringLocalizer<SharedResources> Localizer
 
-<PageTitle>Notifications</PageTitle>
+<PageTitle>@Localizer["App.Nav.Notifications"]</PageTitle>
 
 @if (_loading)
 {
@@ -14,13 +15,13 @@
 else if (_errorMessage is not null)
 {
     <BbAlert Variant="AlertVariant.Danger">
-        <BbAlertTitle>Could not load notifications</BbAlertTitle>
+        <BbAlertTitle>@Localizer["App.Notifications.LoadErrorTitle"]</BbAlertTitle>
         <BbAlertDescription>@_errorMessage</BbAlertDescription>
     </BbAlert>
 }
 else if (_events.Count == 0)
 {
-    <BbEmpty Title="You're all caught up" Description="There are no new recruitment suggestions to review." />
+    <BbEmpty Title="@Localizer["App.Notifications.EmptyTitle"]" Description="@Localizer["App.Notifications.EmptyDescription"]" />
 }
 else
 {
@@ -39,7 +40,7 @@ else
                             </p>
                         </div>
                         <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="@(() => DismissAsync(evt))">
-                            Dismiss
+                            @Localizer["App.Notifications.Dismiss"]
                         </BbButton>
                     </div>
                 </BbCardContent>
@@ -59,7 +60,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        BreadcrumbState.Set(new BreadcrumbItem("Notifications"));
+        BreadcrumbState.Set(new BreadcrumbItem(Localizer["App.Nav.Notifications"]));
 
         try
         {
@@ -72,7 +73,7 @@ else
         }
         catch (Exception)
         {
-            _errorMessage = "An unexpected error occurred while loading notifications.";
+            _errorMessage = Localizer["App.Notifications.LoadErrorFallback"];
         }
         finally
         {

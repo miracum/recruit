@@ -4,7 +4,9 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
 using Hl7.Fhir.Utility;
 using list.Models;
+using list.Resources;
 using list.Services.Access;
+using Microsoft.Extensions.Localization;
 using Task = System.Threading.Tasks.Task;
 
 namespace list.Services.Fhir;
@@ -21,6 +23,7 @@ public sealed class ResearchSubjectHistoryEntryDto
 public sealed class ResearchSubjectService(
     FhirClientFactory clientFactory,
     TrialAccessService accessService,
+    IStringLocalizer<SharedResources> localizer,
     ILogger<ResearchSubjectService> logger)
 {
     /// <returns>The subject's new meta.lastUpdated, as reported by the FHIR server's PATCH response.</returns>
@@ -55,7 +58,7 @@ public sealed class ResearchSubjectService(
         try
         {
             current = await client.ReadAsync<ResearchSubject>($"ResearchSubject/{researchSubjectId}", ct: ct).ConfigureAwait(false)
-                ?? throw new FhirAccessException("This patient's record could not be found.");
+                ?? throw new FhirAccessException(localizer["App.Errors.PatientRecordNotFound"]);
         }
         catch (FhirAccessException)
         {
@@ -64,7 +67,7 @@ public sealed class ResearchSubjectService(
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to read ResearchSubject/{ResearchSubjectId} before adding a note", researchSubjectId);
-            throw new FhirAccessException("This patient's record could not be loaded to add the note.", ex);
+            throw new FhirAccessException(localizer["App.Errors.PatientRecordLoadForNoteFailed"], ex);
         }
 
         var annotation = new
@@ -96,7 +99,7 @@ public sealed class ResearchSubjectService(
         try
         {
             subject = await client.ReadAsync<ResearchSubject>($"ResearchSubject/{researchSubjectId}", ct: ct).ConfigureAwait(false)
-                ?? throw new FhirAccessException("This patient's record could not be found.");
+                ?? throw new FhirAccessException(localizer["App.Errors.PatientRecordNotFound"]);
         }
         catch (FhirAccessException)
         {
@@ -105,7 +108,7 @@ public sealed class ResearchSubjectService(
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to fetch notes for ResearchSubject/{ResearchSubjectId}", researchSubjectId);
-            throw new FhirAccessException("This patient's notes could not be loaded.", ex);
+            throw new FhirAccessException(localizer["App.Errors.PatientNotesLoadFailed"], ex);
         }
 
         return subject.GetAnnotationExtensions(FhirConstants.UrlResearchSubjectNote)
@@ -133,7 +136,7 @@ public sealed class ResearchSubjectService(
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to fetch history for ResearchSubject/{ResearchSubjectId}", researchSubjectId);
-            throw new FhirAccessException("The status history for this patient could not be loaded.", ex);
+            throw new FhirAccessException(localizer["App.Errors.StatusHistoryLoadFailed"], ex);
         }
 
         return resources.OfType<ResearchSubject>()
@@ -160,14 +163,14 @@ public sealed class ResearchSubjectService(
         entries.AddRange(historyTask.Result.Select(h => new PatientHistoryEntryDto
         {
             Time = h.LastUpdated,
-            Title = $"Status changed to \"{h.Status}\"",
+            Title = localizer["App.Timeline.StatusChanged", localizer[StatusDisplay.GetKey(h.Status)]],
             Kind = PatientHistoryEntryKind.StatusChange,
         }));
 
         entries.AddRange(notesTask.Result.Where(n => n.Time is not null).Select(n => new PatientHistoryEntryDto
         {
             Time = n.Time!.Value,
-            Title = string.IsNullOrEmpty(n.Author) ? "Note added" : $"Note added by {n.Author}",
+            Title = string.IsNullOrEmpty(n.Author) ? localizer["App.Timeline.NoteAdded"] : localizer["App.Timeline.NoteAddedBy", n.Author],
             Description = n.Text,
             Kind = PatientHistoryEntryKind.Note,
         }));
@@ -179,7 +182,7 @@ public sealed class ResearchSubjectService(
     {
         if (!accessService.CanPatchResearchSubject(user, studyAcronym))
         {
-            throw new UnauthorizedAccessException("You are not authorized to update patients for this trial.");
+            throw new UnauthorizedAccessException(localizer["App.Errors.NotAuthorizedUpdatePatient"]);
         }
     }
 
@@ -204,7 +207,7 @@ public sealed class ResearchSubjectService(
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to PATCH ResearchSubject/{ResearchSubjectId}", researchSubjectId);
-            throw new FhirAccessException("The patient's record could not be updated. Please try again.", ex);
+            throw new FhirAccessException(localizer["App.Errors.PatientRecordUpdateFailed"], ex);
         }
     }
 }

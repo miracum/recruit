@@ -1,5 +1,6 @@
 @inject ResearchSubjectService ResearchSubjectService
 @inject ToastService Toast
+@inject IStringLocalizer<SharedResources> Localizer
 
 <BbDialog Open="Patient is not null" OpenChanged="HandleOpenChanged">
     <BbDialogContent Class="sm:max-w-xl">
@@ -8,8 +9,8 @@
             <BbDialogHeader>
                 <BbDialogTitle>@(Patient.Name ?? Patient.PatientId)</BbDialogTitle>
                 <BbDialogDescription>
-                    @(Patient.Age is not null ? $"{Patient.Age} yo" : "Age unknown")
-                    &middot; @(Patient.Gender ?? "gender unknown")
+                    @(Patient.Age is not null ? Localizer["App.PatientDialog.AgeYo", Patient.Age] : Localizer["App.Common.AgeUnknown"])
+                    &middot; @(Patient.Gender is not null ? Localizer[GenderDisplay.GetKey(Patient.Gender)].Value : Localizer["App.Common.GenderUnknown"].Value)
                     @if (!string.IsNullOrEmpty(Patient.LastKnownLocation))
                     {
                         <span> &middot; @Patient.LastKnownLocation</span>
@@ -21,15 +22,15 @@
 
             <BbTabs DefaultValue="details">
                 <BbTabsList>
-                    <BbTabsTrigger Value="details">Details</BbTabsTrigger>
-                    <BbTabsTrigger Value="history">History</BbTabsTrigger>
+                    <BbTabsTrigger Value="details">@Localizer["App.PatientDialog.TabDetails"]</BbTabsTrigger>
+                    <BbTabsTrigger Value="history">@Localizer["App.PatientDialog.TabHistory"]</BbTabsTrigger>
                 </BbTabsList>
                 <BbTabsContent Value="details">
                     <div class="space-y-4">
                         @if (!string.IsNullOrEmpty(Patient.Phone) || !string.IsNullOrEmpty(Patient.Email))
                         {
                             <div>
-                                <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">Contact</span>
+                                <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.Patient.Contact"]</span>
                                 <div class="mt-2 space-y-1 text-sm">
                                     @if (!string.IsNullOrEmpty(Patient.Phone))
                                     {
@@ -44,14 +45,14 @@
                         }
 
                         <div>
-                            <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">Recruitment status</span>
+                            <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.Patient.RecruitmentStatus"]</span>
                             <div class="mt-3 flex flex-wrap gap-x-8 gap-y-3">
                                 @foreach (var status in StatusOptions)
                                 {
                                     <label class="flex cursor-pointer items-center gap-2 text-sm">
                                         <input type="radio" name="recruitment-status" value="@status" checked="@(Patient.Status == status)"
                                                @onchange="() => OnStatusChangedInternal(status)" class="h-4 w-4" style="accent-color: var(--primary);" />
-                                        @status
+                                        @Localizer[StatusDisplay.GetKey(status)]
                                     </label>
                                 }
                             </div>
@@ -68,7 +69,7 @@
             </BbTabs>
 
             <BbDialogFooter>
-                <BbButton Variant="ButtonVariant.Outline" OnClick="Close">Close</BbButton>
+                <BbButton Variant="ButtonVariant.Outline" OnClick="Close">@Localizer["App.Common.Close"]</BbButton>
             </BbDialogFooter>
         }
     </BbDialogContent>
@@ -108,11 +109,11 @@
             var updatedAt = await ResearchSubjectService.UpdateStatusAsync(Patient.ResearchSubjectId, newStatus, StudyAcronym, _user);
             Patient.Status = newStatus;
             Patient.LastUpdated = updatedAt ?? DateTimeOffset.UtcNow;
-            Toast.Success($"Status updated to \"{newStatus}\".", "Saved");
+            Toast.Success(Localizer["App.Toast.StatusUpdated", Localizer[StatusDisplay.GetKey(newStatus)]], Localizer["App.Common.Saved"]);
         }
         catch (Exception ex)
         {
-            Toast.Error(ex.Message, "Could not update status");
+            Toast.Error(ex.Message, Localizer["App.Toast.StatusUpdateError"]);
         }
     }
 

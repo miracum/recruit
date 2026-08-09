@@ -1,4 +1,6 @@
 using Hl7.Fhir.Model;
+using list.Resources;
+using Microsoft.Extensions.Localization;
 
 namespace list.Services.Fhir;
 
@@ -24,7 +26,10 @@ public sealed class LatestLocationDto
     public DateTimeOffset? EncounterStart { get; init; }
 }
 
-public sealed class PatientRecordService(FhirClientFactory clientFactory, ILogger<PatientRecordService> logger)
+public sealed class PatientRecordService(
+    FhirClientFactory clientFactory,
+    IStringLocalizer<SharedResources> localizer,
+    ILogger<PatientRecordService> logger)
 {
     public async Task<PatientClinicalSummaryDto> GetClinicalSummaryAsync(string patientId, CancellationToken ct = default)
     {
@@ -39,7 +44,7 @@ public sealed class PatientRecordService(FhirClientFactory clientFactory, ILogge
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to fetch $everything for Patient/{PatientId}", patientId);
-            throw new FhirAccessException("The patient's clinical record could not be loaded.", ex);
+            throw new FhirAccessException(localizer["App.Errors.ClinicalRecordLoadFailed"], ex);
         }
 
         return new PatientClinicalSummaryDto
@@ -89,7 +94,7 @@ public sealed class PatientRecordService(FhirClientFactory clientFactory, ILogge
 
             if (locationEntry?.Location?.Reference is { } reference && locationsById.TryGetValue(reference, out var location))
             {
-                return new LatestLocationDto { LocationName = location.Name ?? "Unknown", EncounterStart = ParseInstant(encounter.Period?.Start) };
+                return new LatestLocationDto { LocationName = location.Name ?? localizer["App.Common.Unknown"], EncounterStart = ParseInstant(encounter.Period?.Start) };
             }
 
             if (!string.IsNullOrEmpty(locationEntry?.Location?.Display))

@@ -1,4 +1,6 @@
-<BbBadge Variant="Variant">@Status</BbBadge>
+@inject IStringLocalizer<SharedResources> Localizer
+
+<BbBadge Variant="Variant">@Localizer[StatusDisplay.GetKey(Status)]</BbBadge>
 
 @code {
     [Parameter, EditorRequired]

@@ -1,0 +1,547 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="App.Common.AllTrialsBreadcrumb" xml:space="preserve">
+    <value>Alle Studien</value>
+  </data>
+  <data name="App.Common.Unknown" xml:space="preserve">
+    <value>Unbekannt</value>
+  </data>
+  <data name="App.Common.AgeUnknown" xml:space="preserve">
+    <value>Alter unbekannt</value>
+  </data>
+  <data name="App.Common.GenderUnknown" xml:space="preserve">
+    <value>Geschlecht unbekannt</value>
+  </data>
+  <data name="App.Common.Close" xml:space="preserve">
+    <value>Schließen</value>
+  </data>
+  <data name="App.Common.Saved" xml:space="preserve">
+    <value>Gespeichert</value>
+  </data>
+  <data name="App.Nav.Trials" xml:space="preserve">
+    <value>Studien</value>
+  </data>
+  <data name="App.Nav.Patients" xml:space="preserve">
+    <value>Patienten</value>
+  </data>
+  <data name="App.Nav.Notifications" xml:space="preserve">
+    <value>Benachrichtigungen</value>
+  </data>
+  <data name="App.Nav.SignOut" xml:space="preserve">
+    <value>Abmelden</value>
+  </data>
+  <data name="App.Nav.SignIn" xml:space="preserve">
+    <value>Anmelden</value>
+  </data>
+  <data name="App.Language.Label" xml:space="preserve">
+    <value>Sprache</value>
+  </data>
+  <data name="App.Language.English" xml:space="preserve">
+    <value>Englisch</value>
+  </data>
+  <data name="App.Language.German" xml:space="preserve">
+    <value>Deutsch</value>
+  </data>
+  <data name="App.ErrorBoundary.Title" xml:space="preserve">
+    <value>Es ist ein Fehler aufgetreten</value>
+  </data>
+  <data name="App.ErrorBoundary.Description" xml:space="preserve">
+    <value>Auf dieser Seite ist ein unerwarteter Fehler aufgetreten. Bitte laden Sie die Seite neu; wenden Sie sich an einen Administrator, falls das Problem weiterhin besteht.</value>
+  </data>
+  <data name="App.BlazorError.Message" xml:space="preserve">
+    <value>Es ist ein unbehandelter Fehler aufgetreten.</value>
+  </data>
+  <data name="App.BlazorError.Reload" xml:space="preserve">
+    <value>Neu laden</value>
+  </data>
+  <data name="App.Dashboard.LoadErrorTitle" xml:space="preserve">
+    <value>Studien konnten nicht geladen werden</value>
+  </data>
+  <data name="App.Dashboard.LoadErrorFallback" xml:space="preserve">
+    <value>Beim Laden des Dashboards ist ein unerwarteter Fehler aufgetreten. Bitte versuchen Sie es später erneut.</value>
+  </data>
+  <data name="App.Dashboard.EmptyTitle" xml:space="preserve">
+    <value>Keine Rekrutierungsvorschläge</value>
+  </data>
+  <data name="App.Dashboard.EmptyDescription" xml:space="preserve">
+    <value>Entweder haben noch keine Studien Vorschläge erzeugt, oder Sie sind nicht berechtigt, welche einzusehen. Wenden Sie sich an einen Administrator, falls Sie dies für einen Fehler halten.</value>
+  </data>
+  <data name="App.Dashboard.NewSuggestions" xml:space="preserve">
+    <value>Neue Vorschläge</value>
+  </data>
+  <data name="App.Dashboard.StalledLeads" xml:space="preserve">
+    <value>Ins Stocken geratene Fälle</value>
+  </data>
+  <data name="App.Dashboard.ActiveTab" xml:space="preserve">
+    <value>Aktiv</value>
+  </data>
+  <data name="App.Dashboard.InactiveTab" xml:space="preserve">
+    <value>Inaktiv</value>
+  </data>
+  <data name="App.Dashboard.NoActiveTrials" xml:space="preserve">
+    <value>Keine aktiven Studien.</value>
+  </data>
+  <data name="App.Dashboard.NoInactiveTrials" xml:space="preserve">
+    <value>Keine inaktiven Studien.</value>
+  </data>
+  <data name="App.TrialGrid.SearchPlaceholder" xml:space="preserve">
+    <value>Studien durchsuchen...</value>
+  </data>
+  <data name="App.TrialGrid.NoMatches" xml:space="preserve">
+    <value>Keine Studien entsprechen Ihrer Suche.</value>
+  </data>
+  <data name="App.TrialCard.Recruited" xml:space="preserve">
+    <value>Rekrutiert</value>
+  </data>
+  <data name="App.TrialCard.Pending" xml:space="preserve">
+    <value>Ausstehend</value>
+  </data>
+  <data name="App.TrialCard.NotRecruited" xml:space="preserve">
+    <value>Nicht rekrutiert</value>
+  </data>
+  <data name="App.TrialCard.NewSuggestionSingular" xml:space="preserve">
+    <value>neuer Vorschlag</value>
+  </data>
+  <data name="App.TrialCard.NewSuggestionPlural" xml:space="preserve">
+    <value>neue Vorschläge</value>
+  </data>
+  <data name="App.TrialCard.StalledTooltip" xml:space="preserve">
+    <value>Ausstehende Fälle ohne kürzliche Aktivität</value>
+  </data>
+  <data name="App.TrialCard.StalledCount" xml:space="preserve">
+    <value>{0} verzögert</value>
+  </data>
+  <data name="App.PatientList.LoadErrorTitle" xml:space="preserve">
+    <value>Die Vorschläge dieser Studie konnten nicht geladen werden</value>
+  </data>
+  <data name="App.PatientList.LoadErrorFallback" xml:space="preserve">
+    <value>Beim Laden der Studienvorschläge ist ein unerwarteter Fehler aufgetreten.</value>
+  </data>
+  <data name="App.PatientList.LastUpdated" xml:space="preserve">
+    <value>Zuletzt aktualisiert am {0}</value>
+  </data>
+  <data name="App.PatientList.EmptyTitle" xml:space="preserve">
+    <value>Keine Vorschläge</value>
+  </data>
+  <data name="App.PatientList.EmptyDescription" xml:space="preserve">
+    <value>Für diese Studie liegen noch keine Patientenvorschläge vor.</value>
+  </data>
+  <data name="App.PatientList.ColumnName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="App.PatientList.NewBadge" xml:space="preserve">
+    <value>Neu</value>
+  </data>
+  <data name="App.PatientList.SystemIneligibleBadge" xml:space="preserve">
+    <value>System: nicht geeignet</value>
+  </data>
+  <data name="App.PatientList.ColumnDemographics" xml:space="preserve">
+    <value>Demografie</value>
+  </data>
+  <data name="App.PatientList.ColumnLocation" xml:space="preserve">
+    <value>Zuletzt bekannter Standort</value>
+  </data>
+  <data name="App.PatientList.ColumnRecommended" xml:space="preserve">
+    <value>Empfohlen</value>
+  </data>
+  <data name="App.PatientList.ColumnStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="App.PatientList.ColumnUpdated" xml:space="preserve">
+    <value>Aktualisiert</value>
+  </data>
+  <data name="App.PatientDetail.PageTitleFallback" xml:space="preserve">
+    <value>Patient</value>
+  </data>
+  <data name="App.PatientDetail.LoadErrorTitle" xml:space="preserve">
+    <value>Dieser Patient konnte nicht geladen werden</value>
+  </data>
+  <data name="App.PatientDetail.LoadErrorFallback" xml:space="preserve">
+    <value>Beim Laden dieses Patienten ist ein unerwarteter Fehler aufgetreten.</value>
+  </data>
+  <data name="App.PatientDetail.AgeYearsOld" xml:space="preserve">
+    <value>{0} Jahre alt</value>
+  </data>
+  <data name="App.PatientDetail.LastKnownLocationLabel" xml:space="preserve">
+    <value>Zuletzt bekannter Standort: {0}</value>
+  </data>
+  <data name="App.PatientDetail.StatusHistoryTitle" xml:space="preserve">
+    <value>Statusverlauf</value>
+  </data>
+  <data name="App.PatientDetail.ClinicalSummaryTitle" xml:space="preserve">
+    <value>Klinische Zusammenfassung</value>
+  </data>
+  <data name="App.PatientDetail.TabConditions" xml:space="preserve">
+    <value>Diagnosen ({0})</value>
+  </data>
+  <data name="App.PatientDetail.TabProcedures" xml:space="preserve">
+    <value>Prozeduren ({0})</value>
+  </data>
+  <data name="App.PatientDetail.TabMedications" xml:space="preserve">
+    <value>Medikation ({0})</value>
+  </data>
+  <data name="App.PatientDetail.TabObservations" xml:space="preserve">
+    <value>Befunde ({0})</value>
+  </data>
+  <data name="App.PatientDetail.NoConditions" xml:space="preserve">
+    <value>Keine Diagnosen erfasst.</value>
+  </data>
+  <data name="App.PatientDetail.NoProcedures" xml:space="preserve">
+    <value>Keine Prozeduren erfasst.</value>
+  </data>
+  <data name="App.PatientDetail.NoMedications" xml:space="preserve">
+    <value>Keine Medikation erfasst.</value>
+  </data>
+  <data name="App.PatientDetail.NoObservations" xml:space="preserve">
+    <value>Keine Befunde erfasst.</value>
+  </data>
+  <data name="App.PatientDetail.UnspecifiedCondition" xml:space="preserve">
+    <value>Nicht spezifizierte Diagnose</value>
+  </data>
+  <data name="App.PatientDetail.UnspecifiedProcedure" xml:space="preserve">
+    <value>Nicht spezifizierte Prozedur</value>
+  </data>
+  <data name="App.PatientDetail.UnspecifiedMedication" xml:space="preserve">
+    <value>Nicht spezifiziertes Medikament</value>
+  </data>
+  <data name="App.PatientDetail.UnspecifiedObservation" xml:space="preserve">
+    <value>Nicht spezifizierter Befund</value>
+  </data>
+  <data name="App.PatientsPage.LoadErrorTitle" xml:space="preserve">
+    <value>Patienten konnten nicht geladen werden</value>
+  </data>
+  <data name="App.PatientsPage.LoadErrorFallback" xml:space="preserve">
+    <value>Beim Laden der Patienten ist ein unerwarteter Fehler aufgetreten.</value>
+  </data>
+  <data name="App.PatientsPage.EmptyTitle" xml:space="preserve">
+    <value>Keine Patienten</value>
+  </data>
+  <data name="App.PatientsPage.EmptyDescription" xml:space="preserve">
+    <value>Entweder haben noch keine Studien Vorschläge erzeugt, oder Sie sind nicht berechtigt, welche einzusehen.</value>
+  </data>
+  <data name="App.PatientsPage.ColumnStudies" xml:space="preserve">
+    <value>Möglicherweise passende Studien</value>
+  </data>
+  <data name="App.Notifications.LoadErrorTitle" xml:space="preserve">
+    <value>Benachrichtigungen konnten nicht geladen werden</value>
+  </data>
+  <data name="App.Notifications.LoadErrorFallback" xml:space="preserve">
+    <value>Beim Laden der Benachrichtigungen ist ein unerwarteter Fehler aufgetreten.</value>
+  </data>
+  <data name="App.Notifications.EmptyTitle" xml:space="preserve">
+    <value>Sie sind auf dem neuesten Stand</value>
+  </data>
+  <data name="App.Notifications.EmptyDescription" xml:space="preserve">
+    <value>Es liegen keine neuen Rekrutierungsvorschläge zur Überprüfung vor.</value>
+  </data>
+  <data name="App.Notifications.Dismiss" xml:space="preserve">
+    <value>Verwerfen</value>
+  </data>
+  <data name="App.Notifications.MessageFormat" xml:space="preserve">
+    <value>{0} wurde neu für {1} vorgeschlagen</value>
+  </data>
+  <data name="App.Status.Candidate" xml:space="preserve">
+    <value>Kandidat</value>
+  </data>
+  <data name="App.Status.Screening" xml:space="preserve">
+    <value>Screening</value>
+  </data>
+  <data name="App.Status.Eligible" xml:space="preserve">
+    <value>Geeignet</value>
+  </data>
+  <data name="App.Status.Ineligible" xml:space="preserve">
+    <value>Nicht geeignet</value>
+  </data>
+  <data name="App.Status.OnStudy" xml:space="preserve">
+    <value>In Studie</value>
+  </data>
+  <data name="App.Status.Withdrawn" xml:space="preserve">
+    <value>Zurückgezogen</value>
+  </data>
+  <data name="App.Patient.Contact" xml:space="preserve">
+    <value>Kontakt</value>
+  </data>
+  <data name="App.Patient.RecruitmentStatus" xml:space="preserve">
+    <value>Rekrutierungsstatus</value>
+  </data>
+  <data name="App.Patient.Notes" xml:space="preserve">
+    <value>Notizen</value>
+  </data>
+  <data name="App.PatientDialog.TabDetails" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="App.PatientDialog.TabHistory" xml:space="preserve">
+    <value>Verlauf</value>
+  </data>
+  <data name="App.PatientDialog.AgeYo" xml:space="preserve">
+    <value>{0} J.</value>
+  </data>
+  <data name="App.PatientNotes.Empty" xml:space="preserve">
+    <value>Noch keine Notizen.</value>
+  </data>
+  <data name="App.PatientNotes.UnknownTime" xml:space="preserve">
+    <value>Unbekannter Zeitpunkt</value>
+  </data>
+  <data name="App.PatientNotes.Placeholder" xml:space="preserve">
+    <value>Screening-Notiz hinzufügen...</value>
+  </data>
+  <data name="App.PatientNotes.AddButton" xml:space="preserve">
+    <value>Notiz hinzufügen</value>
+  </data>
+  <data name="App.PatientHistory.Empty" xml:space="preserve">
+    <value>Noch kein Verlauf.</value>
+  </data>
+  <data name="App.Timeline.StatusChanged" xml:space="preserve">
+    <value>Status geändert zu „{0}“</value>
+  </data>
+  <data name="App.Timeline.NoteAdded" xml:space="preserve">
+    <value>Notiz hinzugefügt</value>
+  </data>
+  <data name="App.Timeline.NoteAddedBy" xml:space="preserve">
+    <value>Notiz hinzugefügt von {0}</value>
+  </data>
+  <data name="App.Toast.StatusUpdated" xml:space="preserve">
+    <value>Status geändert zu „{0}“.</value>
+  </data>
+  <data name="App.Toast.StatusUpdateError" xml:space="preserve">
+    <value>Status konnte nicht aktualisiert werden</value>
+  </data>
+  <data name="App.Toast.NoteSaved" xml:space="preserve">
+    <value>Notiz gespeichert.</value>
+  </data>
+  <data name="App.Toast.NoteSaveError" xml:space="preserve">
+    <value>Notiz konnte nicht gespeichert werden</value>
+  </data>
+  <data name="App.NotFound.Title" xml:space="preserve">
+    <value>Nicht gefunden</value>
+  </data>
+  <data name="App.NotFound.Description" xml:space="preserve">
+    <value>Der gesuchte Inhalt existiert leider nicht.</value>
+  </data>
+  <data name="App.Notifications.UnknownPatient" xml:space="preserve">
+    <value>unbekannter Patient</value>
+  </data>
+  <data name="App.PatientDetail.NotFoundInList" xml:space="preserve">
+    <value>Dieser Patient wurde in der Vorschlagsliste dieser Studie nicht gefunden.</value>
+  </data>
+  <data name="App.Errors.TrialsLoadFailed" xml:space="preserve">
+    <value>Die Liste der klinischen Studien konnte nicht vom FHIR-Server geladen werden.</value>
+  </data>
+  <data name="App.Errors.PatientOverviewLoadFailed" xml:space="preserve">
+    <value>Die Patientenübersicht konnte nicht vom FHIR-Server geladen werden.</value>
+  </data>
+  <data name="App.Errors.NotificationsLoadFailed" xml:space="preserve">
+    <value>Benachrichtigungen konnten nicht vom FHIR-Server geladen werden.</value>
+  </data>
+  <data name="App.Errors.PatientListLoadFailed" xml:space="preserve">
+    <value>Die Patientenliste konnte nicht vom FHIR-Server geladen werden.</value>
+  </data>
+  <data name="App.Errors.ListNotFound" xml:space="preserve">
+    <value>Für die angegebene ID wurde keine Liste gefunden.</value>
+  </data>
+  <data name="App.Errors.NotAuthorizedTrial" xml:space="preserve">
+    <value>Sie sind nicht berechtigt, auf die Vorschläge dieser Studie zuzugreifen.</value>
+  </data>
+  <data name="App.Errors.TrialStatusUpdateFailed" xml:space="preserve">
+    <value>Der Status der Studie konnte nicht aktualisiert werden.</value>
+  </data>
+  <data name="App.Errors.AdminOnlyTrialStatus" xml:space="preserve">
+    <value>Nur Administratoren können den Aktiv-/Inaktiv-Status einer Studie ändern.</value>
+  </data>
+  <data name="App.Errors.PatientRecordNotFound" xml:space="preserve">
+    <value>Der Datensatz dieses Patienten konnte nicht gefunden werden.</value>
+  </data>
+  <data name="App.Errors.PatientRecordLoadForNoteFailed" xml:space="preserve">
+    <value>Der Datensatz dieses Patienten konnte zum Hinzufügen der Notiz nicht geladen werden.</value>
+  </data>
+  <data name="App.Errors.PatientNotesLoadFailed" xml:space="preserve">
+    <value>Die Notizen dieses Patienten konnten nicht geladen werden.</value>
+  </data>
+  <data name="App.Errors.StatusHistoryLoadFailed" xml:space="preserve">
+    <value>Der Statusverlauf dieses Patienten konnte nicht geladen werden.</value>
+  </data>
+  <data name="App.Errors.NotAuthorizedUpdatePatient" xml:space="preserve">
+    <value>Sie sind nicht berechtigt, Patienten dieser Studie zu aktualisieren.</value>
+  </data>
+  <data name="App.Errors.PatientRecordUpdateFailed" xml:space="preserve">
+    <value>Der Datensatz des Patienten konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut.</value>
+  </data>
+  <data name="App.Errors.ClinicalRecordLoadFailed" xml:space="preserve">
+    <value>Die klinische Akte des Patienten konnte nicht geladen werden.</value>
+  </data>
+  <data name="App.Gender.Male" xml:space="preserve">
+    <value>männlich</value>
+  </data>
+  <data name="App.Gender.Female" xml:space="preserve">
+    <value>weiblich</value>
+  </data>
+  <data name="App.Gender.Other" xml:space="preserve">
+    <value>divers</value>
+  </data>
+  <data name="App.Gender.Unknown" xml:space="preserve">
+    <value>unbekannt</value>
+  </data>
+  <data name="Breadcrumb.Breadcrumb" xml:space="preserve">
+    <value>Breadcrumb-Navigation</value>
+  </data>
+  <data name="Breadcrumb.More" xml:space="preserve">
+    <value>Mehr</value>
+  </data>
+  <data name="DataTable.ClearSelection" xml:space="preserve">
+    <value>Auswahl aufheben</value>
+  </data>
+  <data name="DataTable.Columns" xml:space="preserve">
+    <value>Spalten</value>
+  </data>
+  <data name="DataTable.Loading" xml:space="preserve">
+    <value>Wird geladen...</value>
+  </data>
+  <data name="DataTable.NoResultsFound" xml:space="preserve">
+    <value>Keine Ergebnisse gefunden</value>
+  </data>
+  <data name="DataTable.Search" xml:space="preserve">
+    <value>Suchen...</value>
+  </data>
+  <data name="DataTable.SelectAllItems" xml:space="preserve">
+    <value>Alle {0} Einträge auswählen</value>
+  </data>
+  <data name="DataTable.SelectAllOnPage" xml:space="preserve">
+    <value>Alle auf dieser Seite auswählen ({0} Einträge)</value>
+  </data>
+  <data name="DataTable.SelectAllRows" xml:space="preserve">
+    <value>Alle Zeilen auswählen</value>
+  </data>
+  <data name="DataTable.SelectRowsAriaLabel" xml:space="preserve">
+    <value>Zeilen auswählen – klicken für Optionen</value>
+  </data>
+  <data name="DataTable.SelectThisRow" xml:space="preserve">
+    <value>Diese Zeile auswählen</value>
+  </data>
+  <data name="DataTable.ToggleColumns" xml:space="preserve">
+    <value>Spalten ein-/ausblenden</value>
+  </data>
+  <data name="DataView.GridView" xml:space="preserve">
+    <value>Rasteransicht</value>
+  </data>
+  <data name="DataView.ListView" xml:space="preserve">
+    <value>Listenansicht</value>
+  </data>
+  <data name="DataView.Loading" xml:space="preserve">
+    <value>Wird geladen...</value>
+  </data>
+  <data name="DataView.LoadingMore" xml:space="preserve">
+    <value>Weitere werden geladen...</value>
+  </data>
+  <data name="DataView.LoadMore" xml:space="preserve">
+    <value>Mehr laden</value>
+  </data>
+  <data name="DataView.NoResultsFound" xml:space="preserve">
+    <value>Keine Ergebnisse gefunden</value>
+  </data>
+  <data name="DataView.SearchPlaceholder" xml:space="preserve">
+    <value>Suchen...</value>
+  </data>
+  <data name="DataView.Sort" xml:space="preserve">
+    <value>Sortieren</value>
+  </data>
+  <data name="Dialog.Close" xml:space="preserve">
+    <value>Schließen</value>
+  </data>
+  <data name="Pagination.GoToFirstPage" xml:space="preserve">
+    <value>Zur ersten Seite</value>
+  </data>
+  <data name="Pagination.GoToLastPage" xml:space="preserve">
+    <value>Zur letzten Seite</value>
+  </data>
+  <data name="Pagination.MorePages" xml:space="preserve">
+    <value>Weitere Seiten</value>
+  </data>
+  <data name="Pagination.Next" xml:space="preserve">
+    <value>Weiter</value>
+  </data>
+  <data name="Pagination.NoItems" xml:space="preserve">
+    <value>Keine Einträge</value>
+  </data>
+  <data name="Pagination.PageFormat" xml:space="preserve">
+    <value>Seite {0} von {1}</value>
+  </data>
+  <data name="Pagination.Pagination" xml:space="preserve">
+    <value>Seitennavigation</value>
+  </data>
+  <data name="Pagination.Previous" xml:space="preserve">
+    <value>Zurück</value>
+  </data>
+  <data name="Pagination.RowsPerPage" xml:space="preserve">
+    <value>Zeilen pro Seite</value>
+  </data>
+  <data name="Pagination.ShowingFormat" xml:space="preserve">
+    <value>Zeige {0}-{1} von {2}</value>
+  </data>
+  <data name="Sidebar.ToggleSidebar" xml:space="preserve">
+    <value>Seitenleiste umschalten</value>
+  </data>
+  <data name="Timeline.Timeline" xml:space="preserve">
+    <value>Zeitleiste</value>
+  </data>
+  <data name="Alert.Dismiss" xml:space="preserve">
+    <value>Verwerfen</value>
+  </data>
+</root>

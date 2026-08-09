@@ -1,3 +1,5 @@
+@inject IStringLocalizer<SharedResources> Localizer
+
 @if (Trials.Count == 0)
 {
     <p class="text-sm text-muted-foreground">@EmptyMessage</p>
@@ -5,11 +7,11 @@
 else
 {
     <BbInput @bind-Value="_search" UpdateTiming="UpdateTiming.Debounced" DebounceInterval="300"
-             Placeholder="Search trials..." Class="mb-4 max-w-sm" />
+             Placeholder="@Localizer["App.TrialGrid.SearchPlaceholder"]" Class="mb-4 max-w-sm" />
 
     @if (FilteredTrials.Count == 0)
     {
-        <p class="text-sm text-muted-foreground">No trials match your search.</p>
+        <p class="text-sm text-muted-foreground">@Localizer["App.TrialGrid.NoMatches"]</p>
     }
     else
     {

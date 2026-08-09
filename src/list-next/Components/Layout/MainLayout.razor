@@ -3,6 +3,8 @@
 @inject BreadcrumbState BreadcrumbState
 @inject ScreeningListService ScreeningListService
 @inject IOptions<NotificationOptions> NotificationOptionsAccessor
+@inject IStringLocalizer<SharedResources> Localizer
+@inject NavigationManager Navigation
 
 <BbSidebarProvider>
     <BbSidebar>
@@ -20,19 +22,19 @@
                     <BbSidebarMenuItem>
                         <BbSidebarMenuButton Href="/" Match="NavLinkMatch.All">
                             <LucideIcon Name="flask-conical" Size="16" />
-                            Trials
+                            @Localizer["App.Nav.Trials"]
                         </BbSidebarMenuButton>
                     </BbSidebarMenuItem>
                     <BbSidebarMenuItem>
                         <BbSidebarMenuButton Href="/patients">
                             <LucideIcon Name="users" Size="16" />
-                            Patients
+                            @Localizer["App.Nav.Patients"]
                         </BbSidebarMenuButton>
                     </BbSidebarMenuItem>
                     <BbSidebarMenuItem>
                         <BbSidebarMenuButton Href="/notifications">
                             <LucideIcon Name="bell" Size="16" />
-                            Notifications
+                            @Localizer["App.Nav.Notifications"]
                         </BbSidebarMenuButton>
                     </BbSidebarMenuItem>
                 </BbSidebarMenu>
@@ -45,15 +47,27 @@
                         <span class="truncate text-sm">@context.User.Identity?.Name</span>
                         <form method="post" action="/authentication/logout">
                             <BbButton Type="ButtonType.Submit" Variant="ButtonVariant.Ghost" Size="ButtonSize.Small">
-                                Sign out
+                                @Localizer["App.Nav.SignOut"]
                             </BbButton>
                         </form>
                     </div>
                 </Authorized>
                 <NotAuthorized>
-                    <a href="/authentication/login" class="px-3 py-2 text-sm">Sign in</a>
+                    <a href="/authentication/login" class="px-3 py-2 text-sm">@Localizer["App.Nav.SignIn"]</a>
                 </NotAuthorized>
             </AuthorizeView>
+            <div class="flex items-center justify-between gap-2 px-3 py-2 text-xs text-muted-foreground">
+                <span>@Localizer["App.Language.Label"]</span>
+                <div class="flex items-center gap-1">
+                    @foreach (var culture in SupportedCultures)
+                    {
+                        <a href="@BuildCultureUrl(culture)" data-enhance-nav="false"
+                           class="rounded px-1.5 py-0.5 uppercase hover:bg-accent hover:text-accent-foreground @(IsCurrentCulture(culture) ? "font-semibold text-foreground" : "")">
+                            @culture
+                        </a>
+                    }
+                </div>
+            </div>
         </BbSidebarFooter>
     </BbSidebar>
 
@@ -73,9 +87,9 @@
                 </ChildContent>
                 <ErrorContent>
                     <BbAlert Variant="AlertVariant.Danger">
-                        <BbAlertTitle>Something went wrong</BbAlertTitle>
+                        <BbAlertTitle>@Localizer["App.ErrorBoundary.Title"]</BbAlertTitle>
                         <BbAlertDescription>
-                            This page ran into an unexpected error. Try reloading; if the problem persists, contact an administrator.
+                            @Localizer["App.ErrorBoundary.Description"]
                         </BbAlertDescription>
                     </BbAlert>
                 </ErrorContent>
@@ -87,14 +101,16 @@
 <BbPortalHost />
 
 <div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
+    @Localizer["App.BlazorError.Message"]
+    <a href="." class="reload">@Localizer["App.BlazorError.Reload"]</a>
     <span class="dismiss">🗙</span>
 </div>
 
 @code {
     [CascadingParameter]
     private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    private static readonly string[] SupportedCultures = ["en", "de"];
 
     private static readonly string[] DotColors =
     [
@@ -133,6 +149,16 @@
 
     private static string TrialDotColor(string acronym) =>
         DotColors[Math.Abs(acronym.GetHashCode()) % DotColors.Length];
+
+    private bool IsCurrentCulture(string culture) =>
+        string.Equals(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName, culture, StringComparison.OrdinalIgnoreCase);
+
+    private string BuildCultureUrl(string culture)
+    {
+        var relativePath = Navigation.ToBaseRelativePath(Navigation.Uri);
+        var redirectUri = Uri.EscapeDataString(string.IsNullOrEmpty(relativePath) ? "/" : $"/{relativePath}");
+        return $"/culture/set?culture={culture}&redirectUri={redirectUri}";
+    }
 
     private void OnBreadcrumbChanged() => InvokeAsync(StateHasChanged);
 

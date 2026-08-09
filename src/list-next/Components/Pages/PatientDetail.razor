@@ -5,8 +5,9 @@
 @inject PatientRecordService PatientRecordService
 @inject ToastService Toast
 @inject BreadcrumbState BreadcrumbState
+@inject IStringLocalizer<SharedResources> Localizer
 
-<PageTitle>@(_entry?.Name ?? "Patient")</PageTitle>
+<PageTitle>@(_entry?.Name ?? Localizer["App.PatientDetail.PageTitleFallback"])</PageTitle>
 
 @if (_loading)
 {
@@ -16,14 +17,14 @@
 else if (_errorMessage is not null)
 {
     <BbAlert Variant="AlertVariant.Danger">
-        <BbAlertTitle>Could not load this patient</BbAlertTitle>
+        <BbAlertTitle>@Localizer["App.PatientDetail.LoadErrorTitle"]</BbAlertTitle>
         <BbAlertDescription>@_errorMessage</BbAlertDescription>
     </BbAlert>
 }
 else if (_entry is not null)
 {
     <p class="mb-4 text-sm text-muted-foreground">
-        @(_entry.Age is not null ? $"{_entry.Age} years old" : "Age unknown"), @(_entry.Gender ?? "gender unknown")
+        @(_entry.Age is not null ? Localizer["App.PatientDetail.AgeYearsOld", _entry.Age] : Localizer["App.Common.AgeUnknown"]), @(_entry.Gender is not null ? Localizer[GenderDisplay.GetKey(_entry.Gender)].Value : Localizer["App.Common.GenderUnknown"].Value)
         @if (_mrNumber is not null)
         {
             <span> &middot; MR @_mrNumber</span>
@@ -33,7 +34,7 @@ else if (_entry is not null)
     <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
         <BbCard>
             <BbCardHeader>
-                <BbCardTitle>Recruitment status</BbCardTitle>
+                <BbCardTitle>@Localizer["App.Patient.RecruitmentStatus"]</BbCardTitle>
             </BbCardHeader>
             <BbCardContent>
                 <div class="flex flex-wrap gap-x-6 gap-y-3">
@@ -42,12 +43,12 @@ else if (_entry is not null)
                         <label class="flex cursor-pointer items-center gap-2 text-sm">
                             <input type="radio" name="recruitment-status-detail" value="@status" checked="@(_entry.Status == status)"
                                    @onchange="() => OnStatusChanged(status)" class="h-4 w-4" style="accent-color: var(--primary);" />
-                            @status
+                            @Localizer[StatusDisplay.GetKey(status)]
                         </label>
                     }
                 </div>
                 <p class="mt-3 text-sm text-muted-foreground">
-                    Last known location: @(_location?.LocationName ?? "unknown")
+                    @Localizer["App.PatientDetail.LastKnownLocationLabel", _location?.LocationName ?? Localizer["App.Common.Unknown"].Value]
                 </p>
             </BbCardContent>
         </BbCard>
@@ -62,36 +63,36 @@ else if (_entry is not null)
     @if (_history.Count > 0)
     {
         <section class="mb-6">
-            <h2 class="mb-3 text-lg font-medium">Status history</h2>
+            <h2 class="mb-3 text-lg font-medium">@Localizer["App.PatientDetail.StatusHistoryTitle"]</h2>
             <BbTimeline>
                 @foreach (var entry in _history)
                 {
-                    <BbTimelineItem Title="@entry.Status" Time="@entry.LastUpdated.LocalDateTime.ToString("g")" />
+                    <BbTimelineItem Title="@Localizer[StatusDisplay.GetKey(entry.Status)]" Time="@entry.LastUpdated.LocalDateTime.ToString("g")" />
                 }
             </BbTimeline>
         </section>
     }
 
     <section>
-        <h2 class="mb-3 text-lg font-medium">Clinical summary</h2>
+        <h2 class="mb-3 text-lg font-medium">@Localizer["App.PatientDetail.ClinicalSummaryTitle"]</h2>
         <BbTabs DefaultValue="conditions">
             <BbTabsList>
-                <BbTabsTrigger Value="conditions">Conditions (@_summary.Conditions.Count)</BbTabsTrigger>
-                <BbTabsTrigger Value="procedures">Procedures (@_summary.Procedures.Count)</BbTabsTrigger>
-                <BbTabsTrigger Value="medications">Medications (@(_summary.MedicationStatements.Count + _summary.MedicationAdministrations.Count))</BbTabsTrigger>
-                <BbTabsTrigger Value="observations">Observations (@_summary.Observations.Count)</BbTabsTrigger>
+                <BbTabsTrigger Value="conditions">@Localizer["App.PatientDetail.TabConditions", _summary.Conditions.Count]</BbTabsTrigger>
+                <BbTabsTrigger Value="procedures">@Localizer["App.PatientDetail.TabProcedures", _summary.Procedures.Count]</BbTabsTrigger>
+                <BbTabsTrigger Value="medications">@Localizer["App.PatientDetail.TabMedications", _summary.MedicationStatements.Count + _summary.MedicationAdministrations.Count]</BbTabsTrigger>
+                <BbTabsTrigger Value="observations">@Localizer["App.PatientDetail.TabObservations", _summary.Observations.Count]</BbTabsTrigger>
             </BbTabsList>
             <BbTabsContent Value="conditions">
                 @if (_summary.Conditions.Count == 0)
                 {
-                    <p class="text-sm text-muted-foreground">No conditions recorded.</p>
+                    <p class="text-sm text-muted-foreground">@Localizer["App.PatientDetail.NoConditions"]</p>
                 }
                 else
                 {
                     <ul class="list-disc space-y-1 pl-5">
                         @foreach (var c in _summary.Conditions)
                         {
-                            <li>@(c.Code?.Text ?? c.Code?.Coding?.FirstOrDefault()?.Display ?? "Unspecified condition")</li>
+                            <li>@(c.Code?.Text ?? c.Code?.Coding?.FirstOrDefault()?.Display ?? Localizer["App.PatientDetail.UnspecifiedCondition"].Value)</li>
                         }
                     </ul>
                 }
@@ -99,14 +100,14 @@ else if (_entry is not null)
             <BbTabsContent Value="procedures">
                 @if (_summary.Procedures.Count == 0)
                 {
-                    <p class="text-sm text-muted-foreground">No procedures recorded.</p>
+                    <p class="text-sm text-muted-foreground">@Localizer["App.PatientDetail.NoProcedures"]</p>
                 }
                 else
                 {
                     <ul class="list-disc space-y-1 pl-5">
                         @foreach (var p in _summary.Procedures)
                         {
-                            <li>@(p.Code?.Text ?? p.Code?.Coding?.FirstOrDefault()?.Display ?? "Unspecified procedure")</li>
+                            <li>@(p.Code?.Text ?? p.Code?.Coding?.FirstOrDefault()?.Display ?? Localizer["App.PatientDetail.UnspecifiedProcedure"].Value)</li>
                         }
                     </ul>
                 }
@@ -114,18 +115,18 @@ else if (_entry is not null)
             <BbTabsContent Value="medications">
                 @if (_summary.MedicationStatements.Count == 0 && _summary.MedicationAdministrations.Count == 0)
                 {
-                    <p class="text-sm text-muted-foreground">No medications recorded.</p>
+                    <p class="text-sm text-muted-foreground">@Localizer["App.PatientDetail.NoMedications"]</p>
                 }
                 else
                 {
                     <ul class="list-disc space-y-1 pl-5">
                         @foreach (var m in _summary.MedicationStatements)
                         {
-                            <li>@((m.Medication as Hl7.Fhir.Model.CodeableConcept)?.Text ?? "Unspecified medication")</li>
+                            <li>@((m.Medication as Hl7.Fhir.Model.CodeableConcept)?.Text ?? Localizer["App.PatientDetail.UnspecifiedMedication"].Value)</li>
                         }
                         @foreach (var m in _summary.MedicationAdministrations)
                         {
-                            <li>@((m.Medication as Hl7.Fhir.Model.CodeableConcept)?.Text ?? "Unspecified medication")</li>
+                            <li>@((m.Medication as Hl7.Fhir.Model.CodeableConcept)?.Text ?? Localizer["App.PatientDetail.UnspecifiedMedication"].Value)</li>
                         }
                     </ul>
                 }
@@ -133,14 +134,14 @@ else if (_entry is not null)
             <BbTabsContent Value="observations">
                 @if (_summary.Observations.Count == 0)
                 {
-                    <p class="text-sm text-muted-foreground">No observations recorded.</p>
+                    <p class="text-sm text-muted-foreground">@Localizer["App.PatientDetail.NoObservations"]</p>
                 }
                 else
                 {
                     <ul class="list-disc space-y-1 pl-5">
                         @foreach (var o in _summary.Observations)
                         {
-                            <li>@(o.Code?.Text ?? o.Code?.Coding?.FirstOrDefault()?.Display ?? "Unspecified observation")</li>
+                            <li>@(o.Code?.Text ?? o.Code?.Coding?.FirstOrDefault()?.Display ?? Localizer["App.PatientDetail.UnspecifiedObservation"].Value)</li>
                         }
                     </ul>
                 }
@@ -184,10 +185,10 @@ else if (_entry is not null)
                 ListId, _user, NotificationOptionsAccessor.Value.NewSuggestionWindowDays, NotificationOptionsAccessor.Value.StalledLeadWindowDays);
             _trial = trial;
             _entry = patients.FirstOrDefault(p => p.ResearchSubjectId == ResearchSubjectId)
-                ?? throw new FhirAccessException("This patient could not be found in the trial's recommendation list.");
+                ?? throw new FhirAccessException(Localizer["App.PatientDetail.NotFoundInList"]);
 
             BreadcrumbState.Set(
-                new BreadcrumbItem("All trials", "/"),
+                new BreadcrumbItem(Localizer["App.Common.AllTrialsBreadcrumb"], "/"),
                 new BreadcrumbItem(trial.StudyAcronym, $"/trials/{ListId}/patients"),
                 new BreadcrumbItem(_entry.Name ?? _entry.PatientId));
 
@@ -210,7 +211,7 @@ else if (_entry is not null)
         }
         catch (Exception)
         {
-            _errorMessage = "An unexpected error occurred while loading this patient.";
+            _errorMessage = Localizer["App.PatientDetail.LoadErrorFallback"];
         }
         finally
         {
@@ -230,11 +231,11 @@ else if (_entry is not null)
             var updatedAt = await ResearchSubjectService.UpdateStatusAsync(ResearchSubjectId, newStatus, _trial.StudyAcronym, _user);
             _entry.Status = newStatus;
             _entry.LastUpdated = updatedAt ?? DateTimeOffset.UtcNow;
-            Toast.Success($"Status updated to \"{newStatus}\".", "Saved");
+            Toast.Success(Localizer["App.Toast.StatusUpdated", Localizer[StatusDisplay.GetKey(newStatus)]], Localizer["App.Common.Saved"]);
         }
         catch (Exception ex)
         {
-            Toast.Error(ex.Message, "Could not update status");
+            Toast.Error(ex.Message, Localizer["App.Toast.StatusUpdateError"]);
         }
     }
 }
