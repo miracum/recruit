@@ -159,6 +159,9 @@ else if (_entry is not null)
     [CascadingParameter]
     private Task<AuthenticationState>? AuthStateTask { get; set; }
 
+    [Inject]
+    private IOptions<NotificationOptions> NotificationOptionsAccessor { get; set; } = default!;
+
     private static readonly string[] StatusOptions = ["candidate", "screening", "eligible", "ineligible", "on-study", "withdrawn"];
 
     private PatientListEntryDto? _entry;
@@ -177,7 +180,8 @@ else if (_entry is not null)
 
         try
         {
-            var (trial, patients) = await ScreeningListService.GetListWithPatientsAsync(ListId, _user);
+            var (trial, patients) = await ScreeningListService.GetListWithPatientsAsync(
+                ListId, _user, NotificationOptionsAccessor.Value.NewSuggestionWindowDays, NotificationOptionsAccessor.Value.StalledLeadWindowDays);
             _trial = trial;
             _entry = patients.FirstOrDefault(p => p.ResearchSubjectId == ResearchSubjectId)
                 ?? throw new FhirAccessException("This patient could not be found in the trial's recommendation list.");

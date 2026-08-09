@@ -16,11 +16,18 @@
             </div>
         </BbCardContent>
         <BbCardFooter Class="flex items-center justify-between">
-            <div class="flex items-center gap-1.5 text-xs text-muted-foreground" title="Since you last opened this trial">
-                <span class="h-2 w-2 rounded-full bg-green-500"></span>
+            <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span class="h-2 w-2 rounded-full @(Trial.NewSuggestionsCount > 0 ? "bg-green-500" : "bg-muted-foreground/30")"></span>
                 <LucideIcon Name="user" Size="14" />
-                <span>3 new suggestions</span>
+                <span>@Trial.NewSuggestionsCount new suggestion@(Trial.NewSuggestionsCount == 1 ? "" : "s")</span>
             </div>
+            @if (Trial.StalledLeadsCount > 0)
+            {
+                <div class="flex items-center gap-1.5 text-xs text-amber-600" title="Pending leads with no recent activity">
+                    <LucideIcon Name="clock" Size="14" />
+                    <span>@Trial.StalledLeadsCount stalled</span>
+                </div>
+            }
         </BbCardFooter>
     </BbCard>
 </div>

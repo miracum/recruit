@@ -1,0 +1,100 @@
+@page "/patients"
+@attribute [Authorize]
+@inject ScreeningListService ScreeningListService
+@inject BreadcrumbState BreadcrumbState
+
+<PageTitle>Patients</PageTitle>
+
+@if (_loading)
+{
+    <BbSkeleton Class="mb-4 h-8 w-64" />
+    <BbSkeleton Class="h-96 w-full" />
+}
+else if (_errorMessage is not null)
+{
+    <BbAlert Variant="AlertVariant.Danger">
+        <BbAlertTitle>Could not load patients</BbAlertTitle>
+        <BbAlertDescription>@_errorMessage</BbAlertDescription>
+    </BbAlert>
+}
+else if (_patients.Count == 0)
+{
+    <BbEmpty Title="No patients" Description="Either no trials have produced recommendations yet, or you aren't authorized to view any." />
+}
+else
+{
+    <BbDataTable TData="PatientOverviewDto" Data="_patients" ShowPagination="true"
+                 PageSizes="new[] { 10, 25, 50, 100 }" InitialPageSize="25" IsLoading="false">
+        <Columns>
+            <BbDataTableColumn TData="PatientOverviewDto" TValue="string" Header="Name" Property="p => p.Name ?? p.PatientId" Sortable="true">
+                <CellTemplate Context="p">
+                    <span class="font-medium">@(p.Name ?? p.PatientId)</span>
+                </CellTemplate>
+            </BbDataTableColumn>
+            <BbDataTableColumn TData="PatientOverviewDto" TValue="int?" Header="Demographics" Width="140px">
+                <CellTemplate Context="p">
+                    @(p.Age is not null ? p.Age.ToString() : "Age unknown")
+                    <span class="mx-1.5 text-muted-foreground">&middot;</span>
+                    @(p.Gender ?? "unknown")
+                </CellTemplate>
+            </BbDataTableColumn>
+            <BbDataTableColumn TData="PatientOverviewDto" TValue="int" Header="Potentially fitting studies">
+                <CellTemplate Context="p">
+                    <div class="flex flex-wrap gap-1.5">
+                        @foreach (var membership in p.Trials)
+                        {
+                            <div class="-m-0.5 flex cursor-pointer items-center gap-1 rounded-md p-0.5 hover:bg-accent"
+                                 @onclick="() => GoToTrial(membership)">
+                                <span class="text-sm font-medium">@membership.StudyAcronym</span>
+                                <StatusBadge Status="@membership.Status" />
+                            </div>
+                        }
+                    </div>
+                </CellTemplate>
+            </BbDataTableColumn>
+            <BbDataTableColumn TData="PatientOverviewDto" TValue="DateTimeOffset?" Header="Updated"
+                               Property="p => p.Trials.Max(t => t.LastUpdated)" Sortable="true">
+                <CellTemplate Context="p">
+                    @(p.Trials.Max(t => t.LastUpdated)?.LocalDateTime.ToString("g") ?? "-")
+                </CellTemplate>
+            </BbDataTableColumn>
+        </Columns>
+    </BbDataTable>
+}
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    [Inject]
+    private NavigationManager Navigation { get; set; } = default!;
+
+    private List<PatientOverviewDto> _patients = [];
+    private bool _loading = true;
+    private string? _errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        BreadcrumbState.Set(new BreadcrumbItem("Patients"));
+
+        try
+        {
+            var user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
+            _patients = [.. await ScreeningListService.GetPatientsAcrossTrialsAsync(user)];
+        }
+        catch (FhirAccessException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        catch (Exception)
+        {
+            _errorMessage = "An unexpected error occurred while loading patients.";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void GoToTrial(PatientListEntryDto membership) => Navigation.NavigateTo($"/trials/{membership.ListId}/patients");
+}

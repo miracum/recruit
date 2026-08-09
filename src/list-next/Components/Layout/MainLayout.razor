@@ -19,8 +19,14 @@
                 <BbSidebarMenu>
                     <BbSidebarMenuItem>
                         <BbSidebarMenuButton Href="/" Match="NavLinkMatch.All">
-                            <LucideIcon Name="layout-dashboard" Size="16" />
-                            Dashboard
+                            <LucideIcon Name="flask-conical" Size="16" />
+                            Trials
+                        </BbSidebarMenuButton>
+                    </BbSidebarMenuItem>
+                    <BbSidebarMenuItem>
+                        <BbSidebarMenuButton Href="/patients">
+                            <LucideIcon Name="users" Size="16" />
+                            Patients
                         </BbSidebarMenuButton>
                     </BbSidebarMenuItem>
                     <BbSidebarMenuItem>
@@ -114,7 +120,7 @@
         try
         {
             var user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
-            _trials = [.. await ScreeningListService.GetAccessibleTrialsAsync(user, NotificationOptionsAccessor.Value.NewSuggestionWindowDays)];
+            _trials = [.. await ScreeningListService.GetAccessibleTrialsAsync(user, NotificationOptionsAccessor.Value.NewSuggestionWindowDays, NotificationOptionsAccessor.Value.StalledLeadWindowDays)];
         }
         catch
         {

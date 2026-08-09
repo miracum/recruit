@@ -14,7 +14,7 @@ public sealed class ScreeningListService(
     ILogger<ScreeningListService> logger)
 {
     public async Task<IReadOnlyList<TrialSummaryDto>> GetAccessibleTrialsAsync(
-        ClaimsPrincipal user, int newSuggestionWindowDays, CancellationToken ct = default)
+        ClaimsPrincipal user, int newSuggestionWindowDays, int stalledLeadWindowDays, CancellationToken ct = default)
     {
         var client = clientFactory.CreateClient();
 
@@ -49,14 +49,13 @@ public sealed class ScreeningListService(
             }
 
             var entries = list.Entry ?? [];
-            int recruited = 0, pending = 0, notRecruited = 0, newSuggestions = 0;
+            int recruited = 0, pending = 0, notRecruited = 0, newSuggestions = 0, stalled = 0;
 
             foreach (var entry in entries)
             {
                 var subjectId = entry.Item?.Reference?.Split('/').LastOrDefault();
-                var status = subjectId is not null && researchSubjectsById.TryGetValue(subjectId, out var subject)
-                    ? EnumUtility.GetLiteral(subject.Status)
-                    : null;
+                var subject = subjectId is not null && researchSubjectsById.TryGetValue(subjectId, out var s) ? s : null;
+                var status = subject is not null ? EnumUtility.GetLiteral(subject.Status) : null;
 
                 if (status is not null && FhirConstants.RecruitedStatuses.Contains(status))
                 {
@@ -69,6 +68,12 @@ public sealed class ScreeningListService(
                 else
                 {
                     pending++;
+
+                    if (subject?.Meta?.LastUpdated is { } lastUpdated &&
+                        lastUpdated < DateTimeOffset.UtcNow.AddDays(-stalledLeadWindowDays))
+                    {
+                        stalled++;
+                    }
                 }
 
                 if (entry.Date is { } dateString && DateTimeOffset.TryParse(dateString, out var recommendedDate) &&
@@ -91,10 +96,115 @@ public sealed class ScreeningListService(
                 PendingCount = pending,
                 NotRecruitedCount = notRecruited,
                 NewSuggestionsCount = newSuggestions,
+                StalledLeadsCount = stalled,
             });
         }
 
         return summaries.OrderBy(s => s.StudyAcronym, StringComparer.OrdinalIgnoreCase).ToList();
+    }
+
+    /// <summary>
+    /// Patient-centric view of the same data the dashboard uses: instead of one row per trial, this
+    /// groups every accessible List's entries by patient, so a patient recommended for several
+    /// trials shows up once with a membership entry per trial ("potentially fitting studies").
+    /// </summary>
+    public async Task<IReadOnlyList<PatientOverviewDto>> GetPatientsAcrossTrialsAsync(
+        ClaimsPrincipal user, CancellationToken ct = default)
+    {
+        var client = clientFactory.CreateClient();
+
+        var query =
+            $"List?code={Uri.EscapeDataString($"{FhirConstants.SystemScreeningList}|{FhirConstants.ScreeningListCode}")}" +
+            "&status=current" +
+            "&_include=List:item" +
+            "&_include:iterate=ResearchSubject:patient" +
+            "&_count=100";
+
+        List<Resource> resources;
+        try
+        {
+            resources = await FhirBundleHelpers.GetAllPagesAsync(client, query, ct).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch screening lists for the patient overview");
+            throw new FhirAccessException("The patient overview could not be loaded from the FHIR server.", ex);
+        }
+
+        var subjectsById = resources.OfType<ResearchSubject>().ToDictionary(rs => rs.Id!, rs => rs);
+        var patientsById = resources.OfType<Patient>().ToDictionary(p => p.Id!, p => p);
+
+        var overviewsByPatient = new Dictionary<string, PatientOverviewDto>();
+
+        foreach (var list in resources.OfType<FhirList>())
+        {
+            var acronym = list.GetReferenceExtension(FhirConstants.UrlListBelongsToStudy)?.Display;
+            if (string.IsNullOrEmpty(acronym) || !accessService.CanAccessStudy(user, acronym))
+            {
+                continue;
+            }
+
+            foreach (var entry in list.Entry ?? [])
+            {
+                var subjectId = entry.Item?.Reference?.Split('/').LastOrDefault();
+                if (subjectId is null || !subjectsById.TryGetValue(subjectId, out var subject))
+                {
+                    continue;
+                }
+
+                var patientId = subject.Individual?.Reference?.Split('/').LastOrDefault();
+                if (patientId is null)
+                {
+                    continue;
+                }
+
+                var patient = patientsById.TryGetValue(patientId, out var p) ? p : null;
+
+                if (!overviewsByPatient.TryGetValue(patientId, out var overview))
+                {
+                    overview = new PatientOverviewDto
+                    {
+                        PatientId = patientId,
+                        Name = FormatPatientName(patient),
+                        BirthDate = patient?.BirthDate is { } bd && DateTimeOffset.TryParse(bd, out var birthDate) ? birthDate : null,
+                        Gender = EnumUtility.GetLiteral(patient?.Gender),
+                        Trials = [],
+                    };
+                    overviewsByPatient[patientId] = overview;
+                }
+
+                DateTimeOffset? recommendedDate = entry.Date is { } d && DateTimeOffset.TryParse(d, out var parsed) ? parsed : null;
+                var isFlaggedIneligible = entry.Flag?.Coding?.Any(c =>
+                    c.System == FhirConstants.SystemDeterminedSubjectStatus && c.Code == FhirConstants.DeterminedStatusIneligible) ?? false;
+
+                overview.Trials.Add(new PatientListEntryDto
+                {
+                    ResearchSubjectId = subject.Id!,
+                    PatientId = patientId,
+                    Name = overview.Name,
+                    BirthDate = overview.BirthDate,
+                    Gender = overview.Gender,
+                    Phone = patient?.Telecom?.FirstOrDefault(t => t.System == ContactPoint.ContactPointSystem.Phone)?.Value,
+                    Email = patient?.Telecom?.FirstOrDefault(t => t.System == ContactPoint.ContactPointSystem.Email)?.Value,
+                    Status = EnumUtility.GetLiteral(subject.Status) ?? "candidate",
+                    Note = subject.GetStringExtension(FhirConstants.UrlResearchSubjectNote),
+                    RecommendedDate = recommendedDate,
+                    SystemDeterminedIneligible = isFlaggedIneligible,
+                    LastUpdated = subject.Meta?.LastUpdated,
+                    ListId = list.Id,
+                    StudyAcronym = acronym,
+                });
+            }
+        }
+
+        foreach (var overview in overviewsByPatient.Values)
+        {
+            overview.Trials.Sort((a, b) => string.Compare(a.StudyAcronym, b.StudyAcronym, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return overviewsByPatient.Values
+            .OrderBy(o => o.Name ?? o.PatientId, StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     /// <summary>
@@ -170,7 +280,7 @@ public sealed class ScreeningListService(
     }
 
     public async Task<(TrialSummaryDto Summary, IReadOnlyList<PatientListEntryDto> Patients)> GetListWithPatientsAsync(
-        string listId, ClaimsPrincipal user, CancellationToken ct = default)
+        string listId, ClaimsPrincipal user, int newSuggestionWindowDays, int stalledLeadWindowDays, CancellationToken ct = default)
     {
         var client = clientFactory.CreateClient();
 
@@ -222,7 +332,7 @@ public sealed class ScreeningListService(
         var patientsById = resources.OfType<Patient>().ToDictionary(p => p.Id!, p => p);
 
         var patientEntries = new List<PatientListEntryDto>();
-        int recruited = 0, pending = 0, notRecruited = 0, newSuggestions = 0;
+        int recruited = 0, pending = 0, notRecruited = 0, newSuggestions = 0, stalled = 0;
 
         foreach (var entry in list.Entry ?? [])
         {
@@ -251,9 +361,15 @@ public sealed class ScreeningListService(
             else
             {
                 pending++;
+
+                if (subject.Meta?.LastUpdated is { } lastUpdated &&
+                    lastUpdated < DateTimeOffset.UtcNow.AddDays(-stalledLeadWindowDays))
+                {
+                    stalled++;
+                }
             }
 
-            if (recommendedDate is not null && recommendedDate >= DateTimeOffset.UtcNow.AddDays(-7))
+            if (recommendedDate is not null && recommendedDate >= DateTimeOffset.UtcNow.AddDays(-newSuggestionWindowDays))
             {
                 newSuggestions++;
             }
@@ -288,6 +404,7 @@ public sealed class ScreeningListService(
             PendingCount = pending,
             NotRecruitedCount = notRecruited,
             NewSuggestionsCount = newSuggestions,
+            StalledLeadsCount = stalled,
         };
 
         return (summary, patientEntries.OrderByDescending(p => p.RecommendedDate).ToList());

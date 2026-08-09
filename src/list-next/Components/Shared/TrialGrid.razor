@@ -4,12 +4,23 @@
 }
 else
 {
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        @foreach (var trial in Trials)
-        {
-            <TrialCard Trial="trial" />
-        }
-    </div>
+    <BbInput @bind-Value="_search" UpdateTiming="UpdateTiming.Debounced" DebounceInterval="300"
+             Placeholder="Search trials..." Class="mb-4 max-w-sm" />
+
+    @if (FilteredTrials.Count == 0)
+    {
+        <p class="text-sm text-muted-foreground">No trials match your search.</p>
+    }
+    else
+    {
+        <BbDataView TItem="TrialSummaryDto" Data="FilteredTrials" Layout="DataViewLayout.Grid"
+                    ShowToolbar="false" ShowPagination="false"
+                    GridClass="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <GridTemplate Context="trial">
+                <TrialCard Trial="trial" />
+            </GridTemplate>
+        </BbDataView>
+    }
 }
 
 @code {
@@ -18,4 +29,12 @@ else
 
     [Parameter]
     public string EmptyMessage { get; set; } = "No trials.";
+
+    private string _search = string.Empty;
+
+    private List<TrialSummaryDto> FilteredTrials => string.IsNullOrWhiteSpace(_search)
+        ? [.. Trials]
+        : [.. Trials.Where(t =>
+            t.StudyAcronym.Contains(_search, StringComparison.OrdinalIgnoreCase) ||
+            (t.StudyTitle?.Contains(_search, StringComparison.OrdinalIgnoreCase) ?? false))];
 }

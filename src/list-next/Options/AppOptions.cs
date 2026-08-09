@@ -24,5 +24,11 @@ public sealed class NotificationOptions
 
     public int NewSuggestionWindowDays { get; set; } = 7;
 
+    /// <summary>
+    /// A pending patient (candidate/screening/eligible) whose ResearchSubject hasn't been touched
+    /// in this many days counts as a "stalled lead" - nobody has acted on it in a while.
+    /// </summary>
+    public int StalledLeadWindowDays { get; set; } = 14;
+
     public int ScanIntervalSeconds { get; set; } = 60;
 }

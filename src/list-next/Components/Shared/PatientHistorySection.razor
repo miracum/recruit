@@ -1,0 +1,75 @@
+@inject ResearchSubjectService ResearchSubjectService
+
+<div>
+    @if (_loading)
+    {
+        <div class="space-y-3">
+            <BbSkeleton Class="h-12 w-full" />
+            <BbSkeleton Class="h-12 w-full" />
+            <BbSkeleton Class="h-12 w-full" />
+        </div>
+    }
+    else if (_entries.Count == 0)
+    {
+        <p class="text-sm text-muted-foreground">No history yet.</p>
+    }
+    else
+    {
+        <div class="max-h-60 overflow-y-auto pr-2">
+            <BbTimeline>
+                @foreach (var entry in _entries)
+                {
+                    <BbTimelineItem Title="@entry.Title"
+                                    Time="@entry.Time.LocalDateTime.ToString("MMM d, yyyy 'at' HH:mm")"
+                                    Description="@entry.Description"
+                                    IconColor="@(entry.Kind == PatientHistoryEntryKind.Note ? TimelineColor.Secondary : TimelineColor.Primary)">
+                        <IconContent>
+                            <LucideIcon Name="@(entry.Kind == PatientHistoryEntryKind.Note ? "message-square" : "activity")" Size="12" />
+                        </IconContent>
+                    </BbTimelineItem>
+                }
+            </BbTimeline>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public required PatientListEntryDto Patient { get; set; }
+
+    private List<PatientHistoryEntryDto> _entries = [];
+    private bool _loading;
+    private string? _loadedForSubjectId;
+    private DateTimeOffset? _loadedForLastUpdated;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Also keyed on LastUpdated (not just the subject id) so a status change or note added
+        // elsewhere in the same dialog session - both bump Patient.LastUpdated - refreshes this
+        // timeline without requiring the dialog to be closed and reopened.
+        if (Patient.ResearchSubjectId != _loadedForSubjectId || Patient.LastUpdated != _loadedForLastUpdated)
+        {
+            _loadedForSubjectId = Patient.ResearchSubjectId;
+            _loadedForLastUpdated = Patient.LastUpdated;
+            await LoadAsync();
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        try
+        {
+            _entries = [.. await ResearchSubjectService.GetTimelineAsync(Patient.ResearchSubjectId)];
+        }
+        catch
+        {
+            // Best-effort - an empty history is preferable to blocking on a fetch failure.
+            _entries = [];
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

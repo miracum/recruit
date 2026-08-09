@@ -148,6 +148,33 @@ public sealed class ResearchSubjectService(
             .ToList();
     }
 
+    /// <summary>Status changes and added notes merged into one newest-first timeline, for the patient history view.</summary>
+    public async Task<IReadOnlyList<PatientHistoryEntryDto>> GetTimelineAsync(string researchSubjectId, CancellationToken ct = default)
+    {
+        var historyTask = GetHistoryAsync(researchSubjectId, ct);
+        var notesTask = GetNotesAsync(researchSubjectId, ct);
+        await Task.WhenAll(historyTask, notesTask).ConfigureAwait(false);
+
+        var entries = new List<PatientHistoryEntryDto>();
+
+        entries.AddRange(historyTask.Result.Select(h => new PatientHistoryEntryDto
+        {
+            Time = h.LastUpdated,
+            Title = $"Status changed to \"{h.Status}\"",
+            Kind = PatientHistoryEntryKind.StatusChange,
+        }));
+
+        entries.AddRange(notesTask.Result.Where(n => n.Time is not null).Select(n => new PatientHistoryEntryDto
+        {
+            Time = n.Time!.Value,
+            Title = string.IsNullOrEmpty(n.Author) ? "Note added" : $"Note added by {n.Author}",
+            Description = n.Text,
+            Kind = PatientHistoryEntryKind.Note,
+        }));
+
+        return entries.OrderByDescending(e => e.Time).ToList();
+    }
+
     private void EnsureCanPatch(string studyAcronym, ClaimsPrincipal user)
     {
         if (!accessService.CanPatchResearchSubject(user, studyAcronym))

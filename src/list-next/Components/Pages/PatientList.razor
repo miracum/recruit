@@ -78,7 +78,14 @@ else if (_summary is not null)
                 <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="Last known location">
                     <CellTemplate Context="p">
                         <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
-                            @(p.LastKnownLocationLoaded ? p.LastKnownLocation ?? "Unknown" : "Loading...")
+                            @if (p.LastKnownLocationLoaded)
+                            {
+                                @(p.LastKnownLocation ?? "Unknown")
+                            }
+                            else
+                            {
+                                <BbSkeleton Class="h-4 w-24" />
+                            }
                         </div>
                     </CellTemplate>
                 </BbDataTableColumn>
@@ -136,24 +143,27 @@ else if (_summary is not null)
         await LoadAsync();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && _patients.Count > 0)
-        {
-            await LoadLocationsInBackgroundAsync();
-        }
-    }
-
     private async Task LoadAsync()
     {
         _loading = true;
         _errorMessage = null;
         try
         {
-            var (summary, patients) = await ScreeningListService.GetListWithPatientsAsync(ListId, _user);
+            var (summary, patients) = await ScreeningListService.GetListWithPatientsAsync(
+                ListId, _user, NotificationOptionsAccessor.Value.NewSuggestionWindowDays, NotificationOptionsAccessor.Value.StalledLeadWindowDays);
             _summary = summary;
             _patients = [.. patients];
             BreadcrumbState.Set(new BreadcrumbItem("All trials", "/"), new BreadcrumbItem(summary.StudyAcronym));
+
+            // Fire-and-forget rather than gating on OnAfterRenderAsync(firstRender): when
+            // GetListWithPatientsAsync resolves fast enough (e.g. a warm connection from in-app
+            // navigation), Blazor can fold the whole initial load into a single render, so the
+            // "first" OnAfterRenderAsync would already be past firstRender=true and this would
+            // never fire on a cold/direct page load where the fetch takes longer.
+            if (_patients.Count > 0)
+            {
+                _ = LoadLocationsInBackgroundAsync();
+            }
         }
         catch (UnauthorizedAccessException ex)
         {
