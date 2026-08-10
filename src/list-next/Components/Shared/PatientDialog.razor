@@ -47,10 +47,15 @@
                         }
 
                         <div>
-                            <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.Patient.RecruitmentStatus"]</span>
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.Patient.RecruitmentStatus"]</span>
+                                <SaveStatusIndicator Saving="_statusSaving" />
+                            </div>
                             @if (CanEdit)
                             {
-                                <BbRadioGroup TValue="string" Value="@Patient.Status" ValueChanged="OnStatusChangedInternal" Class="mt-3 flex flex-row flex-wrap items-center gap-x-8 gap-y-3">
+                                <BbRadioGroup TValue="string" Value="@Patient.Status" ValueChanged="OnStatusChangedInternal"
+                                              Disabled="_statusSaving"
+                                              Class="mt-3 flex flex-row flex-wrap items-center gap-x-8 gap-y-3">
                                     @foreach (var status in StatusOptions)
                                     {
                                         <BbRadioGroupItem TValue="string" Value="@status" Label="@Localizer[StatusDisplay.GetKey(status)].Value" />
@@ -191,6 +196,7 @@
     private PatientClinicalSummaryDto _summary = new();
     private bool _summaryLoading;
     private string? _loadedSummaryForSubjectId;
+    private bool _statusSaving;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -233,6 +239,9 @@
             return;
         }
 
+        _statusSaving = true;
+        StateHasChanged();
+
         try
         {
             var updatedAt = await ResearchSubjectService.UpdateStatusAsync(Patient.ResearchSubjectId, newStatus, TrialIdentifier, _user);
@@ -243,6 +252,10 @@
         catch (Exception ex)
         {
             Toast.Error(ex.Message, Localizer["App.Toast.StatusUpdateError"]);
+        }
+        finally
+        {
+            _statusSaving = false;
         }
     }
 

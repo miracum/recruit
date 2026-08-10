@@ -26,6 +26,16 @@ public static class FhirConstants
     public const string SystemEligibilityCriteriaTypes = "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-criteria-types";
     public const string EligibilityCriteriaTypeTrinoSql = "trino-sql";
 
+    /// <summary>
+    /// New system, minted by this app: keys a signed-in user's Practitioner by their OIDC "sub"
+    /// (stable regardless of email/name changes). notify currently keys its own Practitioner
+    /// resources by email under a different system (fhir.systems.subscriber-id,
+    /// "https://fhir.miracum.org/uc1/identifiers/notification-subscriber-id") - reconciling the two
+    /// so a coordinator's list-next identity and notify's CommunicationRequest-recipient identity
+    /// resolve to the same resource is a follow-up on the notify side, not done here.
+    /// </summary>
+    public const string SystemPractitionerOidcSubject = "https://miracum.github.io/recruit/fhir/identifiers/practitioner-oidc-subject";
+
     public const string ListStatusCurrent = "current";
     public const string ListStatusRetired = "retired";
 

@@ -24,6 +24,7 @@ public sealed class ResearchSubjectHistoryEntryDto
 public sealed class ResearchSubjectService(
     FhirClientFactory clientFactory,
     TrialAccessService accessService,
+    PractitionerService practitionerService,
     IStringLocalizer<SharedResources> localizer,
     ILogger<ResearchSubjectService> logger)
 {
@@ -71,16 +72,35 @@ public sealed class ResearchSubjectService(
             throw new FhirAccessException(localizer["App.Errors.PatientRecordLoadForNoteFailed"], ex);
         }
 
-        var annotation = new
-        {
-            url = FhirConstants.UrlResearchSubjectNote,
-            valueAnnotation = new
+        // Prefer a reference to the user's Practitioner resource (a real, resolvable join key) over
+        // a plain string; the display name is still carried on the reference itself (Reference.display
+        // is not a choice type, so this isn't a tradeoff) as a point-in-time fallback for when the
+        // Practitioner can't be resolved later. Falls back to authorString only if no Practitioner
+        // could be created/found (e.g. the user has no email claim to key one on).
+        var practitionerReference = await practitionerService.EnsureCurrentPractitionerAsync(user, ct);
+        var authorDisplayName = GetAuthorDisplayName(user);
+
+        object annotation = practitionerReference is not null
+            ? new
             {
-                text = note,
-                time = DateTimeOffset.UtcNow.ToString("O"),
-                authorString = GetAuthorDisplayName(user),
-            },
-        };
+                url = FhirConstants.UrlResearchSubjectNote,
+                valueAnnotation = new
+                {
+                    text = note,
+                    time = DateTimeOffset.UtcNow.ToString("O"),
+                    authorReference = new { reference = practitionerReference.Reference, display = authorDisplayName },
+                },
+            }
+            : new
+            {
+                url = FhirConstants.UrlResearchSubjectNote,
+                valueAnnotation = new
+                {
+                    text = note,
+                    time = DateTimeOffset.UtcNow.ToString("O"),
+                    authorString = authorDisplayName,
+                },
+            };
 
         // JSON Patch's "/extension/-" append syntax requires the array to already exist; if this is
         // the subject's very first extension of any kind, the array itself must be created first.
@@ -112,15 +132,68 @@ public sealed class ResearchSubjectService(
             throw new FhirAccessException(localizer["App.Errors.PatientNotesLoadFailed"], ex);
         }
 
-        return subject.GetAnnotationExtensions(FhirConstants.UrlResearchSubjectNote)
+        var annotations = subject.GetAnnotationExtensions(FhirConstants.UrlResearchSubjectNote);
+
+        var practitionerIds = annotations
+            .Select(a => (a.Author as ResourceReference).GetReferencedId())
+            .OfType<string>()
+            .Distinct()
+            .ToList();
+
+        var practitionerNames = practitionerIds.Count > 0
+            ? await ResolvePractitionerDisplayNamesAsync(client, practitionerIds, ct)
+            : [];
+
+        return annotations
             .Select(a => new PatientNoteDto
             {
                 Text = a.Text ?? string.Empty,
-                Author = (a.Author as FhirString)?.Value,
+                Author = ResolveAuthorDisplay(a, practitionerNames),
                 Time = DateTimeOffset.TryParse(a.Time, out var time) ? time : null,
             })
             .OrderByDescending(n => n.Time)
             .ToList();
+    }
+
+    private static string? ResolveAuthorDisplay(Annotation annotation, IReadOnlyDictionary<string, string> practitionerNames)
+    {
+        if (annotation.Author is ResourceReference reference)
+        {
+            var id = reference.GetReferencedId();
+            return id is not null && practitionerNames.TryGetValue(id, out var name) ? name : reference.Display;
+        }
+
+        return (annotation.Author as FhirString)?.Value;
+    }
+
+    /// <summary>
+    /// Resolves current display names for a note's authorReference Practitioners in one search
+    /// (rather than one GET per note) - falls back silently to each reference's own .display if the
+    /// lookup fails, since author resolution shouldn't block viewing notes.
+    /// </summary>
+    private async Task<Dictionary<string, string>> ResolvePractitionerDisplayNamesAsync(
+        FhirClient client, IReadOnlyList<string> practitionerIds, CancellationToken ct)
+    {
+        var names = new Dictionary<string, string>();
+        try
+        {
+            var bundle = await client.SearchAsync<Practitioner>(new SearchParams().Add("_id", string.Join(',', practitionerIds)), ct);
+            foreach (var practitioner in bundle?.Entry.Select(e => e.Resource).OfType<Practitioner>() ?? [])
+            {
+                var name = practitioner.Name?.FirstOrDefault()?.Text
+                    ?? practitioner.Telecom?.FirstOrDefault(t => t.System == ContactPoint.ContactPointSystem.Email)?.Value;
+                if (practitioner.Id is not null && name is not null)
+                {
+                    names[practitioner.Id] = name;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to resolve practitioner display names for notes");
+        }
+
+        return names;
     }
 
     /// <summary>Status-only change history; building block for GetTimelineAsync's merged status+note feed.</summary>

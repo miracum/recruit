@@ -38,8 +38,10 @@
     @if (CanEdit)
     {
         <BbRichTextEditor @bind-Value="_noteDraftHtml" Placeholder="@Localizer["App.PatientNotes.Placeholder"]" Class="mt-3" MinHeight="120px" />
-        <div class="mt-2 flex justify-end">
-            <BbButton Variant="ButtonVariant.Default" Disabled="IsNoteDraftEmpty" OnClick="SaveNoteAsync">
+        <div class="mt-2 flex items-center justify-end gap-3">
+            <SaveStatusIndicator Saving="_saving" />
+            <BbButton Variant="ButtonVariant.Default" Disabled="@(IsNoteDraftEmpty || _saving)"
+                      Loading="_saving" OnClick="SaveNoteAsync">
                 @Localizer["App.PatientNotes.AddButton"]
             </BbButton>
         </div>
@@ -69,6 +71,7 @@
     private string _noteDraftHtml = string.Empty;
     private string? _loadedForSubjectId;
     private ClaimsPrincipal _user = new();
+    private bool _saving;
 
     /// <summary>Quill emits markup like "&lt;p&gt;&lt;br&gt;&lt;/p&gt;" for an empty editor, so a plain string check isn't enough.</summary>
     private bool IsNoteDraftEmpty => string.IsNullOrWhiteSpace(HtmlTagRegex.Replace(_noteDraftHtml, string.Empty).Replace("&nbsp;", " "));
@@ -120,6 +123,9 @@
             return;
         }
 
+        _saving = true;
+        StateHasChanged();
+
         try
         {
             var updatedAt = await ResearchSubjectService.AddNoteAsync(Patient.ResearchSubjectId, markdown, TrialIdentifier, _user);
@@ -132,6 +138,10 @@
         catch (Exception ex)
         {
             Toast.Error(ex.Message, Localizer["App.Toast.NoteSaveError"]);
+        }
+        finally
+        {
+            _saving = false;
         }
     }
 }

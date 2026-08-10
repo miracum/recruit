@@ -88,6 +88,24 @@ jobs:
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
 
+  build-list-next:
+    name: build list-next
+    permissions:
+      contents: write
+      pull-requests: write
+      security-events: write
+      actions: read
+      packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    uses: miracum/.github/.github/workflows/standard-build.yaml@7eaa603620c450f73fd25d6b68c37795ef4be999 # v1.22.8
+    with:
+      image: ghcr.io/${{ github.repository }}/list-next
+      build-context: "src/list-next/"
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+
   build-query-fhir-trino:
     name: build query-fhir-trino
     permissions:

@@ -135,6 +135,9 @@
   <data name="App.Common.Saved" xml:space="preserve">
     <value>Gespeichert</value>
   </data>
+  <data name="App.Common.Saving" xml:space="preserve">
+    <value>Wird gespeichert...</value>
+  </data>
   <data name="App.Nav.Trials" xml:space="preserve">
     <value>Studien</value>
   </data>

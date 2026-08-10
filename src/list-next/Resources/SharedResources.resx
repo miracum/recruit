@@ -76,6 +76,9 @@
   <data name="App.Common.Saved" xml:space="preserve">
     <value>Saved</value>
   </data>
+  <data name="App.Common.Saving" xml:space="preserve">
+    <value>Saving...</value>
+  </data>
   <data name="App.Nav.Trials" xml:space="preserve">
     <value>Trials</value>
   </data>
