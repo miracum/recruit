@@ -23,3 +23,24 @@ h1:focus {
 .blazor-error-boundary::after {
     content: "An error has occurred.";
 }
+
+/* Recruitment status badge accents (see StatusBadge.razor). Plain CSS against theme.css's
+   Radix-inspired accent tokens rather than Tailwind utility classes, since arbitrary utilities
+   that BlazorBlueprint's own components don't already use aren't in its precompiled CSS bundle. */
+.status-badge-screening {
+    background-color: var(--color-orange-accent-bg);
+    color: var(--color-orange-accent);
+    border-color: transparent;
+}
+
+.status-badge-eligible {
+    background-color: var(--color-green-accent-bg);
+    color: var(--color-green-accent);
+    border-color: transparent;
+}
+
+.status-badge-on-study {
+    background-color: var(--color-blue-accent-bg);
+    color: var(--color-blue-accent);
+    border-color: transparent;
+}

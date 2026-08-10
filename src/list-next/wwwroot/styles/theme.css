@@ -1,29 +1,29 @@
 /* Light Mode (Default) */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.85 0 0);
-  --chart-2: oklch(0.7 0 0);
-  --chart-3: oklch(0.55 0 0);
-  --chart-4: oklch(0.4 0 0);
-  --chart-5: oklch(0.25 0 0);
+  --background: #f3f7fc;
+  --foreground: #060a12;
+  --card: #f9fcff;
+  --card-foreground: #060a12;
+  --popover: #f9fcff;
+  --popover-foreground: #060a12;
+  --primary: #101723;
+  --primary-foreground: #fafafa;
+  --secondary: #e7edf6;
+  --secondary-foreground: #101723;
+  --muted: #e7edf6;
+  --muted-foreground: #636974;
+  --accent: #e7edf6;
+  --accent-foreground: #101723;
+  --destructive: #e7000b;
+  --destructive-foreground: #ffffff;
+  --border: #d8dfe9;
+  --input: #d8dfe9;
+  --ring: #87909d;
+  --chart-1: #91c5ff;
+  --chart-2: #3a81f6;
+  --chart-3: #2563ef;
+  --chart-4: #1a4eda;
+  --chart-5: #1f3fad;
   --font-sans:
     ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
@@ -32,14 +32,14 @@
   --font-mono:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: #eef2f9;
+  --sidebar-foreground: #060a12;
+  --sidebar-primary: #101723;
+  --sidebar-primary-foreground: #fafafa;
+  --sidebar-accent: #e7edf6;
+  --sidebar-accent-foreground: #101723;
+  --sidebar-border: #d8dfe9;
+  --sidebar-ring: #87909d;
   --radius: 0.625rem;
   --shadow-x: 0;
   --shadow-y: 1px;
@@ -62,7 +62,9 @@
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
-  /* Radix-Inspired Accent Colors */
+  /* Radix-Inspired Accent Colors - independent of the palette above, used for semantic tags
+     (e.g. StatusBadge.razor's screening/eligible/on-study colors) that the base
+     primary/secondary/accent tokens don't cover. */
   --color-blue-accent: oklch(0.55 0.22 260);
   --color-purple-accent: oklch(0.55 0.2 280);
   --color-orange-accent: oklch(0.65 0.18 40);
@@ -73,53 +75,41 @@
   --color-purple-accent-bg: oklch(0.95 0.02 280);
   --color-orange-accent-bg: oklch(0.97 0.02 40);
   --color-green-accent-bg: oklch(0.95 0.02 150);
-
-  /* Gradients */
-  --gradient-hero: linear-gradient(
-    135deg,
-    oklch(0.95 0.03 260) 0%,
-    oklch(0.95 0.03 280) 100%
-  );
-  --gradient-feature: radial-gradient(
-    circle at 50% 0%,
-    oklch(0.97 0.02 260),
-    transparent 70%
-  );
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.269 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.371 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.275 0 0);
-  --input: oklch(0.325 0 0);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.85 0 0);
-  --chart-2: oklch(0.7 0 0);
-  --chart-3: oklch(0.55 0 0);
-  --chart-4: oklch(0.4 0 0);
-  --chart-5: oklch(0.25 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.922 0 0);
-  --sidebar-primary-foreground: oklch(0.205 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.275 0 0);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #141d2b;
+  --foreground: #e5ecf1;
+  --card: #1a2533;
+  --card-foreground: #e5ecf1;
+  --popover: #202c3c;
+  --popover-foreground: #e5ecf1;
+  --primary: #d7dfe5;
+  --primary-foreground: #182230;
+  --secondary: #243040;
+  --secondary-foreground: #e5ecf1;
+  --muted: #232d3c;
+  --muted-foreground: #8794a1;
+  --accent: #2b3a4d;
+  --accent-foreground: #e5ecf1;
+  --destructive: #ff6467;
+  --destructive-foreground: #fafafa;
+  --border: #2b3646;
+  --input: #273444;
+  --ring: #6e7c8c;
+  --chart-1: #91c5ff;
+  --chart-2: #3a81f6;
+  --chart-3: #2563ef;
+  --chart-4: #1a4eda;
+  --chart-5: #1f3fad;
+  --sidebar: #17212f;
+  --sidebar-foreground: #e5ecf1;
+  --sidebar-primary: #1048e6;
+  --sidebar-primary-foreground: #fafafa;
+  --sidebar-accent: #243040;
+  --sidebar-accent-foreground: #e5ecf1;
+  --sidebar-border: #25303e;
+  --sidebar-ring: #6e7c8c;
   --font-sans:
     ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
@@ -159,23 +149,16 @@
   --color-purple-accent-bg: oklch(0.25 0.04 280);
   --color-orange-accent-bg: oklch(0.27 0.03 40);
   --color-green-accent-bg: oklch(0.25 0.03 150);
-
-  /* Gradients (Dark Mode) */
-  --gradient-hero: linear-gradient(
-    135deg,
-    oklch(0.2 0.05 260) 0%,
-    oklch(0.2 0.05 280) 100%
-  );
-  --gradient-feature: radial-gradient(
-    circle at 50% 0%,
-    oklch(0.22 0.04 260),
-    transparent 70%
-  );
 }
 
-/* Global Element Styles */
+/* Global Element Styles - plain-CSS equivalent of the source theme's
+   `@layer base { * { @apply border-border outline-ring/50; } body { @apply bg-background
+   text-foreground; } }`. This app has no Tailwind build step (only BlazorBlueprint.Components'
+   precompiled CSS), so @apply/@layer never run - these variable-based rules are what actually
+   ships the colors. */
 * {
   border-color: var(--border);
+  outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
 }
 
 body {
@@ -183,7 +166,11 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
 }
-/* Tailwind v4 Theme Integration */
+
+/* Tailwind v4 Theme Integration - inert without a Tailwind build step (see note above); kept only
+   so this file matches what a real Tailwind pipeline would expect if one is ever added. The
+   bg-background/text-foreground/etc. utility classes actually used throughout this app resolve via
+   BlazorBlueprint.Components' own precompiled CSS, which already targets these same variable names. */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

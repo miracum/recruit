@@ -256,7 +256,7 @@
     <value>Zuletzt bekannter Standort</value>
   </data>
   <data name="App.PatientList.ColumnRecommended" xml:space="preserve">
-    <value>Empfohlen</value>
+    <value>Vorschlagsdatum</value>
   </data>
   <data name="App.PatientList.ColumnStatus" xml:space="preserve">
     <value>Status</value>
@@ -475,10 +475,10 @@
     <value>Die klinische Akte des Patienten konnte nicht geladen werden.</value>
   </data>
   <data name="App.Gender.Male" xml:space="preserve">
-    <value>männlich</value>
+    <value>m</value>
   </data>
   <data name="App.Gender.Female" xml:space="preserve">
-    <value>weiblich</value>
+    <value>w</value>
   </data>
   <data name="App.Gender.Other" xml:space="preserve">
     <value>divers</value>

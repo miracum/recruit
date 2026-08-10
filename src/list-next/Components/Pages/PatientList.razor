@@ -65,6 +65,13 @@ else if (_summary is not null)
         <BbDataTable TData="PatientListEntryDto" Data="_patients" ShowPagination="true"
                      PageSizes="new[] { 10, 25, 50, 100 }" InitialPageSize="25" IsLoading="false">
             <Columns>
+                <BbDataTableColumn TData="PatientListEntryDto" TValue="DateTimeOffset?" Header="@Localizer["App.PatientList.ColumnRecommended"]" Property="p => p.RecommendedDate" Sortable="true">
+                    <CellTemplate Context="p">
+                        <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
+                            @(p.RecommendedDate?.LocalDateTime.ToString("d") ?? "-")
+                        </div>
+                    </CellTemplate>
+                </BbDataTableColumn>
                 <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="@Localizer["App.PatientList.ColumnName"]" Property="p => p.Name ?? p.PatientId" Sortable="true">
                     <CellTemplate Context="p">
                         <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
@@ -72,10 +79,6 @@ else if (_summary is not null)
                             @if (p.IsNew(NewSuggestionWindowDays))
                             {
                                 <BbBadge Variant="BadgeVariant.Default" Class="ml-2">@Localizer["App.PatientList.NewBadge"]</BbBadge>
-                            }
-                            @if (p.SystemDeterminedIneligible)
-                            {
-                                <BbBadge Variant="BadgeVariant.Outline" Class="ml-2">@Localizer["App.PatientList.SystemIneligibleBadge"]</BbBadge>
                             }
                         </div>
                     </CellTemplate>
@@ -86,6 +89,17 @@ else if (_summary is not null)
                             @(p.Age is not null ? p.Age.ToString() : Localizer["App.Common.AgeUnknown"].Value)
                             <span class="mx-1.5 text-muted-foreground">&middot;</span>
                             @(p.Gender is not null ? Localizer[GenderDisplay.GetKey(p.Gender)].Value : Localizer["App.Common.Unknown"].Value)
+                        </div>
+                    </CellTemplate>
+                </BbDataTableColumn>
+                <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="@Localizer["App.PatientList.ColumnStatus"]">
+                    <CellTemplate Context="p">
+                        <div class="-m-4 flex flex-wrap items-center gap-2 cursor-pointer p-4" @onclick="() => OpenPatient(p)">
+                            <StatusBadge Status="@p.Status" />
+                            @if (p.SystemDeterminedIneligible)
+                            {
+                                <BbBadge Variant="BadgeVariant.Outline">@Localizer["App.PatientList.SystemIneligibleBadge"]</BbBadge>
+                            }
                         </div>
                     </CellTemplate>
                 </BbDataTableColumn>
@@ -100,20 +114,6 @@ else if (_summary is not null)
                             {
                                 <BbSkeleton Class="h-4 w-24" />
                             }
-                        </div>
-                    </CellTemplate>
-                </BbDataTableColumn>
-                <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="@Localizer["App.PatientList.ColumnRecommended"]">
-                    <CellTemplate Context="p">
-                        <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
-                            @(p.RecommendedDate?.LocalDateTime.ToString("d") ?? "-")
-                        </div>
-                    </CellTemplate>
-                </BbDataTableColumn>
-                <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="@Localizer["App.PatientList.ColumnStatus"]">
-                    <CellTemplate Context="p">
-                        <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
-                            <StatusBadge Status="@p.Status" />
                         </div>
                     </CellTemplate>
                 </BbDataTableColumn>
