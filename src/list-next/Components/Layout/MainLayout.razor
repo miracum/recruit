@@ -7,8 +7,8 @@
 @inject NavigationManager Navigation
 @inject ThemeService ThemeService
 
-<BbSidebarProvider>
-    <BbSidebar>
+<BbSidebarProvider CookieKey="@((string?)null)">
+    <BbSidebar Collapsible="false">
         <BbSidebarHeader>
             <div class="flex h-12 items-center gap-2 px-3">
                 <div class="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
