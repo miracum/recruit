@@ -102,6 +102,17 @@
           "attributes": {}
         }
       ],
+      "list-next": [
+        {
+          "id": "1c7a4e2b-6f3d-4a8e-9d2c-8b5f6e1a9c40",
+          "name": "admin",
+          "description": "",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "b8b2be02-c65d-462f-ae5b-a7d7f29208e5",
+          "attributes": {}
+        }
+      ],
       "realm-management": [
         {
           "id": "fe146788-bde9-4de9-b3eb-d74104127708",
@@ -427,7 +438,8 @@
           "attributes": {},
           "realmRoles": [],
           "clientRoles": {
-            "recruit-list": ["admin"]
+            "recruit-list": ["admin"],
+            "list-next": ["admin"]
           },
           "subGroups": []
         }
@@ -488,12 +500,9 @@
       "email": "list-admin@example.com",
       "credentials": [
         {
-          "id": "19d4ee4c-0326-451a-ad04-cb124cbe2d58",
           "type": "password",
-          "userLabel": "My password",
-          "createdDate": 1682888257223,
-          "secretData": "{\"value\":\"P/wXA0jcnKNnU1oRXFhjeSlKBByCows2rre4g/q0XWE=\",\"salt\":\"cWUuNCHXy7weFvTDVFj43w==\",\"additionalParameters\":{}}",
-          "credentialData": "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+          "value": "list-admin",
+          "temporary": false
         }
       ],
       "disableableCredentialTypes": [],
@@ -884,6 +893,24 @@
         "token.response.type.bearer.lower-case": "false"
       },
       "authenticationFlowBindingOverrides": {},
+      "protocolMappers": [
+        {
+          "id": "9d3f1a5c-2e6b-4c8a-9f0d-5b1e7c4a8d62",
+          "name": "list-next client roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-client-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "usermodel.clientRoleMapping.clientId": "list-next",
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "role",
+            "jsonType.label": "String"
+          }
+        }
+      ],
       "fullScopeAllowed": true,
       "nodeReRegistrationTimeout": -1,
       "defaultClientScopes": ["web-origins", "acr", "profile", "roles", "email"],

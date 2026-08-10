@@ -1,84 +1,99 @@
 using System.Security.Claims;
+using list.Data;
+using list.Data.Entities;
 using list.Models;
-using Microsoft.Extensions.Logging;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
+using list.Resources;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace list.Services.Access;
 
 /// <summary>
-/// Enforces per-trial access control based on notify-rules.yaml, the same schema used by the
-/// previous (list-old) Node proxy's fhirAccessFilter.js. The FHIR server itself has no concept
-/// of "which studies can this user see" - that mapping only exists in this file, keyed by the
-/// authenticated user's username/email.
+/// Enforces per-trial access control from the TrialAccessGrant table (Postgres), keyed by each
+/// trial's ResearchStudy business identifier (see TrialIdentifier). A global "admin" OIDC role
+/// bypasses every per-trial check. Grants are only ever looked up by the signed-in user's OIDC
+/// "sub" (falling back to email for grants created before that user's first login - see
+/// OidcEvents, which backfills SubjectId once they do log in).
 /// </summary>
-public sealed class TrialAccessService
+public sealed class TrialAccessService(
+    IDbContextFactory<AppDbContext> dbContextFactory, IStringLocalizer<SharedResources> localizer, ILogger<TrialAccessService> logger)
 {
     public const string AdminRole = "admin";
-    private const string AllStudiesAcronym = "*";
-
-    private readonly ILogger<TrialAccessService> _logger;
-    private readonly List<TrialRule> _trials;
-
-    public TrialAccessService(IConfiguration configuration, ILogger<TrialAccessService> logger)
-    {
-        _logger = logger;
-        var rulesFilePath = configuration["RulesFilePath"] ?? "notify-rules.dev.yaml";
-        _trials = LoadTrials(rulesFilePath, logger);
-    }
-
-    public IReadOnlyList<TrialRule> Trials => _trials;
 
     public static bool IsAdmin(ClaimsPrincipal user) => user.IsInRole(AdminRole);
 
-    /// <summary>Study acronyms the user may view. Contains "*" if the user can see everything.</summary>
-    public IReadOnlyList<string> GetAccessibleStudyAcronyms(ClaimsPrincipal user)
+    /// <summary>
+    /// The permission level to use as a fallback for admins - they outrank TrialAdmin without
+    /// needing an actual grant row.
+    /// </summary>
+    private const TrialPermissionLevel AdminEffectiveLevel = TrialPermissionLevel.TrialAdmin;
+
+    public async Task<TrialPermissionLevel?> GetPermissionAsync(
+        ClaimsPrincipal user, TrialIdentifier trialIdentifier, CancellationToken ct = default)
     {
         if (IsAdmin(user))
         {
-            return [AllStudiesAcronym];
+            return AdminEffectiveLevel;
         }
 
-        var username = GetUsername(user);
-        var email = GetEmail(user);
-
-        if (username is null && email is null)
+        var (subjectId, email) = GetUserKeys(user);
+        if (subjectId is null && email is null)
         {
-            _logger.LogWarning("Neither username nor email are set for the current user. Denying all access.");
-            return [];
+            logger.LogWarning("Neither sub nor email are set for the current user. Denying all access.");
+            return null;
         }
 
-        var accessible = new List<string>();
-        foreach (var trial in _trials)
-        {
-            var allowedByUser = trial.AccessibleBy?.Users is { } users &&
-                                 ((username is not null && users.Contains(username)) ||
-                                  (email is not null && users.Contains(email)));
-            var allowedBySubscription = trial.Subscriptions.Any(s => s.Email == email);
+        await using var db = await dbContextFactory.CreateDbContextAsync(ct);
+        var grant = await db.TrialAccessGrants.AsNoTracking().FirstOrDefaultAsync(
+            g => g.TrialIdentifierSystem == trialIdentifier.System && g.TrialIdentifierValue == trialIdentifier.Value &&
+                 ((subjectId != null && g.SubjectId == subjectId) || (email != null && g.Email == email)),
+            ct);
 
-            if (allowedByUser || allowedBySubscription)
-            {
-                accessible.Add(trial.Acronym);
-            }
-        }
-
-        return accessible;
+        return grant?.Level;
     }
 
-    public bool CanAccessStudy(ClaimsPrincipal user, string? studyAcronym)
+    /// <summary>
+    /// Every trial the user has any grant on, for scanning many trials at once (dashboard,
+    /// notifications) without one DB round-trip per trial. Admin: null, meaning "all trials".
+    /// </summary>
+    public async Task<IReadOnlySet<TrialIdentifier>?> GetAccessibleTrialIdentifiersAsync(
+        ClaimsPrincipal user, CancellationToken ct = default)
     {
-        if (string.IsNullOrEmpty(studyAcronym))
+        if (IsAdmin(user))
         {
-            return false;
+            return null;
         }
 
-        var accessible = GetAccessibleStudyAcronyms(user);
-        return accessible.Contains(AllStudiesAcronym) || accessible.Contains(studyAcronym);
+        var (subjectId, email) = GetUserKeys(user);
+        if (subjectId is null && email is null)
+        {
+            logger.LogWarning("Neither sub nor email are set for the current user. Denying all access.");
+            return new HashSet<TrialIdentifier>();
+        }
+
+        await using var db = await dbContextFactory.CreateDbContextAsync(ct);
+        var grants = await db.TrialAccessGrants.AsNoTracking()
+            .Where(g => (subjectId != null && g.SubjectId == subjectId) || (email != null && g.Email == email))
+            .Select(g => new { g.TrialIdentifierSystem, g.TrialIdentifierValue })
+            .ToListAsync(ct);
+
+        return grants.Select(g => new TrialIdentifier(g.TrialIdentifierSystem, g.TrialIdentifierValue)).ToHashSet();
     }
 
-    /// <summary>ResearchSubject status/note PATCHes are allowed for anyone who can see the trial.</summary>
-    public bool CanPatchResearchSubject(ClaimsPrincipal user, string studyAcronym) =>
-        CanAccessStudy(user, studyAcronym);
+    /// <summary>Companion to GetAccessibleTrialIdentifiersAsync - null means "admin, everything is accessible".</summary>
+    public static bool CanAccessTrial(IReadOnlySet<TrialIdentifier>? accessibleTrials, TrialIdentifier? trialIdentifier) =>
+        trialIdentifier is not null && (accessibleTrials is null || accessibleTrials.Contains(trialIdentifier));
+
+    public async Task<bool> CanAccessTrialAsync(ClaimsPrincipal user, TrialIdentifier? trialIdentifier, CancellationToken ct = default) =>
+        trialIdentifier is not null && await GetPermissionAsync(user, trialIdentifier, ct) is not null;
+
+    /// <summary>ResearchSubject status/note PATCHes require Coordinator or above.</summary>
+    public async Task<bool> CanPatchResearchSubjectAsync(ClaimsPrincipal user, TrialIdentifier trialIdentifier, CancellationToken ct = default) =>
+        await GetPermissionAsync(user, trialIdentifier, ct) is { } level && level >= TrialPermissionLevel.Coordinator;
+
+    /// <summary>Managing who else has access to a trial requires TrialAdmin (or global Admin).</summary>
+    public async Task<bool> CanManageAccessAsync(ClaimsPrincipal user, TrialIdentifier trialIdentifier, CancellationToken ct = default) =>
+        await GetPermissionAsync(user, trialIdentifier, ct) is { } level && level >= TrialPermissionLevel.TrialAdmin;
 
     /// <summary>Only admins may retire/reactivate a List (matches list-old's createPatchFilter).</summary>
     public bool CanPatchList(ClaimsPrincipal user) => IsAdmin(user);
@@ -86,39 +101,105 @@ public sealed class TrialAccessService
     /// <summary>Only admins may DELETE resources (matches list-old's createDeleteFilter).</summary>
     public bool CanDelete(ClaimsPrincipal user) => IsAdmin(user);
 
-    private static string? GetUsername(ClaimsPrincipal user) =>
-        user.FindFirst("preferred_username")?.Value
-        ?? user.FindFirst(ClaimTypes.Name)?.Value
-        ?? user.Identity?.Name;
-
-    private static string? GetEmail(ClaimsPrincipal user) =>
-        user.FindFirst("email")?.Value
-        ?? user.FindFirst(ClaimTypes.Email)?.Value;
-
-    private static List<TrialRule> LoadTrials(string rulesFilePath, ILogger logger)
+    /// <summary>
+    /// Whether this grant belongs to the given user - used to stop a TrialAdmin from editing or
+    /// revoking their own grant and accidentally locking themselves out of managing this trial.
+    /// </summary>
+    public static bool IsOwnGrant(TrialAccessGrant grant, ClaimsPrincipal user)
     {
-        try
-        {
-            logger.LogDebug("Loading trial access rules from {RulesFilePath}", rulesFilePath);
-            using var reader = new StreamReader(rulesFilePath);
-            var deserializer = new DeserializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .IgnoreUnmatchedProperties()
-                .Build();
+        var (subjectId, email) = GetUserKeys(user);
+        return (subjectId is not null && grant.SubjectId == subjectId) || (email is not null && grant.Email == email);
+    }
 
-            var config = deserializer.Deserialize<RulesConfig>(reader);
-            var trials = config.Notify?.Rules?.Trials;
-            if (trials is null)
+    public async Task<IReadOnlyList<TrialAccessGrant>> ListGrantsAsync(
+        TrialIdentifier trialIdentifier, ClaimsPrincipal user, CancellationToken ct = default)
+    {
+        await EnsureCanManageAccessAsync(user, trialIdentifier, ct);
+
+        await using var db = await dbContextFactory.CreateDbContextAsync(ct);
+        return await db.TrialAccessGrants.AsNoTracking()
+            .Where(g => g.TrialIdentifierSystem == trialIdentifier.System && g.TrialIdentifierValue == trialIdentifier.Value)
+            .OrderBy(g => g.Email)
+            .ToListAsync(ct);
+    }
+
+    public async Task AddOrUpdateGrantAsync(
+        TrialIdentifier trialIdentifier, string email, TrialPermissionLevel level, ClaimsPrincipal grantedBy, CancellationToken ct = default)
+    {
+        await EnsureCanManageAccessAsync(grantedBy, trialIdentifier, ct);
+
+        var normalizedEmail = email.Trim();
+        var (granterSubjectId, granterEmail) = GetUserKeys(grantedBy);
+        var granterIdentity = granterSubjectId ?? granterEmail ?? "unknown";
+
+        await using var db = await dbContextFactory.CreateDbContextAsync(ct);
+        var existing = await db.TrialAccessGrants.FirstOrDefaultAsync(
+            g => g.TrialIdentifierSystem == trialIdentifier.System && g.TrialIdentifierValue == trialIdentifier.Value &&
+                 g.Email == normalizedEmail,
+            ct);
+
+        var now = DateTimeOffset.UtcNow;
+        if (existing is null)
+        {
+            db.TrialAccessGrants.Add(new TrialAccessGrant
             {
-                throw new InvalidOperationException("Invalid configuration file structure. Expected notify.rules.trials.");
+                Id = Guid.NewGuid(),
+                TrialIdentifierSystem = trialIdentifier.System,
+                TrialIdentifierValue = trialIdentifier.Value,
+                Email = normalizedEmail,
+                Level = level,
+                GrantedBy = granterIdentity,
+                GrantedAt = now,
+                UpdatedAt = now,
+            });
+        }
+        else
+        {
+            // A TrialAdmin (or anyone) editing their own existing grant could accidentally
+            // demote or otherwise change their own access - reject it outright, matching the
+            // disabled control on the access-management page.
+            if (IsOwnGrant(existing, grantedBy))
+            {
+                throw new UnauthorizedAccessException(localizer["App.Errors.CannotModifyOwnGrant"]);
             }
 
-            return trials;
+            existing.Level = level;
+            existing.GrantedBy = granterIdentity;
+            existing.UpdatedAt = now;
         }
-        catch (Exception ex)
+
+        await db.SaveChangesAsync(ct);
+    }
+
+    public async Task RevokeGrantAsync(Guid grantId, ClaimsPrincipal user, CancellationToken ct = default)
+    {
+        await using var db = await dbContextFactory.CreateDbContextAsync(ct);
+        var grant = await db.TrialAccessGrants.FirstOrDefaultAsync(g => g.Id == grantId, ct);
+        if (grant is null)
         {
-            logger.LogError(ex, "Failed to load trial rules config from {RulesFilePath}. Defaulting to no access for any study.", rulesFilePath);
-            return [];
+            return;
+        }
+
+        await EnsureCanManageAccessAsync(user, new TrialIdentifier(grant.TrialIdentifierSystem, grant.TrialIdentifierValue), ct);
+
+        if (IsOwnGrant(grant, user))
+        {
+            throw new UnauthorizedAccessException(localizer["App.Errors.CannotModifyOwnGrant"]);
+        }
+
+        db.TrialAccessGrants.Remove(grant);
+        await db.SaveChangesAsync(ct);
+    }
+
+    private async Task EnsureCanManageAccessAsync(ClaimsPrincipal user, TrialIdentifier trialIdentifier, CancellationToken ct)
+    {
+        if (!await CanManageAccessAsync(user, trialIdentifier, ct))
+        {
+            throw new UnauthorizedAccessException(localizer["App.Errors.NotAuthorizedManageAccess"]);
         }
     }
+
+    private static (string? SubjectId, string? Email) GetUserKeys(ClaimsPrincipal user) =>
+        (user.FindFirst("sub")?.Value ?? user.FindFirst(ClaimTypes.NameIdentifier)?.Value,
+         user.FindFirst("email")?.Value ?? user.FindFirst(ClaimTypes.Email)?.Value);
 }

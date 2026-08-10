@@ -6,6 +6,7 @@ using Hl7.Fhir.Utility;
 using list.Models;
 using list.Resources;
 using list.Services.Access;
+using list.Services.Auth;
 using Microsoft.Extensions.Localization;
 using Task = System.Threading.Tasks.Task;
 
@@ -28,9 +29,9 @@ public sealed class ResearchSubjectService(
 {
     /// <returns>The subject's new meta.lastUpdated, as reported by the FHIR server's PATCH response.</returns>
     public async Task<DateTimeOffset?> UpdateStatusAsync(
-        string researchSubjectId, string newStatus, string studyAcronym, ClaimsPrincipal user, CancellationToken ct = default)
+        string researchSubjectId, string newStatus, TrialIdentifier trialIdentifier, ClaimsPrincipal user, CancellationToken ct = default)
     {
-        EnsureCanPatch(studyAcronym, user);
+        await EnsureCanPatchAsync(trialIdentifier, user, ct);
 
         var patch = JsonSerializer.Serialize(new object[]
         {
@@ -49,9 +50,9 @@ public sealed class ResearchSubjectService(
     /// </summary>
     /// <returns>The subject's new meta.lastUpdated, as reported by the FHIR server's PATCH response.</returns>
     public async Task<DateTimeOffset?> AddNoteAsync(
-        string researchSubjectId, string note, string studyAcronym, ClaimsPrincipal user, CancellationToken ct = default)
+        string researchSubjectId, string note, TrialIdentifier trialIdentifier, ClaimsPrincipal user, CancellationToken ct = default)
     {
-        EnsureCanPatch(studyAcronym, user);
+        await EnsureCanPatchAsync(trialIdentifier, user, ct);
 
         var client = clientFactory.CreateClient();
         ResearchSubject current;
@@ -122,8 +123,8 @@ public sealed class ResearchSubjectService(
             .ToList();
     }
 
-    /// <summary>Status-only change history (who touched what note and when is now on the resource itself, see GetNotesAsync).</summary>
-    public async Task<IReadOnlyList<ResearchSubjectHistoryEntryDto>> GetHistoryAsync(string researchSubjectId, CancellationToken ct = default)
+    /// <summary>Status-only change history; building block for GetTimelineAsync's merged status+note feed.</summary>
+    private async Task<IReadOnlyList<ResearchSubjectHistoryEntryDto>> GetHistoryAsync(string researchSubjectId, CancellationToken ct = default)
     {
         var client = clientFactory.CreateClient();
 
@@ -178,18 +179,17 @@ public sealed class ResearchSubjectService(
         return entries.OrderByDescending(e => e.Time).ToList();
     }
 
-    private void EnsureCanPatch(string studyAcronym, ClaimsPrincipal user)
+    private async Task EnsureCanPatchAsync(TrialIdentifier trialIdentifier, ClaimsPrincipal user, CancellationToken ct)
     {
-        if (!accessService.CanPatchResearchSubject(user, studyAcronym))
+        if (!await accessService.CanPatchResearchSubjectAsync(user, trialIdentifier, ct))
         {
             throw new UnauthorizedAccessException(localizer["App.Errors.NotAuthorizedUpdatePatient"]);
         }
     }
 
     private static string GetAuthorDisplayName(ClaimsPrincipal user) =>
-        user.FindFirst("preferred_username")?.Value
+        user.GetDisplayName()
         ?? user.FindFirst(ClaimTypes.Email)?.Value
-        ?? user.Identity?.Name
         ?? "unknown";
 
     private async Task<DateTimeOffset?> PatchAsync(string researchSubjectId, string patchDocument, CancellationToken ct)

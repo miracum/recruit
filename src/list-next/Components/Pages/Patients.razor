@@ -1,6 +1,7 @@
 @page "/patients"
 @attribute [Authorize]
 @inject ScreeningListService ScreeningListService
+@inject TrialAccessService AccessService
 @inject BreadcrumbState BreadcrumbState
 @inject IStringLocalizer<SharedResources> Localizer
 
@@ -62,7 +63,8 @@ else
         </Columns>
     </BbDataTable>
 
-    <PatientDialog Patient="_selectedPatient" PatientChanged="p => _selectedPatient = p" StudyAcronym="@(_selectedPatient?.StudyAcronym ?? string.Empty)" />
+    <PatientDialog Patient="_selectedPatient" PatientChanged="p => _selectedPatient = p"
+                   Acronym="@(_selectedPatient?.StudyAcronym ?? string.Empty)" TrialIdentifier="_selectedPatient?.TrialIdentifier" CanEdit="_canEditSelected" />
 }
 
 @code {
@@ -72,8 +74,10 @@ else
     private List<PatientOverviewDto> _patients = [];
     private bool _loading = true;
     private string? _errorMessage;
+    private ClaimsPrincipal _user = new();
 
     private PatientListEntryDto? _selectedPatient;
+    private bool _canEditSelected;
 
     protected override async Task OnInitializedAsync()
     {
@@ -81,8 +85,8 @@ else
 
         try
         {
-            var user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
-            _patients = [.. await ScreeningListService.GetPatientsAcrossTrialsAsync(user)];
+            _user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
+            _patients = [.. await ScreeningListService.GetPatientsAcrossTrialsAsync(_user)];
         }
         catch (FhirAccessException ex)
         {
@@ -98,5 +102,11 @@ else
         }
     }
 
-    private void OpenPatient(PatientListEntryDto membership) => _selectedPatient = membership;
+    private async Task OpenPatient(PatientListEntryDto membership)
+    {
+        _selectedPatient = membership;
+        _canEditSelected = membership.TrialIdentifier is not null &&
+            await AccessService.GetPermissionAsync(_user, membership.TrialIdentifier) is { } level &&
+            level >= TrialPermissionLevel.Coordinator;
+    }
 }

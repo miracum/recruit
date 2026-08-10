@@ -455,3 +455,5 @@ obj/
 fhirpkg.lock.json
 
 charts/**/.helm_ls_cache
+
+!**/wwwroot/lib/

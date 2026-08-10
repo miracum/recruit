@@ -5,10 +5,8 @@ using Microsoft.Extensions.Options;
 namespace list.Services.Fhir;
 
 /// <summary>
-/// Builds a Firely SDK FhirClient using the "fhir" named HttpClient, which already carries the
-/// current user's OIDC access token (attached by Duende.AccessTokenManagement) or, in dev-bypass
-/// mode, no auth at all. One instance per request/circuit scope is fine - the underlying
-/// HttpClient is pooled by IHttpClientFactory.
+/// Builds a Firely SDK FhirClient using the "fhir" named HttpClient. One instance per
+/// request/circuit scope is fine - the underlying HttpClient is pooled by IHttpClientFactory.
 /// </summary>
 public sealed class FhirClientFactory(IHttpClientFactory httpClientFactory, IOptions<FhirOptions> fhirOptions)
 {

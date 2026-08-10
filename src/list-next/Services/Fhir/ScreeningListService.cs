@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Rest;
 using Hl7.Fhir.Utility;
 using list.Models;
 using list.Resources;
@@ -40,13 +41,17 @@ public sealed class ScreeningListService(
         }
 
         var researchSubjectsById = resources.OfType<ResearchSubject>().ToDictionary(rs => rs.Id!, rs => rs);
-        var lists = resources.OfType<FhirList>();
+        var lists = resources.OfType<FhirList>().ToList();
+
+        var trialIdentifiers = await ResolveTrialIdentifiersAsync(client, lists, ct);
+        var accessibleTrials = await accessService.GetAccessibleTrialIdentifiersAsync(user, ct);
 
         var summaries = new List<TrialSummaryDto>();
         foreach (var list in lists)
         {
             var acronym = list.GetReferenceExtension(FhirConstants.UrlListBelongsToStudy)?.Display;
-            if (string.IsNullOrEmpty(acronym) || !accessService.CanAccessStudy(user, acronym))
+            var trialIdentifier = list.Id is not null ? trialIdentifiers.GetValueOrDefault(list.Id) : null;
+            if (string.IsNullOrEmpty(acronym) || !TrialAccessService.CanAccessTrial(accessibleTrials, trialIdentifier))
             {
                 continue;
             }
@@ -91,6 +96,7 @@ public sealed class ScreeningListService(
             summaries.Add(new TrialSummaryDto
             {
                 ListId = list.Id!,
+                TrialIdentifier = trialIdentifier!,
                 StudyAcronym = acronym,
                 ListStatus = EnumUtility.GetLiteral(list.Status) ?? FhirConstants.ListStatusCurrent,
                 LastUpdated = list.Meta?.LastUpdated,
@@ -136,13 +142,18 @@ public sealed class ScreeningListService(
 
         var subjectsById = resources.OfType<ResearchSubject>().ToDictionary(rs => rs.Id!, rs => rs);
         var patientsById = resources.OfType<Patient>().ToDictionary(p => p.Id!, p => p);
+        var lists = resources.OfType<FhirList>().ToList();
+
+        var trialIdentifiers = await ResolveTrialIdentifiersAsync(client, lists, ct);
+        var accessibleTrials = await accessService.GetAccessibleTrialIdentifiersAsync(user, ct);
 
         var overviewsByPatient = new Dictionary<string, PatientOverviewDto>();
 
-        foreach (var list in resources.OfType<FhirList>())
+        foreach (var list in lists)
         {
             var acronym = list.GetReferenceExtension(FhirConstants.UrlListBelongsToStudy)?.Display;
-            if (string.IsNullOrEmpty(acronym) || !accessService.CanAccessStudy(user, acronym))
+            var trialIdentifier = list.Id is not null ? trialIdentifiers.GetValueOrDefault(list.Id) : null;
+            if (string.IsNullOrEmpty(acronym) || !TrialAccessService.CanAccessTrial(accessibleTrials, trialIdentifier))
             {
                 continue;
             }
@@ -196,6 +207,7 @@ public sealed class ScreeningListService(
                     LastUpdated = subject.Meta?.LastUpdated,
                     ListId = list.Id,
                     StudyAcronym = acronym,
+                    TrialIdentifier = trialIdentifier,
                 });
             }
         }
@@ -241,12 +253,17 @@ public sealed class ScreeningListService(
 
         var subjectsById = resources.OfType<ResearchSubject>().ToDictionary(rs => rs.Id!, rs => rs);
         var patientsById = resources.OfType<Patient>().ToDictionary(p => p.Id!, p => p);
+        var lists = resources.OfType<FhirList>().ToList();
         var events = new List<NotificationEventDto>();
 
-        foreach (var list in resources.OfType<FhirList>())
+        var trialIdentifiers = await ResolveTrialIdentifiersAsync(client, lists, ct);
+        var accessibleTrials = await accessService.GetAccessibleTrialIdentifiersAsync(user, ct);
+
+        foreach (var list in lists)
         {
             var acronym = list.GetReferenceExtension(FhirConstants.UrlListBelongsToStudy)?.Display;
-            if (string.IsNullOrEmpty(acronym) || !accessService.CanAccessStudy(user, acronym))
+            var trialIdentifier = list.Id is not null ? trialIdentifiers.GetValueOrDefault(list.Id) : null;
+            if (string.IsNullOrEmpty(acronym) || !TrialAccessService.CanAccessTrial(accessibleTrials, trialIdentifier))
             {
                 continue;
             }
@@ -270,6 +287,7 @@ public sealed class ScreeningListService(
                     Id = $"new:{subjectId}",
                     Kind = NotificationKind.NewRecommendation,
                     ListId = list.Id!,
+                    TrialIdentifier = trialIdentifier!,
                     StudyAcronym = acronym,
                     PatientId = patientId,
                     PatientName = patientName,
@@ -305,30 +323,28 @@ public sealed class ScreeningListService(
 
         var belongsToStudyRef = list.GetReferenceExtension(FhirConstants.UrlListBelongsToStudy);
         var acronym = belongsToStudyRef?.Display;
-        if (string.IsNullOrEmpty(acronym) || !accessService.CanAccessStudy(user, acronym))
-        {
-            throw new UnauthorizedAccessException(localizer["App.Errors.NotAuthorizedTrial"]);
-        }
 
         // The acronym comes from the extension's display text (no _include exists for arbitrary
-        // extension references), but the title/description require a separate fetch of the
-        // ResearchStudy itself.
-        string? studyTitle = null;
-        string? studyDescription = null;
+        // extension references), and the trial identifier used for access checks (see
+        // TrialIdentifier) plus the title/description all live on the ResearchStudy itself, so
+        // fetch it once up front - before the access check, since the check now needs it too.
+        ResearchStudy? study = null;
         if (belongsToStudyRef?.Reference is { } studyReference)
         {
             try
             {
-                if (await client.GetAsync(studyReference, ct) is ResearchStudy study)
-                {
-                    studyTitle = study.Title;
-                    studyDescription = study.Description;
-                }
+                study = await client.GetAsync(studyReference, ct) as ResearchStudy;
             }
             catch (Exception ex)
             {
                 logger.LogWarning(ex, "Failed to fetch {StudyReference} for List/{ListId}", studyReference, listId);
             }
+        }
+
+        var trialIdentifier = study?.GetTrialIdentifier();
+        if (string.IsNullOrEmpty(acronym) || trialIdentifier is null || !await accessService.CanAccessTrialAsync(user, trialIdentifier, ct))
+        {
+            throw new UnauthorizedAccessException(localizer["App.Errors.NotAuthorizedTrial"]);
         }
 
         var subjectsById = resources.OfType<ResearchSubject>().ToDictionary(rs => rs.Id!, rs => rs);
@@ -397,9 +413,10 @@ public sealed class ScreeningListService(
         var summary = new TrialSummaryDto
         {
             ListId = list.Id!,
+            TrialIdentifier = trialIdentifier,
             StudyAcronym = acronym,
-            StudyTitle = studyTitle,
-            StudyDescription = studyDescription,
+            StudyTitle = study?.Title,
+            StudyDescription = study?.Description,
             ListStatus = EnumUtility.GetLiteral(list.Status) ?? FhirConstants.ListStatusCurrent,
             LastUpdated = list.Meta?.LastUpdated,
             TruncationNote = list.Note?.FirstOrDefault()?.Text,
@@ -428,13 +445,67 @@ public sealed class ScreeningListService(
             // PatchAsync<TResource> builds the "{ResourceType}/{id}" path itself from TResource, so
             // the id argument must be bare (no "List/" prefix) or the two collide into an invalid
             // "List/List" path.
-            await client.PatchAsync<FhirList>(listId, patchDocument, Hl7.Fhir.Rest.ResourceFormat.Json, ct);
+            await client.PatchAsync<FhirList>(listId, patchDocument, ResourceFormat.Json, ct);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to update status for List/{ListId}", listId);
             throw new FhirAccessException(localizer["App.Errors.TrialStatusUpdateFailed"], ex);
         }
+    }
+
+    /// <summary>
+    /// Resolves each List's ResearchStudy business identifier (see TrialIdentifier) in one batched
+    /// `_id=a,b,c` fetch instead of one request per list, keyed by the List's own FHIR id.
+    /// </summary>
+    private async Task<Dictionary<string, TrialIdentifier>> ResolveTrialIdentifiersAsync(
+        FhirClient client, IEnumerable<FhirList> lists, CancellationToken ct)
+    {
+        var studyIdByListId = new Dictionary<string, string>();
+        foreach (var list in lists)
+        {
+            var studyId = list.GetReferenceExtension(FhirConstants.UrlListBelongsToStudy)?.GetReferencedId();
+            if (list.Id is not null && studyId is not null)
+            {
+                studyIdByListId[list.Id] = studyId;
+            }
+        }
+
+        if (studyIdByListId.Count == 0)
+        {
+            return [];
+        }
+
+        var distinctStudyIds = studyIdByListId.Values.Distinct().ToList();
+        var query = $"ResearchStudy?_id={Uri.EscapeDataString(string.Join(',', distinctStudyIds))}&_count={distinctStudyIds.Count}";
+
+        List<Resource> studyResources;
+        try
+        {
+            studyResources = await FhirBundleHelpers.GetAllPagesAsync(client, query, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to batch-resolve ResearchStudy identifiers for {Count} studies", distinctStudyIds.Count);
+            return [];
+        }
+
+        var identifierByStudyId = studyResources.OfType<ResearchStudy>()
+            .Where(s => s.Id is not null)
+            .Select(s => (s.Id, Identifier: s.GetTrialIdentifier()))
+            .Where(t => t.Identifier is not null)
+            .ToDictionary(t => t.Id!, t => t.Identifier!);
+
+        var result = new Dictionary<string, TrialIdentifier>();
+        foreach (var (listId, studyId) in studyIdByListId)
+        {
+            if (identifierByStudyId.TryGetValue(studyId, out var identifier))
+            {
+                result[listId] = identifier;
+            }
+        }
+
+        return result;
     }
 
     private static string? FormatPatientName(Patient? patient)

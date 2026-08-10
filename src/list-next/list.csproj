@@ -9,11 +9,26 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- list.Tests lives in a subdirectory of this project; without this, the SDK's default glob
+         would compile its files (and the Xunit types they reference) into list.csproj itself. -->
+    <Compile Remove="list.Tests/**/*.cs" />
+    <Content Remove="list.Tests/**" />
+    <None Remove="list.Tests/**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BlazorBlueprint.Components" Version="3.15.0" />
-    <PackageReference Include="Duende.AccessTokenManagement.OpenIdConnect" Version="4.2.0" />
+    <PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
     <PackageReference Include="Hl7.Fhir.R4" Version="6.4.0" />
+    <PackageReference Include="HtmlSanitizer" Version="9.1.982" />
+    <PackageReference Include="Markdig" Version="0.37.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.4" />
-    <PackageReference Include="YamlDotNet" Version="18.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    <PackageReference Include="ReverseMarkdown" Version="6.1.1" />
   </ItemGroup>
 
 </Project>

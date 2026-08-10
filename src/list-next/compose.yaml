@@ -1,0 +1,25 @@
+# Local Postgres for list-next's trial access control (the TrialAccessGrant table). list-next
+# isn't wired into any shared compose stack yet - both docker-compose/docker-compose.yaml and
+# src/hack/compose.yaml still build/deploy the old src/list (Node/Express) app under the "list"
+# service name, so this stays a standalone file scoped to list-next until that changes.
+#
+# Run with: docker compose -f compose.yaml up -d
+# Matches the "Host=localhost;Port=5433;Database=list;Username=list;Password=list" default in
+# appsettings.json.
+services:
+  list-db:
+    image: docker.io/library/postgres:18.4@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a
+    restart: unless-stopped
+    ipc: private
+    security_opt:
+      - "no-new-privileges:true"
+    # No cap_drop here (unlike this repo's application containers): postgres's entrypoint needs
+    # CAP_CHOWN/CAP_FOWNER to fix data-directory ownership on first start - matches fhir-db and
+    # notify-ha-db in src/hack/compose.yaml, which omit cap_drop for the same reason.
+    privileged: false
+    environment:
+      POSTGRES_USER: list
+      POSTGRES_PASSWORD: list # pragma: allowlist secret
+      POSTGRES_DB: list
+    ports:
+      - "127.0.0.1:5433:5432"

@@ -17,19 +17,30 @@
                 <MetricTile Label="@Localizer["App.TrialCard.NotRecruited"]" Value="Trial.NotRecruitedCount" />
             </div>
         </BbCardContent>
-        <BbCardFooter Class="flex items-center justify-between">
+        <BbCardFooter Class="flex items-center justify-between gap-2">
             <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <span class="h-2 w-2 rounded-full @(Trial.NewSuggestionsCount > 0 ? "bg-green-500" : "bg-muted-foreground/30")"></span>
                 <LucideIcon Name="user" Size="14" />
                 <span>@Trial.NewSuggestionsCount @(Trial.NewSuggestionsCount == 1 ? Localizer["App.TrialCard.NewSuggestionSingular"] : Localizer["App.TrialCard.NewSuggestionPlural"])</span>
             </div>
-            @if (Trial.StalledLeadsCount > 0)
-            {
-                <div class="flex items-center gap-1.5 text-xs text-amber-600" title="@Localizer["App.TrialCard.StalledTooltip"]">
-                    <LucideIcon Name="clock" Size="14" />
-                    <span>@Localizer["App.TrialCard.StalledCount", Trial.StalledLeadsCount]</span>
-                </div>
-            }
+            <div class="flex items-center gap-2">
+                @if (Trial.StalledLeadsCount > 0)
+                {
+                    <div class="flex items-center gap-1.5 text-xs text-amber-600" title="@Localizer["App.TrialCard.StalledTooltip"]">
+                        <LucideIcon Name="clock" Size="14" />
+                        <span>@Localizer["App.TrialCard.StalledCount", Trial.StalledLeadsCount]</span>
+                    </div>
+                }
+                @if (_canManageAccess)
+                {
+                    <div @onclick="NavigateToAccess" @onclick:stopPropagation="true">
+                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">
+                            <Icon><LucideIcon Name="shield" Size="16" /></Icon>
+                            <ChildContent>@Localizer["App.PatientList.ManageAccessLink"]</ChildContent>
+                        </BbButton>
+                    </div>
+                }
+            </div>
         </BbCardFooter>
     </BbCard>
 </div>
@@ -38,10 +49,26 @@
     [Parameter, EditorRequired]
     public required TrialSummaryDto Trial { get; set; }
 
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
     [Inject]
     private NavigationManager Navigation { get; set; } = default!;
 
+    [Inject]
+    private TrialAccessService AccessService { get; set; } = default!;
+
     private bool IsActive => Trial.ListStatus == "current";
 
+    private bool _canManageAccess;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
+        _canManageAccess = await AccessService.CanManageAccessAsync(user, Trial.TrialIdentifier);
+    }
+
     private void NavigateToPatients() => Navigation.NavigateTo($"/trials/{Trial.ListId}/patients");
+
+    private void NavigateToAccess() => Navigation.NavigateTo($"/trials/{Trial.ListId}/access");
 }

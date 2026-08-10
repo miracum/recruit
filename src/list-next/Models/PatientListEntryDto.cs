@@ -46,6 +46,9 @@ public sealed class PatientListEntryDto
     /// <summary>Populated only in cross-trial views (e.g. the patient-centric Patients page) where a single patient can appear under several lists.</summary>
     public string? StudyAcronym { get; init; }
 
+    /// <summary>Populated only in cross-trial views. The trial's stable business identity - see TrialIdentifier.</summary>
+    public TrialIdentifier? TrialIdentifier { get; init; }
+
     public bool IsNew(int windowDays) =>
         RecommendedDate is not null && RecommendedDate.Value >= DateTimeOffset.UtcNow.AddDays(-windowDays);
 }

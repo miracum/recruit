@@ -1,6 +1,7 @@
 using BlazorBlueprint.Components;
-using Duende.AccessTokenManagement.OpenIdConnect;
 using list.Components;
+using list.Data;
+using list.Models;
 using list.Options;
 using list.Services.Access;
 using list.Services.Auth;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,6 +42,17 @@ var fhirBaseUrl = builder.Configuration.GetValue<string>("Fhir:BaseUrl")
     ?? throw new InvalidOperationException("Fhir:BaseUrl must be configured.");
 var authDisabled = builder.Configuration.GetValue<bool>("Auth:Disabled");
 
+var appDbConnectionString = builder.Configuration.GetConnectionString("AppDb")
+    ?? throw new InvalidOperationException("ConnectionStrings:AppDb must be configured.");
+
+// AddDbContextFactory (not AddDbContext) is required in Blazor Server: DI scopes there are
+// per-circuit (roughly per user session), not per-request, so a directly-injected DbContext would
+// live far longer than intended. Services instead resolve IDbContextFactory<AppDbContext> and
+// create a short-lived context per operation.
+builder.Services.AddDbContextFactory<AppDbContext>(options => options
+    .UseNpgsql(appDbConnectionString, npgsql => npgsql.MapEnum<TrialPermissionLevel>("trial_permission_level"))
+    .UseSnakeCaseNamingConvention());
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthorizationCore(options =>
@@ -53,14 +66,12 @@ if (authDisabled)
         .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, DevBypassAuthenticationHandler>(
             DevBypassAuthenticationHandler.SchemeName, _ => { });
     builder.Services.AddAuthorization();
-    builder.Services.AddHttpClient(FhirClientFactory.HttpClientName, client => client.BaseAddress = new Uri(fhirBaseUrl));
 }
 else
 {
     var oidcSection = builder.Configuration.GetSection("Oidc");
     var roleClaimType = oidcSection["RoleClaimType"] is { Length: > 0 } rc ? rc : "role";
 
-    builder.Services.AddTransient<CookieEvents>();
     builder.Services.AddTransient<OidcEvents>();
 
     builder.Services.AddAuthentication(options =>
@@ -69,7 +80,7 @@ else
         options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
         options.DefaultSignOutScheme = OpenIdConnectDefaults.AuthenticationScheme;
     })
-    .AddCookie(options => options.EventsType = typeof(CookieEvents))
+    .AddCookie()
     .AddOpenIdConnect(options =>
     {
         oidcSection.Bind(options);
@@ -96,14 +107,15 @@ else
     });
 
     builder.Services.AddAuthorization();
-    builder.Services.AddOpenIdConnectAccessTokenManagement()
-        .AddBlazorServerAccessTokenManagement<ServerSideTokenStore>();
-    builder.Services.AddUserAccessTokenHttpClient(
-        FhirClientFactory.HttpClientName,
-        configureClient: client => client.BaseAddress = new Uri(fhirBaseUrl));
 }
 
-builder.Services.AddSingleton<TrialAccessService>();
+// TODO: the FHIR server call currently carries no credentials at all - same as Auth:Disabled
+// mode. This app used to forward the signed-in user's OIDC access token (AddUserAccessTokenHttpClient),
+// but per-user FHIR authorization isn't needed right now; a static/service-account credential
+// (the app calling FHIR as itself, not as any particular user) should replace this later.
+builder.Services.AddHttpClient(FhirClientFactory.HttpClientName, client => client.BaseAddress = new Uri(fhirBaseUrl));
+
+builder.Services.AddScoped<TrialAccessService>();
 builder.Services.AddSingleton<FhirClientFactory>();
 builder.Services.AddScoped<ScreeningListService>();
 builder.Services.AddScoped<ResearchSubjectService>();
@@ -112,6 +124,13 @@ builder.Services.AddScoped<NotificationDismissalService>();
 builder.Services.AddScoped<BreadcrumbState>();
 
 var app = builder.Build();
+
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var dbContextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AppDbContext>>();
+    await using var db = await dbContextFactory.CreateDbContextAsync();
+    await db.Database.MigrateAsync();
+}
 
 app.UseRequestLocalization();
 
@@ -140,7 +159,7 @@ if (!authDisabled)
     // interactive circuit - always issues a GET.
     authGroup.MapMethods("/logout", ["GET", "POST"], (string? returnUrl) =>
         Results.SignOut(
-            new Microsoft.AspNetCore.Authentication.AuthenticationProperties { RedirectUri = returnUrl ?? "/" },
+            new Microsoft.AspNetCore.Authentication.AuthenticationProperties { RedirectUri = returnUrl ?? "/logged-out" },
             [CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme]));
 }
 
@@ -162,4 +181,4 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-app.Run();
+await app.RunAsync();

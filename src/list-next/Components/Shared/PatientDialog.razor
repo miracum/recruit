@@ -1,4 +1,5 @@
 @inject ResearchSubjectService ResearchSubjectService
+@inject PatientRecordService PatientRecordService
 @inject ToastService Toast
 @inject IStringLocalizer<SharedResources> Localizer
 
@@ -16,7 +17,7 @@
                         <span> &middot; @Patient.LastKnownLocation</span>
                     }
                     <br />
-                    <span class="font-medium text-foreground">@StudyAcronym</span>
+                    <span class="font-medium text-foreground">@Acronym</span>
                 </BbSheetDescription>
             </BbSheetHeader>
 
@@ -24,6 +25,7 @@
                 <BbTabsList>
                     <BbTabsTrigger Value="details">@Localizer["App.PatientDialog.TabDetails"]</BbTabsTrigger>
                     <BbTabsTrigger Value="history">@Localizer["App.PatientDialog.TabHistory"]</BbTabsTrigger>
+                    <BbTabsTrigger Value="clinical">@Localizer["App.PatientDialog.TabClinicalSummary"]</BbTabsTrigger>
                 </BbTabsList>
                 <BbTabsContent Value="details">
                     <div class="space-y-4">
@@ -46,25 +48,118 @@
 
                         <div>
                             <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.Patient.RecruitmentStatus"]</span>
-                            <div class="mt-3 flex flex-wrap gap-x-8 gap-y-3">
-                                @foreach (var status in StatusOptions)
-                                {
-                                    <label class="flex cursor-pointer items-center gap-2 text-sm">
-                                        <input type="radio" name="recruitment-status" value="@status" checked="@(Patient.Status == status)"
-                                               @onchange="() => OnStatusChangedInternal(status)" class="h-4 w-4" style="accent-color: var(--primary);" />
-                                        @Localizer[StatusDisplay.GetKey(status)]
-                                    </label>
-                                }
-                            </div>
+                            @if (CanEdit)
+                            {
+                                <BbRadioGroup TValue="string" Value="@Patient.Status" ValueChanged="OnStatusChangedInternal" Class="mt-3 flex flex-row flex-wrap items-center gap-x-8 gap-y-3">
+                                    @foreach (var status in StatusOptions)
+                                    {
+                                        <BbRadioGroupItem TValue="string" Value="@status" Label="@Localizer[StatusDisplay.GetKey(status)].Value" />
+                                    }
+                                </BbRadioGroup>
+                            }
+                            else
+                            {
+                                <div class="mt-2">
+                                    <StatusBadge Status="@Patient.Status" />
+                                </div>
+                            }
                         </div>
 
                         <BbSeparator />
 
-                        <PatientNotesSection Patient="Patient" StudyAcronym="@StudyAcronym" />
+                        @if (TrialIdentifier is not null)
+                        {
+                            <PatientNotesSection Patient="Patient" TrialIdentifier="TrialIdentifier" CanEdit="CanEdit" />
+                        }
                     </div>
                 </BbTabsContent>
                 <BbTabsContent Value="history">
                     <PatientHistorySection Patient="Patient" />
+                </BbTabsContent>
+                <BbTabsContent Value="clinical">
+                    @if (_summaryLoading)
+                    {
+                        <div class="space-y-2">
+                            <BbSkeleton Class="h-6 w-full" />
+                            <BbSkeleton Class="h-6 w-full" />
+                            <BbSkeleton Class="h-6 w-full" />
+                        </div>
+                    }
+                    else
+                    {
+                        <BbTabs DefaultValue="conditions">
+                            <BbTabsList>
+                                <BbTabsTrigger Value="conditions">@Localizer["App.PatientDialog.TabConditions", _summary.Conditions.Count]</BbTabsTrigger>
+                                <BbTabsTrigger Value="procedures">@Localizer["App.PatientDialog.TabProcedures", _summary.Procedures.Count]</BbTabsTrigger>
+                                <BbTabsTrigger Value="medications">@Localizer["App.PatientDialog.TabMedications", _summary.MedicationStatements.Count + _summary.MedicationAdministrations.Count]</BbTabsTrigger>
+                                <BbTabsTrigger Value="observations">@Localizer["App.PatientDialog.TabObservations", _summary.Observations.Count]</BbTabsTrigger>
+                            </BbTabsList>
+                            <BbTabsContent Value="conditions">
+                                @if (_summary.Conditions.Count == 0)
+                                {
+                                    <p class="text-sm text-muted-foreground">@Localizer["App.PatientDialog.NoConditions"]</p>
+                                }
+                                else
+                                {
+                                    <ul class="list-disc space-y-1 pl-5">
+                                        @foreach (var c in _summary.Conditions)
+                                        {
+                                            <li>@(c.Code?.Text ?? c.Code?.Coding?.FirstOrDefault()?.Display ?? Localizer["App.PatientDialog.UnspecifiedCondition"].Value)</li>
+                                        }
+                                    </ul>
+                                }
+                            </BbTabsContent>
+                            <BbTabsContent Value="procedures">
+                                @if (_summary.Procedures.Count == 0)
+                                {
+                                    <p class="text-sm text-muted-foreground">@Localizer["App.PatientDialog.NoProcedures"]</p>
+                                }
+                                else
+                                {
+                                    <ul class="list-disc space-y-1 pl-5">
+                                        @foreach (var p in _summary.Procedures)
+                                        {
+                                            <li>@(p.Code?.Text ?? p.Code?.Coding?.FirstOrDefault()?.Display ?? Localizer["App.PatientDialog.UnspecifiedProcedure"].Value)</li>
+                                        }
+                                    </ul>
+                                }
+                            </BbTabsContent>
+                            <BbTabsContent Value="medications">
+                                @if (_summary.MedicationStatements.Count == 0 && _summary.MedicationAdministrations.Count == 0)
+                                {
+                                    <p class="text-sm text-muted-foreground">@Localizer["App.PatientDialog.NoMedications"]</p>
+                                }
+                                else
+                                {
+                                    <ul class="list-disc space-y-1 pl-5">
+                                        @foreach (var m in _summary.MedicationStatements)
+                                        {
+                                            <li>@((m.Medication as Hl7.Fhir.Model.CodeableConcept)?.Text ?? Localizer["App.PatientDialog.UnspecifiedMedication"].Value)</li>
+                                        }
+                                        @foreach (var m in _summary.MedicationAdministrations)
+                                        {
+                                            <li>@((m.Medication as Hl7.Fhir.Model.CodeableConcept)?.Text ?? Localizer["App.PatientDialog.UnspecifiedMedication"].Value)</li>
+                                        }
+                                    </ul>
+                                }
+                            </BbTabsContent>
+                            <BbTabsContent Value="observations">
+                                @if (_summary.Observations.Count == 0)
+                                {
+                                    <p class="text-sm text-muted-foreground">@Localizer["App.PatientDialog.NoObservations"]</p>
+                                }
+                                else
+                                {
+                                    <ul class="list-disc space-y-1 pl-5">
+                                        @foreach (var o in _summary.Observations)
+                                        {
+                                            <li>@(o.Code?.Text ?? o.Code?.Coding?.FirstOrDefault()?.Display ?? Localizer["App.PatientDialog.UnspecifiedObservation"].Value)</li>
+                                        }
+                                    </ul>
+                                }
+                            </BbTabsContent>
+                        </BbTabs>
+                    }
                 </BbTabsContent>
             </BbTabs>
         }
@@ -79,7 +174,13 @@
     public EventCallback<PatientListEntryDto?> PatientChanged { get; set; }
 
     [Parameter, EditorRequired]
-    public required string StudyAcronym { get; set; }
+    public required string Acronym { get; set; }
+
+    [Parameter]
+    public TrialIdentifier? TrialIdentifier { get; set; }
+
+    [Parameter]
+    public bool CanEdit { get; set; }
 
     [CascadingParameter]
     private Task<AuthenticationState>? AuthStateTask { get; set; }
@@ -87,22 +188,54 @@
     private static readonly string[] StatusOptions = ["candidate", "screening", "eligible", "ineligible", "on-study", "withdrawn"];
 
     private ClaimsPrincipal _user = new();
+    private PatientClinicalSummaryDto _summary = new();
+    private bool _summaryLoading;
+    private string? _loadedSummaryForSubjectId;
 
     protected override async Task OnParametersSetAsync()
     {
         _user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
+
+        if (Patient is not null && Patient.ResearchSubjectId != _loadedSummaryForSubjectId)
+        {
+            _loadedSummaryForSubjectId = Patient.ResearchSubjectId;
+            await LoadClinicalSummaryAsync();
+        }
     }
 
-    private async Task OnStatusChangedInternal(string newStatus)
+    private async Task LoadClinicalSummaryAsync()
     {
         if (Patient is null)
         {
             return;
         }
 
+        _summaryLoading = true;
         try
         {
-            var updatedAt = await ResearchSubjectService.UpdateStatusAsync(Patient.ResearchSubjectId, newStatus, StudyAcronym, _user);
+            _summary = await PatientRecordService.GetClinicalSummaryAsync(Patient.PatientId);
+        }
+        catch
+        {
+            // Best-effort - an empty clinical summary is preferable to blocking the dialog on a fetch failure.
+            _summary = new();
+        }
+        finally
+        {
+            _summaryLoading = false;
+        }
+    }
+
+    private async Task OnStatusChangedInternal(string newStatus)
+    {
+        if (Patient is null || TrialIdentifier is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var updatedAt = await ResearchSubjectService.UpdateStatusAsync(Patient.ResearchSubjectId, newStatus, TrialIdentifier, _user);
             Patient.Status = newStatus;
             Patient.LastUpdated = updatedAt ?? DateTimeOffset.UtcNow;
             Toast.Success(Localizer["App.Toast.StatusUpdated", Localizer[StatusDisplay.GetKey(newStatus)]], Localizer["App.Common.Saved"]);

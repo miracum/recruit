@@ -232,11 +232,7 @@
     // that calls SignOutAsync (see Program.cs's /authentication/logout).
     private void SignOut() => Navigation.NavigateTo("/authentication/logout", forceLoad: true);
 
-    private static string GetFullName(ClaimsPrincipal user) =>
-        user.FindFirst("name")?.Value
-        ?? user.FindFirst(ClaimTypes.Name)?.Value
-        ?? user.Identity?.Name
-        ?? string.Empty;
+    private static string GetFullName(ClaimsPrincipal user) => user.GetDisplayName() ?? string.Empty;
 
     private static string GetEmail(ClaimsPrincipal user) =>
         user.FindFirst("email")?.Value

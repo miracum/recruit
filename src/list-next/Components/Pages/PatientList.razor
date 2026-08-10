@@ -2,7 +2,9 @@
 @attribute [Authorize]
 @inject ScreeningListService ScreeningListService
 @inject PatientRecordService PatientRecordService
+@inject TrialAccessService AccessService
 @inject BreadcrumbState BreadcrumbState
+@inject NavigationManager Navigation
 @inject IStringLocalizer<SharedResources> Localizer
 
 <PageTitle>@(_summary?.StudyAcronym ?? Localizer["App.Nav.Patients"])</PageTitle>
@@ -21,10 +23,21 @@ else if (_errorMessage is not null)
 }
 else if (_summary is not null)
 {
-    @if (!string.IsNullOrEmpty(_summary.StudyTitle))
-    {
-        <h2 class="text-lg font-medium">@_summary.StudyTitle</h2>
-    }
+    <div class="flex items-start justify-between gap-4">
+        <div>
+            @if (!string.IsNullOrEmpty(_summary.StudyTitle))
+            {
+                <h2 class="text-lg font-medium">@_summary.StudyTitle</h2>
+            }
+        </div>
+        @if (_canManageAccess)
+        {
+            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Class="shrink-0" OnClick="@(() => Navigation.NavigateTo($"/trials/{ListId}/access"))">
+                <Icon><LucideIcon Name="shield" Size="16" /></Icon>
+                <ChildContent>@Localizer["App.PatientList.ManageAccessLink"]</ChildContent>
+            </BbButton>
+        }
+    </div>
 
     @if (!string.IsNullOrEmpty(_summary.StudyDescription))
     {
@@ -115,7 +128,8 @@ else if (_summary is not null)
         </BbDataTable>
     }
 
-    <PatientDialog Patient="_selectedPatient" PatientChanged="p => _selectedPatient = p" StudyAcronym="@_summary.StudyAcronym" />
+    <PatientDialog Patient="_selectedPatient" PatientChanged="p => _selectedPatient = p"
+                   Acronym="@_summary.StudyAcronym" TrialIdentifier="_summary.TrialIdentifier" CanEdit="_canEdit" />
 }
 
 @code {
@@ -131,6 +145,8 @@ else if (_summary is not null)
     private TrialSummaryDto? _summary;
     private List<PatientListEntryDto> _patients = [];
     private bool _loading = true;
+    private bool _canEdit;
+    private bool _canManageAccess;
     private string? _errorMessage;
     private ClaimsPrincipal _user = new();
 
@@ -154,6 +170,9 @@ else if (_summary is not null)
                 ListId, _user, NotificationOptionsAccessor.Value.NewSuggestionWindowDays, NotificationOptionsAccessor.Value.StalledLeadWindowDays);
             _summary = summary;
             _patients = [.. patients];
+            var permission = await AccessService.GetPermissionAsync(_user, summary.TrialIdentifier);
+            _canEdit = permission is { } level && level >= TrialPermissionLevel.Coordinator;
+            _canManageAccess = permission is { } manageLevel && manageLevel >= TrialPermissionLevel.TrialAdmin;
             BreadcrumbState.Set(new BreadcrumbItem(Localizer["App.Common.AllTrialsBreadcrumb"], "/"), new BreadcrumbItem(summary.StudyAcronym));
 
             // Fire-and-forget rather than gating on OnAfterRenderAsync(firstRender): when

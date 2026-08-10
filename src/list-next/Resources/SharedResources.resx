@@ -205,61 +205,46 @@
   <data name="App.PatientList.ColumnUpdated" xml:space="preserve">
     <value>Updated</value>
   </data>
-  <data name="App.PatientDetail.PageTitleFallback" xml:space="preserve">
-    <value>Patient</value>
+  <data name="App.PatientList.ManageAccessLink" xml:space="preserve">
+    <value>Manage access</value>
   </data>
-  <data name="App.PatientDetail.LoadErrorTitle" xml:space="preserve">
-    <value>Could not load this patient</value>
-  </data>
-  <data name="App.PatientDetail.LoadErrorFallback" xml:space="preserve">
-    <value>An unexpected error occurred while loading this patient.</value>
-  </data>
-  <data name="App.PatientDetail.AgeYearsOld" xml:space="preserve">
-    <value>{0} years old</value>
-  </data>
-  <data name="App.PatientDetail.LastKnownLocationLabel" xml:space="preserve">
-    <value>Last known location: {0}</value>
-  </data>
-  <data name="App.PatientDetail.StatusHistoryTitle" xml:space="preserve">
-    <value>Status history</value>
-  </data>
-  <data name="App.PatientDetail.ClinicalSummaryTitle" xml:space="preserve">
+  <data name="App.PatientDialog.TabClinicalSummary" xml:space="preserve">
     <value>Clinical summary</value>
   </data>
-  <data name="App.PatientDetail.TabConditions" xml:space="preserve">
+  <data name="App.PatientDialog.TabConditions" xml:space="preserve">
     <value>Conditions ({0})</value>
   </data>
-  <data name="App.PatientDetail.TabProcedures" xml:space="preserve">
+  <data name="App.PatientDialog.TabProcedures" xml:space="preserve">
     <value>Procedures ({0})</value>
   </data>
-  <data name="App.PatientDetail.TabMedications" xml:space="preserve">
+  <data name="App.PatientDialog.TabMedications" xml:space="preserve">
     <value>Medications ({0})</value>
   </data>
-  <data name="App.PatientDetail.TabObservations" xml:space="preserve">
+  <data name="App.PatientDialog.TabObservations" xml:space="preserve">
     <value>Observations ({0})</value>
   </data>
-  <data name="App.PatientDetail.NoConditions" xml:space="preserve">
+  <data name="App.PatientDialog.NoConditions" xml:space="preserve">
     <value>No conditions recorded.</value>
   </data>
-  <data name="App.PatientDetail.NoProcedures" xml:space="preserve">
+  <data name="App.PatientDialog.NoProcedures" xml:space="preserve">
     <value>No procedures recorded.</value>
   </data>
-  <data name="App.PatientDetail.NoMedications" xml:space="preserve">
+  <data name="App.PatientDialog.NoMedications" xml:space="preserve">
     <value>No medications recorded.</value>
   </data>
-  <data name="App.PatientDetail.NoObservations" xml:space="preserve">
+  <data name="App.PatientDialog.NoObservations" xml:space="preserve">
     <value>No observations recorded.</value>
   </data>
-  <data name="App.PatientDetail.UnspecifiedCondition" xml:space="preserve">
+  <data name="App.PatientDialog.UnspecifiedCondition" xml:space="preserve">
     <value>Unspecified condition</value>
   </data>
-  <data name="App.PatientDetail.UnspecifiedProcedure" xml:space="preserve">
+  <data name="App.PatientDialog.UnspecifiedProcedure" xml:space="preserve">
     <value>Unspecified procedure</value>
   </data>
-  <data name="App.PatientDetail.UnspecifiedMedication" xml:space="preserve">
+  <data name="App.PatientDialog.UnspecifiedMedication" xml:space="preserve">
     <value>Unspecified medication</value>
   </data>
-  <data name="App.PatientDetail.UnspecifiedObservation" xml:space="preserve">
+  <data name="App.PatientDialog.UnspecifiedObservation" xml:space="preserve">
     <value>Unspecified observation</value>
   </data>
   <data name="App.PatientsPage.LoadErrorTitle" xml:space="preserve">
@@ -373,11 +358,14 @@
   <data name="App.NotFound.Description" xml:space="preserve">
     <value>Sorry, the content you are looking for does not exist.</value>
   </data>
+  <data name="App.LoggedOut.Title" xml:space="preserve">
+    <value>You've been logged out.</value>
+  </data>
+  <data name="App.LoggedOut.BackToApp" xml:space="preserve">
+    <value>Back to app</value>
+  </data>
   <data name="App.Notifications.UnknownPatient" xml:space="preserve">
     <value>unknown patient</value>
-  </data>
-  <data name="App.PatientDetail.NotFoundInList" xml:space="preserve">
-    <value>This patient could not be found in the trial's recommendation list.</value>
   </data>
   <data name="App.Errors.TrialsLoadFailed" xml:space="preserve">
     <value>The list of clinical trials could not be loaded from the FHIR server.</value>
@@ -418,6 +406,12 @@
   <data name="App.Errors.NotAuthorizedUpdatePatient" xml:space="preserve">
     <value>You are not authorized to update patients for this trial.</value>
   </data>
+  <data name="App.Errors.NotAuthorizedManageAccess" xml:space="preserve">
+    <value>You are not authorized to manage access for this trial.</value>
+  </data>
+  <data name="App.Errors.CannotModifyOwnGrant" xml:space="preserve">
+    <value>You cannot change or revoke your own access.</value>
+  </data>
   <data name="App.Errors.PatientRecordUpdateFailed" xml:space="preserve">
     <value>The patient's record could not be updated. Please try again.</value>
   </data>
@@ -447,5 +441,80 @@
   </data>
   <data name="App.User.NoRoles" xml:space="preserve">
     <value>No roles assigned</value>
+  </data>
+  <data name="App.TrialAccess.PageTitle" xml:space="preserve">
+    <value>Manage access</value>
+  </data>
+  <data name="App.TrialAccess.Breadcrumb" xml:space="preserve">
+    <value>Manage access</value>
+  </data>
+  <data name="App.TrialAccess.LoadErrorTitle" xml:space="preserve">
+    <value>Access management could not be loaded</value>
+  </data>
+  <data name="App.TrialAccess.LoadErrorFallback" xml:space="preserve">
+    <value>Access management for this trial could not be loaded.</value>
+  </data>
+  <data name="App.TrialAccess.AddGrantTitle" xml:space="preserve">
+    <value>Grant access</value>
+  </data>
+  <data name="App.TrialAccess.EmailLabel" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="App.TrialAccess.EmailPlaceholder" xml:space="preserve">
+    <value>name@example.com</value>
+  </data>
+  <data name="App.TrialAccess.LevelLabel" xml:space="preserve">
+    <value>Level</value>
+  </data>
+  <data name="App.TrialAccess.LevelViewer" xml:space="preserve">
+    <value>Viewer</value>
+  </data>
+  <data name="App.TrialAccess.LevelCoordinator" xml:space="preserve">
+    <value>Coordinator</value>
+  </data>
+  <data name="App.TrialAccess.LevelTrialAdmin" xml:space="preserve">
+    <value>Trial admin</value>
+  </data>
+  <data name="App.TrialAccess.AddButton" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="App.TrialAccess.GrantsTitle" xml:space="preserve">
+    <value>People with access</value>
+  </data>
+  <data name="App.TrialAccess.ColumnEmail" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="App.TrialAccess.ColumnLevel" xml:space="preserve">
+    <value>Level</value>
+  </data>
+  <data name="App.TrialAccess.ColumnGrantedAt" xml:space="preserve">
+    <value>Granted</value>
+  </data>
+  <data name="App.TrialAccess.PendingBadge" xml:space="preserve">
+    <value>Invited - not yet signed in</value>
+  </data>
+  <data name="App.TrialAccess.RevokeButton" xml:space="preserve">
+    <value>Revoke</value>
+  </data>
+  <data name="App.TrialAccess.CannotModifyOwnGrantHint" xml:space="preserve">
+    <value>You cannot change or revoke your own access. Ask another trial admin or an administrator.</value>
+  </data>
+  <data name="App.TrialAccess.EmptyTitle" xml:space="preserve">
+    <value>Nobody has access yet</value>
+  </data>
+  <data name="App.TrialAccess.EmptyDescription" xml:space="preserve">
+    <value>Grant access above to let someone view or work on this trial.</value>
+  </data>
+  <data name="App.TrialAccess.GrantSaved" xml:space="preserve">
+    <value>Access saved.</value>
+  </data>
+  <data name="App.TrialAccess.GrantSaveError" xml:space="preserve">
+    <value>Access could not be saved</value>
+  </data>
+  <data name="App.TrialAccess.GrantRevoked" xml:space="preserve">
+    <value>Access revoked.</value>
+  </data>
+  <data name="App.TrialAccess.GrantRevokeError" xml:space="preserve">
+    <value>Access could not be revoked</value>
   </data>
 </root>

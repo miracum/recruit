@@ -1,5 +1,6 @@
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
+using list.Models;
 
 namespace list.Services.Fhir;
 
@@ -44,4 +45,18 @@ internal static class FhirBundleHelpers
             .Select(e => e.Value as Annotation)
             .OfType<Annotation>()
             .ToList();
+
+    /// <summary>Extracts the bare logical id (e.g. "abc123") from a relative reference (e.g. "ResearchStudy/abc123").</summary>
+    public static string? GetReferencedId(this ResourceReference? reference) =>
+        reference?.Reference?.Split('/').LastOrDefault();
+
+    /// <summary>
+    /// The trial's stable business identifier - see TrialIdentifier for why this (not the FHIR id,
+    /// not the acronym) is the correct key for access-control purposes.
+    /// </summary>
+    public static TrialIdentifier? GetTrialIdentifier(this ResearchStudy study) =>
+        study.Identifier?.FirstOrDefault(i => !string.IsNullOrEmpty(i.System) && !string.IsNullOrEmpty(i.Value))
+            is { System: { Length: > 0 } system, Value: { Length: > 0 } value }
+            ? new TrialIdentifier(system, value)
+            : null;
 }

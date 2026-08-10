@@ -15,6 +15,9 @@ public sealed class NotificationEventDto
 
     public required string ListId { get; init; }
 
+    /// <summary>The trial's stable business identity - see TrialIdentifier.</summary>
+    public required TrialIdentifier TrialIdentifier { get; init; }
+
     public required string StudyAcronym { get; init; }
 
     public string? PatientId { get; init; }

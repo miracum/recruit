@@ -1,3 +1,6 @@
+@using Ganss.Xss
+@using Markdig
+@using System.Text.RegularExpressions
 @inject ResearchSubjectService ResearchSubjectService
 @inject ToastService Toast
 @inject IStringLocalizer<SharedResources> Localizer
@@ -26,18 +29,21 @@
                             <span> &middot; @note.Author</span>
                         }
                     </p>
-                    <p class="text-sm">@note.Text</p>
+                    <div class="prose prose-sm dark:prose-invert max-w-none text-sm [&_p]:mb-2 [&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4 [&_li]:mb-1 [&_strong]:font-bold [&_em]:italic">@RenderNote(note.Text)</div>
                 </div>
             }
         }
     </div>
 
-    <BbTextarea @bind-Value="_noteDraft" UpdateTiming="UpdateTiming.Immediate" Placeholder="@Localizer["App.PatientNotes.Placeholder"]" Class="mt-3" />
-    <div class="mt-2 flex justify-end">
-        <BbButton Variant="ButtonVariant.Default" Disabled="string.IsNullOrWhiteSpace(_noteDraft)" OnClick="SaveNoteAsync">
-            @Localizer["App.PatientNotes.AddButton"]
-        </BbButton>
-    </div>
+    @if (CanEdit)
+    {
+        <BbRichTextEditor @bind-Value="_noteDraftHtml" Placeholder="@Localizer["App.PatientNotes.Placeholder"]" Class="mt-3" MinHeight="120px" />
+        <div class="mt-2 flex justify-end">
+            <BbButton Variant="ButtonVariant.Default" Disabled="IsNoteDraftEmpty" OnClick="SaveNoteAsync">
+                @Localizer["App.PatientNotes.AddButton"]
+            </BbButton>
+        </div>
+    }
 </div>
 
 @code {
@@ -45,16 +51,31 @@
     public required PatientListEntryDto Patient { get; set; }
 
     [Parameter, EditorRequired]
-    public required string StudyAcronym { get; set; }
+    public required TrialIdentifier TrialIdentifier { get; set; }
+
+    [Parameter]
+    public bool CanEdit { get; set; }
 
     [CascadingParameter]
     private Task<AuthenticationState>? AuthStateTask { get; set; }
 
+    private static readonly MarkdownPipeline MarkdownPipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+    private static readonly HtmlSanitizer Sanitizer = new();
+    private static readonly ReverseMarkdown.Converter HtmlToMarkdownConverter = new();
+    private static readonly Regex HtmlTagRegex = new("<[^>]+>", RegexOptions.Compiled);
+
     private List<PatientNoteDto> _notes = [];
     private bool _loading;
-    private string _noteDraft = string.Empty;
+    private string _noteDraftHtml = string.Empty;
     private string? _loadedForSubjectId;
     private ClaimsPrincipal _user = new();
+
+    /// <summary>Quill emits markup like "&lt;p&gt;&lt;br&gt;&lt;/p&gt;" for an empty editor, so a plain string check isn't enough.</summary>
+    private bool IsNoteDraftEmpty => string.IsNullOrWhiteSpace(HtmlTagRegex.Replace(_noteDraftHtml, string.Empty).Replace("&nbsp;", " "));
+
+    /// <summary>Notes are stored as Markdown (matching FHIR's Annotation.text type); render + sanitize for display.</summary>
+    private static MarkupString RenderNote(string text) =>
+        new(Sanitizer.Sanitize(Markdown.ToHtml(text, MarkdownPipeline)));
 
     protected override async Task OnParametersSetAsync()
     {
@@ -63,7 +84,7 @@
         if (Patient.ResearchSubjectId != _loadedForSubjectId)
         {
             _loadedForSubjectId = Patient.ResearchSubjectId;
-            _noteDraft = string.Empty;
+            _noteDraftHtml = string.Empty;
             await LoadNotesAsync();
         }
     }
@@ -88,18 +109,24 @@
 
     private async Task SaveNoteAsync()
     {
-        if (string.IsNullOrWhiteSpace(_noteDraft))
+        if (IsNoteDraftEmpty)
+        {
+            return;
+        }
+
+        var markdown = HtmlToMarkdownConverter.Convert(Sanitizer.Sanitize(_noteDraftHtml)).Trim();
+        if (string.IsNullOrWhiteSpace(markdown))
         {
             return;
         }
 
         try
         {
-            var updatedAt = await ResearchSubjectService.AddNoteAsync(Patient.ResearchSubjectId, _noteDraft, StudyAcronym, _user);
-            Patient.Note = _noteDraft;
+            var updatedAt = await ResearchSubjectService.AddNoteAsync(Patient.ResearchSubjectId, markdown, TrialIdentifier, _user);
+            Patient.Note = markdown;
             Patient.LastUpdated = updatedAt ?? DateTimeOffset.UtcNow;
             Toast.Success(Localizer["App.Toast.NoteSaved"], Localizer["App.Common.Saved"]);
-            _noteDraft = string.Empty;
+            _noteDraftHtml = string.Empty;
             await LoadNotesAsync();
         }
         catch (Exception ex)
