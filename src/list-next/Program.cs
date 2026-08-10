@@ -120,6 +120,7 @@ builder.Services.AddSingleton<FhirClientFactory>();
 builder.Services.AddScoped<ScreeningListService>();
 builder.Services.AddScoped<ResearchSubjectService>();
 builder.Services.AddScoped<PatientRecordService>();
+builder.Services.AddScoped<EligibilityCriteriaService>();
 builder.Services.AddScoped<NotificationDismissalService>();
 builder.Services.AddScoped<BreadcrumbState>();
 

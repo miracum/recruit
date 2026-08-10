@@ -1,0 +1,222 @@
+@page "/admin/criteria"
+@attribute [Authorize]
+@inject EligibilityCriteriaService CriteriaService
+@inject BreadcrumbState BreadcrumbState
+@inject IStringLocalizer<SharedResources> Localizer
+
+<PageTitle>@Localizer["App.CriteriaBuilder.PageTitle"]</PageTitle>
+
+@if (!_isAdmin)
+{
+    <BbAlert Variant="AlertVariant.Danger">
+        <BbAlertDescription>@Localizer["App.Errors.NotAuthorizedAdminOnly"]</BbAlertDescription>
+    </BbAlert>
+}
+else
+{
+    <p class="mb-4 text-sm text-muted-foreground">@Localizer["App.CriteriaBuilder.PageDescription"]</p>
+
+    <BbCard>
+        <BbCardHeader>
+            <BbCardTitle>@Localizer["App.CriteriaBuilder.StudySectionTitle"]</BbCardTitle>
+        </BbCardHeader>
+        <BbCardContent>
+            <div class="flex gap-2">
+                <BbButton Variant="@(_studyMode == StudyMode.Existing ? ButtonVariant.Default : ButtonVariant.Outline)"
+                          Size="ButtonSize.Small" OnClick="@(() => _studyMode = StudyMode.Existing)">
+                    @Localizer["App.CriteriaBuilder.ExistingStudyTab"]
+                </BbButton>
+                <BbButton Variant="@(_studyMode == StudyMode.New ? ButtonVariant.Default : ButtonVariant.Outline)"
+                          Size="ButtonSize.Small" OnClick="@(() => _studyMode = StudyMode.New)">
+                    @Localizer["App.CriteriaBuilder.NewStudyTab"]
+                </BbButton>
+            </div>
+
+            @if (_studyMode == StudyMode.Existing)
+            {
+                <div class="mt-4 max-w-md">
+                    @if (_existingStudiesLoading)
+                    {
+                        <BbSkeleton Class="h-9 w-full" />
+                    }
+                    else if (_loadErrorMessage is not null)
+                    {
+                        <BbAlert Variant="AlertVariant.Danger">
+                            <BbAlertDescription>@_loadErrorMessage</BbAlertDescription>
+                        </BbAlert>
+                    }
+                    else if (_existingStudies.Count == 0)
+                    {
+                        <p class="text-sm text-muted-foreground">@Localizer["App.CriteriaBuilder.NoExistingStudies"]</p>
+                    }
+                    else
+                    {
+                        <select class="block w-full rounded-md border bg-background p-2 text-sm"
+                                @bind="_selectedExistingStudyId" @bind:after="OnExistingStudySelected">
+                            <option value="">@Localizer["App.CriteriaBuilder.SelectStudyPlaceholder"]</option>
+                            @foreach (var study in _existingStudies)
+                            {
+                                <option value="@study.Id">@(study.Acronym ?? study.Title ?? study.Id)</option>
+                            }
+                        </select>
+                    }
+                </div>
+            }
+
+            <div class="mt-4 flex flex-wrap gap-3">
+                <div class="min-w-64 flex-1">
+                    <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaBuilder.StudyTitleLabel"]</label>
+                    <BbInput @bind-Value="_studyDraft.Title" Disabled="@(_studyMode == StudyMode.Existing)" Class="mt-1" />
+                </div>
+                <div class="w-full max-w-xs">
+                    <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaBuilder.StudyAcronymLabel"]</label>
+                    <BbInput @bind-Value="_studyDraft.Acronym" Disabled="@(_studyMode == StudyMode.Existing)" Class="mt-1" />
+                </div>
+                <div class="w-full max-w-sm">
+                    <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaBuilder.IdentifierSystemLabel"]</label>
+                    <BbInput @bind-Value="_studyDraft.IdentifierSystem" Disabled="@(_studyMode == StudyMode.Existing)" Class="mt-1" />
+                </div>
+                <div class="w-full max-w-xs">
+                    <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaBuilder.IdentifierValueLabel"]</label>
+                    <BbInput @bind-Value="_studyDraft.IdentifierValue" Disabled="@(_studyMode == StudyMode.Existing)" Class="mt-1" />
+                </div>
+            </div>
+        </BbCardContent>
+    </BbCard>
+
+    <BbCard Class="mt-6">
+        <BbCardHeader>
+            <BbCardTitle>@Localizer["App.CriteriaBuilder.CriteriaSectionTitle"]</BbCardTitle>
+        </BbCardHeader>
+        <BbCardContent>
+            @if (_criteria.Count == 0)
+            {
+                <p class="text-sm text-muted-foreground">@Localizer["App.CriteriaBuilder.NoCriteriaMessage"]</p>
+            }
+            else
+            {
+                <div class="flex flex-col gap-4">
+                    @foreach (var criterion in _criteria)
+                    {
+                        <div class="rounded-md border p-3">
+                            <div class="flex flex-wrap items-end gap-3">
+                                <div class="min-w-64 flex-1">
+                                    <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaBuilder.CriterionDisplayTextLabel"]</label>
+                                    <BbInput @bind-Value="criterion.DisplayText" Class="mt-1" />
+                                </div>
+                                <div>
+                                    <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaBuilder.CriterionTypeLabel"]</label>
+                                    <select class="mt-1 block rounded-md border bg-background p-2 text-sm" @bind="criterion.Exclude">
+                                        <option value="false">@Localizer["App.CriteriaBuilder.InclusionOption"]</option>
+                                        <option value="true">@Localizer["App.CriteriaBuilder.ExclusionOption"]</option>
+                                    </select>
+                                </div>
+                                <BbButton Variant="ButtonVariant.Destructive" Size="ButtonSize.Small" OnClick="@(() => RemoveCriterion(criterion))">
+                                    @Localizer["App.CriteriaBuilder.RemoveCriterionButton"]
+                                </BbButton>
+                            </div>
+                            <div class="mt-3">
+                                <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaBuilder.CriterionExistingLibraryLabel"]</label>
+                                <BbInput @bind-Value="criterion.ExistingLibraryReference" Placeholder="Library/common-age-min-18" Class="mt-1" />
+                            </div>
+                            @if (string.IsNullOrWhiteSpace(criterion.ExistingLibraryReference))
+                            {
+                                <div class="mt-3">
+                                    <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaBuilder.CriterionSqlLabel"]</label>
+                                    <textarea class="mt-1 block w-full rounded-md border bg-background p-2 font-mono text-xs" rows="4"
+                                              @bind="criterion.Sql" @bind:event="oninput"></textarea>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            <BbButton Variant="ButtonVariant.Outline" Class="mt-4" OnClick="AddCriterion">
+                <Icon><LucideIcon Name="plus" Size="16" /></Icon>
+                <ChildContent>@Localizer["App.CriteriaBuilder.AddCriterionButton"]</ChildContent>
+            </BbButton>
+        </BbCardContent>
+    </BbCard>
+
+    <BbCard Class="mt-6">
+        <BbCardHeader>
+            <BbCardTitle>@Localizer["App.CriteriaBuilder.PreviewSectionTitle"]</BbCardTitle>
+        </BbCardHeader>
+        <BbCardContent>
+            <p class="mb-3 text-sm text-muted-foreground">@Localizer["App.CriteriaBuilder.PreviewDescription"]</p>
+            <pre class="max-h-[32rem] overflow-auto rounded-md border bg-muted p-3 text-xs"><code>@PreviewJson</code></pre>
+        </BbCardContent>
+    </BbCard>
+}
+
+@code {
+    private enum StudyMode
+    {
+        New,
+        Existing,
+    }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    private bool _isAdmin;
+    private ClaimsPrincipal _user = new();
+
+    private StudyMode _studyMode = StudyMode.New;
+    private ResearchStudyDraft _studyDraft = new();
+    private readonly List<CriterionDraft> _criteria = [];
+
+    private List<ResearchStudySummaryDto> _existingStudies = [];
+    private bool _existingStudiesLoading = true;
+    private string _selectedExistingStudyId = string.Empty;
+    private string? _loadErrorMessage;
+
+    private string PreviewJson => CriteriaService.BuildPreviewJson(_studyDraft, _criteria);
+
+    protected override async Task OnInitializedAsync()
+    {
+        _user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
+        _isAdmin = TrialAccessService.IsAdmin(_user);
+
+        BreadcrumbState.Set(
+            new BreadcrumbItem(Localizer["App.Common.AllTrialsBreadcrumb"], "/"),
+            new BreadcrumbItem(Localizer["App.CriteriaBuilder.Breadcrumb"]));
+
+        if (!_isAdmin)
+        {
+            return;
+        }
+
+        try
+        {
+            _existingStudies = [.. await CriteriaService.SearchResearchStudiesAsync()];
+        }
+        catch (Exception ex)
+        {
+            _loadErrorMessage = ex.Message;
+        }
+        finally
+        {
+            _existingStudiesLoading = false;
+        }
+    }
+
+    private void OnExistingStudySelected()
+    {
+        var study = _existingStudies.FirstOrDefault(s => s.Id == _selectedExistingStudyId);
+        _studyDraft = study is null
+            ? new ResearchStudyDraft()
+            : new ResearchStudyDraft
+            {
+                ExistingId = study.Id,
+                Title = study.Title ?? string.Empty,
+                Acronym = study.Acronym ?? string.Empty,
+                IdentifierSystem = study.TrialIdentifier?.System ?? string.Empty,
+                IdentifierValue = study.TrialIdentifier?.Value ?? string.Empty,
+            };
+    }
+
+    private void AddCriterion() => _criteria.Add(new CriterionDraft());
+
+    private void RemoveCriterion(CriterionDraft criterion) => _criteria.Remove(criterion);
+}

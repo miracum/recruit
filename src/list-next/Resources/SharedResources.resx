@@ -85,6 +85,9 @@
   <data name="App.Nav.Notifications" xml:space="preserve">
     <value>Notifications</value>
   </data>
+  <data name="App.Nav.CriteriaBuilder" xml:space="preserve">
+    <value>Criteria Builder</value>
+  </data>
   <data name="App.Nav.SignOut" xml:space="preserve">
     <value>Sign out</value>
   </data>
@@ -409,6 +412,12 @@
   <data name="App.Errors.NotAuthorizedManageAccess" xml:space="preserve">
     <value>You are not authorized to manage access for this trial.</value>
   </data>
+  <data name="App.Errors.NotAuthorizedAdminOnly" xml:space="preserve">
+    <value>You are not authorized to view this page. Administrator access is required.</value>
+  </data>
+  <data name="App.Errors.ResearchStudiesLoadFailed" xml:space="preserve">
+    <value>Existing studies could not be loaded.</value>
+  </data>
   <data name="App.Errors.CannotModifyOwnGrant" xml:space="preserve">
     <value>You cannot change or revoke your own access.</value>
   </data>
@@ -516,5 +525,77 @@
   </data>
   <data name="App.TrialAccess.GrantRevokeError" xml:space="preserve">
     <value>Access could not be revoked</value>
+  </data>
+  <data name="App.CriteriaBuilder.PageTitle" xml:space="preserve">
+    <value>Criteria Builder</value>
+  </data>
+  <data name="App.CriteriaBuilder.Breadcrumb" xml:space="preserve">
+    <value>Criteria Builder</value>
+  </data>
+  <data name="App.CriteriaBuilder.PageDescription" xml:space="preserve">
+    <value>Assemble the ResearchStudy, Group, and Library resources that define a study's eligibility criteria. Nothing on this page is saved - copy the preview below to apply it manually.</value>
+  </data>
+  <data name="App.CriteriaBuilder.StudySectionTitle" xml:space="preserve">
+    <value>Study</value>
+  </data>
+  <data name="App.CriteriaBuilder.ExistingStudyTab" xml:space="preserve">
+    <value>Existing study</value>
+  </data>
+  <data name="App.CriteriaBuilder.NewStudyTab" xml:space="preserve">
+    <value>New study</value>
+  </data>
+  <data name="App.CriteriaBuilder.SelectStudyPlaceholder" xml:space="preserve">
+    <value>Select a study...</value>
+  </data>
+  <data name="App.CriteriaBuilder.NoExistingStudies" xml:space="preserve">
+    <value>No existing studies found.</value>
+  </data>
+  <data name="App.CriteriaBuilder.StudyTitleLabel" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="App.CriteriaBuilder.StudyAcronymLabel" xml:space="preserve">
+    <value>Acronym</value>
+  </data>
+  <data name="App.CriteriaBuilder.IdentifierSystemLabel" xml:space="preserve">
+    <value>Identifier system</value>
+  </data>
+  <data name="App.CriteriaBuilder.IdentifierValueLabel" xml:space="preserve">
+    <value>Identifier value</value>
+  </data>
+  <data name="App.CriteriaBuilder.CriteriaSectionTitle" xml:space="preserve">
+    <value>Eligibility criteria</value>
+  </data>
+  <data name="App.CriteriaBuilder.NoCriteriaMessage" xml:space="preserve">
+    <value>No criteria added yet.</value>
+  </data>
+  <data name="App.CriteriaBuilder.CriterionDisplayTextLabel" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="App.CriteriaBuilder.CriterionTypeLabel" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="App.CriteriaBuilder.InclusionOption" xml:space="preserve">
+    <value>Inclusion</value>
+  </data>
+  <data name="App.CriteriaBuilder.ExclusionOption" xml:space="preserve">
+    <value>Exclusion</value>
+  </data>
+  <data name="App.CriteriaBuilder.RemoveCriterionButton" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="App.CriteriaBuilder.CriterionExistingLibraryLabel" xml:space="preserve">
+    <value>Reuse existing Library (optional)</value>
+  </data>
+  <data name="App.CriteriaBuilder.CriterionSqlLabel" xml:space="preserve">
+    <value>SQL</value>
+  </data>
+  <data name="App.CriteriaBuilder.AddCriterionButton" xml:space="preserve">
+    <value>Add criterion</value>
+  </data>
+  <data name="App.CriteriaBuilder.PreviewSectionTitle" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="App.CriteriaBuilder.PreviewDescription" xml:space="preserve">
+    <value>This FHIR transaction Bundle is generated locally and not sent to the FHIR server. Copy it to apply manually, or hand it to whatever process will eventually persist it.</value>
   </data>
 </root>

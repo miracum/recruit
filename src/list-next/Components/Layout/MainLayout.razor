@@ -38,6 +38,14 @@
                             @Localizer["App.Nav.Notifications"]
                         </BbSidebarMenuButton>
                     </BbSidebarMenuItem>
+                    <AuthorizeView Roles="@TrialAccessService.AdminRole">
+                        <BbSidebarMenuItem>
+                            <BbSidebarMenuButton Href="/admin/criteria">
+                                <LucideIcon Name="list-checks" Size="16" />
+                                @Localizer["App.Nav.CriteriaBuilder"]
+                            </BbSidebarMenuButton>
+                        </BbSidebarMenuItem>
+                    </AuthorizeView>
                 </BbSidebarMenu>
             </BbSidebarGroup>
         </BbSidebarContent>
