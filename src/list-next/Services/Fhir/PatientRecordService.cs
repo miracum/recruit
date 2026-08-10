@@ -39,7 +39,7 @@ public sealed class PatientRecordService(
         try
         {
             resources = await FhirBundleHelpers.GetAllPagesAsync(
-                client, $"Patient/{patientId}/$everything?_count=250&_pretty=false", ct).ConfigureAwait(false);
+                client, $"Patient/{patientId}/$everything?_count=250&_pretty=false", ct);
         }
         catch (Exception ex)
         {
@@ -73,7 +73,7 @@ public sealed class PatientRecordService(
             resources = await FhirBundleHelpers.GetAllPagesAsync(
                 client,
                 $"Encounter?subject=Patient/{patientId}&_count=5&_include=Encounter:location&_sort=-date&_pretty=false",
-                ct).ConfigureAwait(false);
+                ct);
         }
         catch (Exception ex)
         {

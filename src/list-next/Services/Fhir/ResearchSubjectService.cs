@@ -37,7 +37,7 @@ public sealed class ResearchSubjectService(
             new { op = "replace", path = "/status", value = newStatus },
         });
 
-        return await PatchAsync(researchSubjectId, patch, ct).ConfigureAwait(false);
+        return await PatchAsync(researchSubjectId, patch, ct);
     }
 
     /// <summary>
@@ -57,7 +57,7 @@ public sealed class ResearchSubjectService(
         ResearchSubject current;
         try
         {
-            current = await client.ReadAsync<ResearchSubject>($"ResearchSubject/{researchSubjectId}", ct: ct).ConfigureAwait(false)
+            current = await client.ReadAsync<ResearchSubject>($"ResearchSubject/{researchSubjectId}", ct: ct)
                 ?? throw new FhirAccessException(localizer["App.Errors.PatientRecordNotFound"]);
         }
         catch (FhirAccessException)
@@ -87,7 +87,7 @@ public sealed class ResearchSubjectService(
             ? JsonSerializer.Serialize(new object[] { new { op = "add", path = "/extension/-", value = annotation } })
             : JsonSerializer.Serialize(new object[] { new { op = "add", path = "/extension", value = new[] { annotation } } });
 
-        return await PatchAsync(researchSubjectId, patch, ct).ConfigureAwait(false);
+        return await PatchAsync(researchSubjectId, patch, ct);
     }
 
     /// <summary>All notes ever added to this subject, newest first.</summary>
@@ -98,7 +98,7 @@ public sealed class ResearchSubjectService(
         ResearchSubject subject;
         try
         {
-            subject = await client.ReadAsync<ResearchSubject>($"ResearchSubject/{researchSubjectId}", ct: ct).ConfigureAwait(false)
+            subject = await client.ReadAsync<ResearchSubject>($"ResearchSubject/{researchSubjectId}", ct: ct)
                 ?? throw new FhirAccessException(localizer["App.Errors.PatientRecordNotFound"]);
         }
         catch (FhirAccessException)
@@ -131,7 +131,7 @@ public sealed class ResearchSubjectService(
         try
         {
             resources = await FhirBundleHelpers.GetAllPagesAsync(client, $"ResearchSubject/{researchSubjectId}/_history", ct)
-                .ConfigureAwait(false);
+                ;
         }
         catch (Exception ex)
         {
@@ -156,7 +156,7 @@ public sealed class ResearchSubjectService(
     {
         var historyTask = GetHistoryAsync(researchSubjectId, ct);
         var notesTask = GetNotesAsync(researchSubjectId, ct);
-        await Task.WhenAll(historyTask, notesTask).ConfigureAwait(false);
+        await Task.WhenAll(historyTask, notesTask);
 
         var entries = new List<PatientHistoryEntryDto>();
 
@@ -201,7 +201,7 @@ public sealed class ResearchSubjectService(
             // the id argument must be bare (no "ResearchSubject/" prefix) or the two collide into an
             // invalid "ResearchSubject/ResearchSubject" path.
             var updated = await client.PatchAsync<ResearchSubject>(researchSubjectId, patchDocument, ResourceFormat.Json, ct)
-                .ConfigureAwait(false);
+                ;
             return updated?.Meta?.LastUpdated;
         }
         catch (Exception ex)

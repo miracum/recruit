@@ -13,7 +13,7 @@ internal static class FhirBundleHelpers
     {
         var resources = new List<Resource>();
 
-        var result = await client.GetAsync(relativeUrl, ct).ConfigureAwait(false);
+        var result = await client.GetAsync(relativeUrl, ct);
         var bundle = result as Bundle;
 
         while (bundle is not null)
@@ -25,7 +25,7 @@ internal static class FhirBundleHelpers
                 break;
             }
 
-            bundle = await client.ContinueAsync(bundle, PageDirection.Next, ct).ConfigureAwait(false);
+            bundle = await client.ContinueAsync(bundle, PageDirection.Next, ct);
         }
 
         return resources;

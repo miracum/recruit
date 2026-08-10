@@ -31,7 +31,7 @@ public sealed class ScreeningListService(
         List<Resource> resources;
         try
         {
-            resources = await FhirBundleHelpers.GetAllPagesAsync(client, query, ct).ConfigureAwait(false);
+            resources = await FhirBundleHelpers.GetAllPagesAsync(client, query, ct);
         }
         catch (Exception ex)
         {
@@ -126,7 +126,7 @@ public sealed class ScreeningListService(
         List<Resource> resources;
         try
         {
-            resources = await FhirBundleHelpers.GetAllPagesAsync(client, query, ct).ConfigureAwait(false);
+            resources = await FhirBundleHelpers.GetAllPagesAsync(client, query, ct);
         }
         catch (Exception ex)
         {
@@ -231,7 +231,7 @@ public sealed class ScreeningListService(
         List<Resource> resources;
         try
         {
-            resources = await FhirBundleHelpers.GetAllPagesAsync(client, query, ct).ConfigureAwait(false);
+            resources = await FhirBundleHelpers.GetAllPagesAsync(client, query, ct);
         }
         catch (Exception ex)
         {
@@ -292,7 +292,7 @@ public sealed class ScreeningListService(
         List<Resource> resources;
         try
         {
-            resources = await FhirBundleHelpers.GetAllPagesAsync(client, query, ct).ConfigureAwait(false);
+            resources = await FhirBundleHelpers.GetAllPagesAsync(client, query, ct);
         }
         catch (Exception ex)
         {
@@ -319,7 +319,7 @@ public sealed class ScreeningListService(
         {
             try
             {
-                if (await client.GetAsync(studyReference, ct).ConfigureAwait(false) is ResearchStudy study)
+                if (await client.GetAsync(studyReference, ct) is ResearchStudy study)
                 {
                     studyTitle = study.Title;
                     studyDescription = study.Description;
@@ -428,7 +428,7 @@ public sealed class ScreeningListService(
             // PatchAsync<TResource> builds the "{ResourceType}/{id}" path itself from TResource, so
             // the id argument must be bare (no "List/" prefix) or the two collide into an invalid
             // "List/List" path.
-            await client.PatchAsync<FhirList>(listId, patchDocument, Hl7.Fhir.Rest.ResourceFormat.Json, ct).ConfigureAwait(false);
+            await client.PatchAsync<FhirList>(listId, patchDocument, Hl7.Fhir.Rest.ResourceFormat.Json, ct);
         }
         catch (Exception ex)
         {
