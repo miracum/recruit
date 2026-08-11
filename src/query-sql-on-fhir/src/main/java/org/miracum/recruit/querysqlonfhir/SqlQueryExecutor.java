@@ -77,10 +77,8 @@ public class SqlQueryExecutor {
     }
 
     log.warn(
-        "Study has a mix of Trino-direct and sql-on-fhir-delegated criteria; falling back to"
-            + " resolving each criterion independently and merging in application memory. This"
-            + " does not scale as well as the all-Trino path - prefer keeping every criterion"
-            + " Trino-direct where possible.");
+        "Study has a mix of Trino-direct and sql-on-fhir-delegated criteria; falling back to "
+            + "resolving each criterion independently and merging in application memory.");
     return evaluateWithFallbackMerge(criteria);
   }
 
