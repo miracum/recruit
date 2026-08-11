@@ -15,7 +15,7 @@
   --accent: #e7edf6;
   --accent-foreground: #101723;
   --destructive: #e7000b;
-  --destructive-foreground: #ffffff;
+  --destructive-foreground: #fff;
   --border: #d8dfe9;
   --input: #d8dfe9;
   --ring: #87909d;
@@ -25,12 +25,12 @@
   --chart-4: #1a4eda;
   --chart-5: #1f3fad;
   --font-sans:
-    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
+    ui-sans-serif, system-ui, -apple-system, blinkmacsystemfont, "Segoe UI",
+    roboto, "Helvetica Neue", arial, "Noto Sans", sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-serif: ui-serif, georgia, cambria, "Times New Roman", times, serif;
   --font-mono:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    ui-monospace, sfmono-regular, menlo, monaco, consolas, "Liberation Mono",
     "Courier New", monospace;
   --sidebar: #eef2f9;
   --sidebar-foreground: #060a12;
@@ -46,35 +46,35 @@
   --shadow-blur: 3px;
   --shadow-spread: 0px;
   --shadow-opacity: 0.1;
-  --shadow-color: oklch(0 0 0);
-  --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-  --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+  --shadow-color: oklch(0% 0 0deg);
+  --shadow-2xs: 0 1px 3px 0px hsl(0deg 0% 0% / 5%);
+  --shadow-xs: 0 1px 3px 0px hsl(0deg 0% 0% / 5%);
   --shadow-sm:
-    0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-  --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    0 1px 3px 0px hsl(0deg 0% 0% / 10%), 0 1px 2px -1px hsl(0deg 0% 0% / 10%);
+  --shadow: 0 1px 3px 0px hsl(0deg 0% 0% / 10%), 0 1px 2px -1px hsl(0deg 0% 0% / 10%);
   --shadow-md:
-    0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
+    0 1px 3px 0px hsl(0deg 0% 0% / 10%), 0 2px 4px -1px hsl(0deg 0% 0% / 10%);
   --shadow-lg:
-    0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
+    0 1px 3px 0px hsl(0deg 0% 0% / 10%), 0 4px 6px -1px hsl(0deg 0% 0% / 10%);
   --shadow-xl:
-    0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
-  --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+    0 1px 3px 0px hsl(0deg 0% 0% / 10%), 0 8px 10px -1px hsl(0deg 0% 0% / 10%);
+  --shadow-2xl: 0 1px 3px 0px hsl(0deg 0% 0% / 25%);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
   /* Radix-Inspired Accent Colors - independent of the palette above, used for semantic tags
      (e.g. StatusBadge.razor's screening/eligible/on-study colors) that the base
      primary/secondary/accent tokens don't cover. */
-  --color-blue-accent: oklch(0.55 0.22 260);
-  --color-purple-accent: oklch(0.55 0.2 280);
-  --color-orange-accent: oklch(0.65 0.18 40);
-  --color-green-accent: oklch(0.6 0.18 150);
+  --color-blue-accent: oklch(55% 0.22 260deg);
+  --color-purple-accent: oklch(55% 0.2 280deg);
+  --color-orange-accent: oklch(65% 0.18 40deg);
+  --color-green-accent: oklch(60% 0.18 150deg);
 
   /* Accent Backgrounds (10% opacity) */
-  --color-blue-accent-bg: oklch(0.95 0.02 260);
-  --color-purple-accent-bg: oklch(0.95 0.02 280);
-  --color-orange-accent-bg: oklch(0.97 0.02 40);
-  --color-green-accent-bg: oklch(0.95 0.02 150);
+  --color-blue-accent-bg: oklch(95% 0.02 260deg);
+  --color-purple-accent-bg: oklch(95% 0.02 280deg);
+  --color-orange-accent-bg: oklch(97% 0.02 40deg);
+  --color-green-accent-bg: oklch(95% 0.02 150deg);
 }
 
 .dark {
@@ -111,12 +111,12 @@
   --sidebar-border: #25303e;
   --sidebar-ring: #6e7c8c;
   --font-sans:
-    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
+    ui-sans-serif, system-ui, -apple-system, blinkmacsystemfont, "Segoe UI",
+    roboto, "Helvetica Neue", arial, "Noto Sans", sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-serif: ui-serif, georgia, cambria, "Times New Roman", times, serif;
   --font-mono:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    ui-monospace, sfmono-regular, menlo, monaco, consolas, "Liberation Mono",
     "Courier New", monospace;
   --radius: 0.625rem;
   --shadow-x: 0;
@@ -124,31 +124,31 @@
   --shadow-blur: 3px;
   --shadow-spread: 0px;
   --shadow-opacity: 0.1;
-  --shadow-color: oklch(0 0 0);
-  --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-  --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+  --shadow-color: oklch(0% 0 0deg);
+  --shadow-2xs: 0 1px 3px 0px hsl(0deg 0% 0% / 5%);
+  --shadow-xs: 0 1px 3px 0px hsl(0deg 0% 0% / 5%);
   --shadow-sm:
-    0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-  --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    0 1px 3px 0px hsl(0deg 0% 0% / 10%), 0 1px 2px -1px hsl(0deg 0% 0% / 10%);
+  --shadow: 0 1px 3px 0px hsl(0deg 0% 0% / 10%), 0 1px 2px -1px hsl(0deg 0% 0% / 10%);
   --shadow-md:
-    0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
+    0 1px 3px 0px hsl(0deg 0% 0% / 10%), 0 2px 4px -1px hsl(0deg 0% 0% / 10%);
   --shadow-lg:
-    0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
+    0 1px 3px 0px hsl(0deg 0% 0% / 10%), 0 4px 6px -1px hsl(0deg 0% 0% / 10%);
   --shadow-xl:
-    0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
-  --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+    0 1px 3px 0px hsl(0deg 0% 0% / 10%), 0 8px 10px -1px hsl(0deg 0% 0% / 10%);
+  --shadow-2xl: 0 1px 3px 0px hsl(0deg 0% 0% / 25%);
 
   /* Radix-Inspired Accent Colors (Dark Mode) */
-  --color-blue-accent: oklch(0.6 0.2 260);
-  --color-purple-accent: oklch(0.6 0.18 280);
-  --color-orange-accent: oklch(0.7 0.16 40);
-  --color-green-accent: oklch(0.65 0.16 150);
+  --color-blue-accent: oklch(60% 0.2 260deg);
+  --color-purple-accent: oklch(60% 0.18 280deg);
+  --color-orange-accent: oklch(70% 0.16 40deg);
+  --color-green-accent: oklch(65% 0.16 150deg);
 
   /* Accent Backgrounds (Dark Mode - 15% opacity) */
-  --color-blue-accent-bg: oklch(0.25 0.04 260);
-  --color-purple-accent-bg: oklch(0.25 0.04 280);
-  --color-orange-accent-bg: oklch(0.27 0.03 40);
-  --color-green-accent-bg: oklch(0.25 0.03 150);
+  --color-blue-accent-bg: oklch(25% 0.04 260deg);
+  --color-purple-accent-bg: oklch(25% 0.04 280deg);
+  --color-orange-accent-bg: oklch(27% 0.03 40deg);
+  --color-green-accent-bg: oklch(25% 0.03 150deg);
 }
 
 /* Global Element Styles - plain-CSS equivalent of the source theme's
@@ -171,6 +171,7 @@ body {
    so this file matches what a real Tailwind pipeline would expect if one is ever added. The
    bg-background/text-foreground/etc. utility classes actually used throughout this app resolve via
    BlazorBlueprint.Components' own precompiled CSS, which already targets these same variable names. */
+/* stylelint-disable-next-line at-rule-no-unknown -- @theme is Tailwind v4 syntax, not plain CSS */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -204,16 +205,13 @@ body {
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
   --font-serif: var(--font-serif);
-
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-
   --shadow-2xs: var(--shadow-2xs);
   --shadow-xs: var(--shadow-xs);
   --shadow-sm: var(--shadow-sm);
