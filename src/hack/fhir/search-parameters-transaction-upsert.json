@@ -9,17 +9,13 @@
         "id": "researchstudy-enrollment-reference",
         "name": "researchstudy-enrollment-reference",
         "description": "Study Enrollment",
-        "base": [
-          "ResearchStudy"
-        ],
+        "base": ["ResearchStudy"],
         "status": "active",
         "code": "enrollment",
         "type": "reference",
         "expression": "ResearchStudy.enrollment",
         "xpathUsage": "normal",
-        "target": [
-          "Group"
-        ]
+        "target": ["Group"]
       },
       "request": {
         "method": "PUT",
@@ -33,9 +29,7 @@
         "id": "group-characteristic-reference",
         "name": "group-characteristic-reference",
         "description": "An entity referenced in a characteristic",
-        "base": [
-          "Group"
-        ],
+        "base": ["Group"],
         "status": "active",
         "code": "characteristic-reference",
         "type": "reference",
@@ -54,14 +48,10 @@
         "url": "https://miracum.github.io/recruit/fhir/SearchParameter/list-belongs-to-study",
         "status": "active",
         "code": "belongs-to-study",
-        "base": [
-          "List"
-        ],
+        "base": ["List"],
         "type": "reference",
         "expression": "List.extension('https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy').value.ofType(Reference)",
-        "target": [
-          "ResearchStudy"
-        ]
+        "target": ["ResearchStudy"]
       },
       "request": {
         "method": "PUT",

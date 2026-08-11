@@ -46,14 +46,10 @@
         "url": "https://miracum.github.io/recruit/fhir/SearchParameter/list-belongs-to-study",
         "status": "active",
         "code": "belongs-to-study",
-        "base": [
-          "List"
-        ],
+        "base": ["List"],
         "type": "reference",
         "expression": "List.extension('https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy').value.ofType(Reference)",
-        "target": [
-          "ResearchStudy"
-        ]
+        "target": ["ResearchStudy"]
       },
       "request": {
         "method": "PUT",
