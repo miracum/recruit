@@ -44,16 +44,48 @@ else if (_summary is not null)
         <p class="mt-1 text-sm text-muted-foreground">@_summary.StudyDescription</p>
     }
 
-    @if (_summary.LastUpdated is not null)
+    @if (_summary.Criteria.Count > 0)
     {
-        <p class="mb-4 mt-1 text-sm text-muted-foreground">@Localizer["App.PatientList.LastUpdated", _summary.LastUpdated.Value.LocalDateTime.ToString("g")]</p>
-    }
-
-    @if (!string.IsNullOrEmpty(_summary.TruncationNote))
-    {
-        <BbAlert Variant="AlertVariant.Warning" Class="mb-4">
-            <BbAlertDescription>@_summary.TruncationNote</BbAlertDescription>
-        </BbAlert>
+        <div class="mt-3 grid grid-cols-2 gap-6 mb-4">
+            <div>
+                <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.PatientList.InclusionCriteria"]</span>
+                @if (InclusionCriteria.Count == 0)
+                {
+                    <p class="mt-1.5 text-sm text-muted-foreground">@Localizer["App.PatientList.NoCriteria"]</p>
+                }
+                else
+                {
+                    <ul class="mt-1.5 space-y-1 text-sm">
+                        @foreach (var criterion in InclusionCriteria)
+                        {
+                            <li class="flex items-start gap-2">
+                                <span class="criteria-bullet" aria-hidden="true"></span>
+                                <span>@criterion.DisplayText</span>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+            <div class="criteria-column-divider pl-6">
+                <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.PatientList.ExclusionCriteria"]</span>
+                @if (ExclusionCriteria.Count == 0)
+                {
+                    <p class="mt-1.5 text-sm text-muted-foreground">@Localizer["App.PatientList.NoCriteria"]</p>
+                }
+                else
+                {
+                    <ul class="mt-1.5 space-y-1 text-sm">
+                        @foreach (var criterion in ExclusionCriteria)
+                        {
+                            <li class="flex items-start gap-2">
+                                <span class="criteria-bullet" aria-hidden="true"></span>
+                                <span>@criterion.DisplayText</span>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
     }
 
     @if (_patients.Count == 0)
@@ -129,7 +161,8 @@ else if (_summary is not null)
     }
 
     <PatientDialog Patient="_selectedPatient" PatientChanged="p => _selectedPatient = p"
-                   Acronym="@_summary.StudyAcronym" TrialIdentifier="_summary.TrialIdentifier" CanEdit="_canEdit" />
+                   Acronym="@_summary.StudyAcronym" StudyTitle="@_summary.StudyTitle"
+                   TrialIdentifier="_summary.TrialIdentifier" CanEdit="_canEdit" />
 }
 
 @code {
@@ -153,6 +186,10 @@ else if (_summary is not null)
     private PatientListEntryDto? _selectedPatient;
 
     private int NewSuggestionWindowDays => NotificationOptionsAccessor.Value.NewSuggestionWindowDays;
+
+    private List<CriterionDefinitionDto> InclusionCriteria => _summary?.Criteria.Where(c => !c.Exclude).ToList() ?? [];
+
+    private List<CriterionDefinitionDto> ExclusionCriteria => _summary?.Criteria.Where(c => c.Exclude).ToList() ?? [];
 
     protected override async Task OnInitializedAsync()
     {

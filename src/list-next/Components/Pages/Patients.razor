@@ -64,7 +64,8 @@ else
     </BbDataTable>
 
     <PatientDialog Patient="_selectedPatient" PatientChanged="p => _selectedPatient = p"
-                   Acronym="@(_selectedPatient?.StudyAcronym ?? string.Empty)" TrialIdentifier="_selectedPatient?.TrialIdentifier" CanEdit="_canEditSelected" />
+                   Acronym="@(_selectedPatient?.StudyAcronym ?? string.Empty)" StudyTitle="@_selectedPatient?.StudyTitle"
+                   TrialIdentifier="_selectedPatient?.TrialIdentifier" CanEdit="_canEditSelected" />
 }
 
 @code {

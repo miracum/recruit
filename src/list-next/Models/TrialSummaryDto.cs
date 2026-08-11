@@ -13,13 +13,11 @@ public sealed class TrialSummaryDto
 
     public string? StudyDescription { get; init; }
 
+    /// <summary>The study's eligibility criteria (ResearchStudy.enrollment -> Group.characteristic), in Group.characteristic order.</summary>
+    public IReadOnlyList<CriterionDefinitionDto> Criteria { get; init; } = [];
+
     /// <summary>FHIR List.status: "current" or "retired".</summary>
     public required string ListStatus { get; init; }
-
-    public DateTimeOffset? LastUpdated { get; init; }
-
-    /// <summary>Set when List.note indicates the cohort was truncated at a size threshold.</summary>
-    public string? TruncationNote { get; init; }
 
     public int RecruitedCount { get; init; }
 

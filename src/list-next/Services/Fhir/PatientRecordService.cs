@@ -1,4 +1,5 @@
 using Hl7.Fhir.Model;
+using list.Models;
 using list.Resources;
 using Microsoft.Extensions.Localization;
 
@@ -109,6 +110,44 @@ public sealed class PatientRecordService(
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Per-criterion eligibility status for a patient within one trial - the Observations
+    /// EligibilityBundleBuilder emits per (patient, criterion), see
+    /// docs/trino/eligibility-criteria-design.md. `focus:ResearchStudy.identifier=` is a standard
+    /// chained reference search (no custom SearchParameter needed): it resolves the ResearchStudy
+    /// by its business identifier (TrialIdentifier) directly, without a separate id lookup.
+    /// </summary>
+    public async Task<IReadOnlyList<CriterionStatusDto>> GetEligibilityCriteriaStatusAsync(
+        string patientId, TrialIdentifier trialIdentifier, CancellationToken ct = default)
+    {
+        var client = clientFactory.CreateClient();
+
+        var query =
+            $"Observation?subject=Patient/{patientId}" +
+            $"&focus:ResearchStudy.identifier={Uri.EscapeDataString($"{trialIdentifier.System}|{trialIdentifier.Value}")}" +
+            $"&category={Uri.EscapeDataString($"{FhirConstants.SystemObservationCategory}|{FhirConstants.ObservationCategoryEligibilityAssessment}")}";
+
+        List<Resource> resources;
+        try
+        {
+            resources = await FhirBundleHelpers.GetAllPagesAsync(client, query, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to fetch eligibility criteria status for Patient/{PatientId}", patientId);
+            return [];
+        }
+
+        return resources.OfType<Observation>()
+            .Select(o => new CriterionStatusDto
+            {
+                DisplayText = o.Code?.Text ?? localizer["App.Common.Unknown"],
+                Met = o.Value is FhirBoolean { Value: { } met } ? met : null,
+            })
+            .OrderBy(c => c.DisplayText, StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     private static DateTimeOffset? ParseInstant(string? value) =>

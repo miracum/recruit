@@ -7,4 +7,7 @@ public record FhirSystems(
     String screeningListIdentifier,
     String screeningListCodeSystem,
     String screeningListStudyReferenceExtension,
-    String eligibilityObservationCategorySystem) {}
+    String eligibilityObservationCategorySystem,
+    String eligibilityObservationLibraryExtension,
+    String eligibilityObservationIdentifierSystem,
+    String researchStudyAcronymExtension) {}

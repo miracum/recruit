@@ -67,6 +67,8 @@ services:
       - "traefik.http.services.fhir.loadbalancer.server.port=8080"
       - "traefik.http.routers.fhir.rule=Host(`recruit-fhir-server.127.0.0.1.nip.io`)"
       - "traefik.http.routers.fhir.entrypoints=web"
+    ports:
+      - "127.0.0.1:8082:8080"
 
   fhir-db:
     image: docker.io/library/postgres:18.4@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a
@@ -294,14 +296,17 @@ services:
       SPRING_DATASOURCE_URL: "jdbc:trino://trino:8080/fhir/default"
       SPRING_DATASOURCE_USERNAME: "trino"
       SPRING_DATASOURCE_PASSWORD: ""
-      SQL_ON_FHIR_URL: "http://pathling:8080/fhir"
+      # Set this if you stand up a sql-on-fhir server (e.g. Pathling) separately.
+      SQL_ON_FHIR_URL: ""
     volumes:
       - type: tmpfs
         target: /tmp
         tmpfs:
           size: 1024
     depends_on:
-      wait-for-pathling:
+      # ensures the Delta tables are converted, uploaded, and registered in the Hive metastore -
+      # i.e. actually queryable via Trino - before this module starts polling for studies.
+      warehousekeeper:
         condition: service_completed_successfully
 
   jaeger:
@@ -495,8 +500,22 @@ services:
       fhir:
         condition: service_started
 
-  pathling:
-    image: ghcr.io/aehrc/pathling:2.0.1@sha256:f173027daaa5383597badb52bc294645b657f2ebc2a74d1a2304edce179185e0
+  convert-to-delta:
+    # Uses the pathling CLI (https://pathling.csiro.au) to convert the synthea bulk-export NDJSON
+    # files directly into Delta Lake tables in minio, at the
+    # s3://fhir/default/<ResourceType>.parquet/ layout warehousekeeper expects.
+    #
+    # Uses `pathling run -c` (a small inline script against the Pathling Python API) rather than
+    # `pathling convert -o s3a://...`: pathling 9.8.0's `convert` CLI builds the output path with
+    # Python's pathlib, which collapses the "//" after the URI scheme (s3a://fhir/... becomes
+    # s3a:/fhir/..., breaking bucket resolution - still present on pathling's main branch as of
+    # writing). The Python API called directly here (pathling.read/.write) passes the path
+    # straight through as a plain string and isn't affected.
+    #
+    # Requires a JDK 21+ runtime (pathling's library-runtime jar targets Java 21 class files);
+    # eclipse-temurin:21-jre provides that, and uv/uvx is installed via its official script since
+    # the image doesn't ship Python.
+    image: docker.io/library/eclipse-temurin:21-jre@sha256:8cef5fc7bebe421363ab543a2f4db5caf7d119d8db67d56b0f56c485d2de4d55
     profiles:
       - trino
     ipc: none
@@ -505,93 +524,33 @@ services:
     cap_drop:
       - ALL
     privileged: false
-    environment:
-      JAVA_TOOL_OPTIONS: |
-        -Xmx12g
-        -Xss64m
-        -XX:G1HeapRegionSize=32M
-        -XX:+ExplicitGCInvokesConcurrent
-        -XX:+ExitOnOutOfMemoryError
-        -XX:+HeapDumpOnOutOfMemoryError
-        -Duser.timezone=UTC
-        --add-exports=java.base/sun.nio.ch=ALL-UNNAMED
-        --add-opens=java.base/java.net=ALL-UNNAMED
-        --add-opens=java.base/java.nio=ALL-UNNAMED
-        --add-opens=java.base/java.util=ALL-UNNAMED
-        --add-opens=java.base/java.lang.invoke=ALL-UNNAMED
-      pathling.storage.warehouseUrl: s3a://fhir
-      pathling.storage.cacheDatasets: "false"
-      pathling.query.cacheResults: "false"
-      pathling.import.allowableSources: file:///tmp/import/
-      pathling.terminology.enabled: "false"
-      pathling.terminology.serverUrl: http://localhost:8080/i-dont-exist
-      fs.s3a.endpoint: "http://minio:9000"
-      fs.s3a.access.key: "admin"
-      # kics-scan ignore-line
-      fs.s3a.secret.key: "miniopass" # gitleaks:allow
-      fs.s3a.impl: "org.apache.hadoop.fs.s3a.S3AFileSystem"
-      fs.s3a.path.style.access: "true"
-      spark.sql.parquet.compression.codec: "zstd"
-      spark.io.compression.codec: "zstd"
-      parquet.compression.codec.zstd.level: "9"
-      spark.serializer: "org.apache.spark.serializer.KryoSerializer"
-      spark.master: "local[*]"
-      spark.driver.memory: 10g
-    ports:
-      - "127.0.0.1:8082:8080"
-      - "127.0.0.1:4040:4040"
+    restart: "no"
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        export PATH="$$HOME/.local/bin:$$PATH"
+        uvx pathling@9.8.0 \
+          --spark-conf spark.jars.packages=org.apache.hadoop:hadoop-aws:3.4.1 \
+          --spark-conf spark.hadoop.fs.s3a.endpoint=http://minio:9000 \
+          --spark-conf spark.hadoop.fs.s3a.access.key=admin \
+          --spark-conf spark.hadoop.fs.s3a.secret.key=miniopass \
+          --spark-conf spark.hadoop.fs.s3a.path.style.access=true \
+          --spark-conf spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem \
+          --spark-conf spark.hadoop.fs.s3a.connection.ssl.enabled=false \
+          run -c '
+        data_source = pathling.read.ndjson("/tmp/import")
+        data_source.write.delta("s3a://fhir/default", save_mode="overwrite")
+        '
     volumes:
       - ./synthea/bulk/fhir/:/tmp/import/:ro
     depends_on:
-      wait-for-minio:
+      create-bucket:
         condition: service_completed_successfully
-
-  wait-for-pathling:
-    image: docker.io/curlimages/curl:8.21.0@sha256:7c12af72ceb38b7432ab85e1a265cff6ae58e06f95539d539b654f2cfa64bb13
-    profiles:
-      - trino
-    ipc: none
-    security_opt:
-      - "no-new-privileges:true"
-    cap_drop:
-      - ALL
-    privileged: false
-    restart: "no"
-    environment:
-      PATHLING_URL: http://pathling:8080
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        until [ "$(curl -s -o /dev/null -L -w "%{http_code}" "$$PATHLING_URL/fhir/metadata")" == "200" ]; do
-            echo "$(date): Waiting for pathling server @ $$PATHLING_URL to be up";
-            sleep 5;
-        done;
-    depends_on:
-      pathling:
-        condition: service_started
-
-  import-resources:
-    image: docker.io/curlimages/curl:8.21.0@sha256:7c12af72ceb38b7432ab85e1a265cff6ae58e06f95539d539b654f2cfa64bb13
-    profiles:
-      - trino
-    ipc: none
-    security_opt:
-      - "no-new-privileges:true"
-    cap_drop:
-      - ALL
-    privileged: false
-    restart: "no"
-    environment:
-      PATHLING_URL: http://pathling:8080
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        curl --fail -X POST --header 'Content-Type: application/fhir+json' --data @/tmp/pathling-import-request.json --url 'http://pathling:8080/fhir/$$import'
-    volumes:
-      - ./pathling-import-request.json:/tmp/pathling-import-request.json:ro
-    depends_on:
-      wait-for-pathling:
-        condition: service_completed_successfully
+    deploy:
+      resources:
+        limits:
+          memory: 4G
 
   warehousekeeper:
     image: ghcr.io/bzkf/fhir-to-lakehouse:v1.13.16@sha256:6dc63a645b48523eb0696a2aff94072a70274b256b8698e5682765941f287c17
@@ -613,12 +572,12 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
-        python3 /opt/fhir-to-lakehouse/src/lakehousekeeper.py register --bucket-name=fhir --database-name-prefix=default/ --hive-metastore=thrift://hive-metastore:9083
-        python3 /opt/fhir-to-lakehouse/src/lakehousekeeper.py vacuum   --bucket-name=fhir --database-name-prefix=default/ --retention-hours=0 --dry-run=false --enforce-retention-duration=false
+        python3 /app/src/lakehousekeeper.py register --bucket-name=fhir --database-name-prefix=default/ --hive-metastore=thrift://hive-metastore:9083
+        python3 /app/src/lakehousekeeper.py vacuum   --bucket-name=fhir --database-name-prefix=default/ --retention-hours=0 --dry-run=false --enforce-retention-duration=false
     volumes:
       - ./config/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf:ro
     depends_on:
-      import-resources:
+      convert-to-delta:
         condition: service_completed_successfully
       hive-metastore:
         condition: service_started

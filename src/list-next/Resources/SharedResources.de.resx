@@ -273,6 +273,15 @@
   <data name="App.PatientList.ManageAccessLink" xml:space="preserve">
     <value>Zugriff verwalten</value>
   </data>
+  <data name="App.PatientList.InclusionCriteria" xml:space="preserve">
+    <value>Einschlusskriterien</value>
+  </data>
+  <data name="App.PatientList.ExclusionCriteria" xml:space="preserve">
+    <value>Ausschlusskriterien</value>
+  </data>
+  <data name="App.PatientList.NoCriteria" xml:space="preserve">
+    <value>Keine</value>
+  </data>
   <data name="App.PatientDialog.TabClinicalSummary" xml:space="preserve">
     <value>Klinische Zusammenfassung</value>
   </data>
@@ -371,6 +380,18 @@
   </data>
   <data name="App.Patient.Notes" xml:space="preserve">
     <value>Notizen</value>
+  </data>
+  <data name="App.Patient.EligibilityCriteria" xml:space="preserve">
+    <value>Einschlusskriterien</value>
+  </data>
+  <data name="App.Patient.CriterionMet" xml:space="preserve">
+    <value>Erfüllt</value>
+  </data>
+  <data name="App.Patient.CriterionNotMet" xml:space="preserve">
+    <value>Nicht erfüllt</value>
+  </data>
+  <data name="App.Patient.CriterionUnknown" xml:space="preserve">
+    <value>Unbekannt</value>
   </data>
   <data name="App.PatientDialog.TabDetails" xml:space="preserve">
     <value>Details</value>

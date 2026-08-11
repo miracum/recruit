@@ -26,6 +26,10 @@ public static class FhirConstants
     public const string SystemEligibilityCriteriaTypes = "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-criteria-types";
     public const string EligibilityCriteriaTypeTrinoSql = "trino-sql";
 
+    /// <summary>Matches query-sql-on-fhir's fhir.systems.eligibility-observation-category-system config default.</summary>
+    public const string SystemObservationCategory = "https://fhir.miracum.org/uc1/CodeSystem/observation-category";
+    public const string ObservationCategoryEligibilityAssessment = "eligibility-assessment";
+
     /// <summary>
     /// New system, minted by this app: keys a signed-in user's Practitioner by their OIDC "sub"
     /// (stable regardless of email/name changes). notify currently keys its own Practitioner

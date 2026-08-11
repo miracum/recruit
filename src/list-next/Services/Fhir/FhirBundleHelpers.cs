@@ -50,13 +50,14 @@ internal static class FhirBundleHelpers
     public static string? GetReferencedId(this ResourceReference? reference) =>
         reference?.Reference?.Split('/').LastOrDefault();
 
-    /// <summary>
-    /// The trial's stable business identifier - see TrialIdentifier for why this (not the FHIR id,
-    /// not the acronym) is the correct key for access-control purposes.
-    /// </summary>
     public static TrialIdentifier? GetTrialIdentifier(this ResearchStudy study) =>
         study.Identifier?.FirstOrDefault(i => !string.IsNullOrEmpty(i.System) && !string.IsNullOrEmpty(i.Value))
             is { System: { Length: > 0 } system, Value: { Length: > 0 } value }
             ? new TrialIdentifier(system, value)
             : null;
+
+    public static string? GetStudyAcronym(this ResearchStudy study) =>
+        study.GetStringExtension(FhirConstants.UrlStudyAcronym) is { Length: > 0 } acronym
+            ? acronym
+            : study.Title ?? study.Id;
 }

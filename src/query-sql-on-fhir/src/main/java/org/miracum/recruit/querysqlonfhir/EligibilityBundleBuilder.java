@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.ResearchSubject;
 import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.StringType;
 import org.miracum.recruit.querysqlonfhir.config.FhirSystems;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -142,7 +143,12 @@ public class EligibilityBundleBuilder {
     observation.setCode(new CodeableConcept().setText(outcome.displayText()));
     observation.setSubject(new Reference("Patient/" + patientId));
     observation.addFocus(researchStudyReference);
-    observation.addDerivedFrom(new Reference("Library/" + libraryId));
+    // Library isn't a valid Observation.derivedFrom target, so the criterion is referenced via a
+    // custom extension instead of a core element.
+    observation
+        .addExtension()
+        .setUrl(fhirSystems.eligibilityObservationLibraryExtension())
+        .setValue(new Reference("Library/" + libraryId));
     observation.setEffective(new DateTimeType(effectiveDate));
 
     if (outcome.met() == null) {
@@ -156,24 +162,34 @@ public class EligibilityBundleBuilder {
       observation.setValue(new BooleanType(outcome.met()));
     }
 
-    var conditionalUrl =
-        "Observation?subject=Patient/"
-            + patientId
-            + "&focus=ResearchStudy/"
-            + studyId
-            + "&derived-from=Library/"
-            + libraryId;
+    // The Library extension above isn't searchable without a custom SearchParameter, so identity
+    // for this Observation - and thus the conditional-update key - is expressed as a business
+    // identifier instead, keyed on the standard, always-searchable `identifier` parameter.
+    var identifierValue =
+        Hashing.sha256()
+            .hashString(
+                "patient=" + patientId + ";study=" + studyId + ";library=" + libraryId,
+                StandardCharsets.UTF_8)
+            .toString();
+    observation
+        .addIdentifier()
+        .setSystem(fhirSystems.eligibilityObservationIdentifierSystem())
+        .setValue(identifierValue);
 
     var request = new BundleEntryRequestComponent();
     if (useUpsertInsteadOfConditionalUpdate) {
-      var resourceId =
-          Hashing.sha256().hashString(conditionalUrl, StandardCharsets.UTF_8).toString();
-      observation.setId(resourceId);
+      observation.setId(identifierValue);
       request
           .setMethod(Bundle.HTTPVerb.PUT)
-          .setUrl(ResourceType.Observation.name() + "/" + resourceId);
+          .setUrl(ResourceType.Observation.name() + "/" + identifierValue);
     } else {
-      request.setMethod(Bundle.HTTPVerb.PUT).setUrl(conditionalUrl);
+      request
+          .setMethod(Bundle.HTTPVerb.PUT)
+          .setUrl(
+              "Observation?identifier="
+                  + fhirSystems.eligibilityObservationIdentifierSystem()
+                  + "|"
+                  + identifierValue);
     }
 
     bundle
@@ -211,7 +227,7 @@ public class EligibilityBundleBuilder {
     screeningList
         .addExtension()
         .setUrl(fhirSystems.screeningListStudyReferenceExtension())
-        .setValue(new Reference("ResearchStudy/" + studyId));
+        .setValue(new Reference("ResearchStudy/" + studyId).setDisplay(getStudyAcronym(study)));
 
     for (var result : results) {
       var patientId = result.patientId();
@@ -278,6 +294,15 @@ public class EligibilityBundleBuilder {
         .setRequest(request);
 
     return bundle;
+  }
+
+  private String getStudyAcronym(ResearchStudy study) {
+    var extension = study.getExtensionByUrl(fhirSystems.researchStudyAcronymExtension());
+    if (extension != null && extension.getValue() instanceof StringType acronym) {
+      return acronym.getValue();
+    }
+
+    return study.hasTitle() ? study.getTitle() : study.getIdElement().getIdPart();
   }
 
   private static <T> List<List<T>> partition(List<T> items, int size) {

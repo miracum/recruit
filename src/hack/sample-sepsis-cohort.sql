@@ -8,6 +8,6 @@ SELECT
         WHERE
             condition.subject.reference = CONCAT('Patient/', patient.id)
             AND condition_coding.system = 'http://snomed.info/sct'
-            AND condition_coding.code IN ('10509002')
+            AND condition_coding.code IN ('91302008')
     ) AS met
 FROM fhir.default.patient AS patient

@@ -213,16 +213,35 @@ public sealed class ResearchSubjectService(
             throw new FhirAccessException(localizer["App.Errors.StatusHistoryLoadFailed"], ex);
         }
 
-        return resources.OfType<ResearchSubject>()
+        var versions = resources.OfType<ResearchSubject>()
             .Where(rs => rs.Meta?.LastUpdated is not null)
-            .OrderByDescending(rs => rs.Meta!.LastUpdated)
             .Select(rs => new ResearchSubjectHistoryEntryDto
             {
                 Status = EnumUtility.GetLiteral(rs.Status) ?? "candidate",
                 LastUpdated = rs.Meta!.LastUpdated!.Value,
                 VersionId = int.TryParse(rs.Meta.VersionId, out var v) ? v : 0,
             })
+            .OrderBy(h => h.VersionId)
             .ToList();
+
+        // Every PATCH - including a note-only one - creates a new ResearchSubject version, even
+        // when /status itself is untouched. Only surface an entry where the status actually
+        // differs from the version right before it, so a note-only edit doesn't also show up as a
+        // spurious "status changed to X" (X being whatever it already was) alongside the real
+        // "note added" entry at the same timestamp.
+        var changes = new List<ResearchSubjectHistoryEntryDto>();
+        string? previousStatus = null;
+        foreach (var version in versions)
+        {
+            if (version.Status != previousStatus)
+            {
+                changes.Add(version);
+            }
+
+            previousStatus = version.Status;
+        }
+
+        return changes.OrderByDescending(h => h.LastUpdated).ToList();
     }
 
     /// <summary>Status changes and added notes merged into one newest-first timeline, for the patient history view.</summary>

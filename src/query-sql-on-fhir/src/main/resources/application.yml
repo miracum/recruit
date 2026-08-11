@@ -21,6 +21,17 @@ fhir:
     # custom, non-standard code identifying the synthetic per-criterion eligibility Observations
     # this module creates, distinguishing them from genuine clinical Observations elsewhere.
     eligibility-observation-category-system: "https://fhir.miracum.org/uc1/CodeSystem/observation-category"
+    # Observation.derivedFrom doesn't accept Library as a target type, so the criterion Library is
+    # referenced via this extension instead; Observation.focus carries the ResearchStudy.
+    eligibility-observation-library-extension: "https://fhir.miracum.org/uc1/StructureDefinition/derivedFromLibrary"
+    # business identifier used as the conditional-update key for per-criterion Observations, since
+    # the library extension above isn't a searchable parameter without a custom SearchParameter
+    # registered on the FHIR server - identifier is a standard, always-searchable parameter instead.
+    eligibility-observation-identifier-system: "https://fhir.miracum.org/uc1/NamingSystem/eligibilityObservationId"
+    # read off ResearchStudy to populate the belongsToStudy extension's Reference.display on the
+    # screening List - list-next reads the trial's acronym from that display text, not by
+    # resolving the ResearchStudy itself (see ScreeningListService.cs).
+    research-study-acronym-extension: "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym"
 
 # base URL of a sql-on-fhir server (e.g. Pathling) implementing the $sqlquery-run operation.
 # only required if any of the polled SQLQuery Library resources depend on ViewDefinitions

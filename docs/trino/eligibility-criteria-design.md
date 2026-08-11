@@ -233,11 +233,12 @@ nothing in the UI needs to explain a checklist for a patient nobody reviews.
 {
   "resourceType": "Observation",
   "status": "final",
-  "category": [{ "coding": [{ "system": "https://recruit.miracum.org/fhir/CodeSystem/observation-category", "code": "eligibility-assessment" }] }],
+  "identifier": [{ "system": "https://fhir.miracum.org/uc1/NamingSystem/eligibilityObservationId", "value": "<sha256 of patient+study+library>" }],
+  "extension": [{ "url": "https://fhir.miracum.org/uc1/StructureDefinition/derivedFromLibrary", "valueReference": { "reference": "Library/trial-042-age-min-18" } }],
+  "category": [{ "coding": [{ "system": "https://fhir.miracum.org/uc1/CodeSystem/observation-category", "code": "eligibility-assessment" }] }],
   "code": { "text": "Age >= 18 years" },
   "subject": { "reference": "Patient/123" },
   "focus": [{ "reference": "ResearchStudy/trial-042" }],
-  "derivedFrom": [{ "reference": "Library/trial-042-age-min-18" }],
   "valueBoolean": true,
   "effectiveDateTime": "2026-08-10T09:00:00Z"
 }
@@ -247,11 +248,12 @@ nothing in the UI needs to explain a checklist for a patient nobody reviews.
 {
   "resourceType": "Observation",
   "status": "final",
-  "category": [{ "coding": [{ "system": "https://recruit.miracum.org/fhir/CodeSystem/observation-category", "code": "eligibility-assessment" }] }],
+  "identifier": [{ "system": "https://fhir.miracum.org/uc1/NamingSystem/eligibilityObservationId", "value": "<sha256 of patient+study+library>" }],
+  "extension": [{ "url": "https://fhir.miracum.org/uc1/StructureDefinition/derivedFromLibrary", "valueReference": { "reference": "Library/trial-042-hba1c-elevated" } }],
+  "category": [{ "coding": [{ "system": "https://fhir.miracum.org/uc1/CodeSystem/observation-category", "code": "eligibility-assessment" }] }],
   "code": { "text": "HbA1c > 7.0%" },
   "subject": { "reference": "Patient/123" },
   "focus": [{ "reference": "ResearchStudy/trial-042" }],
-  "derivedFrom": [{ "reference": "Library/trial-042-hba1c-elevated" }],
   "dataAbsentReason": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/data-absent-reason", "code": "unknown" }] },
   "effectiveDateTime": "2026-08-10T09:00:00Z"
 }
@@ -261,11 +263,12 @@ nothing in the UI needs to explain a checklist for a patient nobody reviews.
 {
   "resourceType": "Observation",
   "status": "final",
-  "category": [{ "coding": [{ "system": "https://recruit.miracum.org/fhir/CodeSystem/observation-category", "code": "eligibility-assessment" }] }],
+  "identifier": [{ "system": "https://fhir.miracum.org/uc1/NamingSystem/eligibilityObservationId", "value": "<sha256 of patient+study+library>" }],
+  "extension": [{ "url": "https://fhir.miracum.org/uc1/StructureDefinition/derivedFromLibrary", "valueReference": { "reference": "Library/trial-042-no-prior-chemo" } }],
+  "category": [{ "coding": [{ "system": "https://fhir.miracum.org/uc1/CodeSystem/observation-category", "code": "eligibility-assessment" }] }],
   "code": { "text": "No prior chemotherapy" },
   "subject": { "reference": "Patient/123" },
   "focus": [{ "reference": "ResearchStudy/trial-042" }],
-  "derivedFrom": [{ "reference": "Library/trial-042-no-prior-chemo" }],
   "valueBoolean": false,
   "effectiveDateTime": "2026-08-10T09:00:00Z"
 }
@@ -282,9 +285,25 @@ Notes:
 - `category = eligibility-assessment` is a custom, non-standard code -
   deliberately, to keep these synthetic/derived Observations distinguishable
   from genuine clinical Observations elsewhere in the app's data.
-- `derivedFrom` -> `Library` is the computable join key for "all Observations
-  for criterion X" (e.g. in a SQL-on-FHIR ViewDefinition or a `list-next`
-  query) - `code.text` is for display only.
+- `focus` stays `ResearchStudy`-only, matching how it's already used on other
+  resources in this app (context/scope, not the assessed entity). The
+  criterion `Library` isn't a valid target for `Observation.derivedFrom`
+  (HAPI rejects it: only
+  `DocumentReference | ImagingStudy | ImagingSelection | QuestionnaireResponse
+  | Observation` are allowed there), so it's referenced via the
+  `derivedFromLibrary` extension instead - a plain `valueReference`, not
+  `valueCanonical`, since `Library` is already referenced by relative
+  reference elsewhere in this design (`Group.characteristic.valueReference`)
+  and doesn't carry a canonical `.url`.
+- `identifier` (a SHA-256 hash of `patient` + `study` + `library`) is the
+  conditional-update key for this Observation, not `focus`/`derived-from`
+  search parameters - the `derivedFromLibrary` extension's value isn't
+  searchable without a custom `SearchParameter` registered on the FHIR
+  server, but `identifier` is a standard, always-searchable parameter on
+  every resource, so no server-side setup is needed. `code.text` is for
+  display only; `identifier` (or a resolved `derivedFromLibrary`) is the
+  computable join key for "all Observations for criterion X" (e.g. in a
+  SQL-on-FHIR ViewDefinition or a `list-next` query).
 
 ## Bundle size at scale
 
@@ -309,7 +328,7 @@ the candidate set was computed.
   - A read method (e.g. on `ResearchSubjectService`, or a new
     `EligibilityService`) querying
     `Observation?subject=Patient/{id}&focus=ResearchStudy/{studyId}&category=eligibility-assessment`,
-    grouped/sorted by `derivedFrom`.
+    grouped/sorted by resolving each entry's `derivedFromLibrary` extension.
   - A UI surface for the per-criterion checklist - candidate slot: a new tab
     on `PatientDialog.razor`, or a header strip above the existing Clinical
     tab. Not yet decided.

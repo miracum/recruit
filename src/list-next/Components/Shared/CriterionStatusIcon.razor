@@ -1,0 +1,33 @@
+@inject IStringLocalizer<SharedResources> Localizer
+
+<span class="@IconColorClass" title="@Localizer[LabelKey]" aria-label="@Localizer[LabelKey]">
+    <LucideIcon Name="@IconName" Size="16" />
+</span>
+
+@code {
+    [Parameter, EditorRequired]
+    public bool? Met { get; set; }
+
+    private string IconName => Met switch
+    {
+        true => "circle-check",
+        false => "circle-x",
+        null => "circle-question-mark",
+    };
+
+    // Lucide icons render with stroke="currentColor", so coloring only needs a CSS `color` on this
+    // wrapping span (see app.css) rather than a Class param on LucideIcon itself.
+    private string IconColorClass => Met switch
+    {
+        true => "criterion-icon-met",
+        false => "criterion-icon-not-met",
+        null => "criterion-icon-unknown",
+    };
+
+    private string LabelKey => Met switch
+    {
+        true => "App.Patient.CriterionMet",
+        false => "App.Patient.CriterionNotMet",
+        null => "App.Patient.CriterionUnknown",
+    };
+}
