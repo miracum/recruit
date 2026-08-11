@@ -30,6 +30,8 @@ DISABLE_LINTERS:
   # done by csharpier
   - CSHARP_DOTNET_FORMAT
   - REPOSITORY_KINGFISHER
+  # redundant with trivy
+  - REPOSITORY_OSV_SCANNER
 
 SHOW_ELAPSED_TIME: true
 FILEIO_REPORTER: false
