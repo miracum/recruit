@@ -37,6 +37,9 @@ FILEIO_REPORTER: false
 
 BASH_SHELLCHECK_FILTER_REGEX_EXCLUDE: (fhir/ig)
 
+# vendored third-party library, not project source - don't reformat it away from upstream
+CSS_STYLELINT_FILTER_REGEX_EXCLUDE: (wwwroot/lib/)
+
 BASH_SHFMT_ARGUMENTS:
   - "--indent=2"
 
