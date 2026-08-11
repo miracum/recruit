@@ -57,6 +57,9 @@ class SqlQueryExecutorTest {
 
   /** {@link Map#of} rejects null values, but a criterion's "is_met" column is legitimately null. */
   private static Map<String, Object> row(Object... keyValuePairs) {
+    if (keyValuePairs.length % 2 != 0) {
+      throw new IllegalArgumentException("keyValuePairs must have an even number of elements");
+    }
     var row = new HashMap<String, Object>();
     for (var i = 0; i < keyValuePairs.length; i += 2) {
       row.put((String) keyValuePairs[i], keyValuePairs[i + 1]);
