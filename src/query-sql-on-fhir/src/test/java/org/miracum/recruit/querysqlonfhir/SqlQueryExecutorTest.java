@@ -24,6 +24,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 class SqlQueryExecutorTest {
 
+  private static final String SQL_AGE =
+      "SELECT patient_id, is_met, CAST(NULL AS BOOLEAN) AS is_indeterminate, "
+          + "CAST(NULL AS VARCHAR) AS result_note FROM age";
+  private static final String SQL_CHEMO =
+      "SELECT patient_id, is_met, CAST(NULL AS BOOLEAN) AS is_indeterminate, "
+          + "CAST(NULL AS VARCHAR) AS result_note FROM chemo";
+
   private final JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
   private final IGenericClient sqlOnFhirClient = mock(IGenericClient.class, RETURNS_DEEP_STUBS);
 
@@ -48,7 +55,7 @@ class SqlQueryExecutorTest {
     return library;
   }
 
-  /** {@link Map#of} rejects null values, but a criterion's "met" column is legitimately null. */
+  /** {@link Map#of} rejects null values, but a criterion's "is_met" column is legitimately null. */
   private static Map<String, Object> row(Object... keyValuePairs) {
     var row = new HashMap<String, Object>();
     for (var i = 0; i < keyValuePairs.length; i += 2) {
@@ -93,18 +100,27 @@ class SqlQueryExecutorTest {
 
   @Test
   void evaluateEligibility_withAllTrinoDirectCriteria_runsOneMergedQuery() {
-    var ageCriterion =
-        new EligibilityCriterion(
-            trinoLibrary("SELECT patient_id, met FROM age"), "Age >= 18", false);
+    var ageCriterion = new EligibilityCriterion(trinoLibrary(SQL_AGE), "Age >= 18", false);
     var chemoCriterion =
-        new EligibilityCriterion(
-            trinoLibrary("SELECT patient_id, met FROM chemo"), "No prior chemo", true);
+        new EligibilityCriterion(trinoLibrary(SQL_CHEMO), "No prior chemo", true);
 
     when(jdbcTemplate.queryForList(anyString()))
         .thenReturn(
             List.of(
-                row("patient_id", "pat-1", "crit_0_met", true, "crit_1_met", true),
-                row("patient_id", "pat-2", "crit_0_met", true, "crit_1_met", null)));
+                row(
+                    "patient_id",
+                    "pat-1",
+                    "crit_0_is_met",
+                    true,
+                    "crit_1_is_met",
+                    true),
+                row(
+                    "patient_id",
+                    "pat-2",
+                    "crit_0_is_met",
+                    true,
+                    "crit_1_is_met",
+                    null)));
 
     var results = sut.evaluateEligibility(List.of(ageCriterion, chemoCriterion));
 
@@ -125,12 +141,8 @@ class SqlQueryExecutorTest {
 
   @Test
   void evaluateEligibility_generatesMergedQueryWithOneCteAndAppliesExcludeNegation() {
-    var include =
-        new EligibilityCriterion(
-            trinoLibrary("SELECT patient_id, met FROM age"), "Age >= 18", false);
-    var exclude =
-        new EligibilityCriterion(
-            trinoLibrary("SELECT patient_id, met FROM chemo"), "No prior chemo", true);
+    var include = new EligibilityCriterion(trinoLibrary(SQL_AGE), "Age >= 18", false);
+    var exclude = new EligibilityCriterion(trinoLibrary(SQL_CHEMO), "No prior chemo", true);
 
     when(jdbcTemplate.queryForList(anyString())).thenReturn(List.of());
 
@@ -140,37 +152,66 @@ class SqlQueryExecutorTest {
 
     var sql = captor.getValue();
     assertThat(sql)
-        .contains("WITH crit_0 AS (\nSELECT patient_id, met FROM age\n)")
-        .contains("crit_1 AS (\nSELECT patient_id, met FROM chemo\n)")
+        .contains("WITH crit_0 AS (\n" + SQL_AGE + "\n)")
+        .contains("crit_1 AS (\n" + SQL_CHEMO + "\n)")
         .contains("LEFT JOIN crit_1 ON crit_1.patient_id = crit_0.patient_id")
-        .contains("(crit_0.met) AS crit_0_met")
-        .contains("(NOT crit_1.met) AS crit_1_met")
-        .contains("WHERE ((crit_0.met) AND (NOT crit_1.met)) IS DISTINCT FROM FALSE");
+        .contains("(crit_0.is_met) AS crit_0_is_met")
+        .contains("crit_0.is_indeterminate AS crit_0_is_indeterminate")
+        .contains("crit_0.result_note AS crit_0_result_note")
+        .contains("(NOT crit_1.is_met) AS crit_1_is_met")
+        .contains("crit_1.is_indeterminate AS crit_1_is_indeterminate")
+        .contains("crit_1.result_note AS crit_1_result_note")
+        .contains("WHERE ((crit_0.is_met) AND (NOT crit_1.is_met)) IS DISTINCT FROM FALSE");
+  }
+
+  @Test
+  void evaluateEligibility_carriesIndeterminateAndNoteThroughWithoutAffectingOverallMet() {
+    var ageCriterion = new EligibilityCriterion(trinoLibrary(SQL_AGE), "Age >= 18", false);
+
+    when(jdbcTemplate.queryForList(anyString()))
+        .thenReturn(
+            List.of(
+                row(
+                    "patient_id",
+                    "pat-1",
+                    "crit_0_is_met",
+                    null,
+                    "crit_0_is_indeterminate",
+                    true,
+                    "crit_0_result_note",
+                    "conflicting lab results")));
+
+    var results = sut.evaluateEligibility(List.of(ageCriterion));
+
+    assertThat(results).hasSize(1);
+    var pat1 = results.get(0);
+    assertThat(pat1.overallMet()).isNull();
+    assertThat(pat1.criteria()).hasSize(1);
+    assertThat(pat1.criteria().get(0).met()).isNull();
+    assertThat(pat1.criteria().get(0).indeterminate()).isTrue();
+    assertThat(pat1.criteria().get(0).note()).isEqualTo("conflicting lab results");
   }
 
   @Test
   void evaluateEligibility_withMixOfTrinoAndSqlOnFhirCriteria_mergesInApplicationMemory() {
-    var trinoIncluded =
-        new EligibilityCriterion(
-            trinoLibrary("SELECT patient_id, met FROM age"), "Age >= 18", false);
+    var trinoIncluded = new EligibilityCriterion(trinoLibrary(SQL_AGE), "Age >= 18", false);
     var delegatedExcluded =
-        new EligibilityCriterion(
-            sqlOnFhirLibrary("SELECT patient_id, met FROM chemo"), "No prior chemo", true);
+        new EligibilityCriterion(sqlOnFhirLibrary(SQL_CHEMO), "No prior chemo", true);
 
     when(jdbcTemplate.queryForList(contains("age")))
         .thenReturn(
             List.of(
-                row("patient_id", "pat-1", "met", true),
-                row("patient_id", "pat-2", "met", true),
-                row("patient_id", "pat-3", "met", true)));
+                row("patient_id", "pat-1", "is_met", true),
+                row("patient_id", "pat-2", "is_met", true),
+                row("patient_id", "pat-3", "is_met", true)));
 
     stubSqlOnFhirResponse(
         parametersWithRows(
             List.of(
                 // pat-1: no prior chemo -> raw false -> excluded=true negates to met=true
-                row("patient_id", "pat-1", "met", false),
+                row("patient_id", "pat-1", "is_met", false),
                 // pat-2: had chemo -> raw true -> negates to met=false -> overall excluded
-                row("patient_id", "pat-2", "met", true)
+                row("patient_id", "pat-2", "is_met", true)
                 // pat-3 missing entirely from the delegated result -> unknown
                 )));
 
@@ -191,15 +232,13 @@ class SqlQueryExecutorTest {
 
   @Test
   void evaluateEligibility_withSingleSqlOnFhirDelegatedCriterion_stillFiltersDefiniteNonMatches() {
-    var criterion =
-        new EligibilityCriterion(
-            sqlOnFhirLibrary("SELECT patient_id, met FROM age"), "Age >= 18", false);
+    var criterion = new EligibilityCriterion(sqlOnFhirLibrary(SQL_AGE), "Age >= 18", false);
 
     stubSqlOnFhirResponse(
         parametersWithRows(
             List.of(
-                row("patient_id", "pat-1", "met", true),
-                row("patient_id", "pat-2", "met", false))));
+                row("patient_id", "pat-1", "is_met", true),
+                row("patient_id", "pat-2", "is_met", false))));
 
     var results = sut.evaluateEligibility(List.of(criterion));
 

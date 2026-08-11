@@ -31,6 +31,17 @@ public static class FhirConstants
     public const string ObservationCategoryEligibilityAssessment = "eligibility-assessment";
 
     /// <summary>
+    /// SNOMED CT "Yes/No/Unknown/Indeterminate (qualifier value)" codes used for the eligibility
+    /// Observation's valueCodeableConcept - see EligibilityBundleBuilder.java's buildResultValue.
+    /// </summary>
+    public const string SystemSnomed = "http://snomed.info/sct";
+
+    public const string SnomedCodeYes = "373066001";
+    public const string SnomedCodeNo = "373067005";
+    public const string SnomedCodeUnknown = "261665006";
+    public const string SnomedCodeIndeterminate = "82334004";
+
+    /// <summary>
     /// New system, minted by this app: keys a signed-in user's Practitioner by their OIDC "sub"
     /// (stable regardless of email/name changes). notify currently keys its own Practitioner
     /// resources by email under a different system (fhir.systems.subscriber-id,

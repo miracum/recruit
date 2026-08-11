@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -41,9 +40,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class EligibilityBundleBuilder {
 
-  private static final String DATA_ABSENT_REASON_SYSTEM =
-      "http://terminology.hl7.org/CodeSystem/data-absent-reason";
-  private static final String DATA_ABSENT_REASON_UNKNOWN = "unknown";
+  private static final String SNOMED_SYSTEM = "http://snomed.info/sct";
+  private static final String SNOMED_CODE_YES = "373066001";
+  private static final String SNOMED_DISPLAY_YES = "Yes";
+  private static final String SNOMED_CODE_NO = "373067005";
+  private static final String SNOMED_DISPLAY_NO = "No";
+  private static final String SNOMED_CODE_UNKNOWN = "261665006";
+  private static final String SNOMED_DISPLAY_UNKNOWN = "Unknown";
+  private static final String SNOMED_CODE_INDETERMINATE = "82334004";
+  private static final String SNOMED_DISPLAY_INDETERMINATE = "Indeterminate";
   private static final String ELIGIBILITY_ASSESSMENT_CODE = "eligibility-assessment";
   private static final String SCREENING_RECOMMENDATIONS_CODE = "screening-recommendations";
 
@@ -150,17 +155,7 @@ public class EligibilityBundleBuilder {
         .setUrl(fhirSystems.eligibilityObservationLibraryExtension())
         .setValue(new Reference("Library/" + libraryId));
     observation.setEffective(new DateTimeType(effectiveDate));
-
-    if (outcome.met() == null) {
-      observation.setDataAbsentReason(
-          new CodeableConcept()
-              .addCoding(
-                  new Coding()
-                      .setSystem(DATA_ABSENT_REASON_SYSTEM)
-                      .setCode(DATA_ABSENT_REASON_UNKNOWN)));
-    } else {
-      observation.setValue(new BooleanType(outcome.met()));
-    }
+    observation.setValue(buildResultValue(outcome));
 
     // The Library extension above isn't searchable without a custom SearchParameter, so identity
     // for this Observation - and thus the conditional-update key - is expressed as a business
@@ -294,6 +289,46 @@ public class EligibilityBundleBuilder {
         .setRequest(request);
 
     return bundle;
+  }
+
+  /**
+   * Maps a criterion outcome to a SNOMED CT "Yes/No/Unknown/Indeterminate (qualifier value)"
+   * coding rather than {@code valueBoolean}/{@code dataAbsentReason}: {@code met=null} splits into
+   * two genuinely different situations - {@code indeterminate=false} means the underlying data was
+   * simply missing, {@code indeterminate=true} means the criterion's SQL was evaluated but reached
+   * an inconclusive result - and only a real value (not an absent one qualified by a reason) can
+   * carry that distinction. Both still count as "unresolved" for merge purposes (see
+   * PatientEligibilityResult#overallMet) - this only changes how the result is displayed.
+   *
+   * <p>When the criterion's SQL provided a {@code result_note}, it's set as this CodeableConcept's
+   * {@code text} - supplementing, not replacing, the coding's own {@code display} - so a criterion
+   * author can explain e.g. *why* a result is indeterminate.
+   */
+  private CodeableConcept buildResultValue(CriterionOutcome outcome) {
+    String code;
+    String display;
+    if (Boolean.TRUE.equals(outcome.met())) {
+      code = SNOMED_CODE_YES;
+      display = SNOMED_DISPLAY_YES;
+    } else if (Boolean.FALSE.equals(outcome.met())) {
+      code = SNOMED_CODE_NO;
+      display = SNOMED_DISPLAY_NO;
+    } else if (outcome.indeterminate()) {
+      code = SNOMED_CODE_INDETERMINATE;
+      display = SNOMED_DISPLAY_INDETERMINATE;
+    } else {
+      code = SNOMED_CODE_UNKNOWN;
+      display = SNOMED_DISPLAY_UNKNOWN;
+    }
+
+    var value =
+        new CodeableConcept()
+            .addCoding(new Coding().setSystem(SNOMED_SYSTEM).setCode(code).setDisplay(display));
+    if (outcome.note() != null && !outcome.note().isBlank()) {
+      value.setText(outcome.note());
+    }
+
+    return value;
   }
 
   private String getStudyAcronym(ResearchStudy study) {

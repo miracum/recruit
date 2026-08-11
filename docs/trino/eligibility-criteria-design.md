@@ -19,11 +19,15 @@ does or doesn't satisfy - only the collapsed pass/fail outcome of the whole
 query.
 
 The goal of this design is to let `list-next` show, per patient, a
-per-criterion breakdown with three states:
+per-criterion breakdown with four states:
 
 - **met** - the criterion is satisfied
 - **not met** - the criterion is definitively not satisfied
 - **unknown** - the data needed to evaluate the criterion doesn't exist
+- **indeterminate** - the criterion's logic was evaluated, but the result is
+  inconclusive (as opposed to *unknown*, where evaluation couldn't even be
+  attempted). Both behave identically for merge purposes (see below) - the
+  distinction only matters for display.
 
 ## Alternatives considered and rejected
 
@@ -117,37 +121,65 @@ Notes:
 
 ## Library SQL contract
 
-Every criterion `Library` must contain SQL returning exactly two columns,
+Every criterion `Library` must contain SQL returning exactly four columns,
 covering the **full patient population** (so that "no matching data" reliably
 produces `NULL`, not a missing row):
+
+- `patient_id`
+- `is_met` (nullable boolean) - the raw, un-negated predicate
+- `is_indeterminate` (boolean) - only meaningful when `is_met IS NULL`;
+  distinguishes "evaluated but inconclusive" from plain "unknown" (missing
+  data). Criteria that never produce an indeterminate result just select
+  `CAST(NULL AS BOOLEAN) AS is_indeterminate` - a fixed `FALSE` also works,
+  but `NULL` reads more honestly as "this axis doesn't apply here."
+- `result_note` (nullable string) - an optional free-text explanation, carried
+  through unchanged to the resulting `Observation.value.text` (see below).
+  Most useful alongside `is_indeterminate=true` (explaining *why*), but not
+  limited to it. Criteria that never need it select
+  `CAST(NULL AS VARCHAR) AS result_note`.
 
 ```sql
 -- crit-age-min-18
 SELECT p.id AS patient_id,
        CASE WHEN p.birth_date IS NULL THEN NULL
             ELSE date_diff('year', date(p.birth_date), current_date) >= 18
-       END AS met
+       END AS is_met,
+       CAST(NULL AS BOOLEAN) AS is_indeterminate,
+       CAST(NULL AS VARCHAR) AS result_note
 FROM fhir.default.patient p
 ```
 
 ```sql
--- crit-hba1c-elevated
+-- crit-hba1c-elevated (indeterminate example: more than one conflicting result)
 SELECT p.id AS patient_id,
-       CASE WHEN NOT EXISTS (
-                SELECT 1 FROM fhir.default.observation o
-                WHERE o.subject_reference = p.id AND o.code_coding_code = '4548-4' -- LOINC HbA1c
-            ) THEN NULL
-            ELSE (SELECT max(o.value_quantity_value) FROM fhir.default.observation o
-                  WHERE o.subject_reference = p.id AND o.code_coding_code = '4548-4') > 7.0
-       END AS met
-FROM fhir.default.patient p
+       CASE WHEN result_count = 0 THEN NULL
+            WHEN result_count > 1 AND max_value > 7.0 <> (min_value > 7.0) THEN NULL
+            ELSE max_value > 7.0
+       END AS is_met,
+       (result_count > 1 AND max_value > 7.0 <> (min_value > 7.0)) AS is_indeterminate,
+       CASE WHEN result_count > 1 AND max_value > 7.0 <> (min_value > 7.0)
+            THEN 'Conflicting HbA1c results: ' || CAST(min_value AS VARCHAR) ||
+                 '-' || CAST(max_value AS VARCHAR)
+       END AS result_note
+FROM (
+    SELECT p.id,
+           count(o.value_quantity_value) AS result_count,
+           max(o.value_quantity_value) AS max_value,
+           min(o.value_quantity_value) AS min_value
+    FROM fhir.default.patient p
+    LEFT JOIN fhir.default.observation o
+        ON o.subject_reference = p.id AND o.code_coding_code = '4548-4' -- LOINC HbA1c
+    GROUP BY p.id
+) p
 ```
 
 ```sql
 -- crit-no-prior-chemo (raw predicate; NOT pre-negated - exclude=true handles that)
 SELECT p.id AS patient_id,
        EXISTS (SELECT 1 FROM fhir.default.procedure pr
-               WHERE pr.subject_reference = p.id AND pr.code_coding_code = '367336001') AS has_chemo
+               WHERE pr.subject_reference = p.id AND pr.code_coding_code = '367336001') AS is_met,
+       CAST(NULL AS BOOLEAN) AS is_indeterminate,
+       CAST(NULL AS VARCHAR) AS result_note
 FROM fhir.default.patient p
 ```
 
@@ -177,15 +209,19 @@ WITH crit_0 AS ( <library-0-sql> ),   -- age-min-18, exclude=false
      crit_2 AS ( <library-2-sql> )    -- raw "has_chemo" predicate, exclude=true
 SELECT
     p.id AS patient_id,
-    c0.met AS crit_age_min_18,
-    c1.met AS crit_hba1c_elevated,
-    NOT c2.met AS crit_no_prior_chemo,        -- exclude negation applied here, once, generically
-    (c0.met AND c1.met AND NOT c2.met) AS overall_met
+    c0.is_met AS crit_age_min_18,
+    c1.is_met AS crit_hba1c_elevated,
+    NOT c2.is_met AS crit_no_prior_chemo,     -- exclude negation applied here, once, generically
+    (c0.is_met AND c1.is_met AND NOT c2.is_met) AS overall_met,
+    -- is_indeterminate/result_note are carried through per criterion the same way, just never
+    -- referenced in the AND/WHERE below - they're pure passthrough for display purposes.
+    c0.is_indeterminate AS crit_age_min_18_indeterminate,
+    c0.result_note AS crit_age_min_18_note
 FROM fhir.default.patient p
 LEFT JOIN crit_0 c0 ON c0.patient_id = p.id
 LEFT JOIN crit_1 c1 ON c1.patient_id = p.id
 LEFT JOIN crit_2 c2 ON c2.patient_id = p.id
-WHERE (c0.met AND c1.met AND NOT c2.met) IS DISTINCT FROM FALSE
+WHERE (c0.is_met AND c1.is_met AND NOT c2.is_met) IS DISTINCT FROM FALSE
 ```
 
 Two things this relies on that are native SQL behavior, not custom logic:
@@ -201,10 +237,11 @@ Two things this relies on that are native SQL behavior, not custom logic:
   outright.
 
 This keeps each `Library`'s SQL independently authored, standalone, and
-reusable (it still only needs to satisfy the two-column
-`(patient_id, met)` contract to run alone) - the wrapper is mechanically
-generated from `Group.characteristic`, not hand-written per study, so this
-doesn't reintroduce fragile per-study SQL composition.
+reusable (it still only needs to satisfy the four-column
+`(patient_id, is_met, is_indeterminate, result_note)` contract to run alone) -
+the wrapper is mechanically generated from `Group.characteristic`, not
+hand-written per study, so this doesn't reintroduce fragile per-study SQL
+composition.
 
 The query module's Java code shrinks to: loop over `Group.characteristic`,
 template each `Library`'s SQL into a `crit_N` CTE plus one `LEFT JOIN` and
@@ -239,22 +276,7 @@ nothing in the UI needs to explain a checklist for a patient nobody reviews.
   "code": { "text": "Age >= 18 years" },
   "subject": { "reference": "Patient/123" },
   "focus": [{ "reference": "ResearchStudy/trial-042" }],
-  "valueBoolean": true,
-  "effectiveDateTime": "2026-08-10T09:00:00Z"
-}
-```
-
-```json
-{
-  "resourceType": "Observation",
-  "status": "final",
-  "identifier": [{ "system": "https://fhir.miracum.org/uc1/NamingSystem/eligibilityObservationId", "value": "<sha256 of patient+study+library>" }],
-  "extension": [{ "url": "https://fhir.miracum.org/uc1/StructureDefinition/derivedFromLibrary", "valueReference": { "reference": "Library/trial-042-hba1c-elevated" } }],
-  "category": [{ "coding": [{ "system": "https://fhir.miracum.org/uc1/CodeSystem/observation-category", "code": "eligibility-assessment" }] }],
-  "code": { "text": "HbA1c > 7.0%" },
-  "subject": { "reference": "Patient/123" },
-  "focus": [{ "reference": "ResearchStudy/trial-042" }],
-  "dataAbsentReason": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/data-absent-reason", "code": "unknown" }] },
+  "valueCodeableConcept": { "coding": [{ "system": "http://snomed.info/sct", "code": "373066001", "display": "Yes" }] },
   "effectiveDateTime": "2026-08-10T09:00:00Z"
 }
 ```
@@ -269,19 +291,64 @@ nothing in the UI needs to explain a checklist for a patient nobody reviews.
   "code": { "text": "No prior chemotherapy" },
   "subject": { "reference": "Patient/123" },
   "focus": [{ "reference": "ResearchStudy/trial-042" }],
-  "valueBoolean": false,
+  "valueCodeableConcept": { "coding": [{ "system": "http://snomed.info/sct", "code": "373067005", "display": "No" }] },
+  "effectiveDateTime": "2026-08-10T09:00:00Z"
+}
+```
+
+```json
+{
+  "resourceType": "Observation",
+  "status": "final",
+  "identifier": [{ "system": "https://fhir.miracum.org/uc1/NamingSystem/eligibilityObservationId", "value": "<sha256 of patient+study+library>" }],
+  "extension": [{ "url": "https://fhir.miracum.org/uc1/StructureDefinition/derivedFromLibrary", "valueReference": { "reference": "Library/trial-042-hba1c-elevated" } }],
+  "category": [{ "coding": [{ "system": "https://fhir.miracum.org/uc1/CodeSystem/observation-category", "code": "eligibility-assessment" }] }],
+  "code": { "text": "HbA1c > 7.0%" },
+  "subject": { "reference": "Patient/123" },
+  "focus": [{ "reference": "ResearchStudy/trial-042" }],
+  "valueCodeableConcept": { "coding": [{ "system": "http://snomed.info/sct", "code": "261665006", "display": "Unknown" }] },
+  "effectiveDateTime": "2026-08-10T09:00:00Z"
+}
+```
+
+```json
+{
+  "resourceType": "Observation",
+  "status": "final",
+  "identifier": [{ "system": "https://fhir.miracum.org/uc1/NamingSystem/eligibilityObservationId", "value": "<sha256 of patient+study+library>" }],
+  "extension": [{ "url": "https://fhir.miracum.org/uc1/StructureDefinition/derivedFromLibrary", "valueReference": { "reference": "Library/trial-042-hba1c-elevated" } }],
+  "category": [{ "coding": [{ "system": "https://fhir.miracum.org/uc1/CodeSystem/observation-category", "code": "eligibility-assessment" }] }],
+  "code": { "text": "HbA1c > 7.0%" },
+  "subject": { "reference": "Patient/456" },
+  "focus": [{ "reference": "ResearchStudy/trial-042" }],
+  "valueCodeableConcept": {
+    "coding": [{ "system": "http://snomed.info/sct", "code": "82334004", "display": "Indeterminate" }],
+    "text": "Conflicting HbA1c results: 6.2-8.9"
+  },
   "effectiveDateTime": "2026-08-10T09:00:00Z"
 }
 ```
 
 Notes:
 
-- `valueBoolean` is always the **eligibility-facing** value (i.e. already
-  negated per `exclude`, matching the `overall_met` computation) - a
-  reviewer always reads `true = good` regardless of whether the underlying
-  criterion was framed as inclusion or exclusion. This is the same
-  `crit_N` column value the merge query already produced, just carried
-  through unchanged.
+- `valueCodeableConcept` (not `valueBoolean`/`dataAbsentReason`) carries a
+  SNOMED CT "Yes / No / Unknown / Indeterminate (qualifier value)" coding -
+  `373066001`/`373067005`/`261665006`/`82334004` respectively - and is
+  always the **eligibility-facing** value (i.e. already negated per
+  `exclude`, matching the `overall_met` computation): a reviewer always
+  reads "Yes = good" regardless of whether the underlying criterion was
+  framed as inclusion or exclusion. This is the same `crit_N` column value
+  the merge query already produced, just carried through unchanged.
+  `is_met=null` splits into two of these codes depending on
+  `is_indeterminate`: `Unknown` (data was simply missing) vs.
+  `Indeterminate` (the criterion's SQL ran but the result was inconclusive)
+  - both count identically as "unresolved" in the merge, the distinction is
+  display-only. `dataAbsentReason` is unused here: every state, including
+  the two null-ish ones, is a real coded value, so the Observation's value
+  is never actually absent.
+- `valueCodeableConcept.text`, when the criterion's SQL provided a
+  `result_note`, carries a free-text explanation (e.g. *why* a result is
+  indeterminate) - supplementing, not replacing, the coding's own `display`.
 - `category = eligibility-assessment` is a custom, non-standard code -
   deliberately, to keep these synthetic/derived Observations distinguishable
   from genuine clinical Observations elsewhere in the app's data.

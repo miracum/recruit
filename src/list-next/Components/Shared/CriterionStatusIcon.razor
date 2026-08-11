@@ -1,6 +1,6 @@
 @inject IStringLocalizer<SharedResources> Localizer
 
-<span class="@IconColorClass" title="@Localizer[LabelKey]" aria-label="@Localizer[LabelKey]">
+<span class="@IconColorClass" title="@TooltipText" aria-label="@TooltipText">
     <LucideIcon Name="@IconName" Size="16" />
 </span>
 
@@ -8,26 +8,40 @@
     [Parameter, EditorRequired]
     public bool? Met { get; set; }
 
-    private string IconName => Met switch
+    /// <summary>Only meaningful when Met is null - see CriterionStatusDto.Indeterminate.</summary>
+    [Parameter]
+    public bool Indeterminate { get; set; }
+
+    /// <summary>Optional free-text explanation (CriterionStatusDto.Note), appended to the tooltip when present.</summary>
+    [Parameter]
+    public string? Note { get; set; }
+
+    private string IconName => (Met, Indeterminate) switch
     {
-        true => "circle-check",
-        false => "circle-x",
-        null => "circle-question-mark",
+        (true, _) => "circle-check",
+        (false, _) => "circle-x",
+        (null, true) => "circle-alert",
+        (null, false) => "circle-question-mark",
     };
 
     // Lucide icons render with stroke="currentColor", so coloring only needs a CSS `color` on this
     // wrapping span (see app.css) rather than a Class param on LucideIcon itself.
-    private string IconColorClass => Met switch
+    private string IconColorClass => (Met, Indeterminate) switch
     {
-        true => "criterion-icon-met",
-        false => "criterion-icon-not-met",
-        null => "criterion-icon-unknown",
+        (true, _) => "criterion-icon-met",
+        (false, _) => "criterion-icon-not-met",
+        (null, true) => "criterion-icon-indeterminate",
+        (null, false) => "criterion-icon-unknown",
     };
 
-    private string LabelKey => Met switch
+    private string LabelKey => (Met, Indeterminate) switch
     {
-        true => "App.Patient.CriterionMet",
-        false => "App.Patient.CriterionNotMet",
-        null => "App.Patient.CriterionUnknown",
+        (true, _) => "App.Patient.CriterionMet",
+        (false, _) => "App.Patient.CriterionNotMet",
+        (null, true) => "App.Patient.CriterionIndeterminate",
+        (null, false) => "App.Patient.CriterionUnknown",
     };
+
+    private string TooltipText =>
+        string.IsNullOrEmpty(Note) ? Localizer[LabelKey].Value : $"{Localizer[LabelKey].Value}: {Note}";
 }

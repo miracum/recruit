@@ -393,6 +393,9 @@
   <data name="App.Patient.CriterionUnknown" xml:space="preserve">
     <value>Unbekannt</value>
   </data>
+  <data name="App.Patient.CriterionIndeterminate" xml:space="preserve">
+    <value>Unbestimmt</value>
+  </data>
   <data name="App.PatientDialog.TabDetails" xml:space="preserve">
     <value>Details</value>
   </data>

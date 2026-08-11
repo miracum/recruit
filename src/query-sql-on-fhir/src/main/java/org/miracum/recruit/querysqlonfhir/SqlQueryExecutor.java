@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Library;
@@ -29,9 +28,13 @@ import org.springframework.stereotype.Component;
  * (Kleene) logic: a definite "not met" on any criterion dominates, and the overall result is
  * "unknown" only when nothing is definitely not met but at least one criterion's data is missing.
  *
- * <p>Every criterion Library's SQL must return exactly two columns - {@code patient_id} and {@code
- * met} (nullable boolean) - covering the full patient population, so that missing data reliably
- * produces a {@code null} row rather than a missing one.
+ * <p>Every criterion Library's SQL must return four columns - {@code patient_id}, {@code is_met}
+ * (nullable boolean), {@code is_indeterminate} (boolean, only meaningful when {@code is_met} is
+ * {@code null}), and {@code result_note} (nullable string, a free-text explanation carried through
+ * to {@code Observation.value.text} - most useful alongside indeterminate, but not limited to it).
+ * Criteria that never need either can just select {@code CAST(NULL AS BOOLEAN)} /
+ * {@code CAST(NULL AS VARCHAR)} for them - covering the full patient population, so that missing
+ * data reliably produces a {@code null} row rather than a missing one.
  *
  * <p>When every criterion's Library has {@code application/sql;dialect=trino} content and no {@code
  * relatedArtifact}, the merge is expressed as a single generated SQL query (one CTE per criterion)
@@ -49,7 +52,9 @@ public class SqlQueryExecutor {
 
   private static final String TRINO_SQL_CONTENT_TYPE = "application/sql;dialect=trino";
   private static final String PATIENT_ID_COLUMN = "patient_id";
-  private static final String MET_COLUMN = "met";
+  private static final String IS_MET_COLUMN = "is_met";
+  private static final String IS_INDETERMINATE_COLUMN = "is_indeterminate";
+  private static final String RESULT_NOTE_COLUMN = "result_note";
   private static final String ROW_PARAMETER = "row";
 
   private final JdbcTemplate jdbcTemplate;
@@ -144,15 +149,35 @@ public class SqlQueryExecutor {
           .append("\n)");
 
       // exclude negation is applied once, here, generically - criterion SQL always computes the
-      // raw, un-negated predicate.
+      // raw, un-negated predicate. Indeterminate is a passthrough - it never participates in the
+      // merge/exclude logic, it's only carried through for display once is_met is null.
       var effectiveMetExpr =
-          criterion.exclude() ? "(NOT " + alias + ".met)" : "(" + alias + ".met)";
+          criterion.exclude()
+              ? "(NOT " + alias + "." + IS_MET_COLUMN + ")"
+              : "(" + alias + "." + IS_MET_COLUMN + ")";
       selectColumns
           .append(",\n    ")
           .append(effectiveMetExpr)
           .append(" AS ")
           .append(alias)
-          .append("_met");
+          .append("_")
+          .append(IS_MET_COLUMN)
+          .append(",\n    ")
+          .append(alias)
+          .append(".")
+          .append(IS_INDETERMINATE_COLUMN)
+          .append(" AS ")
+          .append(alias)
+          .append("_")
+          .append(IS_INDETERMINATE_COLUMN)
+          .append(",\n    ")
+          .append(alias)
+          .append(".")
+          .append(RESULT_NOTE_COLUMN)
+          .append(" AS ")
+          .append(alias)
+          .append("_")
+          .append(RESULT_NOTE_COLUMN);
       terms.add(effectiveMetExpr);
 
       if (i == 0) {
@@ -186,8 +211,12 @@ public class SqlQueryExecutor {
     var outcomes = new ArrayList<CriterionOutcome>();
     for (var i = 0; i < criteria.size(); i++) {
       var criterion = criteria.get(i);
-      var met = (Boolean) row.get("crit_" + i + "_met");
-      outcomes.add(new CriterionOutcome(criterion.library(), criterion.displayText(), met));
+      var met = (Boolean) row.get("crit_" + i + "_" + IS_MET_COLUMN);
+      var indeterminate = Boolean.TRUE.equals(row.get("crit_" + i + "_" + IS_INDETERMINATE_COLUMN));
+      var note = (String) row.get("crit_" + i + "_" + RESULT_NOTE_COLUMN);
+      outcomes.add(
+          new CriterionOutcome(
+              criterion.library(), criterion.displayText(), met, indeterminate, note));
     }
 
     return new PatientEligibilityResult(patientId, outcomes);
@@ -208,8 +237,13 @@ public class SqlQueryExecutor {
       for (var i = 0; i < criteria.size(); i++) {
         var criterion = criteria.get(i);
         var raw = perCriterionResults.get(i).get(patientId);
-        var met = raw == null ? null : (criterion.exclude() != raw);
-        outcomes.add(new CriterionOutcome(criterion.library(), criterion.displayText(), met));
+        var met =
+            raw == null || raw.met() == null ? null : (criterion.exclude() != raw.met());
+        var indeterminate = raw != null && raw.indeterminate();
+        var note = raw == null ? null : raw.note();
+        outcomes.add(
+            new CriterionOutcome(
+                criterion.library(), criterion.displayText(), met, indeterminate, note));
       }
 
       var result = new PatientEligibilityResult(patientId, outcomes);
@@ -221,22 +255,28 @@ public class SqlQueryExecutor {
     return results;
   }
 
-  private Map<String, Boolean> resolveRawCriterionResults(EligibilityCriterion criterion) {
+  /** A criterion's raw (pre-exclude-negation) per-patient result, before merge. */
+  private record RawCriterionResult(Boolean met, boolean indeterminate, String note) {}
+
+  private Map<String, RawCriterionResult> resolveRawCriterionResults(
+      EligibilityCriterion criterion) {
     if (isTrinoDirect(criterion)) {
       var rows = jdbcTemplate.queryForList(trinoSql(criterion));
-      return rows.stream()
-          .collect(
-              Collectors.toMap(
-                  row -> (String) row.get(PATIENT_ID_COLUMN),
-                  row -> (Boolean) row.get(MET_COLUMN),
-                  (a, b) -> a,
-                  LinkedHashMap::new));
+      var results = new LinkedHashMap<String, RawCriterionResult>();
+      for (var row : rows) {
+        var patientId = (String) row.get(PATIENT_ID_COLUMN);
+        var met = (Boolean) row.get(IS_MET_COLUMN);
+        var indeterminate = Boolean.TRUE.equals(row.get(IS_INDETERMINATE_COLUMN));
+        var note = (String) row.get(RESULT_NOTE_COLUMN);
+        results.put(patientId, new RawCriterionResult(met, indeterminate, note));
+      }
+      return results;
     }
 
     return resolveRawResultsFromSqlOnFhir(criterion.library());
   }
 
-  private Map<String, Boolean> resolveRawResultsFromSqlOnFhir(Library library) {
+  private Map<String, RawCriterionResult> resolveRawResultsFromSqlOnFhir(Library library) {
     log.info(
         "Delegating SQLQuery Library id={} to the sql-on-fhir server's $sqlquery-run operation",
         library.getId());
@@ -254,7 +294,7 @@ public class SqlQueryExecutor {
             .returnResourceType(Parameters.class)
             .execute();
 
-    var results = new LinkedHashMap<String, Boolean>();
+    var results = new LinkedHashMap<String, RawCriterionResult>();
     for (var param : response.getParameter()) {
       if (!ROW_PARAMETER.equals(param.getName())) {
         continue;
@@ -262,18 +302,26 @@ public class SqlQueryExecutor {
 
       String patientId = null;
       Boolean met = null;
+      var indeterminate = false;
+      String note = null;
       for (var part : param.getPart()) {
         if (PATIENT_ID_COLUMN.equals(part.getName())
             && part.getValue() instanceof PrimitiveType<?> pt) {
           patientId = pt.getValueAsString();
-        } else if (MET_COLUMN.equals(part.getName())
+        } else if (IS_MET_COLUMN.equals(part.getName())
             && part.getValue() instanceof PrimitiveType<?> pt) {
           met = Boolean.parseBoolean(pt.getValueAsString());
+        } else if (IS_INDETERMINATE_COLUMN.equals(part.getName())
+            && part.getValue() instanceof PrimitiveType<?> pt) {
+          indeterminate = Boolean.parseBoolean(pt.getValueAsString());
+        } else if (RESULT_NOTE_COLUMN.equals(part.getName())
+            && part.getValue() instanceof PrimitiveType<?> pt) {
+          note = pt.getValueAsString();
         }
       }
 
       if (patientId != null) {
-        results.put(patientId, met);
+        results.put(patientId, new RawCriterionResult(met, indeterminate, note));
       }
     }
 

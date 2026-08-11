@@ -116,11 +116,11 @@
             "extension": [
               {
                 "url": "https://sql-on-fhir.org/ig/StructureDefinition/sql-text",
-                "valueString": "SELECT\n    patient.id AS patient_id,\n    EXISTS (\n        SELECT 1\n        FROM\n            fhir.default.condition,\n            UNNEST(condition.code.coding) AS condition_coding\n        WHERE\n            condition.subject.reference = CONCAT('Patient/', patient.id)\n            AND condition_coding.system = 'http://snomed.info/sct'\n            AND condition_coding.code IN ('10509002')\n    ) AS met\nFROM fhir.default.patient AS patient"
+                "valueString": "SELECT\n    patient.id AS patient_id,\n    EXISTS (\n        SELECT 1\n        FROM\n            fhir.default.condition,\n            UNNEST(condition.code.coding) AS condition_coding\n        WHERE\n            condition.subject.reference = CONCAT('Patient/', patient.id)\n            AND condition_coding.system = 'http://snomed.info/sct'\n            AND condition_coding.code IN ('10509002')\n    ) AS is_met,\n    CAST(NULL AS BOOLEAN) AS is_indeterminate,\n    CAST(NULL AS VARCHAR) AS result_note\nFROM fhir.default.patient AS patient"
               }
             ],
             "contentType": "application/sql;dialect=trino",
-            "data": "U0VMRUNUCiAgICBwYXRpZW50LmlkIEFTIHBhdGllbnRfaWQsCiAgICBFWElTVFMgKAogICAgICAgIFNFTEVDVCAxCiAgICAgICAgRlJPTQogICAgICAgICAgICBmaGlyLmRlZmF1bHQuY29uZGl0aW9uLAogICAgICAgICAgICBVTk5FU1QoY29uZGl0aW9uLmNvZGUuY29kaW5nKSBBUyBjb25kaXRpb25fY29kaW5nCiAgICAgICAgV0hFUkUKICAgICAgICAgICAgY29uZGl0aW9uLnN1YmplY3QucmVmZXJlbmNlID0gQ09OQ0FUKCdQYXRpZW50LycsIHBhdGllbnQuaWQpCiAgICAgICAgICAgIEFORCBjb25kaXRpb25fY29kaW5nLnN5c3RlbSA9ICdodHRwOi8vc25vbWVkLmluZm8vc2N0JwogICAgICAgICAgICBBTkQgY29uZGl0aW9uX2NvZGluZy5jb2RlIElOICgnMTA1MDkwMDInKQogICAgKSBBUyBtZXQKRlJPTSBmaGlyLmRlZmF1bHQucGF0aWVudCBBUyBwYXRpZW50"
+            "data": "U0VMRUNUCiAgICBwYXRpZW50LmlkIEFTIHBhdGllbnRfaWQsCiAgICBFWElTVFMgKAogICAgICAgIFNFTEVDVCAxCiAgICAgICAgRlJPTQogICAgICAgICAgICBmaGlyLmRlZmF1bHQuY29uZGl0aW9uLAogICAgICAgICAgICBVTk5FU1QoY29uZGl0aW9uLmNvZGUuY29kaW5nKSBBUyBjb25kaXRpb25fY29kaW5nCiAgICAgICAgV0hFUkUKICAgICAgICAgICAgY29uZGl0aW9uLnN1YmplY3QucmVmZXJlbmNlID0gQ09OQ0FUKCdQYXRpZW50LycsIHBhdGllbnQuaWQpCiAgICAgICAgICAgIEFORCBjb25kaXRpb25fY29kaW5nLnN5c3RlbSA9ICdodHRwOi8vc25vbWVkLmluZm8vc2N0JwogICAgICAgICAgICBBTkQgY29uZGl0aW9uX2NvZGluZy5jb2RlIElOICgnMTA1MDkwMDInKQogICAgKSBBUyBpc19tZXQsCiAgICBDQVNUKE5VTEwgQVMgQk9PTEVBTikgQVMgaXNfaW5kZXRlcm1pbmF0ZSwKICAgIENBU1QoTlVMTCBBUyBWQVJDSEFSKSBBUyByZXN1bHRfbm90ZQpGUk9NIGZoaXIuZGVmYXVsdC5wYXRpZW50IEFTIHBhdGllbnQ="
           }
         ]
       },
@@ -153,11 +153,11 @@
             "extension": [
               {
                 "url": "https://sql-on-fhir.org/ig/StructureDefinition/sql-text",
-                "valueString": "SELECT\n    patient.id AS patient_id,\n    date_diff('year', date(patient.birthdate), current_date) > 18 AS met\nFROM fhir.default.patient AS patient"
+                "valueString": "SELECT\n    patient.id AS patient_id,\n    cast(NULL AS BOOLEAN) AS is_indeterminate,\n    cast(NULL AS VARCHAR) AS result_note,\n    date_diff('year', date(patient.birthdate), current_date) > 18 AS is_met\nFROM fhir.default.patient AS patient"
               }
             ],
             "contentType": "application/sql;dialect=trino",
-            "data": "U0VMRUNUCiAgICBwYXRpZW50LmlkIEFTIHBhdGllbnRfaWQsCiAgICBkYXRlX2RpZmYoJ3llYXInLCBkYXRlKHBhdGllbnQuYmlydGhkYXRlKSwgY3VycmVudF9kYXRlKSA+IDE4IEFTIG1ldApGUk9NIGZoaXIuZGVmYXVsdC5wYXRpZW50IEFTIHBhdGllbnQ="
+            "data": "U0VMRUNUCiAgICBwYXRpZW50LmlkIEFTIHBhdGllbnRfaWQsCiAgICBjYXN0KE5VTEwgQVMgQk9PTEVBTikgQVMgaXNfaW5kZXRlcm1pbmF0ZSwKICAgIGNhc3QoTlVMTCBBUyBWQVJDSEFSKSBBUyByZXN1bHRfbm90ZSwKICAgIGRhdGVfZGlmZigneWVhcicsIGRhdGUocGF0aWVudC5iaXJ0aGRhdGUpLCBjdXJyZW50X2RhdGUpID4gMTggQVMgaXNfbWV0CkZST00gZmhpci5kZWZhdWx0LnBhdGllbnQgQVMgcGF0aWVudA=="
           }
         ]
       },
@@ -190,11 +190,11 @@
             "extension": [
               {
                 "url": "https://sql-on-fhir.org/ig/StructureDefinition/sql-text",
-                "valueString": "SELECT\n    patient.id AS patient_id,\n    EXISTS (\n        SELECT 1\n        FROM\n            fhir.default.condition,\n            UNNEST(condition.code.coding) AS condition_coding\n        WHERE\n            condition.subject.reference = CONCAT('Patient/', patient.id)\n            AND condition_coding.system = 'http://snomed.info/sct'\n            AND condition_coding.code IN ('91302008')\n    ) AS met\nFROM fhir.default.patient AS patient"
+                "valueString": "SELECT\n    patient.id AS patient_id,\n    EXISTS (\n        SELECT 1\n        FROM\n            fhir.default.condition,\n            UNNEST(condition.code.coding) AS condition_coding\n        WHERE\n            condition.subject.reference = CONCAT('Patient/', patient.id)\n            AND condition_coding.system = 'http://snomed.info/sct'\n            AND condition_coding.code IN ('91302008')\n    ) AS is_met,\n    CAST(NULL AS BOOLEAN) AS is_indeterminate,\n    CAST(NULL AS VARCHAR) AS result_note\nFROM fhir.default.patient AS patient"
               }
             ],
             "contentType": "application/sql;dialect=trino",
-            "data": "U0VMRUNUCiAgICBwYXRpZW50LmlkIEFTIHBhdGllbnRfaWQsCiAgICBFWElTVFMgKAogICAgICAgIFNFTEVDVCAxCiAgICAgICAgRlJPTQogICAgICAgICAgICBmaGlyLmRlZmF1bHQuY29uZGl0aW9uLAogICAgICAgICAgICBVTk5FU1QoY29uZGl0aW9uLmNvZGUuY29kaW5nKSBBUyBjb25kaXRpb25fY29kaW5nCiAgICAgICAgV0hFUkUKICAgICAgICAgICAgY29uZGl0aW9uLnN1YmplY3QucmVmZXJlbmNlID0gQ09OQ0FUKCdQYXRpZW50LycsIHBhdGllbnQuaWQpCiAgICAgICAgICAgIEFORCBjb25kaXRpb25fY29kaW5nLnN5c3RlbSA9ICdodHRwOi8vc25vbWVkLmluZm8vc2N0JwogICAgICAgICAgICBBTkQgY29uZGl0aW9uX2NvZGluZy5jb2RlIElOICgnOTEzMDIwMDgnKQogICAgKSBBUyBtZXQKRlJPTSBmaGlyLmRlZmF1bHQucGF0aWVudCBBUyBwYXRpZW50"
+            "data": "U0VMRUNUCiAgICBwYXRpZW50LmlkIEFTIHBhdGllbnRfaWQsCiAgICBFWElTVFMgKAogICAgICAgIFNFTEVDVCAxCiAgICAgICAgRlJPTQogICAgICAgICAgICBmaGlyLmRlZmF1bHQuY29uZGl0aW9uLAogICAgICAgICAgICBVTk5FU1QoY29uZGl0aW9uLmNvZGUuY29kaW5nKSBBUyBjb25kaXRpb25fY29kaW5nCiAgICAgICAgV0hFUkUKICAgICAgICAgICAgY29uZGl0aW9uLnN1YmplY3QucmVmZXJlbmNlID0gQ09OQ0FUKCdQYXRpZW50LycsIHBhdGllbnQuaWQpCiAgICAgICAgICAgIEFORCBjb25kaXRpb25fY29kaW5nLnN5c3RlbSA9ICdodHRwOi8vc25vbWVkLmluZm8vc2N0JwogICAgICAgICAgICBBTkQgY29uZGl0aW9uX2NvZGluZy5jb2RlIElOICgnOTEzMDIwMDgnKQogICAgKSBBUyBpc19tZXQsCiAgICBDQVNUKE5VTEwgQVMgQk9PTEVBTikgQVMgaXNfaW5kZXRlcm1pbmF0ZSwKICAgIENBU1QoTlVMTCBBUyBWQVJDSEFSKSBBUyByZXN1bHRfbm90ZQpGUk9NIGZoaXIuZGVmYXVsdC5wYXRpZW50IEFTIHBhdGllbnQ="
           }
         ]
       },

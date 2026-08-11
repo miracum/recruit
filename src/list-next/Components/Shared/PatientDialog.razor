@@ -100,7 +100,7 @@
                                     @foreach (var criterion in _criteria)
                                     {
                                         <li class="flex items-center gap-2">
-                                            <CriterionStatusIcon Met="criterion.Met" />
+                                            <CriterionStatusIcon Met="criterion.Met" Indeterminate="criterion.Indeterminate" Note="criterion.Note" />
                                             <span>@criterion.DisplayText</span>
                                         </li>
                                     }

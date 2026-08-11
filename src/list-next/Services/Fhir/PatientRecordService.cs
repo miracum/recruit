@@ -141,13 +141,35 @@ public sealed class PatientRecordService(
         }
 
         return resources.OfType<Observation>()
-            .Select(o => new CriterionStatusDto
-            {
-                DisplayText = o.Code?.Text ?? localizer["App.Common.Unknown"],
-                Met = o.Value is FhirBoolean { Value: { } met } ? met : null,
-            })
+            .Select(ToCriterionStatus)
             .OrderBy(c => c.DisplayText, StringComparer.OrdinalIgnoreCase)
             .ToList();
+    }
+
+    /// <summary>
+    /// Maps the SNOMED CT "Yes/No/Unknown/Indeterminate (qualifier value)" coding EligibilityBundleBuilder
+    /// writes (see docs/trino/eligibility-criteria-design.md) back to a plain Met/Indeterminate pair -
+    /// Unknown and any unrecognized/missing coding both fall back to "unresolved, not indeterminate".
+    /// </summary>
+    private CriterionStatusDto ToCriterionStatus(Observation observation)
+    {
+        var valueConcept = observation.Value as CodeableConcept;
+        var code = valueConcept?.Coding?.FirstOrDefault()?.Code;
+        var (met, indeterminate) = code switch
+        {
+            FhirConstants.SnomedCodeYes => (true, false),
+            FhirConstants.SnomedCodeNo => (false, false),
+            FhirConstants.SnomedCodeIndeterminate => ((bool?)null, true),
+            _ => ((bool?)null, false),
+        };
+
+        return new CriterionStatusDto
+        {
+            DisplayText = observation.Code?.Text ?? localizer["App.Common.Unknown"],
+            Met = met,
+            Indeterminate = indeterminate,
+            Note = valueConcept?.Text,
+        };
     }
 
     private static DateTimeOffset? ParseInstant(string? value) =>

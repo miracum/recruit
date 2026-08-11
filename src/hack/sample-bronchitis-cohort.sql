@@ -9,5 +9,7 @@ SELECT
             condition.subject.reference = CONCAT('Patient/', patient.id)
             AND condition_coding.system = 'http://snomed.info/sct'
             AND condition_coding.code IN ('10509002')
-    ) AS met
+    ) AS is_met,
+    CAST(NULL AS BOOLEAN) AS is_indeterminate,
+    CAST(NULL AS VARCHAR) AS result_note
 FROM fhir.default.patient AS patient

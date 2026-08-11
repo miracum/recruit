@@ -59,6 +59,13 @@ h1:focus {
     color: var(--muted-foreground);
 }
 
+/* "Evaluated but inconclusive" (see CriterionStatusDto.Indeterminate) reuses the same orange
+   accent as StatusBadge's "screening" state - it reads as "needs attention", distinct from the
+   muted "we never had the data" unknown state. */
+.criterion-icon-indeterminate {
+    color: var(--color-orange-accent);
+}
+
 /* Inclusion/exclusion criteria columns (see PatientList.razor). A plain border rather than a
    Tailwind border utility, for the same precompiled-bundle reason as above. */
 .criteria-column-divider {
