@@ -494,8 +494,11 @@ services:
         echo "Server is up. Sending resources.";
         ls -lsa /synthea/
         /synthea/post-transactions.sh
+        echo "Loading SearchParameter resources.";
+        curl --fail-with-body --retry-connrefused -X POST -H "Content-Type: application/fhir+json" --data @/fhir/search-parameters-transaction-upsert.json "$$FHIR_SERVER_BASE_URL"
     volumes:
       - ./synthea/:/synthea/
+      - ./fhir/:/fhir/
     depends_on:
       fhir:
         condition: service_started

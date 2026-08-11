@@ -79,4 +79,14 @@ internal static class FhirBundleHelpers
         library.Content?.FirstOrDefault()?.Data is { Length: > 0 } data
             ? Encoding.UTF8.GetString(data)
             : null;
+
+    public static string? GetMedicalRecordNumber(this Patient patient) =>
+        patient.Identifier.FirstOrDefault(IsMedicalRecordNumber)?.Value;
+
+    private static bool IsMedicalRecordNumber(Identifier identifier) =>
+        identifier.Type?.Coding.Any(c =>
+            c.System == FhirConstants.SystemIdentifierType
+            && c.Code == FhirConstants.IdentifierTypeMedicalRecordNumber
+        )
+            is true;
 }

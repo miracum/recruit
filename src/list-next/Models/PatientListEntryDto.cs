@@ -8,6 +8,9 @@ public sealed class PatientListEntryDto
 
     public string? Name { get; init; }
 
+    /// <summary>Patient.identifier value with type MR (medical record number) - shown when Name is absent.</summary>
+    public string? MedicalRecordNumber { get; init; }
+
     public DateTimeOffset? BirthDate { get; init; }
 
     public int? Age => BirthDate is null ? null : AgeCalculator.Calculate(BirthDate.Value);

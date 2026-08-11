@@ -534,6 +534,7 @@ public sealed class ScreeningListService(
                     ResearchSubjectId = subject.Id!,
                     PatientId = patientId ?? string.Empty,
                     Name = FormatPatientName(patient),
+                    MedicalRecordNumber = patient?.GetMedicalRecordNumber(),
                     BirthDate =
                         patient?.BirthDate is { } bd
                         && DateTimeOffset.TryParse(bd, out var birthDate)
