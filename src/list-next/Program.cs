@@ -19,8 +19,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
 builder.Services.AddLocalization();
 builder.Services.AddBlazorBlueprintComponents();
@@ -29,29 +28,39 @@ builder.Services.AddScoped<IBbLocalizer, AppBbLocalizer>();
 var supportedCultures = new[] { "en", "de" };
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
-    options.SetDefaultCulture(supportedCultures[0])
+    options
+        .SetDefaultCulture(supportedCultures[0])
         .AddSupportedCultures(supportedCultures)
         .AddSupportedUICultures(supportedCultures);
 });
 
 builder.Services.Configure<FhirOptions>(builder.Configuration.GetSection(FhirOptions.SectionName));
 builder.Services.Configure<AuthOptions>(builder.Configuration.GetSection(AuthOptions.SectionName));
-builder.Services.Configure<NotificationOptions>(builder.Configuration.GetSection(NotificationOptions.SectionName));
+builder.Services.Configure<NotificationOptions>(
+    builder.Configuration.GetSection(NotificationOptions.SectionName)
+);
 
-var fhirBaseUrl = builder.Configuration.GetValue<string>("Fhir:BaseUrl")
+var fhirBaseUrl =
+    builder.Configuration.GetValue<string>("Fhir:BaseUrl")
     ?? throw new InvalidOperationException("Fhir:BaseUrl must be configured.");
 var authDisabled = builder.Configuration.GetValue<bool>("Auth:Disabled");
 
-var appDbConnectionString = builder.Configuration.GetConnectionString("AppDb")
+var appDbConnectionString =
+    builder.Configuration.GetConnectionString("AppDb")
     ?? throw new InvalidOperationException("ConnectionStrings:AppDb must be configured.");
 
 // AddDbContextFactory (not AddDbContext) is required in Blazor Server: DI scopes there are
 // per-circuit (roughly per user session), not per-request, so a directly-injected DbContext would
 // live far longer than intended. Services instead resolve IDbContextFactory<AppDbContext> and
 // create a short-lived context per operation.
-builder.Services.AddDbContextFactory<AppDbContext>(options => options
-    .UseNpgsql(appDbConnectionString, npgsql => npgsql.MapEnum<TrialPermissionLevel>("trial_permission_level"))
-    .UseSnakeCaseNamingConvention());
+builder.Services.AddDbContextFactory<AppDbContext>(options =>
+    options
+        .UseNpgsql(
+            appDbConnectionString,
+            npgsql => npgsql.MapEnum<TrialPermissionLevel>("trial_permission_level")
+        )
+        .UseSnakeCaseNamingConvention()
+);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddCascadingAuthenticationState();
@@ -62,9 +71,12 @@ builder.Services.AddAuthorizationCore(options =>
 
 if (authDisabled)
 {
-    builder.Services.AddAuthentication(DevBypassAuthenticationHandler.SchemeName)
-        .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, DevBypassAuthenticationHandler>(
-            DevBypassAuthenticationHandler.SchemeName, _ => { });
+    builder
+        .Services.AddAuthentication(DevBypassAuthenticationHandler.SchemeName)
+        .AddScheme<
+            Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions,
+            DevBypassAuthenticationHandler
+        >(DevBypassAuthenticationHandler.SchemeName, _ => { });
     builder.Services.AddAuthorization();
 }
 else
@@ -74,37 +86,38 @@ else
 
     builder.Services.AddTransient<OidcEvents>();
 
-    builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-        options.DefaultSignOutScheme = OpenIdConnectDefaults.AuthenticationScheme;
-    })
-    .AddCookie()
-    .AddOpenIdConnect(options =>
-    {
-        oidcSection.Bind(options);
-        options.ResponseType = OpenIdConnectResponseType.Code;
-        options.ResponseMode = OpenIdConnectResponseMode.Query;
-        options.SaveTokens = true;
-        options.MapInboundClaims = false;
-        options.GetClaimsFromUserInfoEndpoint = true;
-        // Only relax to plain-HTTP metadata/issuer for local development (e.g. a local Keycloak
-        // without TLS) - production authorities must always be HTTPS.
-        options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
-        // Opt-in only: ASP.NET Core defaults to using Pushed Authorization Requests whenever the
-        // IdP advertises the endpoint, which added an extra failure mode against this app's
-        // Keycloak setup for no real benefit at this app's size.
-        options.PushedAuthorizationBehavior = PushedAuthorizationBehavior.Disable;
-        options.Scope.Clear();
-        options.Scope.Add("openid");
-        options.Scope.Add("profile");
-        options.Scope.Add("email");
-        options.Scope.Add("offline_access");
-        options.TokenValidationParameters.RoleClaimType = roleClaimType;
-        options.TokenValidationParameters.NameClaimType = "preferred_username";
-        options.EventsType = typeof(OidcEvents);
-    });
+    builder
+        .Services.AddAuthentication(options =>
+        {
+            options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+            options.DefaultSignOutScheme = OpenIdConnectDefaults.AuthenticationScheme;
+        })
+        .AddCookie()
+        .AddOpenIdConnect(options =>
+        {
+            oidcSection.Bind(options);
+            options.ResponseType = OpenIdConnectResponseType.Code;
+            options.ResponseMode = OpenIdConnectResponseMode.Query;
+            options.SaveTokens = true;
+            options.MapInboundClaims = false;
+            options.GetClaimsFromUserInfoEndpoint = true;
+            // Only relax to plain-HTTP metadata/issuer for local development (e.g. a local Keycloak
+            // without TLS) - production authorities must always be HTTPS.
+            options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
+            // Opt-in only: ASP.NET Core defaults to using Pushed Authorization Requests whenever the
+            // IdP advertises the endpoint, which added an extra failure mode against this app's
+            // Keycloak setup for no real benefit at this app's size.
+            options.PushedAuthorizationBehavior = PushedAuthorizationBehavior.Disable;
+            options.Scope.Clear();
+            options.Scope.Add("openid");
+            options.Scope.Add("profile");
+            options.Scope.Add("email");
+            options.Scope.Add("offline_access");
+            options.TokenValidationParameters.RoleClaimType = roleClaimType;
+            options.TokenValidationParameters.NameClaimType = "preferred_username";
+            options.EventsType = typeof(OidcEvents);
+        });
 
     builder.Services.AddAuthorization();
 }
@@ -113,7 +126,10 @@ else
 // mode. This app used to forward the signed-in user's OIDC access token (AddUserAccessTokenHttpClient),
 // but per-user FHIR authorization isn't needed right now; a static/service-account credential
 // (the app calling FHIR as itself, not as any particular user) should replace this later.
-builder.Services.AddHttpClient(FhirClientFactory.HttpClientName, client => client.BaseAddress = new Uri(fhirBaseUrl));
+builder.Services.AddHttpClient(
+    FhirClientFactory.HttpClientName,
+    client => client.BaseAddress = new Uri(fhirBaseUrl)
+);
 
 builder.Services.AddScoped<TrialAccessService>();
 builder.Services.AddSingleton<FhirClientFactory>();
@@ -129,7 +145,9 @@ var app = builder.Build();
 
 await using (var scope = app.Services.CreateAsyncScope())
 {
-    var dbContextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AppDbContext>>();
+    var dbContextFactory = scope.ServiceProvider.GetRequiredService<
+        IDbContextFactory<AppDbContext>
+    >();
     await using var db = await dbContextFactory.CreateDbContextAsync();
     await db.Database.MigrateAsync();
 }
@@ -151,36 +169,57 @@ app.UseAuthorization();
 if (!authDisabled)
 {
     var authGroup = app.MapGroup("/authentication");
-    authGroup.MapGet("/login", (string? returnUrl) =>
-        Results.Challenge(
-            new Microsoft.AspNetCore.Authentication.AuthenticationProperties { RedirectUri = returnUrl ?? "/" },
-            [OpenIdConnectDefaults.AuthenticationScheme]));
+    authGroup.MapGet(
+        "/login",
+        (string? returnUrl) =>
+            Results.Challenge(
+                new Microsoft.AspNetCore.Authentication.AuthenticationProperties
+                {
+                    RedirectUri = returnUrl ?? "/",
+                },
+                [OpenIdConnectDefaults.AuthenticationScheme]
+            )
+    );
 
     // GET is needed because Blazor Server's NavigationManager.NavigateTo(forceLoad: true) - the
     // only way to trigger a real HTTP request (and thus an auth-cookie-clearing response) from an
     // interactive circuit - always issues a GET.
-    authGroup.MapMethods("/logout", ["GET", "POST"], (string? returnUrl) =>
-        Results.SignOut(
-            new Microsoft.AspNetCore.Authentication.AuthenticationProperties { RedirectUri = returnUrl ?? "/logged-out" },
-            [CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme]));
+    authGroup.MapMethods(
+        "/logout",
+        ["GET", "POST"],
+        (string? returnUrl) =>
+            Results.SignOut(
+                new Microsoft.AspNetCore.Authentication.AuthenticationProperties
+                {
+                    RedirectUri = returnUrl ?? "/logged-out",
+                },
+                [
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    OpenIdConnectDefaults.AuthenticationScheme,
+                ]
+            )
+    );
 }
 
-app.MapGet("/culture/set", (string culture, string? redirectUri, HttpContext ctx) =>
-{
-    var resolvedCulture = supportedCultures.Contains(culture) ? culture : supportedCultures[0];
+app.MapGet(
+    "/culture/set",
+    (string culture, string? redirectUri, HttpContext ctx) =>
+    {
+        var resolvedCulture = supportedCultures.Contains(culture) ? culture : supportedCultures[0];
 
-    ctx.Response.Cookies.Append(
-        CookieRequestCultureProvider.DefaultCookieName,
-        CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(resolvedCulture)),
-        new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1), IsEssential = true });
+        ctx.Response.Cookies.Append(
+            CookieRequestCultureProvider.DefaultCookieName,
+            CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(resolvedCulture)),
+            new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1), IsEssential = true }
+        );
 
-    return Results.LocalRedirect(string.IsNullOrEmpty(redirectUri) ? "/" : redirectUri);
-});
+        return Results.LocalRedirect(string.IsNullOrEmpty(redirectUri) ? "/" : redirectUri);
+    }
+);
 
 app.UseAntiforgery();
 
 app.MapStaticAssets();
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 await app.RunAsync();

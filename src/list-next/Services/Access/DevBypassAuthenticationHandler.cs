@@ -14,8 +14,10 @@ namespace list.Services.Access;
 /// Must never be registered outside Development.
 /// </summary>
 public sealed class DevBypassAuthenticationHandler(
-    IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder)
-    : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
+    IOptionsMonitor<AuthenticationSchemeOptions> options,
+    ILoggerFactory logger,
+    UrlEncoder encoder
+) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     public const string SchemeName = "DevBypass";
 
@@ -31,7 +33,8 @@ public sealed class DevBypassAuthenticationHandler(
             ],
             authenticationType: SchemeName,
             nameType: "preferred_username",
-            roleType: "role");
+            roleType: "role"
+        );
 
         var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), SchemeName);
         return Task.FromResult(AuthenticateResult.Success(ticket));

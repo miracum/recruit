@@ -11,8 +11,10 @@ namespace list.Services.Auth;
 /// which would re-run on every request for no benefit, since Blazor Server re-validates the
 /// existing cookie principal rather than the token on each request).
 /// </summary>
-public sealed class OidcEvents(IConfiguration configuration, IDbContextFactory<AppDbContext> dbContextFactory)
-    : OpenIdConnectEvents
+public sealed class OidcEvents(
+    IConfiguration configuration,
+    IDbContextFactory<AppDbContext> dbContextFactory
+) : OpenIdConnectEvents
 {
     public override async Task TokenValidated(TokenValidatedContext context)
     {
@@ -32,13 +34,17 @@ public sealed class OidcEvents(IConfiguration configuration, IDbContextFactory<A
     /// </summary>
     private void ApplyGroupRoleMappings(ClaimsPrincipal principal)
     {
-        var mappings = configuration.GetSection("Oidc:GroupRoleMappings").Get<Dictionary<string, string>>();
+        var mappings = configuration
+            .GetSection("Oidc:GroupRoleMappings")
+            .Get<Dictionary<string, string>>();
         if (mappings is not { Count: > 0 } || principal.Identity is not ClaimsIdentity identity)
         {
             return;
         }
 
-        var groupClaimType = configuration["Oidc:GroupClaimType"] is { Length: > 0 } gct ? gct : "groups";
+        var groupClaimType = configuration["Oidc:GroupClaimType"] is { Length: > 0 } gct
+            ? gct
+            : "groups";
         var roleClaimType = configuration["Oidc:RoleClaimType"] is { Length: > 0 } rc ? rc : "role";
         var existingRoles = identity.FindAll(roleClaimType).Select(c => c.Value).ToHashSet();
 
@@ -57,18 +63,21 @@ public sealed class OidcEvents(IConfiguration configuration, IDbContextFactory<A
     /// </summary>
     private async Task ProvisionGrantsAsync(ClaimsPrincipal principal, CancellationToken ct)
     {
-        var email = principal.FindFirst("email")?.Value ?? principal.FindFirst(ClaimTypes.Email)?.Value;
+        var email =
+            principal.FindFirst("email")?.Value ?? principal.FindFirst(ClaimTypes.Email)?.Value;
         if (string.IsNullOrEmpty(email))
         {
             return;
         }
 
-        var subjectId = principal.FindFirst("sub")?.Value ?? principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var subjectId =
+            principal.FindFirst("sub")?.Value
+            ?? principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var displayName = principal.GetDisplayName();
 
         await using var db = await dbContextFactory.CreateDbContextAsync(ct);
-        var pendingGrants = await db.TrialAccessGrants
-            .Where(g => g.Email == email && g.SubjectId == null)
+        var pendingGrants = await db
+            .TrialAccessGrants.Where(g => g.Email == email && g.SubjectId == null)
             .ToListAsync(ct);
 
         if (pendingGrants.Count == 0)

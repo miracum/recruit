@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -22,7 +21,10 @@
     <PackageReference Include="Hl7.Fhir.R4" Version="6.4.0" />
     <PackageReference Include="HtmlSanitizer" Version="9.1.982" />
     <PackageReference Include="Markdig" Version="0.37.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.4" />
+    <PackageReference
+      Include="Microsoft.AspNetCore.Authentication.OpenIdConnect"
+      Version="10.0.4"
+    />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.10">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -30,5 +32,4 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
     <PackageReference Include="ReverseMarkdown" Version="6.1.1" />
   </ItemGroup>
-
 </Project>

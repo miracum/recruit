@@ -16,9 +16,14 @@ namespace list.Services.Fhir;
 /// serializes a preview so an admin can inspect/copy the result.
 /// </summary>
 public sealed class EligibilityCriteriaService(
-    FhirClientFactory clientFactory, IStringLocalizer<SharedResources> localizer, ILogger<EligibilityCriteriaService> logger)
+    FhirClientFactory clientFactory,
+    IStringLocalizer<SharedResources> localizer,
+    ILogger<EligibilityCriteriaService> logger
+)
 {
-    public async Task<IReadOnlyList<ResearchStudySummaryDto>> SearchResearchStudiesAsync(CancellationToken ct = default)
+    public async Task<IReadOnlyList<ResearchStudySummaryDto>> SearchResearchStudiesAsync(
+        CancellationToken ct = default
+    )
     {
         var client = clientFactory.CreateClient();
         var query = "ResearchStudy?_count=50&_sort=-_lastUpdated";
@@ -34,13 +39,15 @@ public sealed class EligibilityCriteriaService(
             throw new FhirAccessException(localizer["App.Errors.ResearchStudiesLoadFailed"], ex);
         }
 
-        return resources.OfType<ResearchStudy>()
+        return resources
+            .OfType<ResearchStudy>()
             .Where(s => s.Id is not null)
             .Select(s => new ResearchStudySummaryDto(
                 s.Id!,
                 s.Title,
                 s.GetStringExtension(FhirConstants.UrlStudyAcronym),
-                s.GetTrialIdentifier()))
+                s.GetTrialIdentifier()
+            ))
             .OrderBy(s => s.Acronym ?? s.Title ?? s.Id, StringComparer.OrdinalIgnoreCase)
             .ToList();
     }
@@ -51,13 +58,19 @@ public sealed class EligibilityCriteriaService(
     /// entry referencing all of them (plus any reused-by-reference criteria) via
     /// Group.characteristic, and one ResearchStudy entry enrolling that Group.
     /// </summary>
-    public string BuildPreviewJson(ResearchStudyDraft studyDraft, IReadOnlyList<CriterionDraft> criteria)
+    public string BuildPreviewJson(
+        ResearchStudyDraft studyDraft,
+        IReadOnlyList<CriterionDraft> criteria
+    )
     {
         var bundle = BuildPreviewBundle(studyDraft, criteria);
         return new FhirJsonSerializer().SerializeToString(bundle, pretty: true);
     }
 
-    private static Bundle BuildPreviewBundle(ResearchStudyDraft studyDraft, IReadOnlyList<CriterionDraft> criteria)
+    private static Bundle BuildPreviewBundle(
+        ResearchStudyDraft studyDraft,
+        IReadOnlyList<CriterionDraft> criteria
+    )
     {
         var libraryEntries = new List<Bundle.EntryComponent>();
         var characteristics = new List<Group.CharacteristicComponent>();
@@ -87,22 +100,34 @@ public sealed class EligibilityCriteriaService(
                     ],
                 };
 
-                libraryEntries.Add(new Bundle.EntryComponent
-                {
-                    FullUrl = libraryFullUrl,
-                    Resource = library,
-                    Request = new Bundle.RequestComponent { Method = Bundle.HTTPVerb.POST, Url = "Library" },
-                });
+                libraryEntries.Add(
+                    new Bundle.EntryComponent
+                    {
+                        FullUrl = libraryFullUrl,
+                        Resource = library,
+                        Request = new Bundle.RequestComponent
+                        {
+                            Method = Bundle.HTTPVerb.POST,
+                            Url = "Library",
+                        },
+                    }
+                );
 
                 libraryReference = new ResourceReference(libraryFullUrl);
             }
 
-            characteristics.Add(new Group.CharacteristicComponent
-            {
-                Code = new CodeableConcept(system: null, code: null, text: criterion.DisplayText),
-                Value = libraryReference,
-                Exclude = criterion.Exclude,
-            });
+            characteristics.Add(
+                new Group.CharacteristicComponent
+                {
+                    Code = new CodeableConcept(
+                        system: null,
+                        code: null,
+                        text: criterion.DisplayText
+                    ),
+                    Value = libraryReference,
+                    Exclude = criterion.Exclude,
+                }
+            );
         }
 
         var groupFullUrl = "urn:uuid:" + Guid.NewGuid();
@@ -110,7 +135,10 @@ public sealed class EligibilityCriteriaService(
         {
             Type = Group.GroupType.Person,
             Actual = true,
-            Code = new CodeableConcept(FhirConstants.SystemEligibilityCriteriaTypes, FhirConstants.EligibilityCriteriaTypeTrinoSql),
+            Code = new CodeableConcept(
+                FhirConstants.SystemEligibilityCriteriaTypes,
+                FhirConstants.EligibilityCriteriaTypeTrinoSql
+            ),
             Characteristic = characteristics,
         };
 
@@ -126,30 +154,49 @@ public sealed class EligibilityCriteriaService(
             study.AddExtension(FhirConstants.UrlStudyAcronym, new FhirString(studyDraft.Acronym));
         }
 
-        if (!string.IsNullOrWhiteSpace(studyDraft.IdentifierSystem) && !string.IsNullOrWhiteSpace(studyDraft.IdentifierValue))
+        if (
+            !string.IsNullOrWhiteSpace(studyDraft.IdentifierSystem)
+            && !string.IsNullOrWhiteSpace(studyDraft.IdentifierValue)
+        )
         {
-            study.Identifier.Add(new Identifier(studyDraft.IdentifierSystem, studyDraft.IdentifierValue));
+            study.Identifier.Add(
+                new Identifier(studyDraft.IdentifierSystem, studyDraft.IdentifierValue)
+            );
         }
 
         var studyEntry = new Bundle.EntryComponent { Resource = study };
         if (!string.IsNullOrWhiteSpace(studyDraft.ExistingId))
         {
             study.Id = studyDraft.ExistingId;
-            studyEntry.Request = new Bundle.RequestComponent { Method = Bundle.HTTPVerb.PUT, Url = $"ResearchStudy/{studyDraft.ExistingId}" };
+            studyEntry.Request = new Bundle.RequestComponent
+            {
+                Method = Bundle.HTTPVerb.PUT,
+                Url = $"ResearchStudy/{studyDraft.ExistingId}",
+            };
         }
         else
         {
-            studyEntry.Request = new Bundle.RequestComponent { Method = Bundle.HTTPVerb.POST, Url = "ResearchStudy" };
+            studyEntry.Request = new Bundle.RequestComponent
+            {
+                Method = Bundle.HTTPVerb.POST,
+                Url = "ResearchStudy",
+            };
         }
 
         var bundle = new Bundle { Type = Bundle.BundleType.Transaction };
         bundle.Entry.Add(studyEntry);
-        bundle.Entry.Add(new Bundle.EntryComponent
-        {
-            FullUrl = groupFullUrl,
-            Resource = group,
-            Request = new Bundle.RequestComponent { Method = Bundle.HTTPVerb.POST, Url = "Group" },
-        });
+        bundle.Entry.Add(
+            new Bundle.EntryComponent
+            {
+                FullUrl = groupFullUrl,
+                Resource = group,
+                Request = new Bundle.RequestComponent
+                {
+                    Method = Bundle.HTTPVerb.POST,
+                    Url = "Group",
+                },
+            }
+        );
         bundle.Entry.AddRange(libraryEntries);
 
         return bundle;

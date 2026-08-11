@@ -30,9 +30,13 @@ public sealed class LatestLocationDto
 public sealed class PatientRecordService(
     FhirClientFactory clientFactory,
     IStringLocalizer<SharedResources> localizer,
-    ILogger<PatientRecordService> logger)
+    ILogger<PatientRecordService> logger
+)
 {
-    public async Task<PatientClinicalSummaryDto> GetClinicalSummaryAsync(string patientId, CancellationToken ct = default)
+    public async Task<PatientClinicalSummaryDto> GetClinicalSummaryAsync(
+        string patientId,
+        CancellationToken ct = default
+    )
     {
         var client = clientFactory.CreateClient();
 
@@ -40,7 +44,10 @@ public sealed class PatientRecordService(
         try
         {
             resources = await FhirBundleHelpers.GetAllPagesAsync(
-                client, $"Patient/{patientId}/$everything?_count=250&_pretty=false", ct);
+                client,
+                $"Patient/{patientId}/$everything?_count=250&_pretty=false",
+                ct
+            );
         }
         catch (Exception ex)
         {
@@ -64,7 +71,10 @@ public sealed class PatientRecordService(
     /// "latest per patient" FHIR query, so this is fetched per-patient/on-demand, mirroring
     /// list-old's fetchLatestEncounterWithLocation.
     /// </summary>
-    public async Task<LatestLocationDto?> GetLatestLocationAsync(string patientId, CancellationToken ct = default)
+    public async Task<LatestLocationDto?> GetLatestLocationAsync(
+        string patientId,
+        CancellationToken ct = default
+    )
     {
         var client = clientFactory.CreateClient();
 
@@ -74,7 +84,8 @@ public sealed class PatientRecordService(
             resources = await FhirBundleHelpers.GetAllPagesAsync(
                 client,
                 $"Encounter?subject=Patient/{patientId}&_count=5&_include=Encounter:location&_sort=-date&_pretty=false",
-                ct);
+                ct
+            );
         }
         catch (Exception ex)
         {
@@ -82,30 +93,48 @@ public sealed class PatientRecordService(
             return null;
         }
 
-        var locationsById = resources.OfType<Location>().ToDictionary(l => $"Location/{l.Id}", l => l);
-        var encounters = resources.OfType<Encounter>()
+        var locationsById = resources
+            .OfType<Location>()
+            .ToDictionary(l => $"Location/{l.Id}", l => l);
+        var encounters = resources
+            .OfType<Encounter>()
             .OrderByDescending(e => e.Period?.Start)
             .ToList();
 
         foreach (var encounter in encounters)
         {
-            var locationEntry = encounter.Location?
-                .OrderByDescending(l => l.Period?.Start)
+            var locationEntry = encounter
+                .Location?.OrderByDescending(l => l.Period?.Start)
                 .FirstOrDefault();
 
-            if (locationEntry?.Location?.Reference is { } reference && locationsById.TryGetValue(reference, out var location))
+            if (
+                locationEntry?.Location?.Reference is { } reference
+                && locationsById.TryGetValue(reference, out var location)
+            )
             {
-                return new LatestLocationDto { LocationName = location.Name ?? localizer["App.Common.Unknown"], EncounterStart = ParseInstant(encounter.Period?.Start) };
+                return new LatestLocationDto
+                {
+                    LocationName = location.Name ?? localizer["App.Common.Unknown"],
+                    EncounterStart = ParseInstant(encounter.Period?.Start),
+                };
             }
 
             if (!string.IsNullOrEmpty(locationEntry?.Location?.Display))
             {
-                return new LatestLocationDto { LocationName = locationEntry.Location.Display, EncounterStart = ParseInstant(encounter.Period?.Start) };
+                return new LatestLocationDto
+                {
+                    LocationName = locationEntry.Location.Display,
+                    EncounterStart = ParseInstant(encounter.Period?.Start),
+                };
             }
 
             if (!string.IsNullOrEmpty(encounter.ServiceProvider?.Display))
             {
-                return new LatestLocationDto { LocationName = encounter.ServiceProvider.Display, EncounterStart = ParseInstant(encounter.Period?.Start) };
+                return new LatestLocationDto
+                {
+                    LocationName = encounter.ServiceProvider.Display,
+                    EncounterStart = ParseInstant(encounter.Period?.Start),
+                };
             }
         }
 
@@ -120,14 +149,17 @@ public sealed class PatientRecordService(
     /// by its business identifier (TrialIdentifier) directly, without a separate id lookup.
     /// </summary>
     public async Task<IReadOnlyList<CriterionStatusDto>> GetEligibilityCriteriaStatusAsync(
-        string patientId, TrialIdentifier trialIdentifier, CancellationToken ct = default)
+        string patientId,
+        TrialIdentifier trialIdentifier,
+        CancellationToken ct = default
+    )
     {
         var client = clientFactory.CreateClient();
 
         var query =
-            $"Observation?subject=Patient/{patientId}" +
-            $"&focus:ResearchStudy.identifier={Uri.EscapeDataString($"{trialIdentifier.System}|{trialIdentifier.Value}")}" +
-            $"&category={Uri.EscapeDataString($"{FhirConstants.SystemObservationCategory}|{FhirConstants.ObservationCategoryEligibilityAssessment}")}";
+            $"Observation?subject=Patient/{patientId}"
+            + $"&focus:ResearchStudy.identifier={Uri.EscapeDataString($"{trialIdentifier.System}|{trialIdentifier.Value}")}"
+            + $"&category={Uri.EscapeDataString($"{FhirConstants.SystemObservationCategory}|{FhirConstants.ObservationCategoryEligibilityAssessment}")}";
 
         List<Resource> resources;
         try
@@ -136,11 +168,16 @@ public sealed class PatientRecordService(
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "Failed to fetch eligibility criteria status for Patient/{PatientId}", patientId);
+            logger.LogWarning(
+                ex,
+                "Failed to fetch eligibility criteria status for Patient/{PatientId}",
+                patientId
+            );
             return [];
         }
 
-        return resources.OfType<Observation>()
+        return resources
+            .OfType<Observation>()
             .Select(ToCriterionStatus)
             .OrderBy(c => c.DisplayText, StringComparer.OrdinalIgnoreCase)
             .ToList();

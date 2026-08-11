@@ -15,20 +15,25 @@ public sealed class ScreeningListService(
     FhirClientFactory clientFactory,
     TrialAccessService accessService,
     IStringLocalizer<SharedResources> localizer,
-    ILogger<ScreeningListService> logger)
+    ILogger<ScreeningListService> logger
+)
 {
     public async Task<IReadOnlyList<TrialSummaryDto>> GetAccessibleTrialsAsync(
-        ClaimsPrincipal user, int newSuggestionWindowDays, int stalledLeadWindowDays, CancellationToken ct = default)
+        ClaimsPrincipal user,
+        int newSuggestionWindowDays,
+        int stalledLeadWindowDays,
+        CancellationToken ct = default
+    )
     {
         var client = clientFactory.CreateClient();
 
         var query =
-            $"List?code={Uri.EscapeDataString($"{FhirConstants.SystemScreeningList}|{FhirConstants.ScreeningListCode}")}" +
-            "&status=current,retired" +
-            "&_include=List:item" +
-            "&_include:iterate=ResearchSubject:patient" +
-            "&_include=List:belongs-to-study" +
-            "&_count=100";
+            $"List?code={Uri.EscapeDataString($"{FhirConstants.SystemScreeningList}|{FhirConstants.ScreeningListCode}")}"
+            + "&status=current,retired"
+            + "&_include=List:item"
+            + "&_include:iterate=ResearchSubject:patient"
+            + "&_include=List:belongs-to-study"
+            + "&_count=100";
 
         List<Resource> resources;
         try
@@ -41,7 +46,9 @@ public sealed class ScreeningListService(
             throw new FhirAccessException(localizer["App.Errors.TrialsLoadFailed"], ex);
         }
 
-        var researchSubjectsById = resources.OfType<ResearchSubject>().ToDictionary(rs => rs.Id!, rs => rs);
+        var researchSubjectsById = resources
+            .OfType<ResearchSubject>()
+            .ToDictionary(rs => rs.Id!, rs => rs);
         var lists = resources.OfType<FhirList>().ToList();
 
         var trialInfoByListId = BuildTrialInfoByListId(resources, lists);
@@ -50,21 +57,33 @@ public sealed class ScreeningListService(
         var summaries = new List<TrialSummaryDto>();
         foreach (var list in lists)
         {
-            var trialInfo = list.Id is not null ? trialInfoByListId.GetValueOrDefault(list.Id) : null;
+            var trialInfo = list.Id is not null
+                ? trialInfoByListId.GetValueOrDefault(list.Id)
+                : null;
             var acronym = trialInfo?.Acronym;
             var trialIdentifier = trialInfo?.Identifier;
-            if (string.IsNullOrEmpty(acronym) || !TrialAccessService.CanAccessTrial(accessibleTrials, trialIdentifier))
+            if (
+                string.IsNullOrEmpty(acronym)
+                || !TrialAccessService.CanAccessTrial(accessibleTrials, trialIdentifier)
+            )
             {
                 continue;
             }
 
             var entries = list.Entry ?? [];
-            int recruited = 0, pending = 0, notRecruited = 0, newSuggestions = 0, stalled = 0;
+            int recruited = 0,
+                pending = 0,
+                notRecruited = 0,
+                newSuggestions = 0,
+                stalled = 0;
 
             foreach (var entry in entries)
             {
                 var subjectId = entry.Item?.Reference?.Split('/').LastOrDefault();
-                var subject = subjectId is not null && researchSubjectsById.TryGetValue(subjectId, out var s) ? s : null;
+                var subject =
+                    subjectId is not null && researchSubjectsById.TryGetValue(subjectId, out var s)
+                        ? s
+                        : null;
                 var status = subject is not null ? EnumUtility.GetLiteral(subject.Status) : null;
 
                 if (status is not null && FhirConstants.RecruitedStatuses.Contains(status))
@@ -79,32 +98,40 @@ public sealed class ScreeningListService(
                 {
                     pending++;
 
-                    if (subject?.Meta?.LastUpdated is { } lastUpdated &&
-                        lastUpdated < DateTimeOffset.UtcNow.AddDays(-stalledLeadWindowDays))
+                    if (
+                        subject?.Meta?.LastUpdated is { } lastUpdated
+                        && lastUpdated < DateTimeOffset.UtcNow.AddDays(-stalledLeadWindowDays)
+                    )
                     {
                         stalled++;
                     }
                 }
 
-                if (entry.Date is { } dateString && DateTimeOffset.TryParse(dateString, out var recommendedDate) &&
-                    recommendedDate >= DateTimeOffset.UtcNow.AddDays(-newSuggestionWindowDays))
+                if (
+                    entry.Date is { } dateString
+                    && DateTimeOffset.TryParse(dateString, out var recommendedDate)
+                    && recommendedDate >= DateTimeOffset.UtcNow.AddDays(-newSuggestionWindowDays)
+                )
                 {
                     newSuggestions++;
                 }
             }
 
-            summaries.Add(new TrialSummaryDto
-            {
-                ListId = list.Id!,
-                TrialIdentifier = trialIdentifier!,
-                StudyAcronym = acronym,
-                ListStatus = EnumUtility.GetLiteral(list.Status) ?? FhirConstants.ListStatusCurrent,
-                RecruitedCount = recruited,
-                PendingCount = pending,
-                NotRecruitedCount = notRecruited,
-                NewSuggestionsCount = newSuggestions,
-                StalledLeadsCount = stalled,
-            });
+            summaries.Add(
+                new TrialSummaryDto
+                {
+                    ListId = list.Id!,
+                    TrialIdentifier = trialIdentifier!,
+                    StudyAcronym = acronym,
+                    ListStatus =
+                        EnumUtility.GetLiteral(list.Status) ?? FhirConstants.ListStatusCurrent,
+                    RecruitedCount = recruited,
+                    PendingCount = pending,
+                    NotRecruitedCount = notRecruited,
+                    NewSuggestionsCount = newSuggestions,
+                    StalledLeadsCount = stalled,
+                }
+            );
         }
 
         return summaries.OrderBy(s => s.StudyAcronym, StringComparer.OrdinalIgnoreCase).ToList();
@@ -116,17 +143,19 @@ public sealed class ScreeningListService(
     /// trials shows up once with a membership entry per trial ("potentially fitting studies").
     /// </summary>
     public async Task<IReadOnlyList<PatientOverviewDto>> GetPatientsAcrossTrialsAsync(
-        ClaimsPrincipal user, CancellationToken ct = default)
+        ClaimsPrincipal user,
+        CancellationToken ct = default
+    )
     {
         var client = clientFactory.CreateClient();
 
         var query =
-            $"List?code={Uri.EscapeDataString($"{FhirConstants.SystemScreeningList}|{FhirConstants.ScreeningListCode}")}" +
-            "&status=current" +
-            "&_include=List:item" +
-            "&_include:iterate=ResearchSubject:patient" +
-            "&_include=List:belongs-to-study" +
-            "&_count=100";
+            $"List?code={Uri.EscapeDataString($"{FhirConstants.SystemScreeningList}|{FhirConstants.ScreeningListCode}")}"
+            + "&status=current"
+            + "&_include=List:item"
+            + "&_include:iterate=ResearchSubject:patient"
+            + "&_include=List:belongs-to-study"
+            + "&_count=100";
 
         List<Resource> resources;
         try
@@ -150,11 +179,16 @@ public sealed class ScreeningListService(
 
         foreach (var list in lists)
         {
-            var trialInfo = list.Id is not null ? trialInfoByListId.GetValueOrDefault(list.Id) : null;
+            var trialInfo = list.Id is not null
+                ? trialInfoByListId.GetValueOrDefault(list.Id)
+                : null;
             var acronym = trialInfo?.Acronym;
             var studyTitle = trialInfo?.Title;
             var trialIdentifier = trialInfo?.Identifier;
-            if (string.IsNullOrEmpty(acronym) || !TrialAccessService.CanAccessTrial(accessibleTrials, trialIdentifier))
+            if (
+                string.IsNullOrEmpty(acronym)
+                || !TrialAccessService.CanAccessTrial(accessibleTrials, trialIdentifier)
+            )
             {
                 continue;
             }
@@ -181,46 +215,73 @@ public sealed class ScreeningListService(
                     {
                         PatientId = patientId,
                         Name = FormatPatientName(patient),
-                        BirthDate = patient?.BirthDate is { } bd && DateTimeOffset.TryParse(bd, out var birthDate) ? birthDate : null,
+                        BirthDate =
+                            patient?.BirthDate is { } bd
+                            && DateTimeOffset.TryParse(bd, out var birthDate)
+                                ? birthDate
+                                : null,
                         Gender = EnumUtility.GetLiteral(patient?.Gender),
                         Trials = [],
                     };
                     overviewsByPatient[patientId] = overview;
                 }
 
-                DateTimeOffset? recommendedDate = entry.Date is { } d && DateTimeOffset.TryParse(d, out var parsed) ? parsed : null;
-                var isFlaggedIneligible = entry.Flag?.Coding?.Any(c =>
-                    c.System == FhirConstants.SystemDeterminedSubjectStatus && c.Code == FhirConstants.DeterminedStatusIneligible) ?? false;
+                DateTimeOffset? recommendedDate =
+                    entry.Date is { } d && DateTimeOffset.TryParse(d, out var parsed)
+                        ? parsed
+                        : null;
+                var isFlaggedIneligible =
+                    entry.Flag?.Coding?.Any(c =>
+                        c.System == FhirConstants.SystemDeterminedSubjectStatus
+                        && c.Code == FhirConstants.DeterminedStatusIneligible
+                    ) ?? false;
 
-                overview.Trials.Add(new PatientListEntryDto
-                {
-                    ResearchSubjectId = subject.Id!,
-                    PatientId = patientId,
-                    Name = overview.Name,
-                    BirthDate = overview.BirthDate,
-                    Gender = overview.Gender,
-                    Phone = patient?.Telecom?.FirstOrDefault(t => t.System == ContactPoint.ContactPointSystem.Phone)?.Value,
-                    Email = patient?.Telecom?.FirstOrDefault(t => t.System == ContactPoint.ContactPointSystem.Email)?.Value,
-                    Status = EnumUtility.GetLiteral(subject.Status) ?? "candidate",
-                    Note = subject.GetStringExtension(FhirConstants.UrlResearchSubjectNote),
-                    RecommendedDate = recommendedDate,
-                    SystemDeterminedIneligible = isFlaggedIneligible,
-                    LastUpdated = subject.Meta?.LastUpdated,
-                    ListId = list.Id,
-                    StudyAcronym = acronym,
-                    StudyTitle = studyTitle,
-                    TrialIdentifier = trialIdentifier,
-                });
+                overview.Trials.Add(
+                    new PatientListEntryDto
+                    {
+                        ResearchSubjectId = subject.Id!,
+                        PatientId = patientId,
+                        Name = overview.Name,
+                        BirthDate = overview.BirthDate,
+                        Gender = overview.Gender,
+                        Phone = patient
+                            ?.Telecom?.FirstOrDefault(t =>
+                                t.System == ContactPoint.ContactPointSystem.Phone
+                            )
+                            ?.Value,
+                        Email = patient
+                            ?.Telecom?.FirstOrDefault(t =>
+                                t.System == ContactPoint.ContactPointSystem.Email
+                            )
+                            ?.Value,
+                        Status = EnumUtility.GetLiteral(subject.Status) ?? "candidate",
+                        Note = subject.GetStringExtension(FhirConstants.UrlResearchSubjectNote),
+                        RecommendedDate = recommendedDate,
+                        SystemDeterminedIneligible = isFlaggedIneligible,
+                        LastUpdated = subject.Meta?.LastUpdated,
+                        ListId = list.Id,
+                        StudyAcronym = acronym,
+                        StudyTitle = studyTitle,
+                        TrialIdentifier = trialIdentifier,
+                    }
+                );
             }
         }
 
         foreach (var overview in overviewsByPatient.Values)
         {
-            overview.Trials.Sort((a, b) => string.Compare(a.StudyAcronym, b.StudyAcronym, StringComparison.OrdinalIgnoreCase));
+            overview.Trials.Sort(
+                (a, b) =>
+                    string.Compare(
+                        a.StudyAcronym,
+                        b.StudyAcronym,
+                        StringComparison.OrdinalIgnoreCase
+                    )
+            );
         }
 
-        return overviewsByPatient.Values
-            .OrderBy(o => o.Name ?? o.PatientId, StringComparer.OrdinalIgnoreCase)
+        return overviewsByPatient
+            .Values.OrderBy(o => o.Name ?? o.PatientId, StringComparer.OrdinalIgnoreCase)
             .ToList();
     }
 
@@ -231,17 +292,20 @@ public sealed class ScreeningListService(
     /// background service has no per-user OIDC token to call FHIR with.
     /// </summary>
     public async Task<IReadOnlyList<NotificationEventDto>> GetNewRecommendationEventsAsync(
-        ClaimsPrincipal user, int windowDays, CancellationToken ct = default)
+        ClaimsPrincipal user,
+        int windowDays,
+        CancellationToken ct = default
+    )
     {
         var client = clientFactory.CreateClient();
 
         var query =
-            $"List?code={Uri.EscapeDataString($"{FhirConstants.SystemScreeningList}|{FhirConstants.ScreeningListCode}")}" +
-            "&status=current" +
-            "&_include=List:item" +
-            "&_include:iterate=ResearchSubject:patient" +
-            "&_include=List:belongs-to-study" +
-            "&_count=100";
+            $"List?code={Uri.EscapeDataString($"{FhirConstants.SystemScreeningList}|{FhirConstants.ScreeningListCode}")}"
+            + "&status=current"
+            + "&_include=List:item"
+            + "&_include:iterate=ResearchSubject:patient"
+            + "&_include=List:belongs-to-study"
+            + "&_count=100";
 
         List<Resource> resources;
         try
@@ -264,57 +328,88 @@ public sealed class ScreeningListService(
 
         foreach (var list in lists)
         {
-            var trialInfo = list.Id is not null ? trialInfoByListId.GetValueOrDefault(list.Id) : null;
+            var trialInfo = list.Id is not null
+                ? trialInfoByListId.GetValueOrDefault(list.Id)
+                : null;
             var acronym = trialInfo?.Acronym;
             var trialIdentifier = trialInfo?.Identifier;
-            if (string.IsNullOrEmpty(acronym) || !TrialAccessService.CanAccessTrial(accessibleTrials, trialIdentifier))
+            if (
+                string.IsNullOrEmpty(acronym)
+                || !TrialAccessService.CanAccessTrial(accessibleTrials, trialIdentifier)
+            )
             {
                 continue;
             }
 
             foreach (var entry in list.Entry ?? [])
             {
-                if (entry.Date is not { } dateString || !DateTimeOffset.TryParse(dateString, out var recommendedDate) ||
-                    recommendedDate < DateTimeOffset.UtcNow.AddDays(-windowDays))
+                if (
+                    entry.Date is not { } dateString
+                    || !DateTimeOffset.TryParse(dateString, out var recommendedDate)
+                    || recommendedDate < DateTimeOffset.UtcNow.AddDays(-windowDays)
+                )
                 {
                     continue;
                 }
 
                 var subjectId = entry.Item?.Reference?.Split('/').LastOrDefault();
-                var subject = subjectId is not null && subjectsById.TryGetValue(subjectId, out var s) ? s : null;
+                var subject =
+                    subjectId is not null && subjectsById.TryGetValue(subjectId, out var s)
+                        ? s
+                        : null;
                 var patientId = subject?.Individual?.Reference?.Split('/').LastOrDefault();
-                var patient = patientId is not null && patientsById.TryGetValue(patientId, out var p) ? p : null;
-                var patientName = FormatPatientName(patient) ?? patientId ?? localizer["App.Notifications.UnknownPatient"].Value;
+                var patient =
+                    patientId is not null && patientsById.TryGetValue(patientId, out var p)
+                        ? p
+                        : null;
+                var patientName =
+                    FormatPatientName(patient)
+                    ?? patientId
+                    ?? localizer["App.Notifications.UnknownPatient"].Value;
 
-                events.Add(new NotificationEventDto
-                {
-                    Id = $"new:{subjectId}",
-                    Kind = NotificationKind.NewRecommendation,
-                    ListId = list.Id!,
-                    TrialIdentifier = trialIdentifier!,
-                    StudyAcronym = acronym,
-                    PatientId = patientId,
-                    PatientName = patientName,
-                    Message = localizer["App.Notifications.MessageFormat", patientName, acronym],
-                    OccurredAt = recommendedDate,
-                });
+                events.Add(
+                    new NotificationEventDto
+                    {
+                        Id = $"new:{subjectId}",
+                        Kind = NotificationKind.NewRecommendation,
+                        ListId = list.Id!,
+                        TrialIdentifier = trialIdentifier!,
+                        StudyAcronym = acronym,
+                        PatientId = patientId,
+                        PatientName = patientName,
+                        Message = localizer[
+                            "App.Notifications.MessageFormat",
+                            patientName,
+                            acronym
+                        ],
+                        OccurredAt = recommendedDate,
+                    }
+                );
             }
         }
 
         return events.OrderByDescending(e => e.OccurredAt).ToList();
     }
 
-    public async Task<(TrialSummaryDto Summary, IReadOnlyList<PatientListEntryDto> Patients)> GetListWithPatientsAsync(
-        string listId, ClaimsPrincipal user, int newSuggestionWindowDays, int stalledLeadWindowDays, CancellationToken ct = default)
+    public async Task<(
+        TrialSummaryDto Summary,
+        IReadOnlyList<PatientListEntryDto> Patients
+    )> GetListWithPatientsAsync(
+        string listId,
+        ClaimsPrincipal user,
+        int newSuggestionWindowDays,
+        int stalledLeadWindowDays,
+        CancellationToken ct = default
+    )
     {
         var client = clientFactory.CreateClient();
 
         var query =
-            $"List?_id={Uri.EscapeDataString(listId)}" +
-            "&_include=List:item" +
-            "&_include:iterate=ResearchSubject:patient" +
-            "&_include=List:belongs-to-study" +
-            "&_include:iterate=ResearchStudy:enrollment";
+            $"List?_id={Uri.EscapeDataString(listId)}"
+            + "&_include=List:item"
+            + "&_include:iterate=ResearchSubject:patient"
+            + "&_include=List:belongs-to-study"
+            + "&_include:iterate=ResearchStudy:enrollment";
 
         List<Resource> resources;
         try
@@ -327,7 +422,8 @@ public sealed class ScreeningListService(
             throw new FhirAccessException(localizer["App.Errors.PatientListLoadFailed"], ex);
         }
 
-        var list = resources.OfType<FhirList>().FirstOrDefault()
+        var list =
+            resources.OfType<FhirList>().FirstOrDefault()
             ?? throw new FhirAccessException(localizer["App.Errors.ListNotFound"]);
 
         // The acronym, trial identifier (see TrialIdentifier) and title/description all live on
@@ -337,7 +433,11 @@ public sealed class ScreeningListService(
         var study = resources.OfType<ResearchStudy>().FirstOrDefault();
         var acronym = study?.GetStudyAcronym();
         var trialIdentifier = study?.GetTrialIdentifier();
-        if (string.IsNullOrEmpty(acronym) || trialIdentifier is null || !await accessService.CanAccessTrialAsync(user, trialIdentifier, ct))
+        if (
+            string.IsNullOrEmpty(acronym)
+            || trialIdentifier is null
+            || !await accessService.CanAccessTrialAsync(user, trialIdentifier, ct)
+        )
         {
             throw new UnauthorizedAccessException(localizer["App.Errors.NotAuthorizedTrial"]);
         }
@@ -351,14 +451,22 @@ public sealed class ScreeningListService(
             : null;
         var criteria = (group?.Characteristic ?? [])
             .Where(c => !string.IsNullOrEmpty(c.Code?.Text))
-            .Select(c => new CriterionDefinitionDto { DisplayText = c.Code!.Text!, Exclude = c.Exclude ?? false })
+            .Select(c => new CriterionDefinitionDto
+            {
+                DisplayText = c.Code!.Text!,
+                Exclude = c.Exclude ?? false,
+            })
             .ToList();
 
         var subjectsById = resources.OfType<ResearchSubject>().ToDictionary(rs => rs.Id!, rs => rs);
         var patientsById = resources.OfType<Patient>().ToDictionary(p => p.Id!, p => p);
 
         var patientEntries = new List<PatientListEntryDto>();
-        int recruited = 0, pending = 0, notRecruited = 0, newSuggestions = 0, stalled = 0;
+        int recruited = 0,
+            pending = 0,
+            notRecruited = 0,
+            newSuggestions = 0,
+            stalled = 0;
 
         foreach (var entry in list.Entry ?? [])
         {
@@ -369,12 +477,17 @@ public sealed class ScreeningListService(
             }
 
             var patientId = subject.Individual?.Reference?.Split('/').LastOrDefault();
-            var patient = patientId is not null && patientsById.TryGetValue(patientId, out var p) ? p : null;
+            var patient =
+                patientId is not null && patientsById.TryGetValue(patientId, out var p) ? p : null;
 
             var status = EnumUtility.GetLiteral(subject.Status) ?? "candidate";
-            DateTimeOffset? recommendedDate = entry.Date is { } d && DateTimeOffset.TryParse(d, out var parsed) ? parsed : null;
-            var isFlaggedIneligible = entry.Flag?.Coding?.Any(c =>
-                c.System == FhirConstants.SystemDeterminedSubjectStatus && c.Code == FhirConstants.DeterminedStatusIneligible) ?? false;
+            DateTimeOffset? recommendedDate =
+                entry.Date is { } d && DateTimeOffset.TryParse(d, out var parsed) ? parsed : null;
+            var isFlaggedIneligible =
+                entry.Flag?.Coding?.Any(c =>
+                    c.System == FhirConstants.SystemDeterminedSubjectStatus
+                    && c.Code == FhirConstants.DeterminedStatusIneligible
+                ) ?? false;
 
             if (FhirConstants.RecruitedStatuses.Contains(status))
             {
@@ -388,33 +501,52 @@ public sealed class ScreeningListService(
             {
                 pending++;
 
-                if (subject.Meta?.LastUpdated is { } lastUpdated &&
-                    lastUpdated < DateTimeOffset.UtcNow.AddDays(-stalledLeadWindowDays))
+                if (
+                    subject.Meta?.LastUpdated is { } lastUpdated
+                    && lastUpdated < DateTimeOffset.UtcNow.AddDays(-stalledLeadWindowDays)
+                )
                 {
                     stalled++;
                 }
             }
 
-            if (recommendedDate is not null && recommendedDate >= DateTimeOffset.UtcNow.AddDays(-newSuggestionWindowDays))
+            if (
+                recommendedDate is not null
+                && recommendedDate >= DateTimeOffset.UtcNow.AddDays(-newSuggestionWindowDays)
+            )
             {
                 newSuggestions++;
             }
 
-            patientEntries.Add(new PatientListEntryDto
-            {
-                ResearchSubjectId = subject.Id!,
-                PatientId = patientId ?? string.Empty,
-                Name = FormatPatientName(patient),
-                BirthDate = patient?.BirthDate is { } bd && DateTimeOffset.TryParse(bd, out var birthDate) ? birthDate : null,
-                Gender = EnumUtility.GetLiteral(patient?.Gender),
-                Phone = patient?.Telecom?.FirstOrDefault(t => t.System == ContactPoint.ContactPointSystem.Phone)?.Value,
-                Email = patient?.Telecom?.FirstOrDefault(t => t.System == ContactPoint.ContactPointSystem.Email)?.Value,
-                Status = status,
-                Note = subject.GetStringExtension(FhirConstants.UrlResearchSubjectNote),
-                RecommendedDate = recommendedDate,
-                SystemDeterminedIneligible = isFlaggedIneligible,
-                LastUpdated = subject.Meta?.LastUpdated,
-            });
+            patientEntries.Add(
+                new PatientListEntryDto
+                {
+                    ResearchSubjectId = subject.Id!,
+                    PatientId = patientId ?? string.Empty,
+                    Name = FormatPatientName(patient),
+                    BirthDate =
+                        patient?.BirthDate is { } bd
+                        && DateTimeOffset.TryParse(bd, out var birthDate)
+                            ? birthDate
+                            : null,
+                    Gender = EnumUtility.GetLiteral(patient?.Gender),
+                    Phone = patient
+                        ?.Telecom?.FirstOrDefault(t =>
+                            t.System == ContactPoint.ContactPointSystem.Phone
+                        )
+                        ?.Value,
+                    Email = patient
+                        ?.Telecom?.FirstOrDefault(t =>
+                            t.System == ContactPoint.ContactPointSystem.Email
+                        )
+                        ?.Value,
+                    Status = status,
+                    Note = subject.GetStringExtension(FhirConstants.UrlResearchSubjectNote),
+                    RecommendedDate = recommendedDate,
+                    SystemDeterminedIneligible = isFlaggedIneligible,
+                    LastUpdated = subject.Meta?.LastUpdated,
+                }
+            );
         }
 
         var summary = new TrialSummaryDto
@@ -436,7 +568,12 @@ public sealed class ScreeningListService(
         return (summary, patientEntries.OrderByDescending(p => p.RecommendedDate).ToList());
     }
 
-    public async Task UpdateListStatusAsync(string listId, string status, ClaimsPrincipal user, CancellationToken ct = default)
+    public async Task UpdateListStatusAsync(
+        string listId,
+        string status,
+        ClaimsPrincipal user,
+        CancellationToken ct = default
+    )
     {
         if (!accessService.CanPatchList(user))
         {
@@ -468,17 +605,25 @@ public sealed class ScreeningListService(
     /// so this needs no request of its own.
     /// </summary>
     private static Dictionary<string, TrialInfo> BuildTrialInfoByListId(
-        IReadOnlyList<Resource> resources, IEnumerable<FhirList> lists)
+        IReadOnlyList<Resource> resources,
+        IEnumerable<FhirList> lists
+    )
     {
-        var studiesById = resources.OfType<ResearchStudy>()
+        var studiesById = resources
+            .OfType<ResearchStudy>()
             .Where(s => s.Id is not null)
             .ToDictionary(s => s.Id!, s => s);
 
         var result = new Dictionary<string, TrialInfo>();
         foreach (var list in lists)
         {
-            var studyId = list.GetReferenceExtension(FhirConstants.UrlListBelongsToStudy)?.GetReferencedId();
-            if (list.Id is null || studyId is null || !studiesById.TryGetValue(studyId, out var study))
+            var studyId = list.GetReferenceExtension(FhirConstants.UrlListBelongsToStudy)
+                ?.GetReferencedId();
+            if (
+                list.Id is null
+                || studyId is null
+                || !studiesById.TryGetValue(studyId, out var study)
+            )
             {
                 continue;
             }
@@ -503,6 +648,9 @@ public sealed class ScreeningListService(
         }
 
         var given = string.Join(' ', name.Given ?? []);
-        return string.Join(' ', new[] { given, name.Family }.Where(s => !string.IsNullOrWhiteSpace(s)));
+        return string.Join(
+            ' ',
+            new[] { given, name.Family }.Where(s => !string.IsNullOrWhiteSpace(s))
+        );
     }
 }

@@ -1,6 +1,6 @@
 using System;
-using Microsoft.EntityFrameworkCore.Migrations;
 using list.Models;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -12,7 +12,8 @@ namespace list.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterDatabase()
+            migrationBuilder
+                .AlterDatabase()
                 .Annotation("Npgsql:Enum:trial_permission_level", "coordinator,trial_admin,viewer");
 
             migrationBuilder.CreateTable(
@@ -25,28 +26,38 @@ namespace list.Data.Migrations
                     subject_id = table.Column<string>(type: "text", nullable: true),
                     email = table.Column<string>(type: "text", nullable: false),
                     display_name = table.Column<string>(type: "text", nullable: true),
-                    level = table.Column<TrialPermissionLevel>(type: "trial_permission_level", nullable: false),
+                    level = table.Column<TrialPermissionLevel>(
+                        type: "trial_permission_level",
+                        nullable: false
+                    ),
                     granted_by = table.Column<string>(type: "text", nullable: false),
-                    granted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                    granted_at = table.Column<DateTimeOffset>(
+                        type: "timestamp with time zone",
+                        nullable: false
+                    ),
+                    updated_at = table.Column<DateTimeOffset>(
+                        type: "timestamp with time zone",
+                        nullable: false
+                    ),
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_trial_access_grants", x => x.id);
-                });
+                }
+            );
 
             migrationBuilder.CreateIndex(
                 name: "ix_trial_access_grants_trial_identifier_system_trial_identifie",
                 table: "trial_access_grants",
                 columns: ["trial_identifier_system", "trial_identifier_value", "email"],
-                unique: true);
+                unique: true
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "trial_access_grants");
+            migrationBuilder.DropTable(name: "trial_access_grants");
         }
     }
 }

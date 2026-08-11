@@ -16,7 +16,10 @@ namespace list.Services.Access;
 /// OidcEvents, which backfills SubjectId once they do log in).
 /// </summary>
 public sealed class TrialAccessService(
-    IDbContextFactory<AppDbContext> dbContextFactory, IStringLocalizer<SharedResources> localizer, ILogger<TrialAccessService> logger)
+    IDbContextFactory<AppDbContext> dbContextFactory,
+    IStringLocalizer<SharedResources> localizer,
+    ILogger<TrialAccessService> logger
+)
 {
     public const string AdminRole = "admin";
 
@@ -29,7 +32,10 @@ public sealed class TrialAccessService(
     private const TrialPermissionLevel AdminEffectiveLevel = TrialPermissionLevel.TrialAdmin;
 
     public async Task<TrialPermissionLevel?> GetPermissionAsync(
-        ClaimsPrincipal user, TrialIdentifier trialIdentifier, CancellationToken ct = default)
+        ClaimsPrincipal user,
+        TrialIdentifier trialIdentifier,
+        CancellationToken ct = default
+    )
     {
         if (IsAdmin(user))
         {
@@ -39,15 +45,25 @@ public sealed class TrialAccessService(
         var (subjectId, email) = GetUserKeys(user);
         if (subjectId is null && email is null)
         {
-            logger.LogWarning("Neither sub nor email are set for the current user. Denying all access.");
+            logger.LogWarning(
+                "Neither sub nor email are set for the current user. Denying all access."
+            );
             return null;
         }
 
         await using var db = await dbContextFactory.CreateDbContextAsync(ct);
-        var grant = await db.TrialAccessGrants.AsNoTracking().FirstOrDefaultAsync(
-            g => g.TrialIdentifierSystem == trialIdentifier.System && g.TrialIdentifierValue == trialIdentifier.Value &&
-                 ((subjectId != null && g.SubjectId == subjectId) || (email != null && g.Email == email)),
-            ct);
+        var grant = await db
+            .TrialAccessGrants.AsNoTracking()
+            .FirstOrDefaultAsync(
+                g =>
+                    g.TrialIdentifierSystem == trialIdentifier.System
+                    && g.TrialIdentifierValue == trialIdentifier.Value
+                    && (
+                        (subjectId != null && g.SubjectId == subjectId)
+                        || (email != null && g.Email == email)
+                    ),
+                ct
+            );
 
         return grant?.Level;
     }
@@ -57,7 +73,9 @@ public sealed class TrialAccessService(
     /// notifications) without one DB round-trip per trial. Admin: null, meaning "all trials".
     /// </summary>
     public async Task<IReadOnlySet<TrialIdentifier>?> GetAccessibleTrialIdentifiersAsync(
-        ClaimsPrincipal user, CancellationToken ct = default)
+        ClaimsPrincipal user,
+        CancellationToken ct = default
+    )
     {
         if (IsAdmin(user))
         {
@@ -67,33 +85,60 @@ public sealed class TrialAccessService(
         var (subjectId, email) = GetUserKeys(user);
         if (subjectId is null && email is null)
         {
-            logger.LogWarning("Neither sub nor email are set for the current user. Denying all access.");
+            logger.LogWarning(
+                "Neither sub nor email are set for the current user. Denying all access."
+            );
             return new HashSet<TrialIdentifier>();
         }
 
         await using var db = await dbContextFactory.CreateDbContextAsync(ct);
-        var grants = await db.TrialAccessGrants.AsNoTracking()
-            .Where(g => (subjectId != null && g.SubjectId == subjectId) || (email != null && g.Email == email))
+        var grants = await db
+            .TrialAccessGrants.AsNoTracking()
+            .Where(g =>
+                (subjectId != null && g.SubjectId == subjectId)
+                || (email != null && g.Email == email)
+            )
             .Select(g => new { g.TrialIdentifierSystem, g.TrialIdentifierValue })
             .ToListAsync(ct);
 
-        return grants.Select(g => new TrialIdentifier(g.TrialIdentifierSystem, g.TrialIdentifierValue)).ToHashSet();
+        return grants
+            .Select(g => new TrialIdentifier(g.TrialIdentifierSystem, g.TrialIdentifierValue))
+            .ToHashSet();
     }
 
     /// <summary>Companion to GetAccessibleTrialIdentifiersAsync - null means "admin, everything is accessible".</summary>
-    public static bool CanAccessTrial(IReadOnlySet<TrialIdentifier>? accessibleTrials, TrialIdentifier? trialIdentifier) =>
-        trialIdentifier is not null && (accessibleTrials is null || accessibleTrials.Contains(trialIdentifier));
+    public static bool CanAccessTrial(
+        IReadOnlySet<TrialIdentifier>? accessibleTrials,
+        TrialIdentifier? trialIdentifier
+    ) =>
+        trialIdentifier is not null
+        && (accessibleTrials is null || accessibleTrials.Contains(trialIdentifier));
 
-    public async Task<bool> CanAccessTrialAsync(ClaimsPrincipal user, TrialIdentifier? trialIdentifier, CancellationToken ct = default) =>
-        trialIdentifier is not null && await GetPermissionAsync(user, trialIdentifier, ct) is not null;
+    public async Task<bool> CanAccessTrialAsync(
+        ClaimsPrincipal user,
+        TrialIdentifier? trialIdentifier,
+        CancellationToken ct = default
+    ) =>
+        trialIdentifier is not null
+        && await GetPermissionAsync(user, trialIdentifier, ct) is not null;
 
     /// <summary>ResearchSubject status/note PATCHes require Coordinator or above.</summary>
-    public async Task<bool> CanPatchResearchSubjectAsync(ClaimsPrincipal user, TrialIdentifier trialIdentifier, CancellationToken ct = default) =>
-        await GetPermissionAsync(user, trialIdentifier, ct) is { } level && level >= TrialPermissionLevel.Coordinator;
+    public async Task<bool> CanPatchResearchSubjectAsync(
+        ClaimsPrincipal user,
+        TrialIdentifier trialIdentifier,
+        CancellationToken ct = default
+    ) =>
+        await GetPermissionAsync(user, trialIdentifier, ct) is { } level
+        && level >= TrialPermissionLevel.Coordinator;
 
     /// <summary>Managing who else has access to a trial requires TrialAdmin (or global Admin).</summary>
-    public async Task<bool> CanManageAccessAsync(ClaimsPrincipal user, TrialIdentifier trialIdentifier, CancellationToken ct = default) =>
-        await GetPermissionAsync(user, trialIdentifier, ct) is { } level && level >= TrialPermissionLevel.TrialAdmin;
+    public async Task<bool> CanManageAccessAsync(
+        ClaimsPrincipal user,
+        TrialIdentifier trialIdentifier,
+        CancellationToken ct = default
+    ) =>
+        await GetPermissionAsync(user, trialIdentifier, ct) is { } level
+        && level >= TrialPermissionLevel.TrialAdmin;
 
     /// <summary>Only admins may retire/reactivate a List (matches list-old's createPatchFilter).</summary>
     public bool CanPatchList(ClaimsPrincipal user) => IsAdmin(user);
@@ -108,23 +153,36 @@ public sealed class TrialAccessService(
     public static bool IsOwnGrant(TrialAccessGrant grant, ClaimsPrincipal user)
     {
         var (subjectId, email) = GetUserKeys(user);
-        return (subjectId is not null && grant.SubjectId == subjectId) || (email is not null && grant.Email == email);
+        return (subjectId is not null && grant.SubjectId == subjectId)
+            || (email is not null && grant.Email == email);
     }
 
     public async Task<IReadOnlyList<TrialAccessGrant>> ListGrantsAsync(
-        TrialIdentifier trialIdentifier, ClaimsPrincipal user, CancellationToken ct = default)
+        TrialIdentifier trialIdentifier,
+        ClaimsPrincipal user,
+        CancellationToken ct = default
+    )
     {
         await EnsureCanManageAccessAsync(user, trialIdentifier, ct);
 
         await using var db = await dbContextFactory.CreateDbContextAsync(ct);
-        return await db.TrialAccessGrants.AsNoTracking()
-            .Where(g => g.TrialIdentifierSystem == trialIdentifier.System && g.TrialIdentifierValue == trialIdentifier.Value)
+        return await db
+            .TrialAccessGrants.AsNoTracking()
+            .Where(g =>
+                g.TrialIdentifierSystem == trialIdentifier.System
+                && g.TrialIdentifierValue == trialIdentifier.Value
+            )
             .OrderBy(g => g.Email)
             .ToListAsync(ct);
     }
 
     public async Task AddOrUpdateGrantAsync(
-        TrialIdentifier trialIdentifier, string email, TrialPermissionLevel level, ClaimsPrincipal grantedBy, CancellationToken ct = default)
+        TrialIdentifier trialIdentifier,
+        string email,
+        TrialPermissionLevel level,
+        ClaimsPrincipal grantedBy,
+        CancellationToken ct = default
+    )
     {
         await EnsureCanManageAccessAsync(grantedBy, trialIdentifier, ct);
 
@@ -134,24 +192,29 @@ public sealed class TrialAccessService(
 
         await using var db = await dbContextFactory.CreateDbContextAsync(ct);
         var existing = await db.TrialAccessGrants.FirstOrDefaultAsync(
-            g => g.TrialIdentifierSystem == trialIdentifier.System && g.TrialIdentifierValue == trialIdentifier.Value &&
-                 g.Email == normalizedEmail,
-            ct);
+            g =>
+                g.TrialIdentifierSystem == trialIdentifier.System
+                && g.TrialIdentifierValue == trialIdentifier.Value
+                && g.Email == normalizedEmail,
+            ct
+        );
 
         var now = DateTimeOffset.UtcNow;
         if (existing is null)
         {
-            db.TrialAccessGrants.Add(new TrialAccessGrant
-            {
-                Id = Guid.NewGuid(),
-                TrialIdentifierSystem = trialIdentifier.System,
-                TrialIdentifierValue = trialIdentifier.Value,
-                Email = normalizedEmail,
-                Level = level,
-                GrantedBy = granterIdentity,
-                GrantedAt = now,
-                UpdatedAt = now,
-            });
+            db.TrialAccessGrants.Add(
+                new TrialAccessGrant
+                {
+                    Id = Guid.NewGuid(),
+                    TrialIdentifierSystem = trialIdentifier.System,
+                    TrialIdentifierValue = trialIdentifier.Value,
+                    Email = normalizedEmail,
+                    Level = level,
+                    GrantedBy = granterIdentity,
+                    GrantedAt = now,
+                    UpdatedAt = now,
+                }
+            );
         }
         else
         {
@@ -171,7 +234,11 @@ public sealed class TrialAccessService(
         await db.SaveChangesAsync(ct);
     }
 
-    public async Task RevokeGrantAsync(Guid grantId, ClaimsPrincipal user, CancellationToken ct = default)
+    public async Task RevokeGrantAsync(
+        Guid grantId,
+        ClaimsPrincipal user,
+        CancellationToken ct = default
+    )
     {
         await using var db = await dbContextFactory.CreateDbContextAsync(ct);
         var grant = await db.TrialAccessGrants.FirstOrDefaultAsync(g => g.Id == grantId, ct);
@@ -180,7 +247,11 @@ public sealed class TrialAccessService(
             return;
         }
 
-        await EnsureCanManageAccessAsync(user, new TrialIdentifier(grant.TrialIdentifierSystem, grant.TrialIdentifierValue), ct);
+        await EnsureCanManageAccessAsync(
+            user,
+            new TrialIdentifier(grant.TrialIdentifierSystem, grant.TrialIdentifierValue),
+            ct
+        );
 
         if (IsOwnGrant(grant, user))
         {
@@ -191,15 +262,23 @@ public sealed class TrialAccessService(
         await db.SaveChangesAsync(ct);
     }
 
-    private async Task EnsureCanManageAccessAsync(ClaimsPrincipal user, TrialIdentifier trialIdentifier, CancellationToken ct)
+    private async Task EnsureCanManageAccessAsync(
+        ClaimsPrincipal user,
+        TrialIdentifier trialIdentifier,
+        CancellationToken ct
+    )
     {
         if (!await CanManageAccessAsync(user, trialIdentifier, ct))
         {
-            throw new UnauthorizedAccessException(localizer["App.Errors.NotAuthorizedManageAccess"]);
+            throw new UnauthorizedAccessException(
+                localizer["App.Errors.NotAuthorizedManageAccess"]
+            );
         }
     }
 
     private static (string? SubjectId, string? Email) GetUserKeys(ClaimsPrincipal user) =>
-        (user.FindFirst("sub")?.Value ?? user.FindFirst(ClaimTypes.NameIdentifier)?.Value,
-         user.FindFirst("email")?.Value ?? user.FindFirst(ClaimTypes.Email)?.Value);
+        (
+            user.FindFirst("sub")?.Value ?? user.FindFirst(ClaimTypes.NameIdentifier)?.Value,
+            user.FindFirst("email")?.Value ?? user.FindFirst(ClaimTypes.Email)?.Value
+        );
 }

@@ -35,7 +35,9 @@ public sealed class NotificationDismissalService(ProtectedLocalStorage storage)
         await storage.SetAsync(StorageKey, dismissed.ToArray());
     }
 
-    public async Task<IReadOnlyList<NotificationEventDto>> FilterActiveAsync(IEnumerable<NotificationEventDto> events)
+    public async Task<IReadOnlyList<NotificationEventDto>> FilterActiveAsync(
+        IEnumerable<NotificationEventDto> events
+    )
     {
         var dismissed = await GetDismissedIdsAsync();
         return events.Where(e => !dismissed.Contains(e.Id)).ToList();

@@ -16,5 +16,7 @@ public sealed class AppBbLocalizer(IStringLocalizer<SharedResources> localizer) 
         localizer[key] is { ResourceNotFound: false } found ? found.Value : base[key];
 
     public override string this[string key, params object[] arguments] =>
-        localizer[key, arguments] is { ResourceNotFound: false } found ? found.Value : base[key, arguments];
+        localizer[key, arguments] is { ResourceNotFound: false } found
+            ? found.Value
+            : base[key, arguments];
 }

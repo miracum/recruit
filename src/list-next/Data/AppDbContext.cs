@@ -14,7 +14,14 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             // Level is mapped to a native Postgres enum type via MapEnum in Program.cs, not a
             // string/int conversion here - Npgsql's EF Core provider generates the CREATE TYPE ...
             // AS ENUM migration and supports normal LINQ filtering on it directly.
-            entity.HasIndex(g => new { g.TrialIdentifierSystem, g.TrialIdentifierValue, g.Email }).IsUnique();
+            entity
+                .HasIndex(g => new
+                {
+                    g.TrialIdentifierSystem,
+                    g.TrialIdentifierValue,
+                    g.Email,
+                })
+                .IsUnique();
         });
     }
 }

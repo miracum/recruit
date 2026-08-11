@@ -7,12 +7,8 @@ namespace list.Services.Fhir;
 public sealed class FhirAccessException : Exception
 {
     public FhirAccessException(string message)
-        : base(message)
-    {
-    }
+        : base(message) { }
 
     public FhirAccessException(string message, Exception innerException)
-        : base(message, innerException)
-    {
-    }
+        : base(message, innerException) { }
 }

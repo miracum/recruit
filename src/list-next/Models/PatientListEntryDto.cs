@@ -53,5 +53,6 @@ public sealed class PatientListEntryDto
     public TrialIdentifier? TrialIdentifier { get; init; }
 
     public bool IsNew(int windowDays) =>
-        RecommendedDate is not null && RecommendedDate.Value >= DateTimeOffset.UtcNow.AddDays(-windowDays);
+        RecommendedDate is not null
+        && RecommendedDate.Value >= DateTimeOffset.UtcNow.AddDays(-windowDays);
 }

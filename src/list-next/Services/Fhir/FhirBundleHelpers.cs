@@ -10,7 +10,11 @@ internal static class FhirBundleHelpers
     /// Issues a GET against the given relative FHIR url and follows "next" links, returning
     /// every resource across all pages. Mirrors the "pageLimit: 0" behavior list-old relied on.
     /// </summary>
-    public static async Task<List<Resource>> GetAllPagesAsync(FhirClient client, string relativeUrl, CancellationToken ct = default)
+    public static async Task<List<Resource>> GetAllPagesAsync(
+        FhirClient client,
+        string relativeUrl,
+        CancellationToken ct = default
+    )
     {
         var resources = new List<Resource>();
 
@@ -19,7 +23,9 @@ internal static class FhirBundleHelpers
 
         while (bundle is not null)
         {
-            resources.AddRange(bundle.Entry.Where(e => e.Resource is not null).Select(e => e.Resource!));
+            resources.AddRange(
+                bundle.Entry.Where(e => e.Resource is not null).Select(e => e.Resource!)
+            );
 
             if (bundle.NextLink is null)
             {
@@ -33,13 +39,17 @@ internal static class FhirBundleHelpers
     }
 
     public static string? GetStringExtension(this IExtendable element, string url) =>
-        (element.GetExtension(url)?.Value as FhirString)?.Value ?? (element.GetExtension(url)?.Value as PrimitiveType)?.ToString();
+        (element.GetExtension(url)?.Value as FhirString)?.Value
+        ?? (element.GetExtension(url)?.Value as PrimitiveType)?.ToString();
 
     public static ResourceReference? GetReferenceExtension(this IExtendable element, string url) =>
         element.GetExtension(url)?.Value as ResourceReference;
 
     /// <summary>All repeating extensions at the given url whose value is an Annotation (author/time/text).</summary>
-    public static IReadOnlyList<Annotation> GetAnnotationExtensions(this IExtendable element, string url) =>
+    public static IReadOnlyList<Annotation> GetAnnotationExtensions(
+        this IExtendable element,
+        string url
+    ) =>
         (element.Extension ?? [])
             .Where(e => e.Url == url)
             .Select(e => e.Value as Annotation)
@@ -51,7 +61,9 @@ internal static class FhirBundleHelpers
         reference?.Reference?.Split('/').LastOrDefault();
 
     public static TrialIdentifier? GetTrialIdentifier(this ResearchStudy study) =>
-        study.Identifier?.FirstOrDefault(i => !string.IsNullOrEmpty(i.System) && !string.IsNullOrEmpty(i.Value))
+        study.Identifier?.FirstOrDefault(i =>
+            !string.IsNullOrEmpty(i.System) && !string.IsNullOrEmpty(i.Value)
+        )
             is { System: { Length: > 0 } system, Value: { Length: > 0 } value }
             ? new TrialIdentifier(system, value)
             : null;

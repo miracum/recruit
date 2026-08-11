@@ -10,14 +10,20 @@ namespace list.Services.Fhir;
 /// "sub" (see FhirConstants.SystemPractitionerOidcSubject) - stable even if the user's email or
 /// display name later changes.
 /// </summary>
-public sealed class PractitionerService(FhirClientFactory clientFactory, ILogger<PractitionerService> logger)
+public sealed class PractitionerService(
+    FhirClientFactory clientFactory,
+    ILogger<PractitionerService> logger
+)
 {
     /// <summary>
     /// Conditionally creates or updates (PUT Practitioner?identifier=...) the current user's
     /// Practitioner, keeping name/email in sync with their current claims.
     /// </summary>
     /// <returns>A reference to the Practitioner, or null if the user has no "sub" claim to key on.</returns>
-    public async Task<ResourceReference?> EnsureCurrentPractitionerAsync(ClaimsPrincipal user, CancellationToken ct = default)
+    public async Task<ResourceReference?> EnsureCurrentPractitionerAsync(
+        ClaimsPrincipal user,
+        CancellationToken ct = default
+    )
     {
         var subjectId = GetSubjectId(user);
         if (string.IsNullOrWhiteSpace(subjectId))
@@ -33,7 +39,14 @@ public sealed class PractitionerService(FhirClientFactory clientFactory, ILogger
         var email = GetEmail(user);
         if (!string.IsNullOrWhiteSpace(email))
         {
-            practitioner.Telecom = [new ContactPoint(ContactPoint.ContactPointSystem.Email, ContactPoint.ContactPointUse.Work, email)];
+            practitioner.Telecom =
+            [
+                new ContactPoint(
+                    ContactPoint.ContactPointSystem.Email,
+                    ContactPoint.ContactPointUse.Work,
+                    email
+                ),
+            ];
         }
 
         var displayName = user.GetDisplayName();
@@ -42,17 +55,26 @@ public sealed class PractitionerService(FhirClientFactory clientFactory, ILogger
             practitioner.Name = [new HumanName { Text = displayName }];
         }
 
-        var condition = new SearchParams().Add("identifier", $"{FhirConstants.SystemPractitionerOidcSubject}|{subjectId}");
+        var condition = new SearchParams().Add(
+            "identifier",
+            $"{FhirConstants.SystemPractitionerOidcSubject}|{subjectId}"
+        );
 
         try
         {
             var client = clientFactory.CreateClient();
             var result = await client.ConditionalUpdateAsync(practitioner, condition, ct: ct);
-            return result?.Id is { Length: > 0 } id ? new ResourceReference($"Practitioner/{id}") : null;
+            return result?.Id is { Length: > 0 } id
+                ? new ResourceReference($"Practitioner/{id}")
+                : null;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to conditionally create/update Practitioner for subject {SubjectId}", subjectId);
+            logger.LogError(
+                ex,
+                "Failed to conditionally create/update Practitioner for subject {SubjectId}",
+                subjectId
+            );
             return null;
         }
     }

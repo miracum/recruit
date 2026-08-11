@@ -8,7 +8,10 @@ namespace list.Services.Fhir;
 /// Builds a Firely SDK FhirClient using the "fhir" named HttpClient. One instance per
 /// request/circuit scope is fine - the underlying HttpClient is pooled by IHttpClientFactory.
 /// </summary>
-public sealed class FhirClientFactory(IHttpClientFactory httpClientFactory, IOptions<FhirOptions> fhirOptions)
+public sealed class FhirClientFactory(
+    IHttpClientFactory httpClientFactory,
+    IOptions<FhirOptions> fhirOptions
+)
 {
     public const string HttpClientName = "fhir";
 

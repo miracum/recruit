@@ -10,5 +10,7 @@ public static class ClaimsPrincipalExtensions
     /// so UI surfaces show a real name ("Jane Doe") rather than a login handle ("jdoe") wherever possible.
     /// </summary>
     public static string? GetDisplayName(this ClaimsPrincipal user) =>
-        user.FindFirst("name")?.Value ?? user.FindFirst(ClaimTypes.Name)?.Value ?? user.Identity?.Name;
+        user.FindFirst("name")?.Value
+        ?? user.FindFirst(ClaimTypes.Name)?.Value
+        ?? user.Identity?.Name;
 }
