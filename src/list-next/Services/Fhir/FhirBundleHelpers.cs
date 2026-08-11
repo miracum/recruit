@@ -1,3 +1,4 @@
+using System.Text;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
 using list.Models;
@@ -72,4 +73,10 @@ internal static class FhirBundleHelpers
         study.GetStringExtension(FhirConstants.UrlStudyAcronym) is { Length: > 0 } acronym
             ? acronym
             : study.Title ?? study.Id;
+
+    /// <summary>Decodes a criterion Library's SQL source from its content attachment.</summary>
+    public static string? GetSqlText(this Library library) =>
+        library.Content?.FirstOrDefault()?.Data is { Length: > 0 } data
+            ? Encoding.UTF8.GetString(data)
+            : null;
 }

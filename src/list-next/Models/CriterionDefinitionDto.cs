@@ -6,4 +6,6 @@ public sealed class CriterionDefinitionDto
     public required string DisplayText { get; init; }
 
     public bool Exclude { get; init; }
+
+    public string? Sql { get; init; }
 }

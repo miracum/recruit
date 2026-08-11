@@ -58,10 +58,7 @@ else if (_summary is not null)
                     <ul class="mt-1.5 space-y-1 text-sm">
                         @foreach (var criterion in InclusionCriteria)
                         {
-                            <li class="flex items-start gap-2">
-                                <span class="criteria-bullet" aria-hidden="true"></span>
-                                <span>@criterion.DisplayText</span>
-                            </li>
+                            <CriterionListItem Criterion="criterion" />
                         }
                     </ul>
                 }
@@ -77,10 +74,7 @@ else if (_summary is not null)
                     <ul class="mt-1.5 space-y-1 text-sm">
                         @foreach (var criterion in ExclusionCriteria)
                         {
-                            <li class="flex items-start gap-2">
-                                <span class="criteria-bullet" aria-hidden="true"></span>
-                                <span>@criterion.DisplayText</span>
-                            </li>
+                            <CriterionListItem Criterion="criterion" />
                         }
                     </ul>
                 }

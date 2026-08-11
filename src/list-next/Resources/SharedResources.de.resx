@@ -282,6 +282,9 @@
   <data name="App.PatientList.NoCriteria" xml:space="preserve">
     <value>Keine</value>
   </data>
+  <data name="App.PatientList.CriterionSqlLabel" xml:space="preserve">
+    <value>Zugrunde liegendes SQL</value>
+  </data>
   <data name="App.PatientDialog.TabClinicalSummary" xml:space="preserve">
     <value>Klinische Zusammenfassung</value>
   </data>

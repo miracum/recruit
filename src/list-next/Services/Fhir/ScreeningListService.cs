@@ -409,7 +409,8 @@ public sealed class ScreeningListService(
             + "&_include=List:item"
             + "&_include:iterate=ResearchSubject:patient"
             + "&_include=List:belongs-to-study"
-            + "&_include:iterate=ResearchStudy:enrollment";
+            + "&_include:iterate=ResearchStudy:enrollment"
+            + "&_include:iterate=Group:characteristic-reference";
 
         List<Resource> resources;
         try
@@ -449,12 +450,21 @@ public sealed class ScreeningListService(
         var group = enrolledGroupId is not null
             ? resources.OfType<Group>().FirstOrDefault(g => g.Id == enrolledGroupId)
             : null;
+        var librariesById = resources
+            .OfType<Library>()
+            .Where(l => l.Id is not null)
+            .ToDictionary(l => l.Id!, l => l);
         var criteria = (group?.Characteristic ?? [])
             .Where(c => !string.IsNullOrEmpty(c.Code?.Text))
             .Select(c => new CriterionDefinitionDto
             {
                 DisplayText = c.Code!.Text!,
                 Exclude = c.Exclude ?? false,
+                Sql =
+                    (c.Value as ResourceReference).GetReferencedId() is { } libraryId
+                    && librariesById.TryGetValue(libraryId, out var library)
+                        ? library.GetSqlText()
+                        : null,
             })
             .ToList();
 
