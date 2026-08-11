@@ -241,10 +241,10 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 Return the Trino credentials secret name
 */}}
 {{- define "recruit.trino.secret.name" -}}
-{{- if .Values.queryFhirTrino.trino.auth.existingSecret.name  -}}
-    {{ printf "%s" (tpl .Values.queryFhirTrino.trino.auth.existingSecret.name $) }}
+{{- if .Values.querySqlOnFhir.trino.auth.existingSecret.name  -}}
+    {{ printf "%s" (tpl .Values.querySqlOnFhir.trino.auth.existingSecret.name $) }}
 {{- else -}}
-    {{ printf "%s-%s" (include "recruit.fullname" . ) "query-fhir-trino-secret" }}
+    {{ printf "%s-%s" (include "recruit.fullname" . ) "query-sql-on-fhir-secret" }}
 {{- end -}}
 {{- end -}}
 
@@ -252,8 +252,8 @@ Return the Trino credentials secret name
 Return the Trino credentials secret key
 */}}
 {{- define "recruit.trino.secret.key" -}}
-{{- if .Values.queryFhirTrino.trino.auth.existingSecret.name  -}}
-    {{ printf "%s" (tpl .Values.queryFhirTrino.trino.auth.existingSecret.key $) }}
+{{- if .Values.querySqlOnFhir.trino.auth.existingSecret.name  -}}
+    {{ printf "%s" (tpl .Values.querySqlOnFhir.trino.auth.existingSecret.key $) }}
 {{- else -}}
     {{ printf "%s" "trino-password" }}
 {{- end -}}
@@ -263,5 +263,5 @@ Return the Trino credentials secret key
 Return the Trino password
 */}}
 {{- define "recruit.trino.password" -}}
-    {{ printf "%s" (tpl .Values.queryFhirTrino.trino.auth.password $) }}
+    {{ printf "%s" (tpl .Values.querySqlOnFhir.trino.auth.password $) }}
 {{- end -}}

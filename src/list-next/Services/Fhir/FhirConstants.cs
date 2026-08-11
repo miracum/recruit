@@ -22,7 +22,7 @@ public static class FhirConstants
     public const string SystemDeterminedSubjectStatus = "https://fhir.miracum.org/uc1/CodeSystem/system-determined-subject-status";
     public const string DeterminedStatusIneligible = "ineligible";
 
-    /// <summary>Matches query-fhir-trino's fhir.systems.eligibility-criteria-types config default.</summary>
+    /// <summary>Matches query-sql-on-fhir's fhir.systems.eligibility-criteria-types config default.</summary>
     public const string SystemEligibilityCriteriaTypes = "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-criteria-types";
     public const string EligibilityCriteriaTypeTrinoSql = "trino-sql";
 

@@ -9,4 +9,4 @@
  */
 
 rootProject.name = 'recruit'
-include('notify', 'query', 'query-fhir-trino', 'tester')
+include('notify', 'query', 'query-sql-on-fhir', 'tester')

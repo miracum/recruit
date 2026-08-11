@@ -106,8 +106,8 @@ jobs:
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
 
-  build-query-fhir-trino:
-    name: build query-fhir-trino
+  build-query-sql-on-fhir:
+    name: build query-sql-on-fhir
     permissions:
       contents: write
       pull-requests: write
@@ -119,11 +119,11 @@ jobs:
       artifact-metadata: write
     uses: miracum/.github/.github/workflows/standard-build.yaml@7eaa603620c450f73fd25d6b68c37795ef4be999 # v1.22.8
     with:
-      image: ghcr.io/${{ github.repository }}/query-fhir-trino
+      image: ghcr.io/${{ github.repository }}/query-sql-on-fhir
       build-context: "src/"
       enable-build-test-layer: true
       build-args: |
-        MODULE_NAME=query-fhir-trino
+        MODULE_NAME=query-sql-on-fhir
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -134,7 +134,7 @@ jobs:
       - build-query
       - build-notify
       - build-list
-      - build-query-fhir-trino
+      - build-query-sql-on-fhir
     strategy:
       fail-fast: false
       matrix:
@@ -145,7 +145,7 @@ jobs:
             e2e-test-directory: "tests/e2e/"
           - module: "list"
             e2e-test-directory: "frontend/tests/e2e/"
-          - module: "query-fhir-trino"
+          - module: "query-sql-on-fhir"
     env:
       IMAGE_NAME: ghcr.io/${{ github.repository }}/${{ matrix.module }}
       # the image tag is the same for all modules, so it doesn't matter which build job we read it from.
@@ -232,7 +232,7 @@ jobs:
       - build-query
       - build-notify
       - build-list
-      - build-query-fhir-trino
+      - build-query-sql-on-fhir
       - test
     uses: ./.github/workflows/test-k8s-installation.yaml
     with:
@@ -243,7 +243,7 @@ jobs:
       - build-query
       - build-notify
       - build-list
-      - build-query-fhir-trino
+      - build-query-sql-on-fhir
       - test
     uses: ./.github/workflows/test-compose-installation.yaml
     with:
@@ -268,13 +268,13 @@ jobs:
       - build-query
       - build-notify
       - build-list
-      - build-query-fhir-trino
+      - build-query-sql-on-fhir
     uses: ./.github/workflows/release.yaml
     with:
       query-image-digest: ${{ needs.build-query.outputs.image-digest }}
       notify-image-digest: ${{ needs.build-notify.outputs.image-digest }}
       list-image-digest: ${{ needs.build-list.outputs.image-digest }}
-      query-fhir-trino-image-digest: ${{ needs.build-query-fhir-trino.outputs.image-digest }}
+      query-sql-on-fhir-image-digest: ${{ needs.build-query-sql-on-fhir.outputs.image-digest }}
     secrets:
       token: ${{ secrets.MIRACUM_BOT_SEMANTIC_RELEASE_TOKEN }}
 

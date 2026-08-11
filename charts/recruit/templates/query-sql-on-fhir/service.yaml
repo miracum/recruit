@@ -1,12 +1,12 @@
-{{- with .Values.queryFhirTrino -}}
+{{- with .Values.querySqlOnFhir -}}
 {{- if .enabled -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "recruit.fullname" $ }}-query-fhir-trino
+  name: {{ include "recruit.fullname" $ }}-query-sql-on-fhir
   labels:
     {{- include "recruit.labels" $ | nindent 4 }}
-    app.kubernetes.io/component: query-fhir-trino
+    app.kubernetes.io/component: query-sql-on-fhir
 spec:
   type: {{ .service.type }}
   ports:
@@ -20,6 +20,6 @@ spec:
       name: http-metrics
   selector:
     {{- include "recruit.matchLabels" $ | nindent 4 }}
-    app.kubernetes.io/component: query-fhir-trino
+    app.kubernetes.io/component: query-sql-on-fhir
 {{- end -}}
 {{- end -}}

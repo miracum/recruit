@@ -73,7 +73,7 @@ curl --fail-with-body -X POST -H "Content-Type: application/fhir+json" --data @h
 Now, running
 
 ```sh
-./gradlew :query-fhir-trino:bootRun
+./gradlew :query-sql-on-fhir:bootRun
 ```
 
 ```sh
@@ -99,7 +99,7 @@ export MODULE_NAME=query
 docker build -t "ghcr.io/miracum/recruit/${MODULE_NAME}:local" --build-arg=MODULE_NAME=${MODULE_NAME} .
 ```
 
-The `--build-arg` `MODULE_NAME` can be either `notify`, `query-fhir-trino`, or `query` (default).
+The `--build-arg` `MODULE_NAME` can be either `notify`, `query-sql-on-fhir`, or `query` (default).
 
 #### Using jib
 

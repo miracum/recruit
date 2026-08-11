@@ -1,8 +1,12 @@
-query-fhir-trino:
+query-sql-on-fhir:
   version: "10.5.7" # x-release-please-version
   schedule:
     # every 1 hour
     cron: "@hourly"
+  # max number of patients' (ResearchSubject + per-criterion Observation) entries per transaction
+  # bundle - a study's full candidate set is submitted as one or more bundles of at most this size,
+  # rather than a single unbounded transaction, to stay under the FHIR server's transaction limits.
+  transaction-bundle-chunk-size: 500
 
 fhir:
   url: ""
@@ -14,6 +18,9 @@ fhir:
     screeningListIdentifier: "https://fhir.miracum.org/uc1/NamingSystem/screeningListId"
     screening-list-study-reference-extension: "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy"
     screening-list-code-system: "https://fhir.miracum.org/uc1/CodeSystem/screeningList"
+    # custom, non-standard code identifying the synthetic per-criterion eligibility Observations
+    # this module creates, distinguishing them from genuine clinical Observations elsewhere.
+    eligibility-observation-category-system: "https://fhir.miracum.org/uc1/CodeSystem/observation-category"
 
 # base URL of a sql-on-fhir server (e.g. Pathling) implementing the $sqlquery-run operation.
 # only required if any of the polled SQLQuery Library resources depend on ViewDefinitions
@@ -34,7 +41,7 @@ spring:
   profiles:
     active: dev
   application:
-    name: query-fhir-trino
+    name: query-sql-on-fhir
 
 management:
   endpoint:

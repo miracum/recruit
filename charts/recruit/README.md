@@ -182,39 +182,39 @@ helm install recruit oci://ghcr.io/miracum/recruit/charts/recruit -n recruit
 | query.webAPI.auth.username | string | `""` | the username to login as. Note that this user needs permissions to query and generate cohorts |
 | query.webAPI.dataSource | string | `"CDS-CDMV5"` | name of the OMOP datasource used to generate the cohorts from. |
 | query.webAPI.url | string | `"http://example:8080/WebAPI"` | URL of the ATLAS WebAPI endpoint. Usually ends in /WebAPI. |
-| queryFhirTrino.affinity | object | `{}` | affinity for pod assignment see: <https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity> |
-| queryFhirTrino.enabled | bool | `false` | Whether the Trino SQL-based query module should be enabled |
-| queryFhirTrino.extraEnv | list | `[]` | extra environment vars on the container |
-| queryFhirTrino.extraPodLabels | object | `{}` | specify additional labels to apply to the query pod |
-| queryFhirTrino.extraVolumeMounts | list | `[]` | extra volumes to mount inside the container |
-| queryFhirTrino.extraVolumes | list | `[]` | extra volumes |
-| queryFhirTrino.metrics.serviceMonitor.additionalLabels | object | `{}` | additional labels to apply the the ServiceMonitor object, eg. `release: prometheus` |
-| queryFhirTrino.metrics.serviceMonitor.enabled | bool | `false` | if enabled, creates a ServiceMonitor instance for Prometheus Operator-based monitoring |
-| queryFhirTrino.nodeSelector | object | `{}` | node labels for pod assignment see: <https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/> |
-| queryFhirTrino.podSecurityContext | object | `{}` | security context for the pod |
-| queryFhirTrino.replicaCount | int | `1` | Number of replicas of the query module to run. Running more than one replica for this component is discouraged. |
-| queryFhirTrino.resources | object | `{}` | resource requests and limits for the container |
-| queryFhirTrino.resourcesPreset | string | `"medium"` | set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if primary.resources is set (primary.resources is recommended for production). More information: <https://github.com/miracum/charts/blob/master/charts/common/templates/_resources.tpl#L1> |
-| queryFhirTrino.revisionHistoryLimit | int | `5` | specify how many old ReplicaSets for this Deployment you want to retain. |
-| queryFhirTrino.schedule | string | `"@hourly"` | a Spring cron expression defining the execution schedule of the query module |
-| queryFhirTrino.service | object | `{"metricsPort":8081,"port":8080,"type":"ClusterIP"}` | the service used to expose the query module web port |
-| queryFhirTrino.service.metricsPort | int | `8081` | the service port for the actuator/metrics endpoint |
-| queryFhirTrino.service.port | int | `8080` | the service port for the HTTP endpoint |
-| queryFhirTrino.service.type | string | `"ClusterIP"` | the service type |
-| queryFhirTrino.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
-| queryFhirTrino.serviceAccount.automountServiceAccountToken | bool | `false` | whether to automount the SA token. |
-| queryFhirTrino.serviceAccount.create | bool | `false` | Specifies whether a service account should be created. |
-| queryFhirTrino.serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
-| queryFhirTrino.shouldWaitForNotify | bool | `false` | whether the query module should wait for the notification module to be up before starting. implemented as an init container that waits on notify's `/actuator/health` endpoint |
-| queryFhirTrino.sqlOnFhir.url | string | `""` | base URL of a sql-on-fhir server (e.g. Pathling) implementing the SQLQueryRun operation,    used for SQLQuery Library resources that depend on a ViewDefinition or use a SQL dialect    other than trino. e.g. `http://pathling:8080/fhir` |
-| queryFhirTrino.tolerations | list | `[]` | tolerations for pod assignment see: <https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/> |
-| queryFhirTrino.topologySpreadConstraints | list | `[]` | pod topology spread configuration see: <https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#api> |
-| queryFhirTrino.trino.auth.existingSecret | object | `{"key":"trino-password","name":""}` | use an existing secret to retrieve the login credentials from |
-| queryFhirTrino.trino.auth.existingSecret.key | string | `"trino-password"` | the key containing the password |
-| queryFhirTrino.trino.auth.existingSecret.name | string | `""` | name of an existing Kubernetes secret that contains the user password |
-| queryFhirTrino.trino.auth.password | string | `""` | the password used for login. |
-| queryFhirTrino.trino.auth.username | string | `""` | the username to login as. |
-| queryFhirTrino.trino.jdbcUrl | string | `""` | JDBC URL of the Trino server, e.g. `jdbc:trino://localhost:8080/fhir/default`    the URL can optionally include the catalog and schema, whether this is necessary depends    on how the SQL cohorts are written in the FHIR Library. |
+| querySqlOnFhir.affinity | object | `{}` | affinity for pod assignment see: <https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity> |
+| querySqlOnFhir.enabled | bool | `false` | Whether the Trino SQL-based query module should be enabled |
+| querySqlOnFhir.extraEnv | list | `[]` | extra environment vars on the container |
+| querySqlOnFhir.extraPodLabels | object | `{}` | specify additional labels to apply to the query pod |
+| querySqlOnFhir.extraVolumeMounts | list | `[]` | extra volumes to mount inside the container |
+| querySqlOnFhir.extraVolumes | list | `[]` | extra volumes |
+| querySqlOnFhir.metrics.serviceMonitor.additionalLabels | object | `{}` | additional labels to apply the the ServiceMonitor object, eg. `release: prometheus` |
+| querySqlOnFhir.metrics.serviceMonitor.enabled | bool | `false` | if enabled, creates a ServiceMonitor instance for Prometheus Operator-based monitoring |
+| querySqlOnFhir.nodeSelector | object | `{}` | node labels for pod assignment see: <https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/> |
+| querySqlOnFhir.podSecurityContext | object | `{}` | security context for the pod |
+| querySqlOnFhir.replicaCount | int | `1` | Number of replicas of the query module to run. Running more than one replica for this component is discouraged. |
+| querySqlOnFhir.resources | object | `{}` | resource requests and limits for the container |
+| querySqlOnFhir.resourcesPreset | string | `"medium"` | set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if primary.resources is set (primary.resources is recommended for production). More information: <https://github.com/miracum/charts/blob/master/charts/common/templates/_resources.tpl#L1> |
+| querySqlOnFhir.revisionHistoryLimit | int | `5` | specify how many old ReplicaSets for this Deployment you want to retain. |
+| querySqlOnFhir.schedule | string | `"@hourly"` | a Spring cron expression defining the execution schedule of the query module |
+| querySqlOnFhir.service | object | `{"metricsPort":8081,"port":8080,"type":"ClusterIP"}` | the service used to expose the query module web port |
+| querySqlOnFhir.service.metricsPort | int | `8081` | the service port for the actuator/metrics endpoint |
+| querySqlOnFhir.service.port | int | `8080` | the service port for the HTTP endpoint |
+| querySqlOnFhir.service.type | string | `"ClusterIP"` | the service type |
+| querySqlOnFhir.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
+| querySqlOnFhir.serviceAccount.automountServiceAccountToken | bool | `false` | whether to automount the SA token. |
+| querySqlOnFhir.serviceAccount.create | bool | `false` | Specifies whether a service account should be created. |
+| querySqlOnFhir.serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
+| querySqlOnFhir.shouldWaitForNotify | bool | `false` | whether the query module should wait for the notification module to be up before starting. implemented as an init container that waits on notify's `/actuator/health` endpoint |
+| querySqlOnFhir.sqlOnFhir.url | string | `""` | base URL of a sql-on-fhir server (e.g. Pathling) implementing the SQLQueryRun operation,    used for SQLQuery Library resources that depend on a ViewDefinition or use a SQL dialect    other than trino. e.g. `http://pathling:8080/fhir` |
+| querySqlOnFhir.tolerations | list | `[]` | tolerations for pod assignment see: <https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/> |
+| querySqlOnFhir.topologySpreadConstraints | list | `[]` | pod topology spread configuration see: <https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#api> |
+| querySqlOnFhir.trino.auth.existingSecret | object | `{"key":"trino-password","name":""}` | use an existing secret to retrieve the login credentials from |
+| querySqlOnFhir.trino.auth.existingSecret.key | string | `"trino-password"` | the key containing the password |
+| querySqlOnFhir.trino.auth.existingSecret.name | string | `""` | name of an existing Kubernetes secret that contains the user password |
+| querySqlOnFhir.trino.auth.password | string | `""` | the password used for login. |
+| querySqlOnFhir.trino.auth.username | string | `""` | the username to login as. |
+| querySqlOnFhir.trino.jdbcUrl | string | `""` | JDBC URL of the Trino server, e.g. `jdbc:trino://localhost:8080/fhir/default`    the URL can optionally include the catalog and schema, whether this is necessary depends    on how the SQL cohorts are written in the FHIR Library. |
 | tests.automountServiceAccountToken | bool | `false` |  |
 | tests.resources | object | `{}` | configure the test pods resource requests and limits |
 | tests.resourcesPreset | string | `"nano"` | set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if primary.resources is set (primary.resources is recommended for production). More information: <https://github.com/miracum/charts/blob/master/charts/common/templates/_resources.tpl#L1> |

@@ -1,31 +1,19 @@
-package org.miracum.recruit.queryfhirtrino;
+package org.miracum.recruit.querysqlonfhir;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.util.BundleUtil;
-import com.google.common.hash.Hashing;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Group;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.ListResource;
-import org.hl7.fhir.r4.model.ListResource.ListStatus;
-import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
-import org.hl7.fhir.r4.model.ResearchSubject;
-import org.hl7.fhir.r4.model.ResourceType;
-import org.miracum.recruit.queryfhirtrino.config.FhirSystems;
+import org.miracum.recruit.querysqlonfhir.config.FhirSystems;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -38,25 +26,27 @@ public class PollForStudies {
       "https://sql-on-fhir.org/ig/CodeSystem/LibraryTypesCodes";
   private static final String SQL_QUERY_LIBRARY_TYPE_CODE = "sql-query";
 
-  private SqlQueryExecutor sqlQueryExecutor;
-  private IGenericClient fhirClient;
-  private FhirSystems fhirSystems;
-
-  @Value("${fhir.use-upsert-instead-of-conditional-update}")
-  private boolean useUpsertInsteadOfConditionalUpdate = false;
+  private final SqlQueryExecutor sqlQueryExecutor;
+  private final EligibilityBundleBuilder bundleBuilder;
+  private final IGenericClient fhirClient;
+  private final FhirSystems fhirSystems;
 
   public PollForStudies(
-      SqlQueryExecutor sqlQueryExecutor, IGenericClient fhirClient, FhirSystems fhirSystems) {
+      SqlQueryExecutor sqlQueryExecutor,
+      EligibilityBundleBuilder bundleBuilder,
+      IGenericClient fhirClient,
+      FhirSystems fhirSystems) {
     this.sqlQueryExecutor = sqlQueryExecutor;
+    this.bundleBuilder = bundleBuilder;
     this.fhirClient = fhirClient;
     this.fhirSystems = fhirSystems;
   }
 
-  @Scheduled(cron = "${query-fhir-trino.schedule.cron}")
+  @Scheduled(cron = "${query-sql-on-fhir.schedule.cron}")
   public void pollForStudies() {
     log.info(
-        "Polling for ResearchStudy resources referencing a Group with a SQLQuery Library"
-            + " characteristic");
+        "Polling for ResearchStudy resources referencing a Group with SQLQuery Library"
+            + " characteristics");
 
     var studyBundle =
         fhirClient
@@ -86,157 +76,62 @@ public class PollForStudies {
             fhirClient.getFhirContext(), studyBundle, ResearchStudy.class);
 
     for (var study : researchStudies) {
-      log.info("Found ResearchStudy with id: {}", study.getId());
-
-      var group = (Group) study.getEnrollmentFirstRep().getResource();
-
-      log.info(
-          "Found Group with id: {}, {}", group.getId(), group.getIdentifierFirstRep().getValue());
-
-      var library = (Library) group.getCharacteristicFirstRep().getValueReference().getResource();
-
-      log.info("Found SQLQuery Library with id: {}", library.getId());
-
-      var patientIds = sqlQueryExecutor.resolvePatientIds(library);
-
-      for (var patientId : patientIds) {
-        log.info("Found patient with id: {}", patientId);
+      try {
+        processStudy(study);
+      } catch (Exception ex) {
+        // isolate one study's failure so it doesn't abort polling for every other study found in
+        // this run - now that a study's update can span several chunked transactions, a mid-way
+        // failure is no longer necessarily atomic the way a single-transaction update was.
+        log.error("Failed to process ResearchStudy with id {}", study.getId(), ex);
       }
+    }
+  }
 
-      var bundle = createScreeningListBundle(study, patientIds);
+  private void processStudy(ResearchStudy study) {
+    log.info("Found ResearchStudy with id: {}", study.getId());
 
+    var group = (Group) study.getEnrollmentFirstRep().getResource();
+    log.info(
+        "Found Group with id: {}, {}", group.getId(), group.getIdentifierFirstRep().getValue());
+
+    var criteria =
+        group.getCharacteristic().stream()
+            .map(
+                c ->
+                    new EligibilityCriterion(
+                        (Library) c.getValueReference().getResource(),
+                        c.getCode().getText(),
+                        c.getExclude()))
+            .toList();
+
+    log.info("Found {} eligibility criteria for study {}", criteria.size(), study.getId());
+
+    var results = sqlQueryExecutor.evaluateEligibility(criteria);
+
+    log.info(
+        "{} patients are candidates or have unknown eligibility for study {}",
+        results.size(),
+        study.getId());
+
+    var effectiveDate = new Date();
+
+    var subjectAndObservationBundles =
+        bundleBuilder.buildSubjectAndObservationBundles(study, results, effectiveDate);
+    for (var bundle : subjectAndObservationBundles) {
       fhirClient.transaction().withBundle(bundle).execute();
     }
+
+    // built and submitted after every chunk above has committed, so its conditional
+    // ResearchSubject references (see EligibilityBundleBuilder) actually resolve.
+    var previousScreeningList = fetchPreviousScreeningList(study);
+    var listBundle = bundleBuilder.buildScreeningListBundle(study, results, previousScreeningList);
+    fhirClient.transaction().withBundle(listBundle).execute();
   }
 
-  private Bundle createScreeningListBundle(ResearchStudy study, List<String> patientIds) {
-    var bundle = new Bundle();
-    bundle.setType(Bundle.BundleType.TRANSACTION);
-    bundle.setTimestamp(new Date());
+  private Optional<ListResource> fetchPreviousScreeningList(ResearchStudy study) {
+    var identifierSystem = fhirSystems.screeningListIdentifier();
+    var identifierValue = study.getIdentifierFirstRep().getValue();
 
-    var researchStudyReference = new Reference("ResearchStudy/" + study.getIdElement().getIdPart());
-
-    var screeningListCode = new CodeableConcept();
-    screeningListCode
-        .addCoding()
-        .setSystem(fhirSystems.screeningListCodeSystem())
-        .setCode("screening-recommendations");
-    var screeningList =
-        new ListResource()
-            .setStatus(ListStatus.CURRENT)
-            .setMode(ListResource.ListMode.WORKING)
-            .setCode(screeningListCode);
-    screeningList
-        .addIdentifier()
-        .setSystem(fhirSystems.screeningListIdentifier())
-        .setValue(study.getIdentifierFirstRep().getValue());
-    screeningList
-        .addExtension()
-        .setUrl(fhirSystems.screeningListStudyReferenceExtension())
-        .setValue(researchStudyReference);
-
-    // fetch previous screening list to retain List.entry.date
-    var previousScreeningList = fetchPreviousScreeningList(screeningList.getIdentifierFirstRep());
-
-    for (var patientId : patientIds) {
-      var subject =
-          new ResearchSubject()
-              .setStudy(researchStudyReference)
-              .setIndividual(new Reference("Patient/" + patientId))
-              .setStatus(ResearchSubject.ResearchSubjectStatus.CANDIDATE);
-
-      var entryRequestComponent = new BundleEntryRequestComponent();
-      if (useUpsertInsteadOfConditionalUpdate) {
-        var idValue =
-            "ResearchSubject?patient=Patient/"
-                + patientId
-                + "&study=ResearchStudy/"
-                + study.getIdElement().getIdPart();
-        var resourceId = Hashing.sha256().hashString(idValue, StandardCharsets.UTF_8).toString();
-        subject.setId(resourceId);
-        entryRequestComponent
-            .setMethod(Bundle.HTTPVerb.PUT)
-            .setUrl(ResourceType.ResearchSubject.name() + "/" + resourceId);
-      } else {
-        entryRequestComponent
-            .setMethod(Bundle.HTTPVerb.POST)
-            .setIfNoneExist(
-                "ResearchSubject?patient=Patient/"
-                    + patientId
-                    + "&study=ResearchStudy/"
-                    + study.getIdElement().getIdPart())
-            .setUrl(ResourceType.ResearchSubject.name());
-      }
-
-      var subjectEntry =
-          new Bundle.BundleEntryComponent()
-              .setResource(subject)
-              .setFullUrl(IdType.newRandomUuid().getValue())
-              .setRequest(entryRequestComponent);
-
-      bundle.addEntry(subjectEntry);
-
-      // by default, the ListEntry date is the current date
-      var listEntry =
-          new ListResource.ListEntryComponent()
-              .setItem(new Reference(subjectEntry.getFullUrl()))
-              .setDate(new Date());
-
-      if (previousScreeningList.isPresent()) {
-        // check if there is an entry in the list with the same patient and study reference,
-        // i.e. the same ResearchSubject
-        var previousEntry =
-            previousScreeningList.get().getEntry().stream()
-                .filter(
-                    item ->
-                        ((ResearchSubject) item.getItem().getResource())
-                                .getIndividual()
-                                .getReference()
-                                .equals(subject.getIndividual().getReference())
-                            && ((ResearchSubject) item.getItem().getResource())
-                                .getStudy()
-                                .getReference()
-                                .equals(subject.getStudy().getReference()))
-                .findFirst();
-
-        if (previousEntry.isPresent() && previousEntry.get().hasDate()) {
-          listEntry.setDate(previousEntry.get().getDate());
-        }
-      }
-      screeningList.addEntry(listEntry);
-    }
-
-    var entryRequestComponent = new BundleEntryRequestComponent();
-    if (useUpsertInsteadOfConditionalUpdate) {
-      var identifierValue =
-          fhirSystems.screeningListIdentifier() + "|" + study.getIdentifierFirstRep().getValue();
-      var resourceId =
-          Hashing.sha256().hashString(identifierValue, StandardCharsets.UTF_8).toString();
-      screeningList.setId(resourceId);
-      entryRequestComponent
-          .setMethod(Bundle.HTTPVerb.PUT)
-          .setUrl(ResourceType.List.name() + "/" + resourceId);
-
-    } else {
-      entryRequestComponent
-          .setMethod(Bundle.HTTPVerb.PUT)
-          .setUrl(
-              "List?identifier="
-                  + fhirSystems.screeningListIdentifier()
-                  + "|"
-                  + study.getIdentifierFirstRep().getValue());
-    }
-
-    bundle
-        .addEntry()
-        .setResource(screeningList)
-        .setFullUrl(IdType.newRandomUuid().getValue())
-        .setRequest(entryRequestComponent);
-
-    return bundle;
-  }
-
-  private Optional<ListResource> fetchPreviousScreeningList(Identifier identifier) {
     var previousListBundle =
         fhirClient
             .search()
@@ -244,7 +139,7 @@ public class PollForStudies {
             .where(
                 ListResource.IDENTIFIER
                     .exactly()
-                    .systemAndIdentifier(identifier.getSystem(), identifier.getValue()))
+                    .systemAndIdentifier(identifierSystem, identifierValue))
             .include(new Include("List:item"))
             .returnBundle(Bundle.class)
             .encodedJson()
@@ -260,7 +155,7 @@ public class PollForStudies {
     }
     if (listResources.size() > 1) {
       throw new IllegalArgumentException(
-          "Found more than one List resource matching identifier " + identifier.getValue());
+          "Found more than one List resource matching identifier " + identifierValue);
     }
 
     return Optional.of(listResources.getFirst());

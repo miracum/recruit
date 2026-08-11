@@ -8,7 +8,7 @@
 
 ## Motivation
 
-Today, `query-fhir-trino`'s `PollForStudies` evaluates exactly **one** SQL
+Today, `query-sql-on-fhir`'s `PollForStudies` evaluates exactly **one** SQL
 query per study (`ResearchStudy.enrollment` -> `Group` with
 `Group.code = trino-sql` -> the first `Group.characteristic` -> a `Library`
 holding base64-encoded SQL). The query returns a flat list of `patient_id`s
@@ -298,7 +298,7 @@ the candidate set was computed.
 
 ## Implementation touchpoints
 
-- `query-fhir-trino`'s `PollForStudies.java`:
+- `query-sql-on-fhir`'s `PollForStudies.java`:
   - Loop `group.getCharacteristic()` instead of `characteristicFirstRep()`.
   - Replace the single `jdbcTemplate.queryForList(contentString)` call with
     the generated wrapper query described above.

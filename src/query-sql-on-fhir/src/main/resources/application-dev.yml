@@ -4,7 +4,7 @@ spring:
     username: "trino"
     password: ""
 
-query-fhir-trino:
+query-sql-on-fhir:
   schedule:
     # every 5 seconds
     cron: "*/5 * * * * *"
@@ -25,4 +25,4 @@ logging:
       springframework: "INFO"
       miracum:
         recruit:
-          queryfhirtrino: "DEBUG"
+          querysqlonfhir: "DEBUG"

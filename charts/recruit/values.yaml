@@ -662,7 +662,7 @@ list:
     seccompProfile:
       type: RuntimeDefault
 
-queryFhirTrino:
+querySqlOnFhir:
   # -- Whether the Trino SQL-based query module should be enabled
   enabled: false
   # -- Number of replicas of the query module to run.
@@ -675,7 +675,7 @@ queryFhirTrino:
   # @ignore
   image: # +doc-gen:ignore
     registry: ghcr.io
-    repository: miracum/recruit/query-fhir-trino
+    repository: miracum/recruit/query-sql-on-fhir
     tag: v10.5.7 # x-release-please-version
     pullPolicy: IfNotPresent
 
@@ -826,7 +826,7 @@ queryFhirTrino:
     #   whenUnsatisfiable: ScheduleAnyway
     #   labelSelector:
     #     matchLabels:
-    #       app.kubernetes.io/component: query-fhir-trino
+    #       app.kubernetes.io/component: query-sql-on-fhir
     #       app.kubernetes.io/instance: recruit
 
   # -- extra volumes

@@ -90,8 +90,8 @@ services:
           size: 1024
       - ${NOTIFY_RULES_CONFIG_PATH:?}:/app/config/notify-rules/application.yaml:ro
 
-  query-fhir-trino:
-    image: ${RECRUIT_IMAGE_BASE_NAME:-ghcr.io/miracum/recruit}/query-fhir-trino:${RECRUIT_IMAGE_TAG:-v10.5.7} # x-release-please-version
+  query-sql-on-fhir:
+    image: ${RECRUIT_IMAGE_BASE_NAME:-ghcr.io/miracum/recruit}/query-sql-on-fhir:${RECRUIT_IMAGE_TAG:-v10.5.7} # x-release-please-version
     profiles:
       - trino
     restart: unless-stopped
@@ -107,7 +107,7 @@ services:
       SPRING_DATASOURCE_URL: ${TRINO_JDBC_URL:?}
       SPRING_DATASOURCE_USERNAME: ${TRINO_USERNAME:?}
       SPRING_DATASOURCE_PASSWORD: ${TRINO_PASSWORD:?}
-      QUERY_FHIR_TRINO_SCHEDULE_CRON: ${QUERY_FHIR_TRINO_SCHEDULE_CRON:-"@hourly"}
+      QUERY_SQL_ON_FHIR_SCHEDULE_CRON: ${QUERY_SQL_ON_FHIR_SCHEDULE_CRON:-"@hourly"}
       # base URL of a sql-on-fhir server (e.g. Pathling) implementing the $sqlquery-run operation.
       # only required if any polled SQLQuery Library depends on a ViewDefinition or uses a
       # non-trino SQL dialect.

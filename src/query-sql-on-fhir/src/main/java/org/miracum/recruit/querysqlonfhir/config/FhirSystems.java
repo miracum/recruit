@@ -1,4 +1,4 @@
-package org.miracum.recruit.queryfhirtrino.config;
+package org.miracum.recruit.querysqlonfhir.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -6,4 +6,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record FhirSystems(
     String screeningListIdentifier,
     String screeningListCodeSystem,
-    String screeningListStudyReferenceExtension) {}
+    String screeningListStudyReferenceExtension,
+    String eligibilityObservationCategorySystem) {}

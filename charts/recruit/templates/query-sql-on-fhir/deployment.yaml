@@ -1,12 +1,12 @@
-{{- with .Values.queryFhirTrino -}}
+{{- with .Values.querySqlOnFhir -}}
 {{- if .enabled -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "recruit.fullname" $ }}-query-fhir-trino
+  name: {{ include "recruit.fullname" $ }}-query-sql-on-fhir
   labels:
     {{- include "recruit.labels" $ | nindent 4 }}
-    app.kubernetes.io/component: query-fhir-trino
+    app.kubernetes.io/component: query-sql-on-fhir
   {{- with .deploymentAnnotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -17,12 +17,12 @@ spec:
   selector:
     matchLabels:
       {{- include "recruit.matchLabels" $ | nindent 6 }}
-      app.kubernetes.io/component: query-fhir-trino
+      app.kubernetes.io/component: query-sql-on-fhir
   template:
     metadata:
       labels:
         {{- include "recruit.podLabels" $ | nindent 8 }}
-        app.kubernetes.io/component: query-fhir-trino
+        app.kubernetes.io/component: query-sql-on-fhir
         {{- with .extraPodLabels }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -37,7 +37,7 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .podSecurityContext | nindent 8 }}
-      serviceAccountName: {{ include "recruit.serviceAccountName" (dict "context" . "component" "query-fhir-trino") }}
+      serviceAccountName: {{ include "recruit.serviceAccountName" (dict "context" . "component" "query-sql-on-fhir") }}
       automountServiceAccountToken: {{ .serviceAccount.automountServiceAccountToken }}
       initContainers:
         # TODO: wait for trino to be up
@@ -82,7 +82,7 @@ spec:
               done;
         {{- end }}
       containers:
-        - name: query-fhir-trino
+        - name: query-sql-on-fhir
           image: "{{ .image.registry }}/{{ .image.repository }}:{{ .image.tag }}"
           securityContext:
             {{- toYaml .securityContext | nindent 12 }}
@@ -123,7 +123,7 @@ spec:
                 secretKeyRef:
                   name: {{ include "recruit.trino.secret.name" $ }}
                   key: {{ include "recruit.trino.secret.key" $ }}
-            - name: QUERY_FHIR_TRINO_SCHEDULE_CRON
+            - name: QUERY_SQL_ON_FHIR_SCHEDULE_CRON
               value: {{ .schedule | quote }}
             - name: SQL_ON_FHIR_URL
               value: {{ .sqlOnFhir.url | quote }}

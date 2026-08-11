@@ -8,9 +8,9 @@ build:
       jib:
         project: query
         type: gradle
-    - image: ghcr.io/miracum/recruit/query-fhir-trino
+    - image: ghcr.io/miracum/recruit/query-sql-on-fhir
       jib:
-        project: query-fhir-trino
+        project: query-sql-on-fhir
         type: gradle
     - image: ghcr.io/miracum/recruit/notify
       jib:
