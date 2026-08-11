@@ -101,26 +101,13 @@ class SqlQueryExecutorTest {
   @Test
   void evaluateEligibility_withAllTrinoDirectCriteria_runsOneMergedQuery() {
     var ageCriterion = new EligibilityCriterion(trinoLibrary(SQL_AGE), "Age >= 18", false);
-    var chemoCriterion =
-        new EligibilityCriterion(trinoLibrary(SQL_CHEMO), "No prior chemo", true);
+    var chemoCriterion = new EligibilityCriterion(trinoLibrary(SQL_CHEMO), "No prior chemo", true);
 
     when(jdbcTemplate.queryForList(anyString()))
         .thenReturn(
             List.of(
-                row(
-                    "patient_id",
-                    "pat-1",
-                    "crit_0_is_met",
-                    true,
-                    "crit_1_is_met",
-                    true),
-                row(
-                    "patient_id",
-                    "pat-2",
-                    "crit_0_is_met",
-                    true,
-                    "crit_1_is_met",
-                    null)));
+                row("patient_id", "pat-1", "crit_0_is_met", true, "crit_1_is_met", true),
+                row("patient_id", "pat-2", "crit_0_is_met", true, "crit_1_is_met", null)));
 
     var results = sut.evaluateEligibility(List.of(ageCriterion, chemoCriterion));
 

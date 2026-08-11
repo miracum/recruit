@@ -32,9 +32,9 @@ import org.springframework.stereotype.Component;
  * (nullable boolean), {@code is_indeterminate} (boolean, only meaningful when {@code is_met} is
  * {@code null}), and {@code result_note} (nullable string, a free-text explanation carried through
  * to {@code Observation.value.text} - most useful alongside indeterminate, but not limited to it).
- * Criteria that never need either can just select {@code CAST(NULL AS BOOLEAN)} /
- * {@code CAST(NULL AS VARCHAR)} for them - covering the full patient population, so that missing
- * data reliably produces a {@code null} row rather than a missing one.
+ * Criteria that never need either can just select {@code CAST(NULL AS BOOLEAN)} / {@code CAST(NULL
+ * AS VARCHAR)} for them - covering the full patient population, so that missing data reliably
+ * produces a {@code null} row rather than a missing one.
  *
  * <p>When every criterion's Library has {@code application/sql;dialect=trino} content and no {@code
  * relatedArtifact}, the merge is expressed as a single generated SQL query (one CTE per criterion)
@@ -237,8 +237,7 @@ public class SqlQueryExecutor {
       for (var i = 0; i < criteria.size(); i++) {
         var criterion = criteria.get(i);
         var raw = perCriterionResults.get(i).get(patientId);
-        var met =
-            raw == null || raw.met() == null ? null : (criterion.exclude() != raw.met());
+        var met = raw == null || raw.met() == null ? null : (criterion.exclude() != raw.met());
         var indeterminate = raw != null && raw.indeterminate();
         var note = raw == null ? null : raw.note();
         outcomes.add(

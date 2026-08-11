@@ -292,9 +292,9 @@ public class EligibilityBundleBuilder {
   }
 
   /**
-   * Maps a criterion outcome to a SNOMED CT "Yes/No/Unknown/Indeterminate (qualifier value)"
-   * coding rather than {@code valueBoolean}/{@code dataAbsentReason}: {@code met=null} splits into
-   * two genuinely different situations - {@code indeterminate=false} means the underlying data was
+   * Maps a criterion outcome to a SNOMED CT "Yes/No/Unknown/Indeterminate (qualifier value)" coding
+   * rather than {@code valueBoolean}/{@code dataAbsentReason}: {@code met=null} splits into two
+   * genuinely different situations - {@code indeterminate=false} means the underlying data was
    * simply missing, {@code indeterminate=true} means the criterion's SQL was evaluated but reached
    * an inconclusive result - and only a real value (not an absent one qualified by a reason) can
    * carry that distinction. Both still count as "unresolved" for merge purposes (see
