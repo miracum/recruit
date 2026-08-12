@@ -127,6 +127,54 @@ jobs:
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
 
+  publish-pr-helm-chart:
+    name: publish pr helm chart
+    # only for same-repo PRs: forked PRs don't get a GITHUB_TOKEN with packages:write.
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    needs:
+      - build-query
+      - build-notify
+      - build-list
+      - build-query-sql-on-fhir
+    env:
+      # the image tag is the same for all modules, so it doesn't matter which build job we read it from.
+      IMAGE_TAG: ${{ needs.build-query.outputs.image-version }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add helm repos and build chart dependencies
+        run: |
+          helm repo add hapifhir https://hapifhir.github.io/hapi-fhir-jpaserver-starter
+          helm dependency build charts/recruit
+
+      - name: Point chart at this PR's images and version it as a pre-release
+        run: |
+          for key in query notify list querySqlOnFhir; do
+            yq -i ".${key}.image.tag = \"${IMAGE_TAG}\"" charts/recruit/values.yaml
+          done
+          yq -i ".version = \"0.0.0-pr${PR_NUMBER}\" | .appVersion = \"${IMAGE_TAG}\"" charts/recruit/Chart.yaml
+
+      - name: Package and push Helm chart
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          helm package charts/recruit/
+          helm push "recruit-0.0.0-pr${PR_NUMBER}.tgz" "oci://ghcr.io/${GITHUB_REPOSITORY}/charts"
+
   test:
     name: test
     runs-on: ubuntu-24.04
