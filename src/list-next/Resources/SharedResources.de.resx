@@ -150,6 +150,9 @@
   <data name="App.Nav.CriteriaBuilder" xml:space="preserve">
     <value>Kriterien-Editor</value>
   </data>
+  <data name="App.Nav.HangfireDashboard" xml:space="preserve">
+    <value>Hangfire-Dashboard</value>
+  </data>
   <data name="App.Nav.SignOut" xml:space="preserve">
     <value>Abmelden</value>
   </data>

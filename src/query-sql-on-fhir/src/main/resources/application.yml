@@ -15,7 +15,7 @@ fhir:
     timeout-in-seconds: 300
   use-upsert-instead-of-conditional-update: false
   systems:
-    screeningListIdentifier: "https://fhir.miracum.org/uc1/NamingSystem/screeningListId"
+    screening-list-identifier: "https://fhir.miracum.org/uc1/NamingSystem/screeningListId"
     screening-list-study-reference-extension: "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy"
     screening-list-code-system: "https://fhir.miracum.org/uc1/CodeSystem/screeningList"
     # custom, non-standard code identifying the synthetic per-criterion eligibility Observations
@@ -31,7 +31,7 @@ fhir:
     # read off ResearchStudy to populate the belongsToStudy extension's Reference.display on the
     # screening List - list-next reads the trial's acronym from that display text, not by
     # resolving the ResearchStudy itself (see ScreeningListService.cs).
-    research-study-acronym-extension: "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym"
+    research-study-acronym-extension: "https://www.medizininformatik-initiative.de/fhir/modul-studie/StructureDefinition/mii-ex-studie-akronym"
 
 # base URL of a sql-on-fhir server (e.g. Pathling) implementing the $sqlquery-run operation.
 # only required if any of the polled SQLQuery Library resources depend on ViewDefinitions

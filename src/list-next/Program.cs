@@ -211,6 +211,14 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseHangfireDashboard(
+    "/hangfire",
+    new DashboardOptions
+    {
+        Authorization = [new HangfireDashboardAuthorizationFilter(authDisabled)],
+    }
+);
+
 if (!authDisabled)
 {
     var authGroup = app.MapGroup("/authentication");
