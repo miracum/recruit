@@ -14,7 +14,6 @@ import org.hl7.fhir.r4.model.ResearchStudy;
 import org.miracum.recruit.querysqlonfhir.config.FhirSystems;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -42,8 +41,14 @@ public class PollForStudies {
     this.fhirSystems = fhirSystems;
   }
 
-  @Scheduled(cron = "${query-sql-on-fhir.schedule.cron}")
-  public void pollForStudies() {
+  /**
+   * Runs a single poll cycle: finds all matching ResearchStudy resources and processes each one,
+   * isolating individual failures so one bad study doesn't stop the rest. Called on a schedule by
+   * {@link ScheduledPolling} or once by {@link OneShotRunner}, depending on {@code
+   * query-sql-on-fhir.run-mode} - the isolation behavior below is identical either way, only what
+   * happens with the returned failure count differs.
+   */
+  public PollResult pollForStudies() {
     log.info(
         "Polling for ResearchStudy resources referencing a Group with SQLQuery Library"
             + " characteristics");
@@ -75,6 +80,7 @@ public class PollForStudies {
         BundleUtil.toListOfResourcesOfType(
             fhirClient.getFhirContext(), studyBundle, ResearchStudy.class);
 
+    var failedCount = 0;
     for (var study : researchStudies) {
       try {
         processStudy(study);
@@ -82,9 +88,12 @@ public class PollForStudies {
         // isolate one study's failure so it doesn't abort polling for every other study found in
         // this run - now that a study's update can span several chunked transactions, a mid-way
         // failure is no longer necessarily atomic the way a single-transaction update was.
+        failedCount++;
         log.error("Failed to process ResearchStudy with id {}", study.getId(), ex);
       }
     }
+
+    return new PollResult(researchStudies.size(), failedCount);
   }
 
   private void processStudy(ResearchStudy study) {

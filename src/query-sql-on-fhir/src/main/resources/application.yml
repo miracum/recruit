@@ -1,5 +1,10 @@
 query-sql-on-fhir:
   version: "10.5.7" # x-release-please-version
+  # "scheduled" (default): run forever, triggering a poll cycle on the cron schedule below.
+  # "one-shot": run a single poll cycle, then exit - non-zero if any study failed to process.
+  # Intended for running this module as a Job/Argo Workflow step instead of a long-running
+  # service; the cron schedule below is ignored in this mode.
+  run-mode: scheduled
   schedule:
     # every 1 hour
     cron: "@hourly"
