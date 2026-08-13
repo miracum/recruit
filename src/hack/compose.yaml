@@ -496,6 +496,7 @@ services:
         /synthea/post-transactions.sh
         echo "Loading SearchParameter resources.";
         curl --fail-with-body --retry-connrefused -X POST -H "Content-Type: application/fhir+json" --data @/fhir/search-parameters-transaction-upsert.json "$$FHIR_SERVER_BASE_URL"
+        curl --fail-with-body --retry-connrefused -X POST -H "Content-Type: application/fhir+json" --data @/fhir/trino-sql-study-transaction-upsert.json "$$FHIR_SERVER_BASE_URL"
     volumes:
       - ./synthea/:/synthea/
       - ./fhir/:/fhir/
@@ -504,20 +505,6 @@ services:
         condition: service_started
 
   convert-to-delta:
-    # Uses the pathling CLI (https://pathling.csiro.au) to convert the synthea bulk-export NDJSON
-    # files directly into Delta Lake tables in minio, at the
-    # s3://fhir/default/<ResourceType>.parquet/ layout warehousekeeper expects.
-    #
-    # Uses `pathling run -c` (a small inline script against the Pathling Python API) rather than
-    # `pathling convert -o s3a://...`: pathling 9.8.0's `convert` CLI builds the output path with
-    # Python's pathlib, which collapses the "//" after the URI scheme (s3a://fhir/... becomes
-    # s3a:/fhir/..., breaking bucket resolution - still present on pathling's main branch as of
-    # writing). The Python API called directly here (pathling.read/.write) passes the path
-    # straight through as a plain string and isn't affected.
-    #
-    # Requires a JDK 21+ runtime (pathling's library-runtime jar targets Java 21 class files);
-    # eclipse-temurin:21-jre provides that, and uv/uvx is installed via its official script since
-    # the image doesn't ship Python.
     image: docker.io/library/eclipse-temurin:21-jre@sha256:8cef5fc7bebe421363ab543a2f4db5caf7d119d8db67d56b0f56c485d2de4d55
     profiles:
       - trino
@@ -657,3 +644,17 @@ services:
     depends_on:
       hive-metastore:
         condition: service_started
+
+  recruit-db:
+    image: docker.io/library/postgres:18.4@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a
+    restart: unless-stopped
+    ipc: private
+    security_opt:
+      - "no-new-privileges:true"
+    privileged: false
+    environment:
+      POSTGRES_USER: list
+      POSTGRES_PASSWORD: list # pragma: allowlist secret
+      POSTGRES_DB: list
+    ports:
+      - "127.0.0.1:5433:5432"

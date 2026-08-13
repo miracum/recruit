@@ -7,6 +7,10 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 {
     public DbSet<TrialAccessGrant> TrialAccessGrants => Set<TrialAccessGrant>();
 
+    public DbSet<PollCursor> PollCursors => Set<PollCursor>();
+
+    public DbSet<NotificationRecipient> NotificationRecipients => Set<NotificationRecipient>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<TrialAccessGrant>(entity =>
@@ -20,6 +24,29 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
                     g.TrialIdentifierSystem,
                     g.TrialIdentifierValue,
                     g.Email,
+                })
+                .IsUnique();
+        });
+
+        modelBuilder.Entity<PollCursor>(entity =>
+        {
+            entity.HasKey(c => c.ListId);
+            // The version id itself is the concurrency token: SaveChangesAsync() generates
+            // `UPDATE ... WHERE list_id = @p0 AND last_seen_version_id = @original`, and throws
+            // DbUpdateConcurrencyException when another replica already advanced it - this is the
+            // compare-and-swap the whole HA design rests on, with no hand-written SQL needed.
+            entity.Property(c => c.LastSeenVersionId).IsConcurrencyToken();
+        });
+
+        modelBuilder.Entity<NotificationRecipient>(entity =>
+        {
+            entity
+                .HasIndex(r => new
+                {
+                    r.TrialIdentifierSystem,
+                    r.TrialIdentifierValue,
+                    r.Email,
+                    r.Channel,
                 })
                 .IsUnique();
         });

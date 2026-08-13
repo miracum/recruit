@@ -37,7 +37,7 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .podSecurityContext | nindent 8 }}
-      serviceAccountName: {{ include "recruit.serviceAccountName" (dict "context" . "component" "query-sql-on-fhir") }}
+      serviceAccountName: {{ include "recruit.serviceAccountName" (dict "context" . "component" "query-sql-on-fhir" "root" $) }}
       automountServiceAccountToken: {{ .serviceAccount.automountServiceAccountToken }}
       initContainers:
         # TODO: wait for trino to be up

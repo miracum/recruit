@@ -1,4 +1,6 @@
 using BlazorBlueprint.Components;
+using Hangfire;
+using Hangfire.PostgreSql;
 using list.Components;
 using list.Data;
 using list.Models;
@@ -9,6 +11,7 @@ using list.Services.Fhir;
 using list.Services.Localization;
 using list.Services.Navigation;
 using list.Services.Notifications;
+using list.Services.Notify;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
@@ -39,6 +42,9 @@ builder.Services.Configure<AuthOptions>(builder.Configuration.GetSection(AuthOpt
 builder.Services.Configure<NotificationOptions>(
     builder.Configuration.GetSection(NotificationOptions.SectionName)
 );
+builder.Services.Configure<NotifyMailerOptions>(
+    builder.Configuration.GetSection(NotifyMailerOptions.SectionName)
+);
 
 var fhirBaseUrl =
     builder.Configuration.GetValue<string>("Fhir:BaseUrl")
@@ -57,10 +63,29 @@ builder.Services.AddDbContextFactory<AppDbContext>(options =>
     options
         .UseNpgsql(
             appDbConnectionString,
-            npgsql => npgsql.MapEnum<TrialPermissionLevel>("trial_permission_level")
+            npgsql =>
+                npgsql
+                    .MapEnum<TrialPermissionLevel>("trial_permission_level")
+                    .MapEnum<NotificationChannel>("notification_channel")
         )
         .UseSnakeCaseNamingConvention()
 );
+
+// Hangfire coordinates the notification poller across all list-next replicas via this same
+// Postgres database - see Services/Notify and the notify-next plan for why (a plain
+// UPDATE ... WHERE last_seen_version_id = @original concurrency-token check on PollCursor is the
+// actual dedup mechanism; Hangfire just gives each replica a clustered recurring trigger and a
+// distributed, retried delivery queue on top of that).
+builder.Services.AddHangfire(config =>
+    config
+        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+        .UseSimpleAssemblyNameTypeSerializer()
+        .UseRecommendedSerializerSettings()
+        .UsePostgreSqlStorage(options =>
+            options.UseNpgsqlConnection(appDbConnectionString, _ => { })
+        )
+);
+builder.Services.AddHangfireServer();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddCascadingAuthenticationState();
@@ -141,6 +166,10 @@ builder.Services.AddScoped<EligibilityCriteriaService>();
 builder.Services.AddScoped<NotificationDismissalService>();
 builder.Services.AddScoped<BreadcrumbState>();
 
+builder.Services.AddScoped<INotificationChannel, EmailNotificationChannel>();
+builder.Services.AddScoped<ScreeningListPollService>();
+builder.Services.AddScoped<NotificationDeliveryService>();
+
 var app = builder.Build();
 
 await using (var scope = app.Services.CreateAsyncScope())
@@ -150,6 +179,22 @@ await using (var scope = app.Services.CreateAsyncScope())
     >();
     await using var db = await dbContextFactory.CreateDbContextAsync();
     await db.Database.MigrateAsync();
+}
+
+// Every list-next replica runs a Hangfire server (AddHangfireServer above); they self-coordinate
+// via the shared Postgres storage, so registering the recurring job on every replica's startup is
+// safe and idempotent (Hangfire dedupes by the job id, "poll-screening-lists"). Uses the DI-based
+// IRecurringJobManager rather than the static RecurringJob API, since the static API relies on
+// JobStorage.Current having already been initialized by AddHangfire's lazy configuration - which
+// hasn't necessarily happened yet this early.
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+    recurringJobManager.AddOrUpdate<ScreeningListPollService>(
+        "poll-screening-lists",
+        s => s.PollAllTrialsAsync(CancellationToken.None),
+        Cron.Minutely()
+    );
 }
 
 app.UseRequestLocalization();

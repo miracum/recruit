@@ -37,7 +37,7 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .Values.notify.podSecurityContext | nindent 8 }}
-      serviceAccountName: {{ include "recruit.serviceAccountName" (dict "context" .Values.notify "component" "notify") }}
+      serviceAccountName: {{ include "recruit.serviceAccountName" (dict "context" .Values.notify "component" "notify" "root" $) }}
       automountServiceAccountToken: {{ .Values.notify.serviceAccount.automountServiceAccountToken }}
       initContainers:
         {{- if .Values.notify.ha.enabled }}

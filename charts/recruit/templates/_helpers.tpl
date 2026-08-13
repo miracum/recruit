@@ -59,11 +59,14 @@ Extra labels to apply to every pod
 {{- end -}}
 
 {{/*
-Create the name of the service account to use
+Create the name of the service account to use.
+Expects a dict with "context" (the component's values, e.g. .Values.notify), "component" (e.g.
+"notify") and "root" (the chart's root context, i.e. $) - root is needed because "recruit.fullname"
+reads .Values/.Chart/.Release from the top level, which isn't reachable from "context" alone.
 */}}
 {{- define "recruit.serviceAccountName" -}}
 {{- if .context.serviceAccount.create }}
-{{- default (printf "%s-%s" (include "recruit.fullname" .) .component) .context.serviceAccount.name }}
+{{- default (printf "%s-%s" (include "recruit.fullname" .root) .component) .context.serviceAccount.name }}
 {{- else }}
 {{- default "default" .context.serviceAccount.name }}
 {{- end }}

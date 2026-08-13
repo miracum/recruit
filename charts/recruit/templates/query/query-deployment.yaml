@@ -36,7 +36,7 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .Values.query.podSecurityContext | nindent 8 }}
-      serviceAccountName: {{ include "recruit.serviceAccountName" (dict "context" .Values.query "component" "query") }}
+      serviceAccountName: {{ include "recruit.serviceAccountName" (dict "context" .Values.query "component" "query" "root" $) }}
       automountServiceAccountToken: {{ .Values.query.serviceAccount.automountServiceAccountToken }}
       initContainers:
         - name: wait-for-omop-db
