@@ -410,7 +410,7 @@ public sealed class ScreeningListService(
             + "&_include:iterate=ResearchSubject:patient"
             + "&_include=List:belongs-to-study"
             + "&_include:iterate=ResearchStudy:enrollment"
-            + "&_include:iterate=Group:characteristic-reference";
+            + "&_include:iterate=Group:characteristic";
 
         List<Resource> resources;
         try

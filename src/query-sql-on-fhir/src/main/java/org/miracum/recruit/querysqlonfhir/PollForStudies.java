@@ -61,7 +61,7 @@ public class PollForStudies {
                 new ReferenceClientParam("enrollment")
                     .hasChainedProperty(
                         "Group",
-                        new ReferenceClientParam("characteristic-reference")
+                        new ReferenceClientParam("characteristic")
                             .hasChainedProperty(
                                 "Library",
                                 Library.TYPE
@@ -70,7 +70,7 @@ public class PollForStudies {
                                         SQL_QUERY_LIBRARY_TYPE_SYSTEM,
                                         SQL_QUERY_LIBRARY_TYPE_CODE))))
             .include(new Include("ResearchStudy:enrollment"))
-            .include(new Include("Group:characteristic-reference", true))
+            .include(new Include("Group:characteristic", true))
             .withAdditionalHeader("Prefer", "handling=strict")
             .returnBundle(Bundle.class)
             .encodedJson()
