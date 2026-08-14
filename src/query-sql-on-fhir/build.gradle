@@ -10,6 +10,8 @@ plugins {
 }
 
 dependencies {
+    implementation project(':fhir-constants')
+
     implementation 'com.github.slugify:slugify:4.0.1'
 
     // https://mvnrepository.com/artifact/io.trino/trino-jdbc

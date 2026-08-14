@@ -20,7 +20,7 @@ model) — `generateIgConstants` (see `build.gradle`) scans `fhir/ig/fsh-generat
 directly, via ig-codegen's lower-level `IgPackageScanner`/`JavaConstantsGenerator` API, the same
 directory `sushi` builds locally from `fhir/ig/input/fsh`.
 
-1. From the repo root, run `npx fsh-sushi fhir/ig` to (re-)generate
+1. From the repo root, run `npx fsh-sushi fhir/ig --snapshot` to (re-)generate
    `fhir/ig/fsh-generated/resources`.
 2. Run `./gradlew :fhir-constants:generateIgConstants`.
 3. Review the diff in `src/main/java`, commit it.
@@ -35,25 +35,11 @@ String profileUrl = Recruit.Profiles.screeningList();
 
 // CodeSystems with inline concepts (content == "complete") also get an enum with a coding() accessor:
 Coding coding = Recruit.CodeSystems.ScreeningListType.SCREENING_RECOMMENDATIONS.coding();
+
+// Extensions get a factory method typed to their value[x] (sushi's --snapshot flag is what makes
+// this possible - see "Regenerating" above):
+Extension ext = Recruit.Extensions.screeningListBelongsToStudy(new Reference(researchStudy));
 ```
-
-## Known limitation: `Extensions` factory methods aren't typed to their `value[x]`
-
-`ig-codegen` determines an extension's `value[x]` shape from the `StructureDefinition.snapshot`.
-`sushi` only emits a `differential`, not a `snapshot` (snapshot generation requires the full HL7 IG
-Publisher, which this repo doesn't run as part of the regular build — see the commented-out "build
-FHIR IG" step in `.github/workflows/build-docs.yaml`). Without a snapshot, every extension falls
-back to the generic no-arg factory method, e.g.:
-
-```java
-Extension ext = Recruit.Extensions.screeningListBelongsToStudy();
-ext.setValue(new Reference(researchStudy));
-```
-
-rather than the precisely-typed `screeningListBelongsToStudy(Reference value)` overload
-`ig-codegen` would generate from a full snapshot. If the IG Publisher gets wired into the build
-later, rerunning `generateIgConstants` against its snapshot-bearing output will pick up the more
-specific overloads automatically.
 
 ## Updating the IG
 

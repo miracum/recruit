@@ -5,5 +5,5 @@ Thumbs.db
 /temp
 /template
 
-/fsh-generated/resources/*
-!/fsh-generated/resources/Bundle-recruit-search-parameters-transaction.json
+/fsh-generated/
+!/fsh-generated/resources/

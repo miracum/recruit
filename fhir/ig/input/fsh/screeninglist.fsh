@@ -13,6 +13,7 @@ Extension: ScreeningListBelongsToStudy
 Id: screening-list-belongs-to-study
 Title: "Screening list clinical study reference"
 Description: "A reference to the clinical study that this screening list contains study candidates for"
+Context: List
 * value[x] only Reference(RecruitResearchStudy)
 
 CodeSystem: CodeSystemScreeningList

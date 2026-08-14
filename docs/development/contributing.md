@@ -74,7 +74,7 @@ output behind) and commit the result:
 
 ```sh
 rm -rf fhir/ig/fsh-generated
-npx fsh-sushi fhir/ig
+npx fsh-sushi --snapshot fhir/ig
 ```
 
 Afterwards you can upload a sample study with the associated SQL-encoded criteria:

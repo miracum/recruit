@@ -38,7 +38,7 @@ jobs:
           # instance wouldn't otherwise show up as a diff, since sushi doesn't delete output
           # for resources it no longer generates.
           rm -rf fhir/ig/fsh-generated
-          npx --yes fsh-sushi fhir/ig
+          sushi --snapshot fhir/ig
           if git diff --exit-code -- fhir/ig/fsh-generated; then
             echo -e "\033[0;32mfsh-generated search-parameters Bundle is up to date\033[0m ✔"
           else

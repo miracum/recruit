@@ -5,7 +5,9 @@ export const logger = pino({
   level: process.env.LOG_LEVEL || "info",
 });
 
-const URL_LIST_BELONGS_TO_STUDY_EXTENSION = "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy";
+// keep in sync with recruit's fhir/ig - see the fhir-constants module (Recruit.Extensions.screeningListBelongsToStudy())
+// and frontend/src/const.js's URL_LIST_BELONGS_TO_STUDY_EXTENSION
+const URL_LIST_BELONGS_TO_STUDY_EXTENSION = "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study";
 
 const getAccessibleStudyAcronymsForUser = (user, trialsConfig) => {
   const accessibleStudyAcronyms = [];

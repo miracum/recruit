@@ -53,9 +53,11 @@ fhir:
     omopSubjectIdentifier: "http://ohdsi.org/omop/fhir/subject-identifier"
     omopCohortIdentifier: "http://ohdsi.org/omop/fhir/cohort-identifier"
     screeningListIdentifier: "https://fhir.miracum.org/uc1/NamingSystem/screeningListId"
-    screeningListStudyReferenceExtension: "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy"
+    # keep in sync with recruit's fhir/ig - see the fhir-constants module (Recruit.Extensions.screeningListBelongsToStudy())
+    screeningListStudyReferenceExtension: "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study"
     researchStudyAcronym: "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym"
-    screeningListCoding: "https://fhir.miracum.org/uc1/CodeSystem/screeningList"
+    # keep in sync with recruit's fhir/ig - see the fhir-constants module (Recruit.CodeSystems.screeningListType())
+    screeningListCoding: "https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type"
     studySource: "https://fhir.miracum.org/uc1/recruit/generatedByQueryModule"
     localIdentifier: "https://fhir.miracum.org/core/NamingSystem/patientId"
     patient-id: ${fhir.systems.localIdentifier}

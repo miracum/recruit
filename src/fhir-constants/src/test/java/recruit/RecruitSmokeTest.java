@@ -1,10 +1,10 @@
 package recruit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 
 class RecruitSmokeTest {
@@ -36,11 +36,12 @@ class RecruitSmokeTest {
   }
 
   @Test
-  void extensionFactoryReturnsEmptyExtensionWithTheCanonicalUrl() {
-    Extension extension = Recruit.Extensions.screeningListBelongsToStudy();
+  void extensionFactoryReturnsExtensionWithTheCanonicalUrlAndGivenValue() {
+    var reference = new Reference("ResearchStudy/123");
+    Extension extension = Recruit.Extensions.screeningListBelongsToStudy(reference);
     assertEquals(
         "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study",
         extension.getUrl());
-    assertTrue(extension.getValue() == null);
+    assertEquals(reference, extension.getValue());
   }
 }

@@ -7,12 +7,14 @@ namespace list.Services.Fhir;
 /// </summary>
 public static class FhirConstants
 {
+    /// <summary>Matches recruit's fhir/ig - see the fhir-constants module (Recruit.CodeSystems.screeningListType()).</summary>
     public const string SystemScreeningList =
-        "https://fhir.miracum.org/uc1/CodeSystem/screeningList";
+        "https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type";
     public const string ScreeningListCode = "screening-recommendations";
 
+    /// <summary>Matches recruit's fhir/ig - see the fhir-constants module (Recruit.Extensions.screeningListBelongsToStudy()).</summary>
     public const string UrlListBelongsToStudy =
-        "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy";
+        "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study";
     public const string UrlStudyAcronym =
         "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym";
 

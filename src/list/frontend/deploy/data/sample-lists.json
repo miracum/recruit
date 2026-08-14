@@ -403,7 +403,7 @@
         ],
         "extension": [
           {
-            "url": "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy",
+            "url": "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study",
             "valueReference": {
               "reference": "urn:uuid:df30cc14-a26a-56b4-a6da-27ac32da223f",
               "display": "PROSa"
@@ -414,7 +414,7 @@
         "code": {
           "coding": [
             {
-              "system": "https://fhir.miracum.org/uc1/CodeSystem/screeningList",
+              "system": "https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type",
               "code": "screening-recommendations"
             }
           ]
@@ -455,7 +455,7 @@
         ],
         "extension": [
           {
-            "url": "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy",
+            "url": "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study",
             "valueReference": {
               "reference": "urn:uuid:2ea1bdd1-052b-590d-b2aa-dd61b7258175",
               "display": "AMICA"
@@ -466,7 +466,7 @@
         "code": {
           "coding": [
             {
-              "system": "https://fhir.miracum.org/uc1/CodeSystem/screeningList",
+              "system": "https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type",
               "code": "screening-recommendations"
             }
           ]
@@ -518,7 +518,7 @@
         ],
         "extension": [
           {
-            "url": "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy",
+            "url": "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study",
             "valueReference": {
               "reference": "urn:uuid:7d1857ba-c625-5953-a65e-ae45ce249dfb",
               "display": "SECRET"
@@ -529,7 +529,7 @@
         "code": {
           "coding": [
             {
-              "system": "https://fhir.miracum.org/uc1/CodeSystem/screeningList",
+              "system": "https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type",
               "code": "screening-recommendations"
             }
           ]
@@ -553,7 +553,7 @@
         ],
         "extension": [
           {
-            "url": "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy",
+            "url": "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study",
             "valueReference": {
               "reference": "urn:uuid:8b45f838-729c-5253-b215-0a7bf5adbceb",
               "display": "RETIRED"
@@ -564,7 +564,7 @@
         "code": {
           "coding": [
             {
-              "system": "https://fhir.miracum.org/uc1/CodeSystem/screeningList",
+              "system": "https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type",
               "code": "screening-recommendations"
             }
           ]

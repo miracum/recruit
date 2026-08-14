@@ -46,9 +46,9 @@ tasks.register('generateIgConstants') {
     def outputDir = layout.projectDirectory.dir('src/main/java')
     doLast {
         def scanner = new IgPackageScanner(new ObjectMapper())
-        def model = scanner.scan(resourcesDir.asFile.toPath(), 'recruit', '0.1.0')
+        def model = scanner.scan(resourcesDir.asFile.toPath(), 'io.github.miracum.recruit', '0.1.0')
         def generatedFile = JavaConstantsGenerator.writeTo(
-            model, 'recruit', 'Recruit', outputDir.asFile.toPath())
+            model, 'io.github.miracum.recruit', 'Recruit', outputDir.asFile.toPath())
         logger.lifecycle('Generated {}', generatedFile)
     }
     notCompatibleWithConfigurationCache('reads from the sushi-built fhir/ig/fsh-generated output, not a declared task input')

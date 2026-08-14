@@ -21,8 +21,6 @@ fhir:
   use-upsert-instead-of-conditional-update: false
   systems:
     screening-list-identifier: "https://fhir.miracum.org/uc1/NamingSystem/screeningListId"
-    screening-list-study-reference-extension: "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy"
-    screening-list-code-system: "https://fhir.miracum.org/uc1/CodeSystem/screeningList"
     # custom, non-standard code identifying the synthetic per-criterion eligibility Observations
     # this module creates, distinguishing them from genuine clinical Observations elsewhere.
     eligibility-observation-category-system: "https://fhir.miracum.org/uc1/CodeSystem/observation-category"

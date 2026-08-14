@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.miracum.recruit.querysqlonfhir.config.FhirSystems;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import recruit.Recruit;
 
 /**
  * Builds the FHIR transaction bundles {@link PollForStudies} submits from a study's merged
@@ -50,7 +51,6 @@ public class EligibilityBundleBuilder {
   private static final String SNOMED_CODE_INDETERMINATE = "82334004";
   private static final String SNOMED_DISPLAY_INDETERMINATE = "Indeterminate";
   private static final String ELIGIBILITY_ASSESSMENT_CODE = "eligibility-assessment";
-  private static final String SCREENING_RECOMMENDATIONS_CODE = "screening-recommendations";
 
   private final FhirSystems fhirSystems;
   private final boolean useUpsertInsteadOfConditionalUpdate;
@@ -207,8 +207,9 @@ public class EligibilityBundleBuilder {
     var screeningListCode = new CodeableConcept();
     screeningListCode
         .addCoding()
-        .setSystem(fhirSystems.screeningListCodeSystem())
-        .setCode(SCREENING_RECOMMENDATIONS_CODE);
+        .setSystem(Recruit.CodeSystems.ScreeningListType)
+        .setCode(
+            Recruit.CodeSystems.ScreeningListType.SCREENING_RECOMMENDATIONS.coding().getCode());
 
     var screeningList =
         new ListResource()

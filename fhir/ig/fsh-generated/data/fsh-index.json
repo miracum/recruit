@@ -12,16 +12,16 @@
     "fshName": "CodeSystemScreeningList",
     "fshType": "CodeSystem",
     "fshFile": "screeninglist.fsh",
-    "startLine": 18,
-    "endLine": 21
+    "startLine": 19,
+    "endLine": 22
   },
   {
     "outputFile": "List-ScreeningListExample.json",
     "fshName": "ScreeningListExample",
     "fshType": "Instance",
     "fshFile": "screeninglist.fsh",
-    "startLine": 23,
-    "endLine": 29
+    "startLine": 24,
+    "endLine": 30
   },
   {
     "outputFile": "ResearchStudy-RecruitResearchStudyExample.json",
@@ -69,7 +69,7 @@
     "fshType": "Extension",
     "fshFile": "screeninglist.fsh",
     "startLine": 12,
-    "endLine": 16
+    "endLine": 17
   },
   {
     "outputFile": "StructureDefinition-screening-list.json",
