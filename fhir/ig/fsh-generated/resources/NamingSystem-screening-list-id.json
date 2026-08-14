@@ -9,7 +9,7 @@
   "uniqueId": [
     {
       "type": "uri",
-      "value": "https://miracum.github.io/recruit/fhir/NamingSystem/screening-list-id",
+      "value": "https://miracum.github.io/recruit/fhir/identifiers/screening-list-id",
       "preferred": true
     }
   ]
