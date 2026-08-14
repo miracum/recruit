@@ -4,18 +4,27 @@
  * regenerate.
  */
 
+// Scoped to this build script only (not buildSrc): ig-codegen backs the generateIgConstants task
+// below and nothing else in this module - it has no business being on every other module's build
+// script classpath.
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'io.github.diz-uker:ig-codegen:0.2.10'
+    }
+}
+
+import io.github.dizuker.igcodegen.IgPackageScanner
+import io.github.dizuker.igcodegen.JavaConstantsGenerator
+import tools.jackson.databind.ObjectMapper
+
 plugins {
     id 'org.miracum.recruit.java-library-conventions'
 }
 
-// Only used to run the generator below, not part of the published module's dependencies.
-configurations {
-    codegen
-}
-
 dependencies {
-    codegen 'io.github.diz-uker:ig-codegen:0.2.10'
-
     // CodeSystems with inline concepts (content == "complete") get a generated enum whose
     // coding() accessor returns a org.hl7.fhir.r4.model.Coding - part of the public API, so 'api'
     // rather than 'implementation'.
@@ -25,30 +34,22 @@ dependencies {
     api 'org.jspecify:jspecify:1.0.0'
 }
 
-// Copies the FHIR resources sushi generates from fhir/ig/input/fsh into the flat npm-style
-// package layout ig-codegen expects (<fhirPackagesDir>/<packageName>/*.json). The recruit IG
-// isn't published to a FHIR package registry, so there's nothing for `fhir restore`/`npm
-// install` to fetch here - sushi's own output is the only copy of these resources.
-tasks.register('syncRecruitIgResources', Copy) {
-    from layout.projectDirectory.dir('../../fhir/ig/fsh-generated/resources')
-    into layout.buildDirectory.dir('fhir-packages/recruit')
-    include '*.json'
-}
-
 // Manually-invoked "generate, review, commit" dev tool - not a build-graph participant. See
-// ig-codegen/README.md (in the ig-codegen source repo) for the rationale: don't wire this output
-// dir as a custom @OutputDirectory task, and don't make it configuration-cache compatible, since
-// its input (the sushi-built recruit IG) isn't tracked as a Gradle input either.
-tasks.register('generateIgConstants', JavaExec) {
+// README.md for the rationale. Scans fhir/ig/fsh-generated/resources directly via ig-codegen's
+// lower-level scanner/generator API, rather than IgCodegen's own CLI entry point, which expects a
+// package.json plus a Firely Terminal/npm package cache - there's nothing to restore for an IG
+// that isn't published to a FHIR package registry; sushi's own output is the only copy.
+tasks.register('generateIgConstants') {
     group = 'codegen'
-    description = 'Regenerates the constant classes in src/main/java from package.json. Review the diff and commit.'
-    dependsOn tasks.named('syncRecruitIgResources')
-    classpath = configurations.codegen
-    mainClass = 'io.github.dizuker.igcodegen.IgCodegen'
-    args = [
-        layout.projectDirectory.file('package.json').asFile.path,
-        layout.buildDirectory.dir('fhir-packages').get().asFile.path,
-        layout.projectDirectory.dir('src/main/java').asFile.path,
-    ]
-    notCompatibleWithConfigurationCache('reads from the sushi-built fhir/ig/fsh-generated output')
+    description = 'Regenerates the constant classes in src/main/java from fhir/ig/fsh-generated/resources. Review the diff and commit.'
+    def resourcesDir = layout.projectDirectory.dir('../../fhir/ig/fsh-generated/resources')
+    def outputDir = layout.projectDirectory.dir('src/main/java')
+    doLast {
+        def scanner = new IgPackageScanner(new ObjectMapper())
+        def model = scanner.scan(resourcesDir.asFile.toPath(), 'recruit', '0.1.0')
+        def generatedFile = JavaConstantsGenerator.writeTo(
+            model, 'recruit', 'Recruit', outputDir.asFile.toPath())
+        logger.lifecycle('Generated {}', generatedFile)
+    }
+    notCompatibleWithConfigurationCache('reads from the sushi-built fhir/ig/fsh-generated output, not a declared task input')
 }

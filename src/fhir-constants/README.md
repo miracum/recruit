@@ -4,16 +4,21 @@ Generated Java constant classes for the canonical `CodeSystem`/`StructureDefinit
 (Profile)/`Extension` URLs defined by the recruIT FHIR Implementation Guide (`../../fhir/ig`), via
 [`ig-codegen`](https://github.com/diz-uker/to-fhir/tree/main/ig-codegen).
 
-`ig-codegen` itself is only needed at generation time (wired up as a `codegen` configuration, not
-`api`/`implementation`). The generated code does carry one real runtime dependency, though:
-`hapi-fhir-structures-r4` (`api` scope) — the `CodeSystems.ScreeningListType` enum's `coding()`
-accessor returns a `org.hl7.fhir.r4.model.Coding`.
+`ig-codegen` itself is only needed at generation time, not at compile/runtime for this module - it's
+on the `generateIgConstants` task's `buildscript` classpath (see `build.gradle`), not an
+`api`/`implementation` dependency here, and scoped to this one build script rather than `buildSrc`
+so it doesn't end up on every other module's build script classpath too. The generated code does
+carry one real runtime dependency, though: `hapi-fhir-structures-r4` (`api` scope) — the
+`CodeSystems.ScreeningListType` enum's `coding()` accessor returns a
+`org.hl7.fhir.r4.model.Coding`.
 
 ## Regenerating
 
-The recruIT IG isn't published to a FHIR package registry, so there's nothing for `fhir
-restore`/`npm install` to fetch — `ig-codegen` instead reads straight from what `sushi` builds
-locally from `fhir/ig/input/fsh`.
+The recruIT IG isn't published to a FHIR package registry, so there's no `package.json`/package
+cache to restore here (unlike `ig-codegen`'s own CLI entry point, which is built around that
+model) — `generateIgConstants` (see `build.gradle`) scans `fhir/ig/fsh-generated/resources`
+directly, via ig-codegen's lower-level `IgPackageScanner`/`JavaConstantsGenerator` API, the same
+directory `sushi` builds locally from `fhir/ig/input/fsh`.
 
 1. From the repo root, run `npx fsh-sushi fhir/ig` to (re-)generate
    `fhir/ig/fsh-generated/resources`.
