@@ -9,4 +9,4 @@
  */
 
 rootProject.name = 'recruit'
-include('notify', 'query', 'query-sql-on-fhir', 'tester')
+include('fhir-constants', 'notify', 'query', 'query-sql-on-fhir', 'tester')
