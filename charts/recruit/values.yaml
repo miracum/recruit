@@ -257,17 +257,27 @@ query:
   # implemented as an init container that waits on notify's `/actuator/health` endpoint
   shouldWaitForNotify: false
 
-  # -- configuration for the container's readiness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # -- configuration for the container's readiness probe. Set `enabled: false` to disable it.
+  # See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
   # @ignore
   readinessProbe: # +doc-gen:ignore
+    enabled: true
+    httpGet:
+      path: /readyz
+      port: http
     failureThreshold: 3
     initialDelaySeconds: 30
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 5
-  # -- configuration for the container's liveness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # -- configuration for the container's liveness probe. Set `enabled: false` to disable it.
+  # See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
   # @ignore
   livenessProbe: # +doc-gen:ignore
+    enabled: true
+    httpGet:
+      path: /livez
+      port: http
     failureThreshold: 3
     initialDelaySeconds: 30
     periodSeconds: 10
@@ -450,17 +460,27 @@ notify:
     #    hosts:
     #      - notify-example.local
 
-  # -- configuration for the container's readiness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # -- configuration for the container's readiness probe. Set `enabled: false` to disable it.
+  # See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
   # @ignore
   readinessProbe: # +doc-gen:ignore
+    enabled: true
+    httpGet:
+      path: /readyz
+      port: http
     failureThreshold: 5
     initialDelaySeconds: 30
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 10
-  # -- configuration for the container's liveness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # -- configuration for the container's liveness probe. Set `enabled: false` to disable it.
+  # See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
   # @ignore
   livenessProbe: # +doc-gen:ignore
+    enabled: true
+    httpGet:
+      path: /livez
+      port: http
     failureThreshold: 3
     initialDelaySeconds: 30
     periodSeconds: 10
@@ -626,17 +646,27 @@ list:
   # -- resource requests and limits for the container
   resources: {}
 
-  # Configuration for the container's readiness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # Configuration for the container's readiness probe. Set `enabled: false` to disable it.
+  # See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
   # @ignore
   readinessProbe: # +doc-gen:ignore
+    enabled: true
+    httpGet:
+      path: /api/health/readiness
+      port: http
     failureThreshold: 3
     initialDelaySeconds: 20
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 5
-  # Configuration for the container's liveness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # Configuration for the container's liveness probe. Set `enabled: false` to disable it.
+  # See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
   # @ignore
   livenessProbe: # +doc-gen:ignore
+    enabled: true
+    httpGet:
+      path: /api/health/liveness
+      port: http
     failureThreshold: 3
     initialDelaySeconds: 20
     periodSeconds: 10

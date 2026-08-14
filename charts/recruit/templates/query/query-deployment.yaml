@@ -113,24 +113,14 @@ spec:
             - name: http-metrics
               containerPort: 8081
               protocol: TCP
+          {{- if .Values.query.livenessProbe.enabled }}
           livenessProbe:
-            httpGet:
-              path: /livez
-              port: http
-            initialDelaySeconds: {{ .Values.query.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.query.livenessProbe.periodSeconds }}
-            timeoutSeconds: {{ .Values.query.livenessProbe.timeoutSeconds }}
-            successThreshold: {{ .Values.query.livenessProbe.successThreshold }}
-            failureThreshold: {{ .Values.query.livenessProbe.failureThreshold }}
+            {{- include "common.tplvalues.render" (dict "value" (omit .Values.query.livenessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.query.readinessProbe.enabled }}
           readinessProbe:
-            httpGet:
-              path: /readyz
-              port: http
-            initialDelaySeconds: {{ .Values.query.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.query.readinessProbe.periodSeconds }}
-            timeoutSeconds: {{ .Values.query.readinessProbe.timeoutSeconds }}
-            successThreshold: {{ .Values.query.readinessProbe.successThreshold }}
-            failureThreshold: {{ .Values.query.readinessProbe.failureThreshold }}
+            {{- include "common.tplvalues.render" (dict "value" (omit .Values.query.readinessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
           {{- if .Values.query.resources }}
           resources: {{- toYaml .Values.query.resources | nindent 12 }}
           {{- else if ne .Values.query.resourcesPreset "none" }}
