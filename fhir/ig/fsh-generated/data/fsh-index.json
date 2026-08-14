@@ -4,8 +4,8 @@
     "fshName": "RecruitSearchParametersTransaction",
     "fshType": "Instance",
     "fshFile": "searchparameters.fsh",
-    "startLine": 43,
-    "endLine": 56
+    "startLine": 39,
+    "endLine": 52
   },
   {
     "outputFile": "CodeSystem-screening-list-type.json",
@@ -36,24 +36,24 @@
     "fshName": "GroupCharacteristic",
     "fshType": "Instance",
     "fshFile": "searchparameters.fsh",
-    "startLine": 18,
-    "endLine": 28
+    "startLine": 14,
+    "endLine": 24
   },
   {
     "outputFile": "SearchParameter-list-belongs-to-study.json",
     "fshName": "ListBelongsToStudy",
     "fshType": "Instance",
     "fshFile": "searchparameters.fsh",
-    "startLine": 30,
-    "endLine": 41
+    "startLine": 26,
+    "endLine": 37
   },
   {
     "outputFile": "SearchParameter-researchstudy-enrollment.json",
     "fshName": "ResearchStudyEnrollment",
     "fshType": "Instance",
     "fshFile": "searchparameters.fsh",
-    "startLine": 5,
-    "endLine": 16
+    "startLine": 1,
+    "endLine": 12
   },
   {
     "outputFile": "StructureDefinition-research-study.json",

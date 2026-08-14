@@ -1,11 +1,11 @@
 Output File                                               Name                                Type        FSH File                   Lines
-Bundle-recruit-search-parameters-transaction.json         RecruitSearchParametersTransaction  Instance    searchparameters.fsh       43 - 56
+Bundle-recruit-search-parameters-transaction.json         RecruitSearchParametersTransaction  Instance    searchparameters.fsh       39 - 52
 CodeSystem-screening-list-type.json                       CodeSystemScreeningList             CodeSystem  screeninglist.fsh          18 - 21
 List-ScreeningListExample.json                            ScreeningListExample                Instance    screeninglist.fsh          23 - 29
 ResearchStudy-RecruitResearchStudyExample.json            RecruitResearchStudyExample         Instance    recruit-researchstudy.fsh  9 - 12
-SearchParameter-group-characteristic.json                 GroupCharacteristic                 Instance    searchparameters.fsh       18 - 28
-SearchParameter-list-belongs-to-study.json                ListBelongsToStudy                  Instance    searchparameters.fsh       30 - 41
-SearchParameter-researchstudy-enrollment.json             ResearchStudyEnrollment             Instance    searchparameters.fsh       5 - 16
+SearchParameter-group-characteristic.json                 GroupCharacteristic                 Instance    searchparameters.fsh       14 - 24
+SearchParameter-list-belongs-to-study.json                ListBelongsToStudy                  Instance    searchparameters.fsh       26 - 37
+SearchParameter-researchstudy-enrollment.json             ResearchStudyEnrollment             Instance    searchparameters.fsh       1 - 12
 StructureDefinition-research-study.json                   RecruitResearchStudy                Profile     recruit-researchstudy.fsh  4 - 7
 StructureDefinition-screening-list-belongs-to-study.json  ScreeningListBelongsToStudy         Extension   screeninglist.fsh          12 - 16
 StructureDefinition-screening-list.json                   ScreeningList                       Profile     screeninglist.fsh          4 - 10
