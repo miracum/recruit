@@ -70,18 +70,18 @@ jar {
 bootJar {
     layered {
         application {
-            intoLayer("spring-boot-loader") {
-                include("org/springframework/boot/loader/**")
+            intoLayer('spring-boot-loader') {
+                include('org/springframework/boot/loader/**')
             }
-            intoLayer("application")
+            intoLayer('application')
         }
         dependencies {
-            intoLayer("module-dependencies") {
-                include("org.miracum:*:*")
+            intoLayer('module-dependencies') {
+                include('org.miracum:*:*')
             }
-            intoLayer("dependencies")
+            intoLayer('dependencies')
         }
-        layerOrder = [ "dependencies", "spring-boot-loader", "module-dependencies", "application" ]
+        layerOrder = [ 'dependencies', 'spring-boot-loader', 'module-dependencies', 'application' ]
     }
 }
 
@@ -137,9 +137,9 @@ jib {
             'org.opencontainers.image.title': project.name,
             'org.opencontainers.image.base.name': jib.from.image.split('@')[0],
             'org.opencontainers.image.base.digest': jib.from.image.split('@')[1],
-            // don't use this label since it changes every time causing the image digest to change as well,
-            // making reproducible builds impossible
-            // 'org.opencontainers.image.created': new Date().format("yyyy-MM-dd'T'HH:mm:ssXXX")
+        // don't use this label since it changes every time causing the image digest to change as well,
+        // making reproducible builds impossible
+        // 'org.opencontainers.image.created': new Date().format("yyyy-MM-dd'T'HH:mm:ssXXX")
         ]
     }
     extraDirectories {
