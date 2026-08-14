@@ -10,16 +10,12 @@
         "url": "https://miracum.github.io/recruit/fhir/SearchParameter/researchstudy-enrollment",
         "name": "ResearchStudyEnrollment",
         "description": "The Group resource representing the study enrollment",
-        "base": [
-          "ResearchStudy"
-        ],
+        "base": ["ResearchStudy"],
         "status": "active",
         "code": "enrollment",
         "type": "reference",
         "expression": "ResearchStudy.enrollment",
-        "target": [
-          "Group"
-        ]
+        "target": ["Group"]
       },
       "request": {
         "method": "PUT",
@@ -33,9 +29,7 @@
         "url": "https://miracum.github.io/recruit/fhir/SearchParameter/group-characteristic",
         "name": "GroupCharacteristic",
         "description": "An entity referenced in a characteristic",
-        "base": [
-          "Group"
-        ],
+        "base": ["Group"],
         "status": "active",
         "code": "characteristic",
         "type": "reference",
@@ -53,16 +47,12 @@
         "url": "https://miracum.github.io/recruit/fhir/SearchParameter/list-belongs-to-study",
         "name": "ListBelongsToStudy",
         "description": "The ResearchStudy the list manages candidates for",
-        "base": [
-          "List"
-        ],
+        "base": ["List"],
         "status": "active",
         "code": "belongs-to-study",
         "type": "reference",
         "expression": "List.extension('https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study').value.ofType(Reference)",
-        "target": [
-          "ResearchStudy"
-        ]
+        "target": ["ResearchStudy"]
       },
       "request": {
         "method": "PUT",
