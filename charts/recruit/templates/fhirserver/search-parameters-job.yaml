@@ -1,4 +1,4 @@
-{{- if and .Values.fhirserver.searchParameters.enabled (or .Values.fhirserver.enabled (ne .Values.externalFhirServer.url "")) -}}
+{{- if and .Values.createSearchParameters.enabled (or .Values.fhirserver.enabled (ne .Values.externalFhirServer.url "")) -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -11,13 +11,13 @@ metadata:
     "helm.sh/hook-weight": "1"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
-  backoffLimit: {{ .Values.fhirserver.searchParameters.backoffLimit }}
-  {{- with .Values.fhirserver.searchParameters.ttlSecondsAfterFinished }}
+  backoffLimit: {{ .Values.createSearchParameters.backoffLimit }}
+  {{- with .Values.createSearchParameters.ttlSecondsAfterFinished }}
   ttlSecondsAfterFinished: {{ . }}
   {{- end }}
   template:
     metadata:
-      {{- with .Values.fhirserver.searchParameters.podAnnotations }}
+      {{- with .Values.createSearchParameters.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -39,10 +39,10 @@ spec:
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if .Values.fhirserver.searchParameters.resources }}
-          resources: {{- toYaml .Values.fhirserver.searchParameters.resources | nindent 12 }}
-          {{- else if ne .Values.fhirserver.searchParameters.resourcesPreset "none" }}
-          resources: {{- include "common.resources.preset" (dict "type" .Values.fhirserver.searchParameters.resourcesPreset) | nindent 12 }}
+          {{- if .Values.createSearchParameters.resources }}
+          resources: {{- toYaml .Values.createSearchParameters.resources | nindent 12 }}
+          {{- else if ne .Values.createSearchParameters.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.createSearchParameters.resourcesPreset) | nindent 12 }}
           {{- end }}
           env:
             - name: FHIR_URL
@@ -62,16 +62,16 @@ spec:
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if .Values.fhirserver.searchParameters.resources }}
-          resources: {{- toYaml .Values.fhirserver.searchParameters.resources | nindent 12 }}
-          {{- else if ne .Values.fhirserver.searchParameters.resourcesPreset "none" }}
-          resources: {{- include "common.resources.preset" (dict "type" .Values.fhirserver.searchParameters.resourcesPreset) | nindent 12 }}
+          {{- if .Values.createSearchParameters.resources }}
+          resources: {{- toYaml .Values.createSearchParameters.resources | nindent 12 }}
+          {{- else if ne .Values.createSearchParameters.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.createSearchParameters.resourcesPreset) | nindent 12 }}
           {{- end }}
           env:
             - name: FHIR_URL
               value: {{ include "recruit.fhirserver.url" . }}
             - name: TRIGGER_REINDEX
-              value: {{ .Values.fhirserver.searchParameters.reindex | quote }}
+              value: {{ .Values.createSearchParameters.reindex | quote }}
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -92,7 +92,7 @@ spec:
                   --data '{"resourceType":"Parameters","parameter":[{"name":"url","valueString":"ResearchStudy?"},{"name":"url","valueString":"Group?"},{"name":"url","valueString":"List?"}]}' \
                   "$FHIR_URL/\$reindex"
               else
-                echo "Skipping \$reindex operation (fhirserver.searchParameters.reindex is disabled)."
+                echo "Skipping \$reindex operation (createSearchParameters.reindex is disabled)."
               fi
           volumeMounts:
             - name: search-parameters

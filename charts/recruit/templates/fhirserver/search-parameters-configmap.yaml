@@ -1,4 +1,4 @@
-{{- if and .Values.fhirserver.searchParameters.enabled (or .Values.fhirserver.enabled (ne .Values.externalFhirServer.url "")) -}}
+{{- if and .Values.createSearchParameters.enabled (or .Values.fhirserver.enabled (ne .Values.externalFhirServer.url "")) -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
