@@ -1,0 +1,73 @@
+{
+  "resourceType": "Bundle",
+  "id": "recruit-search-parameters-transaction",
+  "type": "transaction",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "SearchParameter",
+        "id": "researchstudy-enrollment",
+        "url": "https://miracum.github.io/recruit/fhir/SearchParameter/researchstudy-enrollment",
+        "name": "ResearchStudyEnrollment",
+        "description": "The Group resource representing the study enrollment",
+        "base": [
+          "ResearchStudy"
+        ],
+        "status": "active",
+        "code": "enrollment",
+        "type": "reference",
+        "expression": "ResearchStudy.enrollment",
+        "target": [
+          "Group"
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "SearchParameter/researchstudy-enrollment"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "SearchParameter",
+        "id": "group-characteristic",
+        "url": "https://miracum.github.io/recruit/fhir/SearchParameter/group-characteristic",
+        "name": "GroupCharacteristic",
+        "description": "An entity referenced in a characteristic",
+        "base": [
+          "Group"
+        ],
+        "status": "active",
+        "code": "characteristic",
+        "type": "reference",
+        "expression": "Group.characteristic.value.ofType(Reference)"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "SearchParameter/group-characteristic"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "SearchParameter",
+        "id": "list-belongs-to-study",
+        "url": "https://miracum.github.io/recruit/fhir/SearchParameter/list-belongs-to-study",
+        "name": "ListBelongsToStudy",
+        "description": "The ResearchStudy the list manages candidates for",
+        "base": [
+          "List"
+        ],
+        "status": "active",
+        "code": "belongs-to-study",
+        "type": "reference",
+        "expression": "List.extension('https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study').value.ofType(Reference)",
+        "target": [
+          "ResearchStudy"
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "SearchParameter/list-belongs-to-study"
+      }
+    }
+  ]
+}

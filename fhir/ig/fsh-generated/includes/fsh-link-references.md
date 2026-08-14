@@ -1,0 +1,10 @@
+[group-characteristic]: SearchParameter-group-characteristic.html
+[list-belongs-to-study]: SearchParameter-list-belongs-to-study.html
+[CodeSystemScreeningList]: CodeSystem-screening-list-type.html
+[RecruitResearchStudy]: StructureDefinition-research-study.html
+[RecruitResearchStudyExample]: ResearchStudy-RecruitResearchStudyExample.html
+[recruit-search-parameters-transaction]: Bundle-recruit-search-parameters-transaction.html
+[researchstudy-enrollment]: SearchParameter-researchstudy-enrollment.html
+[ScreeningListBelongsToStudy]: StructureDefinition-screening-list-belongs-to-study.html
+[ScreeningList]: StructureDefinition-screening-list.html
+[ScreeningListExample]: List-ScreeningListExample.html

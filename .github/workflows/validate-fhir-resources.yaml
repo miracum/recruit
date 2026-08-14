@@ -30,3 +30,18 @@ jobs:
         shell: bash
         run: |
           find ../src/ -name "*.fhir.json" -exec fhir validate --verbose --fail "{}" \;
+
+      - name: Check fsh-generated search-parameters Bundle is up-to-date with the FSH source
+        shell: bash
+        run: |
+          # clean rebuild: a stale committed Bundle file left over from a since-renamed FSH
+          # instance wouldn't otherwise show up as a diff, since sushi doesn't delete output
+          # for resources it no longer generates.
+          rm -rf fhir/ig/fsh-generated
+          npx --yes fsh-sushi fhir/ig
+          if git diff --exit-code -- fhir/ig/fsh-generated; then
+            echo -e "\033[0;32mfsh-generated search-parameters Bundle is up to date\033[0m ✔"
+          else
+            echo -e "\033[0;31mfsh-generated search-parameters Bundle is outdated! Please run \`npx fsh-sushi fhir/ig\` locally and push the changes.\033[0m ❌"
+            exit 1
+          fi

@@ -17,7 +17,7 @@ Description: "A reference to the clinical study that this screening list contain
 
 CodeSystem: CodeSystemScreeningList
 Id: screening-list-type
-Title: "CodeSystem - recruIT screening list type"
+Title: "recruIT screening list type"
 * #screening-recommendations "Screening recommendations"
 
 Instance: ScreeningListExample

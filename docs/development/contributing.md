@@ -64,6 +64,19 @@ For development, you will also need to upload two FHIR SearchParameter resources
 curl --fail-with-body -X POST -H "Content-Type: application/fhir+json" --data @hack/fhir/search-parameters-transaction.json "http://recruit-fhir-server.127.0.0.1.nip.io/fhir"
 ```
 
+The custom SearchParameter resources used by the list and query-sql-on-fhir modules are defined in
+`fhir/ig/input/fsh/searchparameters.fsh`, together with the transaction Bundle used to install them, which SUSHI
+outputs to `fhir/ig/fsh-generated/resources/Bundle-recruit-search-parameters-transaction.json`. That generated file
+is the canonical source: `hack/fhir/search-parameters-transaction-upsert.json` and, in the Helm chart,
+`charts/recruit/files/fhir/search-parameters-transaction-upsert.json` are both symlinks to it. After changing
+`searchparameters.fsh`, regenerate it with a clean rebuild (so that renamed/removed instances don't leave stale
+output behind) and commit the result:
+
+```sh
+rm -rf fhir/ig/fsh-generated
+npx fsh-sushi fhir/ig
+```
+
 Afterwards you can upload a sample study with the associated SQL-encoded criteria:
 
 ```sh

@@ -1,0 +1,105 @@
+{{- if and .Values.fhirserver.searchParameters.enabled (or .Values.fhirserver.enabled (ne .Values.externalFhirServer.url "")) -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "recruit.fullname" . }}-search-parameters
+  labels:
+    {{- include "recruit.labels" . | nindent 4 }}
+    app.kubernetes.io/component: search-parameters
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: {{ .Values.fhirserver.searchParameters.backoffLimit }}
+  {{- with .Values.fhirserver.searchParameters.ttlSecondsAfterFinished }}
+  ttlSecondsAfterFinished: {{ . }}
+  {{- end }}
+  template:
+    metadata:
+      {{- with .Values.fhirserver.searchParameters.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "recruit.labels" . | nindent 8 }}
+        app.kubernetes.io/component: search-parameters
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: wait-for-fhir-server
+          image: "{{ .Values.curl.image.registry }}/{{ .Values.curl.image.repository }}:{{ .Values.curl.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          {{- with .Values.restrictedContainerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.fhirserver.searchParameters.resources }}
+          resources: {{- toYaml .Values.fhirserver.searchParameters.resources | nindent 12 }}
+          {{- else if ne .Values.fhirserver.searchParameters.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.fhirserver.searchParameters.resourcesPreset) | nindent 12 }}
+          {{- end }}
+          env:
+            - name: FHIR_URL
+              value: {{ include "recruit.fhirserver.url" . }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              until [ "$(curl -s -o /dev/null -L -w '%{http_code}' "$FHIR_URL/metadata")" == "200" ]; do
+                echo "$(date): Waiting for FHIR server to be up";
+                sleep 15;
+              done;
+      containers:
+        - name: search-parameters
+          image: "{{ .Values.curl.image.registry }}/{{ .Values.curl.image.repository }}:{{ .Values.curl.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          {{- with .Values.restrictedContainerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.fhirserver.searchParameters.resources }}
+          resources: {{- toYaml .Values.fhirserver.searchParameters.resources | nindent 12 }}
+          {{- else if ne .Values.fhirserver.searchParameters.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.fhirserver.searchParameters.resourcesPreset) | nindent 12 }}
+          {{- end }}
+          env:
+            - name: FHIR_URL
+              value: {{ include "recruit.fhirserver.url" . }}
+            - name: TRIGGER_REINDEX
+              value: {{ .Values.fhirserver.searchParameters.reindex | quote }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+
+              echo "Installing SearchParameter resources on $FHIR_URL..."
+              curl --fail-with-body --retry 5 --retry-delay 5 --retry-connrefused --retry-all-errors \
+                -X POST \
+                -H "Content-Type: application/fhir+json" \
+                --data @/fhir/search-parameters-transaction-upsert.json \
+                "$FHIR_URL"
+
+              if [ "$TRIGGER_REINDEX" = "true" ]; then
+                echo "Triggering \$reindex operation on $FHIR_URL..."
+                curl --fail-with-body --retry 5 --retry-delay 5 --retry-connrefused --retry-all-errors \
+                  -X POST \
+                  -H "Content-Type: application/fhir+json" \
+                  --data '{"resourceType":"Parameters","parameter":[{"name":"url","valueString":"ResearchStudy?"},{"name":"url","valueString":"Group?"},{"name":"url","valueString":"List?"}]}' \
+                  "$FHIR_URL/\$reindex"
+              else
+                echo "Skipping \$reindex operation (fhirserver.searchParameters.reindex is disabled)."
+              fi
+          volumeMounts:
+            - name: search-parameters
+              mountPath: /fhir
+              readOnly: true
+      volumes:
+        - name: search-parameters
+          configMap:
+            name: {{ include "recruit.fullname" . }}-search-parameters
+{{- end -}}

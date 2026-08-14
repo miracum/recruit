@@ -1,0 +1,82 @@
+[
+  {
+    "outputFile": "Bundle-recruit-search-parameters-transaction.json",
+    "fshName": "RecruitSearchParametersTransaction",
+    "fshType": "Instance",
+    "fshFile": "searchparameters.fsh",
+    "startLine": 43,
+    "endLine": 56
+  },
+  {
+    "outputFile": "CodeSystem-screening-list-type.json",
+    "fshName": "CodeSystemScreeningList",
+    "fshType": "CodeSystem",
+    "fshFile": "screeninglist.fsh",
+    "startLine": 18,
+    "endLine": 21
+  },
+  {
+    "outputFile": "List-ScreeningListExample.json",
+    "fshName": "ScreeningListExample",
+    "fshType": "Instance",
+    "fshFile": "screeninglist.fsh",
+    "startLine": 23,
+    "endLine": 29
+  },
+  {
+    "outputFile": "ResearchStudy-RecruitResearchStudyExample.json",
+    "fshName": "RecruitResearchStudyExample",
+    "fshType": "Instance",
+    "fshFile": "recruit-researchstudy.fsh",
+    "startLine": 9,
+    "endLine": 12
+  },
+  {
+    "outputFile": "SearchParameter-group-characteristic.json",
+    "fshName": "GroupCharacteristic",
+    "fshType": "Instance",
+    "fshFile": "searchparameters.fsh",
+    "startLine": 18,
+    "endLine": 28
+  },
+  {
+    "outputFile": "SearchParameter-list-belongs-to-study.json",
+    "fshName": "ListBelongsToStudy",
+    "fshType": "Instance",
+    "fshFile": "searchparameters.fsh",
+    "startLine": 30,
+    "endLine": 41
+  },
+  {
+    "outputFile": "SearchParameter-researchstudy-enrollment.json",
+    "fshName": "ResearchStudyEnrollment",
+    "fshType": "Instance",
+    "fshFile": "searchparameters.fsh",
+    "startLine": 5,
+    "endLine": 16
+  },
+  {
+    "outputFile": "StructureDefinition-research-study.json",
+    "fshName": "RecruitResearchStudy",
+    "fshType": "Profile",
+    "fshFile": "recruit-researchstudy.fsh",
+    "startLine": 4,
+    "endLine": 7
+  },
+  {
+    "outputFile": "StructureDefinition-screening-list-belongs-to-study.json",
+    "fshName": "ScreeningListBelongsToStudy",
+    "fshType": "Extension",
+    "fshFile": "screeninglist.fsh",
+    "startLine": 12,
+    "endLine": 16
+  },
+  {
+    "outputFile": "StructureDefinition-screening-list.json",
+    "fshName": "ScreeningList",
+    "fshType": "Profile",
+    "fshFile": "screeninglist.fsh",
+    "startLine": 4,
+    "endLine": 10
+  }
+]
