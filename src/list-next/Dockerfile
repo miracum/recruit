@@ -17,8 +17,10 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0@sha256:f1126d438ccc359f51cc6d4701a8dea
 WORKDIR /app
 USER $APP_UID
 
-ENV ASPNETCORE_HTTP_PORTS=8080
+# HTTP_PORT/METRICS_PORT (not ASPNETCORE_HTTP_PORTS) control the listen ports - Program.cs
+# configures Kestrel for both explicitly, which takes precedence over ASPNETCORE_HTTP_PORTS/URLS.
 EXPOSE 8080/tcp
+EXPOSE 8081/tcp
 
 COPY --from=build /app/publish .
 

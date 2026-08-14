@@ -14,11 +14,27 @@ using list.Services.Notifications;
 using list.Services.Notify;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Npgsql;
+using OpenTelemetry.Metrics;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// A dedicated metrics port (separate from the app's HTTP_PORT) keeps /metrics off the
+// internet-facing listener - only the in-cluster ServiceMonitor needs to reach it. Configuring
+// both endpoints in code (rather than relying on ASPNETCORE_HTTP_PORTS/ASPNETCORE_URLS) is
+// required here: once Kestrel has any code- or config-based endpoint, it stops honoring the
+// URLs-based env vars for the rest, so both ports must be declared together.
+var httpPort = builder.Configuration.GetValue<int?>("HTTP_PORT") ?? 8080;
+var metricsPort = builder.Configuration.GetValue<int?>("METRICS_PORT") ?? 8081;
+builder.WebHost.ConfigureKestrel(kestrel =>
+{
+    kestrel.ListenAnyIP(httpPort);
+    kestrel.ListenAnyIP(metricsPort);
+});
 
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
@@ -49,9 +65,34 @@ var fhirBaseUrl =
     ?? throw new InvalidOperationException("Fhir:BaseUrl must be configured.");
 var authDisabled = builder.Configuration.GetValue<bool>("Auth:Disabled");
 
-var appDbConnectionString =
+// ConnectionStrings:AppDb carries the non-sensitive parts (host/port/database, ...) as-is; PGUSER
+// and PGPASSWORD are applied on top so credentials can be injected separately (e.g. mounted from a
+// Kubernetes secret via extraEnv) instead of being baked into the connection string value itself.
+var appDbConnectionStringBuilder = new NpgsqlConnectionStringBuilder(
     builder.Configuration.GetConnectionString("AppDb")
-    ?? throw new InvalidOperationException("ConnectionStrings:AppDb must be configured.");
+        ?? throw new InvalidOperationException("ConnectionStrings:AppDb must be configured.")
+);
+if (builder.Configuration["PGUSER"] is { Length: > 0 } pgUser)
+{
+    appDbConnectionStringBuilder.Username = pgUser;
+}
+if (builder.Configuration["PGPASSWORD"] is { Length: > 0 } pgPassword)
+{
+    appDbConnectionStringBuilder.Password = pgPassword;
+}
+var appDbConnectionString = appDbConnectionStringBuilder.ConnectionString;
+
+// Liveness (/livez) intentionally checks nothing but that the process can still handle a request -
+// it shouldn't flap just because a downstream dependency is briefly unavailable. Readiness (/readyz)
+// only runs checks tagged "ready", currently just the DB, since that's the one dependency this app
+// can't do anything useful without.
+builder.Services.AddHealthChecks().AddNpgSql(appDbConnectionString, name: "postgres", tags: ["ready"]);
+
+builder
+    .Services.AddOpenTelemetry()
+    .WithMetrics(metrics =>
+        metrics.AddAspNetCoreInstrumentation().AddRuntimeInstrumentation().AddPrometheusExporter()
+    );
 
 // AddDbContextFactory (not AddDbContext) is required in Blazor Server: DI scopes there are
 // per-circuit (roughly per user session), not per-request, so a directly-injected DbContext would
@@ -216,6 +257,13 @@ app.UseHangfireDashboard(
         Authorization = [new HangfireDashboardAuthorizationFilter(authDisabled)],
     }
 );
+
+app.MapHealthChecks("/livez", new HealthCheckOptions { Predicate = _ => false })
+    .RequireHost($"*:{httpPort}");
+app.MapHealthChecks("/readyz", new HealthCheckOptions { Predicate = check => check.Tags.Contains("ready") })
+    .RequireHost($"*:{httpPort}");
+
+app.MapPrometheusScrapingEndpoint().RequireHost($"*:{metricsPort}");
 
 if (!authDisabled)
 {
