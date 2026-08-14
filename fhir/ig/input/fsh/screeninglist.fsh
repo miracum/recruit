@@ -21,6 +21,19 @@ Id: screening-list-type
 Title: "recruIT screening list type"
 * #screening-recommendations "Screening recommendations"
 
+Instance: ScreeningListIdentifierSystem
+InstanceOf: NamingSystem
+Usage: #definition
+Description: "The identifier system for a screening List's business identifier, which is the study's own identifier - used as the conditional-update key for a study's screening List."
+* id = "screening-list-id"
+* name = "ScreeningListIdentifier"
+* status = #active
+* kind = #identifier
+* date = "2026-08-14"
+* uniqueId.type = #uri
+* uniqueId.value = "https://miracum.github.io/recruit/fhir/identifiers/screening-list-id"
+* uniqueId.preferred = true
+
 Instance: ScreeningListExample
 InstanceOf: ScreeningList
 Description: "An example of a screening list."

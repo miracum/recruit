@@ -1,6 +1,7 @@
 package org.miracum.recruit.querysqlonfhir;
 
 import com.google.common.hash.Hashing;
+import io.github.miracum.recruit.Recruit;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,7 +24,6 @@ import org.hl7.fhir.r4.model.StringType;
 import org.miracum.recruit.querysqlonfhir.config.FhirSystems;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import io.github.miracum.recruit.Recruit;
 
 /**
  * Builds the FHIR transaction bundles {@link PollForStudies} submits from a study's merged
@@ -50,19 +50,17 @@ public class EligibilityBundleBuilder {
   private static final String SNOMED_DISPLAY_UNKNOWN = "Unknown";
   private static final String SNOMED_CODE_INDETERMINATE = "82334004";
   private static final String SNOMED_DISPLAY_INDETERMINATE = "Indeterminate";
-  private static final String ELIGIBILITY_ASSESSMENT_CODE = "eligibility-assessment";
 
   private final FhirSystems fhirSystems;
-  private final boolean useUpsertInsteadOfConditionalUpdate;
+  private final boolean useUpdateAsCreate;
   private final int chunkSize;
 
   public EligibilityBundleBuilder(
       FhirSystems fhirSystems,
-      @Value("${fhir.use-upsert-instead-of-conditional-update}")
-          boolean useUpsertInsteadOfConditionalUpdate,
+      @Value("${fhir.use-update-as-create}") boolean useUpdateAsCreate,
       @Value("${query-sql-on-fhir.transaction-bundle-chunk-size}") int chunkSize) {
     this.fhirSystems = fhirSystems;
-    this.useUpsertInsteadOfConditionalUpdate = useUpsertInsteadOfConditionalUpdate;
+    this.useUpdateAsCreate = useUpdateAsCreate;
     this.chunkSize = chunkSize;
   }
 
@@ -105,7 +103,7 @@ public class EligibilityBundleBuilder {
             .setStatus(ResearchSubject.ResearchSubjectStatus.CANDIDATE);
 
     var request = new BundleEntryRequestComponent();
-    if (useUpsertInsteadOfConditionalUpdate) {
+    if (useUpdateAsCreate) {
       var idValue =
           "ResearchSubject?patient=Patient/" + patientId + "&study=ResearchStudy/" + studyId;
       var resourceId = Hashing.sha256().hashString(idValue, StandardCharsets.UTF_8).toString();
@@ -139,21 +137,19 @@ public class EligibilityBundleBuilder {
 
     var observation = new Observation();
     observation.setStatus(Observation.ObservationStatus.FINAL);
-    observation
-        .addCategory()
-        .addCoding(
-            new Coding()
-                .setSystem(fhirSystems.eligibilityObservationCategorySystem())
-                .setCode(ELIGIBILITY_ASSESSMENT_CODE));
+    observation.addCategory(
+        new CodeableConcept()
+            .addCoding(
+                Recruit.CodeSystems.EligibilityObservationCategory.ELIGIBILITY_ASSESSMENT
+                    .coding()));
     observation.setCode(new CodeableConcept().setText(outcome.displayText()));
     observation.setSubject(new Reference("Patient/" + patientId));
     observation.addFocus(researchStudyReference);
     // Library isn't a valid Observation.derivedFrom target, so the criterion is referenced via a
     // custom extension instead of a core element.
-    observation
-        .addExtension()
-        .setUrl(fhirSystems.eligibilityObservationLibraryExtension())
-        .setValue(new Reference("Library/" + libraryId));
+    observation.addExtension(
+        Recruit.Extensions.eligibilityObservationDerivedFromLibrary(
+            new Reference("Library/" + libraryId)));
     observation.setEffective(new DateTimeType(effectiveDate));
     observation.setValue(buildResultValue(outcome));
 
@@ -172,7 +168,7 @@ public class EligibilityBundleBuilder {
         .setValue(identifierValue);
 
     var request = new BundleEntryRequestComponent();
-    if (useUpsertInsteadOfConditionalUpdate) {
+    if (useUpdateAsCreate) {
       observation.setId(identifierValue);
       request
           .setMethod(Bundle.HTTPVerb.PUT)
@@ -207,7 +203,7 @@ public class EligibilityBundleBuilder {
     var screeningListCode = new CodeableConcept();
     screeningListCode
         .addCoding()
-        .setSystem(Recruit.CodeSystems.ScreeningListType)
+        .setSystem(Recruit.CodeSystems.screeningListType())
         .setCode(
             Recruit.CodeSystems.ScreeningListType.SCREENING_RECOMMENDATIONS.coding().getCode());
 
@@ -220,10 +216,10 @@ public class EligibilityBundleBuilder {
         .addIdentifier()
         .setSystem(fhirSystems.screeningListIdentifier())
         .setValue(study.getIdentifierFirstRep().getValue());
-    screeningList
-        .addExtension()
-        .setUrl(fhirSystems.screeningListStudyReferenceExtension())
-        .setValue(new Reference("ResearchStudy/" + studyId).setDisplay(getStudyAcronym(study)));
+
+    var studyReference =
+        new Reference("ResearchStudy/" + studyId).setDisplay(getStudyAcronym(study));
+    screeningList.addExtension(Recruit.Extensions.screeningListBelongsToStudy(studyReference));
 
     for (var result : results) {
       var patientId = result.patientId();
@@ -266,7 +262,7 @@ public class EligibilityBundleBuilder {
     }
 
     var request = new BundleEntryRequestComponent();
-    if (useUpsertInsteadOfConditionalUpdate) {
+    if (useUpdateAsCreate) {
       var identifierValue =
           fhirSystems.screeningListIdentifier() + "|" + study.getIdentifierFirstRep().getValue();
       var resourceId =

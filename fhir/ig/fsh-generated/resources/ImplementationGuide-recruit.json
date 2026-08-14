@@ -1,0 +1,171 @@
+{
+  "resourceType": "ImplementationGuide",
+  "id": "recruit",
+  "url": "https://miracum.github.io/recruit/fhir/ImplementationGuide/recruit",
+  "version": "0.1.0",
+  "name": "RecruITIG",
+  "title": "recruIT FHIR IG",
+  "status": "active",
+  "publisher": "MIRACUM",
+  "contact": [
+    {
+      "name": "MIRACUM",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "https://miracum.org"
+        }
+      ]
+    }
+  ],
+  "description": "FHIR Implementation Guide for the recruIT clinical trial patient recruitment support system.",
+  "packageId": "recruit",
+  "license": "AGPL-3.0-or-later",
+  "fhirVersion": [
+    "4.0.1"
+  ],
+  "definition": {
+    "resource": [
+      {
+        "reference": {
+          "reference": "StructureDefinition/eligibility-observation-derived-from-library"
+        },
+        "name": "Eligibility observation derived-from Library",
+        "description": "A reference to the eligibility-criterion Library resource this Observation was derived from. Observation.derivedFrom does not accept Library as a target type, so this extension carries the reference instead.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "NamingSystem/eligibility-observation-id"
+        },
+        "name": "EligibilityObservationIdentifierSystem",
+        "description": "The identifier system for a per-criterion eligibility Observation's business identifier",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "SearchParameter/group-characteristic"
+        },
+        "name": "GroupCharacteristic",
+        "description": "An entity referenced in a characteristic",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "SearchParameter/list-belongs-to-study"
+        },
+        "name": "ListBelongsToStudy",
+        "description": "The ResearchStudy the list manages candidates for",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "SearchParameter/observation-derived-from-library"
+        },
+        "name": "ObservationDerivedFromLibrary",
+        "description": "The Library resource containing the eligibility criterion this Observation was derived from",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "CodeSystem/eligibility-observation-category"
+        },
+        "name": "recruIT eligibility observation category",
+        "description": "A custom, non-standard Observation.category code identifying the synthetic per-criterion eligibility Observations produced by the sql-on-fhir eligibility engine, distinguishing them from genuine clinical Observations elsewhere in the system.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "CodeSystem/screening-list-type"
+        },
+        "name": "recruIT screening list type",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "StructureDefinition/research-study"
+        },
+        "name": "RecruitResearchStudy",
+        "description": "A profile for the ResearchStudy resource used to represent a clinical trial.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "ResearchStudy/RecruitResearchStudyExample"
+        },
+        "name": "RecruitResearchStudyExample",
+        "description": "An example of a recruIT ResearchStudy.",
+        "exampleCanonical": "https://miracum.github.io/recruit/fhir/StructureDefinition/research-study"
+      },
+      {
+        "reference": {
+          "reference": "Bundle/recruit-search-parameters-transaction"
+        },
+        "name": "RecruitSearchParametersTransaction",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "SearchParameter/researchstudy-enrollment"
+        },
+        "name": "ResearchStudyEnrollment",
+        "description": "The Group resource representing the study enrollment",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "StructureDefinition/screening-list-belongs-to-study"
+        },
+        "name": "Screening list clinical study reference",
+        "description": "A reference to the clinical study that this screening list contains study candidates for",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "StructureDefinition/screening-list"
+        },
+        "name": "ScreeningList",
+        "description": "A profile for the List resource used to represent a list of identified study candidates.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "NamingSystem/screening-list-id"
+        },
+        "name": "ScreeningListIdentifierSystem",
+        "description": "The identifier system for a screening List's business identifier, which is the study's own identifier - used as the conditional-update key for a study's screening List.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "List/ScreeningListExample"
+        },
+        "name": "Test",
+        "description": "An example of a screening list.",
+        "exampleCanonical": "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list"
+      }
+    ],
+    "page": {
+      "nameUrl": "toc.html",
+      "title": "Table of Contents",
+      "generation": "html",
+      "page": [
+        {
+          "nameUrl": "index.html",
+          "title": "Home",
+          "generation": "markdown"
+        }
+      ]
+    },
+    "parameter": [
+      {
+        "code": "copyrightyear",
+        "value": "2022+"
+      },
+      {
+        "code": "releaselabel",
+        "value": "trial-use"
+      }
+    ]
+  }
+}

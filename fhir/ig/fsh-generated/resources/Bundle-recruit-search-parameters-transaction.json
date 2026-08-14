@@ -68,6 +68,29 @@
         "method": "PUT",
         "url": "SearchParameter/list-belongs-to-study"
       }
+    },
+    {
+      "resource": {
+        "resourceType": "SearchParameter",
+        "id": "observation-derived-from-library",
+        "url": "https://miracum.github.io/recruit/fhir/SearchParameter/observation-derived-from-library",
+        "name": "ObservationDerivedFromLibrary",
+        "description": "The Library resource containing the eligibility criterion this Observation was derived from",
+        "base": [
+          "Observation"
+        ],
+        "status": "active",
+        "code": "derived-from-library",
+        "type": "reference",
+        "expression": "Observation.extension('https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-observation-derived-from-library').value.ofType(Reference)",
+        "target": [
+          "Library"
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "SearchParameter/observation-derived-from-library"
+      }
     }
   ]
 }

@@ -19,12 +19,67 @@ public final class Recruit {
     }
 
     /**
+     * The canonical URL {@code https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-observation-category}.
+     *
+     * @return {@code https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-observation-category}
+     */
+    public static String eligibilityObservationCategory() {
+      return "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-observation-category";
+    }
+
+    /**
      * The canonical URL {@code https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type}.
      *
      * @return {@code https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type}
      */
     public static String screeningListType() {
       return "https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type";
+    }
+
+    public enum EligibilityObservationCategory {
+      /**
+       * {@code eligibility-assessment} - Eligibility assessment
+       */
+      ELIGIBILITY_ASSESSMENT("eligibility-assessment", "Eligibility assessment");
+
+      private final @NonNull String code;
+
+      private final @Nullable String display;
+
+      EligibilityObservationCategory(@NonNull String code, @Nullable String display) {
+        this.code = code;
+        this.display = display;
+      }
+
+      /**
+       * @return a new {@link Coding} for this concept, with system {@code https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-observation-category}
+       */
+      public @NonNull Coding coding(@NonNull EligibilityObservationCategory this) {
+        return new Coding("https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-observation-category", code, display);
+      }
+
+      /**
+       * @param code the FHIR code to look up
+       * @return an {@link Optional} containing the constant whose {@code code} matches, or empty if none matches
+       */
+      public static Optional<@NonNull EligibilityObservationCategory> fromValue(
+          @NonNull String code) {
+        for (EligibilityObservationCategory value : values()) {
+          if (value.code.equals(code)) {
+            return Optional.of(value);
+          }
+        }
+        return Optional.empty();
+      }
+
+      /**
+       * @param code the FHIR code to look up
+       * @return the constant whose {@code code} matches
+       * @throws IllegalArgumentException if no constant has that code
+       */
+      public static @NonNull EligibilityObservationCategory fromValueOrThrow(@NonNull String code) {
+        return fromValue(code).orElseThrow(() -> new IllegalArgumentException("Unknown code: " + code));
+      }
     }
 
     public enum ScreeningListType {
@@ -98,6 +153,17 @@ public final class Recruit {
 
   public static final class Extensions {
     private Extensions() {
+    }
+
+    /**
+     * A new {@link Extension} for the canonical URL {@code https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-observation-derived-from-library}.
+     *
+     * @param value the extension value
+     * @return a new {@link Extension} with url {@code https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-observation-derived-from-library} and the given value
+     */
+    public static @NonNull Extension eligibilityObservationDerivedFromLibrary(
+        @NonNull Reference value) {
+      return new Extension("https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-observation-derived-from-library", value);
     }
 
     /**

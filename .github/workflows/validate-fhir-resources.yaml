@@ -42,6 +42,6 @@ jobs:
           if git diff --exit-code -- fhir/ig/fsh-generated; then
             echo -e "\033[0;32mfsh-generated search-parameters Bundle is up to date\033[0m ✔"
           else
-            echo -e "\033[0;31mfsh-generated search-parameters Bundle is outdated! Please run \`npx fsh-sushi fhir/ig\` locally and push the changes.\033[0m ❌"
+            echo -e "\033[0;31mfsh-generated search-parameters Bundle is outdated! Please run \`npx fsh-sushi --snapshot fhir/ig\` locally and push the changes.\033[0m ❌"
             exit 1
           fi

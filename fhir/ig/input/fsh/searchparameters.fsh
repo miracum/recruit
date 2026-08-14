@@ -36,6 +36,19 @@ Usage: #definition
 * expression = "List.extension('https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study').value.ofType(Reference)"
 * target = #ResearchStudy
 
+Instance: ObservationDerivedFromLibrary
+InstanceOf: SearchParameter
+Usage: #definition
+* id = "observation-derived-from-library"
+* name = "ObservationDerivedFromLibrary"
+* description = "The Library resource containing the eligibility criterion this Observation was derived from"
+* base = #Observation
+* status = #active
+* code = #derived-from-library
+* type = #reference
+* expression = "Observation.extension('https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-observation-derived-from-library').value.ofType(Reference)"
+* target = #Library
+
 Instance: RecruitSearchParametersTransaction
 InstanceOf: Bundle
 Usage: #definition
@@ -50,3 +63,6 @@ Usage: #definition
 * entry[2].resource = ListBelongsToStudy
 * entry[2].request.method = #PUT
 * entry[2].request.url = "SearchParameter/list-belongs-to-study"
+* entry[3].resource = ObservationDerivedFromLibrary
+* entry[3].request.method = #PUT
+* entry[3].request.url = "SearchParameter/observation-derived-from-library"

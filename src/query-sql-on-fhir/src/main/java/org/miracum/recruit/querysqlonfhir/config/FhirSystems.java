@@ -5,7 +5,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "fhir.systems")
 public record FhirSystems(
     String screeningListIdentifier,
-    String eligibilityObservationCategorySystem,
-    String eligibilityObservationLibraryExtension,
     String eligibilityObservationIdentifierSystem,
     String researchStudyAcronymExtension) {}

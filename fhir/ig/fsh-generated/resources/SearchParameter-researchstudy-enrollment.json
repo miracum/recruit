@@ -1,0 +1,17 @@
+{
+  "resourceType": "SearchParameter",
+  "id": "researchstudy-enrollment",
+  "url": "https://miracum.github.io/recruit/fhir/SearchParameter/researchstudy-enrollment",
+  "name": "ResearchStudyEnrollment",
+  "description": "The Group resource representing the study enrollment",
+  "base": [
+    "ResearchStudy"
+  ],
+  "status": "active",
+  "code": "enrollment",
+  "type": "reference",
+  "expression": "ResearchStudy.enrollment",
+  "target": [
+    "Group"
+  ]
+}

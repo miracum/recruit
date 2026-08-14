@@ -18,19 +18,14 @@ fhir:
   server:
     # call, connect, read, and write timeout to the FHIR server in seconds
     timeout-in-seconds: 300
-  use-upsert-instead-of-conditional-update: false
+  use-update-as-create: false
   systems:
-    screening-list-identifier: "https://fhir.miracum.org/uc1/NamingSystem/screeningListId"
-    # custom, non-standard code identifying the synthetic per-criterion eligibility Observations
-    # this module creates, distinguishing them from genuine clinical Observations elsewhere.
-    eligibility-observation-category-system: "https://fhir.miracum.org/uc1/CodeSystem/observation-category"
-    # Observation.derivedFrom doesn't accept Library as a target type, so the criterion Library is
-    # referenced via this extension instead; Observation.focus carries the ResearchStudy.
-    eligibility-observation-library-extension: "https://fhir.miracum.org/uc1/StructureDefinition/derivedFromLibrary"
+    screening-list-identifier: "https://miracum.github.io/recruit/fhir/NamingSystem/screening-list-id"
     # business identifier used as the conditional-update key for per-criterion Observations, since
-    # the library extension above isn't a searchable parameter without a custom SearchParameter
-    # registered on the FHIR server - identifier is a standard, always-searchable parameter instead.
-    eligibility-observation-identifier-system: "https://fhir.miracum.org/uc1/NamingSystem/eligibilityObservationId"
+    # the EligibilityObservationDerivedFromLibrary extension isn't a searchable parameter without a
+    # custom SearchParameter registered on the FHIR server - identifier is a standard,
+    # always-searchable parameter instead.
+    eligibility-observation-identifier-system: "https://miracum.github.io/recruit/fhir/NamingSystem/eligibility-observation-id"
     # read off ResearchStudy to populate the belongsToStudy extension's Reference.display on the
     # screening List - list-next reads the trial's acronym from that display text, not by
     # resolving the ResearchStudy itself (see ScreeningListService.cs).

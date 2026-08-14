@@ -5,5 +5,4 @@ Thumbs.db
 /temp
 /template
 
-/fsh-generated/
-!/fsh-generated/resources/
+!/fsh-generated/

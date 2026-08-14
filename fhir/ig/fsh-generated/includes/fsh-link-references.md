@@ -1,5 +1,9 @@
+[EligibilityObservationDerivedFromLibrary]: StructureDefinition-eligibility-observation-derived-from-library.html
+[eligibility-observation-id]: NamingSystem-eligibility-observation-id.html
 [group-characteristic]: SearchParameter-group-characteristic.html
 [list-belongs-to-study]: SearchParameter-list-belongs-to-study.html
+[observation-derived-from-library]: SearchParameter-observation-derived-from-library.html
+[EligibilityObservationCategory]: CodeSystem-eligibility-observation-category.html
 [CodeSystemScreeningList]: CodeSystem-screening-list-type.html
 [RecruitResearchStudy]: StructureDefinition-research-study.html
 [RecruitResearchStudyExample]: ResearchStudy-RecruitResearchStudyExample.html
@@ -7,4 +11,5 @@
 [researchstudy-enrollment]: SearchParameter-researchstudy-enrollment.html
 [ScreeningListBelongsToStudy]: StructureDefinition-screening-list-belongs-to-study.html
 [ScreeningList]: StructureDefinition-screening-list.html
+[screening-list-id]: NamingSystem-screening-list-id.html
 [ScreeningListExample]: List-ScreeningListExample.html
