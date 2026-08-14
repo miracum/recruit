@@ -23,7 +23,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.miracum.recruit.querysqlonfhir.config.FhirSystems;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import recruit.Recruit;
+import io.github.miracum.recruit.Recruit;
 
 /**
  * Builds the FHIR transaction bundles {@link PollForStudies} submits from a study's merged
