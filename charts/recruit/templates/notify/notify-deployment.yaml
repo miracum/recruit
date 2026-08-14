@@ -64,7 +64,7 @@ spec:
               done;
         {{- end }}
         - name: wait-for-fhir-server
-          image: "{{ .Values.curl.image.registry }}/{{ .Values.curl.image.repository }}:{{ .Values.curl.image.tag }}"
+          image: {{ include "recruit.curl.image" . }}
           imagePullPolicy: IfNotPresent
           {{- with .Values.restrictedContainerSecurityContext }}
           securityContext:

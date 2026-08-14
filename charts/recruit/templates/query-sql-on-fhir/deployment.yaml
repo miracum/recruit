@@ -42,7 +42,7 @@ spec:
       initContainers:
         # TODO: wait for trino to be up
         - name: wait-for-fhir-server
-          image: "{{ $.Values.curl.image.registry }}/{{ $.Values.curl.image.repository }}:{{ $.Values.curl.image.tag }}"
+          image: {{ include "recruit.curl.image" $ }}
           imagePullPolicy: IfNotPresent
           {{- with $.Values.restrictedContainerSecurityContext }}
           securityContext:
@@ -64,7 +64,7 @@ spec:
         # attempts by the FHIR server to trigger the Subscriptions to fail
         {{- if (and $.Values.notify.enabled .shouldWaitForNotify) }}
         - name: wait-for-notify
-          image: "{{ $.Values.curl.image.registry }}/{{ $.Values.curl.image.repository }}:{{ $.Values.curl.image.tag }}"
+          image: {{ include "recruit.curl.image" $ }}
           imagePullPolicy: IfNotPresent
           {{- with $.Values.restrictedContainerSecurityContext }}
           securityContext:

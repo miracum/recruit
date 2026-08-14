@@ -231,6 +231,16 @@ Image used to for the PostgreSQL readiness init containers
 {{- end -}}
 
 {{/*
+curlimages/curl image used by various init containers and helper Jobs across the chart.
+*/}}
+{{- define "recruit.curl.image" -}}
+{{- $registry := .Values.curl.image.registry -}}
+{{- $repository := .Values.curl.image.repository -}}
+{{- $tag := .Values.curl.image.tag -}}
+{{ printf "%s/%s:%s" $registry $repository $tag}}
+{{- end -}}
+
+{{/*
 Create a default fully qualified postgresql name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
