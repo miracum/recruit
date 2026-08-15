@@ -492,6 +492,12 @@
   <data name="App.Errors.PatientRecordLoadForNoteFailed" xml:space="preserve">
     <value>Der Datensatz dieses Patienten konnte zum Hinzufügen der Notiz nicht geladen werden.</value>
   </data>
+  <data name="App.Errors.PatientRecordLoadForStatusUpdateFailed" xml:space="preserve">
+    <value>Der Datensatz dieses Patienten konnte zum Aktualisieren des Status nicht geladen werden.</value>
+  </data>
+  <data name="App.Errors.PatientRecordStatusConflict" xml:space="preserve">
+    <value>Der Status dieses Patienten wurde zwischenzeitlich von jemand anderem geändert. Bitte laden Sie die Seite neu und versuchen Sie es erneut.</value>
+  </data>
   <data name="App.Errors.PatientNotesLoadFailed" xml:space="preserve">
     <value>Die Notizen dieses Patienten konnten nicht geladen werden.</value>
   </data>

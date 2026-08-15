@@ -1,3 +1,4 @@
+using System.Net;
 using System.Security.Claims;
 using System.Text.Json;
 using Hl7.Fhir.Model;
@@ -29,7 +30,15 @@ public sealed class ResearchSubjectService(
     ILogger<ResearchSubjectService> logger
 )
 {
-    /// <returns>The subject's new meta.lastUpdated, as reported by the FHIR server's PATCH response.</returns>
+    /// <summary>
+    /// Updates a subject's status via a version-aware read-modify-write (PUT with If-Match), not
+    /// PATCH - Blaze, among other servers, doesn't implement the PATCH verb at all. Being
+    /// version-aware also buys optimistic-concurrency conflict detection for free: if someone else
+    /// updated this subject after it was read here, the server rejects the write instead of
+    /// silently clobbering their change, and that's surfaced to the caller as a
+    /// <see cref="FhirAccessException"/> distinct from a generic failure.
+    /// </summary>
+    /// <returns>The subject's new meta.lastUpdated, as reported by the FHIR server's update response.</returns>
     public async Task<DateTimeOffset?> UpdateStatusAsync(
         string researchSubjectId,
         string newStatus,
@@ -40,19 +49,64 @@ public sealed class ResearchSubjectService(
     {
         await EnsureCanPatchAsync(trialIdentifier, user, ct);
 
-        var patch = JsonSerializer.Serialize(
-            new object[]
-            {
-                new
-                {
-                    op = "replace",
-                    path = "/status",
-                    value = newStatus,
-                },
-            }
+        var client = clientFactory.CreateClient();
+
+        ResearchSubject current;
+        try
+        {
+            current =
+                await client.ReadAsync<ResearchSubject>(
+                    $"ResearchSubject/{researchSubjectId}",
+                    ct: ct
+                ) ?? throw new FhirAccessException(localizer["App.Errors.PatientRecordNotFound"]);
+        }
+        catch (FhirAccessException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                ex,
+                "Failed to read ResearchSubject/{ResearchSubjectId} before updating status",
+                researchSubjectId
+            );
+            throw new FhirAccessException(
+                localizer["App.Errors.PatientRecordLoadForStatusUpdateFailed"],
+                ex
+            );
+        }
+
+        current.Status = EnumUtility.ParseLiteral<ResearchSubject.ResearchSubjectStatus>(
+            newStatus,
+            ignoreCase: true
         );
 
-        return await PatchAsync(researchSubjectId, patch, ct);
+        try
+        {
+            var updated = await client.UpdateAsync(current, versionAware: true, ct);
+            return updated?.Meta?.LastUpdated;
+        }
+        catch (FhirOperationException ex)
+            when (ex.Status is HttpStatusCode.Conflict or HttpStatusCode.PreconditionFailed)
+        {
+            logger.LogWarning(
+                ex,
+                "Version conflict updating status for ResearchSubject/{ResearchSubjectId}: it was "
+                    + "changed by someone else since it was last loaded",
+                researchSubjectId
+            );
+            throw new FhirAccessException(localizer["App.Errors.PatientRecordStatusConflict"], ex);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                ex,
+                "Failed to update status for ResearchSubject/{ResearchSubjectId}",
+                researchSubjectId
+            );
+            throw new FhirAccessException(localizer["App.Errors.PatientRecordUpdateFailed"], ex);
+        }
     }
 
     /// <summary>
