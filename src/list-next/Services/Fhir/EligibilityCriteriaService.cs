@@ -152,7 +152,9 @@ public sealed class EligibilityCriteriaService(
 
         if (!string.IsNullOrWhiteSpace(studyDraft.Acronym))
         {
-            study.Extension.Add(Studie.Extensions.MiiExStudieAkronym(new FhirString(studyDraft.Acronym)));
+            study.Extension.Add(
+                Studie.Extensions.MiiExStudieAkronym(new FhirString(studyDraft.Acronym))
+            );
         }
 
         if (

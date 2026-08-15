@@ -1,7 +1,7 @@
 @using Ganss.Xss
 @using Markdig
 @using System.Text.RegularExpressions
-@inject ResearchSubjectService ResearchSubjectService
+@inject ScreeningNoteService ScreeningNoteService
 @inject ToastService Toast
 @inject IStringLocalizer<SharedResources> Localizer
 
@@ -35,7 +35,7 @@
         }
     </div>
 
-    @if (CanEdit)
+    @if (CanEdit && Patient.ResearchSubjectIdentifier is not null)
     {
         <BbRichTextEditor @bind-Value="_noteDraftHtml" Placeholder="@Localizer["App.PatientNotes.Placeholder"]" Class="mt-3" MinHeight="120px" />
         <div class="mt-2 flex items-center justify-end gap-3">
@@ -66,7 +66,7 @@
     private static readonly ReverseMarkdown.Converter HtmlToMarkdownConverter = new();
     private static readonly Regex HtmlTagRegex = new("<[^>]+>", RegexOptions.Compiled);
 
-    private List<PatientNoteDto> _notes = [];
+    private List<ScreeningNoteDto> _notes = [];
     private bool _loading;
     private string _noteDraftHtml = string.Empty;
     private string? _loadedForSubjectId;
@@ -94,10 +94,16 @@
 
     private async Task LoadNotesAsync()
     {
+        if (Patient.ResearchSubjectIdentifier is not { } researchSubjectIdentifier)
+        {
+            _notes = [];
+            return;
+        }
+
         _loading = true;
         try
         {
-            _notes = [.. await ResearchSubjectService.GetNotesAsync(Patient.ResearchSubjectId)];
+            _notes = [.. await ScreeningNoteService.GetNotesAsync(researchSubjectIdentifier)];
         }
         catch
         {
@@ -112,7 +118,7 @@
 
     private async Task SaveNoteAsync()
     {
-        if (IsNoteDraftEmpty)
+        if (IsNoteDraftEmpty || Patient.ResearchSubjectIdentifier is not { } researchSubjectIdentifier)
         {
             return;
         }
@@ -128,9 +134,7 @@
 
         try
         {
-            var updatedAt = await ResearchSubjectService.AddNoteAsync(Patient.ResearchSubjectId, markdown, TrialIdentifier, _user);
-            Patient.Note = markdown;
-            Patient.LastUpdated = updatedAt ?? DateTimeOffset.UtcNow;
+            await ScreeningNoteService.AddNoteAsync(researchSubjectIdentifier, markdown, TrialIdentifier, _user);
             Toast.Success(Localizer["App.Toast.NoteSaved"], Localizer["App.Common.Saved"]);
             _noteDraftHtml = string.Empty;
             await LoadNotesAsync();

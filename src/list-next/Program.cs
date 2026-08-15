@@ -5,6 +5,7 @@ using list.Components;
 using list.Data;
 using list.Models;
 using list.Options;
+using list.Services;
 using list.Services.Access;
 using list.Services.Auth;
 using list.Services.Fhir;
@@ -86,7 +87,9 @@ var appDbConnectionString = appDbConnectionStringBuilder.ConnectionString;
 // it shouldn't flap just because a downstream dependency is briefly unavailable. Readiness (/readyz)
 // only runs checks tagged "ready", currently just the DB, since that's the one dependency this app
 // can't do anything useful without.
-builder.Services.AddHealthChecks().AddNpgSql(appDbConnectionString, name: "postgres", tags: ["ready"]);
+builder
+    .Services.AddHealthChecks()
+    .AddNpgSql(appDbConnectionString, name: "postgres", tags: ["ready"]);
 
 builder
     .Services.AddOpenTelemetry()
@@ -199,7 +202,7 @@ builder.Services.AddScoped<TrialAccessService>();
 builder.Services.AddSingleton<FhirClientFactory>();
 builder.Services.AddScoped<ScreeningListService>();
 builder.Services.AddScoped<ResearchSubjectService>();
-builder.Services.AddScoped<PractitionerService>();
+builder.Services.AddScoped<ScreeningNoteService>();
 builder.Services.AddScoped<PatientRecordService>();
 builder.Services.AddScoped<EligibilityCriteriaService>();
 builder.Services.AddScoped<NotificationDismissalService>();

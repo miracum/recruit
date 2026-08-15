@@ -16,9 +16,13 @@ public static class FhirConstants
     public const string UrlListBelongsToStudy =
         "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study";
 
-    /// <summary>Written by this app (list), not by the query module.</summary>
-    public const string UrlResearchSubjectNote =
-        "https://fhir.miracum.org/uc1/StructureDefinition/researchSubjectNote";
+    /// <summary>
+    /// ResearchSubject's stable business identifier, set unconditionally by query-sql-on-fhir's
+    /// EligibilityBundleBuilder (see fhir.systems.research-subject-identifier). Notes are keyed on
+    /// this "system|value" pair rather than the FHIR logical id - see ScreeningNoteService.
+    /// </summary>
+    public const string UrlResearchSubjectIdentifier =
+        "https://miracum.github.io/recruit/fhir/NamingSystem/research-subject-id";
 
     public const string SystemIdentifierType = "http://terminology.hl7.org/CodeSystem/v2-0203";
     public const string IdentifierTypeMedicalRecordNumber = "MR";

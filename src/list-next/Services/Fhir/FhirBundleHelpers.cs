@@ -40,23 +40,8 @@ internal static class FhirBundleHelpers
         return resources;
     }
 
-    public static string? GetStringExtension(this IExtendable element, string url) =>
-        (element.GetExtension(url)?.Value as FhirString)?.Value
-        ?? (element.GetExtension(url)?.Value as PrimitiveType)?.ToString();
-
     public static ResourceReference? GetReferenceExtension(this IExtendable element, string url) =>
         element.GetExtension(url)?.Value as ResourceReference;
-
-    /// <summary>All repeating extensions at the given url whose value is an Annotation (author/time/text).</summary>
-    public static IReadOnlyList<Annotation> GetAnnotationExtensions(
-        this IExtendable element,
-        string url
-    ) =>
-        (element.Extension ?? [])
-            .Where(e => e.Url == url)
-            .Select(e => e.Value as Annotation)
-            .OfType<Annotation>()
-            .ToList();
 
     /// <summary>Extracts the bare logical id (e.g. "abc123") from a relative reference (e.g. "ResearchStudy/abc123").</summary>
     public static string? GetReferencedId(this ResourceReference? reference) =>
@@ -68,6 +53,19 @@ internal static class FhirBundleHelpers
         )
             is { System: { Length: > 0 } system, Value: { Length: > 0 } value }
             ? new TrialIdentifier(system, value)
+            : null;
+
+    /// <summary>
+    /// ResearchSubject's business identifier formatted as "system|value" - see
+    /// FhirConstants.UrlResearchSubjectIdentifier. Null for subjects that predate that identifier
+    /// being set by query-sql-on-fhir.
+    /// </summary>
+    public static string? GetResearchSubjectIdentifierToken(this ResearchSubject subject) =>
+        subject.Identifier?.FirstOrDefault(i =>
+            i.System == FhirConstants.UrlResearchSubjectIdentifier
+        )
+            is { System: { Length: > 0 } system, Value: { Length: > 0 } value }
+            ? $"{system}|{value}"
             : null;
 
     public static string? GetStudyAcronym(this ResearchStudy study) =>

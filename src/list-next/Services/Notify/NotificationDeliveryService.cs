@@ -27,7 +27,11 @@ public sealed class NotificationDeliveryService(
 {
     private static readonly MjmlRenderer Renderer = new();
 
-    public async Task DeliverAsync(string listId, string patientReference, CancellationToken ct = default)
+    public async Task DeliverAsync(
+        string listId,
+        string patientReference,
+        CancellationToken ct = default
+    )
     {
         var client = clientFactory.CreateClient();
 
@@ -42,13 +46,11 @@ public sealed class NotificationDeliveryService(
             return;
         }
 
-        var studyId = list
-            .GetReferenceExtension(FhirConstants.UrlListBelongsToStudy)
+        var studyId = list.GetReferenceExtension(FhirConstants.UrlListBelongsToStudy)
             ?.GetReferencedId();
-        var study =
-            studyId is not null
-                ? await client.ReadAsync<ResearchStudy>($"ResearchStudy/{studyId}", ct: ct)
-                : null;
+        var study = studyId is not null
+            ? await client.ReadAsync<ResearchStudy>($"ResearchStudy/{studyId}", ct: ct)
+            : null;
 
         var studyAcronym = study?.GetStudyAcronym() ?? listId;
         var trialIdentifier = study?.GetTrialIdentifier();
@@ -88,10 +90,7 @@ public sealed class NotificationDeliveryService(
             "[list_id]",
             listId
         );
-        var subject = mailerOptions.Value.SubjectTemplate.Replace(
-            "[study_acronym]",
-            studyAcronym
-        );
+        var subject = mailerOptions.Value.SubjectTemplate.Replace("[study_acronym]", studyAcronym);
         var html = RenderHtml(studyAcronym, screeningListUrl);
 
         foreach (var recipient in recipients)

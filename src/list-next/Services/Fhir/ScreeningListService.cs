@@ -240,6 +240,7 @@ public sealed class ScreeningListService(
                     new PatientListEntryDto
                     {
                         ResearchSubjectId = subject.Id!,
+                        ResearchSubjectIdentifier = subject.GetResearchSubjectIdentifierToken(),
                         PatientId = patientId,
                         Name = overview.Name,
                         BirthDate = overview.BirthDate,
@@ -255,7 +256,6 @@ public sealed class ScreeningListService(
                             )
                             ?.Value,
                         Status = EnumUtility.GetLiteral(subject.Status) ?? "candidate",
-                        Note = subject.GetStringExtension(FhirConstants.UrlResearchSubjectNote),
                         RecommendedDate = recommendedDate,
                         SystemDeterminedIneligible = isFlaggedIneligible,
                         LastUpdated = subject.Meta?.LastUpdated,
@@ -532,6 +532,7 @@ public sealed class ScreeningListService(
                 new PatientListEntryDto
                 {
                     ResearchSubjectId = subject.Id!,
+                    ResearchSubjectIdentifier = subject.GetResearchSubjectIdentifierToken(),
                     PatientId = patientId ?? string.Empty,
                     Name = FormatPatientName(patient),
                     MedicalRecordNumber = patient?.GetMedicalRecordNumber(),
@@ -552,7 +553,6 @@ public sealed class ScreeningListService(
                         )
                         ?.Value,
                     Status = status,
-                    Note = subject.GetStringExtension(FhirConstants.UrlResearchSubjectNote),
                     RecommendedDate = recommendedDate,
                     SystemDeterminedIneligible = isFlaggedIneligible,
                     LastUpdated = subject.Meta?.LastUpdated,

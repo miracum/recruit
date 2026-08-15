@@ -7,5 +7,10 @@ namespace list.Services.Notify;
 /// </summary>
 public interface INotificationChannel
 {
-    Task SendAsync(string recipient, string subject, string htmlBody, CancellationToken ct = default);
+    Task SendAsync(
+        string recipient,
+        string subject,
+        string htmlBody,
+        CancellationToken ct = default
+    );
 }

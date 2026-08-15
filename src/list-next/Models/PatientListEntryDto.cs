@@ -4,6 +4,14 @@ public sealed class PatientListEntryDto
 {
     public required string ResearchSubjectId { get; init; }
 
+    /// <summary>
+    /// ResearchSubject's business identifier as "system|value" (see
+    /// FhirConstants.UrlResearchSubjectIdentifier), null if the subject predates that identifier
+    /// being set. Screening notes are keyed on this, not ResearchSubjectId - see
+    /// ScreeningNoteService.
+    /// </summary>
+    public string? ResearchSubjectIdentifier { get; init; }
+
     public required string PatientId { get; init; }
 
     public string? Name { get; init; }
@@ -24,14 +32,13 @@ public sealed class PatientListEntryDto
     /// <summary>ResearchSubject.status: candidate, screening, eligible, ineligible, on-study, withdrawn.</summary>
     public required string Status { get; set; }
 
-    public string? Note { get; set; }
-
     /// <summary>List.entry.date - when the patient was first recommended for this trial.</summary>
     public DateTimeOffset? RecommendedDate { get; init; }
 
     /// <summary>
-    /// ResearchSubject.meta.lastUpdated - bumped by every PATCH to this subject (status change or
-    /// note edit), so this doubles as "when was this suggestion last touched".
+    /// ResearchSubject.meta.lastUpdated - bumped by every PATCH to this subject's status, so this
+    /// doubles as "when was this suggestion's status last touched". Screening notes live in
+    /// Postgres now and no longer bump this.
     /// </summary>
     public DateTimeOffset? LastUpdated { get; set; }
 

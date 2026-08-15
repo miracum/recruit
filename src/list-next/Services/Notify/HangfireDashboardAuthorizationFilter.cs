@@ -8,7 +8,8 @@ namespace list.Services.Notify;
 /// Hangfire's dashboard middleware sits outside ASP.NET Core's authorization pipeline, so it needs
 /// its own filter rather than an [Authorize] attribute or MapGroup policy.
 /// </summary>
-public sealed class HangfireDashboardAuthorizationFilter(bool authDisabled) : IDashboardAuthorizationFilter
+public sealed class HangfireDashboardAuthorizationFilter(bool authDisabled)
+    : IDashboardAuthorizationFilter
 {
     public bool Authorize(DashboardContext context)
     {
@@ -18,6 +19,7 @@ public sealed class HangfireDashboardAuthorizationFilter(bool authDisabled) : ID
         }
 
         var httpContext = context.GetHttpContext();
-        return httpContext.User.Identity?.IsAuthenticated == true && TrialAccessService.IsAdmin(httpContext.User);
+        return httpContext.User.Identity?.IsAuthenticated == true
+            && TrialAccessService.IsAdmin(httpContext.User);
     }
 }

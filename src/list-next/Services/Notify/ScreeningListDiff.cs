@@ -12,7 +12,9 @@ public static class ScreeningListDiff
     public static IReadOnlyList<string> NewEntryReferences(FhirList? previous, FhirList current)
     {
         var previousRefs = EntryReferences(previous);
-        return EntryReferences(current).Where(reference => !previousRefs.Contains(reference)).ToList();
+        return EntryReferences(current)
+            .Where(reference => !previousRefs.Contains(reference))
+            .ToList();
     }
 
     private static HashSet<string> EntryReferences(FhirList? list)

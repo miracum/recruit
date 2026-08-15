@@ -61,7 +61,7 @@
         _loading = true;
         try
         {
-            _entries = [.. await ResearchSubjectService.GetTimelineAsync(Patient.ResearchSubjectId)];
+            _entries = [.. await ResearchSubjectService.GetTimelineAsync(Patient.ResearchSubjectId, Patient.ResearchSubjectIdentifier)];
         }
         catch
         {

@@ -11,6 +11,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<NotificationRecipient> NotificationRecipients => Set<NotificationRecipient>();
 
+    public DbSet<ScreeningNote> ScreeningNotes => Set<ScreeningNote>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<TrialAccessGrant>(entity =>
@@ -49,6 +51,12 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
                     r.Channel,
                 })
                 .IsUnique();
+        });
+
+        modelBuilder.Entity<ScreeningNote>(entity =>
+        {
+            // The hot lookup path - GetNotesAsync/GetTimelineAsync both key off this.
+            entity.HasIndex(n => n.ResearchSubjectIdentifier);
         });
     }
 }
