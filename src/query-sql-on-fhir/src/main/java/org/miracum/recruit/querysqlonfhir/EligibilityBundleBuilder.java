@@ -1,6 +1,7 @@
 package org.miracum.recruit.querysqlonfhir;
 
 import com.google.common.hash.Hashing;
+import io.github.dizuker.tofhir.IdUtils;
 import io.github.miracum.recruit.Recruit;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -36,7 +37,10 @@ import org.springframework.stereotype.Component;
  * bundle-internal {@code fullUrl}) precisely so it can be built and submitted independently of -
  * and after - whichever chunk actually created or updated that ResearchSubject; the server resolves
  * it against whatever now matches on the server, without this class needing to track
- * server-assigned ids across chunk submissions.
+ * server-assigned ids across chunk submissions. When {@code useUpdateAsCreate} is enabled, the
+ * ResearchSubject's id is instead deterministic (a hash of the same patient/study pair - see {@link
+ * #researchSubjectResourceId}), so a direct reference to that id is used in place of the
+ * conditional one, for FHIR servers (e.g. Blaze) that don't support conditional references here.
  */
 @Component
 public class EligibilityBundleBuilder {
@@ -104,9 +108,7 @@ public class EligibilityBundleBuilder {
 
     var request = new BundleEntryRequestComponent();
     if (useUpdateAsCreate) {
-      var idValue =
-          "ResearchSubject?patient=Patient/" + patientId + "&study=ResearchStudy/" + studyId;
-      var resourceId = Hashing.sha256().hashString(idValue, StandardCharsets.UTF_8).toString();
+      var resourceId = researchSubjectResourceId(patientId, studyId);
       subject.setId(resourceId);
       request
           .setMethod(Bundle.HTTPVerb.PUT)
@@ -114,8 +116,7 @@ public class EligibilityBundleBuilder {
     } else {
       request
           .setMethod(Bundle.HTTPVerb.POST)
-          .setIfNoneExist(
-              "ResearchSubject?patient=Patient/" + patientId + "&study=ResearchStudy/" + studyId)
+          .setIfNoneExist(researchSubjectConditionalReferenceValue(patientId, studyId))
           .setUrl(ResourceType.ResearchSubject.name());
     }
 
@@ -124,6 +125,22 @@ public class EligibilityBundleBuilder {
         .setResource(subject)
         .setFullUrl(IdType.newRandomUuid().getValue())
         .setRequest(request);
+  }
+
+  private static String researchSubjectConditionalReferenceValue(String patientId, String studyId) {
+    return "ResearchSubject?patient=Patient/" + patientId + "&study=ResearchStudy/" + studyId;
+  }
+
+  /**
+   * The deterministic id a ResearchSubject is created/updated under when {@code useUpdateAsCreate}
+   * is enabled - a hash of the same patient/study pair that would otherwise identify it via a
+   * conditional reference, so the two addressing schemes stay in sync.
+   */
+  private static String researchSubjectResourceId(String patientId, String studyId) {
+    return Hashing.sha256()
+        .hashString(
+            researchSubjectConditionalReferenceValue(patientId, studyId), StandardCharsets.UTF_8)
+        .toString();
   }
 
   private void addObservationEntry(
@@ -145,7 +162,8 @@ public class EligibilityBundleBuilder {
     observation.setCode(new CodeableConcept().setText(outcome.displayText()));
     observation.setSubject(new Reference("Patient/" + patientId));
     observation.addFocus(researchStudyReference);
-    // Library isn't a valid Observation.derivedFrom target, so the criterion is referenced via a
+    // Library isn't a valid Observation.derivedFrom target, so the criterion is
+    // referenced via a
     // custom extension instead of a core element.
     observation.addExtension(
         Recruit.Extensions.eligibilityObservationDerivedFromLibrary(
@@ -153,9 +171,12 @@ public class EligibilityBundleBuilder {
     observation.setEffective(new DateTimeType(effectiveDate));
     observation.setValue(buildResultValue(outcome));
 
-    // The Library extension above isn't searchable without a custom SearchParameter, so identity
-    // for this Observation - and thus the conditional-update key - is expressed as a business
-    // identifier instead, keyed on the standard, always-searchable `identifier` parameter.
+    // The Library extension above isn't searchable without a custom
+    // SearchParameter, so identity
+    // for this Observation - and thus the conditional-update key - is expressed as
+    // a business
+    // identifier instead, keyed on the standard, always-searchable `identifier`
+    // parameter.
     var identifierValue =
         Hashing.sha256()
             .hashString(
@@ -212,10 +233,11 @@ public class EligibilityBundleBuilder {
             .setStatus(ListStatus.CURRENT)
             .setMode(ListResource.ListMode.WORKING)
             .setCode(screeningListCode);
-    screeningList
-        .addIdentifier()
-        .setSystem(fhirSystems.screeningListIdentifier())
-        .setValue(study.getIdentifierFirstRep().getValue());
+    var screeningListIdentifier =
+        screeningList
+            .addIdentifier()
+            .setSystem(fhirSystems.screeningListIdentifier())
+            .setValue(study.getIdentifierFirstRep().getValue());
 
     var studyReference =
         new Reference("ResearchStudy/" + studyId).setDisplay(getStudyAcronym(study));
@@ -226,14 +248,19 @@ public class EligibilityBundleBuilder {
       var individualReferenceValue = "Patient/" + patientId;
       var studyReferenceValue = "ResearchStudy/" + studyId;
 
-      // Conditional reference, not a bundle-internal fullUrl - see the class Javadoc.
-      var itemReference =
-          new Reference()
-              .setReference(
-                  "ResearchSubject?patient="
-                      + individualReferenceValue
-                      + "&study="
-                      + studyReferenceValue);
+      Reference itemReference;
+      if (useUpdateAsCreate) {
+        itemReference =
+            new Reference("ResearchSubject/" + researchSubjectResourceId(patientId, studyId));
+      } else {
+        itemReference =
+            new Reference()
+                .setReference(
+                    "ResearchSubject?patient="
+                        + individualReferenceValue
+                        + "&study="
+                        + studyReferenceValue);
+      }
 
       var listEntry =
           new ListResource.ListEntryComponent().setItem(itemReference).setDate(new Date());
@@ -263,12 +290,9 @@ public class EligibilityBundleBuilder {
 
     var request = new BundleEntryRequestComponent();
     if (useUpdateAsCreate) {
-      var identifierValue =
-          fhirSystems.screeningListIdentifier() + "|" + study.getIdentifierFirstRep().getValue();
-      var resourceId =
-          Hashing.sha256().hashString(identifierValue, StandardCharsets.UTF_8).toString();
-      screeningList.setId(resourceId);
-      request.setMethod(Bundle.HTTPVerb.PUT).setUrl(ResourceType.List.name() + "/" + resourceId);
+      var id = IdUtils.fromIdentifier(screeningListIdentifier);
+      screeningList.setId(id);
+      request.setMethod(Bundle.HTTPVerb.PUT).setUrl(ResourceType.List.name() + "/" + id);
     } else {
       request
           .setMethod(Bundle.HTTPVerb.PUT)
@@ -334,7 +358,10 @@ public class EligibilityBundleBuilder {
       return acronym.getValue();
     }
 
-    return study.hasTitle() ? study.getTitle() : study.getIdElement().getIdPart();
+    if (study.hasTitle()) {
+      return study.getTitle();
+    }
+    return study.getIdElement().getIdPart();
   }
 
   private static <T> List<List<T>> partition(List<T> items, int size) {
