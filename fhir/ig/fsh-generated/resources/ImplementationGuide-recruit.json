@@ -44,6 +44,14 @@
       },
       {
         "reference": {
+          "reference": "NamingSystem/eligibility-library-id"
+        },
+        "name": "EligibilityLibraryIdentifierSystem",
+        "description": "The identifier system for a criterion expressed in a Library resource",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
           "reference": "NamingSystem/eligibility-observation-id"
         },
         "name": "EligibilityObservationIdentifierSystem",

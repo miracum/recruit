@@ -23,7 +23,7 @@ step:
    `fhir/ig/fsh-generated/resources`.
 2. Regenerate one or both languages:
    - Java: `./gradlew :fhir-constants:generateIgConstants`
-   - C#: `dotnet build src/list-next/fhir-constants-cs/fhir-constants-cs.csproj -t:GenerateIgConstants`
+   - C#: `dotnet build list-next/fhir-constants-cs/fhir-constants-cs.csproj -t:GenerateIgConstants`
 3. Review the diff (added/removed/renamed constants), commit it.
 
 See the two module READMEs linked above for the generated API shape and usage examples in each

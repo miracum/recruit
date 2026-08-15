@@ -43,7 +43,7 @@
         "id": "be24c1a6-b052-4360-871b-0a1b7b6bdfb4",
         "identifier": [
           {
-            "system": "https://miracum.github.io/recruit/fhir/identifiers/trino-sql-criteria-group-id",
+            "system": "https://miracum.github.io/recruit/fhir/identifiers/eligibility-group-id",
             "value": "bronchitis"
           }
         ],

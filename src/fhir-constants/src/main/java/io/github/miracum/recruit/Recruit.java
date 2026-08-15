@@ -261,6 +261,21 @@ public final class Recruit {
     }
 
     /**
+     * The identifier system for a criterion expressed in a Library resource
+     */
+    public static final class EligibilityLibraryId {
+      private EligibilityLibraryId() {
+      }
+
+      /**
+       * @return {@code https://miracum.github.io/recruit/fhir/identifiers/eligibility-library-id}
+       */
+      public static @NonNull String uri() {
+        return "https://miracum.github.io/recruit/fhir/identifiers/eligibility-library-id";
+      }
+    }
+
+    /**
      * The identifier system for a per-criterion eligibility Observation's business identifier
      */
     public static final class EligibilityObservationId {

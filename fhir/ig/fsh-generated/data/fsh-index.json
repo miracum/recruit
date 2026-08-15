@@ -40,6 +40,14 @@
     "endLine": 12
   },
   {
+    "outputFile": "NamingSystem-eligibility-library-id.json",
+    "fshName": "EligibilityLibraryIdentifierSystem",
+    "fshType": "Instance",
+    "fshFile": "eligibility-library.fsh",
+    "startLine": 1,
+    "endLine": 12
+  },
+  {
     "outputFile": "NamingSystem-eligibility-observation-id.json",
     "fshName": "EligibilityObservationIdentifierSystem",
     "fshType": "Instance",
