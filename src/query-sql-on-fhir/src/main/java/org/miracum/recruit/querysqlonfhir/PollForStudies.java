@@ -149,7 +149,6 @@ public class PollForStudies {
                 ListResource.IDENTIFIER
                     .exactly()
                     .systemAndIdentifier(identifierSystem, identifierValue))
-            .include(new Include("List:item"))
             .returnBundle(Bundle.class)
             .encodedJson()
             .withAdditionalHeader("Prefer", "handling=strict")

@@ -266,18 +266,15 @@ public class EligibilityBundleBuilder {
           new ListResource.ListEntryComponent().setItem(itemReference).setDate(new Date());
 
       if (previousList.isPresent()) {
+        // itemReference is built the same way for a given patient/study pair on every run, so
+        // the previous entry for this patient can be matched by comparing that literal
+        // reference string directly - no need to resolve item.getItem().getResource(), which
+        // isn't reliably populated (e.g. Blaze doesn't resolve it via the `_include` used to
+        // fetch previousList).
+        var referenceValue = itemReference.getReference();
         var previousEntry =
             previousList.get().getEntry().stream()
-                .filter(
-                    item ->
-                        ((ResearchSubject) item.getItem().getResource())
-                                .getIndividual()
-                                .getReference()
-                                .equals(individualReferenceValue)
-                            && ((ResearchSubject) item.getItem().getResource())
-                                .getStudy()
-                                .getReference()
-                                .equals(studyReferenceValue))
+                .filter(item -> referenceValue.equals(item.getItem().getReference()))
                 .findFirst();
 
         if (previousEntry.isPresent() && previousEntry.get().hasDate()) {
