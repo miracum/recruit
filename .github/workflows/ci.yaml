@@ -338,6 +338,7 @@ jobs:
       enable-validate-gradle-wrapper: false
       codeql-languages: '["javascript", "java"]'
       enable-codeql: true
+      java-version: "25"
       enable-verify-base-image-signature: false
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}

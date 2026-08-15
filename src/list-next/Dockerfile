@@ -10,8 +10,7 @@ ARG VERSION=v10.5.7 # x-release-please-version
 RUN dotnet publish ./list.csproj \
     -c Release \
     -o /app/publish \
-    -p:Version=${VERSION#v} \
-    --no-restore
+    -p:Version=${VERSION#v}
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0@sha256:f1126d438ccc359f51cc6d4701a8deae513856cf10f5fe645d29ea6403dcac6b
 WORKDIR /app

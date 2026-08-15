@@ -46,4 +46,4 @@ services:
     depends_on:
       - fhir
       # not strictly required, but makes sure the list service starts at this point
-      # - list
+      - list
