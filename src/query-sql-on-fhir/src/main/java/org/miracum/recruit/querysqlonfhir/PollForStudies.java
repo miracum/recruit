@@ -4,13 +4,18 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.util.BundleUtil;
+import io.github.miracum.recruit.Recruit;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.ResearchStudy;
+import org.hl7.fhir.r4.model.ResearchSubject;
 import org.miracum.recruit.querysqlonfhir.config.FhirSystems;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,8 +129,18 @@ public class PollForStudies {
 
     var effectiveDate = new Date();
 
+    // Only needed in update-as-create mode: without it, POST's conditional-create already
+    // guarantees existing ResearchSubjects are left untouched (see EligibilityBundleBuilder).
+    Set<String> existingResearchSubjectIds;
+    if (bundleBuilder.usesUpdateAsCreate()) {
+      existingResearchSubjectIds = fetchExistingResearchSubjectIds(study);
+    } else {
+      existingResearchSubjectIds = Set.of();
+    }
+
     var subjectAndObservationBundles =
-        bundleBuilder.buildSubjectAndObservationBundles(study, results, effectiveDate);
+        bundleBuilder.buildSubjectAndObservationBundles(
+            study, results, effectiveDate, existingResearchSubjectIds);
     for (var bundle : subjectAndObservationBundles) {
       fhirClient.transaction().withBundle(bundle).execute();
     }
@@ -138,7 +153,7 @@ public class PollForStudies {
   }
 
   private Optional<ListResource> fetchPreviousScreeningList(ResearchStudy study) {
-    var identifierSystem = fhirSystems.screeningListIdentifier();
+    var identifierSystem = Recruit.NamingSystems.ScreeningListId.UniqueId.uri();
     var identifierValue = study.getIdentifierFirstRep().getValue();
 
     var previousListBundle =
@@ -167,5 +182,38 @@ public class PollForStudies {
     }
 
     return Optional.of(listResources.getFirst());
+  }
+
+  /**
+   * Ids of every ResearchSubject already on the server for this study - only called in
+   * update-as-create mode, to keep {@link EligibilityBundleBuilder} from PUTting over (and thereby
+   * resetting the status of) a subject list-next has since updated. Paginates through the full
+   * result set since a study can have far more subjects than fit on one page.
+   */
+  private Set<String> fetchExistingResearchSubjectIds(ResearchStudy study) {
+    var studyReference = "ResearchStudy/" + study.getIdElement().getIdPart();
+
+    var ids = new HashSet<String>();
+    var page =
+        fhirClient
+            .search()
+            .forResource(ResearchSubject.class)
+            .where(ResearchSubject.STUDY.hasId(studyReference))
+            .returnBundle(Bundle.class)
+            .encodedJson()
+            .execute();
+
+    while (page != null) {
+      BundleUtil.toListOfResourcesOfType(fhirClient.getFhirContext(), page, ResearchSubject.class)
+          .forEach(subject -> ids.add(subject.getIdElement().getIdPart()));
+
+      if (page.getLink(IBaseBundle.LINK_NEXT) != null) {
+        page = fhirClient.loadPage().next(page).execute();
+      } else {
+        page = null;
+      }
+    }
+
+    return ids;
   }
 }

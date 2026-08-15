@@ -4,6 +4,7 @@ CodeSystem-eligibility-observation-category.json                       Eligibili
 CodeSystem-screening-list-type.json                                    CodeSystemScreeningList                   CodeSystem  screeninglist.fsh            19 - 22
 List-ScreeningListExample.json                                         ScreeningListExample                      Instance    screeninglist.fsh            37 - 43
 NamingSystem-eligibility-observation-id.json                           EligibilityObservationIdentifierSystem    Instance    eligibility-observation.fsh  14 - 25
+NamingSystem-research-subject-id.json                                  ResearchSubjectIdentifierSystem           Instance    researchsubject.fsh          1 - 12
 NamingSystem-screening-list-id.json                                    ScreeningListIdentifierSystem             Instance    screeninglist.fsh            24 - 35
 ResearchStudy-RecruitResearchStudyExample.json                         RecruitResearchStudyExample               Instance    recruit-researchstudy.fsh    9 - 12
 SearchParameter-group-characteristic.json                              GroupCharacteristic                       Instance    searchparameters.fsh         14 - 24

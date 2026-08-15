@@ -1,6 +1,7 @@
 package org.miracum.recruit.querysqlonfhir;
 
 import com.google.common.hash.Hashing;
+import de.medizininformatikinitiative.kerndatensatz.studie.Studie;
 import io.github.dizuker.tofhir.IdUtils;
 import io.github.miracum.recruit.Recruit;
 import java.nio.charset.StandardCharsets;
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -21,10 +23,10 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.ResearchSubject;
 import org.hl7.fhir.r4.model.ResourceType;
-import org.hl7.fhir.r4.model.StringType;
 import org.miracum.recruit.querysqlonfhir.config.FhirSystems;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 /**
  * Builds the FHIR transaction bundles {@link PollForStudies} submits from a study's merged
@@ -41,6 +43,15 @@ import org.springframework.stereotype.Component;
  * ResearchSubject's id is instead deterministic (a hash of the same patient/study pair - see {@link
  * #researchSubjectResourceId}), so a direct reference to that id is used in place of the
  * conditional one, for FHIR servers (e.g. Blaze) that don't support conditional references here.
+ *
+ * <p>Either way, a ResearchSubject that already exists is never rewritten by this class: once
+ * created, its {@code status} is owned by list-next (see {@code ResearchSubjectService.cs}), which
+ * updates it via a version-aware PUT as users triage candidates. Without {@code useUpdateAsCreate},
+ * this falls out of the FHIR server's conditional-create semantics for free (a {@code POST} with
+ * {@code If-None-Exist} is a no-op if a match already exists). With {@code useUpdateAsCreate}, a
+ * plain PUT-by-id would instead unconditionally replace the whole resource - resetting {@code
+ * status} back to {@code candidate} and dropping any notes - every poll cycle, so {@link
+ * #buildSubjectAndObservationBundles} is told which ids already exist and skips them explicitly.
  */
 @Component
 public class EligibilityBundleBuilder {
@@ -69,12 +80,31 @@ public class EligibilityBundleBuilder {
   }
 
   /**
+   * Whether ResearchSubjects are written via update-as-create (PUT to a deterministic id) rather
+   * than conditional create (POST with If-None-Exist). Callers use this to decide whether they need
+   * to look up already-existing ResearchSubject ids before calling {@link
+   * #buildSubjectAndObservationBundles} - see that method's {@code existingResearchSubjectIds}.
+   */
+  public boolean usesUpdateAsCreate() {
+    return useUpdateAsCreate;
+  }
+
+  /**
    * One transaction bundle per chunk of at most {@code chunkSize} patients, each entry containing
-   * that patient's ResearchSubject plus one Observation per criterion. Empty if {@code results} is
+   * that patient's ResearchSubject (unless it already exists - see {@code
+   * existingResearchSubjectIds}) plus one Observation per criterion. Empty if {@code results} is
    * empty.
+   *
+   * @param existingResearchSubjectIds ids (as returned by {@link #researchSubjectResourceId}) of
+   *     ResearchSubjects already on the server for this study. Only consulted when {@code
+   *     useUpdateAsCreate} is enabled - without it, {@code POST}'s conditional-create already
+   *     guarantees existing subjects are left untouched, so callers may pass {@link Set#of()}.
    */
   public List<Bundle> buildSubjectAndObservationBundles(
-      ResearchStudy study, List<PatientEligibilityResult> results, Date effectiveDate) {
+      ResearchStudy study,
+      List<PatientEligibilityResult> results,
+      Date effectiveDate,
+      Set<String> existingResearchSubjectIds) {
     var studyId = study.getIdElement().getIdPart();
     var researchStudyReference = new Reference("ResearchStudy/" + studyId);
 
@@ -84,7 +114,12 @@ public class EligibilityBundleBuilder {
       bundle.setTimestamp(effectiveDate);
 
       for (var result : chunk) {
-        addResearchSubjectEntry(bundle, studyId, researchStudyReference, result.patientId());
+        addResearchSubjectEntry(
+            bundle,
+            studyId,
+            researchStudyReference,
+            result.patientId(),
+            existingResearchSubjectIds);
 
         for (var outcome : result.criteria()) {
           addObservationEntry(
@@ -99,16 +134,27 @@ public class EligibilityBundleBuilder {
   }
 
   private void addResearchSubjectEntry(
-      Bundle bundle, String studyId, Reference researchStudyReference, String patientId) {
+      Bundle bundle,
+      String studyId,
+      Reference researchStudyReference,
+      String patientId,
+      Set<String> existingResearchSubjectIds) {
+    var request = new BundleEntryRequestComponent();
     var subject =
         new ResearchSubject()
             .setStudy(researchStudyReference)
             .setIndividual(new Reference("Patient/" + patientId))
             .setStatus(ResearchSubject.ResearchSubjectStatus.CANDIDATE);
 
-    var request = new BundleEntryRequestComponent();
     if (useUpdateAsCreate) {
       var resourceId = researchSubjectResourceId(patientId, studyId);
+      if (existingResearchSubjectIds.contains(resourceId)) {
+        // Already created by a previous poll cycle. A PUT is a full replace, and this freshly
+        // built subject only knows CANDIDATE - PUTting it again would reset a status list-next
+        // has since moved on, and drop any notes appended there. Leave it alone; its Observations
+        // are still refreshed below regardless.
+        return;
+      }
       subject.setId(resourceId);
       request
           .setMethod(Bundle.HTTPVerb.PUT)
@@ -119,6 +165,15 @@ public class EligibilityBundleBuilder {
           .setIfNoneExist(researchSubjectConditionalReferenceValue(patientId, studyId))
           .setUrl(ResourceType.ResearchSubject.name());
     }
+
+    // Set unconditionally - independent of useUpdateAsCreate above, which only controls how the
+    // subject is addressed on the wire (a direct id vs. a conditional reference). This identifier
+    // is what list-next keys its screening-notes table on, so it must be stable and present
+    // either way.
+    subject
+        .addIdentifier()
+        .setSystem(Recruit.NamingSystems.ResearchSubjectId.UniqueId.uri())
+        .setValue(researchSubjectResourceId(patientId, studyId));
 
     bundle
         .addEntry()
@@ -185,7 +240,7 @@ public class EligibilityBundleBuilder {
             .toString();
     observation
         .addIdentifier()
-        .setSystem(fhirSystems.eligibilityObservationIdentifierSystem())
+        .setSystem(Recruit.NamingSystems.EligibilityObservationId.UniqueId.uri())
         .setValue(identifierValue);
 
     var request = new BundleEntryRequestComponent();
@@ -199,7 +254,7 @@ public class EligibilityBundleBuilder {
           .setMethod(Bundle.HTTPVerb.PUT)
           .setUrl(
               "Observation?identifier="
-                  + fhirSystems.eligibilityObservationIdentifierSystem()
+                  + Recruit.NamingSystems.EligibilityObservationId.UniqueId.uri()
                   + "|"
                   + identifierValue);
     }
@@ -236,7 +291,7 @@ public class EligibilityBundleBuilder {
     var screeningListIdentifier =
         screeningList
             .addIdentifier()
-            .setSystem(fhirSystems.screeningListIdentifier())
+            .setSystem(Recruit.NamingSystems.ScreeningListId.UniqueId.uri())
             .setValue(study.getIdentifierFirstRep().getValue());
 
     var studyReference =
@@ -295,7 +350,7 @@ public class EligibilityBundleBuilder {
           .setMethod(Bundle.HTTPVerb.PUT)
           .setUrl(
               "List?identifier="
-                  + fhirSystems.screeningListIdentifier()
+                  + Recruit.NamingSystems.ScreeningListId.UniqueId.uri()
                   + "|"
                   + study.getIdentifierFirstRep().getValue());
     }
@@ -350,8 +405,8 @@ public class EligibilityBundleBuilder {
   }
 
   private String getStudyAcronym(ResearchStudy study) {
-    var extension = study.getExtensionByUrl(fhirSystems.researchStudyAcronymExtension());
-    if (extension != null && extension.getValue() instanceof StringType acronym) {
+    var acronym = Studie.Extensions.getMiiExStudieAkronym(study);
+    if (acronym != null && StringUtils.hasText(acronym.getValue())) {
       return acronym.getValue();
     }
 

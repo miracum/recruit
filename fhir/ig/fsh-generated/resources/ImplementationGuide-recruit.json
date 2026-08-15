@@ -114,6 +114,14 @@
       },
       {
         "reference": {
+          "reference": "NamingSystem/research-subject-id"
+        },
+        "name": "ResearchSubjectIdentifierSystem",
+        "description": "The identifier system for a recruIT-created ResearchSubject's business identifier",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
           "reference": "StructureDefinition/screening-list-belongs-to-study"
         },
         "name": "Screening list clinical study reference",

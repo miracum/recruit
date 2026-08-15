@@ -19,17 +19,6 @@ fhir:
     # call, connect, read, and write timeout to the FHIR server in seconds
     timeout-in-seconds: 300
   use-update-as-create: false
-  systems:
-    screening-list-identifier: "https://miracum.github.io/recruit/fhir/NamingSystem/screening-list-id"
-    # business identifier used as the conditional-update key for per-criterion Observations, since
-    # the EligibilityObservationDerivedFromLibrary extension isn't a searchable parameter without a
-    # custom SearchParameter registered on the FHIR server - identifier is a standard,
-    # always-searchable parameter instead.
-    eligibility-observation-identifier-system: "https://miracum.github.io/recruit/fhir/NamingSystem/eligibility-observation-id"
-    # read off ResearchStudy to populate the belongsToStudy extension's Reference.display on the
-    # screening List - list-next reads the trial's acronym from that display text, not by
-    # resolving the ResearchStudy itself (see ScreeningListService.cs).
-    research-study-acronym-extension: "https://www.medizininformatik-initiative.de/fhir/modul-studie/StructureDefinition/mii-ex-studie-akronym"
 
 # base URL of a sql-on-fhir server (e.g. Pathling) implementing the $sqlquery-run operation.
 # only required if any of the polled SQLQuery Library resources depend on ViewDefinitions

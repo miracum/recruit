@@ -9,6 +9,7 @@
 [RecruitResearchStudyExample]: ResearchStudy-RecruitResearchStudyExample.html
 [recruit-search-parameters-transaction]: Bundle-recruit-search-parameters-transaction.html
 [researchstudy-enrollment]: SearchParameter-researchstudy-enrollment.html
+[research-subject-id]: NamingSystem-research-subject-id.html
 [ScreeningListBelongsToStudy]: StructureDefinition-screening-list-belongs-to-study.html
 [ScreeningList]: StructureDefinition-screening-list.html
 [screening-list-id]: NamingSystem-screening-list-id.html

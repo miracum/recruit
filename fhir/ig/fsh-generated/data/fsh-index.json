@@ -40,6 +40,14 @@
     "endLine": 25
   },
   {
+    "outputFile": "NamingSystem-research-subject-id.json",
+    "fshName": "ResearchSubjectIdentifierSystem",
+    "fshType": "Instance",
+    "fshFile": "researchsubject.fsh",
+    "startLine": 1,
+    "endLine": 12
+  },
+  {
     "outputFile": "NamingSystem-screening-list-id.json",
     "fshName": "ScreeningListIdentifierSystem",
     "fshType": "Instance",
