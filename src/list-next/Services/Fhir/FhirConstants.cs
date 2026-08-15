@@ -15,8 +15,6 @@ public static class FhirConstants
     /// <summary>Matches recruit's fhir/ig - see the fhir-constants module (Recruit.Extensions.screeningListBelongsToStudy()).</summary>
     public const string UrlListBelongsToStudy =
         "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study";
-    public const string UrlStudyAcronym =
-        "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym";
 
     /// <summary>Written by this app (list), not by the query module.</summary>
     public const string UrlResearchSubjectNote =

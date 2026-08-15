@@ -1,4 +1,5 @@
 using System.Text;
+using De.Medizininformatikinitiative.Kerndatensatz.Studie;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
 using list.Models;
@@ -70,8 +71,8 @@ internal static class FhirBundleHelpers
             : null;
 
     public static string? GetStudyAcronym(this ResearchStudy study) =>
-        study.GetStringExtension(FhirConstants.UrlStudyAcronym) is { Length: > 0 } acronym
-            ? acronym
+        study.GetMiiExStudieAkronym()?.Value is FhirString { Value.Length: > 0 } acronym
+            ? acronym.Value
             : study.Title ?? study.Id;
 
     /// <summary>Decodes a criterion Library's SQL source from its content attachment.</summary>

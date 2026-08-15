@@ -1,4 +1,5 @@
 using System.Text;
+using De.Medizininformatikinitiative.Kerndatensatz.Studie;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using list.Models;
@@ -45,7 +46,7 @@ public sealed class EligibilityCriteriaService(
             .Select(s => new ResearchStudySummaryDto(
                 s.Id!,
                 s.Title,
-                s.GetStringExtension(FhirConstants.UrlStudyAcronym),
+                s.GetMiiExStudieAkronym()?.Value?.ToString(),
                 s.GetTrialIdentifier()
             ))
             .OrderBy(s => s.Acronym ?? s.Title ?? s.Id, StringComparer.OrdinalIgnoreCase)
@@ -151,7 +152,7 @@ public sealed class EligibilityCriteriaService(
 
         if (!string.IsNullOrWhiteSpace(studyDraft.Acronym))
         {
-            study.AddExtension(FhirConstants.UrlStudyAcronym, new FhirString(studyDraft.Acronym));
+            study.Extension.Add(Studie.Extensions.MiiExStudieAkronym(new FhirString(studyDraft.Acronym)));
         }
 
         if (
