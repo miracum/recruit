@@ -3,6 +3,7 @@ package org.miracum.recruit.querysqlonfhir;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.hash.Hashing;
+import io.github.miracum.recruit.Recruit;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
@@ -15,7 +16,7 @@ import org.junit.jupiter.api.Test;
 class EligibilityBundleBuilderTest {
 
   private static final String RESEARCH_SUBJECT_IDENTIFIER_SYSTEM =
-      "https://example.org/fhir/NamingSystem/research-subject-id";
+      Recruit.NamingSystems.ResearchSubjectId.uri();
 
   private static ResearchStudy studyWithId(String id) {
     var study = new ResearchStudy();
