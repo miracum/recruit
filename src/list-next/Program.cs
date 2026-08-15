@@ -236,24 +236,17 @@ await using (var scope = app.Services.CreateAsyncScope())
     );
 }
 
-// /livez, /readyz, and /metrics are restricted to their intended port using the actual accepted
-// connection's local port rather than RequireHost's Host-header matching: the Host header isn't
-// trustworthy for this (it reflects whatever the client sent, which port-forwarding, NAT, or a
-// misbehaving client can desync from the socket that was actually connected to), so relying on it
-// risks a probe/scrape silently falling through to the Blazor app instead of a clean 404 - or,
-// worse, matching a legitimate probe by accident when it shouldn't. Placed before other middleware
-// so these checks stay cheap and unaffected by request localization/HTTPS redirection/auth.
+// Keeps /metrics off the app's public-facing port: ASP.NET Core routing doesn't care which Kestrel
+// listener accepted a connection, so without this, ingress traffic (which forwards "/" to the same
+// port list-next's main listener serves) could reach the Prometheus exporter too - defeating the
+// point of a separate metrics port. Checks the actual accepted connection's local port rather than
+// RequireHost's Host-header matching, since the Host header can desync from the real port behind
+// port-forwarding/NAT. /livez and /readyz don't get the same treatment: kubelet always probes the
+// "http" port by name, and a plain Healthy/Unhealthy response isn't sensitive either way.
 app.Use(
     async (context, next) =>
     {
-        var path = context.Request.Path;
-        var localPort = context.Connection.LocalPort;
-        if ((path == "/livez" || path == "/readyz") && localPort != httpPort)
-        {
-            context.Response.StatusCode = StatusCodes.Status404NotFound;
-            return;
-        }
-        if (path == "/metrics" && localPort != metricsPort)
+        if (context.Request.Path == "/metrics" && context.Connection.LocalPort != metricsPort)
         {
             context.Response.StatusCode = StatusCodes.Status404NotFound;
             return;
