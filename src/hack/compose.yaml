@@ -487,6 +487,7 @@ services:
     working_dir: /synthea/
     command:
       - |
+        set -euo pipefail
         until [ "$(curl -s -o /dev/null -L -w "%{http_code}" "$$FHIR_SERVER_BASE_URL/metadata")" == "200" ]; do
             echo "$(date): Waiting for FHIR server @ $$FHIR_SERVER_BASE_URL to be up";
             sleep 5;
@@ -499,7 +500,13 @@ services:
         curl --fail-with-body --retry-connrefused -X POST -H "Content-Type: application/fhir+json" --data @/fhir/trino-sql-study-transaction-upsert.json "$$FHIR_SERVER_BASE_URL"
     volumes:
       - ./synthea/:/synthea/
-      - ./fhir/:/fhir/
+      # ./fhir/search-parameters-transaction-upsert.json is a symlink pointing outside of ./fhir/.
+      # Mounting ./fhir/ as a whole would carry that symlink into the container, and Docker
+      # resolves mount targets through existing symlinks - so a later mount at the same path
+      # would follow it and (since /fhir/ is a live bind mount) recreate the resolved directory
+      # tree back on the host. Mount each file individually by its real path instead.
+      - ./fhir/trino-sql-study-transaction-upsert.json:/fhir/trino-sql-study-transaction-upsert.json:ro
+      - ../../fhir/ig/fsh-generated/resources/Bundle-recruit-search-parameters-transaction.json:/fhir/search-parameters-transaction-upsert.json:ro
     depends_on:
       fhir:
         condition: service_started
