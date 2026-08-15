@@ -121,22 +121,28 @@ Notes:
 
 ## Library SQL contract
 
-Every criterion `Library` must contain SQL returning exactly four columns,
+Every criterion `Library` must contain SQL returning `patient_id` and `is_met`,
 covering the **full patient population** (so that "no matching data" reliably
 produces `NULL`, not a missing row):
 
 - `patient_id`
 - `is_met` (nullable boolean) - the raw, un-negated predicate
+
+It may additionally return two optional columns - a criterion whose SQL omits
+either is treated exactly as if it had selected a `NULL` literal for it, so
+there's no need to pad every criterion's SQL with columns it doesn't use:
+
 - `is_indeterminate` (boolean) - only meaningful when `is_met IS NULL`;
   distinguishes "evaluated but inconclusive" from plain "unknown" (missing
-  data). Criteria that never produce an indeterminate result just select
-  `CAST(NULL AS BOOLEAN) AS is_indeterminate` - a fixed `FALSE` also works,
-  but `NULL` reads more honestly as "this axis doesn't apply here."
-- `result_note` (nullable string) - an optional free-text explanation, carried
-  through unchanged to the resulting `Observation.value.text` (see below).
-  Most useful alongside `is_indeterminate=true` (explaining *why*), but not
-  limited to it. Criteria that never need it select
-  `CAST(NULL AS VARCHAR) AS result_note`.
+  data). Criteria that never produce an indeterminate result can omit it, or
+  select `CAST(NULL AS BOOLEAN) AS is_indeterminate` explicitly - a fixed
+  `FALSE` also works, but `NULL` reads more honestly as "this axis doesn't
+  apply here."
+- `result_note` (nullable string) - a free-text explanation, carried through
+  unchanged to the resulting `Observation.value.text` (see below). Most
+  useful alongside `is_indeterminate=true` (explaining *why*), but not
+  limited to it. Criteria that never need it can omit it, or select
+  `CAST(NULL AS VARCHAR) AS result_note` explicitly.
 
 ```sql
 -- crit-age-min-18
@@ -237,11 +243,11 @@ Two things this relies on that are native SQL behavior, not custom logic:
   outright.
 
 This keeps each `Library`'s SQL independently authored, standalone, and
-reusable (it still only needs to satisfy the four-column
-`(patient_id, is_met, is_indeterminate, result_note)` contract to run alone) -
-the wrapper is mechanically generated from `Group.characteristic`, not
-hand-written per study, so this doesn't reintroduce fragile per-study SQL
-composition.
+reusable (it still only needs to satisfy the `(patient_id, is_met)` contract,
+plus whichever of the optional `is_indeterminate`/`result_note` columns it
+actually uses, to run alone) - the wrapper is mechanically generated from
+`Group.characteristic`, not hand-written per study, so this doesn't
+reintroduce fragile per-study SQL composition.
 
 The query module's Java code shrinks to: loop over `Group.characteristic`,
 template each `Library`'s SQL into a `crit_N` CTE plus one `LEFT JOIN` and

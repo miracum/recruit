@@ -14,13 +14,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 
 class SqlQueryExecutorTest {
 
@@ -35,6 +38,19 @@ class SqlQueryExecutorTest {
   private final IGenericClient sqlOnFhirClient = mock(IGenericClient.class, RETURNS_DEEP_STUBS);
 
   private final SqlQueryExecutor sut = new SqlQueryExecutor(jdbcTemplate, sqlOnFhirClient);
+
+  /**
+   * Trino-direct criteria are probed with a {@code LIMIT 0} query to see which optional columns
+   * they return, before the merged query referencing them is built. {@code SQL_AGE}/{@code
+   * SQL_CHEMO} both select {@code is_indeterminate}/{@code result_note}, so this is what a real
+   * probe against them would report; tests exercising a criterion that omits either column override
+   * this stub.
+   */
+  @BeforeEach
+  void stubColumnProbe() {
+    when(jdbcTemplate.query(anyString(), any(ResultSetExtractor.class)))
+        .thenReturn(Set.of("is_indeterminate", "result_note"));
+  }
 
   private static Library trinoLibrary(String sql) {
     var library = new Library();
@@ -152,6 +168,32 @@ class SqlQueryExecutorTest {
         .contains("crit_1.is_indeterminate AS crit_1_is_indeterminate")
         .contains("crit_1.result_note AS crit_1_result_note")
         .contains("WHERE ((crit_0.is_met) AND (NOT crit_1.is_met)) IS DISTINCT FROM FALSE");
+  }
+
+  @Test
+  void
+      evaluateEligibility_whenCriterionSqlOmitsOptionalColumns_substitutesNullLiteralsInMergedQuery() {
+    var sqlWithoutOptionalColumns = "SELECT patient_id, is_met FROM age";
+    var withBoth = new EligibilityCriterion(trinoLibrary(SQL_AGE), "Age >= 18", false);
+    var withoutEither =
+        new EligibilityCriterion(trinoLibrary(sqlWithoutOptionalColumns), "No prior chemo", true);
+
+    when(jdbcTemplate.query(contains(sqlWithoutOptionalColumns), any(ResultSetExtractor.class)))
+        .thenReturn(Set.of());
+    when(jdbcTemplate.queryForList(anyString())).thenReturn(List.of());
+
+    var captor = ArgumentCaptor.forClass(String.class);
+    sut.evaluateEligibility(List.of(withBoth, withoutEither));
+    org.mockito.Mockito.verify(jdbcTemplate).queryForList(captor.capture());
+
+    var sql = captor.getValue();
+    assertThat(sql)
+        .contains("crit_0.is_indeterminate AS crit_0_is_indeterminate")
+        .contains("crit_0.result_note AS crit_0_result_note")
+        .contains("CAST(NULL AS BOOLEAN) AS crit_1_is_indeterminate")
+        .contains("CAST(NULL AS VARCHAR) AS crit_1_result_note")
+        .doesNotContain("crit_1.is_indeterminate")
+        .doesNotContain("crit_1.result_note");
   }
 
   @Test

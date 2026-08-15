@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Library;
@@ -28,13 +29,14 @@ import org.springframework.stereotype.Component;
  * (Kleene) logic: a definite "not met" on any criterion dominates, and the overall result is
  * "unknown" only when nothing is definitely not met but at least one criterion's data is missing.
  *
- * <p>Every criterion Library's SQL must return four columns - {@code patient_id}, {@code is_met}
- * (nullable boolean), {@code is_indeterminate} (boolean, only meaningful when {@code is_met} is
- * {@code null}), and {@code result_note} (nullable string, a free-text explanation carried through
- * to {@code Observation.value.text} - most useful alongside indeterminate, but not limited to it).
- * Criteria that never need either can just select {@code CAST(NULL AS BOOLEAN)} / {@code CAST(NULL
- * AS VARCHAR)} for them - covering the full patient population, so that missing data reliably
- * produces a {@code null} row rather than a missing one.
+ * <p>Every criterion Library's SQL must return {@code patient_id} and {@code is_met} (nullable
+ * boolean), covering the full patient population so that missing data reliably produces a {@code
+ * null} row rather than a missing one. It may optionally also return {@code is_indeterminate}
+ * (boolean, only meaningful when {@code is_met} is {@code null}) and {@code result_note} (nullable
+ * string, a free-text explanation carried through to {@code Observation.value.text} - most useful
+ * alongside indeterminate, but not limited to it); a criterion whose SQL omits either column is
+ * treated as if it had selected {@code CAST(NULL AS BOOLEAN)} / {@code CAST(NULL AS VARCHAR)} for
+ * it.
  *
  * <p>When every criterion's Library has {@code application/sql;dialect=trino} content and no {@code
  * relatedArtifact}, the merge is expressed as a single generated SQL query (one CTE per criterion)
@@ -115,7 +117,9 @@ public class SqlQueryExecutor {
   // ---- all-Trino path: one generated, merged query ----
 
   private List<PatientEligibilityResult> evaluateAgainstTrino(List<EligibilityCriterion> criteria) {
-    var sql = buildMergedQuery(criteria);
+    var criterionColumns = criteria.stream().map(c -> resolveResultColumns(trinoSql(c))).toList();
+
+    var sql = buildMergedQuery(criteria, criterionColumns);
     log.info(
         "Running merged eligibility query for {} criteria against Trino:\n{}",
         criteria.size(),
@@ -126,13 +130,36 @@ public class SqlQueryExecutor {
   }
 
   /**
+   * The lowercased column labels a criterion's SQL actually returns, found by probing it with a
+   * {@code LIMIT 0} wrapper - cheap since Trino doesn't need to scan any data to plan a query with
+   * no rows, and independent of the SQL's own result count. Used to tell whether the optional
+   * {@code is_indeterminate}/{@code result_note} columns are present before they're referenced by
+   * name in the generated merged query, since referencing a column a criterion's SQL doesn't
+   * actually select would otherwise fail the whole merged query at the database.
+   */
+  private Set<String> resolveResultColumns(String sql) {
+    var probeSql = "SELECT * FROM (\n" + sql + "\n) AS probe LIMIT 0";
+    return jdbcTemplate.query(
+        probeSql,
+        rs -> {
+          var metaData = rs.getMetaData();
+          var columns = new LinkedHashSet<String>();
+          for (var i = 1; i <= metaData.getColumnCount(); i++) {
+            columns.add(metaData.getColumnLabel(i).toLowerCase(Locale.ROOT));
+          }
+          return columns;
+        });
+  }
+
+  /**
    * Wraps each criterion's already-standalone SQL as a CTE, joins them on {@code patient_id}
    * (anchored on the first criterion, which - per the two-column contract - already covers the full
    * patient population), and filters out definite non-matches via native Kleene {@code AND} pushed
    * down into the {@code WHERE} clause. See {@code docs/trino/eligibility-criteria-design.md} for
    * the full rationale.
    */
-  private String buildMergedQuery(List<EligibilityCriterion> criteria) {
+  private String buildMergedQuery(
+      List<EligibilityCriterion> criteria, List<Set<String>> criterionColumns) {
     var ctes = new StringBuilder();
     var selectColumns = new StringBuilder();
     var joins = new StringBuilder();
@@ -141,6 +168,7 @@ public class SqlQueryExecutor {
     for (var i = 0; i < criteria.size(); i++) {
       var criterion = criteria.get(i);
       var alias = "crit_" + i;
+      var columns = criterionColumns.get(i);
 
       ctes.append(i == 0 ? "WITH " : ",\n     ")
           .append(alias)
@@ -155,6 +183,21 @@ public class SqlQueryExecutor {
           criterion.exclude()
               ? "(NOT " + alias + "." + IS_MET_COLUMN + ")"
               : "(" + alias + "." + IS_MET_COLUMN + ")";
+
+      String indeterminateExpr;
+      if (columns.contains(IS_INDETERMINATE_COLUMN)) {
+        indeterminateExpr = alias + "." + IS_INDETERMINATE_COLUMN;
+      } else {
+        indeterminateExpr = "CAST(NULL AS BOOLEAN)";
+      }
+
+      String noteExpr;
+      if (columns.contains(RESULT_NOTE_COLUMN)) {
+        noteExpr = alias + "." + RESULT_NOTE_COLUMN;
+      } else {
+        noteExpr = "CAST(NULL AS VARCHAR)";
+      }
+
       selectColumns
           .append(",\n    ")
           .append(effectiveMetExpr)
@@ -163,17 +206,13 @@ public class SqlQueryExecutor {
           .append("_")
           .append(IS_MET_COLUMN)
           .append(",\n    ")
-          .append(alias)
-          .append(".")
-          .append(IS_INDETERMINATE_COLUMN)
+          .append(indeterminateExpr)
           .append(" AS ")
           .append(alias)
           .append("_")
           .append(IS_INDETERMINATE_COLUMN)
           .append(",\n    ")
-          .append(alias)
-          .append(".")
-          .append(RESULT_NOTE_COLUMN)
+          .append(noteExpr)
           .append(" AS ")
           .append(alias)
           .append("_")
