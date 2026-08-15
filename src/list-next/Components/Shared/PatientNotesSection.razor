@@ -1,5 +1,4 @@
 @using Ganss.Xss
-@using Markdig
 @using System.Text.RegularExpressions
 @inject ScreeningNoteService ScreeningNoteService
 @inject ToastService Toast
@@ -61,9 +60,7 @@
     [CascadingParameter]
     private Task<AuthenticationState>? AuthStateTask { get; set; }
 
-    private static readonly MarkdownPipeline MarkdownPipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
     private static readonly HtmlSanitizer Sanitizer = new();
-    private static readonly ReverseMarkdown.Converter HtmlToMarkdownConverter = new();
     private static readonly Regex HtmlTagRegex = new("<[^>]+>", RegexOptions.Compiled);
 
     private List<ScreeningNoteDto> _notes = [];
@@ -74,11 +71,17 @@
     private bool _saving;
 
     /// <summary>Quill emits markup like "&lt;p&gt;&lt;br&gt;&lt;/p&gt;" for an empty editor, so a plain string check isn't enough.</summary>
-    private bool IsNoteDraftEmpty => string.IsNullOrWhiteSpace(HtmlTagRegex.Replace(_noteDraftHtml, string.Empty).Replace("&nbsp;", " "));
+    private bool IsNoteDraftEmpty => IsEffectivelyEmpty(_noteDraftHtml);
 
-    /// <summary>Notes are stored as Markdown (matching FHIR's Annotation.text type); render + sanitize for display.</summary>
-    private static MarkupString RenderNote(string text) =>
-        new(Sanitizer.Sanitize(Markdown.ToHtml(text, MarkdownPipeline)));
+    private static bool IsEffectivelyEmpty(string html) =>
+        string.IsNullOrWhiteSpace(HtmlTagRegex.Replace(html, string.Empty).Replace("&nbsp;", " "));
+
+    /// <summary>
+    /// Notes are stored as sanitized HTML directly (sanitized once at save time in
+    /// SaveNoteAsync) - sanitizing again here too is cheap, harmless defense-in-depth against the
+    /// storage invariant ever being violated (e.g. a row written some other way).
+    /// </summary>
+    private static MarkupString RenderNote(string html) => new(Sanitizer.Sanitize(html));
 
     protected override async Task OnParametersSetAsync()
     {
@@ -123,8 +126,8 @@
             return;
         }
 
-        var markdown = HtmlToMarkdownConverter.Convert(Sanitizer.Sanitize(_noteDraftHtml)).Trim();
-        if (string.IsNullOrWhiteSpace(markdown))
+        var sanitizedHtml = Sanitizer.Sanitize(_noteDraftHtml);
+        if (IsEffectivelyEmpty(sanitizedHtml))
         {
             return;
         }
@@ -134,7 +137,7 @@
 
         try
         {
-            await ScreeningNoteService.AddNoteAsync(researchSubjectIdentifier, markdown, TrialIdentifier, _user);
+            await ScreeningNoteService.AddNoteAsync(researchSubjectIdentifier, sanitizedHtml, TrialIdentifier, _user);
             Toast.Success(Localizer["App.Toast.NoteSaved"], Localizer["App.Common.Saved"]);
             _noteDraftHtml = string.Empty;
             await LoadNotesAsync();
