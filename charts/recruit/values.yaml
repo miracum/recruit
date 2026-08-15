@@ -884,6 +884,23 @@ listNext:
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 5
+  # Configuration for the container's startup probe. Set `enabled: false` to disable it. list-next
+  # runs EF Core migrations and installs the Hangfire schema before it starts listening at all, so
+  # this gives it a generous, one-time grace period to finish that instead of being judged against
+  # livenessProbe's much tighter steady-state budget (which would otherwise risk killing the
+  # container mid-migration on a slow first start).
+  # See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # @ignore
+  startupProbe: # +doc-gen:ignore
+    enabled: true
+    httpGet:
+      path: /livez
+      port: http
+    failureThreshold: 30
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
 
   # -- node labels for pod assignment
   # see: <https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/>

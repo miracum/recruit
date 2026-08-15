@@ -78,6 +78,10 @@ spec:
           readinessProbe:
             {{- include "common.tplvalues.render" (dict "value" (omit .readinessProbe "enabled") "context" $) | nindent 12 }}
           {{- end }}
+          {{- if .startupProbe.enabled }}
+          startupProbe:
+            {{- include "common.tplvalues.render" (dict "value" (omit .startupProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
           {{- if .resources }}
           resources: {{- toYaml .resources | nindent 12 }}
           {{- else if ne .resourcesPreset "none" }}

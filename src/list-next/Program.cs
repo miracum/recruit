@@ -236,6 +236,32 @@ await using (var scope = app.Services.CreateAsyncScope())
     );
 }
 
+// /livez, /readyz, and /metrics are restricted to their intended port using the actual accepted
+// connection's local port rather than RequireHost's Host-header matching: the Host header isn't
+// trustworthy for this (it reflects whatever the client sent, which port-forwarding, NAT, or a
+// misbehaving client can desync from the socket that was actually connected to), so relying on it
+// risks a probe/scrape silently falling through to the Blazor app instead of a clean 404 - or,
+// worse, matching a legitimate probe by accident when it shouldn't. Placed before other middleware
+// so these checks stay cheap and unaffected by request localization/HTTPS redirection/auth.
+app.Use(
+    async (context, next) =>
+    {
+        var path = context.Request.Path;
+        var localPort = context.Connection.LocalPort;
+        if ((path == "/livez" || path == "/readyz") && localPort != httpPort)
+        {
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+            return;
+        }
+        if (path == "/metrics" && localPort != metricsPort)
+        {
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+            return;
+        }
+        await next(context);
+    }
+);
+
 app.UseRequestLocalization();
 
 if (!app.Environment.IsDevelopment())
@@ -258,12 +284,13 @@ app.UseHangfireDashboard(
     }
 );
 
-app.MapHealthChecks("/livez", new HealthCheckOptions { Predicate = _ => false })
-    .RequireHost($"*:{httpPort}");
-app.MapHealthChecks("/readyz", new HealthCheckOptions { Predicate = check => check.Tags.Contains("ready") })
-    .RequireHost($"*:{httpPort}");
+app.MapHealthChecks("/livez", new HealthCheckOptions { Predicate = _ => false });
+app.MapHealthChecks(
+    "/readyz",
+    new HealthCheckOptions { Predicate = check => check.Tags.Contains("ready") }
+);
 
-app.MapPrometheusScrapingEndpoint().RequireHost($"*:{metricsPort}");
+app.MapPrometheusScrapingEndpoint();
 
 if (!authDisabled)
 {
