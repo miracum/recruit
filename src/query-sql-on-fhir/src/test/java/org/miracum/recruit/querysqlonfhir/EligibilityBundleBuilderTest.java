@@ -11,19 +11,11 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.ResearchSubject;
 import org.junit.jupiter.api.Test;
-import org.miracum.recruit.querysqlonfhir.config.FhirSystems;
 
 class EligibilityBundleBuilderTest {
 
   private static final String RESEARCH_SUBJECT_IDENTIFIER_SYSTEM =
       "https://example.org/fhir/NamingSystem/research-subject-id";
-
-  private static final FhirSystems FHIR_SYSTEMS =
-      new FhirSystems(
-          "https://example.org/fhir/NamingSystem/screening-list-id",
-          "https://example.org/fhir/NamingSystem/eligibility-observation-id",
-          "https://example.org/fhir/StructureDefinition/acronym",
-          RESEARCH_SUBJECT_IDENTIFIER_SYSTEM);
 
   private static ResearchStudy studyWithId(String id) {
     var study = new ResearchStudy();
@@ -46,7 +38,7 @@ class EligibilityBundleBuilderTest {
    */
   @Test
   void buildSubjectAndObservationBundles_withoutUpdateAsCreate_usesConditionalPost() {
-    var sut = new EligibilityBundleBuilder(FHIR_SYSTEMS, false, 500);
+    var sut = new EligibilityBundleBuilder(false, 500);
     var study = studyWithId("study-1");
     var results = List.of(new PatientEligibilityResult("patient-1", List.of()));
 
@@ -63,7 +55,7 @@ class EligibilityBundleBuilderTest {
 
   @Test
   void buildSubjectAndObservationBundles_withUpdateAsCreate_createsNewSubjectViaPut() {
-    var sut = new EligibilityBundleBuilder(FHIR_SYSTEMS, true, 500);
+    var sut = new EligibilityBundleBuilder(true, 500);
     var study = studyWithId("study-1");
     var results = List.of(new PatientEligibilityResult("patient-1", List.of()));
 
@@ -85,7 +77,7 @@ class EligibilityBundleBuilderTest {
    */
   @Test
   void buildSubjectAndObservationBundles_withUpdateAsCreate_skipsExistingSubject() {
-    var sut = new EligibilityBundleBuilder(FHIR_SYSTEMS, true, 500);
+    var sut = new EligibilityBundleBuilder(true, 500);
     var study = studyWithId("study-1");
     var results = List.of(new PatientEligibilityResult("patient-1", List.of()));
     var existingId = researchSubjectId("patient-1", "study-1");
@@ -100,7 +92,7 @@ class EligibilityBundleBuilderTest {
   /** A mixed chunk: the new patient still gets created, the existing one is left alone. */
   @Test
   void buildSubjectAndObservationBundles_withUpdateAsCreate_onlySkipsKnownExistingSubjects() {
-    var sut = new EligibilityBundleBuilder(FHIR_SYSTEMS, true, 500);
+    var sut = new EligibilityBundleBuilder(true, 500);
     var study = studyWithId("study-1");
     var results =
         List.of(
@@ -125,7 +117,7 @@ class EligibilityBundleBuilderTest {
    */
   @Test
   void buildSubjectAndObservationBundles_withoutUpdateAsCreate_setsResearchSubjectIdentifier() {
-    var sut = new EligibilityBundleBuilder(FHIR_SYSTEMS, false, 500);
+    var sut = new EligibilityBundleBuilder(false, 500);
     var study = studyWithId("study-1");
     var results = List.of(new PatientEligibilityResult("patient-1", List.of()));
 
@@ -140,7 +132,7 @@ class EligibilityBundleBuilderTest {
 
   @Test
   void buildSubjectAndObservationBundles_withUpdateAsCreate_setsResearchSubjectIdentifier() {
-    var sut = new EligibilityBundleBuilder(FHIR_SYSTEMS, true, 500);
+    var sut = new EligibilityBundleBuilder(true, 500);
     var study = studyWithId("study-1");
     var results = List.of(new PatientEligibilityResult("patient-1", List.of()));
 

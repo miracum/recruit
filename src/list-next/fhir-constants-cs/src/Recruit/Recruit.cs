@@ -78,6 +78,17 @@ public static class Recruit
 
     public static class NamingSystems
     {
+        /// <summary>The identifier system for the Group containing references to one or more eligibility criteria Library resources</summary>
+        public static class EligibilityGroupId
+        {
+            public static class UniqueId
+            {
+                /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/eligibility-group-id</c></summary>
+                public static string Uri =>
+                    "https://miracum.github.io/recruit/fhir/identifiers/eligibility-group-id";
+            }
+        }
+
         /// <summary>The identifier system for a per-criterion eligibility Observation's business identifier</summary>
         public static class EligibilityObservationId
         {

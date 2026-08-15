@@ -252,16 +252,11 @@ public final class Recruit {
       private EligibilityGroupId() {
       }
 
-      public static final class UniqueId {
-        private UniqueId() {
-        }
-
-        /**
-         * @return {@code https://miracum.github.io/recruit/fhir/identifiers/eligibility-group-id}
-         */
-        public static @NonNull String uri() {
-          return "https://miracum.github.io/recruit/fhir/identifiers/eligibility-group-id";
-        }
+      /**
+       * @return {@code https://miracum.github.io/recruit/fhir/identifiers/eligibility-group-id}
+       */
+      public static @NonNull String uri() {
+        return "https://miracum.github.io/recruit/fhir/identifiers/eligibility-group-id";
       }
     }
 
@@ -272,16 +267,11 @@ public final class Recruit {
       private EligibilityObservationId() {
       }
 
-      public static final class UniqueId {
-        private UniqueId() {
-        }
-
-        /**
-         * @return {@code https://miracum.github.io/recruit/fhir/identifiers/eligibility-observation-id}
-         */
-        public static @NonNull String uri() {
-          return "https://miracum.github.io/recruit/fhir/identifiers/eligibility-observation-id";
-        }
+      /**
+       * @return {@code https://miracum.github.io/recruit/fhir/identifiers/eligibility-observation-id}
+       */
+      public static @NonNull String uri() {
+        return "https://miracum.github.io/recruit/fhir/identifiers/eligibility-observation-id";
       }
     }
 
@@ -292,16 +282,11 @@ public final class Recruit {
       private ResearchSubjectId() {
       }
 
-      public static final class UniqueId {
-        private UniqueId() {
-        }
-
-        /**
-         * @return {@code https://miracum.github.io/recruit/fhir/identifiers/research-subject-id}
-         */
-        public static @NonNull String uri() {
-          return "https://miracum.github.io/recruit/fhir/identifiers/research-subject-id";
-        }
+      /**
+       * @return {@code https://miracum.github.io/recruit/fhir/identifiers/research-subject-id}
+       */
+      public static @NonNull String uri() {
+        return "https://miracum.github.io/recruit/fhir/identifiers/research-subject-id";
       }
     }
 
@@ -312,16 +297,11 @@ public final class Recruit {
       private ScreeningListId() {
       }
 
-      public static final class UniqueId {
-        private UniqueId() {
-        }
-
-        /**
-         * @return {@code https://miracum.github.io/recruit/fhir/identifiers/screening-list-id}
-         */
-        public static @NonNull String uri() {
-          return "https://miracum.github.io/recruit/fhir/identifiers/screening-list-id";
-        }
+      /**
+       * @return {@code https://miracum.github.io/recruit/fhir/identifiers/screening-list-id}
+       */
+      public static @NonNull String uri() {
+        return "https://miracum.github.io/recruit/fhir/identifiers/screening-list-id";
       }
     }
   }

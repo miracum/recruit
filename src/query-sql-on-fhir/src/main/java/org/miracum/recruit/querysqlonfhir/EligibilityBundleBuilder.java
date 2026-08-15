@@ -23,7 +23,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.ResearchSubject;
 import org.hl7.fhir.r4.model.ResourceType;
-import org.miracum.recruit.querysqlonfhir.config.FhirSystems;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -66,15 +65,12 @@ public class EligibilityBundleBuilder {
   private static final String SNOMED_CODE_INDETERMINATE = "82334004";
   private static final String SNOMED_DISPLAY_INDETERMINATE = "Indeterminate";
 
-  private final FhirSystems fhirSystems;
   private final boolean useUpdateAsCreate;
   private final int chunkSize;
 
   public EligibilityBundleBuilder(
-      FhirSystems fhirSystems,
       @Value("${fhir.use-update-as-create}") boolean useUpdateAsCreate,
       @Value("${query-sql-on-fhir.transaction-bundle-chunk-size}") int chunkSize) {
-    this.fhirSystems = fhirSystems;
     this.useUpdateAsCreate = useUpdateAsCreate;
     this.chunkSize = chunkSize;
   }
@@ -172,7 +168,7 @@ public class EligibilityBundleBuilder {
     // either way.
     subject
         .addIdentifier()
-        .setSystem(Recruit.NamingSystems.ResearchSubjectId.UniqueId.uri())
+        .setSystem(Recruit.NamingSystems.ResearchSubjectId.uri())
         .setValue(researchSubjectResourceId(patientId, studyId));
 
     bundle
@@ -240,7 +236,7 @@ public class EligibilityBundleBuilder {
             .toString();
     observation
         .addIdentifier()
-        .setSystem(Recruit.NamingSystems.EligibilityObservationId.UniqueId.uri())
+        .setSystem(Recruit.NamingSystems.EligibilityObservationId.uri())
         .setValue(identifierValue);
 
     var request = new BundleEntryRequestComponent();
@@ -254,7 +250,7 @@ public class EligibilityBundleBuilder {
           .setMethod(Bundle.HTTPVerb.PUT)
           .setUrl(
               "Observation?identifier="
-                  + Recruit.NamingSystems.EligibilityObservationId.UniqueId.uri()
+                  + Recruit.NamingSystems.EligibilityObservationId.uri()
                   + "|"
                   + identifierValue);
     }
@@ -291,7 +287,7 @@ public class EligibilityBundleBuilder {
     var screeningListIdentifier =
         screeningList
             .addIdentifier()
-            .setSystem(Recruit.NamingSystems.ScreeningListId.UniqueId.uri())
+            .setSystem(Recruit.NamingSystems.ScreeningListId.uri())
             .setValue(study.getIdentifierFirstRep().getValue());
 
     var studyReference =
@@ -350,7 +346,7 @@ public class EligibilityBundleBuilder {
           .setMethod(Bundle.HTTPVerb.PUT)
           .setUrl(
               "List?identifier="
-                  + Recruit.NamingSystems.ScreeningListId.UniqueId.uri()
+                  + Recruit.NamingSystems.ScreeningListId.uri()
                   + "|"
                   + study.getIdentifierFirstRep().getValue());
     }

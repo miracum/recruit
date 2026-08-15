@@ -16,7 +16,6 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.ResearchSubject;
-import org.miracum.recruit.querysqlonfhir.config.FhirSystems;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -33,17 +32,14 @@ public class PollForStudies {
   private final SqlQueryExecutor sqlQueryExecutor;
   private final EligibilityBundleBuilder bundleBuilder;
   private final IGenericClient fhirClient;
-  private final FhirSystems fhirSystems;
 
   public PollForStudies(
       SqlQueryExecutor sqlQueryExecutor,
       EligibilityBundleBuilder bundleBuilder,
-      IGenericClient fhirClient,
-      FhirSystems fhirSystems) {
+      IGenericClient fhirClient) {
     this.sqlQueryExecutor = sqlQueryExecutor;
     this.bundleBuilder = bundleBuilder;
     this.fhirClient = fhirClient;
-    this.fhirSystems = fhirSystems;
   }
 
   /**
@@ -153,7 +149,7 @@ public class PollForStudies {
   }
 
   private Optional<ListResource> fetchPreviousScreeningList(ResearchStudy study) {
-    var identifierSystem = Recruit.NamingSystems.ScreeningListId.UniqueId.uri();
+    var identifierSystem = Recruit.NamingSystems.ScreeningListId.uri();
     var identifierValue = study.getIdentifierFirstRep().getValue();
 
     var previousListBundle =
