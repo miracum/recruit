@@ -246,6 +246,26 @@ public final class Recruit {
     }
 
     /**
+     * The identifier system for the Group containing references to one or more eligibility criteria Library resources
+     */
+    public static final class EligibilityGroupId {
+      private EligibilityGroupId() {
+      }
+
+      public static final class UniqueId {
+        private UniqueId() {
+        }
+
+        /**
+         * @return {@code https://miracum.github.io/recruit/fhir/identifiers/eligibility-group-id}
+         */
+        public static @NonNull String uri() {
+          return "https://miracum.github.io/recruit/fhir/identifiers/eligibility-group-id";
+        }
+      }
+    }
+
+    /**
      * The identifier system for a per-criterion eligibility Observation's business identifier
      */
     public static final class EligibilityObservationId {

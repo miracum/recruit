@@ -8,11 +8,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- list.Tests lives in a subdirectory of this project; without this, the SDK's default glob
-         would compile its files (and the Xunit types they reference) into list.csproj itself. -->
+    <!-- list.Tests and fhir-constants-cs each live in a subdirectory of this project and are their
+         own separate projects (see the ProjectReference below for the latter); without this, the
+         SDK's default glob would compile their files directly into list.csproj too. -->
     <Compile Remove="list.Tests/**/*.cs" />
     <Content Remove="list.Tests/**" />
     <None Remove="list.Tests/**" />
+    <Compile Remove="fhir-constants-cs/**/*.cs" />
+    <Content Remove="fhir-constants-cs/**" />
+    <None Remove="fhir-constants-cs/**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,5 +48,9 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.17.0" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.17.0" />
     <PackageReference Include="ReverseMarkdown" Version="6.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="fhir-constants-cs/fhir-constants-cs.csproj" />
   </ItemGroup>
 </Project>

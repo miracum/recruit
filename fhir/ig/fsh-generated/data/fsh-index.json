@@ -32,6 +32,14 @@
     "endLine": 43
   },
   {
+    "outputFile": "NamingSystem-eligibility-group-id.json",
+    "fshName": "EligibilityGroupIdentifierSystem",
+    "fshType": "Instance",
+    "fshFile": "eligibility-group.fsh",
+    "startLine": 1,
+    "endLine": 12
+  },
+  {
     "outputFile": "NamingSystem-eligibility-observation-id.json",
     "fshName": "EligibilityObservationIdentifierSystem",
     "fshType": "Instance",

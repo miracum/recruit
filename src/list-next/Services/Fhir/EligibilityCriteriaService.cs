@@ -136,10 +136,6 @@ public sealed class EligibilityCriteriaService(
         {
             Type = Group.GroupType.Person,
             Actual = true,
-            Code = new CodeableConcept(
-                FhirConstants.SystemEligibilityCriteriaTypes,
-                FhirConstants.EligibilityCriteriaTypeTrinoSql
-            ),
             Characteristic = characteristics,
         };
 

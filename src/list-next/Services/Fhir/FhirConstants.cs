@@ -1,28 +1,33 @@
+using Recruit;
+
 namespace list.Services.Fhir;
 
 /// <summary>
 /// FHIR coding systems and extension URLs used by the `query` module (the producer of the data
 /// this app reads) and by this app itself (for status/note writes). Verified against
 /// src/query's FhirCohortTransactionBuilder.java, not just the previous frontend.
+///
+/// The constants below that come from recruit's own fhir/ig are sourced from the generated
+/// Recruit class (see ../../fhir-constants-cs) rather than duplicated as literals - keeps this
+/// file the single place call sites reference, while staying in sync with the IG. See
+/// ../../fhir-constants-cs/README.md to regenerate after an IG change.
 /// </summary>
 public static class FhirConstants
 {
-    /// <summary>Matches recruit's fhir/ig - see the fhir-constants module (Recruit.CodeSystems.screeningListType()).</summary>
-    public const string SystemScreeningList =
-        "https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type";
-    public const string ScreeningListCode = "screening-recommendations";
+    public static string SystemScreeningList => Recruit.Recruit.CodeSystems.Urls.ScreeningListType;
+    public static string ScreeningListCode =>
+        Recruit.Recruit.CodeSystems.ScreeningListType.ScreeningRecommendations.Code();
 
-    /// <summary>Matches recruit's fhir/ig - see the fhir-constants module (Recruit.Extensions.screeningListBelongsToStudy()).</summary>
-    public const string UrlListBelongsToStudy =
-        "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study";
+    public static string UrlListBelongsToStudy =>
+        Recruit.Recruit.Extensions.Urls.ScreeningListBelongsToStudy;
 
     /// <summary>
     /// ResearchSubject's stable business identifier, set unconditionally by query-sql-on-fhir's
     /// EligibilityBundleBuilder (see fhir.systems.research-subject-identifier). Notes are keyed on
     /// this "system|value" pair rather than the FHIR logical id - see ScreeningNoteService.
     /// </summary>
-    public const string UrlResearchSubjectIdentifier =
-        "https://miracum.github.io/recruit/fhir/NamingSystem/research-subject-id";
+    public static string UrlResearchSubjectIdentifier =>
+        Recruit.Recruit.NamingSystems.ResearchSubjectId.UniqueId.Uri;
 
     public const string SystemIdentifierType = "http://terminology.hl7.org/CodeSystem/v2-0203";
     public const string IdentifierTypeMedicalRecordNumber = "MR";
@@ -31,13 +36,10 @@ public static class FhirConstants
         "https://fhir.miracum.org/uc1/CodeSystem/system-determined-subject-status";
     public const string DeterminedStatusIneligible = "ineligible";
 
-    public const string SystemEligibilityCriteriaTypes =
-        "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-criteria-types";
-    public const string EligibilityCriteriaTypeTrinoSql = "trino-sql";
-
-    public const string SystemObservationCategory =
-        "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-observation-category";
-    public const string ObservationCategoryEligibilityAssessment = "eligibility-assessment";
+    public static string SystemObservationCategory =>
+        Recruit.Recruit.CodeSystems.Urls.EligibilityObservationCategory;
+    public static string ObservationCategoryEligibilityAssessment =>
+        Recruit.Recruit.CodeSystems.EligibilityObservationCategory.EligibilityAssessment.Code();
 
     /// <summary>
     /// SNOMED CT "Yes/No/Unknown/Indeterminate (qualifier value)" codes used for the eligibility

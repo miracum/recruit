@@ -1,4 +1,5 @@
 [EligibilityObservationDerivedFromLibrary]: StructureDefinition-eligibility-observation-derived-from-library.html
+[eligibility-group-id]: NamingSystem-eligibility-group-id.html
 [eligibility-observation-id]: NamingSystem-eligibility-observation-id.html
 [group-characteristic]: SearchParameter-group-characteristic.html
 [list-belongs-to-study]: SearchParameter-list-belongs-to-study.html

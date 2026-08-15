@@ -36,6 +36,14 @@
       },
       {
         "reference": {
+          "reference": "NamingSystem/eligibility-group-id"
+        },
+        "name": "EligibilityGroupIdentifierSystem",
+        "description": "The identifier system for the Group containing references to one or more eligibility criteria Library resources",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
           "reference": "NamingSystem/eligibility-observation-id"
         },
         "name": "EligibilityObservationIdentifierSystem",

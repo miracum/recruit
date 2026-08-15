@@ -2,6 +2,7 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0@sha256:72dd743782f2ae7e5476fd64f6a460045e
 WORKDIR /src
 
 COPY list.csproj ./
+COPY fhir-constants-cs/fhir-constants-cs.csproj ./fhir-constants-cs/
 RUN dotnet restore ./list.csproj
 
 COPY . .
