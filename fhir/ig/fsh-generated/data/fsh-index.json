@@ -8,12 +8,12 @@
     "endLine": 68
   },
   {
-    "outputFile": "CodeSystem-eligibility-observation-category.json",
-    "fshName": "EligibilityObservationCategory",
+    "outputFile": "CodeSystem-eligibility-assessment-category.json",
+    "fshName": "EligibilityAssessmentCategory",
     "fshType": "CodeSystem",
     "fshFile": "eligibility-observation.fsh",
-    "startLine": 1,
-    "endLine": 5
+    "startLine": 16,
+    "endLine": 20
   },
   {
     "outputFile": "CodeSystem-screening-list-type.json",
@@ -32,6 +32,14 @@
     "endLine": 43
   },
   {
+    "outputFile": "NamingSystem-eligibility-assessment-id.json",
+    "fshName": "EligibilityAssessmentIdentifierSystem",
+    "fshType": "Instance",
+    "fshFile": "eligibility-observation.fsh",
+    "startLine": 38,
+    "endLine": 49
+  },
+  {
     "outputFile": "NamingSystem-eligibility-group-id.json",
     "fshName": "EligibilityGroupIdentifierSystem",
     "fshType": "Instance",
@@ -46,14 +54,6 @@
     "fshFile": "eligibility-library.fsh",
     "startLine": 1,
     "endLine": 12
-  },
-  {
-    "outputFile": "NamingSystem-eligibility-observation-id.json",
-    "fshName": "EligibilityObservationIdentifierSystem",
-    "fshType": "Instance",
-    "fshFile": "eligibility-observation.fsh",
-    "startLine": 14,
-    "endLine": 25
   },
   {
     "outputFile": "NamingSystem-research-subject-id.json",
@@ -112,12 +112,20 @@
     "endLine": 12
   },
   {
-    "outputFile": "StructureDefinition-eligibility-observation-derived-from-library.json",
-    "fshName": "EligibilityObservationDerivedFromLibrary",
+    "outputFile": "StructureDefinition-eligibility-assessment-derived-from-library.json",
+    "fshName": "EligibilityAssessmentDerivedFromLibrary",
     "fshType": "Extension",
     "fshFile": "eligibility-observation.fsh",
-    "startLine": 7,
-    "endLine": 12
+    "startLine": 31,
+    "endLine": 36
+  },
+  {
+    "outputFile": "StructureDefinition-eligibility-assessment.json",
+    "fshName": "EligibilityAssessment",
+    "fshType": "Profile",
+    "fshFile": "eligibility-observation.fsh",
+    "startLine": 1,
+    "endLine": 14
   },
   {
     "outputFile": "StructureDefinition-research-study.json",
@@ -142,5 +150,13 @@
     "fshFile": "screeninglist.fsh",
     "startLine": 4,
     "endLine": 10
+  },
+  {
+    "outputFile": "ValueSet-eligibility-assessment-result.json",
+    "fshName": "EligibilityAssessmentResult",
+    "fshType": "ValueSet",
+    "fshFile": "eligibility-observation.fsh",
+    "startLine": 22,
+    "endLine": 29
   }
 ]

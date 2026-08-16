@@ -1,11 +1,13 @@
-[EligibilityObservationDerivedFromLibrary]: StructureDefinition-eligibility-observation-derived-from-library.html
+[EligibilityAssessmentDerivedFromLibrary]: StructureDefinition-eligibility-assessment-derived-from-library.html
+[eligibility-assessment-id]: NamingSystem-eligibility-assessment-id.html
 [eligibility-group-id]: NamingSystem-eligibility-group-id.html
 [eligibility-library-id]: NamingSystem-eligibility-library-id.html
-[eligibility-observation-id]: NamingSystem-eligibility-observation-id.html
 [group-characteristic]: SearchParameter-group-characteristic.html
 [list-belongs-to-study]: SearchParameter-list-belongs-to-study.html
 [observation-derived-from-library]: SearchParameter-observation-derived-from-library.html
-[EligibilityObservationCategory]: CodeSystem-eligibility-observation-category.html
+[EligibilityAssessment]: StructureDefinition-eligibility-assessment.html
+[EligibilityAssessmentCategory]: CodeSystem-eligibility-assessment-category.html
+[EligibilityAssessmentResult]: ValueSet-eligibility-assessment-result.html
 [CodeSystemScreeningList]: CodeSystem-screening-list-type.html
 [RecruitResearchStudy]: StructureDefinition-research-study.html
 [RecruitResearchStudyExample]: ResearchStudy-RecruitResearchStudyExample.html

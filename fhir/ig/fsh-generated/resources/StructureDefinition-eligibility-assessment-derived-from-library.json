@@ -1,11 +1,11 @@
 {
   "resourceType": "StructureDefinition",
-  "id": "eligibility-observation-derived-from-library",
-  "url": "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-observation-derived-from-library",
-  "name": "EligibilityObservationDerivedFromLibrary",
-  "title": "Eligibility observation derived-from Library",
+  "id": "eligibility-assessment-derived-from-library",
+  "url": "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library",
+  "name": "EligibilityAssessmentDerivedFromLibrary",
+  "title": "Eligibility assessment derived-from Library",
   "status": "active",
-  "description": "A reference to the eligibility-criterion Library resource this Observation was derived from. Observation.derivedFrom does not accept Library as a target type, so this extension carries the reference instead.",
+  "description": "A reference to the eligibility-criterion Library resource this assessment was derived from. Observation.derivedFrom does not accept Library as a target type, so this extension carries the reference instead.",
   "fhirVersion": "4.0.1",
   "mapping": [
     {
@@ -30,8 +30,8 @@
       {
         "id": "Extension",
         "path": "Extension",
-        "short": "Eligibility observation derived-from Library",
-        "definition": "A reference to the eligibility-criterion Library resource this Observation was derived from. Observation.derivedFrom does not accept Library as a target type, so this extension carries the reference instead.",
+        "short": "Eligibility assessment derived-from Library",
+        "definition": "A reference to the eligibility-criterion Library resource this assessment was derived from. Observation.derivedFrom does not accept Library as a target type, so this extension carries the reference instead.",
         "min": 0,
         "max": "*",
         "base": {
@@ -192,7 +192,7 @@
             ]
           }
         ],
-        "fixedUri": "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-observation-derived-from-library",
+        "fixedUri": "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library",
         "isModifier": false,
         "isSummary": false,
         "mapping": [
@@ -248,8 +248,8 @@
       {
         "id": "Extension",
         "path": "Extension",
-        "short": "Eligibility observation derived-from Library",
-        "definition": "A reference to the eligibility-criterion Library resource this Observation was derived from. Observation.derivedFrom does not accept Library as a target type, so this extension carries the reference instead."
+        "short": "Eligibility assessment derived-from Library",
+        "definition": "A reference to the eligibility-criterion Library resource this assessment was derived from. Observation.derivedFrom does not accept Library as a target type, so this extension carries the reference instead."
       },
       {
         "id": "Extension.extension",
@@ -259,7 +259,7 @@
       {
         "id": "Extension.url",
         "path": "Extension.url",
-        "fixedUri": "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-observation-derived-from-library"
+        "fixedUri": "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library"
       },
       {
         "id": "Extension.value[x]",

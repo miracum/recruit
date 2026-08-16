@@ -18,12 +18,12 @@ public final class Recruit {
     }
 
     /**
-     * The canonical URL {@code https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-observation-category}.
+     * The canonical URL {@code https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category}.
      *
-     * @return {@code https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-observation-category}
+     * @return {@code https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category}
      */
-    public static String eligibilityObservationCategory() {
-      return "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-observation-category";
+    public static String eligibilityAssessmentCategory() {
+      return "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category";
     }
 
     /**
@@ -35,7 +35,7 @@ public final class Recruit {
       return "https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type";
     }
 
-    public enum EligibilityObservationCategory {
+    public enum EligibilityAssessmentCategory {
       /**
        * {@code eligibility-assessment} - Eligibility assessment
        */
@@ -45,32 +45,32 @@ public final class Recruit {
 
       private final @Nullable String display;
 
-      EligibilityObservationCategory(@NonNull String code, @Nullable String display) {
+      EligibilityAssessmentCategory(@NonNull String code, @Nullable String display) {
         this.code = code;
         this.display = display;
       }
 
       /**
-       * @return the CodeSystem URL {@code https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-observation-category}
+       * @return the CodeSystem URL {@code https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category}
        */
-      public @NonNull String system(@NonNull EligibilityObservationCategory this) {
-        return "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-observation-category";
+      public @NonNull String system(@NonNull EligibilityAssessmentCategory this) {
+        return "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category";
       }
 
       /**
-       * @return a new {@link Coding} for this concept, with system {@code https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-observation-category}
+       * @return a new {@link Coding} for this concept, with system {@code https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category}
        */
-      public @NonNull Coding coding(@NonNull EligibilityObservationCategory this) {
-        return new Coding("https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-observation-category", code, display);
+      public @NonNull Coding coding(@NonNull EligibilityAssessmentCategory this) {
+        return new Coding("https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category", code, display);
       }
 
       /**
        * @param code the FHIR code to look up
        * @return an {@link Optional} containing the constant whose {@code code} matches, or empty if none matches
        */
-      public static Optional<@NonNull EligibilityObservationCategory> fromValue(
+      public static Optional<@NonNull EligibilityAssessmentCategory> fromValue(
           @NonNull String code) {
-        for (EligibilityObservationCategory value : values()) {
+        for (EligibilityAssessmentCategory value : values()) {
           if (value.code.equals(code)) {
             return Optional.of(value);
           }
@@ -83,7 +83,7 @@ public final class Recruit {
        * @return the constant whose {@code code} matches
        * @throws IllegalArgumentException if no constant has that code
        */
-      public static @NonNull EligibilityObservationCategory fromValueOrThrow(@NonNull String code) {
+      public static @NonNull EligibilityAssessmentCategory fromValueOrThrow(@NonNull String code) {
         return fromValue(code).orElseThrow(() -> new IllegalArgumentException("Unknown code: " + code));
       }
     }
@@ -146,6 +146,15 @@ public final class Recruit {
     }
 
     /**
+     * The canonical URL {@code https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment}.
+     *
+     * @return {@code https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment}
+     */
+    public static String eligibilityAssessment() {
+      return "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment";
+    }
+
+    /**
      * The canonical URL {@code https://miracum.github.io/recruit/fhir/StructureDefinition/research-study}.
      *
      * @return {@code https://miracum.github.io/recruit/fhir/StructureDefinition/research-study}
@@ -169,14 +178,14 @@ public final class Recruit {
     }
 
     /**
-     * A new {@link Extension} for the canonical URL {@code https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-observation-derived-from-library}.
+     * A new {@link Extension} for the canonical URL {@code https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library}.
      *
      * @param value the extension value
-     * @return a new {@link Extension} with url {@code https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-observation-derived-from-library} and the given value
+     * @return a new {@link Extension} with url {@code https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library} and the given value
      */
-    public static @NonNull Extension eligibilityObservationDerivedFromLibrary(
+    public static @NonNull Extension eligibilityAssessmentDerivedFromLibrary(
         @NonNull Reference value) {
-      return new Extension("https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-observation-derived-from-library", value);
+      return new Extension("https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library", value);
     }
 
     /**
@@ -190,15 +199,15 @@ public final class Recruit {
     }
 
     /**
-     * Gets the value of extension {@code https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-observation-derived-from-library} from {@code resource}, or {@code null} if absent.
+     * Gets the value of extension {@code https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library} from {@code resource}, or {@code null} if absent.
      *
      * @param resource the resource or element to read from
      * @return the extension value, or {@code null}
      */
-    public static @Nullable Reference getEligibilityObservationDerivedFromLibrary(
+    public static @Nullable Reference getEligibilityAssessmentDerivedFromLibrary(
         @NonNull IBaseHasExtensions resource) {
       for (var e : resource.getExtension()) {
-        if ("https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-observation-derived-from-library".equals(e.getUrl())) {
+        if ("https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library".equals(e.getUrl())) {
           return (Reference) ((Extension) e).getValue();
         }
       }
@@ -226,10 +235,10 @@ public final class Recruit {
       }
 
       /**
-       * @return the extension URL {@code https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-observation-derived-from-library}
+       * @return the extension URL {@code https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library}
        */
-      public static @NonNull String eligibilityObservationDerivedFromLibrary() {
-        return "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-observation-derived-from-library";
+      public static @NonNull String eligibilityAssessmentDerivedFromLibrary() {
+        return "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library";
       }
 
       /**
@@ -243,6 +252,21 @@ public final class Recruit {
 
   public static final class NamingSystems {
     private NamingSystems() {
+    }
+
+    /**
+     * The identifier system for a per-criterion eligibility Observation's business identifier. Derived from the ResearchSubject identifier and the Library identifier of the eligibility criterion.
+     */
+    public static final class EligibilityAssessmentId {
+      private EligibilityAssessmentId() {
+      }
+
+      /**
+       * @return {@code https://miracum.github.io/recruit/fhir/identifiers/eligibility-assessment-id}
+       */
+      public static @NonNull String uri() {
+        return "https://miracum.github.io/recruit/fhir/identifiers/eligibility-assessment-id";
+      }
     }
 
     /**
@@ -272,21 +296,6 @@ public final class Recruit {
        */
       public static @NonNull String uri() {
         return "https://miracum.github.io/recruit/fhir/identifiers/eligibility-library-id";
-      }
-    }
-
-    /**
-     * The identifier system for a per-criterion eligibility Observation's business identifier
-     */
-    public static final class EligibilityObservationId {
-      private EligibilityObservationId() {
-      }
-
-      /**
-       * @return {@code https://miracum.github.io/recruit/fhir/identifiers/eligibility-observation-id}
-       */
-      public static @NonNull String uri() {
-        return "https://miracum.github.io/recruit/fhir/identifiers/eligibility-observation-id";
       }
     }
 

@@ -145,9 +145,12 @@ public class EligibilityBundleBuilder {
     if (useUpdateAsCreate) {
       var resourceId = researchSubjectResourceId(patientId, studyId);
       if (existingResearchSubjectIds.contains(resourceId)) {
-        // Already created by a previous poll cycle. A PUT is a full replace, and this freshly
-        // built subject only knows CANDIDATE - PUTting it again would reset a status list-next
-        // has since moved on, and drop any notes appended there. Leave it alone; its Observations
+        // Already created by a previous poll cycle. A PUT is a full replace, and this
+        // freshly
+        // built subject only knows CANDIDATE - PUTting it again would reset a status
+        // list-next
+        // has since moved on, and drop any notes appended there. Leave it alone; its
+        // Observations
         // are still refreshed below regardless.
         return;
       }
@@ -162,9 +165,12 @@ public class EligibilityBundleBuilder {
           .setUrl(ResourceType.ResearchSubject.name());
     }
 
-    // Set unconditionally - independent of useUpdateAsCreate above, which only controls how the
-    // subject is addressed on the wire (a direct id vs. a conditional reference). This identifier
-    // is what list-next keys its screening-notes table on, so it must be stable and present
+    // Set unconditionally - independent of useUpdateAsCreate above, which only
+    // controls how the
+    // subject is addressed on the wire (a direct id vs. a conditional reference).
+    // This identifier
+    // is what list-next keys its screening-notes table on, so it must be stable and
+    // present
     // either way.
     subject
         .addIdentifier()
@@ -208,8 +214,7 @@ public class EligibilityBundleBuilder {
     observation.addCategory(
         new CodeableConcept()
             .addCoding(
-                Recruit.CodeSystems.EligibilityObservationCategory.ELIGIBILITY_ASSESSMENT
-                    .coding()));
+                Recruit.CodeSystems.EligibilityAssessmentCategory.ELIGIBILITY_ASSESSMENT.coding()));
     observation.setCode(new CodeableConcept().setText(outcome.displayText()));
     observation.setSubject(new Reference("Patient/" + patientId));
     observation.addFocus(researchStudyReference);
@@ -217,10 +222,14 @@ public class EligibilityBundleBuilder {
     // referenced via a
     // custom extension instead of a core element.
     observation.addExtension(
-        Recruit.Extensions.eligibilityObservationDerivedFromLibrary(
+        Recruit.Extensions.eligibilityAssessmentDerivedFromLibrary(
             new Reference("Library/" + libraryId)));
     observation.setEffective(new DateTimeType(effectiveDate));
     observation.setValue(buildResultValue(outcome));
+
+    if (outcome.note() != null && !outcome.note().isBlank()) {
+      observation.addNote().setText(outcome.note()).setTime(new Date());
+    }
 
     // The Library extension above isn't searchable without a custom
     // SearchParameter, so identity
@@ -236,7 +245,7 @@ public class EligibilityBundleBuilder {
             .toString();
     observation
         .addIdentifier()
-        .setSystem(Recruit.NamingSystems.EligibilityObservationId.uri())
+        .setSystem(Recruit.NamingSystems.EligibilityAssessmentId.uri())
         .setValue(identifierValue);
 
     var request = new BundleEntryRequestComponent();
@@ -250,7 +259,7 @@ public class EligibilityBundleBuilder {
           .setMethod(Bundle.HTTPVerb.PUT)
           .setUrl(
               "Observation?identifier="
-                  + Recruit.NamingSystems.EligibilityObservationId.uri()
+                  + Recruit.NamingSystems.EligibilityAssessmentId.uri()
                   + "|"
                   + identifierValue);
     }
@@ -317,10 +326,13 @@ public class EligibilityBundleBuilder {
           new ListResource.ListEntryComponent().setItem(itemReference).setDate(new Date());
 
       if (previousList.isPresent()) {
-        // itemReference is built the same way for a given patient/study pair on every run, so
+        // itemReference is built the same way for a given patient/study pair on every
+        // run, so
         // the previous entry for this patient can be matched by comparing that literal
-        // reference string directly - no need to resolve item.getItem().getResource(), which
-        // isn't reliably populated (e.g. Blaze doesn't resolve it via the `_include` used to
+        // reference string directly - no need to resolve item.getItem().getResource(),
+        // which
+        // isn't reliably populated (e.g. Blaze doesn't resolve it via the `_include`
+        // used to
         // fetch previousList).
         var referenceValue = itemReference.getReference();
         var previousEntry =
@@ -393,9 +405,6 @@ public class EligibilityBundleBuilder {
     var value =
         new CodeableConcept()
             .addCoding(new Coding().setSystem(SNOMED_SYSTEM).setCode(code).setDisplay(display));
-    if (outcome.note() != null && !outcome.note().isBlank()) {
-      value.setText(outcome.note());
-    }
 
     return value;
   }

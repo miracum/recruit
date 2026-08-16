@@ -9,9 +9,9 @@ public static class Recruit
     {
         public static class Urls
         {
-            /// <summary>The canonical URL <c>https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-observation-category</c>.</summary>
-            public static string EligibilityObservationCategory =>
-                "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-observation-category";
+            /// <summary>The canonical URL <c>https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category</c>.</summary>
+            public static string EligibilityAssessmentCategory =>
+                "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category";
 
             /// <summary>The canonical URL <c>https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type</c>.</summary>
             public static string ScreeningListType =>
@@ -19,8 +19,8 @@ public static class Recruit
 
         }
 
-        /// <summary>Concepts for <c>https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-observation-category</c>.</summary>
-        public enum EligibilityObservationCategory
+        /// <summary>Concepts for <c>https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category</c>.</summary>
+        public enum EligibilityAssessmentCategory
         {
             /// <summary><c>eligibility-assessment</c> - Eligibility assessment</summary>
             EligibilityAssessment,
@@ -36,6 +36,9 @@ public static class Recruit
 
     public static class Profiles
     {
+        /// <summary>The canonical URL <c>https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment</c>.</summary>
+        public static string EligibilityAssessment => "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment";
+
         /// <summary>The canonical URL <c>https://miracum.github.io/recruit/fhir/StructureDefinition/research-study</c>.</summary>
         public static string ResearchStudy => "https://miracum.github.io/recruit/fhir/StructureDefinition/research-study";
 
@@ -48,19 +51,19 @@ public static class Recruit
     {
         public static class Urls
         {
-            /// <summary>The extension URL <c>https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-observation-derived-from-library</c>.</summary>
-            public static string EligibilityObservationDerivedFromLibrary => "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-observation-derived-from-library";
+            /// <summary>The extension URL <c>https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library</c>.</summary>
+            public static string EligibilityAssessmentDerivedFromLibrary => "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library";
 
             /// <summary>The extension URL <c>https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study</c>.</summary>
             public static string ScreeningListBelongsToStudy => "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study";
 
         }
 
-        /// <summary>A new <see cref="Extension"/> for <c>https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-observation-derived-from-library</c>.</summary>
+        /// <summary>A new <see cref="Extension"/> for <c>https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library</c>.</summary>
         /// <param name="value">The extension value.</param>
-        /// <returns>A new <see cref="Extension"/> with url <c>https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-observation-derived-from-library</c> and the given value.</returns>
-        public static Extension EligibilityObservationDerivedFromLibrary(ResourceReference value) =>
-            new("https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-observation-derived-from-library", value);
+        /// <returns>A new <see cref="Extension"/> with url <c>https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library</c> and the given value.</returns>
+        public static Extension EligibilityAssessmentDerivedFromLibrary(ResourceReference value) =>
+            new("https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library", value);
 
         /// <summary>A new <see cref="Extension"/> for <c>https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study</c>.</summary>
         /// <param name="value">The extension value.</param>
@@ -71,6 +74,17 @@ public static class Recruit
 
     public static class NamingSystems
     {
+        /// <summary>The identifier system for a per-criterion eligibility Observation's business identifier. Derived from the ResearchSubject identifier and the Library identifier of the eligibility criterion.</summary>
+        public static class EligibilityAssessmentId
+        {
+            public static class UniqueId
+            {
+                /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/eligibility-assessment-id</c></summary>
+                public static string Uri =>
+                    "https://miracum.github.io/recruit/fhir/identifiers/eligibility-assessment-id";
+            }
+        }
+
         /// <summary>The identifier system for the Group containing references to one or more eligibility criteria Library resources</summary>
         public static class EligibilityGroupId
         {
@@ -90,17 +104,6 @@ public static class Recruit
                 /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/eligibility-library-id</c></summary>
                 public static string Uri =>
                     "https://miracum.github.io/recruit/fhir/identifiers/eligibility-library-id";
-            }
-        }
-
-        /// <summary>The identifier system for a per-criterion eligibility Observation's business identifier</summary>
-        public static class EligibilityObservationId
-        {
-            public static class UniqueId
-            {
-                /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/eligibility-observation-id</c></summary>
-                public static string Uri =>
-                    "https://miracum.github.io/recruit/fhir/identifiers/eligibility-observation-id";
             }
         }
 
@@ -128,43 +131,43 @@ public static class Recruit
     }
 }
 
-/// <summary>Extension methods for <see cref="Recruit.CodeSystems.EligibilityObservationCategory"/>.</summary>
-public static class EligibilityObservationCategoryExtensions
+/// <summary>Extension methods for <see cref="Recruit.CodeSystems.EligibilityAssessmentCategory"/>.</summary>
+public static class EligibilityAssessmentCategoryExtensions
 {
-    /// <returns>The CodeSystem URL <c>https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-observation-category</c>.</returns>
-    public static string Url(this Recruit.CodeSystems.EligibilityObservationCategory _) =>
-        "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-observation-category";
+    /// <returns>The CodeSystem URL <c>https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category</c>.</returns>
+    public static string Url(this Recruit.CodeSystems.EligibilityAssessmentCategory _) =>
+        "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category";
 
     /// <returns>The FHIR code for this concept.</returns>
-    public static string Code(this Recruit.CodeSystems.EligibilityObservationCategory value) => value switch
+    public static string Code(this Recruit.CodeSystems.EligibilityAssessmentCategory value) => value switch
     {
-        Recruit.CodeSystems.EligibilityObservationCategory.EligibilityAssessment => "eligibility-assessment",
+        Recruit.CodeSystems.EligibilityAssessmentCategory.EligibilityAssessment => "eligibility-assessment",
         _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
     };
 
     /// <returns>The display label for this concept, or <c>null</c> if none.</returns>
-    public static string? Display(this Recruit.CodeSystems.EligibilityObservationCategory value) => value switch
+    public static string? Display(this Recruit.CodeSystems.EligibilityAssessmentCategory value) => value switch
     {
-        Recruit.CodeSystems.EligibilityObservationCategory.EligibilityAssessment => "Eligibility assessment",
+        Recruit.CodeSystems.EligibilityAssessmentCategory.EligibilityAssessment => "Eligibility assessment",
         _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
     };
 
     /// <returns>A new <see cref="Coding"/> for this concept.</returns>
-    public static Coding Coding(this Recruit.CodeSystems.EligibilityObservationCategory value) =>
+    public static Coding Coding(this Recruit.CodeSystems.EligibilityAssessmentCategory value) =>
         new(value.Url(), value.Code(), value.Display());
 
     /// <param name="code">The FHIR code to look up.</param>
-    /// <returns>The matching <see cref="Recruit.CodeSystems.EligibilityObservationCategory"/>, or <c>null</c> if none matches.</returns>
-    public static Recruit.CodeSystems.EligibilityObservationCategory? FromValue(string code) => code switch
+    /// <returns>The matching <see cref="Recruit.CodeSystems.EligibilityAssessmentCategory"/>, or <c>null</c> if none matches.</returns>
+    public static Recruit.CodeSystems.EligibilityAssessmentCategory? FromValue(string code) => code switch
     {
-        "eligibility-assessment" => Recruit.CodeSystems.EligibilityObservationCategory.EligibilityAssessment,
+        "eligibility-assessment" => Recruit.CodeSystems.EligibilityAssessmentCategory.EligibilityAssessment,
         _ => null
     };
 
     /// <param name="code">The FHIR code to look up.</param>
-    /// <returns>The matching <see cref="Recruit.CodeSystems.EligibilityObservationCategory"/>.</returns>
+    /// <returns>The matching <see cref="Recruit.CodeSystems.EligibilityAssessmentCategory"/>.</returns>
     /// <exception cref="ArgumentException">If no constant has that code.</exception>
-    public static Recruit.CodeSystems.EligibilityObservationCategory FromValueOrThrow(string code) =>
+    public static Recruit.CodeSystems.EligibilityAssessmentCategory FromValueOrThrow(string code) =>
         FromValue(code) ?? throw new ArgumentException($"Unknown code: {code}", nameof(code));
 }
 
@@ -211,9 +214,9 @@ public static class ScreeningListTypeExtensions
 /// <summary>Extension methods for reading <see cref="Recruit.Extensions"/> from FHIR resources.</summary>
 public static class RecruitFhirExtensions
 {
-    /// <summary>Gets the value of extension <c>https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-observation-derived-from-library</c> from <paramref name="resource"/>, or <c>null</c> if absent.</summary>
-    public static ResourceReference? GetEligibilityObservationDerivedFromLibrary(this IExtendable resource) =>
-        resource.GetExtensionValue<ResourceReference>("https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-observation-derived-from-library");
+    /// <summary>Gets the value of extension <c>https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library</c> from <paramref name="resource"/>, or <c>null</c> if absent.</summary>
+    public static ResourceReference? GetEligibilityAssessmentDerivedFromLibrary(this IExtendable resource) =>
+        resource.GetExtensionValue<ResourceReference>("https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library");
 
     /// <summary>Gets the value of extension <c>https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study</c> from <paramref name="resource"/>, or <c>null</c> if absent.</summary>
     public static ResourceReference? GetScreeningListBelongsToStudy(this IExtendable resource) =>

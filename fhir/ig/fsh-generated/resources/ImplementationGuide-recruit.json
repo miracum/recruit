@@ -28,10 +28,18 @@
     "resource": [
       {
         "reference": {
-          "reference": "StructureDefinition/eligibility-observation-derived-from-library"
+          "reference": "StructureDefinition/eligibility-assessment-derived-from-library"
         },
-        "name": "Eligibility observation derived-from Library",
-        "description": "A reference to the eligibility-criterion Library resource this Observation was derived from. Observation.derivedFrom does not accept Library as a target type, so this extension carries the reference instead.",
+        "name": "Eligibility assessment derived-from Library",
+        "description": "A reference to the eligibility-criterion Library resource this assessment was derived from. Observation.derivedFrom does not accept Library as a target type, so this extension carries the reference instead.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "NamingSystem/eligibility-assessment-id"
+        },
+        "name": "EligibilityAssessmentIdentifierSystem",
+        "description": "The identifier system for a per-criterion eligibility Observation's business identifier. Derived from the ResearchSubject identifier and the Library identifier of the eligibility criterion.",
         "exampleBoolean": false
       },
       {
@@ -48,14 +56,6 @@
         },
         "name": "EligibilityLibraryIdentifierSystem",
         "description": "The identifier system for a criterion expressed in a Library resource",
-        "exampleBoolean": false
-      },
-      {
-        "reference": {
-          "reference": "NamingSystem/eligibility-observation-id"
-        },
-        "name": "EligibilityObservationIdentifierSystem",
-        "description": "The identifier system for a per-criterion eligibility Observation's business identifier",
         "exampleBoolean": false
       },
       {
@@ -84,10 +84,26 @@
       },
       {
         "reference": {
-          "reference": "CodeSystem/eligibility-observation-category"
+          "reference": "StructureDefinition/eligibility-assessment"
         },
-        "name": "recruIT eligibility observation category",
-        "description": "A custom, non-standard Observation.category code identifying the synthetic per-criterion eligibility Observations produced by the sql-on-fhir eligibility engine, distinguishing them from genuine clinical Observations elsewhere in the system.",
+        "name": "recruIT eligibility assessment",
+        "description": "A per-criterion eligibility Assessment produced by the query engine, indicating whether a single eligibility criterion is met for a ResearchSubject.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "CodeSystem/eligibility-assessment-category"
+        },
+        "name": "recruIT eligibility assessment category",
+        "description": "A custom, non-standard Observation.category code identifying the per-criterion eligibility Assessments produced by the query eligibility engine..",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "ValueSet/eligibility-assessment-result"
+        },
+        "name": "recruIT eligibility assessment result",
+        "description": "The SNOMED CT qualifier values a per-criterion eligibility assessment's value may be set to, indicating whether the criterion is met, not met, unknown, or indeterminate.",
         "exampleBoolean": false
       },
       {
