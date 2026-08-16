@@ -2,7 +2,6 @@
 @implements IDisposable
 @inject BreadcrumbState BreadcrumbState
 @inject ScreeningListService ScreeningListService
-@inject IOptions<NotificationOptions> NotificationOptionsAccessor
 @inject IStringLocalizer<SharedResources> Localizer
 @inject NavigationManager Navigation
 @inject ThemeService ThemeService
@@ -198,7 +197,7 @@
         try
         {
             var user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
-            _trials = [.. await ScreeningListService.GetAccessibleTrialsAsync(user, NotificationOptionsAccessor.Value.NewSuggestionWindowDays, NotificationOptionsAccessor.Value.StalledLeadWindowDays)];
+            _trials = [.. await ScreeningListService.GetAccessibleTrialsAsync(user)];
         }
         catch
         {

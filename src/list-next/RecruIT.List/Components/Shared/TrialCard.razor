@@ -17,31 +17,17 @@
                 <MetricTile Label="@Localizer["App.TrialCard.NotRecruited"]" Value="Trial.NotRecruitedCount" />
             </div>
         </BbCardContent>
-        <BbCardFooter Class="flex items-center justify-between gap-2">
-            <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span class="h-2 w-2 rounded-full @(Trial.NewSuggestionsCount > 0 ? "bg-green-500" : "bg-muted-foreground/30")"></span>
-                <LucideIcon Name="user" Size="14" />
-                <span>@Trial.NewSuggestionsCount @(Trial.NewSuggestionsCount == 1 ? Localizer["App.TrialCard.NewSuggestionSingular"] : Localizer["App.TrialCard.NewSuggestionPlural"])</span>
-            </div>
-            <div class="flex items-center gap-2">
-                @if (Trial.StalledLeadsCount > 0)
-                {
-                    <div class="flex items-center gap-1.5 text-xs text-amber-600" title="@Localizer["App.TrialCard.StalledTooltip"]">
-                        <LucideIcon Name="clock" Size="14" />
-                        <span>@Localizer["App.TrialCard.StalledCount", Trial.StalledLeadsCount]</span>
-                    </div>
-                }
-                @if (_canManageAccess)
-                {
-                    <div @onclick="NavigateToAccess" @onclick:stopPropagation="true">
-                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">
-                            <Icon><LucideIcon Name="shield" Size="16" /></Icon>
-                            <ChildContent>@Localizer["App.PatientList.ManageAccessLink"]</ChildContent>
-                        </BbButton>
-                    </div>
-                }
-            </div>
-        </BbCardFooter>
+        @if (_canManageAccess)
+        {
+            <BbCardFooter Class="flex items-center justify-end">
+                <div @onclick="NavigateToAccess" @onclick:stopPropagation="true">
+                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">
+                        <Icon><LucideIcon Name="shield" Size="16" /></Icon>
+                        <ChildContent>@Localizer["App.PatientList.ManageAccessLink"]</ChildContent>
+                    </BbButton>
+                </div>
+            </BbCardFooter>
+        }
     </BbCard>
 </div>
 

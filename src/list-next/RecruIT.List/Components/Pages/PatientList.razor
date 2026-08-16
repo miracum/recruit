@@ -197,8 +197,7 @@ else if (_summary is not null)
         _errorMessage = null;
         try
         {
-            var (summary, patients) = await ScreeningListService.GetListWithPatientsAsync(
-                ListId, _user, NotificationOptionsAccessor.Value.NewSuggestionWindowDays, NotificationOptionsAccessor.Value.StalledLeadWindowDays);
+            var (summary, patients) = await ScreeningListService.GetListWithPatientsAsync(ListId, _user);
             _summary = summary;
             _patients = [.. patients];
             var permission = await AccessService.GetPermissionAsync(_user, summary.TrialIdentifier);

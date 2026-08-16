@@ -26,9 +26,4 @@ public sealed class TrialSummaryDto
     public int NotRecruitedCount { get; init; }
 
     public int TotalCount => RecruitedCount + PendingCount + NotRecruitedCount;
-
-    public int NewSuggestionsCount { get; init; }
-
-    /// <summary>Pending patients (candidate/screening/eligible) not touched within the configured window.</summary>
-    public int StalledLeadsCount { get; init; }
 }

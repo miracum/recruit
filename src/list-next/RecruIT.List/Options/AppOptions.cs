@@ -24,19 +24,13 @@ public sealed class NotificationOptions
 
     public int NewSuggestionWindowDays { get; set; } = 7;
 
-    /// <summary>
-    /// A pending patient (candidate/screening/eligible) whose ResearchSubject hasn't been touched
-    /// in this many days counts as a "stalled lead" - nobody has acted on it in a while.
-    /// </summary>
-    public int StalledLeadWindowDays { get; set; } = 14;
-
     public int ScanIntervalSeconds { get; set; } = 60;
 }
 
 /// <summary>
 /// Config for the screening-list-change email notifier (Services/Notify). Deliberately a
-/// separate section from NotificationOptions above, which is about in-app "is this
-/// recommendation new/stalled" UI thresholds, not this background poller/mailer.
+/// separate section from NotificationOptions above, which is about the in-app "is this
+/// recommendation new" UI threshold, not this background poller/mailer.
 /// </summary>
 public sealed class NotifyMailerOptions
 {

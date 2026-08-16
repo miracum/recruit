@@ -1,7 +1,6 @@
 @page "/"
 @attribute [Authorize]
 @inject ScreeningListService ScreeningListService
-@inject IOptions<NotificationOptions> NotificationOptionsAccessor
 @inject ToastService Toast
 @inject BreadcrumbState BreadcrumbState
 @inject IStringLocalizer<SharedResources> Localizer
@@ -30,19 +29,6 @@ else if (_trials.Count == 0)
 }
 else
 {
-    <div class="mb-4 grid grid-cols-2 gap-4 sm:max-w-md">
-        <BbCard>
-            <BbCardContent Class="pt-6">
-                <MetricTile Label="@Localizer["App.Dashboard.NewSuggestions"]" Value="TotalNewSuggestions" />
-            </BbCardContent>
-        </BbCard>
-        <BbCard>
-            <BbCardContent Class="pt-6">
-                <MetricTile Label="@Localizer["App.Dashboard.StalledLeads"]" Value="TotalStalledLeads" />
-            </BbCardContent>
-        </BbCard>
-    </div>
-
     <BbTabs DefaultValue="active">
         <BbTabsList>
             <BbTabsTrigger Value="active">@Localizer["App.Dashboard.ActiveTab"] (@ActiveTrials.Count)</BbTabsTrigger>
@@ -73,12 +59,6 @@ else
 
     private List<TrialSummaryDto> InactiveTrials => [.. _trials.Where(t => t.ListStatus != "current")];
 
-    // Only active trials count toward these totals - stalled/new-suggestion metrics are about
-    // recruitment work that still needs attention, which retired trials no longer do.
-    private int TotalNewSuggestions => ActiveTrials.Sum(t => t.NewSuggestionsCount);
-
-    private int TotalStalledLeads => ActiveTrials.Sum(t => t.StalledLeadsCount);
-
     protected override async Task OnInitializedAsync()
     {
         BreadcrumbState.Set(new BreadcrumbItem(Localizer["App.Common.AllTrialsBreadcrumb"]));
@@ -92,7 +72,7 @@ else
     {
         try
         {
-            _trials = [.. await ScreeningListService.GetAccessibleTrialsAsync(_user, NotificationOptionsAccessor.Value.NewSuggestionWindowDays, NotificationOptionsAccessor.Value.StalledLeadWindowDays)];
+            _trials = [.. await ScreeningListService.GetAccessibleTrialsAsync(_user)];
         }
         catch (FhirAccessException ex)
         {

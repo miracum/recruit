@@ -130,12 +130,6 @@
   <data name="App.Dashboard.EmptyDescription" xml:space="preserve">
     <value>Either no trials have produced recommendations yet, or you aren't authorized to view any. Contact an administrator if you believe this is a mistake.</value>
   </data>
-  <data name="App.Dashboard.NewSuggestions" xml:space="preserve">
-    <value>New suggestions</value>
-  </data>
-  <data name="App.Dashboard.StalledLeads" xml:space="preserve">
-    <value>Stalled leads</value>
-  </data>
   <data name="App.Dashboard.ActiveTab" xml:space="preserve">
     <value>Active</value>
   </data>
@@ -162,18 +156,6 @@
   </data>
   <data name="App.TrialCard.NotRecruited" xml:space="preserve">
     <value>Not Recruited</value>
-  </data>
-  <data name="App.TrialCard.NewSuggestionSingular" xml:space="preserve">
-    <value>new suggestion</value>
-  </data>
-  <data name="App.TrialCard.NewSuggestionPlural" xml:space="preserve">
-    <value>new suggestions</value>
-  </data>
-  <data name="App.TrialCard.StalledTooltip" xml:space="preserve">
-    <value>Pending leads with no recent activity</value>
-  </data>
-  <data name="App.TrialCard.StalledCount" xml:space="preserve">
-    <value>{0} stalled</value>
   </data>
   <data name="App.PatientList.LoadErrorTitle" xml:space="preserve">
     <value>Could not load this trial's recommendations</value>

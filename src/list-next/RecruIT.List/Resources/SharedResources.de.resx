@@ -189,12 +189,6 @@
   <data name="App.Dashboard.EmptyDescription" xml:space="preserve">
     <value>Entweder haben noch keine Studien Vorschläge erzeugt, oder Sie sind nicht berechtigt, welche einzusehen. Wenden Sie sich an einen Administrator, falls Sie dies für einen Fehler halten.</value>
   </data>
-  <data name="App.Dashboard.NewSuggestions" xml:space="preserve">
-    <value>Neue Vorschläge</value>
-  </data>
-  <data name="App.Dashboard.StalledLeads" xml:space="preserve">
-    <value>Ins Stocken geratene Fälle</value>
-  </data>
   <data name="App.Dashboard.ActiveTab" xml:space="preserve">
     <value>Aktiv</value>
   </data>
@@ -221,18 +215,6 @@
   </data>
   <data name="App.TrialCard.NotRecruited" xml:space="preserve">
     <value>Nicht rekrutiert</value>
-  </data>
-  <data name="App.TrialCard.NewSuggestionSingular" xml:space="preserve">
-    <value>neuer Vorschlag</value>
-  </data>
-  <data name="App.TrialCard.NewSuggestionPlural" xml:space="preserve">
-    <value>neue Vorschläge</value>
-  </data>
-  <data name="App.TrialCard.StalledTooltip" xml:space="preserve">
-    <value>Ausstehende Fälle ohne kürzliche Aktivität</value>
-  </data>
-  <data name="App.TrialCard.StalledCount" xml:space="preserve">
-    <value>{0} verzögert</value>
   </data>
   <data name="App.PatientList.LoadErrorTitle" xml:space="preserve">
     <value>Die Vorschläge dieser Studie konnten nicht geladen werden</value>

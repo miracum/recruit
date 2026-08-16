@@ -20,8 +20,6 @@ public sealed class ScreeningListService(
 {
     public async Task<IReadOnlyList<TrialSummaryDto>> GetAccessibleTrialsAsync(
         ClaimsPrincipal user,
-        int newSuggestionWindowDays,
-        int stalledLeadWindowDays,
         CancellationToken ct = default
     )
     {
@@ -73,9 +71,7 @@ public sealed class ScreeningListService(
             var entries = list.Entry ?? [];
             int recruited = 0,
                 pending = 0,
-                notRecruited = 0,
-                newSuggestions = 0,
-                stalled = 0;
+                notRecruited = 0;
 
             foreach (var entry in entries)
             {
@@ -97,23 +93,6 @@ public sealed class ScreeningListService(
                 else
                 {
                     pending++;
-
-                    if (
-                        subject?.Meta?.LastUpdated is { } lastUpdated
-                        && lastUpdated < DateTimeOffset.UtcNow.AddDays(-stalledLeadWindowDays)
-                    )
-                    {
-                        stalled++;
-                    }
-                }
-
-                if (
-                    entry.Date is { } dateString
-                    && DateTimeOffset.TryParse(dateString, out var recommendedDate)
-                    && recommendedDate >= DateTimeOffset.UtcNow.AddDays(-newSuggestionWindowDays)
-                )
-                {
-                    newSuggestions++;
                 }
             }
 
@@ -128,8 +107,6 @@ public sealed class ScreeningListService(
                     RecruitedCount = recruited,
                     PendingCount = pending,
                     NotRecruitedCount = notRecruited,
-                    NewSuggestionsCount = newSuggestions,
-                    StalledLeadsCount = stalled,
                 }
             );
         }
@@ -397,8 +374,6 @@ public sealed class ScreeningListService(
     )> GetListWithPatientsAsync(
         string listId,
         ClaimsPrincipal user,
-        int newSuggestionWindowDays,
-        int stalledLeadWindowDays,
         CancellationToken ct = default
     )
     {
@@ -474,9 +449,7 @@ public sealed class ScreeningListService(
         var patientEntries = new List<PatientListEntryDto>();
         int recruited = 0,
             pending = 0,
-            notRecruited = 0,
-            newSuggestions = 0,
-            stalled = 0;
+            notRecruited = 0;
 
         foreach (var entry in list.Entry ?? [])
         {
@@ -510,22 +483,6 @@ public sealed class ScreeningListService(
             else
             {
                 pending++;
-
-                if (
-                    subject.Meta?.LastUpdated is { } lastUpdated
-                    && lastUpdated < DateTimeOffset.UtcNow.AddDays(-stalledLeadWindowDays)
-                )
-                {
-                    stalled++;
-                }
-            }
-
-            if (
-                recommendedDate is not null
-                && recommendedDate >= DateTimeOffset.UtcNow.AddDays(-newSuggestionWindowDays)
-            )
-            {
-                newSuggestions++;
             }
 
             patientEntries.Add(
@@ -572,8 +529,6 @@ public sealed class ScreeningListService(
             RecruitedCount = recruited,
             PendingCount = pending,
             NotRecruitedCount = notRecruited,
-            NewSuggestionsCount = newSuggestions,
-            StalledLeadsCount = stalled,
         };
 
         return (summary, patientEntries.OrderByDescending(p => p.RecommendedDate).ToList());
