@@ -27,16 +27,9 @@ RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
         --no-self-contained
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0.11-resolute-chiseled-extra@sha256:0e8d291426c277e5b53bb99f3fa6d95c3b02eff20f7ca1d807a7608250164df3
-
 WORKDIR /app
-
-USER 1654:1654
-
-# HTTP_PORT/METRICS_PORT (not ASPNETCORE_HTTP_PORTS) control the listen ports.
-# Program.cs explicitly configures Kestrel for both ports.
-EXPOSE 8080/tcp
-EXPOSE 8081/tcp
 
 COPY --from=build /app/publish .
 
+USER 1654:1654
 ENTRYPOINT ["dotnet", "RecruIT.List.dll"]

@@ -1,0 +1,32 @@
+{
+  "resourceType": "Library",
+  "identifier": [ {
+    "system": "https://superset.example.org/api/v1/saved_query",
+    "value": "7"
+  } ],
+  "name": "Minimal",
+  "title": "Ad Hoc Report",
+  "status": "draft",
+  "type": {
+    "coding": [ {
+      "system": "https://sql-on-fhir.org/ig/CodeSystem/LibraryTypesCodes",
+      "code": "sql-query"
+    } ]
+  },
+  "description": "Some description",
+  "content": [ {
+    "extension": [ {
+      "url": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/sql-text",
+      "valueString": "-- @name: Minimal\nSELECT 1"
+    } ],
+    "contentType": "application/sql",
+    "data": "LS0gQG5hbWU6IE1pbmltYWwKU0VMRUNUIDE="
+  }, {
+    "extension": [ {
+      "url": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/sql-text",
+      "valueString": "-- @name: Minimal\nSELECT 1"
+    } ],
+    "contentType": "application/sql;dialect=trino",
+    "data": "LS0gQG5hbWU6IE1pbmltYWwKU0VMRUNUIDE="
+  } ]
+}

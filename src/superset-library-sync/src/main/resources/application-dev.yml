@@ -1,0 +1,15 @@
+superset:
+  url: "http://localhost:8088"
+  username: "admin"
+  password: "admin"
+
+fhir:
+  url: "http://recruit-fhir-server.127.0.0.1.nip.io/fhir"
+
+logging:
+  level:
+    org:
+      springframework: "INFO"
+      miracum:
+        recruit:
+          supersetlibrarysync: "DEBUG"

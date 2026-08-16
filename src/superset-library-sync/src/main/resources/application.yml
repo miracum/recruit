@@ -1,0 +1,30 @@
+superset:
+  url: ""
+  username: ""
+  password: ""
+  # only saved queries carrying this Superset tag are synced. leave blank to sync every saved
+  # query that has at least one recognized SQL annotation (see the safety net note on
+  # SyncService).
+  tag-filter: "fhir-library"
+  # dialect label added as a second, dialect-specific content attachment alongside the default
+  # untyped "application/sql" one - set blank to skip it.
+  sql-dialect: "trino"
+  page-size: 100
+  timeout-in-seconds: 60
+
+fhir:
+  url: ""
+  server:
+    timeout-in-seconds: 300
+
+spring:
+  profiles:
+    active: dev
+  application:
+    name: superset-library-sync
+  main:
+    banner-mode: off
+
+logging:
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:%5p}) %clr(---){faint} %m %X %n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
