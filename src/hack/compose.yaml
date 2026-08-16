@@ -40,7 +40,7 @@ services:
       - /app/target
     privileged: false
     environment:
-      SPRING_DATASOURCE_URL: "jdbc:postgresql://fhir-db:5432/fhir?currentSchema=public"
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://db:5432/fhir?currentSchema=public"
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
@@ -60,7 +60,7 @@ services:
     depends_on:
       traefik:
         condition: service_started
-      fhir-db:
+      db:
         condition: service_started
     labels:
       - "traefik.enable=true"
@@ -70,20 +70,23 @@ services:
     ports:
       - "127.0.0.1:8082:8080"
 
-  fhir-db:
+  db:
     image: docker.io/library/postgres:18.4@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a
     restart: unless-stopped
     deploy:
       resources:
         limits:
-          memory: 512m
+          memory: 1024m
     ipc: private
     security_opt:
       - "no-new-privileges:true"
     privileged: false
     environment:
       POSTGRES_PASSWORD: postgres # pragma: allowlist secret
-      POSTGRES_DB: fhir
+    volumes:
+      - ./postgres-initdb:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "127.0.0.1:5432:5432"
 
   broadsea-atlasdb:
     image: docker.io/ohdsi/broadsea-atlasdb:2.3.0@sha256:25d5000bd02427ea992d5ad20b1a6f2e7807a673122f83494be4ab477a0f6bf9
@@ -347,23 +350,6 @@ services:
       - "traefik.http.routers.maildev.rule=Host(`recruit-maildev.127.0.0.1.nip.io`)"
       - "traefik.http.routers.maildev.entrypoints=web"
 
-  notify-ha-db:
-    image: docker.io/library/postgres:18.4@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 512m
-    ipc: private
-    security_opt:
-      - "no-new-privileges:true"
-    privileged: false
-    environment:
-      POSTGRES_PASSWORD: postgres # pragma: allowlist secret
-      POSTGRES_DB: recruit_notify_jobs
-    ports:
-      - "127.0.0.1:6432:5432"
-
   keycloak:
     image: quay.io/keycloak/keycloak:26.7.0@sha256:0f198be292568439d700cdbfb893e69a6009bb43a94a06a945b1d3d506c76b13
     restart: unless-stopped
@@ -400,8 +386,6 @@ services:
 
   minio:
     image: docker.io/minio/minio:RELEASE.2025-09-07T16-13-09Z@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e
-    profiles:
-      - trino
     ipc: none
     security_opt:
       - "no-new-privileges:true"
@@ -427,8 +411,6 @@ services:
 
   wait-for-minio:
     image: docker.io/curlimages/curl:8.21.0@sha256:7c12af72ceb38b7432ab85e1a265cff6ae58e06f95539d539b654f2cfa64bb13
-    profiles:
-      - trino
     ipc: none
     security_opt:
       - "no-new-privileges:true"
@@ -452,8 +434,6 @@ services:
   create-bucket:
     image: docker.io/minio/minio:RELEASE.2025-07-23T15-54-02Z@sha256:d249d1fb6966de4d8ad26c04754b545205ff15a62e4fd19ebd0f26fa5baacbc0
     restart: on-failure
-    profiles:
-      - trino
     cap_drop:
       - ALL
     privileged: false
@@ -472,8 +452,6 @@ services:
   upload-to-fhir-server:
     # the image is overkill, but it is the only one that has the necessary tools and is up-to-date
     image: ghcr.io/chgl/kube-powertools:v2.5.61@sha256:f5b8f167380f8da88753a3e0c986e203e0cfdc75c851b0c0af48dcfec0c8df9f
-    profiles:
-      - trino
     ipc: none
     security_opt:
       - "no-new-privileges:true"
@@ -513,8 +491,6 @@ services:
 
   convert-to-delta:
     image: docker.io/library/eclipse-temurin:21-jre@sha256:8cef5fc7bebe421363ab543a2f4db5caf7d119d8db67d56b0f56c485d2de4d55
-    profiles:
-      - trino
     ipc: none
     security_opt:
       - "no-new-privileges:true"
@@ -551,8 +527,6 @@ services:
 
   warehousekeeper:
     image: ghcr.io/bzkf/fhir-to-lakehouse:v1.13.16@sha256:6dc63a645b48523eb0696a2aff94072a70274b256b8698e5682765941f287c17
-    profiles:
-      - trino
     ipc: none
     security_opt:
       - "no-new-privileges:true"
@@ -581,28 +555,8 @@ services:
       trino:
         condition: service_started
 
-  metastore-db:
-    image: docker.io/library/postgres:18.4@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a
-    profiles:
-      - trino
-    ipc: private
-    security_opt:
-      - "no-new-privileges:true"
-    privileged: false
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: hive
-      POSTGRES_PASSWORD: hive
-      POSTGRES_DB: metastore
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-
   hive-metastore:
     image: ghcr.io/miracum/util-images/hive-metastore:v1.3.3@sha256:14fbdf84706986894a4dafbf4963147bad6bf5f155ce0381c0292424932bdc50
-    profiles:
-      - trino
     ipc: none
     security_opt:
       - "no-new-privileges:true"
@@ -614,15 +568,15 @@ services:
       SERVICE_NAME: metastore
       DB_DRIVER: postgres
       SERVICE_OPTS: |
-        -Djavax.jdo.option.ConnectionUserName=hive
-        -Djavax.jdo.option.ConnectionPassword=hive
+        -Djavax.jdo.option.ConnectionUserName=postgres
+        -Djavax.jdo.option.ConnectionPassword=postgres
       AWS_ACCESS_KEY_ID: "admin"
       AWS_SECRET_ACCESS_KEY: "miniopass"
       AWS_DEFAULT_REGION: "eu-central-1"
     volumes:
       - ./config/hive-site.xml:/opt/hive/conf/hive-site.xml:ro
     depends_on:
-      metastore-db:
+      db:
         condition: service_started
     deploy:
       resources:
@@ -631,8 +585,6 @@ services:
 
   trino:
     image: docker.io/trinodb/trino:483@sha256:db58cc93e593a2706553745f276bb119c9810e69918be56ecde088ba7ccb0534
-    profiles:
-      - trino
     ipc: none
     security_opt:
       - "no-new-privileges:true"
@@ -651,17 +603,3 @@ services:
     depends_on:
       hive-metastore:
         condition: service_started
-
-  recruit-db:
-    image: docker.io/library/postgres:18.4@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a
-    restart: unless-stopped
-    ipc: private
-    security_opt:
-      - "no-new-privileges:true"
-    privileged: false
-    environment:
-      POSTGRES_USER: list
-      POSTGRES_PASSWORD: list # pragma: allowlist secret
-      POSTGRES_DB: list
-    ports:
-      - "127.0.0.1:5433:5432"

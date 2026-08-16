@@ -25,23 +25,13 @@ plugins {
 }
 
 dependencies {
-    // CodeSystems with inline concepts (content == "complete") get a generated enum whose
-    // coding() accessor returns a org.hl7.fhir.r4.model.Coding - part of the public API, so 'api'
-    // rather than 'implementation'.
     api 'ca.uhn.hapi.fhir:hapi-fhir-structures-r4:8.10.0'
-    // Generated enums carry JSpecify @NonNull/@Nullable on their public API - part of the public
-    // type contract, so consumers can use them without adding jspecify themselves.
     api 'org.jspecify:jspecify:1.0.0'
 }
 
-// Manually-invoked "generate, review, commit" dev tool - not a build-graph participant. See
-// README.md for the rationale. Scans fhir/ig/fsh-generated/resources directly via ig-codegen's
-// lower-level scanner/generator API, rather than IgCodegen's own CLI entry point, which expects a
-// package.json plus a Firely Terminal/npm package cache - there's nothing to restore for an IG
-// that isn't published to a FHIR package registry; sushi's own output is the only copy.
 tasks.register('generateIgConstants') {
     group = 'codegen'
-    description = 'Regenerates the constant classes in src/main/java from fhir/ig/fsh-generated/resources. Review the diff and commit.'
+    description = 'Regenerates the constant classes'
     def resourcesDir = layout.projectDirectory.dir('../../fhir/ig/fsh-generated/resources')
     def outputDir = layout.projectDirectory.dir('src/main/java')
     doLast {
@@ -51,5 +41,5 @@ tasks.register('generateIgConstants') {
             model, 'io.github.miracum.recruit', 'Recruit', outputDir.asFile.toPath())
         logger.lifecycle('Generated {}', generatedFile)
     }
-    notCompatibleWithConfigurationCache('reads from the sushi-built fhir/ig/fsh-generated output, not a declared task input')
+    notCompatibleWithConfigurationCache('reads from the sushi-built fhir/ig/fsh-generated output')
 }
