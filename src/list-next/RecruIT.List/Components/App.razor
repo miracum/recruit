@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <script>
+        // Applies the saved theme before the first paint so there is no flash of the
+        // light theme while the Blazor circuit connects and ThemeService.InitializeAsync
+        // (which can only run once JS interop is available) re-applies it. Must stay in
+        // sync with BlazorBlueprint.Components' theme.js (localStorage key "bb-theme").
+        (function () {
+            try {
+                var raw = localStorage.getItem('bb-theme');
+                var isDark = raw
+                    ? JSON.parse(raw).isDarkMode
+                    : window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (isDark) {
+                    document.documentElement.classList.add('dark');
+                }
+            } catch (e) {
+                // localStorage/JSON unavailable - fall back to the default light theme.
+            }
+        })();
+    </script>
+    <ResourcePreloader />
+    <link rel="stylesheet" href="@Assets["styles/theme.css"]" />
+    <link rel="stylesheet" href="_content/BlazorBlueprint.Components/blazorblueprint.css" />
+    <link rel="stylesheet" href="@Assets["app.css"]" />
+    <link rel="stylesheet" href="@Assets["RecruIT.List.styles.css"]" />
+    <link rel="stylesheet" href="@Assets["lib/quill/quill.core.css"]" />
+    <ImportMap />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <HeadOutlet @rendermode="InteractiveServer" />
+</head>
+
+<body>
+    <Routes @rendermode="InteractiveServer" />
+    <ReconnectModal />
+    <script src="@Assets["lib/quill/quill.js"]"></script>
+    <script src="@Assets["_framework/blazor.web.js"]"></script>
+</body>
+
+</html>

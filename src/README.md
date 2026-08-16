@@ -11,8 +11,8 @@ Guide (`../fhir/ig`), via [`ig-codegen`](https://github.com/diz-uker/to-fhir/tre
 (Java) / [`ig-codegen-cs`](https://github.com/diz-uker/to-fhir/tree/main/ig-codegen-cs) (C#):
 
 - [`fhir-constants`](fhir-constants/README.md) - Java, consumed by `query-sql-on-fhir`.
-- [`list-next/fhir-constants-cs`](list-next/fhir-constants-cs/README.md) - C#, consumed by
-  `list-next`.
+- [`list-next/RecruIT.FhirConstants`](list-next/RecruIT.FhirConstants/README.md) - C#, consumed by
+  `list-next/RecruIT.List` (the `list-next` service).
 
 Both scan `fhir/ig/fsh-generated/resources` directly (rather than going through either tool's own
 package.json-driven CLI) since the recruIT IG isn't published to a FHIR package registry - sushi's
@@ -23,7 +23,7 @@ step:
    `fhir/ig/fsh-generated/resources`.
 2. Regenerate one or both languages:
    - Java: `./gradlew :fhir-constants:generateIgConstants`
-   - C#: `dotnet build list-next/fhir-constants-cs/fhir-constants-cs.csproj -t:GenerateIgConstants`
+   - C#: `dotnet build list-next/RecruIT.FhirConstants/RecruIT.FhirConstants.csproj -t:GenerateIgConstants`
 3. Review the diff (added/removed/renamed constants), commit it.
 
 See the two module READMEs linked above for the generated API shape and usage examples in each
