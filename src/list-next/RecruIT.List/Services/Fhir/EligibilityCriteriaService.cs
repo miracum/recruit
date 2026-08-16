@@ -9,12 +9,12 @@ using RecruIT.List.Resources;
 namespace RecruIT.List.Services.Fhir;
 
 /// <summary>
-/// Backs the admin-only eligibility criteria builder page: lets an admin browse existing
-/// ResearchStudy resources and assemble the FHIR resources (ResearchStudy, Group, one Library per
+/// Backs the admin-only Criteria Manager page: lets an admin browse existing ResearchStudy and
+/// Library resources, and assemble the FHIR resources (ResearchStudy, Group, one Library per
 /// criterion) that a study's eligibility criteria would consist of, per
-/// docs/trino/eligibility-criteria-design.md. Nothing here is persisted - actually creating these
-/// resources against the FHIR server is a separate, not-yet-built step; this only builds and
-/// serializes a preview so an admin can inspect/copy the result.
+/// docs/trino/eligibility-criteria-design.md. The authoring side is not persisted - actually
+/// creating these resources against the FHIR server is a separate, not-yet-built step; that part
+/// only builds and serializes a preview so an admin can inspect/copy the result.
 /// </summary>
 public sealed class EligibilityCriteriaService(
     FhirClientFactory clientFactory,
@@ -22,6 +22,16 @@ public sealed class EligibilityCriteriaService(
     ILogger<EligibilityCriteriaService> logger
 )
 {
+    /// <summary>
+    /// Library.type coding that marks a Library as SQL-on-FHIR eligibility-criterion SQL, as
+    /// opposed to any other kind of Library resource a FHIR server might hold - see
+    /// query-sql-on-fhir's PollForStudies.SQL_QUERY_LIBRARY_TYPE_SYSTEM/_CODE, which writes this
+    /// same coding.
+    /// </summary>
+    private const string SqlQueryLibraryTypeSystem =
+        "https://sql-on-fhir.org/ig/CodeSystem/LibraryTypesCodes";
+    private const string SqlQueryLibraryTypeCode = "sql-query";
+
     public async Task<IReadOnlyList<ResearchStudySummaryDto>> SearchResearchStudiesAsync(
         CancellationToken ct = default
     )
@@ -52,6 +62,89 @@ public sealed class EligibilityCriteriaService(
             .OrderBy(s => s.Acronym ?? s.Title ?? s.Id, StringComparer.OrdinalIgnoreCase)
             .ToList();
     }
+
+    /// <summary>
+    /// Lists every Library resource on the FHIR server (the eligibility-criterion catalog), each
+    /// with its decoded SQL and the display names of any ResearchStudy(ies) currently referencing
+    /// it (via that study's enrolled Group.characteristic) - resolved by fetching all Group and
+    /// ResearchStudy resources and joining in memory, same "fetch + aggregate in C#" convention
+    /// used elsewhere in this app. Fine at this app's scale; would need real search-parameter
+    /// support (chained search) to stay cheap at a much larger resource count.
+    /// </summary>
+    public async Task<IReadOnlyList<LibrarySummaryDto>> SearchLibrariesAsync(
+        CancellationToken ct = default
+    )
+    {
+        var client = clientFactory.CreateClient();
+
+        List<Resource> libraries;
+        List<Resource> groups;
+        List<Resource> studies;
+        try
+        {
+            libraries = await FhirBundleHelpers.GetAllPagesAsync(
+                client,
+                $"Library?type={Uri.EscapeDataString($"{SqlQueryLibraryTypeSystem}|{SqlQueryLibraryTypeCode}")}"
+                    + "&_count=100&_sort=-_lastUpdated",
+                ct
+            );
+            groups = await FhirBundleHelpers.GetAllPagesAsync(client, "Group?_count=100", ct);
+            studies = await FhirBundleHelpers.GetAllPagesAsync(
+                client,
+                "ResearchStudy?_count=100",
+                ct
+            );
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to search Library resources");
+            throw new FhirAccessException(localizer["App.Errors.LibrariesLoadFailed"], ex);
+        }
+
+        var studiesByGroupId = studies
+            .OfType<ResearchStudy>()
+            .SelectMany(s => s.Enrollment.Select(e => (Study: s, GroupId: e.GetReferencedId())))
+            .Where(x => x.GroupId is not null)
+            .ToLookup(x => x.GroupId!, x => x.Study);
+
+        var studyNamesByLibraryId = groups
+            .OfType<Group>()
+            .Where(g => g.Id is not null)
+            .SelectMany(g =>
+                g.Characteristic.Select(c => (c.Value as ResourceReference).GetReferencedId())
+                    .Where(libraryId => libraryId is not null)
+                    .SelectMany(libraryId =>
+                        studiesByGroupId[g.Id!]
+                            .Select(study => (LibraryId: libraryId!, Study: study))
+                    )
+            )
+            .ToLookup(x => x.LibraryId, x => StudyDisplayName(x.Study));
+
+        return libraries
+            .OfType<Library>()
+            .Where(l => l.Id is not null)
+            .Select(l => new LibrarySummaryDto(
+                l.Id!,
+                l.Title,
+                l.Name,
+                l.Description,
+                l.Status?.ToString(),
+                l.GetSqlText(),
+                l.Meta?.LastUpdated,
+                [
+                    .. studyNamesByLibraryId[l.Id!]
+                        .Distinct()
+                        .OrderBy(n => n, StringComparer.OrdinalIgnoreCase),
+                ]
+            ))
+            .OrderBy(l => l.Title ?? l.Id, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    private static string StudyDisplayName(ResearchStudy study) =>
+        study.GetStudyAcronym() is { Length: > 0 } acronym
+            ? acronym
+            : study.Title ?? study.Id ?? "?";
 
     /// <summary>
     /// Assembles the draft into a preview-only FHIR transaction Bundle and serializes it to

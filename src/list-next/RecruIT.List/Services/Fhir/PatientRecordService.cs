@@ -78,20 +78,31 @@ public sealed class PatientRecordService(
     {
         var client = clientFactory.CreateClient();
 
-        List<Resource> resources;
+        // Deliberately a single-page fetch, not FhirBundleHelpers.GetAllPagesAsync: _count=5
+        // + _sort=-date already gives us the only encounters we could ever use (we return on the
+        // first one with a usable location), and a FHIR server re-runs _include=Encounter:location
+        // on every page it emits - so following "next" links here would re-add the same Location
+        // resources already seen on an earlier page, and the OfType<Location>().ToDictionary(...)
+        // below would throw on the resulting duplicate id the moment a patient's encounters span
+        // more than one page and share a location (common - that's most patients).
+        Bundle? bundle;
         try
         {
-            resources = await FhirBundleHelpers.GetAllPagesAsync(
-                client,
-                $"Encounter?subject=Patient/{patientId}&_count=5&_include=Encounter:location&_sort=-date&_pretty=false",
-                ct
-            );
+            bundle =
+                await client.GetAsync(
+                    $"Encounter?subject=Patient/{patientId}&_count=5&_include=Encounter:location&_sort=-date&_pretty=false",
+                    ct
+                ) as Bundle;
         }
         catch (Exception ex)
         {
             logger.LogWarning(ex, "Failed to fetch encounters for Patient/{PatientId}", patientId);
             return null;
         }
+
+        var resources =
+            bundle?.Entry.Where(e => e.Resource is not null).Select(e => e.Resource!).ToList()
+            ?? [];
 
         var locationsById = resources
             .OfType<Location>()

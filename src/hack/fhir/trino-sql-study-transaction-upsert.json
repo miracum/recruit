@@ -106,6 +106,9 @@
           }
         ],
         "status": "active",
+        "title": "Bronchitis diagnosis",
+        "name": "bronchitis",
+        "description": "Active bronchitis diagnosis (SNOMED CT code 10509002).",
         "type": {
           "coding": [
             {
@@ -143,6 +146,9 @@
             "value": "age-over-18"
           }
         ],
+        "title": "Age over 18",
+        "name": "age-over-18",
+        "description": "Patient is over 18 years old.",
         "status": "active",
         "type": {
           "coding": [
@@ -181,6 +187,9 @@
             "value": "sepsis"
           }
         ],
+        "title": "Sepsis condition",
+        "name": "sepsis",
+        "description": "Active sepsis condition (SNOMED CT code 91302008) documented at any time.",
         "status": "active",
         "type": {
           "coding": [
