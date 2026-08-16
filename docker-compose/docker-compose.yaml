@@ -15,10 +15,10 @@ services:
       - "host.docker.internal:host-gateway"
     environment:
       Fhir__BaseUrl: ${FHIR_URL:?}
-      Auth__Disabled: ${AUTH_DISABLED:-false}
-      Oidc__Authority: ${OIDC_AUTHORITY:?}
-      Oidc__ClientId: ${OIDC_CLIENT_ID:?}
-      Oidc__ClientSecret: ${OIDC_CLIENT_SECRET:?}
+      Auth__Disabled: ${AUTH_DISABLED:-true}
+      Oidc__Authority: ${OIDC_AUTHORITY:-}
+      Oidc__ClientId: ${OIDC_CLIENT_ID:-}
+      Oidc__ClientSecret: ${OIDC_CLIENT_SECRET:-}
       Oidc__RoleClaimType: ${OIDC_ROLE_CLAIM_TYPE:-role}
       RulesFilePath: /etc/rules.yaml
     volumes:
