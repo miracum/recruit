@@ -13,7 +13,7 @@ public static class FhirConstants
         RecruIT.FhirConstants.Recruit.Extensions.Urls.ScreeningListBelongsToStudy;
 
     public static string UrlResearchSubjectIdentifier =>
-        RecruIT.FhirConstants.Recruit.NamingSystems.ResearchSubjectId.UniqueId.Uri;
+        RecruIT.FhirConstants.Recruit.NamingSystems.ResearchSubjectId.Uri;
 
     public const string SystemIdentifierType = "http://terminology.hl7.org/CodeSystem/v2-0203";
     public const string IdentifierTypeMedicalRecordNumber = "MR";

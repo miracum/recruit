@@ -12,8 +12,9 @@ Lives under `src/list-next/` alongside `RecruIT.List/` and `RecruIT.List.Tests/`
 context wouldn't resolve during `docker build`.
 
 `io.github.diz-uker.ig-codegen-core` is only needed at generation time, not at compile/runtime -
-it's a `PackageReference` of the `Generate` console project (see `Generate/Generate.csproj`), not
-of this library itself, so it doesn't end up on `RecruIT.List`'s dependency graph. The generated
+it's a `#:package` reference of `Generate/Program.cs`, a standalone
+[file-based app](https://aka.ms/dotnet/file-based-apps) (no `.csproj` of its own), not of this
+library itself, so it doesn't end up on `RecruIT.List`'s dependency graph. The generated
 code does carry one real runtime dependency, though: `Hl7.Fhir.R4` - the
 `ScreeningListType`/`EligibilityObservationCategory` enums' `Coding()` accessors return a
 `Hl7.Fhir.Model.Coding`, and `Extensions.ScreeningListBelongsToStudy(...)` returns a
@@ -27,10 +28,11 @@ Not published as a NuGet package - referenced directly via `ProjectReference` fr
 The recruIT IG isn't published to a FHIR package registry, so there's no restorable package
 cache here (unlike `ig-codegen`'s own CLI entry point, which is built around that model, and which
 `../../fhir-ig-constants-cs` in the diz-uker/to-fhir repo uses for the externally-published MII
-Kerndatensatz) - `GenerateIgConstants` (see `RecruIT.FhirConstants.csproj`) instead runs a small local
-console project (`Generate/`) that scans `fhir/ig/fsh-generated/resources` directly, via
-`io.github.diz-uker.ig-codegen-core`'s lower-level `IgPackageScanner`/`CSharpConstantsGenerator`
-API - the same directory `sushi` builds locally from `fhir/ig/input/fsh`.
+Kerndatensatz) - `GenerateIgConstants` (see `RecruIT.FhirConstants.csproj`) instead runs
+`Generate/Program.cs` (via `dotnet run --file`) that scans `fhir/ig/fsh-generated/resources`
+directly, via `io.github.diz-uker.ig-codegen-core`'s lower-level
+`IgPackageScanner`/`CSharpConstantsGenerator` API - the same directory `sushi` builds locally from
+`fhir/ig/input/fsh`.
 
 1. From the repo root, run `npx fsh-sushi fhir/ig --snapshot` to (re-)generate
    `fhir/ig/fsh-generated/resources`.

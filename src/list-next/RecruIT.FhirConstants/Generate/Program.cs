@@ -1,3 +1,6 @@
+#:package io.github.diz-uker.ig-codegen-core
+#:property PublishAot=false
+
 using IgCodegen;
 
 string resourcesDir = args.Length > 0 ? args[0] : "../../../../fhir/ig/fsh-generated/resources";

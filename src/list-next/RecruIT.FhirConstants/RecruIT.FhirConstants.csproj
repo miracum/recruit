@@ -1,14 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Generate/ is a separate dev-tool console project (see GenerateIgConstants below), not part
-         of this library's own compile. -->
+    <!-- Generate/Program.cs is a standalone file-based app (see GenerateIgConstants below), not
+         part of this library's own compile. -->
     <Compile Remove="Generate/**/*.cs" />
     <Content Remove="Generate/**" />
     <None Remove="Generate/**" />
@@ -19,23 +16,24 @@
          Coding() accessor returns a Hl7.Fhir.Model.Coding, and Extensions get factory methods
          returning Hl7.Fhir.Model.Extension - part of the public API generated into src/, so this
          needs to be a regular PackageReference rather than scoped to the generator only. -->
-    <PackageReference Include="Hl7.Fhir.R4" Version="6.4.0" />
+    <PackageReference Include="Hl7.Fhir.R4" />
   </ItemGroup>
 
   <!--
     Manually-invoked "generate, review, commit" dev tool - not a build-graph participant. See
     README.md for the rationale. Scans fhir/ig/fsh-generated/resources directly via
     ig-codegen-core's lower-level IgPackageScanner/CSharpConstantsGenerator API (see
-    Generate/Program.cs), rather than the ig-codegen CLI tool, which expects a package.json plus a
-    restored FHIR package cache - there's nothing to restore for an IG that isn't published to a
-    package registry; sushi's own output is the only copy.
+    Generate/Program.cs, a file-based app - see https://aka.ms/dotnet/file-based-apps - rather than
+    a separate project file), rather than the ig-codegen CLI tool, which expects a package.json
+    plus a restored FHIR package cache - there's nothing to restore for an IG that isn't published
+    to a package registry; sushi's own output is the only copy.
   -->
   <Target Name="GenerateIgConstants">
     <PropertyGroup>
       <_ResourcesDir>$(MSBuildThisFileDirectory)../../../fhir/ig/fsh-generated/resources</_ResourcesDir>
       <_OutputDir>$(MSBuildThisFileDirectory)src</_OutputDir>
-      <_GeneratorProject>$(MSBuildThisFileDirectory)Generate/Generate.csproj</_GeneratorProject>
+      <_GeneratorFile>$(MSBuildThisFileDirectory)Generate/Program.cs</_GeneratorFile>
     </PropertyGroup>
-    <Exec Command="dotnet run --project &quot;$(_GeneratorProject)&quot; -- &quot;$(_ResourcesDir)&quot; &quot;$(_OutputDir)&quot;" />
+    <Exec Command="dotnet run --file &quot;$(_GeneratorFile)&quot; -- &quot;$(_ResourcesDir)&quot; &quot;$(_OutputDir)&quot;" />
   </Target>
 </Project>

@@ -77,56 +77,41 @@ public static class Recruit
         /// <summary>The identifier system for a per-criterion eligibility Observation's business identifier. Derived from the ResearchSubject identifier and the Library identifier of the eligibility criterion.</summary>
         public static class EligibilityAssessmentId
         {
-            public static class UniqueId
-            {
-                /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/eligibility-assessment-id</c></summary>
-                public static string Uri =>
-                    "https://miracum.github.io/recruit/fhir/identifiers/eligibility-assessment-id";
-            }
+            /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/eligibility-assessment-id</c></summary>
+            public static string Uri =>
+                "https://miracum.github.io/recruit/fhir/identifiers/eligibility-assessment-id";
         }
 
         /// <summary>The identifier system for the Group containing references to one or more eligibility criteria Library resources</summary>
         public static class EligibilityGroupId
         {
-            public static class UniqueId
-            {
-                /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/eligibility-group-id</c></summary>
-                public static string Uri =>
-                    "https://miracum.github.io/recruit/fhir/identifiers/eligibility-group-id";
-            }
+            /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/eligibility-group-id</c></summary>
+            public static string Uri =>
+                "https://miracum.github.io/recruit/fhir/identifiers/eligibility-group-id";
         }
 
         /// <summary>The identifier system for a criterion expressed in a Library resource</summary>
         public static class EligibilityLibraryId
         {
-            public static class UniqueId
-            {
-                /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/eligibility-library-id</c></summary>
-                public static string Uri =>
-                    "https://miracum.github.io/recruit/fhir/identifiers/eligibility-library-id";
-            }
+            /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/eligibility-library-id</c></summary>
+            public static string Uri =>
+                "https://miracum.github.io/recruit/fhir/identifiers/eligibility-library-id";
         }
 
         /// <summary>The identifier system for a recruIT-created ResearchSubject's business identifier</summary>
         public static class ResearchSubjectId
         {
-            public static class UniqueId
-            {
-                /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/research-subject-id</c></summary>
-                public static string Uri =>
-                    "https://miracum.github.io/recruit/fhir/identifiers/research-subject-id";
-            }
+            /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/research-subject-id</c></summary>
+            public static string Uri =>
+                "https://miracum.github.io/recruit/fhir/identifiers/research-subject-id";
         }
 
         /// <summary>The identifier system for a screening List's business identifier, which is the study's own identifier - used as the conditional-update key for a study's screening List.</summary>
         public static class ScreeningListId
         {
-            public static class UniqueId
-            {
-                /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/screening-list-id</c></summary>
-                public static string Uri =>
-                    "https://miracum.github.io/recruit/fhir/identifiers/screening-list-id";
-            }
+            /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/screening-list-id</c></summary>
+            public static string Uri =>
+                "https://miracum.github.io/recruit/fhir/identifiers/screening-list-id";
         }
     }
 }

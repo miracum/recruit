@@ -15,6 +15,7 @@
         },
         "charts/recruit/values.yaml",
         "src/list/Dockerfile",
+        "src/list-next/Directory.Build.props",
         "src/buildSrc/src/main/groovy/org.miracum.recruit.java-common-conventions.gradle",
         "src/notify/src/main/resources/application.yml",
         "src/query/src/main/resources/application.yml",

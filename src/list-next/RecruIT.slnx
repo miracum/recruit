@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="RecruIT.FhirConstants/RecruIT.FhirConstants.csproj" />
+  <Project Path="RecruIT.List.Tests/RecruIT.List.Tests.csproj" />
+  <Project Path="RecruIT.List/RecruIT.List.csproj" />
+</Solution>
