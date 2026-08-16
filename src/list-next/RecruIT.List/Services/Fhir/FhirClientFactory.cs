@@ -1,6 +1,6 @@
 using Hl7.Fhir.Rest;
-using RecruIT.List.Options;
 using Microsoft.Extensions.Options;
+using RecruIT.List.Options;
 
 namespace RecruIT.List.Services.Fhir;
 

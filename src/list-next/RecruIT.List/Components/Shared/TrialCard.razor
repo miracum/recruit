@@ -5,6 +5,7 @@
         <BbCardHeader>
             <div class="flex items-center justify-between gap-2">
                 <BbCardTitle>@Trial.StudyAcronym</BbCardTitle>
+                <BbCardDescription>@Trial.StudyTitle</BbCardDescription>
                 <BbBadge Variant="@(IsActive ? BadgeVariant.Secondary : BadgeVariant.Outline)">
                     @(IsActive ? Localizer["App.Dashboard.ActiveTab"] : Localizer["App.Dashboard.InactiveTab"])
                 </BbBadge>

@@ -3,11 +3,11 @@ using System.Security.Claims;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
 using Hl7.Fhir.Utility;
+using Microsoft.Extensions.Localization;
 using RecruIT.List.Models;
 using RecruIT.List.Resources;
 using RecruIT.List.Services;
 using RecruIT.List.Services.Access;
-using Microsoft.Extensions.Localization;
 using Task = System.Threading.Tasks.Task;
 
 namespace RecruIT.List.Services.Fhir;

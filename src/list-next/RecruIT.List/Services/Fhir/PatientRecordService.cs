@@ -1,7 +1,7 @@
 using Hl7.Fhir.Model;
+using Microsoft.Extensions.Localization;
 using RecruIT.List.Models;
 using RecruIT.List.Resources;
-using Microsoft.Extensions.Localization;
 
 namespace RecruIT.List.Services.Fhir;
 

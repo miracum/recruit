@@ -1,5 +1,5 @@
-using RecruIT.List.Resources;
 using Microsoft.Extensions.Localization;
+using RecruIT.List.Resources;
 
 namespace RecruIT.List.Tests;
 

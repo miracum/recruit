@@ -1,7 +1,7 @@
 using System.Security.Claims;
-using RecruIT.List.Data;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.EntityFrameworkCore;
+using RecruIT.List.Data;
 
 namespace RecruIT.List.Services.Auth;
 

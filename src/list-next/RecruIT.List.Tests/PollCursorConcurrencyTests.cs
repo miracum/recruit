@@ -1,7 +1,7 @@
+using Microsoft.EntityFrameworkCore;
 using RecruIT.List.Data;
 using RecruIT.List.Data.Entities;
 using RecruIT.List.Models;
-using Microsoft.EntityFrameworkCore;
 using Testcontainers.PostgreSql;
 
 namespace RecruIT.List.Tests;

@@ -1,6 +1,14 @@
 using BlazorBlueprint.Components;
 using Hangfire;
 using Hangfire.PostgreSql;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Npgsql;
+using OpenTelemetry.Metrics;
 using RecruIT.List.Components;
 using RecruIT.List.Data;
 using RecruIT.List.Models;
@@ -13,14 +21,6 @@ using RecruIT.List.Services.Localization;
 using RecruIT.List.Services.Navigation;
 using RecruIT.List.Services.Notifications;
 using RecruIT.List.Services.Notify;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.AspNetCore.Localization;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Npgsql;
-using OpenTelemetry.Metrics;
 
 var builder = WebApplication.CreateBuilder(args);
 

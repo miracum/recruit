@@ -68,10 +68,8 @@ internal static class FhirBundleHelpers
             ? $"{system}|{value}"
             : null;
 
-    public static string? GetStudyAcronym(this ResearchStudy study) =>
-        study.GetMiiExStudieAkronym()?.Value is { Length: > 0 } acronym
-            ? acronym
-            : study.Title ?? study.Id;
+    public static string GetStudyAcronym(this ResearchStudy study) =>
+        study.GetMiiExStudieAkronym()?.Value is { Length: > 0 } acronym ? acronym : string.Empty;
 
     /// <summary>Decodes a criterion Library's SQL source from its content attachment.</summary>
     public static string? GetSqlText(this Library library) =>
@@ -84,8 +82,8 @@ internal static class FhirBundleHelpers
 
     private static bool IsMedicalRecordNumber(Identifier identifier) =>
         identifier.Type?.Coding.Any(c =>
-            c.System == RecruIT.List.Services.Fhir.FhirConstants.SystemIdentifierType
-            && c.Code == RecruIT.List.Services.Fhir.FhirConstants.IdentifierTypeMedicalRecordNumber
+            c.System == FhirConstants.SystemIdentifierType
+            && c.Code == FhirConstants.IdentifierTypeMedicalRecordNumber
         )
             is true;
 }

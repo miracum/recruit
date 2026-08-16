@@ -1,6 +1,6 @@
 using System;
-using RecruIT.List.Models;
 using Microsoft.EntityFrameworkCore.Migrations;
+using RecruIT.List.Models;
 
 #nullable disable
 

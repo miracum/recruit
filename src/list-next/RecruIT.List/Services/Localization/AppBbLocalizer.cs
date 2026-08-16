@@ -1,6 +1,6 @@
 using BlazorBlueprint.Components;
-using RecruIT.List.Resources;
 using Microsoft.Extensions.Localization;
+using RecruIT.List.Resources;
 
 namespace RecruIT.List.Services.Localization;
 

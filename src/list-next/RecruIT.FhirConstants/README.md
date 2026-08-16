@@ -34,8 +34,21 @@ directly, via `io.github.diz-uker.ig-codegen-core`'s lower-level
 `IgPackageScanner`/`CSharpConstantsGenerator` API - the same directory `sushi` builds locally from
 `fhir/ig/input/fsh`.
 
-1. From the repo root, run `npx fsh-sushi fhir/ig --snapshot` to (re-)generate
-   `fhir/ig/fsh-generated/resources`.
+1. From the repo root, run the following to (re-)generate `fhir/ig/fsh-generated/resources`. This
+   uses the same `ig-build-tools` image (and thus the same SUSHI build) as
+   `.github/workflows/validate-fhir-resources.yaml`, rather than whatever version `npx` happens to
+   resolve as latest:
+
+   ```bash
+   docker run --rm \
+     --user "$(id -u):$(id -g)" \
+     -e HOME=/tmp \
+     -v "$PWD:/opt/ig-build-tools/workspace" \
+     -w /opt/ig-build-tools/workspace \
+     --entrypoint sushi \
+     ghcr.io/miracum/ig-build-tools:v2.2.47 \
+     --snapshot fhir/ig
+   ```
 2. Run
    `dotnet build src/list-next/RecruIT.FhirConstants/RecruIT.FhirConstants.csproj -t:GenerateIgConstants`.
 3. Review the diff in `src/`, commit it.

@@ -2,10 +2,10 @@ using System.Security.Claims;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
 using Hl7.Fhir.Utility;
+using Microsoft.Extensions.Localization;
 using RecruIT.List.Models;
 using RecruIT.List.Resources;
 using RecruIT.List.Services.Access;
-using Microsoft.Extensions.Localization;
 using FhirList = Hl7.Fhir.Model.List;
 using Task = System.Threading.Tasks.Task;
 
@@ -82,11 +82,19 @@ public sealed class ScreeningListService(
                         : null;
                 var status = subject is not null ? EnumUtility.GetLiteral(subject.Status) : null;
 
-                if (status is not null && RecruIT.List.Services.Fhir.FhirConstants.RecruitedStatuses.Contains(status))
+                if (
+                    status is not null
+                    && RecruIT.List.Services.Fhir.FhirConstants.RecruitedStatuses.Contains(status)
+                )
                 {
                     recruited++;
                 }
-                else if (status is not null && RecruIT.List.Services.Fhir.FhirConstants.NotRecruitedStatuses.Contains(status))
+                else if (
+                    status is not null
+                    && RecruIT.List.Services.Fhir.FhirConstants.NotRecruitedStatuses.Contains(
+                        status
+                    )
+                )
                 {
                     notRecruited++;
                 }
@@ -103,7 +111,8 @@ public sealed class ScreeningListService(
                     TrialIdentifier = trialIdentifier!,
                     StudyAcronym = acronym,
                     ListStatus =
-                        EnumUtility.GetLiteral(list.Status) ?? RecruIT.List.Services.Fhir.FhirConstants.ListStatusCurrent,
+                        EnumUtility.GetLiteral(list.Status)
+                        ?? RecruIT.List.Services.Fhir.FhirConstants.ListStatusCurrent,
                     RecruitedCount = recruited,
                     PendingCount = pending,
                     NotRecruitedCount = notRecruited,
@@ -209,8 +218,15 @@ public sealed class ScreeningListService(
                         : null;
                 var isFlaggedIneligible =
                     entry.Flag?.Coding?.Any(c =>
-                        c.System == RecruIT.List.Services.Fhir.FhirConstants.SystemDeterminedSubjectStatus
-                        && c.Code == RecruIT.List.Services.Fhir.FhirConstants.DeterminedStatusIneligible
+                        c.System
+                            == RecruIT
+                                .List
+                                .Services
+                                .Fhir
+                                .FhirConstants
+                                .SystemDeterminedSubjectStatus
+                        && c.Code
+                            == RecruIT.List.Services.Fhir.FhirConstants.DeterminedStatusIneligible
                     ) ?? false;
 
                 overview.Trials.Add(
@@ -371,11 +387,7 @@ public sealed class ScreeningListService(
     public async Task<(
         TrialSummaryDto Summary,
         IReadOnlyList<PatientListEntryDto> Patients
-    )> GetListWithPatientsAsync(
-        string listId,
-        ClaimsPrincipal user,
-        CancellationToken ct = default
-    )
+    )> GetListWithPatientsAsync(string listId, ClaimsPrincipal user, CancellationToken ct = default)
     {
         var client = clientFactory.CreateClient();
 
@@ -468,7 +480,8 @@ public sealed class ScreeningListService(
                 entry.Date is { } d && DateTimeOffset.TryParse(d, out var parsed) ? parsed : null;
             var isFlaggedIneligible =
                 entry.Flag?.Coding?.Any(c =>
-                    c.System == RecruIT.List.Services.Fhir.FhirConstants.SystemDeterminedSubjectStatus
+                    c.System
+                        == RecruIT.List.Services.Fhir.FhirConstants.SystemDeterminedSubjectStatus
                     && c.Code == RecruIT.List.Services.Fhir.FhirConstants.DeterminedStatusIneligible
                 ) ?? false;
 
@@ -525,7 +538,9 @@ public sealed class ScreeningListService(
             StudyTitle = study?.Title,
             StudyDescription = study?.Description,
             Criteria = criteria,
-            ListStatus = EnumUtility.GetLiteral(list.Status) ?? RecruIT.List.Services.Fhir.FhirConstants.ListStatusCurrent,
+            ListStatus =
+                EnumUtility.GetLiteral(list.Status)
+                ?? RecruIT.List.Services.Fhir.FhirConstants.ListStatusCurrent,
             RecruitedCount = recruited,
             PendingCount = pending,
             NotRecruitedCount = notRecruited,
@@ -583,7 +598,7 @@ public sealed class ScreeningListService(
         var result = new Dictionary<string, TrialInfo>();
         foreach (var list in lists)
         {
-            var studyId = list.GetReferenceExtension(RecruIT.List.Services.Fhir.FhirConstants.UrlListBelongsToStudy)
+            var studyId = list.GetReferenceExtension(FhirConstants.UrlListBelongsToStudy)
                 ?.GetReferencedId();
             if (
                 list.Id is null

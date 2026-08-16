@@ -2,9 +2,9 @@ using System.Text;
 using De.Medizininformatikinitiative.Kerndatensatz.Studie;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
+using Microsoft.Extensions.Localization;
 using RecruIT.List.Models;
 using RecruIT.List.Resources;
-using Microsoft.Extensions.Localization;
 
 namespace RecruIT.List.Services.Fhir;
 

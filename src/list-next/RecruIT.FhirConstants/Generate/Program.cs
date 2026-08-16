@@ -8,5 +8,10 @@ string outputDir = args.Length > 1 ? args[1] : "../src";
 
 var scanner = new IgPackageScanner();
 var model = scanner.Scan(resourcesDir, "io.github.miracum.recruit", "0.1.0");
-string generated = CSharpConstantsGenerator.WriteTo(model, "RecruIT.FhirConstants", "Recruit", outputDir);
+string generated = CSharpConstantsGenerator.WriteTo(
+    model,
+    "RecruIT.FhirConstants",
+    "Recruit",
+    outputDir
+);
 Console.WriteLine($"Generated {generated}");

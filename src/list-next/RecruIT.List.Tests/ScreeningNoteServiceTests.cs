@@ -1,9 +1,9 @@
 using System.Security.Claims;
+using Microsoft.Extensions.Logging.Abstractions;
 using RecruIT.List.Data.Entities;
 using RecruIT.List.Models;
 using RecruIT.List.Services;
 using RecruIT.List.Services.Access;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace RecruIT.List.Tests;
 

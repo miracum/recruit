@@ -1,12 +1,12 @@
 using System.Net;
 using Hl7.Fhir.Model;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Mjml.Net;
 using RecruIT.List.Data;
 using RecruIT.List.Models;
 using RecruIT.List.Options;
 using RecruIT.List.Services.Fhir;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Mjml.Net;
 using FhirList = Hl7.Fhir.Model.List;
 using NotificationChannel = RecruIT.List.Models.NotificationChannel;
 using Task = System.Threading.Tasks.Task;
@@ -46,7 +46,9 @@ public sealed class NotificationDeliveryService(
             return;
         }
 
-        var studyId = list.GetReferenceExtension(RecruIT.List.Services.Fhir.FhirConstants.UrlListBelongsToStudy)
+        var studyId = list.GetReferenceExtension(
+                RecruIT.List.Services.Fhir.FhirConstants.UrlListBelongsToStudy
+            )
             ?.GetReferencedId();
         var study = studyId is not null
             ? await client.ReadAsync<ResearchStudy>($"ResearchStudy/{studyId}", ct: ct)

@@ -1,5 +1,5 @@
-using RecruIT.List.Models;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using RecruIT.List.Models;
 
 namespace RecruIT.List.Services.Notifications;
 

@@ -1,10 +1,10 @@
 using Hangfire;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using RecruIT.List.Data;
 using RecruIT.List.Data.Entities;
 using RecruIT.List.Options;
 using RecruIT.List.Services.Fhir;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using FhirList = Hl7.Fhir.Model.List;
 
 namespace RecruIT.List.Services.Notify;

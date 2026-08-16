@@ -1,6 +1,6 @@
-using RecruIT.List.Data;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using RecruIT.List.Data;
 
 namespace RecruIT.List.Tests;
 

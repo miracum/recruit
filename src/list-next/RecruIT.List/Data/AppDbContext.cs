@@ -1,5 +1,5 @@
-using RecruIT.List.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using RecruIT.List.Data.Entities;
 
 namespace RecruIT.List.Data;
 

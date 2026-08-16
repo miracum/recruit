@@ -1,8 +1,8 @@
-using RecruIT.List.Options;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using RecruIT.List.Options;
 
 namespace RecruIT.List.Services.Notify;
 
