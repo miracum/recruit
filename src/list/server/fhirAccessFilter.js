@@ -7,7 +7,8 @@ export const logger = pino({
 
 // keep in sync with recruit's fhir/ig - see the fhir-constants module (Recruit.Extensions.screeningListBelongsToStudy())
 // and frontend/src/const.js's URL_LIST_BELONGS_TO_STUDY_EXTENSION
-const URL_LIST_BELONGS_TO_STUDY_EXTENSION = "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study";
+const URL_LIST_BELONGS_TO_STUDY_EXTENSION =
+  "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study";
 
 const getAccessibleStudyAcronymsForUser = (user, trialsConfig) => {
   const accessibleStudyAcronyms = [];

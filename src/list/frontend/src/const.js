@@ -8,7 +8,8 @@ export default {
   URL_NOTE_EXTENSION: "https://fhir.miracum.org/uc1/StructureDefinition/researchSubjectNote",
   // keep in sync with recruit's fhir/ig - see the fhir-constants module (Recruit.Extensions.screeningListBelongsToStudy())
   // make sure to also update this in server/fhirAccessFilter.js
-  URL_LIST_BELONGS_TO_STUDY_EXTENSION: "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study",
+  URL_LIST_BELONGS_TO_STUDY_EXTENSION:
+    "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study",
   STATUS_TRANSLATION: {
     candidate: "Rekrutierungsvorschlag",
     screening: "Wird geprüft",
