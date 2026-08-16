@@ -74,8 +74,19 @@ output behind) and commit the result:
 
 ```sh
 rm -rf fhir/ig/fsh-generated
-npx fsh-sushi --snapshot fhir/ig
+docker run --rm \
+  --user "$(id -u):$(id -g)" \
+  -e HOME=/tmp \
+  -v "$PWD:/opt/ig-build-tools/workspace" \
+  -w /opt/ig-build-tools/workspace \
+  --entrypoint sushi \
+  ghcr.io/miracum/ig-build-tools:v2.2.47 \
+  --snapshot fhir/ig
 ```
+
+This uses the same `ig-build-tools` image (and thus the same SUSHI build) as
+`.github/workflows/validate-fhir-resources.yaml`, rather than whatever version `npx` happens to
+resolve as latest.
 
 Afterwards you can upload a sample study with the associated SQL-encoded criteria:
 

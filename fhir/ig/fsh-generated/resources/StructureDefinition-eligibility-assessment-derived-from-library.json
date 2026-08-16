@@ -56,8 +56,7 @@
             "severity": "error",
             "human": "Must have either extensions or value[x], not both",
             "expression": "extension.exists() != value.exists()",
-            "xpath": "exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])",
-            "source": "http://hl7.org/fhir/StructureDefinition/Extension"
+            "xpath": "exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"
           }
         ],
         "isModifier": false,
@@ -194,6 +193,8 @@
           }
         ],
         "fixedUri": "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library",
+        "isModifier": false,
+        "isSummary": false,
         "mapping": [
           {
             "identity": "rim",
@@ -221,9 +222,6 @@
             ]
           }
         ],
-        "condition": [
-          "ele-1"
-        ],
         "constraint": [
           {
             "key": "ele-1",
@@ -235,11 +233,8 @@
           }
         ],
         "isModifier": false,
+        "isSummary": false,
         "mapping": [
-          {
-            "identity": "rim",
-            "map": "n/a"
-          },
           {
             "identity": "rim",
             "map": "N/A"
