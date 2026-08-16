@@ -63,32 +63,28 @@
             "severity": "error",
             "human": "If the resource is contained in another resource, it SHALL NOT contain nested Resources",
             "expression": "contained.contained.empty()",
-            "xpath": "not(parent::f:contained and f:contained)",
-            "source": "http://hl7.org/fhir/StructureDefinition/DomainResource"
+            "xpath": "not(parent::f:contained and f:contained)"
           },
           {
             "key": "dom-3",
             "severity": "error",
             "human": "If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource",
             "expression": "contained.where((('#'+id in (%resource.descendants().reference | %resource.descendants().as(canonical) | %resource.descendants().as(uri) | %resource.descendants().as(url))) or descendants().where(reference = '#').exists() or descendants().where(as(canonical) = '#').exists() or descendants().where(as(canonical) = '#').exists()).not()).trace('unmatched', id).empty()",
-            "xpath": "not(exists(for $id in f:contained/*/f:id/@value return $contained[not(parent::*/descendant::f:reference/@value=concat('#', $contained/*/id/@value) or descendant::f:reference[@value='#'])]))",
-            "source": "http://hl7.org/fhir/StructureDefinition/DomainResource"
+            "xpath": "not(exists(for $id in f:contained/*/f:id/@value return $contained[not(parent::*/descendant::f:reference/@value=concat('#', $contained/*/id/@value) or descendant::f:reference[@value='#'])]))"
           },
           {
             "key": "dom-4",
             "severity": "error",
             "human": "If a resource is contained in another resource, it SHALL NOT have a meta.versionId or a meta.lastUpdated",
             "expression": "contained.meta.versionId.empty() and contained.meta.lastUpdated.empty()",
-            "xpath": "not(exists(f:contained/*/f:meta/f:versionId)) and not(exists(f:contained/*/f:meta/f:lastUpdated))",
-            "source": "http://hl7.org/fhir/StructureDefinition/DomainResource"
+            "xpath": "not(exists(f:contained/*/f:meta/f:versionId)) and not(exists(f:contained/*/f:meta/f:lastUpdated))"
           },
           {
             "key": "dom-5",
             "severity": "error",
             "human": "If a resource is contained in another resource, it SHALL NOT have a security label",
             "expression": "contained.meta.security.empty()",
-            "xpath": "not(exists(f:contained/*/f:meta/f:security))",
-            "source": "http://hl7.org/fhir/StructureDefinition/DomainResource"
+            "xpath": "not(exists(f:contained/*/f:meta/f:security))"
           },
           {
             "extension": [
@@ -105,8 +101,7 @@
             "severity": "warning",
             "human": "A resource should have narrative for robust management",
             "expression": "text.`div`.exists()",
-            "xpath": "exists(f:text/h:div)",
-            "source": "http://hl7.org/fhir/StructureDefinition/DomainResource"
+            "xpath": "exists(f:text/h:div)"
           }
         ],
         "isModifier": false,
@@ -258,10 +253,6 @@
             {
               "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
               "valueString": "Language"
-            },
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-isCommonBinding",
-              "valueBoolean": true
             }
           ],
           "strength": "preferred",
@@ -347,6 +338,16 @@
       {
         "id": "ResearchStudy.extension",
         "path": "ResearchStudy.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "description": "Extensions are always sliced by (at least) url",
+          "rules": "open"
+        },
         "short": "Additional content defined by implementations",
         "definition": "May be used to represent additional information that is not part of the basic definition of the resource. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
         "comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
@@ -396,6 +397,16 @@
       {
         "id": "ResearchStudy.modifierExtension",
         "path": "ResearchStudy.modifierExtension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "description": "Extensions are always sliced by (at least) url",
+          "rules": "open"
+        },
         "short": "Extensions that cannot be ignored",
         "definition": "May be used to represent additional information that is not part of the basic definition of the resource and that modifies the understanding of the element that contains it and/or the understanding of the containing element's descendants. Usually modifier elements provide negation or qualification. To make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.\n\nModifier extensions SHALL NOT change the meaning of any elements on Resource or DomainResource (including cannot change the meaning of modifierExtension itself).",
         "comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
@@ -462,6 +473,9 @@
             "code": "Identifier"
           }
         ],
+        "condition": [
+          "ele-1"
+        ],
         "constraint": [
           {
             "key": "ele-1",
@@ -475,6 +489,22 @@
         "isModifier": false,
         "isSummary": true,
         "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          },
+          {
+            "identity": "v2",
+            "map": "CX / EI (occasionally, more often EI maps to a resource id or a URL)"
+          },
+          {
+            "identity": "rim",
+            "map": "II - The Identifier class is a little looser than the v3 type II because it allows URIs as well as registered OIDs or GUIDs.  Also maps to Role[classCode=IDENT]"
+          },
+          {
+            "identity": "servd",
+            "map": "Identifier"
+          },
           {
             "identity": "clinicaltrials-gov",
             "map": "Organization's Unique Protocol ID; Secondary IDs"
@@ -498,6 +528,7 @@
         "path": "ResearchStudy.title",
         "short": "Name for this study",
         "definition": "A short, descriptive user-friendly label for the study.",
+        "comment": "Note that FHIR strings SHALL NOT exceed 1MB in size",
         "min": 0,
         "max": "1",
         "base": {
@@ -538,6 +569,7 @@
         "path": "ResearchStudy.protocol",
         "short": "Steps followed in executing study",
         "definition": "The set of steps expected to be performed as part of the execution of the study.",
+        "comment": "References SHALL be a reference to an actual FHIR resource, and SHALL be resolveable (allowing for access control, temporary unavailability, etc.). Resolution can be either by retrieval from the URL, or, where applicable by resource type, by treating an absolute reference as a canonical URL and looking it up in a local registry/repository.",
         "min": 0,
         "max": "*",
         "base": {
@@ -553,6 +585,9 @@
             ]
           }
         ],
+        "condition": [
+          "ele-1"
+        ],
         "constraint": [
           {
             "key": "ele-1",
@@ -561,11 +596,27 @@
             "expression": "hasValue() or (children().count() > id.count())",
             "xpath": "@value|f:*|h:div",
             "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          },
+          {
+            "key": "ref-1",
+            "severity": "error",
+            "human": "SHALL have a contained resource if a local reference is provided",
+            "expression": "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids'))",
+            "xpath": "not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])",
+            "source": "http://hl7.org/fhir/StructureDefinition/Reference"
           }
         ],
         "isModifier": false,
         "isSummary": true,
         "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          },
+          {
+            "identity": "rim",
+            "map": "The target of a resource reference is a RIM entry point (Act, Role, or Entity)"
+          },
           {
             "identity": "clinicaltrials-gov",
             "map": "Interventions; Arm/Intervention Cross-Reference"
@@ -585,6 +636,7 @@
         "path": "ResearchStudy.partOf",
         "short": "Part of larger study",
         "definition": "A larger research study of which this particular study is a component or step.",
+        "comment": "References SHALL be a reference to an actual FHIR resource, and SHALL be resolveable (allowing for access control, temporary unavailability, etc.). Resolution can be either by retrieval from the URL, or, where applicable by resource type, by treating an absolute reference as a canonical URL and looking it up in a local registry/repository.",
         "requirements": "Allows breaking a study into components (e.g. by study site) each with their own PI, status, enrollment, etc.",
         "alias": [
           "container"
@@ -604,6 +656,9 @@
             ]
           }
         ],
+        "condition": [
+          "ele-1"
+        ],
         "constraint": [
           {
             "key": "ele-1",
@@ -612,11 +667,27 @@
             "expression": "hasValue() or (children().count() > id.count())",
             "xpath": "@value|f:*|h:div",
             "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          },
+          {
+            "key": "ref-1",
+            "severity": "error",
+            "human": "SHALL have a contained resource if a local reference is provided",
+            "expression": "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids'))",
+            "xpath": "not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])",
+            "source": "http://hl7.org/fhir/StructureDefinition/Reference"
           }
         ],
         "isModifier": false,
         "isSummary": true,
         "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          },
+          {
+            "identity": "rim",
+            "map": "The target of a resource reference is a RIM entry point (Act, Role, or Entity)"
+          },
           {
             "identity": "BRIDG5.1",
             "map": "CompanionStudyRelationship"
@@ -688,6 +759,7 @@
         "path": "ResearchStudy.primaryPurposeType",
         "short": "treatment | prevention | diagnostic | supportive-care | screening | health-services-research | basic-science | device-feasibility",
         "definition": "The type of study based upon the intent of the study's activities. A classification of the intent of the study.",
+        "comment": "Not all terminology uses fit this general pattern. In some cases, models should not use CodeableConcept and use Coding directly and provide their own structure for managing text, codings, translations and the relationship between elements and pre- and post-coordination.",
         "min": 0,
         "max": "1",
         "base": {
@@ -699,6 +771,9 @@
           {
             "code": "CodeableConcept"
           }
+        ],
+        "condition": [
+          "ele-1"
         ],
         "constraint": [
           {
@@ -725,6 +800,22 @@
         },
         "mapping": [
           {
+            "identity": "rim",
+            "map": "n/a"
+          },
+          {
+            "identity": "v2",
+            "map": "CE/CNE/CWE"
+          },
+          {
+            "identity": "rim",
+            "map": "CD"
+          },
+          {
+            "identity": "orim",
+            "map": "fhir:CodeableConcept rdfs:subClassOf dt:CD"
+          },
+          {
             "identity": "BRIDG5.1",
             "map": "StudyProtocolVersion.primaryPurposeTypeCode"
           }
@@ -735,6 +826,7 @@
         "path": "ResearchStudy.phase",
         "short": "n-a | early-phase-1 | phase-1 | phase-1-phase-2 | phase-2 | phase-2-phase-3 | phase-3 | phase-4",
         "definition": "The stage in the progression of a therapy from initial experimental use in humans in clinical trials to post-market evaluation.",
+        "comment": "Not all terminology uses fit this general pattern. In some cases, models should not use CodeableConcept and use Coding directly and provide their own structure for managing text, codings, translations and the relationship between elements and pre- and post-coordination.",
         "min": 0,
         "max": "1",
         "base": {
@@ -746,6 +838,9 @@
           {
             "code": "CodeableConcept"
           }
+        ],
+        "condition": [
+          "ele-1"
         ],
         "constraint": [
           {
@@ -772,6 +867,22 @@
         },
         "mapping": [
           {
+            "identity": "rim",
+            "map": "n/a"
+          },
+          {
+            "identity": "v2",
+            "map": "CE/CNE/CWE"
+          },
+          {
+            "identity": "rim",
+            "map": "CD"
+          },
+          {
+            "identity": "orim",
+            "map": "fhir:CodeableConcept rdfs:subClassOf dt:CD"
+          },
+          {
             "identity": "clinicaltrials-gov",
             "map": "Study Phase"
           },
@@ -786,6 +897,7 @@
         "path": "ResearchStudy.category",
         "short": "Classifications for the study",
         "definition": "Codes categorizing the type of study such as investigational vs. observational, type of blinding, type of randomization, safety vs. efficacy, etc.",
+        "comment": "Not all terminology uses fit this general pattern. In some cases, models should not use CodeableConcept and use Coding directly and provide their own structure for managing text, codings, translations and the relationship between elements and pre- and post-coordination.",
         "min": 0,
         "max": "*",
         "base": {
@@ -797,6 +909,9 @@
           {
             "code": "CodeableConcept"
           }
+        ],
+        "condition": [
+          "ele-1"
         ],
         "constraint": [
           {
@@ -822,6 +937,22 @@
         },
         "mapping": [
           {
+            "identity": "rim",
+            "map": "n/a"
+          },
+          {
+            "identity": "v2",
+            "map": "CE/CNE/CWE"
+          },
+          {
+            "identity": "rim",
+            "map": "CD"
+          },
+          {
+            "identity": "orim",
+            "map": "fhir:CodeableConcept rdfs:subClassOf dt:CD"
+          },
+          {
             "identity": "clinicaltrials-gov",
             "map": "Study Type; Primary Purpose; Interventional Model; Masking; Allocation; study Classification; Observational Study Model; Time Perspective; Biospecimen Retention"
           },
@@ -836,6 +967,7 @@
         "path": "ResearchStudy.focus",
         "short": "Drugs, devices, etc. under study",
         "definition": "The medication(s), food(s), therapy(ies), device(s) or other concerns or interventions that the study is seeking to gain more information about.",
+        "comment": "Not all terminology uses fit this general pattern. In some cases, models should not use CodeableConcept and use Coding directly and provide their own structure for managing text, codings, translations and the relationship between elements and pre- and post-coordination.",
         "min": 0,
         "max": "*",
         "base": {
@@ -847,6 +979,9 @@
           {
             "code": "CodeableConcept"
           }
+        ],
+        "condition": [
+          "ele-1"
         ],
         "constraint": [
           {
@@ -872,6 +1007,22 @@
         },
         "mapping": [
           {
+            "identity": "rim",
+            "map": "n/a"
+          },
+          {
+            "identity": "v2",
+            "map": "CE/CNE/CWE"
+          },
+          {
+            "identity": "rim",
+            "map": "CD"
+          },
+          {
+            "identity": "orim",
+            "map": "fhir:CodeableConcept rdfs:subClassOf dt:CD"
+          },
+          {
             "identity": "clinicaltrials-gov",
             "map": "Focus of Study"
           },
@@ -890,6 +1041,7 @@
         "path": "ResearchStudy.condition",
         "short": "Condition being studied",
         "definition": "The condition that is the focus of the study.  For example, In a study to examine risk factors for Lupus, might have as an inclusion criterion \"healthy volunteer\", but the target condition code would be a Lupus SNOMED code.",
+        "comment": "Not all terminology uses fit this general pattern. In some cases, models should not use CodeableConcept and use Coding directly and provide their own structure for managing text, codings, translations and the relationship between elements and pre- and post-coordination.",
         "min": 0,
         "max": "*",
         "base": {
@@ -901,6 +1053,9 @@
           {
             "code": "CodeableConcept"
           }
+        ],
+        "condition": [
+          "ele-1"
         ],
         "constraint": [
           {
@@ -926,6 +1081,22 @@
           "valueSet": "http://hl7.org/fhir/ValueSet/condition-code"
         },
         "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          },
+          {
+            "identity": "v2",
+            "map": "CE/CNE/CWE"
+          },
+          {
+            "identity": "rim",
+            "map": "CD"
+          },
+          {
+            "identity": "orim",
+            "map": "fhir:CodeableConcept rdfs:subClassOf dt:CD"
+          },
           {
             "identity": "clinicaltrials-gov",
             "map": "Conditions"
@@ -957,6 +1128,9 @@
             "code": "ContactDetail"
           }
         ],
+        "condition": [
+          "ele-1"
+        ],
         "constraint": [
           {
             "key": "ele-1",
@@ -970,6 +1144,10 @@
         "isModifier": false,
         "isSummary": true,
         "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          },
           {
             "identity": "clinicaltrials-gov",
             "map": "Central Contact; Central Contact Backup; Overall Study Officials; Facility Contact & Backup (if Study tied to only one location); Investigators"
@@ -985,6 +1163,7 @@
         "path": "ResearchStudy.relatedArtifact",
         "short": "References and dependencies",
         "definition": "Citations, references and other related documents.",
+        "comment": "Each related artifact is either an attachment, or a reference to another knowledge resource, but not both.",
         "min": 0,
         "max": "*",
         "base": {
@@ -997,6 +1176,9 @@
             "code": "RelatedArtifact"
           }
         ],
+        "condition": [
+          "ele-1"
+        ],
         "constraint": [
           {
             "key": "ele-1",
@@ -1008,8 +1190,11 @@
           }
         ],
         "isModifier": false,
-        "isSummary": false,
         "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          },
           {
             "identity": "clinicaltrials-gov",
             "map": "Citations, Links, Available Study Data/Documents"
@@ -1025,6 +1210,7 @@
         "path": "ResearchStudy.keyword",
         "short": "Used to search for the study",
         "definition": "Key terms to aid in searching for or filtering the study.",
+        "comment": "Not all terminology uses fit this general pattern. In some cases, models should not use CodeableConcept and use Coding directly and provide their own structure for managing text, codings, translations and the relationship between elements and pre- and post-coordination.",
         "min": 0,
         "max": "*",
         "base": {
@@ -1036,6 +1222,9 @@
           {
             "code": "CodeableConcept"
           }
+        ],
+        "condition": [
+          "ele-1"
         ],
         "constraint": [
           {
@@ -1061,6 +1250,22 @@
         },
         "mapping": [
           {
+            "identity": "rim",
+            "map": "n/a"
+          },
+          {
+            "identity": "v2",
+            "map": "CE/CNE/CWE"
+          },
+          {
+            "identity": "rim",
+            "map": "CD"
+          },
+          {
+            "identity": "orim",
+            "map": "fhir:CodeableConcept rdfs:subClassOf dt:CD"
+          },
+          {
             "identity": "clinicaltrials-gov",
             "map": "Keywords"
           },
@@ -1075,6 +1280,7 @@
         "path": "ResearchStudy.location",
         "short": "Geographic region(s) for study",
         "definition": "Indicates a country, state or other region where the study is taking place.",
+        "comment": "Not all terminology uses fit this general pattern. In some cases, models should not use CodeableConcept and use Coding directly and provide their own structure for managing text, codings, translations and the relationship between elements and pre- and post-coordination.",
         "min": 0,
         "max": "*",
         "base": {
@@ -1086,6 +1292,9 @@
           {
             "code": "CodeableConcept"
           }
+        ],
+        "condition": [
+          "ele-1"
         ],
         "constraint": [
           {
@@ -1116,6 +1325,22 @@
         },
         "mapping": [
           {
+            "identity": "rim",
+            "map": "n/a"
+          },
+          {
+            "identity": "v2",
+            "map": "CE/CNE/CWE"
+          },
+          {
+            "identity": "rim",
+            "map": "CD"
+          },
+          {
+            "identity": "orim",
+            "map": "fhir:CodeableConcept rdfs:subClassOf dt:CD"
+          },
+          {
             "identity": "BRIDG5.1",
             "map": "StudyProtocolVersion.participatingLocationCode"
           }
@@ -1126,6 +1351,7 @@
         "path": "ResearchStudy.description",
         "short": "What this is study doing",
         "definition": "A full description of how the study is being conducted.",
+        "comment": "Systems are not required to have markdown support, so the text should be readable without markdown processing. The markdown syntax is GFM - see https://github.github.com/gfm/",
         "min": 0,
         "max": "1",
         "base": {
@@ -1185,6 +1411,9 @@
             ]
           }
         ],
+        "condition": [
+          "ele-1"
+        ],
         "constraint": [
           {
             "key": "ele-1",
@@ -1193,11 +1422,27 @@
             "expression": "hasValue() or (children().count() > id.count())",
             "xpath": "@value|f:*|h:div",
             "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          },
+          {
+            "key": "ref-1",
+            "severity": "error",
+            "human": "SHALL have a contained resource if a local reference is provided",
+            "expression": "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids'))",
+            "xpath": "not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])",
+            "source": "http://hl7.org/fhir/StructureDefinition/Reference"
           }
         ],
         "isModifier": false,
         "isSummary": true,
         "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          },
+          {
+            "identity": "rim",
+            "map": "The target of a resource reference is a RIM entry point (Act, Role, or Entity)"
+          },
           {
             "identity": "clinicaltrials-gov",
             "map": "Enrollment; Number of Groups/Cohorts (= number of \"enrollment\" instances); Groups (Group/Cohort Label = Group.name; Group/Cohort Description = Group.description); Eligibility (Group criteria)"
@@ -1225,6 +1470,7 @@
         "path": "ResearchStudy.period",
         "short": "When the study began and ended",
         "definition": "Identifies the start date and the expected (or actual, depending on status) end date for the study.",
+        "comment": "A Period specifies a range of time; the context of use will specify whether the entire range applies (e.g. \"the patient was an inpatient of the hospital for this time range\") or one value from the range applies (e.g. \"give to the patient between these two times\").\n\nPeriod is not used for a duration (a measure of elapsed time). See [Duration](datatypes.html#Duration).",
         "alias": [
           "timing"
         ],
@@ -1240,6 +1486,9 @@
             "code": "Period"
           }
         ],
+        "condition": [
+          "ele-1"
+        ],
         "constraint": [
           {
             "key": "ele-1",
@@ -1248,11 +1497,31 @@
             "expression": "hasValue() or (children().count() > id.count())",
             "xpath": "@value|f:*|h:div",
             "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          },
+          {
+            "key": "per-1",
+            "severity": "error",
+            "human": "If present, start SHALL have a lower value than end",
+            "expression": "start.hasValue().not() or end.hasValue().not() or (start <= end)",
+            "xpath": "not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))",
+            "source": "http://hl7.org/fhir/StructureDefinition/Period"
           }
         ],
         "isModifier": false,
         "isSummary": true,
         "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          },
+          {
+            "identity": "v2",
+            "map": "DR"
+          },
+          {
+            "identity": "rim",
+            "map": "IVL<TS>[lowClosed=\"true\" and highClosed=\"true\"] or URG<TS>[lowClosed=\"true\" and highClosed=\"true\"]"
+          },
           {
             "identity": "clinicaltrials-gov",
             "map": "Study Start Date (start); Study Completion Date (end)"
@@ -1276,6 +1545,7 @@
         "path": "ResearchStudy.sponsor",
         "short": "Organization that initiates and is legally responsible for the study",
         "definition": "An organization that initiates the investigation and is legally responsible for the study.",
+        "comment": "References SHALL be a reference to an actual FHIR resource, and SHALL be resolveable (allowing for access control, temporary unavailability, etc.). Resolution can be either by retrieval from the URL, or, where applicable by resource type, by treating an absolute reference as a canonical URL and looking it up in a local registry/repository.",
         "min": 0,
         "max": "1",
         "base": {
@@ -1291,6 +1561,9 @@
             ]
           }
         ],
+        "condition": [
+          "ele-1"
+        ],
         "constraint": [
           {
             "key": "ele-1",
@@ -1299,11 +1572,27 @@
             "expression": "hasValue() or (children().count() > id.count())",
             "xpath": "@value|f:*|h:div",
             "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          },
+          {
+            "key": "ref-1",
+            "severity": "error",
+            "human": "SHALL have a contained resource if a local reference is provided",
+            "expression": "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids'))",
+            "xpath": "not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])",
+            "source": "http://hl7.org/fhir/StructureDefinition/Reference"
           }
         ],
         "isModifier": false,
         "isSummary": true,
         "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          },
+          {
+            "identity": "rim",
+            "map": "The target of a resource reference is a RIM entry point (Act, Role, or Entity)"
+          },
           {
             "identity": "clinicaltrials-gov",
             "map": "Sponsor"
@@ -1327,6 +1616,7 @@
         "path": "ResearchStudy.principalInvestigator",
         "short": "Researcher who oversees multiple aspects of the study",
         "definition": "A researcher in a study who oversees multiple aspects of the study, such as concept development, protocol writing, protocol submission for IRB approval, participant recruitment, informed consent, data collection, analysis, interpretation and presentation.",
+        "comment": "References SHALL be a reference to an actual FHIR resource, and SHALL be resolveable (allowing for access control, temporary unavailability, etc.). Resolution can be either by retrieval from the URL, or, where applicable by resource type, by treating an absolute reference as a canonical URL and looking it up in a local registry/repository.",
         "min": 0,
         "max": "1",
         "base": {
@@ -1343,6 +1633,9 @@
             ]
           }
         ],
+        "condition": [
+          "ele-1"
+        ],
         "constraint": [
           {
             "key": "ele-1",
@@ -1351,11 +1644,27 @@
             "expression": "hasValue() or (children().count() > id.count())",
             "xpath": "@value|f:*|h:div",
             "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          },
+          {
+            "key": "ref-1",
+            "severity": "error",
+            "human": "SHALL have a contained resource if a local reference is provided",
+            "expression": "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids'))",
+            "xpath": "not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])",
+            "source": "http://hl7.org/fhir/StructureDefinition/Reference"
           }
         ],
         "isModifier": false,
         "isSummary": true,
         "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          },
+          {
+            "identity": "rim",
+            "map": "The target of a resource reference is a RIM entry point (Act, Role, or Entity)"
+          },
           {
             "identity": "clinicaltrials-gov",
             "map": "Principal Investigator"
@@ -1375,6 +1684,7 @@
         "path": "ResearchStudy.site",
         "short": "Facility where study activities are conducted",
         "definition": "A facility in which study activities are conducted.",
+        "comment": "References SHALL be a reference to an actual FHIR resource, and SHALL be resolveable (allowing for access control, temporary unavailability, etc.). Resolution can be either by retrieval from the URL, or, where applicable by resource type, by treating an absolute reference as a canonical URL and looking it up in a local registry/repository.",
         "min": 0,
         "max": "*",
         "base": {
@@ -1390,6 +1700,9 @@
             ]
           }
         ],
+        "condition": [
+          "ele-1"
+        ],
         "constraint": [
           {
             "key": "ele-1",
@@ -1398,11 +1711,27 @@
             "expression": "hasValue() or (children().count() > id.count())",
             "xpath": "@value|f:*|h:div",
             "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          },
+          {
+            "key": "ref-1",
+            "severity": "error",
+            "human": "SHALL have a contained resource if a local reference is provided",
+            "expression": "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids'))",
+            "xpath": "not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])",
+            "source": "http://hl7.org/fhir/StructureDefinition/Reference"
           }
         ],
         "isModifier": false,
         "isSummary": true,
         "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          },
+          {
+            "identity": "rim",
+            "map": "The target of a resource reference is a RIM entry point (Act, Role, or Entity)"
+          },
           {
             "identity": "clinicaltrials-gov",
             "map": "Facility"
@@ -1422,6 +1751,7 @@
         "path": "ResearchStudy.reasonStopped",
         "short": "accrual-goal-met | closed-due-to-toxicity | closed-due-to-lack-of-study-progress | temporarily-closed-per-study-design",
         "definition": "A description and/or code explaining the premature termination of the study.",
+        "comment": "Not all terminology uses fit this general pattern. In some cases, models should not use CodeableConcept and use Coding directly and provide their own structure for managing text, codings, translations and the relationship between elements and pre- and post-coordination.",
         "min": 0,
         "max": "1",
         "base": {
@@ -1433,6 +1763,9 @@
           {
             "code": "CodeableConcept"
           }
+        ],
+        "condition": [
+          "ele-1"
         ],
         "constraint": [
           {
@@ -1459,6 +1792,22 @@
         },
         "mapping": [
           {
+            "identity": "rim",
+            "map": "n/a"
+          },
+          {
+            "identity": "v2",
+            "map": "CE/CNE/CWE"
+          },
+          {
+            "identity": "rim",
+            "map": "CD"
+          },
+          {
+            "identity": "orim",
+            "map": "fhir:CodeableConcept rdfs:subClassOf dt:CD"
+          },
+          {
             "identity": "clinicaltrials-gov",
             "map": "Why Study Stopped"
           },
@@ -1477,6 +1826,7 @@
         "path": "ResearchStudy.note",
         "short": "Comments made about the study",
         "definition": "Comments made about the study by the performer, subject or other participants.",
+        "comment": "For systems that do not have structured annotations, they can simply communicate a single annotation with no author or time.  This element may need to be included in narrative because of the potential for modifying information.  *Annotations SHOULD NOT* be used to communicate \"modifying\" information that could be computable. (This is a SHOULD because enforcing user behavior is nearly impossible).",
         "min": 0,
         "max": "*",
         "base": {
@@ -1489,6 +1839,9 @@
             "code": "Annotation"
           }
         ],
+        "condition": [
+          "ele-1"
+        ],
         "constraint": [
           {
             "key": "ele-1",
@@ -1500,8 +1853,19 @@
           }
         ],
         "isModifier": false,
-        "isSummary": false,
         "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          },
+          {
+            "identity": "v2",
+            "map": "N/A"
+          },
+          {
+            "identity": "rim",
+            "map": "Act"
+          },
           {
             "identity": "BRIDG5.1",
             "map": "No BRIDG mapping"
@@ -1529,6 +1893,9 @@
             "code": "BackboneElement"
           }
         ],
+        "condition": [
+          "ele-1"
+        ],
         "constraint": [
           {
             "key": "ele-1",
@@ -1540,8 +1907,11 @@
           }
         ],
         "isModifier": false,
-        "isSummary": false,
         "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          },
           {
             "identity": "clinicaltrials-gov",
             "map": "Arms"
@@ -1590,6 +1960,16 @@
       {
         "id": "ResearchStudy.arm.extension",
         "path": "ResearchStudy.arm.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "description": "Extensions are always sliced by (at least) url",
+          "rules": "open"
+        },
         "short": "Additional content defined by implementations",
         "definition": "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
         "comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
@@ -1693,6 +2073,7 @@
         "path": "ResearchStudy.arm.name",
         "short": "Label for study arm",
         "definition": "Unique, human-readable label for this arm of the study.",
+        "comment": "Note that FHIR strings SHALL NOT exceed 1MB in size",
         "min": 1,
         "max": "1",
         "base": {
@@ -1733,6 +2114,7 @@
         "path": "ResearchStudy.arm.type",
         "short": "Categorization of study arm",
         "definition": "Categorization of study arm, e.g. experimental, active comparator, placebo comparater.",
+        "comment": "Not all terminology uses fit this general pattern. In some cases, models should not use CodeableConcept and use Coding directly and provide their own structure for managing text, codings, translations and the relationship between elements and pre- and post-coordination.",
         "min": 0,
         "max": "1",
         "base": {
@@ -1745,6 +2127,9 @@
             "code": "CodeableConcept"
           }
         ],
+        "condition": [
+          "ele-1"
+        ],
         "constraint": [
           {
             "key": "ele-1",
@@ -1756,8 +2141,23 @@
           }
         ],
         "isModifier": false,
-        "isSummary": false,
         "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          },
+          {
+            "identity": "v2",
+            "map": "CE/CNE/CWE"
+          },
+          {
+            "identity": "rim",
+            "map": "CD"
+          },
+          {
+            "identity": "orim",
+            "map": "fhir:CodeableConcept rdfs:subClassOf dt:CD"
+          },
           {
             "identity": "clinicaltrials-gov",
             "map": "Arm Type"
@@ -1773,6 +2173,7 @@
         "path": "ResearchStudy.arm.description",
         "short": "Short explanation of study path",
         "definition": "A succinct description of the path through the study that would be followed by a subject adhering to this arm.",
+        "comment": "Note that FHIR strings SHALL NOT exceed 1MB in size",
         "min": 0,
         "max": "1",
         "base": {
@@ -1825,6 +2226,9 @@
             "code": "BackboneElement"
           }
         ],
+        "condition": [
+          "ele-1"
+        ],
         "constraint": [
           {
             "key": "ele-1",
@@ -1836,8 +2240,11 @@
           }
         ],
         "isModifier": false,
-        "isSummary": false,
         "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          },
           {
             "identity": "BRIDG5.1",
             "map": "StudyObjective"
@@ -1882,6 +2289,16 @@
       {
         "id": "ResearchStudy.objective.extension",
         "path": "ResearchStudy.objective.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "description": "Extensions are always sliced by (at least) url",
+          "rules": "open"
+        },
         "short": "Additional content defined by implementations",
         "definition": "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
         "comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
@@ -1985,6 +2402,7 @@
         "path": "ResearchStudy.objective.name",
         "short": "Label for the objective",
         "definition": "Unique, human-readable label for this objective of the study.",
+        "comment": "Note that FHIR strings SHALL NOT exceed 1MB in size",
         "min": 0,
         "max": "1",
         "base": {
@@ -2021,6 +2439,7 @@
         "path": "ResearchStudy.objective.type",
         "short": "primary | secondary | exploratory",
         "definition": "The kind of study objective.",
+        "comment": "Not all terminology uses fit this general pattern. In some cases, models should not use CodeableConcept and use Coding directly and provide their own structure for managing text, codings, translations and the relationship between elements and pre- and post-coordination.",
         "min": 0,
         "max": "1",
         "base": {
@@ -2033,6 +2452,9 @@
             "code": "CodeableConcept"
           }
         ],
+        "condition": [
+          "ele-1"
+        ],
         "constraint": [
           {
             "key": "ele-1",
@@ -2044,7 +2466,6 @@
           }
         ],
         "isModifier": false,
-        "isSummary": false,
         "binding": {
           "extension": [
             {
@@ -2057,6 +2478,22 @@
           "valueSet": "http://hl7.org/fhir/ValueSet/research-study-objective-type"
         },
         "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          },
+          {
+            "identity": "v2",
+            "map": "CE/CNE/CWE"
+          },
+          {
+            "identity": "rim",
+            "map": "CD"
+          },
+          {
+            "identity": "orim",
+            "map": "fhir:CodeableConcept rdfs:subClassOf dt:CD"
+          },
           {
             "identity": "BRIDG5.1",
             "map": "StudyObjective.typeCode"
