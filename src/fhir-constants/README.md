@@ -20,21 +20,8 @@ model) — `generateIgConstants` (see `build.gradle`) scans `fhir/ig/fsh-generat
 directly, via ig-codegen's lower-level `IgPackageScanner`/`JavaConstantsGenerator` API, the same
 directory `sushi` builds locally from `fhir/ig/input/fsh`.
 
-1. From the repo root, run the following to (re-)generate `fhir/ig/fsh-generated/resources`. This
-   uses the same `ig-build-tools` image (and thus the same SUSHI build) as
-   `.github/workflows/validate-fhir-resources.yaml`, rather than whatever version `npx` happens to
-   resolve as latest:
-
-   ```bash
-   docker run --rm \
-     --user "$(id -u):$(id -g)" \
-     -e HOME=/tmp \
-     -v "$PWD:/opt/ig-build-tools/workspace" \
-     -w /opt/ig-build-tools/workspace \
-     --entrypoint sushi \
-     ghcr.io/miracum/ig-build-tools:v2.2.47 \
-     --snapshot fhir/ig
-   ```
+1. From the repo root, run `npx fsh-sushi fhir/ig --snapshot` to (re-)generate
+   `fhir/ig/fsh-generated/resources`.
 2. Run `./gradlew :fhir-constants:generateIgConstants`.
 3. Review the diff in `src/main/java`, commit it.
 

@@ -19,21 +19,8 @@ package.json-driven CLI) since the recruIT IG isn't published to a FHIR package 
 own local output is the only copy. That means both regeneration steps below share the same first
 step:
 
-1. From the repo root, run the following to (re-)generate `fhir/ig/fsh-generated/resources`. This
-   uses the same `ig-build-tools` image (and thus the same SUSHI build) as
-   `.github/workflows/validate-fhir-resources.yaml`, rather than whatever version `npx` happens to
-   resolve as latest:
-
-   ```bash
-   docker run --rm \
-     --user "$(id -u):$(id -g)" \
-     -e HOME=/tmp \
-     -v "$PWD:/opt/ig-build-tools/workspace" \
-     -w /opt/ig-build-tools/workspace \
-     --entrypoint sushi \
-     ghcr.io/miracum/ig-build-tools:v2.2.47 \
-     --snapshot fhir/ig
-   ```
+1. From the repo root, run `npx fsh-sushi fhir/ig --snapshot` to (re-)generate
+   `fhir/ig/fsh-generated/resources`.
 2. Regenerate one or both languages:
    - Java: `./gradlew :fhir-constants:generateIgConstants`
    - C#: `dotnet build list-next/RecruIT.FhirConstants/RecruIT.FhirConstants.csproj -t:GenerateIgConstants`
