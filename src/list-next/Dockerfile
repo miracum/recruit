@@ -4,8 +4,7 @@ WORKDIR /src
 
 # Copy files that affect dependency resolution first.
 # Changes to application source won't invalidate the restore layer.
-COPY Directory.Build.props Directory.Packages.props Directory.Build.targets* ./
-COPY NuGet.config* ./
+COPY Directory.Build.props Directory.Packages.props ./
 
 COPY RecruIT.List/RecruIT.List.csproj RecruIT.List/
 COPY RecruIT.FhirConstants/RecruIT.FhirConstants.csproj RecruIT.FhirConstants/
