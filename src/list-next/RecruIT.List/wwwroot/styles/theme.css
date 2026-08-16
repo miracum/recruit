@@ -1,64 +1,56 @@
-/* Light Mode (Default) */
+@custom-variant dark (&:is(.dark *));
+
 :root {
-  --background: #f3f7fc;
-  --foreground: #060a12;
-  --card: #f9fcff;
-  --card-foreground: #060a12;
-  --popover: #f9fcff;
-  --popover-foreground: #060a12;
-  --primary: #101723;
-  --primary-foreground: #fafafa;
-  --secondary: #e7edf6;
-  --secondary-foreground: #101723;
-  --muted: #e7edf6;
-  --muted-foreground: #636974;
-  --accent: #e7edf6;
-  --accent-foreground: #101723;
-  --destructive: #e7000b;
-  --destructive-foreground: #fff;
-  --border: #d8dfe9;
-  --input: #d8dfe9;
-  --ring: #87909d;
-  --chart-1: #91c5ff;
-  --chart-2: #3a81f6;
-  --chart-3: #2563ef;
-  --chart-4: #1a4eda;
-  --chart-5: #1f3fad;
-  --font-sans:
-    ui-sans-serif, system-ui, -apple-system, blinkmacsystemfont, "Segoe UI",
-    roboto, "Helvetica Neue", arial, "Noto Sans", sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-serif: ui-serif, georgia, cambria, "Times New Roman", times, serif;
-  --font-mono:
-    ui-monospace, sfmono-regular, menlo, monaco, consolas, "Liberation Mono",
-    "Courier New", monospace;
-  --sidebar: #eef2f9;
-  --sidebar-foreground: #060a12;
-  --sidebar-primary: #101723;
-  --sidebar-primary-foreground: #fafafa;
-  --sidebar-accent: #e7edf6;
-  --sidebar-accent-foreground: #101723;
-  --sidebar-border: #d8dfe9;
-  --sidebar-ring: #87909d;
+  --background: #f7f7f8;
+  --foreground: #1a2530;
+  --card: #ffffff;
+  --card-foreground: #1a2530;
+  --popover: #ffffff;
+  --popover-foreground: #1a2530;
+  --primary: #1a6289;
+  --primary-foreground: #ffffff;
+  --secondary: #ebeef2;
+  --secondary-foreground: #1a2530;
+  --muted: #ebeef2;
+  --muted-foreground: #5a6573;
+  --accent: #d9e6ee;
+  --accent-foreground: #0f4866;
+  --destructive: #b8413c;
+  --destructive-foreground: #ffffff;
+  --border: #dbe0e6;
+  --input: #dbe0e6;
+  --ring: #1d6c96;
+  --chart-1: #1d6c96;
+  --chart-2: #83c4e7;
+  --chart-3: #144a67;
+  --chart-4: #2f7a5c;
+  --chart-5: #d9a24c;
+  --sidebar: #f1f3f6;
+  --sidebar-foreground: #1a2530;
+  --sidebar-primary: #1a6289;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #d9e6ee;
+  --sidebar-accent-foreground: #0f4866;
+  --sidebar-border: #dbe0e6;
+  --sidebar-ring: #1d6c96;
+  --font-sans: Geist, ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Instrument Serif', ui-serif, Georgia, serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
   --radius: 0.625rem;
-  --shadow-x: 0;
+  --shadow-x: 0px;
   --shadow-y: 1px;
-  --shadow-blur: 3px;
-  --shadow-spread: 0px;
-  --shadow-opacity: 0.1;
-  --shadow-color: oklch(0% 0 0deg);
-  --shadow-2xs: 0 1px 3px 0px hsl(0deg 0% 0% / 5%);
-  --shadow-xs: 0 1px 3px 0px hsl(0deg 0% 0% / 5%);
-  --shadow-sm:
-    0 1px 3px 0px hsl(0deg 0% 0% / 10%), 0 1px 2px -1px hsl(0deg 0% 0% / 10%);
-  --shadow: 0 1px 3px 0px hsl(0deg 0% 0% / 10%), 0 1px 2px -1px hsl(0deg 0% 0% / 10%);
-  --shadow-md:
-    0 1px 3px 0px hsl(0deg 0% 0% / 10%), 0 2px 4px -1px hsl(0deg 0% 0% / 10%);
-  --shadow-lg:
-    0 1px 3px 0px hsl(0deg 0% 0% / 10%), 0 4px 6px -1px hsl(0deg 0% 0% / 10%);
-  --shadow-xl:
-    0 1px 3px 0px hsl(0deg 0% 0% / 10%), 0 8px 10px -1px hsl(0deg 0% 0% / 10%);
-  --shadow-2xl: 0 1px 3px 0px hsl(0deg 0% 0% / 25%);
+  --shadow-blur: 4px;
+  --shadow-spread: -1px;
+  --shadow-opacity: 0.05;
+  --shadow-color: #1a2530;
+  --shadow-2xs: 0px 1px 4px -1px hsl(210 29.7297% 14.5098% / 0.03);
+  --shadow-xs: 0px 1px 4px -1px hsl(210 29.7297% 14.5098% / 0.03);
+  --shadow-sm: 0px 1px 4px -1px hsl(210 29.7297% 14.5098% / 0.05), 0px 1px 2px -2px hsl(210 29.7297% 14.5098% / 0.05);
+  --shadow: 0px 1px 4px -1px hsl(210 29.7297% 14.5098% / 0.05), 0px 1px 2px -2px hsl(210 29.7297% 14.5098% / 0.05);
+  --shadow-md: 0px 1px 4px -1px hsl(210 29.7297% 14.5098% / 0.05), 0px 2px 4px -2px hsl(210 29.7297% 14.5098% / 0.05);
+  --shadow-lg: 0px 1px 4px -1px hsl(210 29.7297% 14.5098% / 0.05), 0px 4px 6px -2px hsl(210 29.7297% 14.5098% / 0.05);
+  --shadow-xl: 0px 1px 4px -1px hsl(210 29.7297% 14.5098% / 0.05), 0px 8px 10px -2px hsl(210 29.7297% 14.5098% / 0.05);
+  --shadow-2xl: 0px 1px 4px -1px hsl(210 29.7297% 14.5098% / 0.13);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
@@ -78,65 +70,56 @@
 }
 
 .dark {
-  --background: #141d2b;
-  --foreground: #e5ecf1;
-  --card: #1a2533;
-  --card-foreground: #e5ecf1;
-  --popover: #202c3c;
-  --popover-foreground: #e5ecf1;
-  --primary: #d7dfe5;
-  --primary-foreground: #182230;
-  --secondary: #243040;
-  --secondary-foreground: #e5ecf1;
-  --muted: #232d3c;
-  --muted-foreground: #8794a1;
-  --accent: #2b3a4d;
-  --accent-foreground: #e5ecf1;
-  --destructive: #ff6467;
-  --destructive-foreground: #fafafa;
-  --border: #2b3646;
-  --input: #273444;
-  --ring: #6e7c8c;
-  --chart-1: #91c5ff;
-  --chart-2: #3a81f6;
-  --chart-3: #2563ef;
-  --chart-4: #1a4eda;
-  --chart-5: #1f3fad;
-  --sidebar: #17212f;
-  --sidebar-foreground: #e5ecf1;
-  --sidebar-primary: #1048e6;
-  --sidebar-primary-foreground: #fafafa;
-  --sidebar-accent: #243040;
-  --sidebar-accent-foreground: #e5ecf1;
-  --sidebar-border: #25303e;
-  --sidebar-ring: #6e7c8c;
-  --font-sans:
-    ui-sans-serif, system-ui, -apple-system, blinkmacsystemfont, "Segoe UI",
-    roboto, "Helvetica Neue", arial, "Noto Sans", sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-serif: ui-serif, georgia, cambria, "Times New Roman", times, serif;
-  --font-mono:
-    ui-monospace, sfmono-regular, menlo, monaco, consolas, "Liberation Mono",
-    "Courier New", monospace;
+  --background: #0f1419;
+  --foreground: #e5e9ee;
+  --card: #161c24;
+  --card-foreground: #e5e9ee;
+  --popover: #1c232d;
+  --popover-foreground: #e5e9ee;
+  --primary: #7ab0d0;
+  --primary-foreground: #0f1419;
+  --secondary: #1e2630;
+  --secondary-foreground: #e5e9ee;
+  --muted: #1e2630;
+  --muted-foreground: #8590a0;
+  --accent: #1e2630;
+  --accent-foreground: #a8cfe3;
+  --destructive: #dc6e69;
+  --destructive-foreground: #160807;
+  --border: #28313d;
+  --input: #28313d;
+  --ring: #7ab0d0;
+  --chart-1: #7ab0d0;
+  --chart-2: #a8cfe3;
+  --chart-3: #5ba3cc;
+  --chart-4: #56ad84;
+  --chart-5: #e8b25c;
+  --sidebar: #0b0f14;
+  --sidebar-foreground: #e5e9ee;
+  --sidebar-primary: #7ab0d0;
+  --sidebar-primary-foreground: #0f1419;
+  --sidebar-accent: #1e2630;
+  --sidebar-accent-foreground: #a8cfe3;
+  --sidebar-border: #1e2630;
+  --sidebar-ring: #7ab0d0;
+  --font-sans: Geist, ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Instrument Serif', ui-serif, Georgia, serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
   --radius: 0.625rem;
-  --shadow-x: 0;
+  --shadow-x: 0px;
   --shadow-y: 1px;
   --shadow-blur: 3px;
   --shadow-spread: 0px;
-  --shadow-opacity: 0.1;
-  --shadow-color: oklch(0% 0 0deg);
-  --shadow-2xs: 0 1px 3px 0px hsl(0deg 0% 0% / 5%);
-  --shadow-xs: 0 1px 3px 0px hsl(0deg 0% 0% / 5%);
-  --shadow-sm:
-    0 1px 3px 0px hsl(0deg 0% 0% / 10%), 0 1px 2px -1px hsl(0deg 0% 0% / 10%);
-  --shadow: 0 1px 3px 0px hsl(0deg 0% 0% / 10%), 0 1px 2px -1px hsl(0deg 0% 0% / 10%);
-  --shadow-md:
-    0 1px 3px 0px hsl(0deg 0% 0% / 10%), 0 2px 4px -1px hsl(0deg 0% 0% / 10%);
-  --shadow-lg:
-    0 1px 3px 0px hsl(0deg 0% 0% / 10%), 0 4px 6px -1px hsl(0deg 0% 0% / 10%);
-  --shadow-xl:
-    0 1px 3px 0px hsl(0deg 0% 0% / 10%), 0 8px 10px -1px hsl(0deg 0% 0% / 10%);
-  --shadow-2xl: 0 1px 3px 0px hsl(0deg 0% 0% / 25%);
+  --shadow-opacity: 0.3;
+  --shadow-color: #000000;
+  --shadow-2xs: 0px 1px 3px 0px hsl(0 0% 0% / 0.15);
+  --shadow-xs: 0px 1px 3px 0px hsl(0 0% 0% / 0.15);
+  --shadow-sm: 0px 1px 3px 0px hsl(0 0% 0% / 0.30), 0px 1px 2px -1px hsl(0 0% 0% / 0.30);
+  --shadow: 0px 1px 3px 0px hsl(0 0% 0% / 0.30), 0px 1px 2px -1px hsl(0 0% 0% / 0.30);
+  --shadow-md: 0px 1px 3px 0px hsl(0 0% 0% / 0.30), 0px 2px 4px -1px hsl(0 0% 0% / 0.30);
+  --shadow-lg: 0px 1px 3px 0px hsl(0 0% 0% / 0.30), 0px 4px 6px -1px hsl(0 0% 0% / 0.30);
+  --shadow-xl: 0px 1px 3px 0px hsl(0 0% 0% / 0.30), 0px 8px 10px -1px hsl(0 0% 0% / 0.30);
+  --shadow-2xl: 0px 1px 3px 0px hsl(0 0% 0% / 0.75);
 
   /* Radix-Inspired Accent Colors (Dark Mode) */
   --color-blue-accent: oklch(60% 0.2 260deg);
@@ -167,11 +150,6 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Tailwind v4 Theme Integration - inert without a Tailwind build step (see note above); kept only
-   so this file matches what a real Tailwind pipeline would expect if one is ever added. The
-   bg-background/text-foreground/etc. utility classes actually used throughout this app resolve via
-   BlazorBlueprint.Components' own precompiled CSS, which already targets these same variable names. */
-/* stylelint-disable-next-line at-rule-no-unknown -- @theme is Tailwind v4 syntax, not plain CSS */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -205,13 +183,16 @@ body {
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
   --font-serif: var(--font-serif);
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
   --shadow-2xs: var(--shadow-2xs);
   --shadow-xs: var(--shadow-xs);
   --shadow-sm: var(--shadow-sm);
@@ -220,4 +201,13 @@ body {
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
   --shadow-2xl: var(--shadow-2xl);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
