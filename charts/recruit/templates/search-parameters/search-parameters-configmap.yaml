@@ -1,4 +1,3 @@
-{{- if and .Values.createSearchParameters.enabled (or .Values.fhirserver.enabled (ne .Values.externalFhirServer.url "")) -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -6,11 +5,6 @@ metadata:
   labels:
     {{- include "recruit.labels" . | nindent 4 }}
     app.kubernetes.io/component: search-parameters
-  annotations:
-    "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-weight": "0"
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 data:
   search-parameters-transaction-upsert.json: |
     {{- .Files.Get "files/fhir/search-parameters-transaction-upsert.json" | nindent 4 }}
-{{- end -}}
