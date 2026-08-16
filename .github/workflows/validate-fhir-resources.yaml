@@ -14,7 +14,6 @@ jobs:
     name: Validate FHIR resources
     runs-on: ubuntu-24.04
     container: ghcr.io/miracum/ig-build-tools:v2.2.47@sha256:c58ede7211013eedbc2819bcd4843996dcfc1998e04a0fc84740c2cf3b04c6f3
-    continue-on-error: true
     steps:
       - name: Add workspace as safe directory
         run: |
@@ -44,6 +43,7 @@ jobs:
 
       - name: Check fsh-generated search-parameters Bundle is up-to-date with the FSH source
         shell: bash
+        continue-on-error: true
         run: |
           # clean rebuild: a stale committed file left over from a since-renamed FSH
           # instance wouldn't otherwise show up as a diff, since sushi doesn't delete output
