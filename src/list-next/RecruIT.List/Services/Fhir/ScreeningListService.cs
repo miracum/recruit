@@ -25,13 +25,7 @@ public sealed class ScreeningListService(
     {
         var client = clientFactory.CreateClient();
 
-        var query =
-            $"List?code={Uri.EscapeDataString($"{RecruIT.List.Services.Fhir.FhirConstants.SystemScreeningList}|{RecruIT.List.Services.Fhir.FhirConstants.ScreeningListCode}")}"
-            + "&status=current,retired"
-            + "&_include=List:item"
-            + "&_include:iterate=ResearchSubject:patient"
-            + "&_include=List:belongs-to-study"
-            + "&_count=100";
+        var query = BuildScreeningListsQuery("current,retired");
 
         List<Resource> resources;
         try
@@ -53,63 +47,30 @@ public sealed class ScreeningListService(
         var accessibleTrials = await accessService.GetAccessibleTrialIdentifiersAsync(user, ct);
 
         var summaries = new List<TrialSummaryDto>();
-        foreach (var list in lists)
+        foreach (
+            var (list, trialInfo) in GetAccessibleLists(lists, trialInfoByListId, accessibleTrials)
+        )
         {
-            var trialInfo = list.Id is not null
-                ? trialInfoByListId.GetValueOrDefault(list.Id)
-                : null;
-            var acronym = trialInfo?.Acronym;
-            var trialIdentifier = trialInfo?.Identifier;
-            if (
-                string.IsNullOrEmpty(acronym)
-                || !TrialAccessService.CanAccessTrial(accessibleTrials, trialIdentifier)
-            )
-            {
-                continue;
-            }
-
-            var entries = list.Entry ?? [];
-            int recruited = 0,
-                pending = 0,
-                notRecruited = 0;
-
-            foreach (var entry in entries)
-            {
-                var subjectId = entry.Item?.Reference?.Split('/').LastOrDefault();
-                var subject =
-                    subjectId is not null && researchSubjectsById.TryGetValue(subjectId, out var s)
-                        ? s
-                        : null;
-                var status = subject is not null ? EnumUtility.GetLiteral(subject.Status) : null;
-
-                if (
-                    status is not null
-                    && RecruIT.List.Services.Fhir.FhirConstants.RecruitedStatuses.Contains(status)
-                )
+            var (recruited, pending, notRecruited) = CountByStatus(
+                (list.Entry ?? []).Select(entry =>
                 {
-                    recruited++;
-                }
-                else if (
-                    status is not null
-                    && RecruIT.List.Services.Fhir.FhirConstants.NotRecruitedStatuses.Contains(
-                        status
-                    )
-                )
-                {
-                    notRecruited++;
-                }
-                else
-                {
-                    pending++;
-                }
-            }
+                    var subjectId = entry.Item?.Reference?.Split('/').LastOrDefault();
+                    var subject =
+                        subjectId is not null
+                        && researchSubjectsById.TryGetValue(subjectId, out var s)
+                            ? s
+                            : null;
+                    return subject is not null ? EnumUtility.GetLiteral(subject.Status) : null;
+                })
+            );
 
             summaries.Add(
                 new TrialSummaryDto
                 {
                     ListId = list.Id!,
-                    TrialIdentifier = trialIdentifier!,
-                    StudyAcronym = acronym,
+                    TrialIdentifier = trialInfo.Identifier,
+                    StudyAcronym = trialInfo.Acronym!,
+                    StudyTitle = trialInfo.Title,
                     ListStatus =
                         EnumUtility.GetLiteral(list.Status)
                         ?? RecruIT.List.Services.Fhir.FhirConstants.ListStatusCurrent,
@@ -135,13 +96,7 @@ public sealed class ScreeningListService(
     {
         var client = clientFactory.CreateClient();
 
-        var query =
-            $"List?code={Uri.EscapeDataString($"{RecruIT.List.Services.Fhir.FhirConstants.SystemScreeningList}|{RecruIT.List.Services.Fhir.FhirConstants.ScreeningListCode}")}"
-            + "&status=current"
-            + "&_include=List:item"
-            + "&_include:iterate=ResearchSubject:patient"
-            + "&_include=List:belongs-to-study"
-            + "&_count=100";
+        var query = BuildScreeningListsQuery("current");
 
         List<Resource> resources;
         try
@@ -163,22 +118,10 @@ public sealed class ScreeningListService(
 
         var overviewsByPatient = new Dictionary<string, PatientOverviewDto>();
 
-        foreach (var list in lists)
+        foreach (
+            var (list, trialInfo) in GetAccessibleLists(lists, trialInfoByListId, accessibleTrials)
+        )
         {
-            var trialInfo = list.Id is not null
-                ? trialInfoByListId.GetValueOrDefault(list.Id)
-                : null;
-            var acronym = trialInfo?.Acronym;
-            var studyTitle = trialInfo?.Title;
-            var trialIdentifier = trialInfo?.Identifier;
-            if (
-                string.IsNullOrEmpty(acronym)
-                || !TrialAccessService.CanAccessTrial(accessibleTrials, trialIdentifier)
-            )
-            {
-                continue;
-            }
-
             foreach (var entry in list.Entry ?? [])
             {
                 var subjectId = entry.Item?.Reference?.Split('/').LastOrDefault();
@@ -253,9 +196,9 @@ public sealed class ScreeningListService(
                         SystemDeterminedIneligible = isFlaggedIneligible,
                         LastUpdated = subject.Meta?.LastUpdated,
                         ListId = list.Id,
-                        StudyAcronym = acronym,
-                        StudyTitle = studyTitle,
-                        TrialIdentifier = trialIdentifier,
+                        StudyAcronym = trialInfo.Acronym,
+                        StudyTitle = trialInfo.Title,
+                        TrialIdentifier = trialInfo.Identifier,
                     }
                 );
             }
@@ -292,13 +235,7 @@ public sealed class ScreeningListService(
     {
         var client = clientFactory.CreateClient();
 
-        var query =
-            $"List?code={Uri.EscapeDataString($"{RecruIT.List.Services.Fhir.FhirConstants.SystemScreeningList}|{RecruIT.List.Services.Fhir.FhirConstants.ScreeningListCode}")}"
-            + "&status=current"
-            + "&_include=List:item"
-            + "&_include:iterate=ResearchSubject:patient"
-            + "&_include=List:belongs-to-study"
-            + "&_count=100";
+        var query = BuildScreeningListsQuery("current");
 
         List<Resource> resources;
         try
@@ -319,21 +256,10 @@ public sealed class ScreeningListService(
         var trialInfoByListId = BuildTrialInfoByListId(resources, lists);
         var accessibleTrials = await accessService.GetAccessibleTrialIdentifiersAsync(user, ct);
 
-        foreach (var list in lists)
+        foreach (
+            var (list, trialInfo) in GetAccessibleLists(lists, trialInfoByListId, accessibleTrials)
+        )
         {
-            var trialInfo = list.Id is not null
-                ? trialInfoByListId.GetValueOrDefault(list.Id)
-                : null;
-            var acronym = trialInfo?.Acronym;
-            var trialIdentifier = trialInfo?.Identifier;
-            if (
-                string.IsNullOrEmpty(acronym)
-                || !TrialAccessService.CanAccessTrial(accessibleTrials, trialIdentifier)
-            )
-            {
-                continue;
-            }
-
             foreach (var entry in list.Entry ?? [])
             {
                 if (
@@ -366,14 +292,14 @@ public sealed class ScreeningListService(
                         Id = $"new:{subjectId}",
                         Kind = NotificationKind.NewRecommendation,
                         ListId = list.Id!,
-                        TrialIdentifier = trialIdentifier!,
-                        StudyAcronym = acronym,
+                        TrialIdentifier = trialInfo.Identifier,
+                        StudyAcronym = trialInfo.Acronym!,
                         PatientId = patientId,
                         PatientName = patientName,
                         Message = localizer[
                             "App.Notifications.MessageFormat",
                             patientName,
-                            acronym
+                            trialInfo.Acronym!
                         ],
                         OccurredAt = recommendedDate,
                     }
@@ -459,9 +385,6 @@ public sealed class ScreeningListService(
         var patientsById = resources.OfType<Patient>().ToDictionary(p => p.Id!, p => p);
 
         var patientEntries = new List<PatientListEntryDto>();
-        int recruited = 0,
-            pending = 0,
-            notRecruited = 0;
 
         foreach (var entry in list.Entry ?? [])
         {
@@ -484,19 +407,6 @@ public sealed class ScreeningListService(
                         == RecruIT.List.Services.Fhir.FhirConstants.SystemDeterminedSubjectStatus
                     && c.Code == RecruIT.List.Services.Fhir.FhirConstants.DeterminedStatusIneligible
                 ) ?? false;
-
-            if (RecruIT.List.Services.Fhir.FhirConstants.RecruitedStatuses.Contains(status))
-            {
-                recruited++;
-            }
-            else if (RecruIT.List.Services.Fhir.FhirConstants.NotRecruitedStatuses.Contains(status))
-            {
-                notRecruited++;
-            }
-            else
-            {
-                pending++;
-            }
 
             patientEntries.Add(
                 new PatientListEntryDto
@@ -529,6 +439,10 @@ public sealed class ScreeningListService(
                 }
             );
         }
+
+        var (recruited, pending, notRecruited) = CountByStatus(
+            patientEntries.Select(p => p.Status)
+        );
 
         var summary = new TrialSummaryDto
         {
@@ -576,6 +490,81 @@ public sealed class ScreeningListService(
             logger.LogError(ex, "Failed to update status for List/{ListId}", listId);
             throw new FhirAccessException(localizer["App.Errors.TrialStatusUpdateFailed"], ex);
         }
+    }
+
+    /// <summary>
+    /// The List?code=...&amp;_include=... query shared by every method that scans screening lists
+    /// across trials (dashboard, patient overview, notifications) - only the status filter varies.
+    /// </summary>
+    private static string BuildScreeningListsQuery(string status) =>
+        $"List?code={Uri.EscapeDataString($"{RecruIT.List.Services.Fhir.FhirConstants.SystemScreeningList}|{RecruIT.List.Services.Fhir.FhirConstants.ScreeningListCode}")}"
+        + $"&status={status}"
+        + "&_include=List:item"
+        + "&_include:iterate=ResearchSubject:patient"
+        + "&_include=List:belongs-to-study"
+        + "&_count=100";
+
+    /// <summary>
+    /// Filters lists down to those whose trial the user can access, paired with the TrialInfo
+    /// resolved for each - the "resolve, then skip if unauthorized" step every cross-trial scan
+    /// needs before it can build its own view-specific DTOs.
+    /// </summary>
+    private static IEnumerable<(FhirList List, TrialInfo Info)> GetAccessibleLists(
+        IEnumerable<FhirList> lists,
+        IReadOnlyDictionary<string, TrialInfo> trialInfoByListId,
+        IReadOnlySet<TrialIdentifier>? accessibleTrials
+    )
+    {
+        foreach (var list in lists)
+        {
+            var trialInfo = list.Id is not null
+                ? trialInfoByListId.GetValueOrDefault(list.Id)
+                : null;
+            if (
+                trialInfo is null
+                || string.IsNullOrEmpty(trialInfo.Acronym)
+                || !TrialAccessService.CanAccessTrial(accessibleTrials, trialInfo.Identifier)
+            )
+            {
+                continue;
+            }
+
+            yield return (list, trialInfo);
+        }
+    }
+
+    /// <summary>Buckets ResearchSubject statuses into the three counts every trial/list summary shows.</summary>
+    private static (int Recruited, int Pending, int NotRecruited) CountByStatus(
+        IEnumerable<string?> statuses
+    )
+    {
+        int recruited = 0,
+            pending = 0,
+            notRecruited = 0;
+
+        foreach (var status in statuses)
+        {
+            if (
+                status is not null
+                && RecruIT.List.Services.Fhir.FhirConstants.RecruitedStatuses.Contains(status)
+            )
+            {
+                recruited++;
+            }
+            else if (
+                status is not null
+                && RecruIT.List.Services.Fhir.FhirConstants.NotRecruitedStatuses.Contains(status)
+            )
+            {
+                notRecruited++;
+            }
+            else
+            {
+                pending++;
+            }
+        }
+
+        return (recruited, pending, notRecruited);
     }
 
     /// <summary>

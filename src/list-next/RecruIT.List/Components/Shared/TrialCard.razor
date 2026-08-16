@@ -3,13 +3,8 @@
 <div class="h-full cursor-pointer transition-shadow hover:shadow-md" @onclick="NavigateToPatients">
     <BbCard Class="flex h-full flex-col">
         <BbCardHeader>
-            <div class="flex items-center justify-between gap-2">
-                <BbCardTitle>@Trial.StudyAcronym</BbCardTitle>
-                <BbCardDescription>@Trial.StudyTitle</BbCardDescription>
-                <BbBadge Variant="@(IsActive ? BadgeVariant.Secondary : BadgeVariant.Outline)">
-                    @(IsActive ? Localizer["App.Dashboard.ActiveTab"] : Localizer["App.Dashboard.InactiveTab"])
-                </BbBadge>
-            </div>
+            <BbCardTitle>@Trial.StudyAcronym</BbCardTitle>
+            <BbCardDescription>@Trial.StudyTitle</BbCardDescription>
         </BbCardHeader>
         <BbCardContent Class="flex-1">
             <div class="grid grid-cols-3 gap-4">
@@ -23,7 +18,9 @@
             <BbCardFooter Class="flex items-center justify-end">
                 <div @onclick="NavigateToAccess" @onclick:stopPropagation="true">
                     <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">
-                        <Icon><LucideIcon Name="shield" Size="16" /></Icon>
+                        <Icon>
+                            <LucideIcon Name="shield" Size="16" />
+                        </Icon>
                         <ChildContent>@Localizer["App.PatientList.ManageAccessLink"]</ChildContent>
                     </BbButton>
                 </div>
@@ -44,8 +41,6 @@
 
     [Inject]
     private TrialAccessService AccessService { get; set; } = default!;
-
-    private bool IsActive => Trial.ListStatus == "current";
 
     private bool _canManageAccess;
 
