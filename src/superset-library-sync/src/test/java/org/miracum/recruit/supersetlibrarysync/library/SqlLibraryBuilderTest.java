@@ -107,18 +107,6 @@ class SqlLibraryBuilderTest {
   }
 
   @Test
-  void build_withoutAuthorAnnotationOrKnownCreator_omitsAuthor() {
-    var savedQuery =
-        new SavedQuery(
-            8,
-            "Ad Hoc Report",
-            null,
-            "public",
-            "-- @name: Minimal\nSELECT 1",
-            null,
-            null,
-            null,
-            null);
   void build_withNonAnnotationComment_keepsItInStoredContent() {
     var savedQuery =
         new SavedQuery(
@@ -131,7 +119,10 @@ class SqlLibraryBuilderTest {
             -- this query intentionally only returns a constant
             SELECT 1
             """,
-            List.of());
+            null,
+            null,
+            null,
+            null);
     var annotations = annotationParser.parse(savedQuery.sql());
 
     var library = sut.build(savedQuery, annotations);
