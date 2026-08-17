@@ -22,14 +22,7 @@ dependencies {
     implementation project(':fhir-constants')
     implementation 'io.github.diz-uker:to-fhir-starter:0.2.14'
     implementation 'com.github.slugify:slugify:4.0.1'
-
-    // optional Kafka publishing (see messaging.KafkaPublishProperties): always on the classpath,
-    // but StreamBridge never touches a broker unless sync.kafka.enabled=true actually triggers a
-    // send, so it's a no-op deployments that don't configure it.
     implementation 'org.springframework.cloud:spring-cloud-starter-stream-kafka'
-    // the same FHIR-aware Kafka serializer used by miracum/kafka-fhir-to-server and
-    // miracum/fhir-gateway - lets Library bundles be sent as native FHIR+JSON without this module
-    // having to encode them itself (see messaging.KafkaLibraryPublisher).
     implementation 'org.miracum:kafka-fhir-serializer:3.0.0'
 
     testImplementation 'com.approvaltests:approvaltests:31.0.0'

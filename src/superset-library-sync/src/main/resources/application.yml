@@ -44,8 +44,12 @@ spring:
       key-store-location: file://${SSL_KEY_STORE_FILE:/opt/kafka-certs/user.p12}
       key-store-password: ${KAFKA_SSL_KEY_STORE_PASSWORD:}
     producer:
+      compression-type: ${KAFKA_PRODUCER_COMPRESSION_TYPE:zstd}
+      batch-size: ${KAFKA_PRODUCER_BATCH_SIZE:262144}
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.miracum.kafka.serializers.KafkaFhirSerializer
+      properties:
+        compression.zstd.level: ${KAFKA_PRODUCER_COMPRESSION_ZSTD_LEVEL:9}
   cloud:
     stream:
       default:
