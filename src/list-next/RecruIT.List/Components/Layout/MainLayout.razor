@@ -1,3 +1,4 @@
+@using System.Reflection
 @inherits LayoutComponentBase
 @implements IDisposable
 @inject BreadcrumbState BreadcrumbState
@@ -55,17 +56,54 @@
             </BbSidebarGroup>
         </BbSidebarContent>
         <BbSidebarFooter>
-            <AuthorizeView>
-                <Authorized>
-                    <div class="px-3 py-2">
+            <div class="px-3 py-2 text-xs text-muted-foreground">
+                <BbTooltip Placement="PopoverPlacement.Top">
+                    <BbTooltipTrigger AsChild="false">
+                        <span>@AppVersionShort</span>
+                    </BbTooltipTrigger>
+                    <BbTooltipContent>@AppVersion</BbTooltipContent>
+                </BbTooltip>
+            </div>
+        </BbSidebarFooter>
+    </BbSidebar>
+
+    <BbSidebarInset Class="flex min-w-0 flex-col bg-background">
+        <header class="flex shrink-0 items-center justify-between border-b px-4 py-3">
+            <div class="flex items-center gap-2">
+                <BbSidebarTrigger Class="h-8 w-8 md:hidden">
+                    <LucideIcon Name="menu" Size="16" />
+                </BbSidebarTrigger>
+                <Breadcrumbs Items="BreadcrumbState.Items" />
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" @onclick="ToggleTheme"
+                        class="rounded p-1 hover:bg-accent hover:text-accent-foreground"
+                        aria-label="@(ThemeService.IsDarkMode ? Localizer["App.Theme.SwitchToLight"] : Localizer["App.Theme.SwitchToDark"])">
+                    <LucideIcon Name="@(ThemeService.IsDarkMode ? "sun" : "moon")" Size="16" />
+                </button>
+                <div class="flex items-center gap-1 text-xs text-muted-foreground">
+                    @for (var i = 0; i < SupportedCultures.Length; i++)
+                    {
+                        var culture = SupportedCultures[i];
+                        <a href="@BuildCultureUrl(culture)" data-enhance-nav="false"
+                           class="rounded px-1.5 py-0.5 uppercase hover:bg-accent hover:text-accent-foreground @(IsCurrentCulture(culture) ? "font-semibold text-foreground" : "")">
+                            @culture
+                        </a>
+                        @if (i < SupportedCultures.Length - 1)
+                        {
+                            <span aria-hidden="true">|</span>
+                        }
+                    }
+                </div>
+                <AuthorizeView>
+                    <Authorized>
                         <BbDropdownMenu>
-                            <BbDropdownMenuTrigger AsChild="false" Class="flex w-full min-w-0 items-center gap-2 rounded-md p-1 text-left hover:bg-accent hover:text-accent-foreground">
+                            <BbDropdownMenuTrigger AsChild="false" Class="flex items-center gap-2 rounded-md p-1 hover:bg-accent hover:text-accent-foreground">
                                 <BbAvatar Size="AvatarSize.Small">
                                     <BbAvatarFallback>@GetInitials(context.User)</BbAvatarFallback>
                                 </BbAvatar>
-                                <span class="min-w-0 flex-1 truncate text-sm">@GetFullName(context.User)</span>
                             </BbDropdownMenuTrigger>
-                            <BbDropdownMenuContent Side="PopoverSide.Top" Align="PopoverAlign.Start" Class="w-64">
+                            <BbDropdownMenuContent Side="PopoverSide.Bottom" Align="PopoverAlign.End" Class="w-64">
                                 <BbDropdownMenuLabel>
                                     <div class="flex flex-col">
                                         <span class="truncate text-sm font-medium">@GetFullName(context.User)</span>
@@ -101,43 +139,11 @@
                                 </BbDropdownMenuItem>
                             </BbDropdownMenuContent>
                         </BbDropdownMenu>
-                    </div>
-                </Authorized>
-                <NotAuthorized>
-                    <a href="/authentication/login" class="px-3 py-2 text-sm">@Localizer["App.Nav.SignIn"]</a>
-                </NotAuthorized>
-            </AuthorizeView>
-            <div class="flex items-center justify-between gap-2 px-3 py-2 text-xs text-muted-foreground">
-                <button type="button" @onclick="ToggleTheme"
-                        class="rounded p-1 hover:bg-accent hover:text-accent-foreground"
-                        aria-label="@(ThemeService.IsDarkMode ? Localizer["App.Theme.SwitchToLight"] : Localizer["App.Theme.SwitchToDark"])">
-                    <LucideIcon Name="@(ThemeService.IsDarkMode ? "sun" : "moon")" Size="16" />
-                </button>
-                <div class="flex items-center gap-1">
-                    @for (var i = 0; i < SupportedCultures.Length; i++)
-                    {
-                        var culture = SupportedCultures[i];
-                        <a href="@BuildCultureUrl(culture)" data-enhance-nav="false"
-                           class="rounded px-1.5 py-0.5 uppercase hover:bg-accent hover:text-accent-foreground @(IsCurrentCulture(culture) ? "font-semibold text-foreground" : "")">
-                            @culture
-                        </a>
-                        @if (i < SupportedCultures.Length - 1)
-                        {
-                            <span aria-hidden="true">|</span>
-                        }
-                    }
-                </div>
-            </div>
-        </BbSidebarFooter>
-    </BbSidebar>
-
-    <BbSidebarInset Class="flex min-w-0 flex-col bg-background">
-        <header class="flex shrink-0 items-center justify-between border-b px-4 py-3">
-            <div class="flex items-center gap-2">
-                <BbSidebarTrigger Class="h-8 w-8 md:hidden">
-                    <LucideIcon Name="menu" Size="16" />
-                </BbSidebarTrigger>
-                <Breadcrumbs Items="BreadcrumbState.Items" />
+                    </Authorized>
+                    <NotAuthorized>
+                        <a href="/authentication/login" class="text-sm">@Localizer["App.Nav.SignIn"]</a>
+                    </NotAuthorized>
+                </AuthorizeView>
             </div>
         </header>
         <main class="min-h-0 flex-1 overflow-auto p-4">
@@ -172,6 +178,13 @@
     private Task<AuthenticationState>? AuthStateTask { get; set; }
 
     private static readonly string[] SupportedCultures = ["de", "en"];
+
+    private static readonly string AppVersion =
+        Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+        ?? Assembly.GetExecutingAssembly().GetName().Version?.ToString()
+        ?? "unknown";
+
+    private static readonly string AppVersionShort = AppVersion.Split('+')[0];
 
     private static readonly string[] DotColors =
     [
