@@ -1,8 +1,13 @@
 package org.miracum.recruit.supersetlibrarysync.library;
 
+import com.github.slugify.Slugify;
+import io.github.dizuker.tofhir.IdUtils;
+import io.github.miracum.recruit.Recruit;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.ParameterDefinition;
@@ -34,27 +39,50 @@ public class SqlLibraryBuilder {
       "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/sql-text";
   private static final String DEFAULT_STATUS = "draft";
 
-  private final String supersetIdentifierSystem;
   private final String sqlDialect;
+  private final Slugify slugify = Slugify.builder().build();
 
   public SqlLibraryBuilder(SupersetProperties properties) {
-    this.supersetIdentifierSystem = properties.url() + "/api/v1/saved_query";
     this.sqlDialect = properties.sqlDialect();
   }
 
+  /**
+   * Builds a {@code sql-query} Library. {@code annotations.name()} must be non-null - it's what the
+   * identifier (and, in turn, the deterministic id below) is derived from, so {@code SyncService}
+   * is expected to have already skipped any saved query without one.
+   */
   public Library build(SavedQuery savedQuery, ParsedSqlAnnotations annotations) {
     var library = new Library();
 
-    library
-        .addIdentifier()
-        .setSystem(supersetIdentifierSystem)
-        .setValue(String.valueOf(savedQuery.id()));
+    // a slug of @name, not the saved query's own Superset id: it's a more stable, human-legible
+    // identity that survives the saved query being deleted and recreated, e.g. as part of
+    // migrating it between Superset instances.
+    var identifier =
+        library
+            .addIdentifier()
+            .setSystem(Recruit.NamingSystems.SupersetSyncedEligibilityLibraryId.uri())
+            .setValue(slugify.slugify(annotations.name()));
+    // a deterministic id (rather than a server-assigned one) lets SyncService upsert each
+    // Library via a plain PUT to Library/<id> instead of a conditional PUT search, and makes the
+    // id independently reproducible from the identifier alone, e.g. for consumers that only have
+    // the saved query's @name annotation on hand.
+    library.setId(IdUtils.fromIdentifier(identifier));
 
     library.setName(resolveName(savedQuery, annotations));
     library.setTitle(annotations.title() != null ? annotations.title() : savedQuery.label());
     library.setStatus(
         Enumerations.PublicationStatus.fromCode(
             annotations.status() != null ? annotations.status() : DEFAULT_STATUS));
+
+    // Library.date (not Resource.meta.lastUpdated, which most FHIR servers overwrite on every
+    // write with the actual server-side write time) is the IG's "when the library's substantive
+    // content last changed" field - the closest FHIR analogue to Superset's changed_on. Built from
+    // Instant#toString() rather than Library#setDate(Date), which would stamp the offset of
+    // whatever timezone this JVM happens to run in instead of the UTC one changed_on is actually
+    // in.
+    if (savedQuery.changedOn() != null) {
+      library.setDateElement(new DateTimeType(savedQuery.changedOn().toString()));
+    }
 
     var description =
         annotations.description() != null ? annotations.description() : savedQuery.description();
@@ -68,7 +96,7 @@ public class SqlLibraryBuilder {
       library.setPublisher(annotations.publisher());
     }
 
-    for (var author : annotations.authors()) {
+    for (var author : resolveAuthors(savedQuery, annotations)) {
       library.addAuthor().setName(author);
     }
 
@@ -122,6 +150,18 @@ public class SqlLibraryBuilder {
         new Attachment().setContentType(contentType).setData(sql.getBytes(StandardCharsets.UTF_8));
     attachment.addExtension(SQL_TEXT_EXTENSION_URL, new StringType(sql));
     return attachment;
+  }
+
+  /**
+   * The {@code @author} annotation(s) if at least one is present, else the saved query's creator
+   * (see {@link SavedQuery#defaultAuthor()}) as a single fallback author, else none at all.
+   */
+  private static List<String> resolveAuthors(
+      SavedQuery savedQuery, ParsedSqlAnnotations annotations) {
+    if (!annotations.authors().isEmpty()) {
+      return annotations.authors();
+    }
+    return savedQuery.defaultAuthor().map(List::of).orElseGet(List::of);
   }
 
   /**

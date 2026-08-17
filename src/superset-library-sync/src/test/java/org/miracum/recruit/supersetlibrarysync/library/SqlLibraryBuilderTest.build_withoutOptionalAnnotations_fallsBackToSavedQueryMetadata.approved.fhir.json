@@ -1,8 +1,9 @@
 {
   "resourceType": "Library",
+  "id": "90f126698123eb6bee575612f30171e26484cc5bbf9e92397746ee7738f3a142",
   "identifier": [ {
-    "system": "https://superset.example.org/api/v1/saved_query",
-    "value": "7"
+    "system": "https://miracum.github.io/recruit/fhir/identifiers/superset-synced-eligibility-library-id",
+    "value": "minimal"
   } ],
   "name": "Minimal",
   "title": "Ad Hoc Report",
@@ -13,7 +14,11 @@
       "code": "sql-query"
     } ]
   },
+  "date": "2024-01-15T08:00:00Z",
   "description": "Some description",
+  "author": [ {
+    "name": "Jane, Doe (jdoe)"
+  } ],
   "content": [ {
     "extension": [ {
       "url": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/sql-text",

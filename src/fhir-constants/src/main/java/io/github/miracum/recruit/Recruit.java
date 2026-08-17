@@ -328,5 +328,20 @@ public final class Recruit {
         return "https://miracum.github.io/recruit/fhir/identifiers/screening-list-id";
       }
     }
+
+    /**
+     * The identifier system for a criterion expressed in a Library resource when synced from a Superset instance.
+     */
+    public static final class SupersetSyncedEligibilityLibraryId {
+      private SupersetSyncedEligibilityLibraryId() {
+      }
+
+      /**
+       * @return {@code https://miracum.github.io/recruit/fhir/identifiers/superset-synced-eligibility-library-id}
+       */
+      public static @NonNull String uri() {
+        return "https://miracum.github.io/recruit/fhir/identifiers/superset-synced-eligibility-library-id";
+      }
+    }
   }
 }

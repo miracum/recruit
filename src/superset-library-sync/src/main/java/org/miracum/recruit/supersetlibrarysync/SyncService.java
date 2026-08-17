@@ -1,27 +1,26 @@
 package org.miracum.recruit.supersetlibrarysync;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Library;
 import org.miracum.recruit.supersetlibrarysync.annotation.SqlAnnotationParser;
 import org.miracum.recruit.supersetlibrarysync.library.SqlLibraryBuilder;
-import org.miracum.recruit.supersetlibrarysync.superset.SavedQuery;
-import org.miracum.recruit.supersetlibrarysync.superset.SupersetClient;
-import org.miracum.recruit.supersetlibrarysync.superset.SupersetProperties;
+import org.miracum.recruit.supersetlibrarysync.superset.SupersetSavedQueryRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * Orchestrates one sync cycle: fetch the (tag-filtered) Superset saved queries, turn each one with
- * at least one recognized SQL annotation into a {@code sql-query} {@link Library}, and upsert all
- * of them in one FHIR {@code batch} bundle of conditional {@code PUT}s keyed by an identifier
- * derived from the saved query's Superset id - the {@code batch} bundle type (as opposed to {@code
- * transaction}) is what gives each entry independent, isolated success/failure, since a {@code
- * transaction} bundle would roll back entirely if even one Library failed server-side validation.
+ * Orchestrates one sync cycle: read every Superset saved query, turn each one with at least one
+ * recognized SQL annotation into a {@code sql-query} {@link Library}, and upsert all of them in one
+ * FHIR {@code batch} bundle of {@code PUT}s keyed by each Library's own id - a deterministic hash
+ * of its identifier computed by {@code SqlLibraryBuilder} via {@code IdUtils.fromIdentifier} - the
+ * {@code batch} bundle type (as opposed to {@code transaction}) is what gives each entry
+ * independent, isolated success/failure, since a {@code transaction} bundle would roll back
+ * entirely if even one Library failed server-side validation.
  *
  * <p>Failures - both while preparing a Library (e.g. an invalid {@code @status} value) and while
  * submitting it - are isolated per saved query so one bad query doesn't prevent the rest of the
@@ -32,42 +31,46 @@ public class SyncService {
 
   private static final Logger log = LoggerFactory.getLogger(SyncService.class);
 
-  private final SupersetClient supersetClient;
-  private final SupersetProperties supersetProperties;
+  private final SupersetSavedQueryRepository savedQueryRepository;
+  private final SyncProperties syncProperties;
   private final SqlAnnotationParser annotationParser;
   private final SqlLibraryBuilder libraryBuilder;
   private final IGenericClient fhirClient;
+  private final FhirContext fhirContext;
 
   public SyncService(
-      SupersetClient supersetClient,
-      SupersetProperties supersetProperties,
+      SupersetSavedQueryRepository savedQueryRepository,
+      SyncProperties syncProperties,
       SqlAnnotationParser annotationParser,
       SqlLibraryBuilder libraryBuilder,
-      IGenericClient fhirClient) {
-    this.supersetClient = supersetClient;
-    this.supersetProperties = supersetProperties;
+      IGenericClient fhirClient,
+      FhirContext fhirContext) {
+    this.savedQueryRepository = savedQueryRepository;
+    this.syncProperties = syncProperties;
     this.annotationParser = annotationParser;
     this.libraryBuilder = libraryBuilder;
     this.fhirClient = fhirClient;
+    this.fhirContext = fhirContext;
   }
 
-  public SyncResult sync() throws IOException {
-    var candidates = fetchCandidates();
+  public SyncResult sync() {
+    var savedQueries = savedQueryRepository.findAll();
     log.info(
         "Found {} saved quer{} to consider syncing",
-        candidates.size(),
-        candidates.size() == 1 ? "y" : "ies");
+        savedQueries.size(),
+        savedQueries.size() == 1 ? "y" : "ies");
 
     var toSubmit = new ArrayList<Library>();
     var preparationFailures = 0;
 
-    for (var candidate : candidates) {
+    for (var savedQuery : savedQueries) {
       try {
-        var savedQuery = supersetClient.getSavedQuery(candidate.id());
         var annotations = annotationParser.parse(savedQuery.sql());
 
-        // safety net beyond the tag filter: a saved query that matched the tag but has no
-        // recognized annotation at all is almost certainly not meant to become a Library.
+        // safety net: a saved query with no recognized annotation at all is almost certainly not
+        // meant to become a Library - this is what actually selects "the ones with annotations
+        // set" out of every saved query on the instance, now that there's no REST tag filter
+        // narrowing the candidates beforehand.
         if (annotations.isEmpty()) {
           log.info(
               "Saved query {} ('{}') has no recognized SQL annotations; skipping.",
@@ -76,47 +79,63 @@ public class SyncService {
           continue;
         }
 
+        // @name (rather than the saved query's own id) is what SqlLibraryBuilder derives the
+        // Library's identifier and id from, so a saved query without one is left out entirely -
+        // logged loudly, not silently skipped like the no-annotations-at-all case above - so it
+        // can be given a @name and picked up on a later sync.
+        if (annotations.name() == null) {
+          log.warn(
+              "Saved query {} ('{}') has recognized SQL annotations but no @name; skipping it"
+                  + " until one is added.",
+              savedQuery.id(),
+              savedQuery.label());
+          continue;
+        }
+
         toSubmit.add(libraryBuilder.build(savedQuery, annotations));
       } catch (Exception ex) {
         preparationFailures++;
-        log.error("Failed to prepare a Library for saved query {}", candidate.id(), ex);
+        log.error("Failed to prepare a Library for saved query {}", savedQuery.id(), ex);
       }
     }
 
     if (toSubmit.isEmpty()) {
-      return new SyncResult(candidates.size(), 0, preparationFailures);
+      return new SyncResult(savedQueries.size(), 0, preparationFailures);
+    }
+
+    if (syncProperties.dryRun()) {
+      logDryRun(toSubmit);
+      return new SyncResult(savedQueries.size(), toSubmit.size(), preparationFailures);
     }
 
     var submissionResult = submit(toSubmit);
     return new SyncResult(
-        candidates.size(),
+        savedQueries.size(),
         submissionResult.succeeded(),
         preparationFailures + submissionResult.failed());
   }
 
-  private List<SavedQuery> fetchCandidates() throws IOException {
-    var savedQueries = supersetClient.listSavedQueries();
+  private void logDryRun(List<Library> libraries) {
+    log.info(
+        "Dry-run enabled: {} Library resource(s) would be synced, not submitting them to the"
+            + " FHIR server.",
+        libraries.size());
 
-    var tagFilter = supersetProperties.tagFilter();
-    if (tagFilter == null || tagFilter.isBlank()) {
-      return savedQueries;
+    var jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
+    for (var library : libraries) {
+      log.info("Would upsert Library:\n{}", jsonParser.encodeResourceToString(library));
     }
-
-    return savedQueries.stream().filter(query -> query.hasTag(tagFilter)).toList();
   }
 
   private SubmissionResult submit(List<Library> libraries) {
     var bundle = new Bundle().setType(Bundle.BundleType.BATCH);
     for (var library : libraries) {
-      var identifier = library.getIdentifierFirstRep();
-      var conditionalUrl =
-          "Library?identifier=" + identifier.getSystem() + "|" + identifier.getValue();
       bundle
           .addEntry()
           .setResource(library)
           .getRequest()
           .setMethod(Bundle.HTTPVerb.PUT)
-          .setUrl(conditionalUrl);
+          .setUrl("Library/" + library.getIdElement().getIdPart());
     }
 
     Bundle response;

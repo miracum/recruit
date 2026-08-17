@@ -1,8 +1,9 @@
 {
   "resourceType": "Library",
+  "id": "fd7cba3817f1d47b05aeef91c1a7ccd0372f732dd50588740174d0a59376d236",
   "identifier": [ {
-    "system": "https://superset.example.org/api/v1/saved_query",
-    "value": "42"
+    "system": "https://miracum.github.io/recruit/fhir/identifiers/superset-synced-eligibility-library-id",
+    "value": "patientbloodpressure"
   } ],
   "version": "1.0.0",
   "name": "PatientBloodPressure",
@@ -14,6 +15,7 @@
       "code": "sql-query"
     } ]
   },
+  "date": "2024-03-05T10:15:30Z",
   "publisher": "Regional Medical Center",
   "description": "Adults with an elevated most recent blood pressure reading.",
   "author": [ {

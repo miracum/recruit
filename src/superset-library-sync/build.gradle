@@ -7,13 +7,12 @@ plugins {
 configurations.configureEach {
     exclude group: 'org.springframework.boot', module: 'spring-boot-starter-webmvc'
     exclude group: 'org.springframework.boot', module: 'spring-boot-starter-actuator'
-    exclude group: 'org.springframework.boot', module: 'spring-boot-starter-jdbc'
-    exclude group: 'org.postgresql', module: 'postgresql'
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-json'
+    implementation project(':fhir-constants')
+    implementation 'io.github.diz-uker:to-fhir-starter:0.2.14'
+    implementation 'com.github.slugify:slugify:4.0.1'
 
     testImplementation 'com.approvaltests:approvaltests:31.0.0'
-    testImplementation 'com.squareup.okhttp3:mockwebserver:5.4.0'
 }

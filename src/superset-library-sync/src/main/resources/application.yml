@@ -1,16 +1,12 @@
 superset:
-  url: ""
-  username: ""
-  password: ""
-  # only saved queries carrying this Superset tag are synced. leave blank to sync every saved
-  # query that has at least one recognized SQL annotation (see the safety net note on
-  # SyncService).
-  tag-filter: "fhir-library"
   # dialect label added as a second, dialect-specific content attachment alongside the default
   # untyped "application/sql" one - set blank to skip it.
   sql-dialect: "trino"
-  page-size: 100
-  timeout-in-seconds: 60
+
+sync:
+  # when true, Library resources are built and logged but not submitted to the FHIR server -
+  # lets a run be previewed before it's allowed to actually change server state.
+  dry-run: false
 
 fhir:
   url: ""
@@ -18,6 +14,14 @@ fhir:
     timeout-in-seconds: 300
 
 spring:
+  datasource:
+    # saved queries are read directly from Superset's own metadata database (see
+    # SupersetSavedQueryRepository) rather than through its REST API, which only exposes the
+    # authenticated user's own saved queries.
+    driver-class-name: org.postgresql.Driver
+    url: ""
+    username: ""
+    password: ""
   profiles:
     active: dev
   application:

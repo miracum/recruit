@@ -178,6 +178,14 @@
       },
       {
         "reference": {
+          "reference": "NamingSystem/superset-synced-eligibility-library-id"
+        },
+        "name": "SupersetSyncedEligibilityLibraryIdentifierSystem",
+        "description": "The identifier system for a criterion expressed in a Library resource when synced from a Superset instance.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
           "reference": "List/ScreeningListExample"
         },
         "name": "Test",

@@ -17,4 +17,5 @@
 [ScreeningListBelongsToStudy]: StructureDefinition-screening-list-belongs-to-study.html
 [ScreeningList]: StructureDefinition-screening-list.html
 [screening-list-id]: NamingSystem-screening-list-id.html
+[superset-synced-eligibility-library-id]: NamingSystem-superset-synced-eligibility-library-id.html
 [ScreeningListExample]: List-ScreeningListExample.html

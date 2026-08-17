@@ -72,6 +72,14 @@
     "endLine": 35
   },
   {
+    "outputFile": "NamingSystem-superset-synced-eligibility-library-id.json",
+    "fshName": "SupersetSyncedEligibilityLibraryIdentifierSystem",
+    "fshType": "Instance",
+    "fshFile": "eligibility-library.fsh",
+    "startLine": 14,
+    "endLine": 25
+  },
+  {
     "outputFile": "ResearchStudy-RecruitResearchStudyExample.json",
     "fshName": "RecruitResearchStudyExample",
     "fshType": "Instance",
