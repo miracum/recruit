@@ -11,7 +11,7 @@ COPY RecruIT.FhirConstants/RecruIT.FhirConstants.csproj RecruIT.FhirConstants/
 
 # Persist NuGet packages between builds.
 RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
-    --mount=type=cache,id=nuget-http,target=/root/.local/share/NuGet/v3-cache \
+    --mount=type=cache,id=nuget-http,target=/root/.local/share/NuGet/http-cache \
     dotnet restore RecruIT.List/RecruIT.List.csproj
 
 # Now copy the actual source.
@@ -26,7 +26,7 @@ COPY . .
 # all (a 404 on /_framework/blazor.web.js at runtime, not a build failure). Restoring again here,
 # now that the full source is present, is cheap since the packages are already cached above.
 RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
-    --mount=type=cache,id=nuget-http,target=/root/.local/share/NuGet/v3-cache \
+    --mount=type=cache,id=nuget-http,target=/root/.local/share/NuGet/http-cache \
     dotnet publish RecruIT.List/RecruIT.List.csproj \
         --configuration Release \
         --output /app/publish \
