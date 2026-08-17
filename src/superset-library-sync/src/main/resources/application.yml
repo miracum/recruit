@@ -7,6 +7,14 @@ sync:
   # when true, Library resources are built and logged but not submitted to the FHIR server -
   # lets a run be previewed before it's allowed to actually change server state.
   dry-run: false
+  kafka:
+    # optional: when true, every synced Library's PUT bundle is published, as FHIR+JSON, to
+    # `topic` instead of being submitted to the FHIR server. Requires `topic` to be set; Kafka
+    # connectivity itself (brokers, SSL, etc.) is the spring.kafka.* block below, shared with
+    # miracum/kafka-fhir-to-server and miracum/fhir-gateway so the same secrets/config can be
+    # reused across all three.
+    enabled: false
+    topic: ""
 
 fhir:
   url: ""
@@ -15,9 +23,6 @@ fhir:
 
 spring:
   datasource:
-    # saved queries are read directly from Superset's own metadata database (see
-    # SupersetSavedQueryRepository) rather than through its REST API, which only exposes the
-    # authenticated user's own saved queries.
     driver-class-name: org.postgresql.Driver
     url: ""
     username: ""
@@ -28,6 +33,24 @@ spring:
     name: superset-library-sync
   main:
     banner-mode: off
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:}
+    security.protocol: ${KAFKA_SECURITY_PROTOCOL:PLAINTEXT}
+    ssl:
+      trust-store-type: PKCS12
+      trust-store-location: file://${SSL_TRUST_STORE:/opt/kafka-certs/ca.p12}
+      trust-store-password: ${KAFKA_SSL_TRUST_STORE_PASSWORD:}
+      key-store-type: PKCS12
+      key-store-location: file://${SSL_KEY_STORE_FILE:/opt/kafka-certs/user.p12}
+      key-store-password: ${KAFKA_SSL_KEY_STORE_PASSWORD:}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.miracum.kafka.serializers.KafkaFhirSerializer
+  cloud:
+    stream:
+      default:
+        producer:
+          use-native-encoding: true
 
 logging:
   pattern:

@@ -2,8 +2,11 @@ package org.miracum.recruit.supersetlibrarysync;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -12,15 +15,19 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import io.github.dizuker.tofhir.IdUtils;
 import io.github.miracum.recruit.Recruit;
 import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Identifier;
 import org.junit.jupiter.api.Test;
 import org.miracum.recruit.supersetlibrarysync.annotation.SqlAnnotationParser;
 import org.miracum.recruit.supersetlibrarysync.library.SqlLibraryBuilder;
+import org.miracum.recruit.supersetlibrarysync.messaging.KafkaLibraryPublisher;
+import org.miracum.recruit.supersetlibrarysync.messaging.KafkaPublishProperties;
 import org.miracum.recruit.supersetlibrarysync.superset.SavedQuery;
 import org.miracum.recruit.supersetlibrarysync.superset.SupersetProperties;
 import org.miracum.recruit.supersetlibrarysync.superset.SupersetSavedQueryRepository;
 import org.mockito.ArgumentCaptor;
+import org.springframework.cloud.stream.function.StreamBridge;
 
 class SyncServiceTest {
 
@@ -32,16 +39,18 @@ class SyncServiceTest {
 
   private final SupersetProperties properties = new SupersetProperties("trino");
 
-  private final SyncService sut = newSyncService(new SyncProperties(false));
+  private final SyncService sut = newSyncService(new SyncProperties(false), Optional.empty());
 
-  private SyncService newSyncService(SyncProperties syncProperties) {
+  private SyncService newSyncService(
+      SyncProperties syncProperties, Optional<KafkaLibraryPublisher> kafkaPublisher) {
     return new SyncService(
         savedQueryRepository,
         syncProperties,
         new SqlAnnotationParser(),
         new SqlLibraryBuilder(properties),
         fhirClient,
-        fhirContext);
+        fhirContext,
+        kafkaPublisher);
   }
 
   private static SavedQuery savedQuery(long id, String label, String sql) {
@@ -127,7 +136,7 @@ class SyncServiceTest {
 
   @Test
   void sync_withDryRunEnabled_preparesLibrariesButDoesNotSubmitThem() {
-    var dryRunSut = newSyncService(new SyncProperties(true));
+    var dryRunSut = newSyncService(new SyncProperties(true), Optional.empty());
     when(savedQueryRepository.findAll())
         .thenReturn(List.of(savedQuery(1, "a", "-- @name: TestLibrary\nSELECT 1")));
 
@@ -137,5 +146,62 @@ class SyncServiceTest {
     assertThat(result.synced()).isEqualTo(1);
     assertThat(result.failed()).isZero();
     verifyNoInteractions(fhirClient);
+  }
+
+  @Test
+  void sync_withKafkaPublishingEnabled_publishesToKafkaInsteadOfSubmittingToTheFhirServer() {
+    var streamBridge = mock(StreamBridge.class);
+    when(streamBridge.send(eq("library-updates"), any())).thenReturn(true);
+    var kafkaPublisher =
+        new KafkaLibraryPublisher(
+            streamBridge, new KafkaPublishProperties(true, "library-updates"));
+    var kafkaEnabledSut = newSyncService(new SyncProperties(false), Optional.of(kafkaPublisher));
+
+    when(savedQueryRepository.findAll())
+        .thenReturn(List.of(savedQuery(1, "a", "-- @name: TestLibrary\nSELECT 1")));
+
+    var result = kafkaEnabledSut.sync();
+
+    assertThat(result.synced()).isEqualTo(1);
+    verify(streamBridge, times(1)).send(eq("library-updates"), any(Bundle.class));
+    verifyNoInteractions(fhirClient);
+  }
+
+  @Test
+  void sync_withKafkaPublishingEnabledAndOnePublishFailure_countsItAsFailed() {
+    var streamBridge = mock(StreamBridge.class);
+    when(streamBridge.send(eq("library-updates"), any())).thenReturn(true, false);
+    var kafkaPublisher =
+        new KafkaLibraryPublisher(
+            streamBridge, new KafkaPublishProperties(true, "library-updates"));
+    var kafkaEnabledSut = newSyncService(new SyncProperties(false), Optional.of(kafkaPublisher));
+
+    when(savedQueryRepository.findAll())
+        .thenReturn(
+            List.of(
+                savedQuery(1, "a", "-- @name: LibraryOne\nSELECT 1"),
+                savedQuery(2, "b", "-- @name: LibraryTwo\nSELECT 1")));
+
+    var result = kafkaEnabledSut.sync();
+
+    assertThat(result.synced()).isEqualTo(1);
+    assertThat(result.failed()).isEqualTo(1);
+    verifyNoInteractions(fhirClient);
+  }
+
+  @Test
+  void sync_withDryRunEnabledAndKafkaPublishingEnabled_doesNotPublishToKafkaEither() {
+    var streamBridge = mock(StreamBridge.class);
+    var kafkaPublisher =
+        new KafkaLibraryPublisher(
+            streamBridge, new KafkaPublishProperties(true, "library-updates"));
+    var dryRunSut = newSyncService(new SyncProperties(true), Optional.of(kafkaPublisher));
+
+    when(savedQueryRepository.findAll())
+        .thenReturn(List.of(savedQuery(1, "a", "-- @name: TestLibrary\nSELECT 1")));
+
+    dryRunSut.sync();
+
+    verifyNoInteractions(streamBridge);
   }
 }

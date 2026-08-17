@@ -1,33 +1,44 @@
 {
-  "resourceType": "Library",
-  "id": "90f126698123eb6bee575612f30171e26484cc5bbf9e92397746ee7738f3a142",
-  "identifier": [ {
-    "system": "https://miracum.github.io/recruit/fhir/identifiers/superset-synced-eligibility-library-id",
-    "value": "minimal"
-  } ],
-  "name": "Minimal",
-  "title": "Ad Hoc Report",
-  "status": "draft",
-  "type": {
-    "coding": [ {
-      "system": "https://sql-on-fhir.org/ig/CodeSystem/LibraryTypesCodes",
-      "code": "sql-query"
-    } ]
-  },
-  "description": "Some description",
-  "content": [ {
-    "extension": [ {
-      "url": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/sql-text",
-      "valueString": "-- this query intentionally only returns a constant\nSELECT 1\n"
-    } ],
-    "contentType": "application/sql",
-    "data": "LS0gdGhpcyBxdWVyeSBpbnRlbnRpb25hbGx5IG9ubHkgcmV0dXJucyBhIGNvbnN0YW50ClNFTEVDVCAxCg=="
-  }, {
-    "extension": [ {
-      "url": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/sql-text",
-      "valueString": "-- this query intentionally only returns a constant\nSELECT 1\n"
-    } ],
-    "contentType": "application/sql;dialect=trino",
-    "data": "LS0gdGhpcyBxdWVyeSBpbnRlbnRpb25hbGx5IG9ubHkgcmV0dXJucyBhIGNvbnN0YW50ClNFTEVDVCAxCg=="
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [ {
+    "fullUrl": "Library/90f126698123eb6bee575612f30171e26484cc5bbf9e92397746ee7738f3a142",
+    "resource": {
+      "resourceType": "Library",
+      "id": "90f126698123eb6bee575612f30171e26484cc5bbf9e92397746ee7738f3a142",
+      "identifier": [ {
+        "system": "https://miracum.github.io/recruit/fhir/identifiers/superset-synced-eligibility-library-id",
+        "value": "minimal"
+      } ],
+      "name": "Minimal",
+      "title": "Ad Hoc Report",
+      "status": "draft",
+      "type": {
+        "coding": [ {
+          "system": "https://sql-on-fhir.org/ig/CodeSystem/LibraryTypesCodes",
+          "code": "sql-query"
+        } ]
+      },
+      "description": "Some description",
+      "content": [ {
+        "extension": [ {
+          "url": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/sql-text",
+          "valueString": "-- this query intentionally only returns a constant\nSELECT 1\n"
+        } ],
+        "contentType": "application/sql",
+        "data": "LS0gdGhpcyBxdWVyeSBpbnRlbnRpb25hbGx5IG9ubHkgcmV0dXJucyBhIGNvbnN0YW50ClNFTEVDVCAxCg=="
+      }, {
+        "extension": [ {
+          "url": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/sql-text",
+          "valueString": "-- this query intentionally only returns a constant\nSELECT 1\n"
+        } ],
+        "contentType": "application/sql;dialect=trino",
+        "data": "LS0gdGhpcyBxdWVyeSBpbnRlbnRpb25hbGx5IG9ubHkgcmV0dXJucyBhIGNvbnN0YW50ClNFTEVDVCAxCg=="
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Library/90f126698123eb6bee575612f30171e26484cc5bbf9e92397746ee7738f3a142"
+    }
   } ]
 }

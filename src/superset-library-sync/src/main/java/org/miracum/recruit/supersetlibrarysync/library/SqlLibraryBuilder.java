@@ -2,11 +2,13 @@ package org.miracum.recruit.supersetlibrarysync.library;
 
 import com.github.slugify.Slugify;
 import io.github.dizuker.tofhir.IdUtils;
+import io.github.dizuker.tofhir.TransactionBuilder;
 import io.github.miracum.recruit.Recruit;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.regex.Pattern;
 import org.hl7.fhir.r4.model.Attachment;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -23,7 +25,11 @@ import org.springframework.stereotype.Component;
  * Maps a {@link SavedQuery} and its {@link ParsedSqlAnnotations} to a {@code sql-query} {@link
  * Library}, applying the SQL on FHIR IG's <a
  * href="https://build.fhir.org/ig/HL7/sql-on-fhir/en/StructureDefinition-SQLQuery.html#sql-annotations">"Builders
- * SHALL/SHOULD"</a> tooling rules.
+ * SHALL/SHOULD"</a> tooling rules, and wraps it in a single-entry {@link Bundle} (via {@code
+ * TransactionBuilder}) with a {@code PUT} request keyed by the Library's own deterministic id - a
+ * self-contained upsert that {@code SyncService} either merges into its aggregate {@code batch}
+ * FHIR submission bundle or publishes standalone (e.g. to Kafka), without either consumer needing
+ * to know how to construct the entry itself.
  */
 @Component
 public class SqlLibraryBuilder {
@@ -53,11 +59,12 @@ public class SqlLibraryBuilder {
   }
 
   /**
-   * Builds a {@code sql-query} Library. {@code annotations.name()} must be non-null - it's what the
-   * identifier (and, in turn, the deterministic id below) is derived from, so {@code SyncService}
-   * is expected to have already skipped any saved query without one.
+   * Builds a {@code sql-query} Library, wrapped in a single-entry PUT {@link Bundle} (see {@link
+   * #toPutBundle}). {@code annotations.name()} must be non-null - it's what the identifier (and, in
+   * turn, the deterministic id below) is derived from, so {@code SyncService} is expected to have
+   * already skipped any saved query without one.
    */
-  public Library build(SavedQuery savedQuery, ParsedSqlAnnotations annotations) {
+  public Bundle build(SavedQuery savedQuery, ParsedSqlAnnotations annotations) {
     var library = new Library();
 
     // a slug of @name, not the saved query's own Superset id: it's a more stable, human-legible
@@ -80,12 +87,6 @@ public class SqlLibraryBuilder {
         Enumerations.PublicationStatus.fromCode(
             annotations.status() != null ? annotations.status() : DEFAULT_STATUS));
 
-    // Library.date (not Resource.meta.lastUpdated, which most FHIR servers overwrite on every
-    // write with the actual server-side write time) is the IG's "when the library's substantive
-    // content last changed" field - the closest FHIR analogue to Superset's changed_on. Built from
-    // Instant#toString() rather than Library#setDate(Date), which would stamp the offset of
-    // whatever timezone this JVM happens to run in instead of the UTC one changed_on is actually
-    // in.
     if (savedQuery.changedOn() != null) {
       library.setDateElement(new DateTimeType(savedQuery.changedOn().toString()));
     }
@@ -133,7 +134,17 @@ public class SqlLibraryBuilder {
       }
     }
 
-    return library;
+    return toPutBundle(library);
+  }
+
+  /**
+   * Wraps the Library in a single-entry PUT {@link Bundle} keyed by the Library's own deterministic
+   * id rather than a server-assigned one, via {@code to-fhir}'s {@code TransactionBuilder} -
+   * produced once here so every consumer (FHIR submission, Kafka publishing) gets the same
+   * self-contained upsert without needing to build the entry itself.
+   */
+  private static Bundle toPutBundle(Library library) {
+    return new TransactionBuilder().addEntry(library).build();
   }
 
   /**

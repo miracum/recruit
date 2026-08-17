@@ -4,10 +4,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Library;
 import org.miracum.recruit.supersetlibrarysync.annotation.SqlAnnotationParser;
 import org.miracum.recruit.supersetlibrarysync.library.SqlLibraryBuilder;
+import org.miracum.recruit.supersetlibrarysync.messaging.KafkaLibraryPublisher;
 import org.miracum.recruit.supersetlibrarysync.superset.SupersetSavedQueryRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,15 +17,18 @@ import org.springframework.stereotype.Component;
 
 /**
  * Orchestrates one sync cycle: read every Superset saved query, turn each one with at least one
- * recognized SQL annotation into a {@code sql-query} {@link Library}, and upsert all of them in one
- * FHIR {@code batch} bundle of {@code PUT}s keyed by each Library's own id - a deterministic hash
- * of its identifier computed by {@code SqlLibraryBuilder} via {@code IdUtils.fromIdentifier} - the
- * {@code batch} bundle type (as opposed to {@code transaction}) is what gives each entry
- * independent, isolated success/failure, since a {@code transaction} bundle would roll back
- * entirely if even one Library failed server-side validation.
+ * recognized SQL annotation into a {@code sql-query} {@link Library} wrapped in its own
+ * single-entry PUT {@link Bundle} (see {@code SqlLibraryBuilder#build}), and deliver every one of
+ * them to exactly one destination. When {@link KafkaLibraryPublisher} is present (see {@code
+ * sync.kafka.enabled}), each per-Library bundle is published to its configured Kafka topic
+ * <em>instead of</em> being submitted to the FHIR server. Otherwise, all of them are upserted in
+ * one FHIR {@code batch} bundle assembled from those per-Library entries - the {@code batch} bundle
+ * type (as opposed to {@code transaction}) is what gives each entry independent, isolated
+ * success/failure, since a {@code transaction} bundle would roll back entirely if even one Library
+ * failed server-side validation.
  *
  * <p>Failures - both while preparing a Library (e.g. an invalid {@code @status} value) and while
- * submitting it - are isolated per saved query so one bad query doesn't prevent the rest of the
+ * delivering it - are isolated per saved query so one bad query doesn't prevent the rest of the
  * batch from syncing, mirroring {@code query-sql-on-fhir}'s {@code PollForStudies}.
  */
 @Component
@@ -37,6 +42,7 @@ public class SyncService {
   private final SqlLibraryBuilder libraryBuilder;
   private final IGenericClient fhirClient;
   private final FhirContext fhirContext;
+  private final Optional<KafkaLibraryPublisher> kafkaPublisher;
 
   public SyncService(
       SupersetSavedQueryRepository savedQueryRepository,
@@ -44,13 +50,15 @@ public class SyncService {
       SqlAnnotationParser annotationParser,
       SqlLibraryBuilder libraryBuilder,
       IGenericClient fhirClient,
-      FhirContext fhirContext) {
+      FhirContext fhirContext,
+      Optional<KafkaLibraryPublisher> kafkaPublisher) {
     this.savedQueryRepository = savedQueryRepository;
     this.syncProperties = syncProperties;
     this.annotationParser = annotationParser;
     this.libraryBuilder = libraryBuilder;
     this.fhirClient = fhirClient;
     this.fhirContext = fhirContext;
+    this.kafkaPublisher = kafkaPublisher;
   }
 
   public SyncResult sync() {
@@ -60,7 +68,7 @@ public class SyncService {
         savedQueries.size(),
         savedQueries.size() == 1 ? "y" : "ies");
 
-    var toSubmit = new ArrayList<Library>();
+    var toSubmit = new ArrayList<Bundle>();
     var preparationFailures = 0;
 
     for (var savedQuery : savedQueries) {
@@ -108,34 +116,46 @@ public class SyncService {
       return new SyncResult(savedQueries.size(), toSubmit.size(), preparationFailures);
     }
 
-    var submissionResult = submit(toSubmit);
+    var deliveryResult =
+        kafkaPublisher.isPresent()
+            ? publishToKafka(kafkaPublisher.get(), toSubmit)
+            : submit(toSubmit);
     return new SyncResult(
         savedQueries.size(),
-        submissionResult.succeeded(),
-        preparationFailures + submissionResult.failed());
+        deliveryResult.succeeded(),
+        preparationFailures + deliveryResult.failed());
   }
 
-  private void logDryRun(List<Library> libraries) {
+  private void logDryRun(List<Bundle> libraryBundles) {
     log.info(
-        "Dry-run enabled: {} Library resource(s) would be synced, not submitting them to the"
-            + " FHIR server.",
-        libraries.size());
+        "Dry-run enabled: {} Library resource(s) would be synced to {}, not actually sent.",
+        libraryBundles.size(),
+        kafkaPublisher.isPresent() ? "Kafka" : "the FHIR server");
 
     var jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
-    for (var library : libraries) {
-      log.info("Would upsert Library:\n{}", jsonParser.encodeResourceToString(library));
+    for (var libraryBundle : libraryBundles) {
+      log.info("Would upsert Library:\n{}", jsonParser.encodeResourceToString(libraryBundle));
     }
   }
 
-  private SubmissionResult submit(List<Library> libraries) {
+  private DeliveryResult publishToKafka(
+      KafkaLibraryPublisher publisher, List<Bundle> libraryBundles) {
+    var succeeded = 0;
+    var failed = 0;
+    for (var libraryBundle : libraryBundles) {
+      if (publisher.publish(libraryBundle)) {
+        succeeded++;
+      } else {
+        failed++;
+      }
+    }
+    return new DeliveryResult(succeeded, failed);
+  }
+
+  private DeliveryResult submit(List<Bundle> libraryBundles) {
     var bundle = new Bundle().setType(Bundle.BundleType.BATCH);
-    for (var library : libraries) {
-      bundle
-          .addEntry()
-          .setResource(library)
-          .getRequest()
-          .setMethod(Bundle.HTTPVerb.PUT)
-          .setUrl("Library/" + library.getIdElement().getIdPart());
+    for (var libraryBundle : libraryBundles) {
+      bundle.getEntry().addAll(libraryBundle.getEntry());
     }
 
     Bundle response;
@@ -144,9 +164,9 @@ public class SyncService {
     } catch (Exception ex) {
       log.error(
           "Failed to submit the batch of {} Library resource(s) to the FHIR server",
-          libraries.size(),
+          libraryBundles.size(),
           ex);
-      return new SubmissionResult(0, libraries.size());
+      return new DeliveryResult(0, libraryBundles.size());
     }
 
     var succeeded = 0;
@@ -161,8 +181,8 @@ public class SyncService {
       }
     }
 
-    return new SubmissionResult(succeeded, failed);
+    return new DeliveryResult(succeeded, failed);
   }
 
-  private record SubmissionResult(int succeeded, int failed) {}
+  private record DeliveryResult(int succeeded, int failed) {}
 }

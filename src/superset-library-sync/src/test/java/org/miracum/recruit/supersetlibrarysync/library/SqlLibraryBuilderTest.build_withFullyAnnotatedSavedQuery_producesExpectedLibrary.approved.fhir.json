@@ -1,59 +1,70 @@
 {
-  "resourceType": "Library",
-  "id": "fd7cba3817f1d47b05aeef91c1a7ccd0372f732dd50588740174d0a59376d236",
-  "identifier": [ {
-    "system": "https://miracum.github.io/recruit/fhir/identifiers/superset-synced-eligibility-library-id",
-    "value": "patientbloodpressure"
-  } ],
-  "version": "1.0.0",
-  "name": "PatientBloodPressure",
-  "title": "Patient Blood Pressure Report",
-  "status": "active",
-  "type": {
-    "coding": [ {
-      "system": "https://sql-on-fhir.org/ig/CodeSystem/LibraryTypesCodes",
-      "code": "sql-query"
-    } ]
-  },
-  "date": "2024-03-05T10:15:30Z",
-  "publisher": "Regional Medical Center",
-  "description": "Adults with an elevated most recent blood pressure reading.",
-  "author": [ {
-    "name": "Clinical Informatics Team"
-  } ],
-  "relatedArtifact": [ {
-    "type": "depends-on",
-    "label": "patient",
-    "url": "https://example.org/ViewDefinition/patient_view"
-  }, {
-    "type": "depends-on",
-    "label": "bp",
-    "url": "https://example.org/ViewDefinition/bp_view"
-  } ],
-  "parameter": [ {
-    "name": "patient_id",
-    "use": "in",
-    "documentation": "Patient identifier",
-    "type": "string"
-  }, {
-    "name": "from_date",
-    "use": "in",
-    "documentation": "Start date",
-    "type": "date"
-  } ],
-  "content": [ {
-    "extension": [ {
-      "url": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/sql-text",
-      "valueString": "SELECT patient.id, bp.systolic\nFROM patient JOIN bp ON patient.id = bp.patient_id\nWHERE patient.id = :patient_id AND bp.effective_date >= :from_date\n"
-    } ],
-    "contentType": "application/sql",
-    "data": "U0VMRUNUIHBhdGllbnQuaWQsIGJwLnN5c3RvbGljCkZST00gcGF0aWVudCBKT0lOIGJwIE9OIHBhdGllbnQuaWQgPSBicC5wYXRpZW50X2lkCldIRVJFIHBhdGllbnQuaWQgPSA6cGF0aWVudF9pZCBBTkQgYnAuZWZmZWN0aXZlX2RhdGUgPj0gOmZyb21fZGF0ZQo="
-  }, {
-    "extension": [ {
-      "url": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/sql-text",
-      "valueString": "SELECT patient.id, bp.systolic\nFROM patient JOIN bp ON patient.id = bp.patient_id\nWHERE patient.id = :patient_id AND bp.effective_date >= :from_date\n"
-    } ],
-    "contentType": "application/sql;dialect=trino",
-    "data": "U0VMRUNUIHBhdGllbnQuaWQsIGJwLnN5c3RvbGljCkZST00gcGF0aWVudCBKT0lOIGJwIE9OIHBhdGllbnQuaWQgPSBicC5wYXRpZW50X2lkCldIRVJFIHBhdGllbnQuaWQgPSA6cGF0aWVudF9pZCBBTkQgYnAuZWZmZWN0aXZlX2RhdGUgPj0gOmZyb21fZGF0ZQo="
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [ {
+    "fullUrl": "Library/fd7cba3817f1d47b05aeef91c1a7ccd0372f732dd50588740174d0a59376d236",
+    "resource": {
+      "resourceType": "Library",
+      "id": "fd7cba3817f1d47b05aeef91c1a7ccd0372f732dd50588740174d0a59376d236",
+      "identifier": [ {
+        "system": "https://miracum.github.io/recruit/fhir/identifiers/superset-synced-eligibility-library-id",
+        "value": "patientbloodpressure"
+      } ],
+      "version": "1.0.0",
+      "name": "PatientBloodPressure",
+      "title": "Patient Blood Pressure Report",
+      "status": "active",
+      "type": {
+        "coding": [ {
+          "system": "https://sql-on-fhir.org/ig/CodeSystem/LibraryTypesCodes",
+          "code": "sql-query"
+        } ]
+      },
+      "date": "2024-03-05T10:15:30Z",
+      "publisher": "Regional Medical Center",
+      "description": "Adults with an elevated most recent blood pressure reading.",
+      "author": [ {
+        "name": "Clinical Informatics Team"
+      } ],
+      "relatedArtifact": [ {
+        "type": "depends-on",
+        "label": "patient",
+        "url": "https://example.org/ViewDefinition/patient_view"
+      }, {
+        "type": "depends-on",
+        "label": "bp",
+        "url": "https://example.org/ViewDefinition/bp_view"
+      } ],
+      "parameter": [ {
+        "name": "patient_id",
+        "use": "in",
+        "documentation": "Patient identifier",
+        "type": "string"
+      }, {
+        "name": "from_date",
+        "use": "in",
+        "documentation": "Start date",
+        "type": "date"
+      } ],
+      "content": [ {
+        "extension": [ {
+          "url": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/sql-text",
+          "valueString": "SELECT patient.id, bp.systolic\nFROM patient JOIN bp ON patient.id = bp.patient_id\nWHERE patient.id = :patient_id AND bp.effective_date >= :from_date\n"
+        } ],
+        "contentType": "application/sql",
+        "data": "U0VMRUNUIHBhdGllbnQuaWQsIGJwLnN5c3RvbGljCkZST00gcGF0aWVudCBKT0lOIGJwIE9OIHBhdGllbnQuaWQgPSBicC5wYXRpZW50X2lkCldIRVJFIHBhdGllbnQuaWQgPSA6cGF0aWVudF9pZCBBTkQgYnAuZWZmZWN0aXZlX2RhdGUgPj0gOmZyb21fZGF0ZQo="
+      }, {
+        "extension": [ {
+          "url": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/sql-text",
+          "valueString": "SELECT patient.id, bp.systolic\nFROM patient JOIN bp ON patient.id = bp.patient_id\nWHERE patient.id = :patient_id AND bp.effective_date >= :from_date\n"
+        } ],
+        "contentType": "application/sql;dialect=trino",
+        "data": "U0VMRUNUIHBhdGllbnQuaWQsIGJwLnN5c3RvbGljCkZST00gcGF0aWVudCBKT0lOIGJwIE9OIHBhdGllbnQuaWQgPSBicC5wYXRpZW50X2lkCldIRVJFIHBhdGllbnQuaWQgPSA6cGF0aWVudF9pZCBBTkQgYnAuZWZmZWN0aXZlX2RhdGUgPj0gOmZyb21fZGF0ZQo="
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Library/fd7cba3817f1d47b05aeef91c1a7ccd0372f732dd50588740174d0a59376d236"
+    }
   } ]
 }

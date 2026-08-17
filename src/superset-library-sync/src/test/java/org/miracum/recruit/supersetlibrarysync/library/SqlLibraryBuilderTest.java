@@ -6,6 +6,8 @@ import ca.uhn.fhir.context.FhirContext;
 import java.time.Instant;
 import org.approvaltests.Approvals;
 import org.approvaltests.core.Options;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Library;
 import org.junit.jupiter.api.Test;
 import org.miracum.recruit.supersetlibrarysync.annotation.SqlAnnotationParser;
 import org.miracum.recruit.supersetlibrarysync.superset.SavedQuery;
@@ -58,9 +60,9 @@ class SqlLibraryBuilderTest {
             Instant.parse("2024-03-05T10:15:30Z"));
     var annotations = annotationParser.parse(savedQuery.sql());
 
-    var library = sut.build(savedQuery, annotations);
+    var bundle = sut.build(savedQuery, annotations);
 
-    var json = fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(library);
+    var json = fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
     Approvals.verify(json, new Options().forFile().withExtension(".fhir.json"));
   }
 
@@ -79,9 +81,9 @@ class SqlLibraryBuilderTest {
             Instant.parse("2024-01-15T08:00:00Z"));
     var annotations = annotationParser.parse(savedQuery.sql());
 
-    var library = sut.build(savedQuery, annotations);
+    var bundle = sut.build(savedQuery, annotations);
 
-    var json = fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(library);
+    var json = fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
     Approvals.verify(json, new Options().forFile().withExtension(".fhir.json"));
   }
 
@@ -100,9 +102,9 @@ class SqlLibraryBuilderTest {
             null);
     var annotations = annotationParser.parse(savedQuery.sql());
 
-    var library = sut.build(savedQuery, annotations);
+    var bundle = sut.build(savedQuery, annotations);
 
-    assertThat(library.getIdentifierFirstRep().getValue())
+    assertThat(libraryOf(bundle).getIdentifierFirstRep().getValue())
         .isEqualTo("patient-blood-pressure-report");
   }
 
@@ -125,11 +127,15 @@ class SqlLibraryBuilderTest {
             null);
     var annotations = annotationParser.parse(savedQuery.sql());
 
-    var library = sut.build(savedQuery, annotations);
+    var bundle = sut.build(savedQuery, annotations);
 
-    assertThat(library.getAuthor()).isEmpty();
-    assertThat(library.hasDate()).isFalse();
-    var json = fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(library);
+    assertThat(libraryOf(bundle).getAuthor()).isEmpty();
+    assertThat(libraryOf(bundle).hasDate()).isFalse();
+    var json = fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
     Approvals.verify(json, new Options().forFile().withExtension(".fhir.json"));
+  }
+
+  private static Library libraryOf(Bundle bundle) {
+    return (Library) bundle.getEntryFirstRep().getResource();
   }
 }

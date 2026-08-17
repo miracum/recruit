@@ -1,37 +1,48 @@
 {
-  "resourceType": "Library",
-  "id": "90f126698123eb6bee575612f30171e26484cc5bbf9e92397746ee7738f3a142",
-  "identifier": [ {
-    "system": "https://miracum.github.io/recruit/fhir/identifiers/superset-synced-eligibility-library-id",
-    "value": "minimal"
-  } ],
-  "name": "Minimal",
-  "title": "Ad Hoc Report",
-  "status": "draft",
-  "type": {
-    "coding": [ {
-      "system": "https://sql-on-fhir.org/ig/CodeSystem/LibraryTypesCodes",
-      "code": "sql-query"
-    } ]
-  },
-  "date": "2024-01-15T08:00:00Z",
-  "description": "Some description",
-  "author": [ {
-    "name": "Jane, Doe (jdoe)"
-  } ],
-  "content": [ {
-    "extension": [ {
-      "url": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/sql-text",
-      "valueString": "SELECT 1"
-    } ],
-    "contentType": "application/sql",
-    "data": "U0VMRUNUIDE="
-  }, {
-    "extension": [ {
-      "url": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/sql-text",
-      "valueString": "SELECT 1"
-    } ],
-    "contentType": "application/sql;dialect=trino",
-    "data": "U0VMRUNUIDE="
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [ {
+    "fullUrl": "Library/90f126698123eb6bee575612f30171e26484cc5bbf9e92397746ee7738f3a142",
+    "resource": {
+      "resourceType": "Library",
+      "id": "90f126698123eb6bee575612f30171e26484cc5bbf9e92397746ee7738f3a142",
+      "identifier": [ {
+        "system": "https://miracum.github.io/recruit/fhir/identifiers/superset-synced-eligibility-library-id",
+        "value": "minimal"
+      } ],
+      "name": "Minimal",
+      "title": "Ad Hoc Report",
+      "status": "draft",
+      "type": {
+        "coding": [ {
+          "system": "https://sql-on-fhir.org/ig/CodeSystem/LibraryTypesCodes",
+          "code": "sql-query"
+        } ]
+      },
+      "date": "2024-01-15T08:00:00Z",
+      "description": "Some description",
+      "author": [ {
+        "name": "Jane, Doe (jdoe)"
+      } ],
+      "content": [ {
+        "extension": [ {
+          "url": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/sql-text",
+          "valueString": "SELECT 1"
+        } ],
+        "contentType": "application/sql",
+        "data": "U0VMRUNUIDE="
+      }, {
+        "extension": [ {
+          "url": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/sql-text",
+          "valueString": "SELECT 1"
+        } ],
+        "contentType": "application/sql;dialect=trino",
+        "data": "U0VMRUNUIDE="
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Library/90f126698123eb6bee575612f30171e26484cc5bbf9e92397746ee7738f3a142"
+    }
   } ]
 }
