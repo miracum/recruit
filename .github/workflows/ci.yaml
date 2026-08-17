@@ -83,7 +83,7 @@ jobs:
       id-token: write # for cosign keyless signing and attestation OIDC tokens
       attestations: write # to publish build provenance/SLSA attestations
       artifact-metadata: write # required alongside attestations: write by the attestation API
-    uses: miracum/.github/.github/workflows/standard-build-bake.yaml@c781b5a866a717ff9a9a74ee9df681aa38b37740 # v1.24.1
+    uses: miracum/.github/.github/workflows/standard-build-bake.yaml@e5af9ff239b4b3556438f9945e65680c0ea4c7e3 # v1.24.2
     with:
       bake-files: docker-bake.hcl
       bake-vars: |
