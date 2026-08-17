@@ -18,6 +18,12 @@ on:
 permissions:
   contents: read
 
+# cancel a superseded PR run (a new push to the same PR obsoletes the old one), but never cancel an
+# in-progress push-to-master/release/merge_group run - those shouldn't be interrupted partway.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 defaults:
   run:
     shell: bash
@@ -36,15 +42,25 @@ jobs:
     steps:
       - name: Compute tag
         id: tag
+        # values are passed through env rather than interpolated directly into the script -
+        # github.ref_name/event.release.tag_name are attacker-controllable (a branch or release tag
+        # name can contain arbitrary characters) and interpolating them straight into the run: block
+        # would let that content be interpreted as shell syntax rather than as inert string data.
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
+          REF_NAME: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            tag="pr-${{ github.event.pull_request.number }}"
-          elif [ "${{ github.event_name }}" = "release" ]; then
-            tag="${{ github.event.release.tag_name }}"
-          elif [ "${{ github.event_name }}" = "push" ]; then
-            tag="${{ github.ref_name }}"
+          if [ "${EVENT_NAME}" = "pull_request" ]; then
+            tag="pr-${PR_NUMBER}"
+          elif [ "${EVENT_NAME}" = "release" ]; then
+            tag="${RELEASE_TAG_NAME}"
+          elif [ "${EVENT_NAME}" = "push" ]; then
+            tag="${REF_NAME}"
           else
-            tag="${{ github.sha }}"
+            tag="${SHA}"
           fi
           echo "tag=${tag}" >> "$GITHUB_OUTPUT"
 
@@ -56,15 +72,17 @@ jobs:
   build-bake:
     name: build images
     needs: compute-tag
+    # granted for standard-build-bake.yaml's internal jobs, which (across build/image-provenance/
+    # sign-images/attest-trivy-vulnerability-report/upload-*-to-release) need all of these.
     permissions:
-      contents: write
-      pull-requests: write
-      security-events: write
-      actions: read
-      packages: write
-      id-token: write
-      attestations: write
-      artifact-metadata: write
+      contents: write # to upload SBOMs/attestations to the GitHub release's assets
+      pull-requests: write # for the trivy scan's PR comment
+      security-events: write # for the trivy scan's Security tab reporting
+      actions: read # for `gh attestation download` when uploading provenance to release assets
+      packages: write # to push images, signatures, and attestations to ghcr.io
+      id-token: write # for cosign keyless signing and attestation OIDC tokens
+      attestations: write # to publish build provenance/SLSA attestations
+      artifact-metadata: write # required alongside attestations: write by the attestation API
     uses: miracum/.github/.github/workflows/standard-build-bake.yaml@fac6807d6a293418d5939a09d610325323fadb5e # v1.24.0
     with:
       bake-files: docker-bake.hcl
@@ -126,7 +144,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
-      packages: write
+      packages: write # to push the PR's pre-release Helm chart to ghcr.io
     needs:
       - compute-tag
       - build-bake
@@ -204,9 +222,11 @@ jobs:
 
       - name: Load image
         if: ${{ github.event_name == 'pull_request' }}
+        env:
+          IMAGE_SLUG: ${{ matrix.image.slug }}
         run: |
           ls -lsa /tmp/images
-          docker load --input "/tmp/images/${{ matrix.image.slug }}.tar"
+          docker load --input "/tmp/images/${IMAGE_SLUG}.tar"
           docker image ls
 
       - name: Pull image if not in PR
@@ -264,11 +284,10 @@ jobs:
     # it's sufficient to just run tests then.
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
     permissions:
-      actions: read
-      attestations: write
+      actions: read # for the build provenance attestation step in release.yaml's prepare-artifacts
+      attestations: write # release.yaml's prepare-artifacts job attests the release checksums
       contents: write # for release notes
-      # for creating OIDC tokens for signing.
-      id-token: write
+      id-token: write # for creating OIDC tokens for signing
       packages: write # for uploading container images, signatures, and attestations.
     needs:
       - k8s-test
@@ -289,10 +308,10 @@ jobs:
     uses: miracum/.github/.github/workflows/standard-lint.yaml@7eaa603620c450f73fd25d6b68c37795ef4be999 # v1.22.8
     permissions:
       contents: read
-      pull-requests: write
-      issues: write
-      security-events: write
-      actions: read
+      pull-requests: write # for MegaLinter's PR comment with lint results
+      issues: write # for MegaLinter's PR comment/annotations
+      security-events: write # for uploading CodeQL's SARIF results to the Security tab
+      actions: read # required by the CodeQL analysis steps
     with:
       enable-validate-gradle-wrapper: false
       codeql-languages: '["javascript", "java"]'
