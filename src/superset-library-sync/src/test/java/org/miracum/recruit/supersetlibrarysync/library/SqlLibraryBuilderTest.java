@@ -119,11 +119,26 @@ class SqlLibraryBuilderTest {
             null,
             null,
             null);
+  void build_withNonAnnotationComment_keepsItInStoredContent() {
+    var savedQuery =
+        new SavedQuery(
+            13,
+            "Ad Hoc Report",
+            "Some description",
+            "public",
+            """
+            -- @name: Minimal
+            -- this query intentionally only returns a constant
+            SELECT 1
+            """,
+            List.of());
     var annotations = annotationParser.parse(savedQuery.sql());
 
     var library = sut.build(savedQuery, annotations);
 
     assertThat(library.getAuthor()).isEmpty();
     assertThat(library.hasDate()).isFalse();
+    var json = fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(library);
+    Approvals.verify(json, new Options().forFile().withExtension(".fhir.json"));
   }
 }

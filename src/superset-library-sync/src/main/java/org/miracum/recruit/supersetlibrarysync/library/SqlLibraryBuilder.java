@@ -5,6 +5,7 @@ import io.github.dizuker.tofhir.IdUtils;
 import io.github.miracum.recruit.Recruit;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.regex.Pattern;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -38,6 +39,11 @@ public class SqlLibraryBuilder {
   private static final String SQL_TEXT_EXTENSION_URL =
       "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/sql-text";
   private static final String DEFAULT_STATUS = "draft";
+
+  // mirrors SqlAnnotationParser.ANNOTATION_LINE - kept separate since this class only needs to
+  // detect *whether* a leading comment carries an annotation, not parse its @key/value pairs out.
+  private static final Pattern ANNOTATION_LINE =
+      Pattern.compile("^\\s*@\\w+\\s*:\\s*\\S", Pattern.MULTILINE);
 
   private final String sqlDialect;
   private final Slugify slugify = Slugify.builder().build();
@@ -133,16 +139,66 @@ public class SqlLibraryBuilder {
   /**
    * Per the IG: a default {@code application/sql} attachment (SHALL, no dialect commitment) plus,
    * when configured, a second {@code application/sql;dialect=<sqlDialect>} attachment - both
-   * carrying the same raw SQL text, comments included: a SQL engine ignores comments, and the IG
-   * doesn't ask for them to be stripped. Each attachment also carries the IG's {@code sql-text}
-   * extension with the same text in plain (non-base64) form.
+   * carrying the SQL text with its leading SQL on FHIR annotation comments (the ones {@link
+   * org.miracum.recruit.supersetlibrarysync.annotation.SqlAnnotationParser} already parsed into the
+   * Library's own elements) removed, since that metadata would otherwise be duplicated verbatim in
+   * the stored query. Any other, non-annotation comments are left untouched. Each attachment also
+   * carries the IG's {@code sql-text} extension with the same text in plain (non-base64) form.
    */
   private void addContent(Library library, String sql) {
-    library.addContent(buildAttachment("application/sql", sql));
+    var content = stripLeadingAnnotationComments(sql);
+    library.addContent(buildAttachment("application/sql", content));
 
     if (sqlDialect != null && !sqlDialect.isBlank()) {
-      library.addContent(buildAttachment("application/sql;dialect=" + sqlDialect, sql));
+      library.addContent(buildAttachment("application/sql;dialect=" + sqlDialect, content));
     }
+  }
+
+  /**
+   * Drops leading {@code /* @key: value *&#47;} block and/or {@code -- @key: value} line comments
+   * from the front of the SQL. A leading comment is only dropped if it actually contains an {@code
+   * @key: value} annotation line; the first comment (or other content) that doesn't is left in
+   * place, along with everything after it.
+   */
+  private static String stripLeadingAnnotationComments(String sql) {
+    var pos = 0;
+    for (var next = leadingAnnotationCommentEnd(sql, pos);
+        next >= 0;
+        next = leadingAnnotationCommentEnd(sql, pos)) {
+      pos = next;
+    }
+    return sql.substring(pos).stripLeading();
+  }
+
+  /**
+   * If an annotation comment starts at {@code pos} (skipping any leading whitespace), returns the
+   * index right after it; otherwise returns {@code -1}.
+   */
+  private static int leadingAnnotationCommentEnd(String sql, int pos) {
+    var length = sql.length();
+    var contentStart = pos;
+    while (contentStart < length && Character.isWhitespace(sql.charAt(contentStart))) {
+      contentStart++;
+    }
+
+    String commentBody;
+    int commentEnd;
+    if (sql.startsWith("/*", contentStart)) {
+      var close = sql.indexOf("*/", contentStart + 2);
+      if (close < 0) {
+        return -1;
+      }
+      commentBody = sql.substring(contentStart + 2, close);
+      commentEnd = close + 2;
+    } else if (sql.startsWith("--", contentStart)) {
+      var eol = sql.indexOf('\n', contentStart + 2);
+      commentEnd = eol < 0 ? length : eol;
+      commentBody = sql.substring(contentStart + 2, commentEnd);
+    } else {
+      return -1;
+    }
+
+    return ANNOTATION_LINE.matcher(commentBody).find() ? commentEnd : -1;
   }
 
   private static Attachment buildAttachment(String contentType, String sql) {

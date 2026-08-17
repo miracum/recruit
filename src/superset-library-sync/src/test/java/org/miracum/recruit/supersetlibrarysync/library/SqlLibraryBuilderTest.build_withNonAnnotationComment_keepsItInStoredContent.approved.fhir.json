@@ -1,9 +1,8 @@
 {
   "resourceType": "Library",
-  "id": "90f126698123eb6bee575612f30171e26484cc5bbf9e92397746ee7738f3a142",
   "identifier": [ {
-    "system": "https://miracum.github.io/recruit/fhir/identifiers/superset-synced-eligibility-library-id",
-    "value": "minimal"
+    "system": "https://superset.example.org/api/v1/saved_query",
+    "value": "13"
   } ],
   "name": "Minimal",
   "title": "Ad Hoc Report",
@@ -14,24 +13,20 @@
       "code": "sql-query"
     } ]
   },
-  "date": "2024-01-15T08:00:00Z",
   "description": "Some description",
-  "author": [ {
-    "name": "Jane, Doe (jdoe)"
-  } ],
   "content": [ {
     "extension": [ {
       "url": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/sql-text",
-      "valueString": "SELECT 1"
+      "valueString": "-- this query intentionally only returns a constant\nSELECT 1\n"
     } ],
     "contentType": "application/sql",
-    "data": "U0VMRUNUIDE="
+    "data": "LS0gdGhpcyBxdWVyeSBpbnRlbnRpb25hbGx5IG9ubHkgcmV0dXJucyBhIGNvbnN0YW50ClNFTEVDVCAxCg=="
   }, {
     "extension": [ {
       "url": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/sql-text",
-      "valueString": "SELECT 1"
+      "valueString": "-- this query intentionally only returns a constant\nSELECT 1\n"
     } ],
     "contentType": "application/sql;dialect=trino",
-    "data": "U0VMRUNUIDE="
+    "data": "LS0gdGhpcyBxdWVyeSBpbnRlbnRpb25hbGx5IG9ubHkgcmV0dXJucyBhIGNvbnN0YW50ClNFTEVDVCAxCg=="
   } ]
 }
