@@ -67,43 +67,23 @@ jobs:
               -f tests/chaos/argo-workflows-values.yaml \
               --version 1.0.13
 
-      - name: Download list image artifact
+      - name: Download images artifact
         if: ${{ github.event_name == 'pull_request' }}
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: ghcr.io-miracum-recruit-list-${{ inputs.image-tag }}
-          path: /tmp/ghcr.io-miracum-recruit-list-${{ inputs.image-tag }}
-
-      - name: Download notify image artifact
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: ghcr.io-miracum-recruit-notify-${{ inputs.image-tag }}
-          path: /tmp/ghcr.io-miracum-recruit-notify-${{ inputs.image-tag }}
-
-      - name: Download query image artifact
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: ghcr.io-miracum-recruit-query-${{ inputs.image-tag }}
-          path: /tmp/ghcr.io-miracum-recruit-query-${{ inputs.image-tag }}
-
-      - name: Download query-sql-on-fhir image artifact
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: ghcr.io-miracum-recruit-query-sql-on-fhir-${{ inputs.image-tag }}
-          path: /tmp/ghcr.io-miracum-recruit-query-sql-on-fhir-${{ inputs.image-tag }}
+          name: images
+          path: /tmp/images
 
       - name: Load container images
+        # built by docker buildx bake (see docker-bake.hcl) as one shared "images" artifact
+        # containing every module's <slug>.tar - load all of them except the *-test build-gate
+        # images, which nothing here references.
         if: ${{ github.event_name == 'pull_request' }}
-        env:
-          IMAGE_TAG: ${{ inputs.image-tag }}
         run: |
-          kind load image-archive "/tmp/ghcr.io-miracum-recruit-list-${IMAGE_TAG}/image.tar"
-          kind load image-archive "/tmp/ghcr.io-miracum-recruit-notify-${IMAGE_TAG}/image.tar"
-          kind load image-archive "/tmp/ghcr.io-miracum-recruit-query-${IMAGE_TAG}/image.tar"
-          kind load image-archive "/tmp/ghcr.io-miracum-recruit-query-sql-on-fhir-${IMAGE_TAG}/image.tar"
+          for f in /tmp/images/*.tar; do
+            [[ "${f}" == *-test.tar ]] && continue
+            kind load image-archive "${f}"
+          done
 
       - name: Load tester image
         run: |
