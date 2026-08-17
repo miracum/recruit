@@ -36,6 +36,7 @@ WORKDIR /app
 ARG MODULE_NAME=query
 COPY --from=build /home/gradle/project/${MODULE_NAME}/dependencies/ ./
 COPY --from=build /home/gradle/project/${MODULE_NAME}/spring-boot-loader/ ./
+COPY --from=build /home/gradle/project/${MODULE_NAME}/module-dependencies/ ./
 COPY --from=build /home/gradle/project/${MODULE_NAME}/application/ ./
 
 USER 65532:65532
