@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   validate-fhir-resource:
     name: Validate FHIR resources
@@ -37,12 +41,10 @@ jobs:
 
       - name: Validate generated FHIR resources
         working-directory: fhir/
-        shell: bash
         run: |
           find ../src/ -name "*.fhir.json" -exec fhir validate --verbose --fail "{}" \;
 
       - name: Check fsh-generated search-parameters Bundle is up-to-date with the FSH source
-        shell: bash
         continue-on-error: true
         run: |
           # clean rebuild: a stale committed file left over from a since-renamed FSH

@@ -18,6 +18,10 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   # computes the one tag every image gets built/tagged under this run, mirroring the tag rules
   # docker/metadata-action used to apply for free per-job: pr-<number> for PRs, the branch name for
@@ -178,7 +182,6 @@ jobs:
       # <https://docs.docker.com/storage/containerd/>
       # via <https://github.com/docker/setup-buildx-action/issues/257>
       - name: Set up containerd image store
-        shell: bash
         run: |
           [ -f /etc/docker/daemon.json ] || echo "{}" | sudo tee /etc/docker/daemon.json
           jq '. | .+{"features": {"containerd-snapshotter": true}}' /etc/docker/daemon.json > /tmp/docker-daemon-with-containerd.json
@@ -207,14 +210,12 @@ jobs:
           docker image ls
 
       - name: Pull image if not in PR
-        shell: bash
         if: ${{ github.event_name != 'pull_request' }}
         run: |
           docker pull "${IMAGE_NAME}:${IMAGE_TAG}"
           docker image ls -a
 
       - name: Run container structure tests
-        shell: bash
         run: |
           curl -LO https://github.com/GoogleContainerTools/container-structure-test/releases/download/v1.22.1/container-structure-test-linux-amd64
           chmod +x container-structure-test-linux-amd64
@@ -223,7 +224,6 @@ jobs:
 
       - name: Run isolated smoke test
         if: ${{ matrix.image.e2eTestDirectory != ''}}
-        shell: bash
         working-directory: src/${{ matrix.image.target }}
         env:
           E2E_TEST_DIRECTORY: ${{ matrix.image.e2eTestDirectory }}
@@ -233,7 +233,6 @@ jobs:
 
       - name: Print test logs and stop all running containers
         if: ${{ matrix.image.e2eTestDirectory != '' && always()}}
-        shell: bash
         working-directory: src/${{ matrix.image.target }}
         continue-on-error: true
         env:
