@@ -43,6 +43,11 @@ BASH_SHELLCHECK_FILTER_REGEX_EXCLUDE: (fhir/ig)
 # ApprovalTests snapshots and shouldn't be hand-edited to add a trailing newline
 EDITORCONFIG_EDITORCONFIG_CHECKER_FILTER_REGEX_EXCLUDE: (fhir/ig/fsh-generated/|\.approved\.fhir\.json$)
 
+# same generated/snapshot files as above, plus the search-parameters-transaction-upsert.json
+# symlinks into fhir/ig/fsh-generated/: prettier refuses to run on a symlink that's passed
+# to it explicitly (rather than discovered via glob), which is how MegaLinter invokes it
+JSON_PRETTIER_FILTER_REGEX_EXCLUDE: (fhir/ig/fsh-generated/|\.approved\.fhir\.json$|/search-parameters-transaction-upsert\.json$)
+
 # vendored third-party library, not project source - don't reformat it away from upstream
 CSS_STYLELINT_FILTER_REGEX_EXCLUDE: (wwwroot/lib/)
 
