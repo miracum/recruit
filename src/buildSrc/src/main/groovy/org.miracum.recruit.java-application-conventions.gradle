@@ -67,24 +67,6 @@ jar {
     enabled = false
 }
 
-bootJar {
-    layered {
-        application {
-            intoLayer('spring-boot-loader') {
-                include('org/springframework/boot/loader/**')
-            }
-            intoLayer('application')
-        }
-        dependencies {
-            intoLayer('module-dependencies') {
-                include('org.miracum:*:*')
-            }
-            intoLayer('dependencies')
-        }
-        layerOrder = [ 'dependencies', 'spring-boot-loader', 'module-dependencies', 'application' ]
-    }
-}
-
 jacoco {
     toolVersion = '0.8.15'
 }
