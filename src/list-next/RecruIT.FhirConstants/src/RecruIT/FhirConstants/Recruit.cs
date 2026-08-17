@@ -16,7 +16,6 @@ public static class Recruit
             /// <summary>The canonical URL <c>https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type</c>.</summary>
             public static string ScreeningListType =>
                 "https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type";
-
         }
 
         /// <summary>Concepts for <c>https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category</c>.</summary>
@@ -37,14 +36,16 @@ public static class Recruit
     public static class Profiles
     {
         /// <summary>The canonical URL <c>https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment</c>.</summary>
-        public static string EligibilityAssessment => "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment";
+        public static string EligibilityAssessment =>
+            "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment";
 
         /// <summary>The canonical URL <c>https://miracum.github.io/recruit/fhir/StructureDefinition/research-study</c>.</summary>
-        public static string ResearchStudy => "https://miracum.github.io/recruit/fhir/StructureDefinition/research-study";
+        public static string ResearchStudy =>
+            "https://miracum.github.io/recruit/fhir/StructureDefinition/research-study";
 
         /// <summary>The canonical URL <c>https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list</c>.</summary>
-        public static string ScreeningList => "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list";
-
+        public static string ScreeningList =>
+            "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list";
     }
 
     public static class Extensions
@@ -52,24 +53,31 @@ public static class Recruit
         public static class Urls
         {
             /// <summary>The extension URL <c>https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library</c>.</summary>
-            public static string EligibilityAssessmentDerivedFromLibrary => "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library";
+            public static string EligibilityAssessmentDerivedFromLibrary =>
+                "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library";
 
             /// <summary>The extension URL <c>https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study</c>.</summary>
-            public static string ScreeningListBelongsToStudy => "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study";
-
+            public static string ScreeningListBelongsToStudy =>
+                "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study";
         }
 
         /// <summary>A new <see cref="Extension"/> for <c>https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library</c>.</summary>
         /// <param name="value">The extension value.</param>
         /// <returns>A new <see cref="Extension"/> with url <c>https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library</c> and the given value.</returns>
         public static Extension EligibilityAssessmentDerivedFromLibrary(ResourceReference value) =>
-            new("https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library", value);
+            new(
+                "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library",
+                value
+            );
 
         /// <summary>A new <see cref="Extension"/> for <c>https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study</c>.</summary>
         /// <param name="value">The extension value.</param>
         /// <returns>A new <see cref="Extension"/> with url <c>https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study</c> and the given value.</returns>
         public static Extension ScreeningListBelongsToStudy(ResourceReference value) =>
-            new("https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study", value);
+            new(
+                "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study",
+                value
+            );
     }
 
     public static class NamingSystems
@@ -132,18 +140,22 @@ public static class EligibilityAssessmentCategoryExtensions
         "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category";
 
     /// <returns>The FHIR code for this concept.</returns>
-    public static string Code(this Recruit.CodeSystems.EligibilityAssessmentCategory value) => value switch
-    {
-        Recruit.CodeSystems.EligibilityAssessmentCategory.EligibilityAssessment => "eligibility-assessment",
-        _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
-    };
+    public static string Code(this Recruit.CodeSystems.EligibilityAssessmentCategory value) =>
+        value switch
+        {
+            Recruit.CodeSystems.EligibilityAssessmentCategory.EligibilityAssessment =>
+                "eligibility-assessment",
+            _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+        };
 
     /// <returns>The display label for this concept, or <c>null</c> if none.</returns>
-    public static string? Display(this Recruit.CodeSystems.EligibilityAssessmentCategory value) => value switch
-    {
-        Recruit.CodeSystems.EligibilityAssessmentCategory.EligibilityAssessment => "Eligibility assessment",
-        _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
-    };
+    public static string? Display(this Recruit.CodeSystems.EligibilityAssessmentCategory value) =>
+        value switch
+        {
+            Recruit.CodeSystems.EligibilityAssessmentCategory.EligibilityAssessment =>
+                "Eligibility assessment",
+            _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+        };
 
     /// <returns>A new <see cref="Coding"/> for this concept.</returns>
     public static Coding Coding(this Recruit.CodeSystems.EligibilityAssessmentCategory value) =>
@@ -151,11 +163,15 @@ public static class EligibilityAssessmentCategoryExtensions
 
     /// <param name="code">The FHIR code to look up.</param>
     /// <returns>The matching <see cref="Recruit.CodeSystems.EligibilityAssessmentCategory"/>, or <c>null</c> if none matches.</returns>
-    public static Recruit.CodeSystems.EligibilityAssessmentCategory? FromValue(string code) => code switch
-    {
-        "eligibility-assessment" => Recruit.CodeSystems.EligibilityAssessmentCategory.EligibilityAssessment,
-        _ => null
-    };
+    public static Recruit.CodeSystems.EligibilityAssessmentCategory? FromValue(string code) =>
+        code switch
+        {
+            "eligibility-assessment" => Recruit
+                .CodeSystems
+                .EligibilityAssessmentCategory
+                .EligibilityAssessment,
+            _ => null,
+        };
 
     /// <param name="code">The FHIR code to look up.</param>
     /// <returns>The matching <see cref="Recruit.CodeSystems.EligibilityAssessmentCategory"/>.</returns>
@@ -172,18 +188,22 @@ public static class ScreeningListTypeExtensions
         "https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type";
 
     /// <returns>The FHIR code for this concept.</returns>
-    public static string Code(this Recruit.CodeSystems.ScreeningListType value) => value switch
-    {
-        Recruit.CodeSystems.ScreeningListType.ScreeningRecommendations => "screening-recommendations",
-        _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
-    };
+    public static string Code(this Recruit.CodeSystems.ScreeningListType value) =>
+        value switch
+        {
+            Recruit.CodeSystems.ScreeningListType.ScreeningRecommendations =>
+                "screening-recommendations",
+            _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+        };
 
     /// <returns>The display label for this concept, or <c>null</c> if none.</returns>
-    public static string? Display(this Recruit.CodeSystems.ScreeningListType value) => value switch
-    {
-        Recruit.CodeSystems.ScreeningListType.ScreeningRecommendations => "Screening recommendations",
-        _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
-    };
+    public static string? Display(this Recruit.CodeSystems.ScreeningListType value) =>
+        value switch
+        {
+            Recruit.CodeSystems.ScreeningListType.ScreeningRecommendations =>
+                "Screening recommendations",
+            _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+        };
 
     /// <returns>A new <see cref="Coding"/> for this concept.</returns>
     public static Coding Coding(this Recruit.CodeSystems.ScreeningListType value) =>
@@ -191,11 +211,15 @@ public static class ScreeningListTypeExtensions
 
     /// <param name="code">The FHIR code to look up.</param>
     /// <returns>The matching <see cref="Recruit.CodeSystems.ScreeningListType"/>, or <c>null</c> if none matches.</returns>
-    public static Recruit.CodeSystems.ScreeningListType? FromValue(string code) => code switch
-    {
-        "screening-recommendations" => Recruit.CodeSystems.ScreeningListType.ScreeningRecommendations,
-        _ => null
-    };
+    public static Recruit.CodeSystems.ScreeningListType? FromValue(string code) =>
+        code switch
+        {
+            "screening-recommendations" => Recruit
+                .CodeSystems
+                .ScreeningListType
+                .ScreeningRecommendations,
+            _ => null,
+        };
 
     /// <param name="code">The FHIR code to look up.</param>
     /// <returns>The matching <see cref="Recruit.CodeSystems.ScreeningListType"/>.</returns>
@@ -208,10 +232,16 @@ public static class ScreeningListTypeExtensions
 public static class RecruitFhirExtensions
 {
     /// <summary>Gets the value of extension <c>https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library</c> from <paramref name="resource"/>, or <c>null</c> if absent.</summary>
-    public static ResourceReference? GetEligibilityAssessmentDerivedFromLibrary(this IExtendable resource) =>
-        resource.GetExtensionValue<ResourceReference>("https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library");
+    public static ResourceReference? GetEligibilityAssessmentDerivedFromLibrary(
+        this IExtendable resource
+    ) =>
+        resource.GetExtensionValue<ResourceReference>(
+            "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library"
+        );
 
     /// <summary>Gets the value of extension <c>https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study</c> from <paramref name="resource"/>, or <c>null</c> if absent.</summary>
     public static ResourceReference? GetScreeningListBelongsToStudy(this IExtendable resource) =>
-        resource.GetExtensionValue<ResourceReference>("https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study");
+        resource.GetExtensionValue<ResourceReference>(
+            "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study"
+        );
 }

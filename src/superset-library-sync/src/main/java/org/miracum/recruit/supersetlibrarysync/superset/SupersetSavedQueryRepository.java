@@ -20,7 +20,7 @@ public class SupersetSavedQueryRepository {
   private static final String FIND_ALL_SQL =
       """
       SELECT sq.id, sq.label, sq.schema, sq.sql, sq.description, d.database_name, u.username,
-             u.first_name, u.last_name, sq.created_on, sq.changed_on
+        u.first_name, u.last_name, sq.created_on, sq.changed_on
       FROM saved_query sq
       LEFT JOIN ab_user u ON u.id = sq.created_by_fk
       LEFT JOIN dbs d ON d.id = sq.db_id
