@@ -5,7 +5,7 @@ WORKDIR /home/gradle/project
 COPY . .
 
 ARG MODULE_NAME=query
-RUN --mount=type=cache,target=/home/gradle/.gradle/,sharing=locked <<EOF
+RUN --mount=type=cache,target=/home/gradle/.gradle <<EOF
 gradle clean ":${MODULE_NAME}:build" -x test --info
 java -Djarmode=tools -jar ${MODULE_NAME}/build/libs/*.jar extract --layers --launcher --force \
     --destination "${MODULE_NAME}/"
@@ -13,7 +13,7 @@ EOF
 
 FROM build AS test
 ENV TZ="UTC"
-RUN --mount=type=cache,target=/home/gradle/.gradle/,sharing=locked <<EOF
+RUN --mount=type=cache,target=/home/gradle/.gradle <<EOF
 gradle ":${MODULE_NAME}:test"
 gradle ":${MODULE_NAME}:jacocoTestReport"
 EOF
