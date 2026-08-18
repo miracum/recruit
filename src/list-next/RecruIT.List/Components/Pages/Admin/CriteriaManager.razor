@@ -2,6 +2,7 @@
 @attribute [Authorize]
 @inject EligibilityCriteriaService CriteriaService
 @inject BreadcrumbState BreadcrumbState
+@inject DialogService DialogService
 @inject IStringLocalizer<SharedResources> Localizer
 
 <PageTitle>@Localizer["App.CriteriaManager.PageTitle"]</PageTitle>
@@ -14,225 +15,276 @@
 }
 else
 {
-    <BbCard>
-        <BbCardHeader>
-            <BbCardTitle>@Localizer["App.CriteriaManager.LibrarySectionTitle"]</BbCardTitle>
-        </BbCardHeader>
-        <BbCardContent>
-            <p class="mb-3 text-sm text-muted-foreground">@Localizer["App.CriteriaManager.LibrarySectionDescription"]</p>
+    <BbTabs DefaultValue="study">
+        <BbTabsList>
+            <BbTabsTrigger Value="study">@Localizer["App.CriteriaManager.StudyTabTitle"]</BbTabsTrigger>
+            <BbTabsTrigger Value="library">@Localizer["App.CriteriaManager.LibraryTabTitle"] (@_libraries.Count)</BbTabsTrigger>
+        </BbTabsList>
 
-            @if (_librariesLoading)
-            {
-                <BbSkeleton Class="h-24 w-full" />
-            }
-            else if (_libraryLoadErrorMessage is not null)
-            {
-                <BbAlert Variant="AlertVariant.Danger">
-                    <BbAlertDescription>@_libraryLoadErrorMessage</BbAlertDescription>
-                </BbAlert>
-            }
-            else
-            {
-                <BbInput @bind-Value="_librarySearch" @bind:event="oninput"
-                         Placeholder="@Localizer["App.CriteriaManager.LibrarySearchPlaceholder"]" Class="mb-4 max-w-sm" />
+        <BbTabsContent Value="library">
+            <BbCard Class="mt-4">
+                <BbCardHeader>
+                    <BbCardTitle>@Localizer["App.CriteriaManager.LibrarySectionTitle"]</BbCardTitle>
+                </BbCardHeader>
+                <BbCardContent>
+                    <p class="mb-3 text-sm text-muted-foreground">@Localizer["App.CriteriaManager.LibrarySectionDescription"]</p>
 
-                @if (FilteredLibraries.Count == 0)
-                {
-                    <p class="text-sm text-muted-foreground">@Localizer["App.CriteriaManager.NoLibrariesMessage"]</p>
-                }
-                else
-                {
-                    <div class="flex flex-col gap-4">
-                        @foreach (var library in FilteredLibraries)
-                        {
-                            <div class="rounded-md border p-3">
-                                <div class="flex flex-wrap items-center justify-between gap-2">
-                                    <div>
-                                        <div class="font-medium">@(library.Title ?? library.Id)</div>
-                                        @if (!string.IsNullOrWhiteSpace(library.Name))
-                                        {
-                                            <div class="text-xs text-muted-foreground">@library.Name</div>
-                                        }
-                                    </div>
-                                    <div class="flex flex-col items-end gap-1">
-                                        @if (library.Status is not null)
-                                        {
-                                            <BbBadge Variant="BadgeVariant.Secondary">@library.Status</BbBadge>
-                                        }
-                                        @if (library.LastUpdated is not null)
-                                        {
-                                            <span class="text-xs text-muted-foreground">
-                                                @Localizer["App.CriteriaManager.LastUpdatedLabel"]: @library.LastUpdated.Value.LocalDateTime.ToString("g")
-                                            </span>
-                                        }
-                                    </div>
-                                </div>
-                                @if (!string.IsNullOrWhiteSpace(library.Description))
-                                {
-                                    <p class="mt-1 text-sm text-muted-foreground">@library.Description</p>
-                                }
-                                <div class="mt-2 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
-                                    <span>@(Localizer["App.CriteriaManager.LibraryUsedByLabel"]):</span>
-                                    @if (library.UsedByStudyDisplayNames.Count == 0)
-                                    {
-                                        <span>@Localizer["App.CriteriaManager.LibraryNotUsedLabel"]</span>
-                                    }
-                                    else
-                                    {
-                                        @foreach (var studyName in library.UsedByStudyDisplayNames)
-                                        {
-                                            <BbBadge Variant="BadgeVariant.Outline">@studyName</BbBadge>
-                                        }
-                                    }
-                                </div>
-                                @if (!string.IsNullOrWhiteSpace(library.Sql))
-                                {
-                                    <details class="mt-3">
-                                        <summary class="cursor-pointer text-xs font-medium uppercase tracking-wide text-muted-foreground hover:text-foreground">
-                                            @Localizer["App.CriteriaManager.CriterionSqlLabel"]
-                                        </summary>
-                                        <pre class="mt-2 max-h-64 overflow-auto rounded-md border bg-muted p-3 text-xs"><code>@library.Sql</code></pre>
-                                    </details>
-                                }
-                            </div>
-                        }
-                    </div>
-                }
-            }
-        </BbCardContent>
-    </BbCard>
-
-    <BbCard Class="mt-6">
-        <BbCardHeader>
-            <BbCardTitle>@Localizer["App.CriteriaManager.StudySectionTitle"]</BbCardTitle>
-        </BbCardHeader>
-        <BbCardContent>
-            <div class="flex gap-2">
-                <BbButton Variant="@(_studyMode == StudyMode.Existing ? ButtonVariant.Default : ButtonVariant.Outline)"
-                          Size="ButtonSize.Small" OnClick="@(() => _studyMode = StudyMode.Existing)">
-                    @Localizer["App.CriteriaManager.ExistingStudyTab"]
-                </BbButton>
-                <BbButton Variant="@(_studyMode == StudyMode.New ? ButtonVariant.Default : ButtonVariant.Outline)"
-                          Size="ButtonSize.Small" OnClick="@(() => _studyMode = StudyMode.New)">
-                    @Localizer["App.CriteriaManager.NewStudyTab"]
-                </BbButton>
-            </div>
-
-            @if (_studyMode == StudyMode.Existing)
-            {
-                <div class="mt-4 max-w-md">
-                    @if (_existingStudiesLoading)
+                    @if (_librariesLoading)
                     {
-                        <BbSkeleton Class="h-9 w-full" />
+                        <BbSkeleton Class="h-24 w-full" />
                     }
-                    else if (_studyLoadErrorMessage is not null)
+                    else if (_libraryLoadErrorMessage is not null)
                     {
                         <BbAlert Variant="AlertVariant.Danger">
-                            <BbAlertDescription>@_studyLoadErrorMessage</BbAlertDescription>
+                            <BbAlertDescription>@_libraryLoadErrorMessage</BbAlertDescription>
                         </BbAlert>
-                    }
-                    else if (_existingStudies.Count == 0)
-                    {
-                        <p class="text-sm text-muted-foreground">@Localizer["App.CriteriaManager.NoExistingStudies"]</p>
                     }
                     else
                     {
-                        <select class="block w-full rounded-md border bg-background p-2 text-sm"
-                                @bind="_selectedExistingStudyId" @bind:after="OnExistingStudySelected">
-                            <option value="">@Localizer["App.CriteriaManager.SelectStudyPlaceholder"]</option>
-                            @foreach (var study in _existingStudies)
-                            {
-                                <option value="@study.Id">@(study.Acronym ?? study.Title ?? study.Id)</option>
-                            }
-                        </select>
+                        <BbInput @bind-Value="_librarySearch" @bind:event="oninput"
+                                 Placeholder="@Localizer["App.CriteriaManager.LibrarySearchPlaceholder"]" Class="mb-4 max-w-sm" />
+
+                        @if (FilteredLibraries.Count == 0)
+                        {
+                            <p class="text-sm text-muted-foreground">@Localizer["App.CriteriaManager.NoLibrariesMessage"]</p>
+                        }
+                        else
+                        {
+                            <div class="flex flex-col gap-4">
+                                @foreach (var library in FilteredLibraries)
+                                {
+                                    <div class="rounded-md border p-3">
+                                        <div class="flex flex-wrap items-center justify-between gap-2">
+                                            <div>
+                                                <div class="font-medium">@(library.Title ?? library.Id)</div>
+                                                @if (!string.IsNullOrWhiteSpace(library.Name))
+                                                {
+                                                    <div class="text-xs text-muted-foreground">@library.Name</div>
+                                                }
+                                            </div>
+                                            <div class="flex flex-col items-end gap-1">
+                                                @if (library.Status is not null)
+                                                {
+                                                    <BbBadge Variant="BadgeVariant.Secondary">@library.Status</BbBadge>
+                                                }
+                                                @if (library.LastUpdated is not null)
+                                                {
+                                                    <span class="text-xs text-muted-foreground">
+                                                        @Localizer["App.CriteriaManager.LastUpdatedLabel"]: @library.LastUpdated.Value.LocalDateTime.ToString("g")
+                                                    </span>
+                                                }
+                                            </div>
+                                        </div>
+                                        @if (!string.IsNullOrWhiteSpace(library.Description))
+                                        {
+                                            <p class="mt-1 text-sm text-muted-foreground">@library.Description</p>
+                                        }
+                                        <div class="mt-2 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+                                            <span>@(Localizer["App.CriteriaManager.LibraryUsedByLabel"]):</span>
+                                            @if (library.UsedByStudyDisplayNames.Count == 0)
+                                            {
+                                                <span>@Localizer["App.CriteriaManager.LibraryNotUsedLabel"]</span>
+                                            }
+                                            else
+                                            {
+                                                @foreach (var studyName in library.UsedByStudyDisplayNames)
+                                                {
+                                                    <BbBadge Variant="BadgeVariant.Outline">@studyName</BbBadge>
+                                                }
+                                            }
+                                        </div>
+                                        @if (!string.IsNullOrWhiteSpace(library.Sql))
+                                        {
+                                            <details class="mt-3">
+                                                <summary class="cursor-pointer text-xs font-medium uppercase tracking-wide text-muted-foreground hover:text-foreground">
+                                                    @Localizer["App.CriteriaManager.CriterionSqlLabel"]
+                                                </summary>
+                                                <pre class="mt-2 max-h-64 overflow-auto rounded-md border bg-muted p-3 text-xs"><code>@library.Sql</code></pre>
+                                            </details>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
                     }
-                </div>
-            }
+                </BbCardContent>
+            </BbCard>
+        </BbTabsContent>
 
-            <div class="mt-4 flex flex-wrap gap-3">
-                <div class="min-w-64 flex-1">
-                    <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.StudyTitleLabel"]</label>
-                    <BbInput @bind-Value="_studyDraft.Title" Disabled="@(_studyMode == StudyMode.Existing)" Class="mt-1" />
-                </div>
-                <div class="w-full max-w-xs">
-                    <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.StudyAcronymLabel"]</label>
-                    <BbInput @bind-Value="_studyDraft.Acronym" Disabled="@(_studyMode == StudyMode.Existing)" Class="mt-1" />
-                </div>
-                <div class="w-full max-w-sm">
-                    <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.IdentifierSystemLabel"]</label>
-                    <BbInput @bind-Value="_studyDraft.IdentifierSystem" Disabled="@(_studyMode == StudyMode.Existing)" Class="mt-1" />
-                </div>
-                <div class="w-full max-w-xs">
-                    <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.IdentifierValueLabel"]</label>
-                    <BbInput @bind-Value="_studyDraft.IdentifierValue" Disabled="@(_studyMode == StudyMode.Existing)" Class="mt-1" />
-                </div>
-            </div>
-        </BbCardContent>
-    </BbCard>
+        <BbTabsContent Value="study">
+            <BbCard Class="mt-4">
+                <BbCardHeader>
+                    <BbCardTitle>@Localizer["App.CriteriaManager.StudySectionTitle"]</BbCardTitle>
+                </BbCardHeader>
+                <BbCardContent>
+                    <div class="flex gap-2">
+                        <BbButton Variant="@(_studyMode == StudyMode.Existing ? ButtonVariant.Default : ButtonVariant.Outline)"
+                                  Size="ButtonSize.Small" OnClick="@(() => _studyMode = StudyMode.Existing)">
+                            @Localizer["App.CriteriaManager.ExistingStudyTab"]
+                        </BbButton>
+                        <BbButton Variant="@(_studyMode == StudyMode.New ? ButtonVariant.Default : ButtonVariant.Outline)"
+                                  Size="ButtonSize.Small" OnClick="@(() => _studyMode = StudyMode.New)">
+                            @Localizer["App.CriteriaManager.NewStudyTab"]
+                        </BbButton>
+                    </div>
 
-    <BbCard Class="mt-6">
-        <BbCardHeader>
-            <BbCardTitle>@Localizer["App.CriteriaManager.CriteriaSectionTitle"]</BbCardTitle>
-        </BbCardHeader>
-        <BbCardContent>
-            @if (_criteria.Count == 0)
-            {
-                <p class="text-sm text-muted-foreground">@Localizer["App.CriteriaManager.NoCriteriaMessage"]</p>
-            }
-            else
-            {
-                <div class="flex flex-col gap-4">
-                    @foreach (var criterion in _criteria)
+                    @if (_studyMode == StudyMode.Existing)
                     {
-                        <div class="rounded-md border p-3">
-                            <div class="flex flex-wrap items-end gap-3">
-                                <div class="min-w-64 flex-1">
-                                    <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.CriterionDisplayTextLabel"]</label>
-                                    <BbInput @bind-Value="criterion.DisplayText" Class="mt-1" />
-                                </div>
-                                <div>
-                                    <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.CriterionTypeLabel"]</label>
-                                    <select class="mt-1 block rounded-md border bg-background p-2 text-sm" @bind="criterion.Exclude">
-                                        <option value="false">@Localizer["App.CriteriaManager.InclusionOption"]</option>
-                                        <option value="true">@Localizer["App.CriteriaManager.ExclusionOption"]</option>
-                                    </select>
-                                </div>
-                                <BbButton Variant="ButtonVariant.Destructive" Size="ButtonSize.Small" OnClick="@(() => RemoveCriterion(criterion))">
-                                    @Localizer["App.CriteriaManager.RemoveCriterionButton"]
-                                </BbButton>
-                            </div>
-                            <div class="mt-3">
-                                <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.CriterionExistingLibraryLabel"]</label>
-                                <BbInput @bind-Value="criterion.ExistingLibraryReference" Placeholder="Library/common-age-min-18" Class="mt-1" />
-                            </div>
-                            @if (string.IsNullOrWhiteSpace(criterion.ExistingLibraryReference))
+                        <div class="mt-4 max-w-md">
+                            @if (_existingStudiesLoading)
                             {
-                                <div class="mt-3">
-                                    <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.CriterionSqlLabel"]</label>
-                                    <textarea class="mt-1 block w-full rounded-md border bg-background p-2 font-mono text-xs" rows="4"
-                                              @bind="criterion.Sql" @bind:event="oninput"></textarea>
-                                </div>
+                                <BbSkeleton Class="h-9 w-full" />
+                            }
+                            else if (_studyLoadErrorMessage is not null)
+                            {
+                                <BbAlert Variant="AlertVariant.Danger">
+                                    <BbAlertDescription>@_studyLoadErrorMessage</BbAlertDescription>
+                                </BbAlert>
+                            }
+                            else if (_existingStudies.Count == 0)
+                            {
+                                <p class="text-sm text-muted-foreground">@Localizer["App.CriteriaManager.NoExistingStudies"]</p>
+                            }
+                            else
+                            {
+                                <select class="block w-full rounded-md border bg-background p-2 text-sm"
+                                        @bind="_selectedExistingStudyId" @bind:after="OnExistingStudySelected">
+                                    <option value="">@Localizer["App.CriteriaManager.SelectStudyPlaceholder"]</option>
+                                    @foreach (var study in _existingStudies)
+                                    {
+                                        <option value="@study.Id">@(study.Acronym ?? study.Title ?? study.Id)</option>
+                                    }
+                                </select>
                             }
                         </div>
                     }
-                </div>
-            }
-            <BbButton Variant="ButtonVariant.Outline" Class="mt-4" OnClick="AddCriterion">
-                <Icon><LucideIcon Name="plus" Size="16" /></Icon>
-                <ChildContent>@Localizer["App.CriteriaManager.AddCriterionButton"]</ChildContent>
-            </BbButton>
-        </BbCardContent>
-    </BbCard>
 
-    <BbCard Class="mt-6">
-        <BbCardHeader>
-            <BbCardTitle>@Localizer["App.CriteriaManager.PreviewSectionTitle"]</BbCardTitle>
-        </BbCardHeader>
-        <BbCardContent>
-            <p class="mb-3 text-sm text-muted-foreground">@Localizer["App.CriteriaManager.PreviewDescription"]</p>
-            <pre class="max-h-[32rem] overflow-auto rounded-md border bg-muted p-3 text-xs"><code>@PreviewJson</code></pre>
-        </BbCardContent>
-    </BbCard>
+                    <div class="mt-4 flex flex-wrap gap-3">
+                        <div class="min-w-64 flex-1">
+                            <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.StudyTitleLabel"]</label>
+                            <BbInput @bind-Value="_studyDraft.Title" Disabled="@(_studyMode == StudyMode.Existing)" Class="mt-1" />
+                        </div>
+                        <div class="w-full max-w-xs">
+                            <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.StudyAcronymLabel"]</label>
+                            <BbInput @bind-Value="_studyDraft.Acronym" Disabled="@(_studyMode == StudyMode.Existing)" Class="mt-1" />
+                        </div>
+                        <div class="w-full max-w-sm">
+                            <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.IdentifierSystemLabel"]</label>
+                            <BbInput @bind-Value="_studyDraft.IdentifierSystem" Disabled="@(_studyMode == StudyMode.Existing)" Class="mt-1" />
+                        </div>
+                        <div class="w-full max-w-xs">
+                            <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.IdentifierValueLabel"]</label>
+                            <BbInput @bind-Value="_studyDraft.IdentifierValue" Disabled="@(_studyMode == StudyMode.Existing)" Class="mt-1" />
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.StudyDescriptionLabel"]</label>
+                        <textarea class="mt-1 block w-full rounded-md border bg-background p-2 text-sm" rows="3"
+                                  @bind="_studyDraft.Description" @bind:event="oninput"
+                                  disabled="@(_studyMode == StudyMode.Existing)"></textarea>
+                    </div>
+                </BbCardContent>
+            </BbCard>
+
+            <BbCard Class="mt-6">
+                <BbCardHeader>
+                    <BbCardTitle>@Localizer["App.CriteriaManager.CriteriaSectionTitle"]</BbCardTitle>
+                </BbCardHeader>
+                <BbCardContent>
+                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                        @{
+                            var inclusion = InclusionCriteria;
+                        }
+                        <div>
+                            <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+                                <h3 class="text-sm font-semibold">@Localizer["App.CriteriaManager.InclusionColumnTitle"]</h3>
+                                <div class="flex flex-wrap gap-2">
+                                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="@(() => OpenLibraryPickerAsync(exclude: false))">
+                                        <Icon><LucideIcon Name="library" Size="14" /></Icon>
+                                        <ChildContent>@Localizer["App.CriteriaManager.AddFromLibraryButton"]</ChildContent>
+                                    </BbButton>
+                                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="@(() => AddCriterion(exclude: false))">
+                                        <Icon><LucideIcon Name="plus" Size="14" /></Icon>
+                                        <ChildContent>@Localizer["App.CriteriaManager.NewInclusionCriterionButton"]</ChildContent>
+                                    </BbButton>
+                                </div>
+                            </div>
+                            @if (inclusion.Count == 0)
+                            {
+                                <p class="text-sm text-muted-foreground">@Localizer["App.CriteriaManager.NoInclusionCriteriaMessage"]</p>
+                            }
+                            else
+                            {
+                                <div class="flex flex-col gap-3">
+                                    @for (var i = 0; i < inclusion.Count; i++)
+                                    {
+                                        var criterion = inclusion[i];
+                                        var isFirst = i == 0;
+                                        var isLast = i == inclusion.Count - 1;
+                                        <CriterionDraftRow Criterion="criterion" CanMoveUp="!isFirst" CanMoveDown="!isLast"
+                                                            OnMoveUp="@(() => MoveCriterion(criterion, -1))"
+                                                            OnMoveDown="@(() => MoveCriterion(criterion, 1))"
+                                                            OnMoveToOtherColumn="@(() => ToggleCriterionColumn(criterion))"
+                                                            OnRemove="@(() => RemoveCriterion(criterion))" />
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        @{
+                            var exclusion = ExclusionCriteria;
+                        }
+                        <div>
+                            <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+                                <h3 class="text-sm font-semibold">@Localizer["App.CriteriaManager.ExclusionColumnTitle"]</h3>
+                                <div class="flex flex-wrap gap-2">
+                                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="@(() => OpenLibraryPickerAsync(exclude: true))">
+                                        <Icon><LucideIcon Name="library" Size="14" /></Icon>
+                                        <ChildContent>@Localizer["App.CriteriaManager.AddFromLibraryButton"]</ChildContent>
+                                    </BbButton>
+                                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="@(() => AddCriterion(exclude: true))">
+                                        <Icon><LucideIcon Name="plus" Size="14" /></Icon>
+                                        <ChildContent>@Localizer["App.CriteriaManager.NewExclusionCriterionButton"]</ChildContent>
+                                    </BbButton>
+                                </div>
+                            </div>
+                            @if (exclusion.Count == 0)
+                            {
+                                <p class="text-sm text-muted-foreground">@Localizer["App.CriteriaManager.NoExclusionCriteriaMessage"]</p>
+                            }
+                            else
+                            {
+                                <div class="flex flex-col gap-3">
+                                    @for (var i = 0; i < exclusion.Count; i++)
+                                    {
+                                        var criterion = exclusion[i];
+                                        var isFirst = i == 0;
+                                        var isLast = i == exclusion.Count - 1;
+                                        <CriterionDraftRow Criterion="criterion" CanMoveUp="!isFirst" CanMoveDown="!isLast"
+                                                            OnMoveUp="@(() => MoveCriterion(criterion, -1))"
+                                                            OnMoveDown="@(() => MoveCriterion(criterion, 1))"
+                                                            OnMoveToOtherColumn="@(() => ToggleCriterionColumn(criterion))"
+                                                            OnRemove="@(() => RemoveCriterion(criterion))" />
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </BbCardContent>
+            </BbCard>
+
+            <BbCard Class="mt-6">
+                <BbCardHeader>
+                    <BbCardTitle>@Localizer["App.CriteriaManager.PreviewSectionTitle"]</BbCardTitle>
+                </BbCardHeader>
+                <BbCardContent>
+                    <p class="mb-3 text-sm text-muted-foreground">@Localizer["App.CriteriaManager.PreviewDescription"]</p>
+                    <pre class="max-h-[32rem] overflow-auto rounded-md border bg-muted p-3 text-xs"><code>@PreviewJson</code></pre>
+                </BbCardContent>
+            </BbCard>
+        </BbTabsContent>
+    </BbTabs>
 }
 
 @code {
@@ -266,6 +318,10 @@ else
 
     private List<LibrarySummaryDto> FilteredLibraries =>
         [.. _libraries.Where(MatchesLibrarySearch)];
+
+    private List<CriterionDraft> InclusionCriteria => [.. _criteria.Where(c => !c.Exclude)];
+
+    private List<CriterionDraft> ExclusionCriteria => [.. _criteria.Where(c => c.Exclude)];
 
     private bool MatchesLibrarySearch(LibrarySummaryDto library) =>
         string.IsNullOrWhiteSpace(_librarySearch)
@@ -323,12 +379,70 @@ else
                 ExistingId = study.Id,
                 Title = study.Title ?? string.Empty,
                 Acronym = study.Acronym ?? string.Empty,
+                Description = study.Description ?? string.Empty,
                 IdentifierSystem = study.TrialIdentifier?.System ?? string.Empty,
                 IdentifierValue = study.TrialIdentifier?.Value ?? string.Empty,
             };
+
+        // TODO: this doesn't (yet) load the selected study's existing criteria into _criteria -
+        // switching to an existing study only backfills its title/acronym/description/identifier.
+        // Needs a read-side method resolving that study's Group.characteristic/Library set, same
+        // as ScreeningListService.GetListWithPatientsAsync does for the patient list page.
     }
 
-    private void AddCriterion() => _criteria.Add(new CriterionDraft());
+    private void AddCriterion(bool exclude) => _criteria.Add(new CriterionDraft { Exclude = exclude });
+
+    private async Task OpenLibraryPickerAsync(bool exclude)
+    {
+        var result = await DialogService.OpenAsync<LibraryCriterionPickerDialog>(
+            new Dictionary<string, object?> { ["Libraries"] = _libraries },
+            new DialogOpenOptions
+            {
+                Title = Localizer["App.CriteriaManager.LibraryPickerDialogTitle"],
+                Description = Localizer["App.CriteriaManager.LibraryPickerDialogDescription"],
+                Size = DialogSize.Large,
+            }
+        );
+
+        if (!result.Cancelled && result.GetData<LibrarySummaryDto>() is { } library)
+        {
+            AddCriterionFromLibrary(library, exclude);
+        }
+    }
+
+    private void AddCriterionFromLibrary(LibrarySummaryDto library, bool exclude) =>
+        _criteria.Add(
+            new CriterionDraft
+            {
+                DisplayText = library.Title ?? library.Name ?? library.Id,
+                Exclude = exclude,
+                ExistingLibraryReference = $"Library/{library.Id}",
+                Sql = library.Sql ?? string.Empty,
+            }
+        );
 
     private void RemoveCriterion(CriterionDraft criterion) => _criteria.Remove(criterion);
+
+    private void ToggleCriterionColumn(CriterionDraft criterion) => criterion.Exclude = !criterion.Exclude;
+
+    /// <summary>
+    /// Moves a criterion up/down within its own column (inclusion/exclusion), not the whole list -
+    /// resolves neighbors from the filtered column view, then swaps positions in the flat backing
+    /// list so both columns' filtered views reflect the new order.
+    /// </summary>
+    private void MoveCriterion(CriterionDraft criterion, int direction)
+    {
+        var column = criterion.Exclude ? ExclusionCriteria : InclusionCriteria;
+        var columnIndex = column.IndexOf(criterion);
+        var targetIndex = columnIndex + direction;
+        if (targetIndex < 0 || targetIndex >= column.Count)
+        {
+            return;
+        }
+
+        var neighbor = column[targetIndex];
+        var i = _criteria.IndexOf(criterion);
+        var j = _criteria.IndexOf(neighbor);
+        (_criteria[i], _criteria[j]) = (_criteria[j], _criteria[i]);
+    }
 }

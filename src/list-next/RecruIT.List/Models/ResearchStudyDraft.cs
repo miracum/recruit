@@ -10,6 +10,7 @@ public sealed class ResearchStudyDraft
     public string? ExistingId { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Acronym { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
     public string IdentifierSystem { get; set; } = string.Empty;
     public string IdentifierValue { get; set; } = string.Empty;
 }

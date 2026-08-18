@@ -326,7 +326,7 @@ services:
       - "traefik.http.routers.jaeger.entrypoints=web"
 
   maildev:
-    image: docker.io/maildev/maildev:2.2.1@sha256:180ef51f65eefebb0e7122d8308813c1fd7bff164bc440ce5a3c2feee167a810
+    image: docker.io/maildev/maildev:3.0.0-rc.1@sha256:ad6d46b7c47617c141961649a9ed5e50069aed53e94ca5359a59b3e1459925da
     restart: unless-stopped
     ipc: none
     security_opt:

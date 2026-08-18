@@ -15,6 +15,14 @@ public static class FhirConstants
     public static string UrlResearchSubjectIdentifier =>
         RecruIT.FhirConstants.Recruit.NamingSystems.ResearchSubjectId.Uri;
 
+    /// <summary>
+    /// The identifier system for an eligibility Group's business identifier, which is the study's
+    /// own identifier value - used as the conditional-update key for the study's Group, same
+    /// convention as ScreeningListId for the study's List.
+    /// </summary>
+    public static string UrlEligibilityGroupIdentifier =>
+        RecruIT.FhirConstants.Recruit.NamingSystems.EligibilityGroupId.Uri;
+
     public const string SystemIdentifierType = "http://terminology.hl7.org/CodeSystem/v2-0203";
     public const string IdentifierTypeMedicalRecordNumber = "MR";
 

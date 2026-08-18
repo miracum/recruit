@@ -738,6 +738,12 @@
   <data name="App.CriteriaManager.LastUpdatedLabel" xml:space="preserve">
     <value>Aktualisiert</value>
   </data>
+  <data name="App.CriteriaManager.StudyTabTitle" xml:space="preserve">
+    <value>Studie</value>
+  </data>
+  <data name="App.CriteriaManager.LibraryTabTitle" xml:space="preserve">
+    <value>Library</value>
+  </data>
   <data name="App.CriteriaManager.StudySectionTitle" xml:space="preserve">
     <value>Studie</value>
   </data>
@@ -765,35 +771,68 @@
   <data name="App.CriteriaManager.IdentifierValueLabel" xml:space="preserve">
     <value>Identifikator-Wert</value>
   </data>
+  <data name="App.CriteriaManager.StudyDescriptionLabel" xml:space="preserve">
+    <value>Beschreibung</value>
+  </data>
   <data name="App.CriteriaManager.CriteriaSectionTitle" xml:space="preserve">
+    <value>Ein- und Ausschlusskriterien</value>
+  </data>
+  <data name="App.CriteriaManager.InclusionColumnTitle" xml:space="preserve">
     <value>Einschlusskriterien</value>
   </data>
-  <data name="App.CriteriaManager.NoCriteriaMessage" xml:space="preserve">
-    <value>Noch keine Kriterien hinzugefügt.</value>
+  <data name="App.CriteriaManager.ExclusionColumnTitle" xml:space="preserve">
+    <value>Ausschlusskriterien</value>
+  </data>
+  <data name="App.CriteriaManager.NoInclusionCriteriaMessage" xml:space="preserve">
+    <value>Noch keine Einschlusskriterien hinzugefügt.</value>
+  </data>
+  <data name="App.CriteriaManager.NoExclusionCriteriaMessage" xml:space="preserve">
+    <value>Noch keine Ausschlusskriterien hinzugefügt.</value>
+  </data>
+  <data name="App.CriteriaManager.AddFromLibraryButton" xml:space="preserve">
+    <value>Aus Library hinzufügen</value>
+  </data>
+  <data name="App.CriteriaManager.NewInclusionCriterionButton" xml:space="preserve">
+    <value>Neues Einschlusskriterium</value>
+  </data>
+  <data name="App.CriteriaManager.NewExclusionCriterionButton" xml:space="preserve">
+    <value>Neues Ausschlusskriterium</value>
+  </data>
+  <data name="App.CriteriaManager.LibraryPickerDialogTitle" xml:space="preserve">
+    <value>Kriterium aus der Library auswählen</value>
+  </data>
+  <data name="App.CriteriaManager.LibraryPickerDialogDescription" xml:space="preserve">
+    <value>Suchen und wählen Sie eine bestehende Library-Ressource für dieses Kriterium aus.</value>
+  </data>
+  <data name="App.CriteriaManager.SelectCriterionButton" xml:space="preserve">
+    <value>Auswählen</value>
+  </data>
+  <data name="App.CriteriaManager.CancelButton" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="App.CriteriaManager.MoveToInclusionButton" xml:space="preserve">
+    <value>Zu Einschluss verschieben</value>
+  </data>
+  <data name="App.CriteriaManager.MoveToExclusionButton" xml:space="preserve">
+    <value>Zu Ausschluss verschieben</value>
+  </data>
+  <data name="App.CriteriaManager.MoveUpButton" xml:space="preserve">
+    <value>Nach oben</value>
+  </data>
+  <data name="App.CriteriaManager.MoveDownButton" xml:space="preserve">
+    <value>Nach unten</value>
+  </data>
+  <data name="App.CriteriaManager.FromLibraryBadge" xml:space="preserve">
+    <value>Aus Library</value>
   </data>
   <data name="App.CriteriaManager.CriterionDisplayTextLabel" xml:space="preserve">
     <value>Beschreibung</value>
   </data>
-  <data name="App.CriteriaManager.CriterionTypeLabel" xml:space="preserve">
-    <value>Typ</value>
-  </data>
-  <data name="App.CriteriaManager.InclusionOption" xml:space="preserve">
-    <value>Einschluss</value>
-  </data>
-  <data name="App.CriteriaManager.ExclusionOption" xml:space="preserve">
-    <value>Ausschluss</value>
-  </data>
   <data name="App.CriteriaManager.RemoveCriterionButton" xml:space="preserve">
     <value>Entfernen</value>
   </data>
-  <data name="App.CriteriaManager.CriterionExistingLibraryLabel" xml:space="preserve">
-    <value>Bestehende Library wiederverwenden (optional)</value>
-  </data>
   <data name="App.CriteriaManager.CriterionSqlLabel" xml:space="preserve">
     <value>SQL</value>
-  </data>
-  <data name="App.CriteriaManager.AddCriterionButton" xml:space="preserve">
-    <value>Kriterium hinzufügen</value>
   </data>
   <data name="App.CriteriaManager.PreviewSectionTitle" xml:space="preserve">
     <value>Vorschau</value>

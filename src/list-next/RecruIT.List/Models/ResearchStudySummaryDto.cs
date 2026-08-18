@@ -5,5 +5,6 @@ public sealed record ResearchStudySummaryDto(
     string Id,
     string? Title,
     string? Acronym,
+    string? Description,
     TrialIdentifier? TrialIdentifier
 );

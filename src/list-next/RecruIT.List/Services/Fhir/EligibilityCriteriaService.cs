@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Text;
 using De.Medizininformatikinitiative.Kerndatensatz.Studie;
 using Hl7.Fhir.Model;
@@ -57,6 +58,7 @@ public sealed class EligibilityCriteriaService(
                 s.Id!,
                 s.Title,
                 s.GetMiiExStudieAkronym()?.Value?.ToString(),
+                s.Description,
                 s.GetTrialIdentifier()
             ))
             .OrderBy(s => s.Acronym ?? s.Title ?? s.Id, StringComparer.OrdinalIgnoreCase)
@@ -184,6 +186,13 @@ public sealed class EligibilityCriteriaService(
                 {
                     Status = PublicationStatus.Active,
                     Title = criterion.DisplayText,
+                    // Must match the type SearchLibrariesAsync filters on and PollForStudies'
+                    // chained discovery search looks for - without it this Library would be
+                    // invisible to both the catalog and the poll job once actually persisted.
+                    Type = new CodeableConcept(
+                        SqlQueryLibraryTypeSystem,
+                        SqlQueryLibraryTypeCode
+                    ),
                     Content =
                     [
                         new Attachment
@@ -224,7 +233,6 @@ public sealed class EligibilityCriteriaService(
             );
         }
 
-        var groupFullUrl = "urn:uuid:" + Guid.NewGuid();
         var group = new Group
         {
             Type = Group.GroupType.Person,
@@ -232,11 +240,58 @@ public sealed class EligibilityCriteriaService(
             Characteristic = characteristics,
         };
 
+        // The Group's own business identifier reuses the study's identifier *value* under a fixed,
+        // Group-specific system - same convention as FhirConstants.SystemScreeningList's List
+        // identifier. Only computable once the admin has entered an identifier value; falls back to
+        // a plain POST (server-assigned id) otherwise, same as before this existed.
+        Bundle.EntryComponent groupEntry;
+        ResourceReference groupReference;
+        if (!string.IsNullOrWhiteSpace(studyDraft.IdentifierValue))
+        {
+            group.Identifier.Add(
+                new Identifier(FhirConstants.UrlEligibilityGroupIdentifier, studyDraft.IdentifierValue)
+            );
+
+            var groupId = ComputeIdentifierHashId(
+                FhirConstants.UrlEligibilityGroupIdentifier,
+                studyDraft.IdentifierValue
+            );
+            group.Id = groupId;
+            groupReference = new ResourceReference($"Group/{groupId}");
+            groupEntry = new Bundle.EntryComponent
+            {
+                Resource = group,
+                Request = new Bundle.RequestComponent
+                {
+                    Method = Bundle.HTTPVerb.PUT,
+                    Url = $"Group/{groupId}",
+                },
+            };
+        }
+        else
+        {
+            var groupFullUrl = "urn:uuid:" + Guid.NewGuid();
+            groupReference = new ResourceReference(groupFullUrl);
+            groupEntry = new Bundle.EntryComponent
+            {
+                FullUrl = groupFullUrl,
+                Resource = group,
+                Request = new Bundle.RequestComponent
+                {
+                    Method = Bundle.HTTPVerb.POST,
+                    Url = "Group",
+                },
+            };
+        }
+
         var study = new ResearchStudy
         {
             Status = ResearchStudy.ResearchStudyStatus.Active,
             Title = studyDraft.Title,
-            Enrollment = [new ResourceReference(groupFullUrl)],
+            Description = string.IsNullOrWhiteSpace(studyDraft.Description)
+                ? null
+                : studyDraft.Description,
+            Enrollment = [groupReference],
         };
 
         if (!string.IsNullOrWhiteSpace(studyDraft.Acronym))
@@ -246,16 +301,19 @@ public sealed class EligibilityCriteriaService(
             );
         }
 
-        if (
+        var hasStudyIdentifier =
             !string.IsNullOrWhiteSpace(studyDraft.IdentifierSystem)
-            && !string.IsNullOrWhiteSpace(studyDraft.IdentifierValue)
-        )
+            && !string.IsNullOrWhiteSpace(studyDraft.IdentifierValue);
+        if (hasStudyIdentifier)
         {
             study.Identifier.Add(
                 new Identifier(studyDraft.IdentifierSystem, studyDraft.IdentifierValue)
             );
         }
 
+        // Update-as-create, keyed by a hash of the study's own identifier, only applies to brand
+        // new studies - reusing an existing one PUTs to its real, already-assigned id instead (which
+        // may predate this convention, e.g. a legacy UUID), never to a freshly recomputed hash.
         var studyEntry = new Bundle.EntryComponent { Resource = study };
         if (!string.IsNullOrWhiteSpace(studyDraft.ExistingId))
         {
@@ -264,6 +322,19 @@ public sealed class EligibilityCriteriaService(
             {
                 Method = Bundle.HTTPVerb.PUT,
                 Url = $"ResearchStudy/{studyDraft.ExistingId}",
+            };
+        }
+        else if (hasStudyIdentifier)
+        {
+            var studyId = ComputeIdentifierHashId(
+                studyDraft.IdentifierSystem,
+                studyDraft.IdentifierValue
+            );
+            study.Id = studyId;
+            studyEntry.Request = new Bundle.RequestComponent
+            {
+                Method = Bundle.HTTPVerb.PUT,
+                Url = $"ResearchStudy/{studyId}",
             };
         }
         else
@@ -277,20 +348,17 @@ public sealed class EligibilityCriteriaService(
 
         var bundle = new Bundle { Type = Bundle.BundleType.Transaction };
         bundle.Entry.Add(studyEntry);
-        bundle.Entry.Add(
-            new Bundle.EntryComponent
-            {
-                FullUrl = groupFullUrl,
-                Resource = group,
-                Request = new Bundle.RequestComponent
-                {
-                    Method = Bundle.HTTPVerb.POST,
-                    Url = "Group",
-                },
-            }
-        );
+        bundle.Entry.Add(groupEntry);
         bundle.Entry.AddRange(libraryEntries);
 
         return bundle;
     }
+
+    /// <summary>
+    /// Update-as-create id for a resource identified by (system, value): a lowercase-hex SHA-256
+    /// digest of "system|value", used as both the resource id and the PUT url so re-submitting the
+    /// same identifier always targets the same resource instead of creating a duplicate.
+    /// </summary>
+    private static string ComputeIdentifierHashId(string system, string value) =>
+        Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes($"{system}|{value}")));
 }
