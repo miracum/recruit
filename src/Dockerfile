@@ -5,7 +5,7 @@ WORKDIR /home/gradle/project
 COPY . .
 
 ARG MODULE_NAME=query
-RUN --mount=type=cache,target=/home/gradle/.gradle/caches <<EOF
+RUN --mount=type=cache,target=/home/gradle/.gradle/,sharing=locked <<EOF
 gradle clean ":${MODULE_NAME}:build" -x test --info
 java -Djarmode=tools -jar ${MODULE_NAME}/build/libs/*.jar extract --layers --launcher --force \
     --destination "${MODULE_NAME}/"
