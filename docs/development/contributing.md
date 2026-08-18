@@ -114,18 +114,6 @@ docker build -t "ghcr.io/miracum/recruit/${MODULE_NAME}:local" --build-arg=MODUL
 
 The `--build-arg` `MODULE_NAME` can be either `notify`, `query-sql-on-fhir`, or `query` (default).
 
-#### Using jib
-
-You can also build the container images using [jib](https://github.com/GoogleContainerTools/jib) via gradle:
-
-```sh
-export MODULE_NAME=query
-./gradlew :${MODULE_NAME}:jibDockerBuild --image="ghcr.io/miracum/recruit/${MODULE_NAME}:local"
-```
-
-Using `jibDockerBuild` will build the image against the local docker daemon. Running just `./gradlew :query:jib`
-will attempt to push the image to the remote registry.
-
 ### list
 
 The list module is a NodeJS app with a Vue frontend and can be built via Dockerfile.

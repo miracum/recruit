@@ -11,8 +11,6 @@ plugins {
 
     id 'io.spring.dependency-management'
 
-    id 'com.google.cloud.tools.jib'
-
     id 'jacoco'
 
     id 'com.diffplug.spotless'
@@ -22,13 +20,6 @@ plugins {
     id 'de.undercouch.download'
 
     id 'checkstyle'
-}
-
-task downloadOpenTelemetryJavaAgent(type: Download) {
-    src 'https://github.com/open-telemetry/opentelemetry-java-instrumentation' +
-        '/releases/download/v2.4.0/opentelemetry-javaagent.jar'
-    dest '../'
-    overwrite false
 }
 
 dependencies {
@@ -86,51 +77,4 @@ spotless {
 checkstyle {
     toolVersion = '13.8.0'
     configFile = file('../config/checkstyle/checkstyle.xml')
-}
-
-jib {
-    from {
-        image = 'gcr.io/distroless/java25-debian13:nonroot' +
-            '@sha256:fa9bfc14924fa3b43d43944d93887155d19843b3aa45610b659496f928fe2a9c'
-    }
-    to {
-        image = "ghcr.io/miracum/recruit/${project.name}:${project.version}"
-    }
-    container {
-        // when using the 'OCI' image format, the build tar can not be loaded via `docker load`
-        // so to work with CI, the format has to be Docker.
-        format = 'Docker'
-        user = '65532:65532'
-        ports = ['8080/tcp', '8081/tcp']
-        workingDirectory = '/app'
-        environment = [
-            'SPRING_PROFILES_ACTIVE': 'prod',
-        ]
-        labels = [
-            'org.opencontainers.image.source': 'https://github.com/miracum/recruit',
-            'org.opencontainers.image.vendor': 'miracum.org',
-            'org.opencontainers.image.authors': 'miracum.org',
-            'org.opencontainers.image.url': 'https://miracum.github.io/recruit/',
-            'org.opencontainers.image.documentation': 'https://miracum.github.io/recruit/',
-            'org.opencontainers.image.version': project.version,
-            'org.opencontainers.image.licenses': 'AGPL-3.0',
-            'org.opencontainers.image.description':
-                "Container image for the ${project.name} module of the recruIT infrastructure",
-            'org.opencontainers.image.title': project.name,
-            'org.opencontainers.image.base.name': jib.from.image.split('@')[0],
-            'org.opencontainers.image.base.digest': jib.from.image.split('@')[1],
-        // don't use this label since it changes every time causing the image digest to change as well,
-        // making reproducible builds impossible
-        // 'org.opencontainers.image.created': new Date().format("yyyy-MM-dd'T'HH:mm:ssXXX")
-        ]
-    }
-    extraDirectories {
-        paths {
-            path {
-                from = '..'
-                into = '/app'
-                includes = ['opentelemetry-javaagent.jar']
-            }
-        }
-    }
 }
