@@ -54,11 +54,13 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@5910c527f6f017bf1d3c9e7743bdf0f3a1c0079e # v1.25.2
+    uses: miracum/.github/.github/workflows/standard-build.yaml@869881c224354c744e09f1d9bba9d47b5c698b44 # v1.26.0
     with:
       image: ghcr.io/${{ github.repository }}/query
       build-context: "src/"
       enable-build-test-layer: true
+      enable-build-cache: false
+      enable-buildkit-cache-mount-caching: true
       build-args: |
         MODULE_NAME=query
     secrets:
@@ -75,11 +77,13 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@5910c527f6f017bf1d3c9e7743bdf0f3a1c0079e # v1.25.2
+    uses: miracum/.github/.github/workflows/standard-build.yaml@869881c224354c744e09f1d9bba9d47b5c698b44 # v1.26.0
     with:
       image: ghcr.io/${{ github.repository }}/notify
       build-context: "src/"
       enable-build-test-layer: true
+      enable-build-cache: false
+      enable-buildkit-cache-mount-caching: true
       build-args: |
         MODULE_NAME=notify
     secrets:
@@ -96,7 +100,7 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@5910c527f6f017bf1d3c9e7743bdf0f3a1c0079e # v1.25.2
+    uses: miracum/.github/.github/workflows/standard-build.yaml@869881c224354c744e09f1d9bba9d47b5c698b44 # v1.26.0
     with:
       image: ghcr.io/${{ github.repository }}/list
       build-context: "src/list/"
@@ -117,7 +121,7 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@5910c527f6f017bf1d3c9e7743bdf0f3a1c0079e # v1.25.2
+    uses: miracum/.github/.github/workflows/standard-build.yaml@869881c224354c744e09f1d9bba9d47b5c698b44 # v1.26.0
     with:
       image: ghcr.io/${{ github.repository }}/list-next
       build-context: "src/list-next/"
@@ -136,11 +140,13 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@5910c527f6f017bf1d3c9e7743bdf0f3a1c0079e # v1.25.2
+    uses: miracum/.github/.github/workflows/standard-build.yaml@869881c224354c744e09f1d9bba9d47b5c698b44 # v1.26.0
     with:
       image: ghcr.io/${{ github.repository }}/query-sql-on-fhir
       build-context: "src/"
       enable-build-test-layer: true
+      enable-build-cache: false
+      enable-buildkit-cache-mount-caching: true
       build-args: |
         MODULE_NAME=query-sql-on-fhir
     secrets:
@@ -157,11 +163,13 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@5910c527f6f017bf1d3c9e7743bdf0f3a1c0079e # v1.25.2
+    uses: miracum/.github/.github/workflows/standard-build.yaml@869881c224354c744e09f1d9bba9d47b5c698b44 # v1.26.0
     with:
       image: ghcr.io/${{ github.repository }}/superset-library-sync
       build-context: "src/"
       enable-build-test-layer: true
+      enable-build-cache: false
+      enable-buildkit-cache-mount-caching: true
       build-args: |
         MODULE_NAME=superset-library-sync
     secrets:
