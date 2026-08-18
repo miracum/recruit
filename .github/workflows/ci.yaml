@@ -29,113 +29,142 @@ defaults:
     shell: bash
 
 jobs:
-  # computes the one tag every image gets built/tagged under this run, mirroring the tag rules
-  # docker/metadata-action used to apply for free per-job: pr-<number> for PRs, the branch name for
-  # a push (ci.yaml only pushes on master), the release's own tag name for a release, and a sha
-  # fallback for anything else (e.g. merge_group). standard-build-bake.yaml has no metadata-action
-  # step of its own - bake-vars are opaque strings - so this replaces that.
-  compute-tag:
-    name: compute image tag
-    runs-on: ubuntu-24.04
-    outputs:
-      tag: ${{ steps.tag.outputs.tag }}
-    steps:
-      - name: Compute tag
-        id: tag
-        # values are passed through env rather than interpolated directly into the script -
-        # github.ref_name/event.release.tag_name are attacker-controllable (a branch or release tag
-        # name can contain arbitrary characters) and interpolating them straight into the run: block
-        # would let that content be interpreted as shell syntax rather than as inert string data.
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
-          REF_NAME: ${{ github.ref_name }}
-          SHA: ${{ github.sha }}
-        run: |
-          if [ "${EVENT_NAME}" = "pull_request" ]; then
-            tag="pr-${PR_NUMBER}"
-          elif [ "${EVENT_NAME}" = "release" ]; then
-            tag="${RELEASE_TAG_NAME}"
-          elif [ "${EVENT_NAME}" = "push" ]; then
-            tag="${REF_NAME}"
-          else
-            tag="${SHA}"
-          fi
-          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
-
-  # builds every module's image from docker-bake.hcl in one docker buildx bake invocation, instead
-  # of one job per module: the 4 Java modules share a base context/Dockerfile, so building them
-  # together lets BuildKit share the COPY . . layer and the RUN --mount=type=cache Gradle
-  # dependency cache across them - previously wasted, since separate jobs run on separate,
-  # independent runners with no shared builder/cache state at all.
-  build-bake:
-    name: build images
-    needs: compute-tag
-    # granted for standard-build-bake.yaml's internal jobs, which (across build/image-provenance/
-    # sign-images/attest-trivy-vulnerability-report/upload-*-to-release) need all of these.
+  # the build job is intentionally *not* a matrix: a matrix job's outputs (notably the
+  # per-module image-digest) are only visible to downstream jobs for the last matrix
+  # instance to complete, not all of them. Splitting into one job per module lets the
+  # release job reference each module's actual, unambiguous build-time digest directly,
+  # instead of having to re-resolve it from the registry later (which would leave a
+  # window for the tag to be repointed between build and release).
+  #
+  # each of the 4 Java modules' jobs runs on its own runner (rather than one shared
+  # `docker buildx bake` job building all 4 concurrently) so their Gradle
+  # dependency-resolution/test-compilation steps don't oversubscribe a single runner's
+  # CPU/RAM. standard-build.yaml's build-push-action steps use BuildKit's `type=gha`
+  # cache backend by default, so the shared, MODULE_NAME-independent parts of src/Dockerfile
+  # (the "deps" stage) still get cached and reused across these separate jobs/runs, without
+  # needing a shared local cache mount.
+  build-query:
+    name: build query
     permissions:
-      contents: write # to upload SBOMs/attestations to the GitHub release's assets
-      pull-requests: write # for the trivy scan's PR comment
-      security-events: write # for the trivy scan's Security tab reporting
-      actions: read # for `gh attestation download` when uploading provenance to release assets
-      packages: write # to push images, signatures, and attestations to ghcr.io
-      id-token: write # for cosign keyless signing and attestation OIDC tokens
-      attestations: write # to publish build provenance/SLSA attestations
-      artifact-metadata: write # required alongside attestations: write by the attestation API
-    uses: miracum/.github/.github/workflows/standard-build-bake.yaml@319a4f1e2fce970ad6ec2851286ee2bf7f8476e4 # v1.24.4
+      contents: write
+      pull-requests: write
+      security-events: write
+      actions: read
+      packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    uses: miracum/.github/.github/workflows/standard-build.yaml@319a4f1e2fce970ad6ec2851286ee2bf7f8476e4 # v1.24.4
     with:
-      bake-files: docker-bake.hcl
-      bake-vars: |
-        REGISTRY=ghcr.io/${{ github.repository }}
-        TAG=${{ needs.compute-tag.outputs.tag }}
+      image: ghcr.io/${{ github.repository }}/query
+      build-context: "src/"
+      enable-build-test-layer: true
+      build-args: |
+        MODULE_NAME=query
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
 
-  # extracts the 4 digests release.yaml needs by target name from build-bake's images JSON, so
-  # release.yaml's own interface (4 named *-image-digest inputs) doesn't have to change.
-  compute-digests:
-    name: compute release image digests
-    runs-on: ubuntu-24.04
-    needs: build-bake
-    outputs:
-      query: ${{ steps.digests.outputs.query }}
-      notify: ${{ steps.digests.outputs.notify }}
-      list: ${{ steps.digests.outputs.list }}
-      query-sql-on-fhir: ${{ steps.digests.outputs.query-sql-on-fhir }}
-    steps:
-      - name: Extract digests
-        id: digests
-        env:
-          IMAGES: ${{ needs.build-bake.outputs.images }}
-        run: |
-          for t in query notify list query-sql-on-fhir; do
-            digest="$(jq -r --arg t "${t}" '.[] | select(.target==$t) | .digest' <<<"${IMAGES}")"
-            echo "${t}=${digest}" >> "$GITHUB_OUTPUT"
-          done
+  build-notify:
+    name: build notify
+    permissions:
+      contents: write
+      pull-requests: write
+      security-events: write
+      actions: read
+      packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    uses: miracum/.github/.github/workflows/standard-build.yaml@319a4f1e2fce970ad6ec2851286ee2bf7f8476e4 # v1.24.4
+    with:
+      image: ghcr.io/${{ github.repository }}/notify
+      build-context: "src/"
+      enable-build-test-layer: true
+      build-args: |
+        MODULE_NAME=notify
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
 
-  # build-bake's images output includes the *-test build-gate targets too - filters those out
-  # (along with list-next, not part of this test job's matrix today either - see ci.yaml history)
-  # and joins in the e2e-test-directory each module used to carry as a static matrix.include field,
-  # which bake has no notion of.
-  compute-test-matrix:
-    name: compute test matrix
-    runs-on: ubuntu-24.04
-    needs: build-bake
-    outputs:
-      matrix: ${{ steps.matrix.outputs.matrix }}
-    steps:
-      - name: Compute matrix
-        id: matrix
-        env:
-          IMAGES: ${{ needs.build-bake.outputs.images }}
-        run: |
-          matrix="$(jq -c '
-            {"query":"tests/e2e/","notify":"tests/e2e/","list":"frontend/tests/e2e/"} as $e2e
-            | [ .[] | select((.target | endswith("-test") | not) and .target != "list-next")
-                | . + {"e2eTestDirectory": ($e2e[.target] // "")} ]
-          ' <<<"${IMAGES}")"
-          echo "matrix=${matrix}" >> "$GITHUB_OUTPUT"
+  build-list:
+    name: build list
+    permissions:
+      contents: write
+      pull-requests: write
+      security-events: write
+      actions: read
+      packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    uses: miracum/.github/.github/workflows/standard-build.yaml@319a4f1e2fce970ad6ec2851286ee2bf7f8476e4 # v1.24.4
+    with:
+      image: ghcr.io/${{ github.repository }}/list
+      build-context: "src/list/"
+      enable-build-test-layer: true
+      build-args: |
+        MODULE_NAME=list
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  build-list-next:
+    name: build list-next
+    permissions:
+      contents: write
+      pull-requests: write
+      security-events: write
+      actions: read
+      packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    uses: miracum/.github/.github/workflows/standard-build.yaml@319a4f1e2fce970ad6ec2851286ee2bf7f8476e4 # v1.24.4
+    with:
+      image: ghcr.io/${{ github.repository }}/list-next
+      build-context: "src/list-next/"
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  build-query-sql-on-fhir:
+    name: build query-sql-on-fhir
+    permissions:
+      contents: write
+      pull-requests: write
+      security-events: write
+      actions: read
+      packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    uses: miracum/.github/.github/workflows/standard-build.yaml@319a4f1e2fce970ad6ec2851286ee2bf7f8476e4 # v1.24.4
+    with:
+      image: ghcr.io/${{ github.repository }}/query-sql-on-fhir
+      build-context: "src/"
+      enable-build-test-layer: true
+      build-args: |
+        MODULE_NAME=query-sql-on-fhir
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  build-superset-library-sync:
+    name: build superset-library-sync
+    permissions:
+      contents: write
+      pull-requests: write
+      security-events: write
+      actions: read
+      packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    uses: miracum/.github/.github/workflows/standard-build.yaml@319a4f1e2fce970ad6ec2851286ee2bf7f8476e4 # v1.24.4
+    with:
+      image: ghcr.io/${{ github.repository }}/superset-library-sync
+      build-context: "src/"
+      enable-build-test-layer: true
+      build-args: |
+        MODULE_NAME=superset-library-sync
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
 
   publish-pr-helm-chart:
     name: publish pr helm chart
@@ -146,10 +175,14 @@ jobs:
       contents: read
       packages: write # to push the PR's pre-release Helm chart to ghcr.io
     needs:
-      - compute-tag
-      - build-bake
+      - build-query
+      - build-notify
+      - build-list
+      - build-query-sql-on-fhir
+      - build-list-next
     env:
-      IMAGE_TAG: ${{ needs.compute-tag.outputs.tag }}
+      # the image tag is the same for all modules, so it doesn't matter which build job we read it from.
+      IMAGE_TAG: ${{ needs.build-query.outputs.image-version }}
       PR_NUMBER: ${{ github.event.pull_request.number }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -186,16 +219,27 @@ jobs:
     name: test
     runs-on: ubuntu-24.04
     needs:
-      - compute-tag
-      - build-bake
-      - compute-test-matrix
+      - build-query
+      - build-notify
+      - build-list
+      - build-query-sql-on-fhir
+      - build-superset-library-sync
     strategy:
       fail-fast: false
       matrix:
-        image: ${{ fromJson(needs.compute-test-matrix.outputs.matrix) }}
+        include:
+          - module: "query"
+            e2e-test-directory: "tests/e2e/"
+          - module: "notify"
+            e2e-test-directory: "tests/e2e/"
+          - module: "list"
+            e2e-test-directory: "frontend/tests/e2e/"
+          - module: "query-sql-on-fhir"
+          - module: "superset-library-sync"
     env:
-      IMAGE_NAME: ${{ matrix.image.name }}
-      IMAGE_TAG: ${{ needs.compute-tag.outputs.tag }}
+      IMAGE_NAME: ghcr.io/${{ github.repository }}/${{ matrix.module }}
+      # the image tag is the same for all modules, so it doesn't matter which build job we read it from.
+      IMAGE_TAG: ${{ needs.build-query.outputs.image-version }}
     steps:
       # <https://docs.docker.com/storage/containerd/>
       # via <https://github.com/docker/setup-buildx-action/issues/257>
@@ -213,20 +257,27 @@ jobs:
         with:
           persist-credentials: false
 
+      # unfortunately we need to re-compute the artifact name as we can't access the matrix job's outputs.
+      - uses: rlespinasse/slugify-value@a4879db1eb3db9bbee01dca36f98a8236c2b8239 # v1.4.0
+        id: slugify-image
+        with:
+          key: BUILD_IMAGE
+          value: "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
+          publish-env: false
+          slug-maxlength: nolimit
+
       - name: Download image
         if: ${{ github.event_name == 'pull_request' }}
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: images
-          path: /tmp/images
+          name: ${{ steps.slugify-image.outputs.slug }}
+          path: /tmp
 
       - name: Load image
         if: ${{ github.event_name == 'pull_request' }}
-        env:
-          IMAGE_SLUG: ${{ matrix.image.slug }}
         run: |
-          ls -lsa /tmp/images
-          docker load --input "/tmp/images/${IMAGE_SLUG}.tar"
+          ls -lsa /tmp
+          docker load --input /tmp/image.tar
           docker image ls
 
       - name: Pull image if not in PR
@@ -243,41 +294,45 @@ jobs:
           ./container-structure-test-linux-amd64 test --image="${IMAGE_NAME}:${IMAGE_TAG}" --config=tests/container-structure/common-tests.yaml
 
       - name: Run isolated smoke test
-        if: ${{ matrix.image.e2eTestDirectory != ''}}
-        working-directory: src/${{ matrix.image.target }}
+        if: ${{ matrix.e2e-test-directory != ''}}
+        working-directory: src/${{ matrix.module }}
         env:
-          E2E_TEST_DIRECTORY: ${{ matrix.image.e2eTestDirectory }}
+          E2E_TEST_DIRECTORY: ${{ matrix.e2e-test-directory }}
         run: |
           docker compose -f "${E2E_TEST_DIRECTORY}/docker-compose.yaml" build
           docker compose -f "${E2E_TEST_DIRECTORY}/docker-compose.yaml" run tester
 
       - name: Print test logs and stop all running containers
-        if: ${{ matrix.image.e2eTestDirectory != '' && always()}}
-        working-directory: src/${{ matrix.image.target }}
+        if: ${{ matrix.e2e-test-directory != '' && always()}}
+        working-directory: src/${{ matrix.module }}
         continue-on-error: true
         env:
-          E2E_TEST_DIRECTORY: ${{ matrix.image.e2eTestDirectory }}
+          E2E_TEST_DIRECTORY: ${{ matrix.e2e-test-directory }}
         run: |
           docker compose -f "${E2E_TEST_DIRECTORY}/docker-compose.yaml" logs
           docker compose -f "${E2E_TEST_DIRECTORY}/docker-compose.yaml" down --volumes --remove-orphans
 
   k8s-test:
     needs:
-      - compute-tag
-      - build-bake
+      - build-query
+      - build-notify
+      - build-list
+      - build-query-sql-on-fhir
       - test
     uses: ./.github/workflows/test-k8s-installation.yaml
     with:
-      image-tag: ${{ needs.compute-tag.outputs.tag }}
+      image-tag: ${{ needs.build-query.outputs.image-version }}
 
   docker-compose-test:
     needs:
-      - compute-tag
-      - build-bake
+      - build-query
+      - build-notify
+      - build-list
+      - build-query-sql-on-fhir
       - test
     uses: ./.github/workflows/test-compose-installation.yaml
     with:
-      image-tag: ${{ needs.compute-tag.outputs.tag }}
+      image-tag: ${{ needs.build-query.outputs.image-version }}
 
   release:
     # the docker compose image tags only change on releases, so
@@ -292,15 +347,18 @@ jobs:
     needs:
       - k8s-test
       - docker-compose-test
-      # listed directly (even though it's already transitively required via k8s-test/
-      # docker-compose-test) so its per-module digest outputs are addressable here.
-      - compute-digests
+      # listed directly (even though they're already transitively required via k8s-test/
+      # docker-compose-test) so their per-module image-digest outputs are addressable here.
+      - build-query
+      - build-notify
+      - build-list
+      - build-query-sql-on-fhir
     uses: ./.github/workflows/release.yaml
     with:
-      query-image-digest: ${{ needs.compute-digests.outputs.query }}
-      notify-image-digest: ${{ needs.compute-digests.outputs.notify }}
-      list-image-digest: ${{ needs.compute-digests.outputs.list }}
-      query-sql-on-fhir-image-digest: ${{ needs.compute-digests.outputs.query-sql-on-fhir }}
+      query-image-digest: ${{ needs.build-query.outputs.image-digest }}
+      notify-image-digest: ${{ needs.build-notify.outputs.image-digest }}
+      list-image-digest: ${{ needs.build-list.outputs.image-digest }}
+      query-sql-on-fhir-image-digest: ${{ needs.build-query-sql-on-fhir.outputs.image-digest }}
     secrets:
       token: ${{ secrets.MIRACUM_BOT_SEMANTIC_RELEASE_TOKEN }}
 
