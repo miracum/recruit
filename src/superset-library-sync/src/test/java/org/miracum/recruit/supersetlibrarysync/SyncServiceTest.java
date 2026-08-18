@@ -28,6 +28,7 @@ import org.miracum.recruit.supersetlibrarysync.superset.SupersetProperties;
 import org.miracum.recruit.supersetlibrarysync.superset.SupersetSavedQueryRepository;
 import org.mockito.ArgumentCaptor;
 import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.messaging.Message;
 
 class SyncServiceTest {
 
@@ -163,7 +164,7 @@ class SyncServiceTest {
     var result = kafkaEnabledSut.sync();
 
     assertThat(result.synced()).isEqualTo(1);
-    verify(streamBridge, times(1)).send(eq("library-updates"), any(Bundle.class));
+    verify(streamBridge, times(1)).send(eq("library-updates"), any(Message.class));
     verifyNoInteractions(fhirClient);
   }
 

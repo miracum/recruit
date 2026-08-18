@@ -144,7 +144,7 @@ public class SqlLibraryBuilder {
    * self-contained upsert without needing to build the entry itself.
    */
   private static Bundle toPutBundle(Library library) {
-    return new TransactionBuilder().addEntry(library).build();
+    return new TransactionBuilder().withId(library.getId()).addEntry(library).build();
   }
 
   /**

@@ -10,13 +10,15 @@ import static org.mockito.Mockito.when;
 import org.hl7.fhir.r4.model.Bundle;
 import org.junit.jupiter.api.Test;
 import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.Message;
 
 class KafkaLibraryPublisherTest {
 
   @Test
   void publish_sendsTheBundleItselfToTheConfiguredTopic() {
     var streamBridge = mock(StreamBridge.class);
-    when(streamBridge.send(eq("library-updates"), any(Bundle.class))).thenReturn(true);
+    when(streamBridge.send(eq("library-updates"), any(Message.class))).thenReturn(true);
     var sut =
         new KafkaLibraryPublisher(
             streamBridge, new KafkaPublishProperties(true, "library-updates"));
@@ -25,9 +27,11 @@ class KafkaLibraryPublisherTest {
     var result = sut.publish(bundle);
 
     assertThat(result).isTrue();
-    // sent natively as the Bundle object itself, not a pre-encoded JSON string - the actual
-    // FHIR+JSON encoding is left to the configured Kafka value-serializer.
-    verify(streamBridge).send("library-updates", bundle);
+    var message = org.mockito.ArgumentCaptor.forClass(Message.class);
+    verify(streamBridge).send(eq("library-updates"), message.capture());
+    assertThat(message.getValue().getPayload()).isSameAs(bundle);
+    assertThat(message.getValue().getHeaders().get(KafkaHeaders.MESSAGE_KEY))
+        .isEqualTo(bundle.getId());
   }
 
   @Test

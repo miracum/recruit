@@ -62,6 +62,9 @@ class SqlLibraryBuilderTest {
 
     var bundle = sut.build(savedQuery, annotations);
 
+    assertThat(bundle.getEntry()).hasSize(1);
+    assertThat(bundle.getId()).isEqualTo(libraryOf(bundle).getId());
+
     var json = fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
     Approvals.verify(json, new Options().forFile().withExtension(".fhir.json"));
   }

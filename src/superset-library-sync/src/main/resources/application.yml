@@ -38,10 +38,10 @@ spring:
     security.protocol: ${KAFKA_SECURITY_PROTOCOL:PLAINTEXT}
     ssl:
       trust-store-type: PKCS12
-      trust-store-location: file://${SSL_TRUST_STORE:/opt/kafka-certs/ca.p12}
+      trust-store-location: file://${KAFKA_SSL_TRUST_STORE:/opt/kafka-certs/ca.p12}
       trust-store-password: ${KAFKA_SSL_TRUST_STORE_PASSWORD:}
       key-store-type: PKCS12
-      key-store-location: file://${SSL_KEY_STORE_FILE:/opt/kafka-certs/user.p12}
+      key-store-location: file://${KAFKA_SSL_KEY_STORE_FILE:/opt/kafka-certs/user.p12}
       key-store-password: ${KAFKA_SSL_KEY_STORE_PASSWORD:}
     producer:
       compression-type: ${KAFKA_PRODUCER_COMPRESSION_TYPE:zstd}

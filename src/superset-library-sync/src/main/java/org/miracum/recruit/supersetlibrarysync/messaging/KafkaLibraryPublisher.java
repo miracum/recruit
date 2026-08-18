@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,15 +18,16 @@ import org.springframework.stereotype.Component;
  * when present, uses it in place of - not alongside - the usual FHIR server submission, so a sync
  * cycle behaves exactly as before when this feature is off, which is the default.
  *
- * <p>Sends the {@code Bundle} object itself (not a pre-encoded string) via {@link
- * StreamBridge#send(String, Object)}, with the configured topic name as the destination directly
- * rather than a statically declared {@code spring.cloud.stream.bindings.*} output binding, since
- * the topic is only known once {@link KafkaPublishProperties} is bound. The actual FHIR+JSON
+ * <p>Sends the {@code Bundle} object itself (not a pre-encoded string) as the message payload, with
+ * the Bundle id as the Kafka message key. The configured topic name is used as the destination
+ * directly rather than a statically declared {@code spring.cloud.stream.bindings.*} output binding,
+ * since the topic is only known once {@link KafkaPublishProperties} is bound. The actual FHIR+JSON
  * encoding is left to the Kafka producer's {@code value-serializer} (see {@code application.yml}'s
- * {@code spring.kafka.producer.value-serializer}) - {@code org.miracum.kafka.serializers.
- * KafkaFhirSerializer}, the same one {@code miracum/kafka-fhir-to-server} and {@code
- * miracum/fhir-gateway} use, with {@code spring.cloud.stream.default.producer.use-native-encoding}
- * telling the binder to hand off to it instead of doing its own message conversion.
+ * {@code spring.kafka.producer.value-serializer}) - {@code
+ * org.miracum.kafka.serializers.KafkaFhirSerializer}, the same one {@code
+ * miracum/kafka-fhir-to-server} and {@code miracum/fhir-gateway} use, with {@code
+ * spring.cloud.stream.default.producer.use-native-encoding} telling the binder to hand off to it
+ * instead of doing its own message conversion.
  */
 @Component
 @ConditionalOnProperty(prefix = "sync.kafka", name = "enabled", havingValue = "true")
@@ -43,7 +46,11 @@ public class KafkaLibraryPublisher {
 
   /** Returns whether the send was accepted by the binder, per {@link StreamBridge#send}. */
   public boolean publish(Bundle libraryPutBundle) {
-    var sent = streamBridge.send(topic, libraryPutBundle);
+    var message =
+        MessageBuilder.withPayload(libraryPutBundle)
+            .setHeader(KafkaHeaders.MESSAGE_KEY, libraryPutBundle.getId())
+            .build();
+    var sent = streamBridge.send(topic, message);
     if (!sent) {
       log.error(
           "Failed to publish a Library bundle to Kafka topic '{}': {}",
