@@ -54,7 +54,7 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@0d8ead44591ddedaabcae73ff163454944ba1e59 # v1.25.1
+    uses: miracum/.github/.github/workflows/standard-build.yaml@5910c527f6f017bf1d3c9e7743bdf0f3a1c0079e # v1.25.2
     with:
       image: ghcr.io/${{ github.repository }}/query
       build-context: "src/"
@@ -75,7 +75,7 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@0d8ead44591ddedaabcae73ff163454944ba1e59 # v1.25.1
+    uses: miracum/.github/.github/workflows/standard-build.yaml@5910c527f6f017bf1d3c9e7743bdf0f3a1c0079e # v1.25.2
     with:
       image: ghcr.io/${{ github.repository }}/notify
       build-context: "src/"
@@ -96,7 +96,7 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@0d8ead44591ddedaabcae73ff163454944ba1e59 # v1.25.1
+    uses: miracum/.github/.github/workflows/standard-build.yaml@5910c527f6f017bf1d3c9e7743bdf0f3a1c0079e # v1.25.2
     with:
       image: ghcr.io/${{ github.repository }}/list
       build-context: "src/list/"
@@ -117,7 +117,7 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@0d8ead44591ddedaabcae73ff163454944ba1e59 # v1.25.1
+    uses: miracum/.github/.github/workflows/standard-build.yaml@5910c527f6f017bf1d3c9e7743bdf0f3a1c0079e # v1.25.2
     with:
       image: ghcr.io/${{ github.repository }}/list-next
       build-context: "src/list-next/"
@@ -136,7 +136,7 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@0d8ead44591ddedaabcae73ff163454944ba1e59 # v1.25.1
+    uses: miracum/.github/.github/workflows/standard-build.yaml@5910c527f6f017bf1d3c9e7743bdf0f3a1c0079e # v1.25.2
     with:
       image: ghcr.io/${{ github.repository }}/query-sql-on-fhir
       build-context: "src/"
@@ -157,7 +157,7 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@0d8ead44591ddedaabcae73ff163454944ba1e59 # v1.25.1
+    uses: miracum/.github/.github/workflows/standard-build.yaml@5910c527f6f017bf1d3c9e7743bdf0f3a1c0079e # v1.25.2
     with:
       image: ghcr.io/${{ github.repository }}/superset-library-sync
       build-context: "src/"
