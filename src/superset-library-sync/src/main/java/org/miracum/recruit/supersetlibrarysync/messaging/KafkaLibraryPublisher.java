@@ -48,7 +48,7 @@ public class KafkaLibraryPublisher {
   public boolean publish(Bundle libraryPutBundle) {
     var message =
         MessageBuilder.withPayload(libraryPutBundle)
-            .setHeader(KafkaHeaders.MESSAGE_KEY, libraryPutBundle.getId())
+            .setHeader(KafkaHeaders.KEY, libraryPutBundle.getId())
             .build();
     var sent = streamBridge.send(topic, message);
     if (!sent) {

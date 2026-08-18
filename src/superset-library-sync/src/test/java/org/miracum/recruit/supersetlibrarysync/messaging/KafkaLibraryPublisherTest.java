@@ -30,8 +30,7 @@ class KafkaLibraryPublisherTest {
     var message = org.mockito.ArgumentCaptor.forClass(Message.class);
     verify(streamBridge).send(eq("library-updates"), message.capture());
     assertThat(message.getValue().getPayload()).isSameAs(bundle);
-    assertThat(message.getValue().getHeaders().get(KafkaHeaders.MESSAGE_KEY))
-        .isEqualTo(bundle.getId());
+    assertThat(message.getValue().getHeaders().get(KafkaHeaders.KEY)).isEqualTo(bundle.getId());
   }
 
   @Test
