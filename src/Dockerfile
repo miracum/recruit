@@ -13,9 +13,9 @@ EOF
 
 FROM build AS test
 ENV TZ="UTC"
-RUN <<EOF
+RUN --mount=type=cache,target=/home/gradle/.gradle/,sharing=locked <<EOF
 gradle ":${MODULE_NAME}:test"
-gradle jacocoTestReport
+gradle ":${MODULE_NAME}:jacocoTestReport"
 EOF
 
 FROM gcr.io/distroless/java25-debian13:nonroot@sha256:2ce7f9eb870273fcb76131cf1e3b0f3e4ef48ee86679166cae1d53fe035c47aa
