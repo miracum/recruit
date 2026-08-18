@@ -59,7 +59,6 @@ jobs:
       image: ghcr.io/${{ github.repository }}/query
       build-context: "src/"
       enable-build-test-layer: true
-      enable-buildkit-cache-mount-caching: true
       build-args: |
         MODULE_NAME=query
     secrets:
@@ -81,7 +80,6 @@ jobs:
       image: ghcr.io/${{ github.repository }}/notify
       build-context: "src/"
       enable-build-test-layer: true
-      enable-buildkit-cache-mount-caching: true
       build-args: |
         MODULE_NAME=notify
     secrets:
@@ -143,7 +141,6 @@ jobs:
       image: ghcr.io/${{ github.repository }}/query-sql-on-fhir
       build-context: "src/"
       enable-build-test-layer: true
-      enable-buildkit-cache-mount-caching: true
       build-args: |
         MODULE_NAME=query-sql-on-fhir
     secrets:
@@ -165,7 +162,6 @@ jobs:
       image: ghcr.io/${{ github.repository }}/superset-library-sync
       build-context: "src/"
       enable-build-test-layer: true
-      enable-buildkit-cache-mount-caching: true
       build-args: |
         MODULE_NAME=superset-library-sync
     secrets:
