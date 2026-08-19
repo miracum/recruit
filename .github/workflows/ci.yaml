@@ -45,7 +45,7 @@ jobs:
       image: ghcr.io/${{ github.repository }}/query
       build-context: "src/"
       enable-build-test-layer: true
-      enable-build-cache: true
+      enable-build-cache: false
       enable-buildkit-cache-mount-caching: true
       build-args: |
         MODULE_NAME=query
