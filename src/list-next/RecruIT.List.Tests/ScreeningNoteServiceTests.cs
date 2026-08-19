@@ -7,6 +7,7 @@ using RecruIT.List.Services.Access;
 
 namespace RecruIT.List.Tests;
 
+[Collection(nameof(TrialAccessRoleCollection))]
 public sealed class ScreeningNoteServiceTests
 {
     private static readonly TrialIdentifier TrialA = new(

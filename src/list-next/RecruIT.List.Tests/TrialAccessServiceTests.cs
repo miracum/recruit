@@ -6,6 +6,12 @@ using RecruIT.List.Services.Access;
 
 namespace RecruIT.List.Tests;
 
+// TrialAccessService.AdminRole is a mutable static; keep tests that touch it out of xUnit's
+// default cross-class parallelization.
+[CollectionDefinition(nameof(TrialAccessRoleCollection), DisableParallelization = true)]
+public sealed class TrialAccessRoleCollection;
+
+[Collection(nameof(TrialAccessRoleCollection))]
 public sealed class TrialAccessServiceTests
 {
     private static readonly TrialIdentifier TrialA = new(
@@ -75,6 +81,29 @@ public sealed class TrialAccessServiceTests
             }
         );
         await db.SaveChangesAsync();
+    }
+
+    [Fact]
+    public async Task Configured_admin_role_is_used_for_admin_checks()
+    {
+        // AdminRole is a static, set once at startup from config - not parallel-safe, hence try/finally.
+        var originalAdminRole = TrialAccessService.AdminRole;
+        try
+        {
+            TrialAccessService.AdminRole = "recruit-admin";
+
+            using var factory = new SqliteDbContextFactory();
+            var service = CreateService(factory);
+            var admin = CreateUser(sub: "admin-1", isAdmin: true);
+
+            Assert.True(await service.CanAccessTrialAsync(admin, TrialA));
+            Assert.True(service.CanPatchList(admin));
+            Assert.True(service.CanDelete(admin));
+        }
+        finally
+        {
+            TrialAccessService.AdminRole = originalAdminRole;
+        }
     }
 
     [Fact]

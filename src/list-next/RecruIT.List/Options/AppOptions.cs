@@ -16,6 +16,9 @@ public sealed class AuthOptions
     /// treats every visitor as an authenticated admin. Never enable this outside local development.
     /// </summary>
     public bool Disabled { get; set; }
+
+    /// <summary>The OIDC role value that grants global admin privileges.</summary>
+    public string AdminRole { get; set; } = "admin";
 }
 
 public sealed class NotificationOptions

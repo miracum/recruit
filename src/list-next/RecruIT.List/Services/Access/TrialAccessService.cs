@@ -10,7 +10,7 @@ namespace RecruIT.List.Services.Access;
 
 /// <summary>
 /// Enforces per-trial access control from the TrialAccessGrant table (Postgres), keyed by each
-/// trial's ResearchStudy business identifier (see TrialIdentifier). A global "admin" OIDC role
+/// trial's ResearchStudy business identifier (see TrialIdentifier). A global admin OIDC role
 /// bypasses every per-trial check. Grants are only ever looked up by the signed-in user's OIDC
 /// "sub" (falling back to email for grants created before that user's first login - see
 /// OidcEvents, which backfills SubjectId once they do log in).
@@ -21,7 +21,8 @@ public sealed class TrialAccessService(
     ILogger<TrialAccessService> logger
 )
 {
-    public const string AdminRole = "admin";
+    /// <summary>Set once at startup from Auth:AdminRole config (see Program.cs).</summary>
+    public static string AdminRole { get; set; } = "admin";
 
     public static bool IsAdmin(ClaimsPrincipal user) => user.IsInRole(AdminRole);
 

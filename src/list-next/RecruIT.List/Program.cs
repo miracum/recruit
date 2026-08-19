@@ -66,6 +66,11 @@ var fhirBaseUrl =
     builder.Configuration.GetValue<string>("Fhir:BaseUrl")
     ?? throw new InvalidOperationException("Fhir:BaseUrl must be configured.");
 var authDisabled = builder.Configuration.GetValue<bool>("Auth:Disabled");
+// Read once at startup rather than threading IOptions<AuthOptions> through every call site.
+if (builder.Configuration["Auth:AdminRole"] is { Length: > 0 } adminRole)
+{
+    TrialAccessService.AdminRole = adminRole;
+}
 
 var appDbConnectionStringBuilder = new NpgsqlConnectionStringBuilder(
     builder.Configuration.GetConnectionString("AppDb")
