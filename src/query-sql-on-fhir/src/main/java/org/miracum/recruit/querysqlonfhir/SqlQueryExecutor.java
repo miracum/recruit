@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -139,12 +140,32 @@ public class SqlQueryExecutor {
         criteria.size(),
         sql);
 
+    // A criterion's SQL is expected to return at most one row per patient_id - the merged query's
+    // LEFT JOINs assume it, since a criterion CTE with more than one row for the same patient
+    // (e.g. one whose WHERE joins against an UNNESTed array without a DISTINCT/GROUP BY) fans that
+    // patient out into multiple rows here, which would otherwise reach the caller as duplicate
+    // PatientEligibilityResults - and, downstream, as the same ResearchSubject id being written
+    // twice in one transaction bundle, failing the whole chunk. Deduplicated defensively, since
+    // that's a data problem in one criterion's SQL, not a reason to drop every other patient in the
+    // same chunk.
+    var seenPatientIds = new HashSet<String>();
     jdbcTemplate.query(
         sql,
         (ResultSetExtractor<Void>)
             rs -> {
               while (rs.next()) {
-                onResult.accept(toPatientEligibilityResult(rs, criteria));
+                var result = toPatientEligibilityResult(rs, criteria);
+                if (seenPatientIds.add(result.patientId())) {
+                  onResult.accept(result);
+                } else {
+                  log.warn(
+                      "Merged eligibility query returned patient_id={} more than once; keeping "
+                          + "the first row and dropping the rest. This usually means one "
+                          + "criterion's SQL joins against a one-to-many relation (e.g. an "
+                          + "UNNESTed array) without a DISTINCT/GROUP BY, so it returns more than "
+                          + "one row for this patient.",
+                      result.patientId());
+                }
               }
               return null;
             });
@@ -173,11 +194,20 @@ public class SqlQueryExecutor {
   }
 
   /**
-   * Wraps each criterion's already-standalone SQL as a CTE, joins them on {@code patient_id}
-   * (anchored on the first criterion, which - per the two-column contract - already covers the full
-   * patient population), and filters out definite non-matches via native Kleene {@code AND} pushed
-   * down into the {@code WHERE} clause. See {@code docs/trino/eligibility-criteria-design.md} for
-   * the full rationale.
+   * Wraps each criterion's already-standalone SQL as a {@code SELECT DISTINCT}-deduplicated CTE,
+   * joins them on {@code patient_id} (anchored on the first criterion, which - per the two-column
+   * contract - already covers the full patient population), and filters out definite non-matches
+   * via native Kleene {@code AND} pushed down into the {@code WHERE} clause. See {@code
+   * docs/trino/eligibility-criteria-design.md} for the full rationale.
+   *
+   * <p>The {@code SELECT DISTINCT} wrapping matters because the {@code LEFT JOIN}s below assume
+   * each criterion contributes at most one row per {@code patient_id} - a criterion whose SQL joins
+   * against a one-to-many relation (e.g. an {@code UNNEST}ed array) without its own {@code
+   * DISTINCT}/{@code GROUP BY} would otherwise fan that patient out into duplicate rows here. This
+   * only collapses rows that come out fully identical, though; a criterion returning genuinely
+   * conflicting rows for the same patient (e.g. {@code is_met} both {@code true} and {@code false})
+   * is a data problem in that criterion's SQL this can't safely resolve - {@link
+   * #evaluateAgainstTrino} still guards against that case defensively.
    */
   private String buildMergedQuery(
       List<EligibilityCriterion> criteria, List<Set<String>> criterionColumns) {
@@ -194,8 +224,11 @@ public class SqlQueryExecutor {
       ctes.append(i == 0 ? "WITH " : ",\n     ")
           .append(alias)
           .append(" AS (\n")
+          .append("SELECT DISTINCT * FROM (\n")
           .append(trinoSql(criterion))
-          .append("\n)");
+          .append("\n) AS ")
+          .append(alias)
+          .append("_raw\n)");
 
       // exclude negation is applied once, here, generically - criterion SQL always computes the
       // raw, un-negated predicate. Indeterminate is a passthrough - it never participates in the

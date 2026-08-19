@@ -201,6 +201,31 @@ class SqlQueryExecutorTest {
     verifyNoInteractions(sqlOnFhirClient);
   }
 
+  /**
+   * A criterion whose SQL joins against a one-to-many relation (e.g. an UNNESTed array) without a
+   * DISTINCT/GROUP BY can return more than one row for the same patient_id - the merged query's
+   * LEFT JOINs then fan that patient out into multiple result rows. Downstream, that would mean the
+   * same ResearchSubject id gets written twice in one transaction bundle, which FHIR servers like
+   * Blaze reject outright (failing the whole chunk) - so this is deduplicated defensively here,
+   * keeping only the first row for a given patient_id.
+   */
+  @Test
+  void evaluateEligibility_whenMergedQueryReturnsDuplicatePatientId_keepsOnlyFirstRow() {
+    var ageCriterion = new EligibilityCriterion(trinoLibrary(SQL_AGE), "Age >= 18", false);
+
+    mainQueryRows.addAll(
+        List.of(
+            row("patient_id", "pat-1", "crit_0_is_met", true),
+            row("patient_id", "pat-1", "crit_0_is_met", true),
+            row("patient_id", "pat-2", "crit_0_is_met", true)));
+
+    var results = collect(sut, List.of(ageCriterion));
+
+    assertThat(results)
+        .extracting(PatientEligibilityResult::patientId)
+        .containsExactly("pat-1", "pat-2");
+  }
+
   @Test
   void evaluateEligibility_generatesMergedQueryWithOneCteAndAppliesExcludeNegation() {
     var include = new EligibilityCriterion(trinoLibrary(SQL_AGE), "Age >= 18", false);
@@ -212,8 +237,8 @@ class SqlQueryExecutorTest {
 
     var sql = mergedQuerySql(captor);
     assertThat(sql)
-        .contains("WITH crit_0 AS (\n" + SQL_AGE + "\n)")
-        .contains("crit_1 AS (\n" + SQL_CHEMO + "\n)")
+        .contains("WITH crit_0 AS (\nSELECT DISTINCT * FROM (\n" + SQL_AGE + "\n) AS crit_0_raw\n)")
+        .contains("crit_1 AS (\nSELECT DISTINCT * FROM (\n" + SQL_CHEMO + "\n) AS crit_1_raw\n)")
         .contains("LEFT JOIN crit_1 ON crit_1.patient_id = crit_0.patient_id")
         .contains("(crit_0.is_met) AS crit_0_is_met")
         .contains("crit_0.is_indeterminate AS crit_0_is_indeterminate")
