@@ -1,27 +1,4 @@
 services:
-  traefik:
-    image: docker.io/library/traefik:v3.7.8@sha256:4299bbed850421258fc5448c2e0e6ad350981d4d335a68de11b92448aedbefe5
-    restart: unless-stopped
-    ipc: none
-    security_opt:
-      - "no-new-privileges:true"
-    cap_drop:
-      - ALL
-    read_only: true
-    command:
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-    ports:
-      - "127.0.0.1:80:80"
-    volumes:
-      # kics-scan ignore-line
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-    deploy:
-      resources:
-        limits:
-          memory: 128m
-
   fhir:
     image: docker.io/hapiproject/hapi:v8.10.0-3@sha256:55213612779ab3eeec919226b7bad378f0061ade823393a61d7dd46dd5087a3d
     restart: unless-stopped
@@ -58,15 +35,8 @@ services:
       OTEL_SERVICE_NAME: "hapi-fhir-jpaserver"
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4318"
     depends_on:
-      traefik:
-        condition: service_started
       db:
         condition: service_started
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.fhir.loadbalancer.server.port=8080"
-      - "traefik.http.routers.fhir.rule=Host(`recruit-fhir-server.127.0.0.1.nip.io`)"
-      - "traefik.http.routers.fhir.entrypoints=web"
     ports:
       - "127.0.0.1:8082:8080"
 
@@ -151,10 +121,6 @@ services:
       OTEL_EXPORTER_JAEGER_ENDPOINT: "http://jaeger:14250"
     depends_on:
       - broadsea-atlasdb
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.ohdsi-webapi.rule=Host(`recruit-ohdsi.127.0.0.1.nip.io`) && PathPrefix(`/WebAPI`)"
-      - "traefik.http.routers.ohdsi-webapi.entrypoints=web"
 
   ohdsi-atlas:
     image: docker.io/ohdsi/atlas:2.15.0@sha256:6814e8c5b5366b50bc197b1eb2881689e5852784742b91b9636eec514f5a555e
@@ -177,10 +143,6 @@ services:
       WEBAPI_URL: ""
     volumes:
       - ./config-local.js:/usr/share/nginx/html/atlas/js/config-local.js:ro
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.ohdsi-atlas.rule=Host(`recruit-ohdsi.127.0.0.1.nip.io`) && PathPrefix(`/atlas`)"
-      - "traefik.http.routers.ohdsi-atlas.entrypoints=web"
 
   list:
     build:
@@ -208,11 +170,6 @@ services:
       OTEL_EXPORTER_JAEGER_AGENT_HOST: "jaeger"
     ports:
       - "127.0.0.1:8085:8080"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.recruit-list.loadbalancer.server.port=8080"
-      - "traefik.http.routers.recruit-list.rule=Host(`recruit-list.127.0.0.1.nip.io`)"
-      - "traefik.http.routers.recruit-list.entrypoints=web"
 
   notify:
     build:
@@ -314,16 +271,13 @@ services:
 
   jaeger:
     image: docker.io/jaegertracing/jaeger:2.20.0@sha256:46a886260e04002d8f45e213fc39063fa11a50446048fdaa64786fc0840cb9f8
+    environment:
+      COLLECTOR_OTLP_ENABLED: true
     ports:
       - "127.0.0.1:16686:16686"
       - "127.0.0.1:6831:6831/udp"
       - "127.0.0.1:6832:6832/udp"
       - "127.0.0.1:14250:14250/tcp"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.jaeger.loadbalancer.server.port=16686"
-      - "traefik.http.routers.jaeger.rule=Host(`recruit-jaeger.127.0.0.1.nip.io`)"
-      - "traefik.http.routers.jaeger.entrypoints=web"
 
   maildev:
     image: docker.io/maildev/maildev:3.0.0-rc.1@sha256:ad6d46b7c47617c141961649a9ed5e50069aed53e94ca5359a59b3e1459925da
@@ -344,11 +298,6 @@ services:
     ports:
       - "127.0.0.1:3025:1025"
       - "127.0.0.1:2080:1080"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.maildev.loadbalancer.server.port=1080"
-      - "traefik.http.routers.maildev.rule=Host(`recruit-maildev.127.0.0.1.nip.io`)"
-      - "traefik.http.routers.maildev.entrypoints=web"
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.7.0@sha256:0f198be292568439d700cdbfb893e69a6009bb43a94a06a945b1d3d506c76b13
@@ -378,11 +327,6 @@ services:
         read_only: true
     ports:
       - "127.0.0.1:8083:8080"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
-      - "traefik.http.routers.keycloak.rule=Host(`recruit-keycloak.127.0.0.1.nip.io`)"
-      - "traefik.http.routers.keycloak.entrypoints=web"
 
   minio:
     image: docker.io/minio/minio:RELEASE.2025-09-07T16-13-09Z@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e
