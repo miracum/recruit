@@ -29,20 +29,6 @@ defaults:
     shell: bash
 
 jobs:
-  # the build job is intentionally *not* a matrix: a matrix job's outputs (notably the
-  # per-module image-digest) are only visible to downstream jobs for the last matrix
-  # instance to complete, not all of them. Splitting into one job per module lets the
-  # release job reference each module's actual, unambiguous build-time digest directly,
-  # instead of having to re-resolve it from the registry later (which would leave a
-  # window for the tag to be repointed between build and release).
-  #
-  # each of the 4 Java modules' jobs runs on its own runner (rather than one shared
-  # `docker buildx bake` job building all 4 concurrently) so their Gradle
-  # dependency-resolution/test-compilation steps don't oversubscribe a single runner's
-  # CPU/RAM. standard-build.yaml's build-push-action steps use BuildKit's `type=gha`
-  # cache backend by default, so the shared, MODULE_NAME-independent parts of src/Dockerfile
-  # (the "deps" stage) still get cached and reused across these separate jobs/runs, without
-  # needing a shared local cache mount.
   build-query:
     name: build query
     permissions:
@@ -59,7 +45,7 @@ jobs:
       image: ghcr.io/${{ github.repository }}/query
       build-context: "src/"
       enable-build-test-layer: true
-      enable-build-cache: false
+      enable-build-cache: true
       enable-buildkit-cache-mount-caching: true
       build-args: |
         MODULE_NAME=query
