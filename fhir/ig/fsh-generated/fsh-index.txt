@@ -9,6 +9,8 @@ NamingSystem-eligibility-library-id.json                              Eligibilit
 NamingSystem-research-subject-id.json                                 ResearchSubjectIdentifierSystem                   Instance    researchsubject.fsh          1 - 12
 NamingSystem-screening-list-id.json                                   ScreeningListIdentifierSystem                     Instance    screeninglist.fsh            24 - 35
 NamingSystem-superset-synced-eligibility-library-id.json              SupersetSyncedEligibilityLibraryIdentifierSystem  Instance    eligibility-library.fsh      14 - 25
+NamingSystem-ui-created-eligibility-library-id.json                   UICreatedEligibilityLibraryIdentifierSystem       Instance    eligibility-library.fsh      27 - 38
+NamingSystem-ui-created-research-study-id.json                        UICreatedResearchStudyIdentifierSystem            Instance    recruit-researchstudy.fsh    14 - 25
 ResearchStudy-RecruitResearchStudyExample.json                        RecruitResearchStudyExample                       Instance    recruit-researchstudy.fsh    9 - 12
 SearchParameter-group-characteristic.json                             GroupCharacteristic                               Instance    searchparameters.fsh         14 - 24
 SearchParameter-list-belongs-to-study.json                            ListBelongsToStudy                                Instance    searchparameters.fsh         26 - 37

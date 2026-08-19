@@ -23,6 +23,19 @@ public static class FhirConstants
     public static string UrlEligibilityGroupIdentifier =>
         RecruIT.FhirConstants.Recruit.NamingSystems.EligibilityGroupId.Uri;
 
+    /// <summary>The identifier system for a criterion Library authored directly through this UI.</summary>
+    public static string UrlUiCreatedEligibilityLibraryIdentifier =>
+        RecruIT.FhirConstants.Recruit.NamingSystems.UiCreatedEligibilityLibraryId.Uri;
+
+    /// <summary>
+    /// The identifier system for a ResearchStudy authored directly through this UI - independent of
+    /// whichever "real" business identifier (see TrialIdentifier) the admin may separately enter;
+    /// gives a study a stable, title-derived identity to key update-as-create off of even when no
+    /// such business identifier exists yet.
+    /// </summary>
+    public static string UrlUiCreatedResearchStudyIdentifier =>
+        RecruIT.FhirConstants.Recruit.NamingSystems.UiCreatedResearchStudyId.Uri;
+
     public const string SystemIdentifierType = "http://terminology.hl7.org/CodeSystem/v2-0203";
     public const string IdentifierTypeMedicalRecordNumber = "MR";
 

@@ -80,6 +80,22 @@
     "endLine": 25
   },
   {
+    "outputFile": "NamingSystem-ui-created-eligibility-library-id.json",
+    "fshName": "UICreatedEligibilityLibraryIdentifierSystem",
+    "fshType": "Instance",
+    "fshFile": "eligibility-library.fsh",
+    "startLine": 27,
+    "endLine": 38
+  },
+  {
+    "outputFile": "NamingSystem-ui-created-research-study-id.json",
+    "fshName": "UICreatedResearchStudyIdentifierSystem",
+    "fshType": "Instance",
+    "fshFile": "recruit-researchstudy.fsh",
+    "startLine": 14,
+    "endLine": 25
+  },
+  {
     "outputFile": "ResearchStudy-RecruitResearchStudyExample.json",
     "fshName": "RecruitResearchStudyExample",
     "fshType": "Instance",

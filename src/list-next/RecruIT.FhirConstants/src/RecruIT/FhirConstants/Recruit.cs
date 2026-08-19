@@ -129,6 +129,22 @@ public static class Recruit
             public static string Uri =>
                 "https://miracum.github.io/recruit/fhir/identifiers/superset-synced-eligibility-library-id";
         }
+
+        /// <summary>The identifier system for a criterion expressed in a Library resource created via the UI.</summary>
+        public static class UiCreatedEligibilityLibraryId
+        {
+            /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/ui-created-eligibility-library-id</c></summary>
+            public static string Uri =>
+                "https://miracum.github.io/recruit/fhir/identifiers/ui-created-eligibility-library-id";
+        }
+
+        /// <summary>The identifier system for a ResearchStudy resource created via the UI.</summary>
+        public static class UiCreatedResearchStudyId
+        {
+            /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/ui-created-research-study-id</c></summary>
+            public static string Uri =>
+                "https://miracum.github.io/recruit/fhir/identifiers/ui-created-research-study-id";
+        }
     }
 }
 

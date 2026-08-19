@@ -770,6 +770,7 @@
           "OpenTelemetry.Instrumentation.AspNetCore": "[1.17.0, )",
           "OpenTelemetry.Instrumentation.Runtime": "[1.17.0, )",
           "RecruIT.FhirConstants": "[10.5.7, )",
+          "Slugify.Core": "[5.1.1, )",
           "io.github.diz-uker.fhir-ig-constants": "[0.2.15, )"
         }
       },
@@ -932,6 +933,12 @@
         "dependencies": {
           "OpenTelemetry.Api": "[1.17.0, 2.0.0)"
         }
+      },
+      "Slugify.Core": {
+        "type": "CentralTransitive",
+        "requested": "[5.1.1, )",
+        "resolved": "5.1.1",
+        "contentHash": "9dsxewpdgnLgOVN6dIRX3XvlEy1XpLbE2nd2bFebcW0XPdysU1WgQUXChFcAfjHpdfImBxMUe33PTwZOuU531Q=="
       }
     }
   }

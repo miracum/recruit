@@ -21,7 +21,7 @@ step:
 
 1. From the repo root, run `npx fsh-sushi fhir/ig --snapshot` to (re-)generate
    `fhir/ig/fsh-generated/resources`.
-2. Regenerate one or both languages:
+2. Regenerate one or both languages, from the `./src/` directory:
    - Java: `./gradlew :fhir-constants:generateIgConstants`
    - C#: `dotnet build list-next/RecruIT.FhirConstants/RecruIT.FhirConstants.csproj -t:GenerateIgConstants`
 3. Review the diff (added/removed/renamed constants), commit it.

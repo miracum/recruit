@@ -343,5 +343,35 @@ public final class Recruit {
         return "https://miracum.github.io/recruit/fhir/identifiers/superset-synced-eligibility-library-id";
       }
     }
+
+    /**
+     * The identifier system for a criterion expressed in a Library resource created via the UI.
+     */
+    public static final class UiCreatedEligibilityLibraryId {
+      private UiCreatedEligibilityLibraryId() {
+      }
+
+      /**
+       * @return {@code https://miracum.github.io/recruit/fhir/identifiers/ui-created-eligibility-library-id}
+       */
+      public static @NonNull String uri() {
+        return "https://miracum.github.io/recruit/fhir/identifiers/ui-created-eligibility-library-id";
+      }
+    }
+
+    /**
+     * The identifier system for a ResearchStudy resource created via the UI.
+     */
+    public static final class UiCreatedResearchStudyId {
+      private UiCreatedResearchStudyId() {
+      }
+
+      /**
+       * @return {@code https://miracum.github.io/recruit/fhir/identifiers/ui-created-research-study-id}
+       */
+      public static @NonNull String uri() {
+        return "https://miracum.github.io/recruit/fhir/identifiers/ui-created-research-study-id";
+      }
+    }
   }
 }

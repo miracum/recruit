@@ -191,6 +191,22 @@
         "name": "Test",
         "description": "An example of a screening list.",
         "exampleCanonical": "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list"
+      },
+      {
+        "reference": {
+          "reference": "NamingSystem/ui-created-eligibility-library-id"
+        },
+        "name": "UICreatedEligibilityLibraryIdentifierSystem",
+        "description": "The identifier system for a criterion expressed in a Library resource created via the UI.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "NamingSystem/ui-created-research-study-id"
+        },
+        "name": "UICreatedResearchStudyIdentifierSystem",
+        "description": "The identifier system for a ResearchStudy resource created via the UI.",
+        "exampleBoolean": false
       }
     ],
     "page": {

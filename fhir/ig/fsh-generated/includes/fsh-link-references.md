@@ -19,3 +19,5 @@
 [screening-list-id]: NamingSystem-screening-list-id.html
 [superset-synced-eligibility-library-id]: NamingSystem-superset-synced-eligibility-library-id.html
 [ScreeningListExample]: List-ScreeningListExample.html
+[ui-created-eligibility-library-id]: NamingSystem-ui-created-eligibility-library-id.html
+[ui-created-research-study-id]: NamingSystem-ui-created-research-study-id.html

@@ -117,72 +117,23 @@ else
                     <BbCardTitle>@Localizer["App.CriteriaManager.StudySectionTitle"]</BbCardTitle>
                 </BbCardHeader>
                 <BbCardContent>
-                    <div class="flex gap-2">
-                        <BbButton Variant="@(_studyMode == StudyMode.Existing ? ButtonVariant.Default : ButtonVariant.Outline)"
-                                  Size="ButtonSize.Small" OnClick="@(() => _studyMode = StudyMode.Existing)">
-                            @Localizer["App.CriteriaManager.ExistingStudyTab"]
-                        </BbButton>
-                        <BbButton Variant="@(_studyMode == StudyMode.New ? ButtonVariant.Default : ButtonVariant.Outline)"
-                                  Size="ButtonSize.Small" OnClick="@(() => _studyMode = StudyMode.New)">
-                            @Localizer["App.CriteriaManager.NewStudyTab"]
-                        </BbButton>
-                    </div>
-
-                    @if (_studyMode == StudyMode.Existing)
-                    {
-                        <div class="mt-4 max-w-md">
-                            @if (_existingStudiesLoading)
-                            {
-                                <BbSkeleton Class="h-9 w-full" />
-                            }
-                            else if (_studyLoadErrorMessage is not null)
-                            {
-                                <BbAlert Variant="AlertVariant.Danger">
-                                    <BbAlertDescription>@_studyLoadErrorMessage</BbAlertDescription>
-                                </BbAlert>
-                            }
-                            else if (_existingStudies.Count == 0)
-                            {
-                                <p class="text-sm text-muted-foreground">@Localizer["App.CriteriaManager.NoExistingStudies"]</p>
-                            }
-                            else
-                            {
-                                <select class="block w-full rounded-md border bg-background p-2 text-sm"
-                                        @bind="_selectedExistingStudyId" @bind:after="OnExistingStudySelected">
-                                    <option value="">@Localizer["App.CriteriaManager.SelectStudyPlaceholder"]</option>
-                                    @foreach (var study in _existingStudies)
-                                    {
-                                        <option value="@study.Id">@(study.Acronym ?? study.Title ?? study.Id)</option>
-                                    }
-                                </select>
-                            }
-                        </div>
-                    }
-
-                    <div class="mt-4 flex flex-wrap gap-3">
+                    <div class="flex flex-wrap gap-3">
                         <div class="min-w-64 flex-1">
-                            <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.StudyTitleLabel"]</label>
-                            <BbInput @bind-Value="_studyDraft.Title" Disabled="@(_studyMode == StudyMode.Existing)" Class="mt-1" />
+                            <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                                @Localizer["App.CriteriaManager.StudyTitleLabel"] <span class="text-destructive">*</span>
+                            </label>
+                            <BbInput @bind-Value="_studyDraft.Title" Required="true" Class="mt-1" />
                         </div>
                         <div class="w-full max-w-xs">
                             <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.StudyAcronymLabel"]</label>
-                            <BbInput @bind-Value="_studyDraft.Acronym" Disabled="@(_studyMode == StudyMode.Existing)" Class="mt-1" />
-                        </div>
-                        <div class="w-full max-w-sm">
-                            <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.IdentifierSystemLabel"]</label>
-                            <BbInput @bind-Value="_studyDraft.IdentifierSystem" Disabled="@(_studyMode == StudyMode.Existing)" Class="mt-1" />
-                        </div>
-                        <div class="w-full max-w-xs">
-                            <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.IdentifierValueLabel"]</label>
-                            <BbInput @bind-Value="_studyDraft.IdentifierValue" Disabled="@(_studyMode == StudyMode.Existing)" Class="mt-1" />
+                            <BbInput @bind-Value="_studyDraft.Acronym" Class="mt-1" />
                         </div>
                     </div>
 
                     <div class="mt-4">
                         <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.StudyDescriptionLabel"]</label>
                         <textarea class="mt-1 block w-full rounded-md border bg-background p-2 text-sm" rows="3"
-                                  @bind="_studyDraft.Description" @bind:event="oninput"
-                                  disabled="@(_studyMode == StudyMode.Existing)"></textarea>
+                                  @bind="_studyDraft.Description" @bind:event="oninput"></textarea>
                     </div>
                 </BbCardContent>
             </BbCard>
@@ -226,7 +177,8 @@ else
                                                             OnMoveUp="@(() => MoveCriterion(criterion, -1))"
                                                             OnMoveDown="@(() => MoveCriterion(criterion, 1))"
                                                             OnMoveToOtherColumn="@(() => ToggleCriterionColumn(criterion))"
-                                                            OnRemove="@(() => RemoveCriterion(criterion))" />
+                                                            OnRemove="@(() => RemoveCriterion(criterion))"
+                                                            OnChanged="StateHasChanged" />
                                     }
                                 </div>
                             }
@@ -265,7 +217,8 @@ else
                                                             OnMoveUp="@(() => MoveCriterion(criterion, -1))"
                                                             OnMoveDown="@(() => MoveCriterion(criterion, 1))"
                                                             OnMoveToOtherColumn="@(() => ToggleCriterionColumn(criterion))"
-                                                            OnRemove="@(() => RemoveCriterion(criterion))" />
+                                                            OnRemove="@(() => RemoveCriterion(criterion))"
+                                                            OnChanged="StateHasChanged" />
                                     }
                                 </div>
                             }
@@ -288,26 +241,14 @@ else
 }
 
 @code {
-    private enum StudyMode
-    {
-        New,
-        Existing,
-    }
-
     [CascadingParameter]
     private Task<AuthenticationState>? AuthStateTask { get; set; }
 
     private bool _isAdmin;
     private ClaimsPrincipal _user = new();
 
-    private StudyMode _studyMode = StudyMode.New;
     private ResearchStudyDraft _studyDraft = new();
     private readonly List<CriterionDraft> _criteria = [];
-
-    private List<ResearchStudySummaryDto> _existingStudies = [];
-    private bool _existingStudiesLoading = true;
-    private string _selectedExistingStudyId = string.Empty;
-    private string? _studyLoadErrorMessage;
 
     private List<LibrarySummaryDto> _libraries = [];
     private bool _librariesLoading = true;
@@ -354,40 +295,6 @@ else
         {
             _librariesLoading = false;
         }
-
-        try
-        {
-            _existingStudies = [.. await CriteriaService.SearchResearchStudiesAsync()];
-        }
-        catch (Exception ex)
-        {
-            _studyLoadErrorMessage = ex.Message;
-        }
-        finally
-        {
-            _existingStudiesLoading = false;
-        }
-    }
-
-    private void OnExistingStudySelected()
-    {
-        var study = _existingStudies.FirstOrDefault(s => s.Id == _selectedExistingStudyId);
-        _studyDraft = study is null
-            ? new ResearchStudyDraft()
-            : new ResearchStudyDraft
-            {
-                ExistingId = study.Id,
-                Title = study.Title ?? string.Empty,
-                Acronym = study.Acronym ?? string.Empty,
-                Description = study.Description ?? string.Empty,
-                IdentifierSystem = study.TrialIdentifier?.System ?? string.Empty,
-                IdentifierValue = study.TrialIdentifier?.Value ?? string.Empty,
-            };
-
-        // TODO: this doesn't (yet) load the selected study's existing criteria into _criteria -
-        // switching to an existing study only backfills its title/acronym/description/identifier.
-        // Needs a read-side method resolving that study's Group.characteristic/Library set, same
-        // as ScreeningListService.GetListWithPatientsAsync does for the patient list page.
     }
 
     private void AddCriterion(bool exclude) => _criteria.Add(new CriterionDraft { Exclude = exclude });

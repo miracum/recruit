@@ -1,0 +1,16 @@
+{
+  "resourceType": "NamingSystem",
+  "id": "ui-created-eligibility-library-id",
+  "description": "The identifier system for a criterion expressed in a Library resource created via the UI.",
+  "name": "UICreatedEligibilityLibraryIdentifier",
+  "status": "active",
+  "kind": "identifier",
+  "date": "2026-08-14",
+  "uniqueId": [
+    {
+      "type": "uri",
+      "value": "https://miracum.github.io/recruit/fhir/identifiers/ui-created-eligibility-library-id",
+      "preferred": true
+    }
+  ]
+}

@@ -89,7 +89,7 @@
     <value>Notifications</value>
   </data>
   <data name="App.Nav.CriteriaManager" xml:space="preserve">
-    <value>Criteria Manager</value>
+    <value>Trial Editor</value>
   </data>
   <data name="App.Nav.HangfireDashboard" xml:space="preserve">
     <value>Hangfire Dashboard</value>
@@ -436,9 +436,6 @@
   <data name="App.Errors.NotAuthorizedAdminOnly" xml:space="preserve">
     <value>You are not authorized to view this page. Administrator access is required.</value>
   </data>
-  <data name="App.Errors.ResearchStudiesLoadFailed" xml:space="preserve">
-    <value>Existing studies could not be loaded.</value>
-  </data>
   <data name="App.Errors.LibrariesLoadFailed" xml:space="preserve">
     <value>Library resources could not be loaded.</value>
   </data>
@@ -551,10 +548,10 @@
     <value>Access could not be revoked</value>
   </data>
   <data name="App.CriteriaManager.PageTitle" xml:space="preserve">
-    <value>Criteria Manager</value>
+    <value>Trial Editor</value>
   </data>
   <data name="App.CriteriaManager.Breadcrumb" xml:space="preserve">
-    <value>Criteria Manager</value>
+    <value>Trial Editor</value>
   </data>
   <data name="App.CriteriaManager.LibrarySectionTitle" xml:space="preserve">
     <value>Library catalog</value>
@@ -586,29 +583,11 @@
   <data name="App.CriteriaManager.StudySectionTitle" xml:space="preserve">
     <value>Study</value>
   </data>
-  <data name="App.CriteriaManager.ExistingStudyTab" xml:space="preserve">
-    <value>Existing study</value>
-  </data>
-  <data name="App.CriteriaManager.NewStudyTab" xml:space="preserve">
-    <value>New study</value>
-  </data>
-  <data name="App.CriteriaManager.SelectStudyPlaceholder" xml:space="preserve">
-    <value>Select a study...</value>
-  </data>
-  <data name="App.CriteriaManager.NoExistingStudies" xml:space="preserve">
-    <value>No existing studies found.</value>
-  </data>
   <data name="App.CriteriaManager.StudyTitleLabel" xml:space="preserve">
     <value>Title</value>
   </data>
   <data name="App.CriteriaManager.StudyAcronymLabel" xml:space="preserve">
     <value>Acronym</value>
-  </data>
-  <data name="App.CriteriaManager.IdentifierSystemLabel" xml:space="preserve">
-    <value>Identifier system</value>
-  </data>
-  <data name="App.CriteriaManager.IdentifierValueLabel" xml:space="preserve">
-    <value>Identifier value</value>
   </data>
   <data name="App.CriteriaManager.StudyDescriptionLabel" xml:space="preserve">
     <value>Description</value>
@@ -665,6 +644,12 @@
     <value>From library</value>
   </data>
   <data name="App.CriteriaManager.CriterionDisplayTextLabel" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="App.CriteriaManager.CriterionNamePreviewLabel" xml:space="preserve">
+    <value>Library name</value>
+  </data>
+  <data name="App.CriteriaManager.CriterionDescriptionLabel" xml:space="preserve">
     <value>Description</value>
   </data>
   <data name="App.CriteriaManager.RemoveCriterionButton" xml:space="preserve">
