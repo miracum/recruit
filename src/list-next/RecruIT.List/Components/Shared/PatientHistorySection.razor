@@ -1,3 +1,4 @@
+@using Ganss.Xss
 @inject ResearchSubjectService ResearchSubjectService
 @inject IStringLocalizer<SharedResources> Localizer
 
@@ -20,13 +21,31 @@
             <BbTimeline>
                 @foreach (var entry in _entries)
                 {
-                    <BbTimelineItem Title="@entry.Title"
-                                    Time="@entry.Time.LocalDateTime.ToString("g")"
-                                    Description="@entry.Description"
-                                    IconColor="@(entry.Kind == PatientHistoryEntryKind.Note ? TimelineColor.Secondary : TimelineColor.Primary)">
+                    <BbTimelineItem IconColor="@(entry.Kind == PatientHistoryEntryKind.Note ? TimelineColor.Secondary : TimelineColor.Primary)">
                         <IconContent>
                             <LucideIcon Name="@(entry.Kind == PatientHistoryEntryKind.Note ? "message-square" : "activity")" Size="12" />
                         </IconContent>
+                        <ChildContent>
+                            <BbTimelineContent>
+                                <BbTimelineHeader>
+                                    <BbTimelineTitle>@entry.Title</BbTimelineTitle>
+                                    <BbTimelineTime>@entry.Time.LocalDateTime.ToString("g")</BbTimelineTime>
+                                </BbTimelineHeader>
+                                @if (!string.IsNullOrEmpty(entry.Description))
+                                {
+                                    <BbTimelineDescription>
+                                        @if (entry.Kind == PatientHistoryEntryKind.Note)
+                                        {
+                                            @RenderNote(entry.Description)
+                                        }
+                                        else
+                                        {
+                                            @entry.Description
+                                        }
+                                    </BbTimelineDescription>
+                                }
+                            </BbTimelineContent>
+                        </ChildContent>
                     </BbTimelineItem>
                 }
             </BbTimeline>
@@ -35,6 +54,8 @@
 </div>
 
 @code {
+    private static readonly HtmlSanitizer Sanitizer = new();
+
     [Parameter, EditorRequired]
     public required PatientListEntryDto Patient { get; set; }
 
@@ -42,6 +63,8 @@
     private bool _loading;
     private string? _loadedForSubjectId;
     private DateTimeOffset? _loadedForLastUpdated;
+
+    private static MarkupString RenderNote(string html) => new(Sanitizer.Sanitize(html));
 
     protected override async Task OnParametersSetAsync()
     {
