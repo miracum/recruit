@@ -5,7 +5,6 @@ import de.medizininformatikinitiative.kerndatensatz.studie.Studie;
 import io.github.dizuker.tofhir.IdUtils;
 import io.github.miracum.recruit.Recruit;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -29,9 +28,11 @@ import org.springframework.util.StringUtils;
 
 /**
  * Builds the FHIR transaction bundles {@link PollForStudies} submits from a study's merged
- * eligibility results: one or more chunked bundles of ResearchSubject + per-criterion Observation
- * entries (see {@link #buildSubjectAndObservationBundles}), and a separate screening List bundle
- * (see {@link #buildScreeningListBundle}) that must be submitted afterwards.
+ * eligibility results: one bundle of ResearchSubject + per-criterion Observation entries per {@link
+ * #chunkSize}-sized batch of patients (see {@link #buildSubjectAndObservationBundle} - {@link
+ * PollForStudies} calls it once per batch as it streams results in, rather than this class chunking
+ * a full, already-materialized result set itself), and a separate screening List bundle (see {@link
+ * #buildScreeningListBundle}) that must be submitted afterwards.
  *
  * <p>The List references each patient's ResearchSubject via a <a
  * href="https://www.hl7.org/fhir/http.html#trules">conditional reference</a> (a search URL, not a
@@ -50,7 +51,7 @@ import org.springframework.util.StringUtils;
  * {@code If-None-Exist} is a no-op if a match already exists). With {@code useUpdateAsCreate}, a
  * plain PUT-by-id would instead unconditionally replace the whole resource - resetting {@code
  * status} back to {@code candidate} and dropping any notes - every poll cycle, so {@link
- * #buildSubjectAndObservationBundles} is told which ids already exist and skips them explicitly.
+ * #buildSubjectAndObservationBundle} is told which ids already exist and skips them explicitly.
  */
 @Component
 public class EligibilityBundleBuilder {
@@ -79,54 +80,54 @@ public class EligibilityBundleBuilder {
    * Whether ResearchSubjects are written via update-as-create (PUT to a deterministic id) rather
    * than conditional create (POST with If-None-Exist). Callers use this to decide whether they need
    * to look up already-existing ResearchSubject ids before calling {@link
-   * #buildSubjectAndObservationBundles} - see that method's {@code existingResearchSubjectIds}.
+   * #buildSubjectAndObservationBundle} - see that method's {@code existingResearchSubjectIds}.
    */
   public boolean usesUpdateAsCreate() {
     return useUpdateAsCreate;
   }
 
   /**
-   * One transaction bundle per chunk of at most {@code chunkSize} patients, each entry containing
-   * that patient's ResearchSubject (unless it already exists - see {@code
-   * existingResearchSubjectIds}) plus one Observation per criterion. Empty if {@code results} is
-   * empty.
+   * The max number of patients' worth of entries {@link #buildSubjectAndObservationBundle} will
+   * accept in one call - callers streaming results in (see {@code PollForStudies}) should buffer up
+   * to this many {@link PatientEligibilityResult}s before building and submitting a bundle, to stay
+   * under the FHIR server's transaction limits.
+   */
+  public int chunkSize() {
+    return chunkSize;
+  }
+
+  /**
+   * One transaction bundle for the given batch of patients (expected to be at most {@link
+   * #chunkSize} patients - see there), containing each patient's ResearchSubject (unless it already
+   * exists - see {@code existingResearchSubjectIds}) plus one Observation per criterion.
    *
    * @param existingResearchSubjectIds ids (as returned by {@link #researchSubjectResourceId}) of
    *     ResearchSubjects already on the server for this study. Only consulted when {@code
    *     useUpdateAsCreate} is enabled - without it, {@code POST}'s conditional-create already
    *     guarantees existing subjects are left untouched, so callers may pass {@link Set#of()}.
    */
-  public List<Bundle> buildSubjectAndObservationBundles(
+  public Bundle buildSubjectAndObservationBundle(
       ResearchStudy study,
-      List<PatientEligibilityResult> results,
+      List<PatientEligibilityResult> batch,
       Date effectiveDate,
       Set<String> existingResearchSubjectIds) {
     var studyId = study.getIdElement().getIdPart();
     var researchStudyReference = new Reference("ResearchStudy/" + studyId);
 
-    var bundles = new ArrayList<Bundle>();
-    for (var chunk : partition(results, chunkSize)) {
-      var bundle = new Bundle().setType(Bundle.BundleType.TRANSACTION);
-      bundle.setTimestamp(effectiveDate);
+    var bundle = new Bundle().setType(Bundle.BundleType.TRANSACTION);
+    bundle.setTimestamp(effectiveDate);
 
-      for (var result : chunk) {
-        addResearchSubjectEntry(
-            bundle,
-            studyId,
-            researchStudyReference,
-            result.patientId(),
-            existingResearchSubjectIds);
+    for (var result : batch) {
+      addResearchSubjectEntry(
+          bundle, studyId, researchStudyReference, result.patientId(), existingResearchSubjectIds);
 
-        for (var outcome : result.criteria()) {
-          addObservationEntry(
-              bundle, studyId, researchStudyReference, result.patientId(), outcome, effectiveDate);
-        }
+      for (var outcome : result.criteria()) {
+        addObservationEntry(
+            bundle, studyId, researchStudyReference, result.patientId(), outcome, effectiveDate);
       }
-
-      bundles.add(bundle);
     }
 
-    return bundles;
+    return bundle;
   }
 
   private void addResearchSubjectEntry(
@@ -271,11 +272,15 @@ public class EligibilityBundleBuilder {
         .setRequest(request);
   }
 
-  /** A single transaction bundle updating the study's screening List to the given membership. */
+  /**
+   * A single transaction bundle updating the study's screening List to the given membership.
+   *
+   * @param patientIds every candidate/undecidable patient's id - just the id, not the full {@link
+   *     PatientEligibilityResult}, since the List only ever references a patient's ResearchSubject
+   *     and doesn't otherwise need their per-criterion outcomes.
+   */
   public Bundle buildScreeningListBundle(
-      ResearchStudy study,
-      List<PatientEligibilityResult> results,
-      Optional<ListResource> previousList) {
+      ResearchStudy study, List<String> patientIds, Optional<ListResource> previousList) {
     var studyId = study.getIdElement().getIdPart();
 
     var bundle = new Bundle().setType(Bundle.BundleType.TRANSACTION);
@@ -303,8 +308,7 @@ public class EligibilityBundleBuilder {
         new Reference("ResearchStudy/" + studyId).setDisplay(getStudyAcronym(study));
     screeningList.addExtension(Recruit.Extensions.screeningListBelongsToStudy(studyReference));
 
-    for (var result : results) {
-      var patientId = result.patientId();
+    for (var patientId : patientIds) {
       var individualReferenceValue = "Patient/" + patientId;
       var studyReferenceValue = "ResearchStudy/" + studyId;
 
@@ -419,17 +423,5 @@ public class EligibilityBundleBuilder {
       return study.getTitle();
     }
     return study.getIdElement().getIdPart();
-  }
-
-  private static <T> List<List<T>> partition(List<T> items, int size) {
-    if (items.isEmpty()) {
-      return List.of();
-    }
-
-    var chunks = new ArrayList<List<T>>();
-    for (var i = 0; i < items.size(); i += size) {
-      chunks.add(items.subList(i, Math.min(i + size, items.size())));
-    }
-    return chunks;
   }
 }

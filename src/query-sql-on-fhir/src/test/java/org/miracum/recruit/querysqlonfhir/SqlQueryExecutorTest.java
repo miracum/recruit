@@ -2,15 +2,21 @@ package org.miracum.recruit.querysqlonfhir;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import java.nio.charset.StandardCharsets;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,16 +46,34 @@ class SqlQueryExecutorTest {
   private final SqlQueryExecutor sut = new SqlQueryExecutor(jdbcTemplate, sqlOnFhirClient);
 
   /**
-   * Trino-direct criteria are probed with a {@code LIMIT 0} query to see which optional columns
-   * they return, before the merged query referencing them is built. {@code SQL_AGE}/{@code
-   * SQL_CHEMO} both select {@code is_indeterminate}/{@code result_note}, so this is what a real
-   * probe against them would report; tests exercising a criterion that omits either column override
-   * this stub.
+   * Rows the merged query's {@link ResultSet} should stream back - see {@link #stubJdbcTemplate}.
+   */
+  private final List<Map<String, Object>> mainQueryRows = new ArrayList<>();
+
+  /**
+   * The merged, all-Trino path is exercised through both a {@code LIMIT 0} column-probe query (see
+   * {@code resolveResultColumns}) and the real merged query (see {@code evaluateAgainstTrino}) -
+   * both go through the same {@code jdbcTemplate.query(String, ResultSetExtractor)} overload, so
+   * this single stub distinguishes them by SQL content: a probe always wraps its criterion SQL with
+   * {@code LIMIT 0}, the merged query never does. Probing both {@code SQL_AGE} and {@code
+   * SQL_CHEMO} report {@code is_indeterminate}/{@code result_note} present; a test exercising a
+   * criterion that omits either column overrides this stub for that criterion's specific probe SQL.
+   * The merged query streams whatever {@link #mainQueryRows} the test has populated, through a fake
+   * {@link ResultSet} - mirroring how the production code reads rows directly off the JDBC
+   * ResultSet instead of collecting them into a list first.
    */
   @BeforeEach
-  void stubColumnProbe() {
+  void stubJdbcTemplate() {
     when(jdbcTemplate.query(anyString(), any(ResultSetExtractor.class)))
-        .thenReturn(Set.of("is_indeterminate", "result_note"));
+        .thenAnswer(
+            invocation -> {
+              String sql = invocation.getArgument(0);
+              if (sql.contains("LIMIT 0")) {
+                return Set.of("is_indeterminate", "result_note");
+              }
+              ResultSetExtractor<?> extractor = invocation.getArgument(1);
+              return extractor.extractData(fakeResultSet(mainQueryRows));
+            });
   }
 
   private static Library trinoLibrary(String sql) {
@@ -83,6 +107,32 @@ class SqlQueryExecutorTest {
     return row;
   }
 
+  /**
+   * A {@link ResultSet} double standing in for a real JDBC driver's, so the production
+   * row-by-row-streaming code (see {@code SqlQueryExecutor#toPatientEligibilityResult}) can be
+   * exercised without a real database. Relies on production code always calling {@code
+   * rs.findColumn(name)} immediately before the corresponding {@code rs.getObject(index)} for that
+   * same column (as {@link org.springframework.jdbc.support.JdbcUtils#getResultSetValue} does), so
+   * the fake doesn't need to simulate real column indices - it just remembers the last column name
+   * looked up and returns that row's value for it.
+   */
+  private static ResultSet fakeResultSet(List<Map<String, Object>> rows) throws SQLException {
+    var rs = mock(ResultSet.class);
+    var rowIndex = new int[] {-1};
+    var lastColumn = new String[1];
+
+    when(rs.next()).thenAnswer(invocation -> ++rowIndex[0] < rows.size());
+    when(rs.findColumn(anyString()))
+        .thenAnswer(
+            invocation -> {
+              lastColumn[0] = invocation.getArgument(0);
+              return 1;
+            });
+    when(rs.getObject(anyInt())).thenAnswer(invocation -> rows.get(rowIndex[0]).get(lastColumn[0]));
+
+    return rs;
+  }
+
   private void stubSqlOnFhirResponse(Parameters response) {
     when(sqlOnFhirClient
             .operation()
@@ -109,9 +159,16 @@ class SqlQueryExecutorTest {
     return parameters;
   }
 
+  private static List<PatientEligibilityResult> collect(
+      SqlQueryExecutor sut, List<EligibilityCriterion> criteria) {
+    var collected = new ArrayList<PatientEligibilityResult>();
+    sut.evaluateEligibility(criteria, collected::add);
+    return collected;
+  }
+
   @Test
   void evaluateEligibility_withEmptyCriteria_returnsEmptyAndTouchesNothing() {
-    var result = sut.evaluateEligibility(List.of());
+    var result = collect(sut, List.of());
 
     assertThat(result).isEmpty();
     verifyNoInteractions(jdbcTemplate, sqlOnFhirClient);
@@ -122,13 +179,12 @@ class SqlQueryExecutorTest {
     var ageCriterion = new EligibilityCriterion(trinoLibrary(SQL_AGE), "Age >= 18", false);
     var chemoCriterion = new EligibilityCriterion(trinoLibrary(SQL_CHEMO), "No prior chemo", true);
 
-    when(jdbcTemplate.queryForList(anyString()))
-        .thenReturn(
-            List.of(
-                row("patient_id", "pat-1", "crit_0_is_met", true, "crit_1_is_met", true),
-                row("patient_id", "pat-2", "crit_0_is_met", true, "crit_1_is_met", null)));
+    mainQueryRows.addAll(
+        List.of(
+            row("patient_id", "pat-1", "crit_0_is_met", true, "crit_1_is_met", true),
+            row("patient_id", "pat-2", "crit_0_is_met", true, "crit_1_is_met", null)));
 
-    var results = sut.evaluateEligibility(List.of(ageCriterion, chemoCriterion));
+    var results = collect(sut, List.of(ageCriterion, chemoCriterion));
 
     assertThat(results).hasSize(2);
 
@@ -150,13 +206,11 @@ class SqlQueryExecutorTest {
     var include = new EligibilityCriterion(trinoLibrary(SQL_AGE), "Age >= 18", false);
     var exclude = new EligibilityCriterion(trinoLibrary(SQL_CHEMO), "No prior chemo", true);
 
-    when(jdbcTemplate.queryForList(anyString())).thenReturn(List.of());
-
     var captor = ArgumentCaptor.forClass(String.class);
-    sut.evaluateEligibility(List.of(include, exclude));
-    org.mockito.Mockito.verify(jdbcTemplate).queryForList(captor.capture());
+    collect(sut, List.of(include, exclude));
+    verify(jdbcTemplate, atLeastOnce()).query(captor.capture(), any(ResultSetExtractor.class));
 
-    var sql = captor.getValue();
+    var sql = mergedQuerySql(captor);
     assertThat(sql)
         .contains("WITH crit_0 AS (\n" + SQL_AGE + "\n)")
         .contains("crit_1 AS (\n" + SQL_CHEMO + "\n)")
@@ -180,13 +234,12 @@ class SqlQueryExecutorTest {
 
     when(jdbcTemplate.query(contains(sqlWithoutOptionalColumns), any(ResultSetExtractor.class)))
         .thenReturn(Set.of());
-    when(jdbcTemplate.queryForList(anyString())).thenReturn(List.of());
 
     var captor = ArgumentCaptor.forClass(String.class);
-    sut.evaluateEligibility(List.of(withBoth, withoutEither));
-    org.mockito.Mockito.verify(jdbcTemplate).queryForList(captor.capture());
+    collect(sut, List.of(withBoth, withoutEither));
+    verify(jdbcTemplate, atLeastOnce()).query(captor.capture(), any(ResultSetExtractor.class));
 
-    var sql = captor.getValue();
+    var sql = mergedQuerySql(captor);
     assertThat(sql)
         .contains("crit_0.is_indeterminate AS crit_0_is_indeterminate")
         .contains("crit_0.result_note AS crit_0_result_note")
@@ -196,24 +249,34 @@ class SqlQueryExecutorTest {
         .doesNotContain("crit_1.result_note");
   }
 
+  /**
+   * The merged query is one of possibly several {@code jdbcTemplate.query(String,
+   * ResultSetExtractor)} calls a test triggers (one {@code LIMIT 0} probe per criterion, plus the
+   * merged query itself) - this picks out the one call that isn't a probe.
+   */
+  private static String mergedQuerySql(ArgumentCaptor<String> captor) {
+    return captor.getAllValues().stream()
+        .filter(sql -> !sql.contains("LIMIT 0"))
+        .findFirst()
+        .orElseThrow();
+  }
+
   @Test
   void evaluateEligibility_carriesIndeterminateAndNoteThroughWithoutAffectingOverallMet() {
     var ageCriterion = new EligibilityCriterion(trinoLibrary(SQL_AGE), "Age >= 18", false);
 
-    when(jdbcTemplate.queryForList(anyString()))
-        .thenReturn(
-            List.of(
-                row(
-                    "patient_id",
-                    "pat-1",
-                    "crit_0_is_met",
-                    null,
-                    "crit_0_is_indeterminate",
-                    true,
-                    "crit_0_result_note",
-                    "conflicting lab results")));
+    mainQueryRows.add(
+        row(
+            "patient_id",
+            "pat-1",
+            "crit_0_is_met",
+            null,
+            "crit_0_is_indeterminate",
+            true,
+            "crit_0_result_note",
+            "conflicting lab results"));
 
-    var results = sut.evaluateEligibility(List.of(ageCriterion));
+    var results = collect(sut, List.of(ageCriterion));
 
     assertThat(results).hasSize(1);
     var pat1 = results.get(0);
@@ -247,7 +310,7 @@ class SqlQueryExecutorTest {
                 // pat-3 missing entirely from the delegated result -> unknown
                 )));
 
-    var results = sut.evaluateEligibility(List.of(trinoIncluded, delegatedExcluded));
+    var results = collect(sut, List.of(trinoIncluded, delegatedExcluded));
 
     assertThat(results)
         .extracting(PatientEligibilityResult::patientId)
@@ -272,7 +335,7 @@ class SqlQueryExecutorTest {
                 row("patient_id", "pat-1", "is_met", true),
                 row("patient_id", "pat-2", "is_met", false))));
 
-    var results = sut.evaluateEligibility(List.of(criterion));
+    var results = collect(sut, List.of(criterion));
 
     assertThat(results).extracting(PatientEligibilityResult::patientId).containsExactly("pat-1");
     verifyNoInteractions(jdbcTemplate);

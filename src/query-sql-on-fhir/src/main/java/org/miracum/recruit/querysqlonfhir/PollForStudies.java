@@ -5,8 +5,10 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.util.BundleUtil;
 import io.github.miracum.recruit.Recruit;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -116,13 +118,6 @@ public class PollForStudies {
 
     log.info("Found {} eligibility criteria for study {}", criteria.size(), study.getId());
 
-    var results = sqlQueryExecutor.evaluateEligibility(criteria);
-
-    log.info(
-        "{} patients are candidates or have unknown eligibility for study {}",
-        results.size(),
-        study.getId());
-
     var effectiveDate = new Date();
 
     // Only needed in update-as-create mode: without it, POST's conditional-create already
@@ -134,18 +129,49 @@ public class PollForStudies {
       existingResearchSubjectIds = Set.of();
     }
 
-    var subjectAndObservationBundles =
-        bundleBuilder.buildSubjectAndObservationBundles(
-            study, results, effectiveDate, existingResearchSubjectIds);
-    for (var bundle : subjectAndObservationBundles) {
-      fhirClient.transaction().withBundle(bundle).execute();
+    // Results are streamed in and submitted per chunkSize-sized batch as they arrive (see
+    // SqlQueryExecutor#evaluateEligibility), rather than the whole study's candidate population
+    // ever being held in memory at once - only patientIds accumulates for the full population,
+    // which is cheap compared to each patient's full per-criterion outcome details.
+    var patientIds = new ArrayList<String>();
+    var batch = new ArrayList<PatientEligibilityResult>(bundleBuilder.chunkSize());
+    sqlQueryExecutor.evaluateEligibility(
+        criteria,
+        result -> {
+          patientIds.add(result.patientId());
+          batch.add(result);
+          if (batch.size() >= bundleBuilder.chunkSize()) {
+            submitSubjectAndObservationBatch(
+                study, batch, effectiveDate, existingResearchSubjectIds);
+            batch.clear();
+          }
+        });
+    if (!batch.isEmpty()) {
+      submitSubjectAndObservationBatch(study, batch, effectiveDate, existingResearchSubjectIds);
     }
 
-    // built and submitted after every chunk above has committed, so its conditional
+    log.info(
+        "{} patients are candidates or have unknown eligibility for study {}",
+        patientIds.size(),
+        study.getId());
+
+    // built and submitted after every batch above has committed, so its conditional
     // ResearchSubject references (see EligibilityBundleBuilder) actually resolve.
     var previousScreeningList = fetchPreviousScreeningList(study);
-    var listBundle = bundleBuilder.buildScreeningListBundle(study, results, previousScreeningList);
+    var listBundle =
+        bundleBuilder.buildScreeningListBundle(study, patientIds, previousScreeningList);
     fhirClient.transaction().withBundle(listBundle).execute();
+  }
+
+  private void submitSubjectAndObservationBatch(
+      ResearchStudy study,
+      List<PatientEligibilityResult> batch,
+      Date effectiveDate,
+      Set<String> existingResearchSubjectIds) {
+    var bundle =
+        bundleBuilder.buildSubjectAndObservationBundle(
+            study, batch, effectiveDate, existingResearchSubjectIds);
+    fhirClient.transaction().withBundle(bundle).execute();
   }
 
   private Optional<ListResource> fetchPreviousScreeningList(ResearchStudy study) {

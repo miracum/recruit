@@ -2,6 +2,8 @@ package org.miracum.recruit.querysqlonfhir;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import java.nio.charset.StandardCharsets;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -10,6 +12,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Library;
@@ -19,6 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.stereotype.Component;
 
 /**
@@ -69,24 +74,32 @@ public class SqlQueryExecutor {
   }
 
   /**
-   * Evaluates every criterion for every patient and returns one result per patient who is either a
-   * candidate (all criteria met) or undecidable (nothing definitely not met, but at least one
-   * unknown). Patients for whom at least one criterion is definitely not met are already excluded
-   * from the returned list.
+   * Evaluates every criterion for every patient and invokes {@code onResult} once per patient who
+   * is either a candidate (all criteria met) or undecidable (nothing definitely not met, but at
+   * least one unknown). Patients for whom at least one criterion is definitely not met are never
+   * passed to {@code onResult}.
+   *
+   * <p>On the all-Trino path, results are streamed row-by-row straight from the JDBC {@link
+   * ResultSet} - at most one patient's worth of data is ever held in memory here, regardless of
+   * population size. The delegated fallback path cannot offer that guarantee (see {@link
+   * #evaluateWithFallbackMerge}) and instead resolves its full result in memory before invoking
+   * {@code onResult} for each entry.
    */
-  public List<PatientEligibilityResult> evaluateEligibility(List<EligibilityCriterion> criteria) {
+  public void evaluateEligibility(
+      List<EligibilityCriterion> criteria, Consumer<PatientEligibilityResult> onResult) {
     if (criteria.isEmpty()) {
-      return List.of();
+      return;
     }
 
     if (criteria.stream().allMatch(this::isTrinoDirect)) {
-      return evaluateAgainstTrino(criteria);
+      evaluateAgainstTrino(criteria, onResult);
+      return;
     }
 
     log.warn(
         "Study has a mix of Trino-direct and sql-on-fhir-delegated criteria; falling back to "
             + "resolving each criterion independently and merging in application memory.");
-    return evaluateWithFallbackMerge(criteria);
+    evaluateWithFallbackMerge(criteria, onResult);
   }
 
   private boolean isTrinoDirect(EligibilityCriterion criterion) {
@@ -116,7 +129,8 @@ public class SqlQueryExecutor {
 
   // ---- all-Trino path: one generated, merged query ----
 
-  private List<PatientEligibilityResult> evaluateAgainstTrino(List<EligibilityCriterion> criteria) {
+  private void evaluateAgainstTrino(
+      List<EligibilityCriterion> criteria, Consumer<PatientEligibilityResult> onResult) {
     var criterionColumns = criteria.stream().map(c -> resolveResultColumns(trinoSql(c))).toList();
 
     var sql = buildMergedQuery(criteria, criterionColumns);
@@ -125,8 +139,15 @@ public class SqlQueryExecutor {
         criteria.size(),
         sql);
 
-    var rows = jdbcTemplate.queryForList(sql);
-    return rows.stream().map(row -> toPatientEligibilityResult(row, criteria)).toList();
+    jdbcTemplate.query(
+        sql,
+        (ResultSetExtractor<Void>)
+            rs -> {
+              while (rs.next()) {
+                onResult.accept(toPatientEligibilityResult(rs, criteria));
+              }
+              return null;
+            });
   }
 
   /**
@@ -243,16 +264,31 @@ public class SqlQueryExecutor {
         + ") IS DISTINCT FROM FALSE";
   }
 
+  /**
+   * Reads one merged-query row directly off the {@link ResultSet} - deliberately not via a {@code
+   * Map}-collecting row mapper, so that streaming callers (see {@link #evaluateAgainstTrino}) never
+   * have more than the current row's data resident in memory. {@link JdbcUtils#getResultSetValue}
+   * (rather than e.g. {@code rs.getBoolean}) is used so a SQL {@code NULL} comes through as Java
+   * {@code null} instead of being coerced to {@code false}.
+   */
   private PatientEligibilityResult toPatientEligibilityResult(
-      Map<String, Object> row, List<EligibilityCriterion> criteria) {
-    var patientId = (String) row.get(PATIENT_ID_COLUMN);
+      ResultSet rs, List<EligibilityCriterion> criteria) throws SQLException {
+    var patientId = (String) JdbcUtils.getResultSetValue(rs, rs.findColumn(PATIENT_ID_COLUMN));
 
     var outcomes = new ArrayList<CriterionOutcome>();
     for (var i = 0; i < criteria.size(); i++) {
       var criterion = criteria.get(i);
-      var met = (Boolean) row.get("crit_" + i + "_" + IS_MET_COLUMN);
-      var indeterminate = Boolean.TRUE.equals(row.get("crit_" + i + "_" + IS_INDETERMINATE_COLUMN));
-      var note = (String) row.get("crit_" + i + "_" + RESULT_NOTE_COLUMN);
+      var met =
+          (Boolean)
+              JdbcUtils.getResultSetValue(rs, rs.findColumn("crit_" + i + "_" + IS_MET_COLUMN));
+      var indeterminate =
+          Boolean.TRUE.equals(
+              JdbcUtils.getResultSetValue(
+                  rs, rs.findColumn("crit_" + i + "_" + IS_INDETERMINATE_COLUMN)));
+      var note =
+          (String)
+              JdbcUtils.getResultSetValue(
+                  rs, rs.findColumn("crit_" + i + "_" + RESULT_NOTE_COLUMN));
       outcomes.add(
           new CriterionOutcome(
               criterion.library(), criterion.displayText(), met, indeterminate, note));
@@ -263,14 +299,13 @@ public class SqlQueryExecutor {
 
   // ---- mixed/delegated fallback: resolve each criterion independently, merge in Java ----
 
-  private List<PatientEligibilityResult> evaluateWithFallbackMerge(
-      List<EligibilityCriterion> criteria) {
+  private void evaluateWithFallbackMerge(
+      List<EligibilityCriterion> criteria, Consumer<PatientEligibilityResult> onResult) {
     var perCriterionResults = criteria.stream().map(this::resolveRawCriterionResults).toList();
 
     var allPatientIds = new LinkedHashSet<String>();
     perCriterionResults.forEach(m -> allPatientIds.addAll(m.keySet()));
 
-    var results = new ArrayList<PatientEligibilityResult>();
     for (var patientId : allPatientIds) {
       var outcomes = new ArrayList<CriterionOutcome>();
       for (var i = 0; i < criteria.size(); i++) {
@@ -286,11 +321,9 @@ public class SqlQueryExecutor {
 
       var result = new PatientEligibilityResult(patientId, outcomes);
       if (!Boolean.FALSE.equals(result.overallMet())) {
-        results.add(result);
+        onResult.accept(result);
       }
     }
-
-    return results;
   }
 
   /** A criterion's raw (pre-exclude-negation) per-patient result, before merge. */

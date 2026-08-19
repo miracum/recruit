@@ -38,15 +38,14 @@ class EligibilityBundleBuilderTest {
    * subjects untouched, not this class, so the set is irrelevant here.
    */
   @Test
-  void buildSubjectAndObservationBundles_withoutUpdateAsCreate_usesConditionalPost() {
+  void buildSubjectAndObservationBundle_withoutUpdateAsCreate_usesConditionalPost() {
     var sut = new EligibilityBundleBuilder(false, 500);
     var study = studyWithId("study-1");
-    var results = List.of(new PatientEligibilityResult("patient-1", List.of()));
+    var batch = List.of(new PatientEligibilityResult("patient-1", List.of()));
 
-    var bundles = sut.buildSubjectAndObservationBundles(study, results, new Date(), Set.of());
+    var bundle = sut.buildSubjectAndObservationBundle(study, batch, new Date(), Set.of());
 
-    assertThat(bundles).hasSize(1);
-    var entry = bundles.getFirst().getEntry().getFirst();
+    var entry = bundle.getEntry().getFirst();
     assertThat(entry.getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.POST);
     assertThat(entry.getRequest().getIfNoneExist())
         .isEqualTo("ResearchSubject?patient=Patient/patient-1&study=ResearchStudy/study-1");
@@ -55,15 +54,14 @@ class EligibilityBundleBuilderTest {
   }
 
   @Test
-  void buildSubjectAndObservationBundles_withUpdateAsCreate_createsNewSubjectViaPut() {
+  void buildSubjectAndObservationBundle_withUpdateAsCreate_createsNewSubjectViaPut() {
     var sut = new EligibilityBundleBuilder(true, 500);
     var study = studyWithId("study-1");
-    var results = List.of(new PatientEligibilityResult("patient-1", List.of()));
+    var batch = List.of(new PatientEligibilityResult("patient-1", List.of()));
 
-    var bundles = sut.buildSubjectAndObservationBundles(study, results, new Date(), Set.of());
+    var bundle = sut.buildSubjectAndObservationBundle(study, batch, new Date(), Set.of());
 
-    assertThat(bundles).hasSize(1);
-    var entry = bundles.getFirst().getEntry().getFirst();
+    var entry = bundle.getEntry().getFirst();
     var expectedId = researchSubjectId("patient-1", "study-1");
     assertThat(entry.getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.PUT);
     assertThat(entry.getRequest().getUrl()).isEqualTo("ResearchSubject/" + expectedId);
@@ -77,35 +75,31 @@ class EligibilityBundleBuilderTest {
    * status would be silently reset to CANDIDATE.
    */
   @Test
-  void buildSubjectAndObservationBundles_withUpdateAsCreate_skipsExistingSubject() {
+  void buildSubjectAndObservationBundle_withUpdateAsCreate_skipsExistingSubject() {
     var sut = new EligibilityBundleBuilder(true, 500);
     var study = studyWithId("study-1");
-    var results = List.of(new PatientEligibilityResult("patient-1", List.of()));
+    var batch = List.of(new PatientEligibilityResult("patient-1", List.of()));
     var existingId = researchSubjectId("patient-1", "study-1");
 
-    var bundles =
-        sut.buildSubjectAndObservationBundles(study, results, new Date(), Set.of(existingId));
+    var bundle = sut.buildSubjectAndObservationBundle(study, batch, new Date(), Set.of(existingId));
 
-    assertThat(bundles).hasSize(1);
-    assertThat(bundles.getFirst().getEntry()).isEmpty();
+    assertThat(bundle.getEntry()).isEmpty();
   }
 
-  /** A mixed chunk: the new patient still gets created, the existing one is left alone. */
+  /** A mixed batch: the new patient still gets created, the existing one is left alone. */
   @Test
-  void buildSubjectAndObservationBundles_withUpdateAsCreate_onlySkipsKnownExistingSubjects() {
+  void buildSubjectAndObservationBundle_withUpdateAsCreate_onlySkipsKnownExistingSubjects() {
     var sut = new EligibilityBundleBuilder(true, 500);
     var study = studyWithId("study-1");
-    var results =
+    var batch =
         List.of(
             new PatientEligibilityResult("existing-patient", List.of()),
             new PatientEligibilityResult("new-patient", List.of()));
     var existingId = researchSubjectId("existing-patient", "study-1");
 
-    var bundles =
-        sut.buildSubjectAndObservationBundles(study, results, new Date(), Set.of(existingId));
+    var bundle = sut.buildSubjectAndObservationBundle(study, batch, new Date(), Set.of(existingId));
 
-    assertThat(bundles).hasSize(1);
-    var entries = bundles.getFirst().getEntry();
+    var entries = bundle.getEntry();
     assertThat(entries).hasSize(1);
     assertThat(entries.getFirst().getRequest().getUrl())
         .isEqualTo("ResearchSubject/" + researchSubjectId("new-patient", "study-1"));
@@ -117,14 +111,14 @@ class EligibilityBundleBuilderTest {
    * conditional POST or update-as-create PUT.
    */
   @Test
-  void buildSubjectAndObservationBundles_withoutUpdateAsCreate_setsResearchSubjectIdentifier() {
+  void buildSubjectAndObservationBundle_withoutUpdateAsCreate_setsResearchSubjectIdentifier() {
     var sut = new EligibilityBundleBuilder(false, 500);
     var study = studyWithId("study-1");
-    var results = List.of(new PatientEligibilityResult("patient-1", List.of()));
+    var batch = List.of(new PatientEligibilityResult("patient-1", List.of()));
 
-    var bundles = sut.buildSubjectAndObservationBundles(study, results, new Date(), Set.of());
+    var bundle = sut.buildSubjectAndObservationBundle(study, batch, new Date(), Set.of());
 
-    var subject = (ResearchSubject) bundles.getFirst().getEntry().getFirst().getResource();
+    var subject = (ResearchSubject) bundle.getEntry().getFirst().getResource();
     assertThat(subject.getIdentifier()).hasSize(1);
     var identifier = subject.getIdentifierFirstRep();
     assertThat(identifier.getSystem()).isEqualTo(RESEARCH_SUBJECT_IDENTIFIER_SYSTEM);
@@ -132,18 +126,25 @@ class EligibilityBundleBuilderTest {
   }
 
   @Test
-  void buildSubjectAndObservationBundles_withUpdateAsCreate_setsResearchSubjectIdentifier() {
+  void buildSubjectAndObservationBundle_withUpdateAsCreate_setsResearchSubjectIdentifier() {
     var sut = new EligibilityBundleBuilder(true, 500);
     var study = studyWithId("study-1");
-    var results = List.of(new PatientEligibilityResult("patient-1", List.of()));
+    var batch = List.of(new PatientEligibilityResult("patient-1", List.of()));
 
-    var bundles = sut.buildSubjectAndObservationBundles(study, results, new Date(), Set.of());
+    var bundle = sut.buildSubjectAndObservationBundle(study, batch, new Date(), Set.of());
 
-    var subject = (ResearchSubject) bundles.getFirst().getEntry().getFirst().getResource();
+    var subject = (ResearchSubject) bundle.getEntry().getFirst().getResource();
     var identifier = subject.getIdentifierFirstRep();
     assertThat(identifier.getSystem()).isEqualTo(RESEARCH_SUBJECT_IDENTIFIER_SYSTEM);
     // Same deterministic hash used as the resource's own id in update-as-create mode - see
     // EligibilityBundleBuilder.researchSubjectResourceId.
     assertThat(identifier.getValue()).isEqualTo(subject.getIdElement().getIdPart());
+  }
+
+  @Test
+  void chunkSize_returnsConfiguredValue() {
+    var sut = new EligibilityBundleBuilder(false, 500);
+
+    assertThat(sut.chunkSize()).isEqualTo(500);
   }
 }
