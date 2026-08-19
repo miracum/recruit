@@ -21,6 +21,10 @@ query-sql-on-fhir:
   # every criterion are submitted - unknowns are dropped, eliminating data-gap-driven population
   # inflation at the cost of potentially missing patients with incomplete records.
   require-all-criteria-met: false
+  # Abort processing a study if the total number of candidate ResearchSubjects (all-met + unknown)
+  # would exceed this value. -1 (default) disables the check. Use dry-run mode first to measure
+  # the expected count before setting a threshold.
+  max-research-subjects: -1
 
 fhir:
   url: ""

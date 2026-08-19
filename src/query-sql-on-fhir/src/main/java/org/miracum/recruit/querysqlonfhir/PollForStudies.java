@@ -36,16 +36,19 @@ public class PollForStudies {
   private final EligibilityBundleBuilder bundleBuilder;
   private final IGenericClient fhirClient;
   private final boolean dryRun;
+  private final int maxResearchSubjects;
 
   public PollForStudies(
       SqlQueryExecutor sqlQueryExecutor,
       EligibilityBundleBuilder bundleBuilder,
       IGenericClient fhirClient,
-      @Value("${query-sql-on-fhir.dry-run:false}") boolean dryRun) {
+      @Value("${query-sql-on-fhir.dry-run:false}") boolean dryRun,
+      @Value("${query-sql-on-fhir.max-research-subjects:-1}") int maxResearchSubjects) {
     this.sqlQueryExecutor = sqlQueryExecutor;
     this.bundleBuilder = bundleBuilder;
     this.fhirClient = fhirClient;
     this.dryRun = dryRun;
+    this.maxResearchSubjects = maxResearchSubjects;
   }
 
   /**
@@ -144,9 +147,20 @@ public class PollForStudies {
     // which is cheap compared to each patient's full per-criterion outcome details.
     var patientIds = new ArrayList<String>();
     var batch = new ArrayList<PatientEligibilityResult>(bundleBuilder.chunkSize());
+    var subjectCount = new int[1];
     sqlQueryExecutor.evaluateEligibility(
         criteria,
         result -> {
+          subjectCount[0]++;
+          if (maxResearchSubjects >= 0 && subjectCount[0] > maxResearchSubjects) {
+            throw new IllegalStateException(
+                "Study "
+                    + study.getId()
+                    + " exceeded max-research-subjects limit of "
+                    + maxResearchSubjects
+                    + ". Use dry-run mode to inspect per-criterion counts and consider"
+                    + " reordering criteria so the most selective criterion is first.");
+          }
           patientIds.add(result.patientId());
           batch.add(result);
           if (batch.size() >= bundleBuilder.chunkSize()) {
@@ -204,6 +218,12 @@ public class PollForStudies {
         totals[0],
         totals[1],
         totals[2]);
+    if (maxResearchSubjects >= 0 && totals[0] > maxResearchSubjects) {
+      log.warn(
+          "Dry run: {} total patients would exceed the max-research-subjects limit of {}",
+          totals[0],
+          maxResearchSubjects);
+    }
 
     for (var i = 0; i < criteria.size(); i++) {
       var c = criteria.get(i);
