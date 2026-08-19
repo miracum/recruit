@@ -4,6 +4,7 @@ using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -66,21 +67,11 @@ var fhirBaseUrl =
     ?? throw new InvalidOperationException("Fhir:BaseUrl must be configured.");
 var authDisabled = builder.Configuration.GetValue<bool>("Auth:Disabled");
 
-// ConnectionStrings:AppDb carries the non-sensitive parts (host/port/database, ...) as-is; PGUSER
-// and PGPASSWORD are applied on top so credentials can be injected separately (e.g. mounted from a
-// Kubernetes secret via extraEnv) instead of being baked into the connection string value itself.
 var appDbConnectionStringBuilder = new NpgsqlConnectionStringBuilder(
     builder.Configuration.GetConnectionString("AppDb")
         ?? throw new InvalidOperationException("ConnectionStrings:AppDb must be configured.")
 );
-if (builder.Configuration["PGUSER"] is { Length: > 0 } pgUser)
-{
-    appDbConnectionStringBuilder.Username = pgUser;
-}
-if (builder.Configuration["PGPASSWORD"] is { Length: > 0 } pgPassword)
-{
-    appDbConnectionStringBuilder.Password = pgPassword;
-}
+
 var appDbConnectionString = appDbConnectionStringBuilder.ConnectionString;
 
 // Liveness (/livez) intentionally checks nothing but that the process can still handle a request -
@@ -213,6 +204,17 @@ builder.Services.AddScoped<ScreeningListPollService>();
 builder.Services.AddScoped<NotificationDeliveryService>();
 
 var app = builder.Build();
+
+var forwardedHeadersOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor
+        | ForwardedHeaders.XForwardedProto
+        | ForwardedHeaders.XForwardedHost,
+};
+forwardedHeadersOptions.KnownIPNetworks.Clear();
+forwardedHeadersOptions.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedHeadersOptions);
 
 await using (var scope = app.Services.CreateAsyncScope())
 {
