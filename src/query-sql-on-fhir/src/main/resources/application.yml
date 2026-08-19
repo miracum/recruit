@@ -12,6 +12,10 @@ query-sql-on-fhir:
   # bundle - a study's full candidate set is submitted as one or more bundles of at most this size,
   # rather than a single unbounded transaction, to stay under the FHIR server's transaction limits.
   transaction-bundle-chunk-size: 500
+  # When true, run the eligibility queries and log a per-criterion breakdown of how many patients
+  # would be submitted, but do not write anything to the FHIR server. Useful for estimating the
+  # scope of a query before committing, especially when the candidate population might be very large.
+  dry-run: false
 
 fhir:
   url: ""

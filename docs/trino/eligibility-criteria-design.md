@@ -199,6 +199,35 @@ FROM fhir.default.patient p
     per-criterion when it's authored - don't let every exclusion criterion
     silently default to "confirmed met" just because no rows were found.
 
+!!! warning "Anchor criterion scope and candidate population size"
+
+    The merged query is anchored on the **first criterion's result set**
+    (`crit_0`). Every patient that appears in `crit_0` and is not definitively
+    excluded by any other criterion will be sent to the FHIR server - including
+    patients for whom a later criterion returns no row (i.e. `is_met = NULL`
+    after the `LEFT JOIN`, treated as *unknown*).
+
+    This means: if `crit_0`'s SQL uses a `WHERE` clause that pre-filters to a
+    broad cohort (e.g. `WHERE age >= 18`), and a narrowing criterion like
+    "has diagnosis C92" only returns a few thousand rows, then every patient
+    in `crit_0` who doesn't appear in the narrowing criterion has
+    `is_met = NULL` for it and passes the `IS DISTINCT FROM FALSE` filter as
+    *unknown*. With a few million adult patients and a rare diagnosis, that is
+    hundreds of thousands of unknowns submitted as candidates.
+
+    To avoid this:
+
+    - Prefer writing the most **selective** criterion as `crit_0` (the first
+      `Group.characteristic`). If the rare-diagnosis criterion returns 5 000
+      patients, use it first - then the anchor is 5 000, not 2 000 000.
+    - Or write each criterion's SQL to cover the **full patient population**
+      and return `NULL` for non-matching patients (see the `patient p LEFT
+      JOIN ...` pattern in the examples above), so that a patient absent from
+      a criterion's narrow data set yields `NULL` explicitly rather than
+      propagating as unknown via `LEFT JOIN`.
+    - Use **dry-run mode** (see below) to check the expected candidate count
+      before a query first runs against production data.
+
 ## Merge logic
 
 At the scale this needs to run at (~2 million patients per site), the merge
@@ -387,6 +416,39 @@ N x `Observation` per patient) into chunks of a few hundred/thousand entries
 rather than one transaction for the whole study - most FHIR servers have
 practical limits on single-transaction size regardless of how efficiently
 the candidate set was computed.
+
+## Dry run mode
+
+Before a new or revised query runs against production data, it is often useful
+to know *how many* patients would be submitted (and why) without actually
+writing anything to the FHIR server. Set `query-sql-on-fhir.dry-run=true`
+(e.g. via an environment variable `QUERY_SQL_ON_FHIR_DRY_RUN=true`) to enable
+this mode.
+
+In dry-run mode the module:
+
+1. Runs the full merged eligibility query against Trino exactly as it would in
+   a normal poll cycle (so streaming, JDBC fetch size, and the
+   `IS DISTINCT FROM FALSE` filter all apply identically).
+2. Logs a per-study and per-criterion breakdown at INFO level - total patients
+   that would be submitted, split by "all criteria met" vs "at least one
+   criterion unknown", and per-criterion met/unknown counts.
+3. Does **not** write any `ResearchSubject`, `Observation`, or `List` resource
+   to the FHIR server.
+
+Example output:
+
+```
+Dry run for study ResearchStudy/trial-042 - evaluating queries but not writing to FHIR
+Dry run result for study ResearchStudy/trial-042: 847 patients would be submitted (312 all criteria met, 535 with at least one unknown criterion)
+  Criterion 'Age >= 18 years' (inclusion): 847 met, 0 unknown
+  Criterion 'Not deceased' (inclusion): 847 met, 0 unknown
+  Criterion 'AML (C92.x)' (inclusion): 312 met, 535 unknown
+```
+
+A large "unknown" count for a narrowing criterion (like a rare diagnosis) is
+the main indicator that the anchor criterion order should be revised - see the
+[anchor criterion scope warning](#library-sql-contract) above.
 
 ## Implementation touchpoints
 

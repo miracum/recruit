@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.ResearchStudy;
 import org.hl7.fhir.r4.model.ResearchSubject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -34,14 +35,17 @@ public class PollForStudies {
   private final SqlQueryExecutor sqlQueryExecutor;
   private final EligibilityBundleBuilder bundleBuilder;
   private final IGenericClient fhirClient;
+  private final boolean dryRun;
 
   public PollForStudies(
       SqlQueryExecutor sqlQueryExecutor,
       EligibilityBundleBuilder bundleBuilder,
-      IGenericClient fhirClient) {
+      IGenericClient fhirClient,
+      @Value("${query-sql-on-fhir.dry-run:false}") boolean dryRun) {
     this.sqlQueryExecutor = sqlQueryExecutor;
     this.bundleBuilder = bundleBuilder;
     this.fhirClient = fhirClient;
+    this.dryRun = dryRun;
   }
 
   /**
@@ -118,6 +122,11 @@ public class PollForStudies {
 
     log.info("Found {} eligibility criteria for study {}", criteria.size(), study.getId());
 
+    if (dryRun) {
+      runDryRun(study, criteria);
+      return;
+    }
+
     var effectiveDate = new Date();
 
     // Only needed in update-as-create mode: without it, POST's conditional-create already
@@ -161,6 +170,51 @@ public class PollForStudies {
     var listBundle =
         bundleBuilder.buildScreeningListBundle(study, patientIds, previousScreeningList);
     fhirClient.transaction().withBundle(listBundle).execute();
+  }
+
+  /**
+   * Streams the eligibility query and logs a per-criterion candidate breakdown without writing
+   * anything to the FHIR server. Enabled via {@code query-sql-on-fhir.dry-run=true}.
+   */
+  private void runDryRun(ResearchStudy study, List<EligibilityCriterion> criteria) {
+    log.info(
+        "Dry run for study {} - evaluating queries but not writing to FHIR", study.getId());
+
+    var totals = new int[3]; // [0]=total, [1]=allMet, [2]=unknown
+    var metCounts = new int[criteria.size()];
+    var unknownCounts = new int[criteria.size()];
+
+    sqlQueryExecutor.evaluateEligibility(
+        criteria,
+        result -> {
+          totals[0]++;
+          var overall = result.overallMet();
+          if (Boolean.TRUE.equals(overall)) totals[1]++;
+          else if (overall == null) totals[2]++;
+          for (var i = 0; i < result.criteria().size(); i++) {
+            var met = result.criteria().get(i).met();
+            if (Boolean.TRUE.equals(met)) metCounts[i]++;
+            else if (met == null) unknownCounts[i]++;
+          }
+        });
+
+    log.info(
+        "Dry run result for study {}: {} patients would be submitted"
+            + " ({} all criteria met, {} with at least one unknown criterion)",
+        study.getId(),
+        totals[0],
+        totals[1],
+        totals[2]);
+
+    for (var i = 0; i < criteria.size(); i++) {
+      var c = criteria.get(i);
+      log.info(
+          "  Criterion '{}' ({}): {} met, {} unknown",
+          c.displayText(),
+          c.exclude() ? "exclusion" : "inclusion",
+          metCounts[i],
+          unknownCounts[i]);
+    }
   }
 
   private void submitSubjectAndObservationBatch(
