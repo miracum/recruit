@@ -177,8 +177,7 @@ public class PollForStudies {
    * anything to the FHIR server. Enabled via {@code query-sql-on-fhir.dry-run=true}.
    */
   private void runDryRun(ResearchStudy study, List<EligibilityCriterion> criteria) {
-    log.info(
-        "Dry run for study {} - evaluating queries but not writing to FHIR", study.getId());
+    log.info("Dry run for study {} - evaluating queries but not writing to FHIR", study.getId());
 
     var totals = new int[3]; // [0]=total, [1]=allMet, [2]=unknown
     var metCounts = new int[criteria.size()];

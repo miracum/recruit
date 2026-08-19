@@ -22,6 +22,7 @@ import org.hl7.fhir.r4.model.PrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -67,11 +68,15 @@ public class SqlQueryExecutor {
 
   private final JdbcTemplate jdbcTemplate;
   private final IGenericClient sqlOnFhirClient;
+  private final boolean requireAllCriteriaMet;
 
   public SqlQueryExecutor(
-      JdbcTemplate jdbcTemplate, @Qualifier("sqlOnFhirClient") IGenericClient sqlOnFhirClient) {
+      JdbcTemplate jdbcTemplate,
+      @Qualifier("sqlOnFhirClient") IGenericClient sqlOnFhirClient,
+      @Value("${query-sql-on-fhir.require-all-criteria-met:false}") boolean requireAllCriteriaMet) {
     this.jdbcTemplate = jdbcTemplate;
     this.sqlOnFhirClient = sqlOnFhirClient;
+    this.requireAllCriteriaMet = requireAllCriteriaMet;
   }
 
   /**
@@ -287,6 +292,9 @@ public class SqlQueryExecutor {
 
     var overallExpr = String.join(" AND ", terms);
 
+    // IS DISTINCT FROM FALSE = candidate or unknown; IS NOT DISTINCT FROM TRUE = confirmed only
+    var whereFilter =
+        requireAllCriteriaMet ? ") IS NOT DISTINCT FROM TRUE" : ") IS DISTINCT FROM FALSE";
     return ctes
         + "\nSELECT\n    crit_0.patient_id AS patient_id"
         + selectColumns
@@ -294,7 +302,7 @@ public class SqlQueryExecutor {
         + joins
         + "\nWHERE ("
         + overallExpr
-        + ") IS DISTINCT FROM FALSE";
+        + whereFilter;
   }
 
   /**
@@ -353,7 +361,11 @@ public class SqlQueryExecutor {
       }
 
       var result = new PatientEligibilityResult(patientId, outcomes);
-      if (!Boolean.FALSE.equals(result.overallMet())) {
+      var passes =
+          requireAllCriteriaMet
+              ? Boolean.TRUE.equals(result.overallMet())
+              : !Boolean.FALSE.equals(result.overallMet());
+      if (passes) {
         onResult.accept(result);
       }
     }

@@ -16,6 +16,11 @@ query-sql-on-fhir:
   # would be submitted, but do not write anything to the FHIR server. Useful for estimating the
   # scope of a query before committing, especially when the candidate population might be very large.
   dry-run: false
+  # When false (default), patients with unknown eligibility for at least one criterion (missing data)
+  # are included as candidates for human review. When true, only patients who definitively satisfy
+  # every criterion are submitted - unknowns are dropped, eliminating data-gap-driven population
+  # inflation at the cost of potentially missing patients with incomplete records.
+  require-all-criteria-met: false
 
 fhir:
   url: ""

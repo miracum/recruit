@@ -43,7 +43,7 @@ class SqlQueryExecutorTest {
   private final JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
   private final IGenericClient sqlOnFhirClient = mock(IGenericClient.class, RETURNS_DEEP_STUBS);
 
-  private final SqlQueryExecutor sut = new SqlQueryExecutor(jdbcTemplate, sqlOnFhirClient);
+  private final SqlQueryExecutor sut = new SqlQueryExecutor(jdbcTemplate, sqlOnFhirClient, false);
 
   /**
    * Rows the merged query's {@link ResultSet} should stream back - see {@link #stubJdbcTemplate}.
