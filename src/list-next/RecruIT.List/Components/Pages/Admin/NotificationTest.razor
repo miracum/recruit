@@ -1,0 +1,98 @@
+@page "/admin/notify-test"
+@attribute [Authorize]
+@inject NotificationSenderService SenderService
+@inject IOptions<NotifyMailerOptions> MailerOptions
+@inject ToastService Toast
+@inject BreadcrumbState BreadcrumbState
+@inject IStringLocalizer<SharedResources> Localizer
+
+<PageTitle>@Localizer["App.NotificationTest.PageTitle"]</PageTitle>
+
+@if (!_isAdmin)
+{
+    <BbAlert Variant="AlertVariant.Danger">
+        <BbAlertDescription>@Localizer["App.Errors.NotAuthorizedAdminOnly"]</BbAlertDescription>
+    </BbAlert>
+}
+else
+{
+    <BbCard>
+        <BbCardHeader>
+            <BbCardTitle>@Localizer["App.NotificationTest.SettingsTitle"]</BbCardTitle>
+        </BbCardHeader>
+        <BbCardContent>
+            <dl class="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+                <div>
+                    <dt class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.NotificationTest.SmtpHostLabel"]</dt>
+                    <dd>@MailerOptions.Value.SmtpHost:@MailerOptions.Value.SmtpPort</dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.NotificationTest.FromLabel"]</dt>
+                    <dd>@MailerOptions.Value.From</dd>
+                </div>
+            </dl>
+        </BbCardContent>
+    </BbCard>
+
+    <BbCard Class="mt-6">
+        <BbCardHeader>
+            <BbCardTitle>@Localizer["App.NotificationTest.SendTitle"]</BbCardTitle>
+        </BbCardHeader>
+        <BbCardContent>
+            <p class="mb-3 text-sm text-muted-foreground">@Localizer["App.NotificationTest.SendDescription"]</p>
+            <div class="flex flex-wrap items-end gap-3">
+                <div class="w-full max-w-sm min-w-64">
+                    <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.NotificationTest.EmailLabel"]</label>
+                    <BbInput @bind-Value="_recipientEmail" Type="InputType.Email" Placeholder="@Localizer["App.NotificationTest.EmailPlaceholder"]" Class="mt-1" />
+                </div>
+                <BbButton Variant="ButtonVariant.Default" Loading="_sending" Disabled="@string.IsNullOrWhiteSpace(_recipientEmail)" OnClick="SendTestEmailAsync">
+                    @Localizer["App.NotificationTest.SendButton"]
+                </BbButton>
+            </div>
+        </BbCardContent>
+    </BbCard>
+}
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    private bool _isAdmin;
+    private bool _sending;
+    private string _recipientEmail = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
+        _isAdmin = TrialAccessService.IsAdmin(user);
+        _recipientEmail =
+            user.FindFirst("email")?.Value ?? user.FindFirst(ClaimTypes.Email)?.Value ?? string.Empty;
+
+        BreadcrumbState.Set(
+            new BreadcrumbItem(Localizer["App.Common.AllTrialsBreadcrumb"], "/"),
+            new BreadcrumbItem(Localizer["App.NotificationTest.Breadcrumb"]));
+    }
+
+    private async Task SendTestEmailAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_recipientEmail))
+        {
+            return;
+        }
+
+        _sending = true;
+        try
+        {
+            await SenderService.SendTestEmailAsync(_recipientEmail.Trim());
+            Toast.Success(Localizer["App.NotificationTest.SentToast"], Localizer["App.Common.Saved"]);
+        }
+        catch (Exception ex)
+        {
+            Toast.Error(ex.Message, Localizer["App.NotificationTest.SendErrorTitle"]);
+        }
+        finally
+        {
+            _sending = false;
+        }
+    }
+}

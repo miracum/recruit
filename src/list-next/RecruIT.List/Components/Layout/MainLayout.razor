@@ -20,6 +20,7 @@
         </BbSidebarHeader>
         <BbSidebarContent Class="flex-1 overflow-auto px-2">
             <BbSidebarGroup>
+                <BbSidebarGroupLabel>@Localizer["App.Nav.GroupMain"]</BbSidebarGroupLabel>
                 <BbSidebarMenu>
                     <BbSidebarMenuItem>
                         <BbSidebarMenuButton Href="/" Match="NavLinkMatch.All">
@@ -45,11 +46,22 @@
                             }
                         </BbSidebarMenuButton>
                     </BbSidebarMenuItem>
-                    <AuthorizeView Roles="@TrialAccessService.AdminRole">
+                </BbSidebarMenu>
+            </BbSidebarGroup>
+            <AuthorizeView Roles="@TrialAccessService.AdminRole">
+                <BbSidebarGroup>
+                    <BbSidebarGroupLabel>@Localizer["App.Nav.GroupAdmin"]</BbSidebarGroupLabel>
+                    <BbSidebarMenu>
                         <BbSidebarMenuItem>
                             <BbSidebarMenuButton Href="/admin/criteria">
                                 <LucideIcon Name="clipboard-pen-line" Size="16" />
                                 @Localizer["App.Nav.CriteriaManager"]
+                            </BbSidebarMenuButton>
+                        </BbSidebarMenuItem>
+                        <BbSidebarMenuItem>
+                            <BbSidebarMenuButton Href="/admin/notify-test">
+                                <LucideIcon Name="mail-check" Size="16" />
+                                @Localizer["App.Nav.NotificationTest"]
                             </BbSidebarMenuButton>
                         </BbSidebarMenuItem>
                         <BbSidebarMenuItem>
@@ -58,9 +70,9 @@
                                 @Localizer["App.Nav.HangfireDashboard"]
                             </BbSidebarMenuButton>
                         </BbSidebarMenuItem>
-                    </AuthorizeView>
-                </BbSidebarMenu>
-            </BbSidebarGroup>
+                    </BbSidebarMenu>
+                </BbSidebarGroup>
+            </AuthorizeView>
         </BbSidebarContent>
         <BbSidebarFooter>
             <div class="px-3 py-2 text-xs text-muted-foreground">

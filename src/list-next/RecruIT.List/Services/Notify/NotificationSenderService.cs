@@ -79,7 +79,8 @@ public sealed class NotificationSenderService(
                             && d.Channel == NotificationChannel.Email
                             && d.SentAt != null
                         )
-                        .MaxAsync(d => (DateTimeOffset?)d.SentAt, ct) ?? subscription.CreatedAt;
+                        .MaxAsync(d => d.SentAt, ct)
+                    ?? subscription.CreatedAt;
 
                 var nextSlot = NotificationScheduling.ComputeEmailScheduledFor(
                     subscription.Frequency,
@@ -209,6 +210,34 @@ public sealed class NotificationSenderService(
         }
 
         await db.SaveChangesAsync(ct);
+    }
+
+    /// <summary>
+    /// Admin-triggered, one-off send: exercises the exact same SMTP config and MJML template as a
+    /// real digest, using one obviously-fake sample item, so an admin can verify NotifyMailerOptions
+    /// (SMTP host/credentials, From, subject/link templates) actually works without waiting for a
+    /// real detected event or touching any subscription/delivery rows.
+    /// </summary>
+    public async Task SendTestEmailAsync(string recipientEmail, CancellationToken ct = default)
+    {
+        var sampleItems = new List<(string StudyAcronym, string PatientDisplayName, string ListUrl)>
+        {
+            (
+                "TEST-TRIAL",
+                "Test Patient",
+                mailerOptions.Value.ScreeningListLinkTemplate.Replace("[list_id]", "test")
+            ),
+        };
+
+        var subject =
+            "[Test] "
+            + mailerOptions.Value.SubjectTemplate.Replace(
+                "[study_acronym]",
+                sampleItems[0].StudyAcronym
+            );
+        var html = RenderHtml(sampleItems);
+
+        await channel.SendAsync(recipientEmail, subject, html, ct);
     }
 
     private static string RenderHtml(

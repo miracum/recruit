@@ -138,6 +138,12 @@
   <data name="App.Common.Saving" xml:space="preserve">
     <value>Wird gespeichert...</value>
   </data>
+  <data name="App.Nav.GroupMain" xml:space="preserve">
+    <value>Rekrutierung</value>
+  </data>
+  <data name="App.Nav.GroupAdmin" xml:space="preserve">
+    <value>Verwaltung</value>
+  </data>
   <data name="App.Nav.Trials" xml:space="preserve">
     <value>Studien</value>
   </data>
@@ -149,6 +155,9 @@
   </data>
   <data name="App.Nav.CriteriaManager" xml:space="preserve">
     <value>Studien-Editor</value>
+  </data>
+  <data name="App.Nav.NotificationTest" xml:space="preserve">
+    <value>Benachrichtigungstest</value>
   </data>
   <data name="App.Nav.HangfireDashboard" xml:space="preserve">
     <value>Hangfire-Dashboard</value>
@@ -818,6 +827,42 @@
   </data>
   <data name="App.CriteriaManager.PreviewDescription" xml:space="preserve">
     <value>Dieses FHIR-Transaction-Bundle wird lokal erzeugt und nicht an den FHIR-Server gesendet. Kopieren Sie es zur manuellen Anwendung oder übergeben Sie es dem Prozess, der es später persistiert.</value>
+  </data>
+  <data name="App.NotificationTest.PageTitle" xml:space="preserve">
+    <value>Benachrichtigungstest</value>
+  </data>
+  <data name="App.NotificationTest.Breadcrumb" xml:space="preserve">
+    <value>Benachrichtigungstest</value>
+  </data>
+  <data name="App.NotificationTest.SettingsTitle" xml:space="preserve">
+    <value>Mail-Einstellungen</value>
+  </data>
+  <data name="App.NotificationTest.SmtpHostLabel" xml:space="preserve">
+    <value>SMTP-Host</value>
+  </data>
+  <data name="App.NotificationTest.FromLabel" xml:space="preserve">
+    <value>Absenderadresse</value>
+  </data>
+  <data name="App.NotificationTest.SendTitle" xml:space="preserve">
+    <value>Test-E-Mail senden</value>
+  </data>
+  <data name="App.NotificationTest.SendDescription" xml:space="preserve">
+    <value>Sendet eine Beispiel-Benachrichtigung über die echte SMTP-Konfiguration und Vorlage, damit Sie bestätigen können, dass die Mail-Einstellungen funktionieren, ohne auf ein echtes Ereignis zu warten.</value>
+  </data>
+  <data name="App.NotificationTest.EmailLabel" xml:space="preserve">
+    <value>Empfänger-E-Mail</value>
+  </data>
+  <data name="App.NotificationTest.EmailPlaceholder" xml:space="preserve">
+    <value>name@beispiel.de</value>
+  </data>
+  <data name="App.NotificationTest.SendButton" xml:space="preserve">
+    <value>Test-E-Mail senden</value>
+  </data>
+  <data name="App.NotificationTest.SentToast" xml:space="preserve">
+    <value>Test-E-Mail gesendet.</value>
+  </data>
+  <data name="App.NotificationTest.SendErrorTitle" xml:space="preserve">
+    <value>Test-E-Mail konnte nicht gesendet werden</value>
   </data>
   <data name="App.Subscription.ButtonLabel" xml:space="preserve">
     <value>Benachrichtigungseinstellungen</value>

@@ -79,6 +79,12 @@
   <data name="App.Common.Saving" xml:space="preserve">
     <value>Saving...</value>
   </data>
+  <data name="App.Nav.GroupMain" xml:space="preserve">
+    <value>Recruitment</value>
+  </data>
+  <data name="App.Nav.GroupAdmin" xml:space="preserve">
+    <value>Administration</value>
+  </data>
   <data name="App.Nav.Trials" xml:space="preserve">
     <value>Trials</value>
   </data>
@@ -90,6 +96,9 @@
   </data>
   <data name="App.Nav.CriteriaManager" xml:space="preserve">
     <value>Trial Editor</value>
+  </data>
+  <data name="App.Nav.NotificationTest" xml:space="preserve">
+    <value>Notification Test</value>
   </data>
   <data name="App.Nav.HangfireDashboard" xml:space="preserve">
     <value>Hangfire Dashboard</value>
@@ -657,6 +666,42 @@
   </data>
   <data name="App.CriteriaManager.PreviewDescription" xml:space="preserve">
     <value>This FHIR transaction Bundle is generated locally and not sent to the FHIR server. Copy it to apply manually, or hand it to whatever process will eventually persist it.</value>
+  </data>
+  <data name="App.NotificationTest.PageTitle" xml:space="preserve">
+    <value>Notification Test</value>
+  </data>
+  <data name="App.NotificationTest.Breadcrumb" xml:space="preserve">
+    <value>Notification Test</value>
+  </data>
+  <data name="App.NotificationTest.SettingsTitle" xml:space="preserve">
+    <value>Mail settings</value>
+  </data>
+  <data name="App.NotificationTest.SmtpHostLabel" xml:space="preserve">
+    <value>SMTP host</value>
+  </data>
+  <data name="App.NotificationTest.FromLabel" xml:space="preserve">
+    <value>From address</value>
+  </data>
+  <data name="App.NotificationTest.SendTitle" xml:space="preserve">
+    <value>Send a test email</value>
+  </data>
+  <data name="App.NotificationTest.SendDescription" xml:space="preserve">
+    <value>Sends a sample notification email through the real SMTP configuration and template, so you can confirm the mail settings actually work without waiting for a real event.</value>
+  </data>
+  <data name="App.NotificationTest.EmailLabel" xml:space="preserve">
+    <value>Recipient email</value>
+  </data>
+  <data name="App.NotificationTest.EmailPlaceholder" xml:space="preserve">
+    <value>name@example.com</value>
+  </data>
+  <data name="App.NotificationTest.SendButton" xml:space="preserve">
+    <value>Send test email</value>
+  </data>
+  <data name="App.NotificationTest.SentToast" xml:space="preserve">
+    <value>Test email sent.</value>
+  </data>
+  <data name="App.NotificationTest.SendErrorTitle" xml:space="preserve">
+    <value>Failed to send test email</value>
   </data>
   <data name="App.Subscription.ButtonLabel" xml:space="preserve">
     <value>Notification settings</value>
