@@ -825,4 +825,61 @@
   <data name="App.CriteriaManager.PreviewDescription" xml:space="preserve">
     <value>Dieses FHIR-Transaction-Bundle wird lokal erzeugt und nicht an den FHIR-Server gesendet. Kopieren Sie es zur manuellen Anwendung oder übergeben Sie es dem Prozess, der es später persistiert.</value>
   </data>
+  <data name="App.Subscription.ButtonLabel" xml:space="preserve">
+    <value>Benachrichtigungseinstellungen</value>
+  </data>
+  <data name="App.Subscription.PopoverTitle" xml:space="preserve">
+    <value>Benachrichtigungen</value>
+  </data>
+  <data name="App.Subscription.PopoverDescription" xml:space="preserve">
+    <value>Lassen Sie sich benachrichtigen, wenn neue Rekrutierungsvorschläge erkannt werden.</value>
+  </data>
+  <data name="App.Subscription.FrequencyLabel" xml:space="preserve">
+    <value>Häufigkeit</value>
+  </data>
+  <data name="App.Subscription.FrequencyInstant" xml:space="preserve">
+    <value>Sofort</value>
+  </data>
+  <data name="App.Subscription.FrequencyDaily" xml:space="preserve">
+    <value>Täglich</value>
+  </data>
+  <data name="App.Subscription.FrequencyWeekly" xml:space="preserve">
+    <value>Wöchentlich</value>
+  </data>
+  <data name="App.Subscription.FrequencyMonthly" xml:space="preserve">
+    <value>Monatlich</value>
+  </data>
+  <data name="App.Subscription.TimeLabel" xml:space="preserve">
+    <value>Uhrzeit</value>
+  </data>
+  <data name="App.Subscription.DayOfWeekLabel" xml:space="preserve">
+    <value>Wochentag</value>
+  </data>
+  <data name="App.Subscription.DayOfMonthLabel" xml:space="preserve">
+    <value>Tag des Monats</value>
+  </data>
+  <data name="App.Subscription.DayMonday" xml:space="preserve">
+    <value>Montag</value>
+  </data>
+  <data name="App.Subscription.DayTuesday" xml:space="preserve">
+    <value>Dienstag</value>
+  </data>
+  <data name="App.Subscription.DayWednesday" xml:space="preserve">
+    <value>Mittwoch</value>
+  </data>
+  <data name="App.Subscription.DayThursday" xml:space="preserve">
+    <value>Donnerstag</value>
+  </data>
+  <data name="App.Subscription.DayFriday" xml:space="preserve">
+    <value>Freitag</value>
+  </data>
+  <data name="App.Subscription.DaySaturday" xml:space="preserve">
+    <value>Samstag</value>
+  </data>
+  <data name="App.Subscription.DaySunday" xml:space="preserve">
+    <value>Sonntag</value>
+  </data>
+  <data name="App.Subscription.DoneButton" xml:space="preserve">
+    <value>Fertig</value>
+  </data>
 </root>

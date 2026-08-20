@@ -30,13 +30,16 @@ else if (_summary is not null)
                 <h2 class="text-lg font-medium">@_summary.StudyTitle</h2>
             }
         </div>
-        @if (_canManageAccess)
-        {
-            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Class="shrink-0" OnClick="@(() => Navigation.NavigateTo($"/trials/{ListId}/access"))">
-                <Icon><LucideIcon Name="shield" Size="16" /></Icon>
-                <ChildContent>@Localizer["App.PatientList.ManageAccessLink"]</ChildContent>
-            </BbButton>
-        }
+        <div class="flex shrink-0 items-center gap-2">
+            <NotificationSubscribeButton />
+            @if (_canManageAccess)
+            {
+                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Class="shrink-0" OnClick="@(() => Navigation.NavigateTo($"/trials/{ListId}/access"))">
+                    <Icon><LucideIcon Name="shield" Size="16" /></Icon>
+                    <ChildContent>@Localizer["App.PatientList.ManageAccessLink"]</ChildContent>
+                </BbButton>
+            }
+        </div>
     </div>
 
     @if (!string.IsNullOrEmpty(_summary.StudyDescription))

@@ -9,6 +9,14 @@ query-sql-on-fhir:
     # every 5 seconds
     cron: "*/5 * * * * *"
 
+# Overrides the application.yml default of disabled: false here is otel.sdk.disabled's own
+# standard OTEL_SDK_DISABLED var, just flipped for local dev. No endpoint override needed - the
+# OTLP default of localhost:4318 already matches where src/hack/compose.yaml publishes jaeger's
+# OTLP/HTTP receiver for host-side processes.
+otel:
+  sdk:
+    disabled: false
+
 server:
   port: 8090
 

@@ -258,6 +258,12 @@ services:
       SPRING_DATASOURCE_PASSWORD: ""
       # Set this if you stand up a sql-on-fhir server (e.g. Pathling) separately.
       SQL_ON_FHIR_URL: ""
+      OTEL_SDK_DISABLED: "false"
+      OTEL_METRICS_EXPORTER: "none"
+      OTEL_LOGS_EXPORTER: "none"
+      OTEL_TRACES_EXPORTER: "otlp"
+      OTEL_SERVICE_NAME: "query-sql-on-fhir"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4318"
     volumes:
       - type: tmpfs
         target: /tmp
@@ -547,8 +553,7 @@ services:
     ports:
       - "127.0.0.1:8080:8080"
     volumes:
-      - ./config/trino/etc:/usr/lib/trino/etc:ro
-      - ./config/trino/catalog:/etc/trino/catalog:ro
+      - ./config/trino/etc:/etc/trino:ro
     depends_on:
       hive-metastore:
         condition: service_started
