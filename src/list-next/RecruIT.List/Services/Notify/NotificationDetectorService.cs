@@ -169,6 +169,11 @@ public sealed class NotificationDetectorService(
                     }
                 );
 
+                // ScheduledFor is just "when this was queued" here - whether it's actually due
+                // yet for Daily/Weekly/Monthly subscribers is decided by NotificationSenderService
+                // against the subscription's *current* settings at send time, not baked in here.
+                // That's deliberate: it's what makes a subscriber's schedule change take effect on
+                // the very next tick, including for deliveries already queued before the change.
                 db.NotificationDeliveries.Add(
                     new NotificationDelivery
                     {
@@ -178,13 +183,7 @@ public sealed class NotificationDetectorService(
                         SubjectId = subscription.SubjectId,
                         Email = subscription.Email,
                         Channel = NotificationChannel.Email,
-                        ScheduledFor = NotificationScheduling.ComputeEmailScheduledFor(
-                            subscription.Frequency,
-                            subscription.DayOfWeek,
-                            subscription.TimeOfDay,
-                            subscription.TimeZoneId,
-                            notificationEvent.OccurredAt
-                        ),
+                        ScheduledFor = notificationEvent.OccurredAt,
                     }
                 );
             }

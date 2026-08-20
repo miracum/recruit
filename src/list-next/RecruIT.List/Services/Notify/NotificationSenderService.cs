@@ -12,11 +12,13 @@ using Task = System.Threading.Tasks.Task;
 namespace RecruIT.List.Services.Notify;
 
 /// <summary>
-/// Recurring job: sends every due (ScheduledFor &lt;= now, SentAt still null) Email
-/// NotificationDelivery, grouped by NotificationSubscriptionId so several events due for the same
-/// subscriber in the same tick become one email rather than several - this grouping is what makes
-/// Milestone 2's Daily/Weekly/Monthly digest batching a non-change to this job later; right now
-/// (Instant-only materialization) every group will just happen to have one event in it.
+/// Recurring job: for every subscription with at least one pending (SentAt still null) Email
+/// NotificationDelivery, checks whether that subscription is due a send *right now* - Instant
+/// always is; Daily/Weekly/Monthly are checked against the subscription's current
+/// Frequency/DayOfWeek/TimeOfDay/TimeZoneId via NotificationScheduling, using the last time this
+/// subscription was actually sent (or its CreatedAt, if never sent) as the reference point. Due
+/// subscriptions get every pending delivery sent as one grouped email - several events queued for
+/// the same subscriber between ticks become one digest rather than several.
 /// </summary>
 public sealed class NotificationSenderService(
     IDbContextFactory<AppDbContext> dbContextFactory,
@@ -33,16 +35,82 @@ public sealed class NotificationSenderService(
         await using var db = await dbContextFactory.CreateDbContextAsync(ct);
         var now = DateTimeOffset.UtcNow;
 
-        var due = await db
+        var pendingSubscriptionIds = await db
             .NotificationDeliveries.Where(d =>
-                d.Channel == NotificationChannel.Email && d.SentAt == null && d.ScheduledFor <= now
+                d.Channel == NotificationChannel.Email && d.SentAt == null
             )
+            .Select(d => d.NotificationSubscriptionId)
+            .Distinct()
             .ToListAsync(ct);
 
-        if (due.Count == 0)
+        if (pendingSubscriptionIds.Count == 0)
         {
             return;
         }
+
+        var subscriptionsById = await db
+            .NotificationSubscriptions.Where(s => pendingSubscriptionIds.Contains(s.Id))
+            .ToDictionaryAsync(s => s.Id, ct);
+
+        var dueSubscriptionIds = new List<Guid>();
+        foreach (var subscriptionId in pendingSubscriptionIds)
+        {
+            if (!subscriptionsById.TryGetValue(subscriptionId, out var subscription))
+            {
+                // Unsubscribed since these were queued - don't email them, just clean up rather
+                // than leaving them to be re-checked (and re-orphaned) forever.
+                var orphaned = await db
+                    .NotificationDeliveries.Where(d =>
+                        d.NotificationSubscriptionId == subscriptionId
+                        && d.Channel == NotificationChannel.Email
+                        && d.SentAt == null
+                    )
+                    .ToListAsync(ct);
+                db.NotificationDeliveries.RemoveRange(orphaned);
+                continue;
+            }
+
+            if (subscription.Frequency != NotificationFrequency.Instant)
+            {
+                var lastSent =
+                    await db
+                        .NotificationDeliveries.Where(d =>
+                            d.NotificationSubscriptionId == subscriptionId
+                            && d.Channel == NotificationChannel.Email
+                            && d.SentAt != null
+                        )
+                        .MaxAsync(d => (DateTimeOffset?)d.SentAt, ct) ?? subscription.CreatedAt;
+
+                var nextSlot = NotificationScheduling.ComputeEmailScheduledFor(
+                    subscription.Frequency,
+                    subscription.DayOfWeek,
+                    subscription.TimeOfDay,
+                    subscription.TimeZoneId,
+                    lastSent
+                );
+
+                if (nextSlot > now)
+                {
+                    continue;
+                }
+            }
+
+            dueSubscriptionIds.Add(subscriptionId);
+        }
+
+        if (dueSubscriptionIds.Count == 0)
+        {
+            await db.SaveChangesAsync(ct); // persists any orphan cleanup above
+            return;
+        }
+
+        var due = await db
+            .NotificationDeliveries.Where(d =>
+                d.Channel == NotificationChannel.Email
+                && d.SentAt == null
+                && dueSubscriptionIds.Contains(d.NotificationSubscriptionId)
+            )
+            .ToListAsync(ct);
 
         var eventIds = due.Select(d => d.NotificationEventId).Distinct().ToList();
         var events = await db
