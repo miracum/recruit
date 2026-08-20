@@ -855,8 +855,8 @@
   <data name="App.Subscription.DayOfWeekLabel" xml:space="preserve">
     <value>Wochentag</value>
   </data>
-  <data name="App.Subscription.DayOfMonthLabel" xml:space="preserve">
-    <value>Tag des Monats</value>
+  <data name="App.Subscription.MonthlyNote" xml:space="preserve">
+    <value>Wird am 1. jedes Monats zugestellt.</value>
   </data>
   <data name="App.Subscription.DayMonday" xml:space="preserve">
     <value>Montag</value>

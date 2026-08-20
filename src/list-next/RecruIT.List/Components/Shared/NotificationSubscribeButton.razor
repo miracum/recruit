@@ -37,37 +37,33 @@
                     </BbRadioGroup>
                 </div>
 
-                @if (_frequency != NotificationFrequency.Instant)
+                @if (_frequency == NotificationFrequency.Monthly)
+                {
+                    <p class="text-xs text-muted-foreground">@Localizer["App.Subscription.MonthlyNote"]</p>
+                }
+                else if (_frequency == NotificationFrequency.Weekly)
                 {
                     <div class="grid grid-cols-2 gap-3">
-                        @if (_frequency == NotificationFrequency.Weekly)
-                        {
-                            <div>
-                                <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.Subscription.DayOfWeekLabel"]</label>
-                                <select class="mt-1 block w-full rounded-md border bg-background p-2 text-sm" @bind="_dayOfWeek">
-                                    @foreach (var day in DayOfWeekOptions)
-                                    {
-                                        <option value="@day">@Localizer[DayOfWeekKey(day)]</option>
-                                    }
-                                </select>
-                            </div>
-                        }
-                        else if (_frequency == NotificationFrequency.Monthly)
-                        {
-                            <div>
-                                <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.Subscription.DayOfMonthLabel"]</label>
-                                <select class="mt-1 block w-full rounded-md border bg-background p-2 text-sm" @bind="_dayOfMonth">
-                                    @foreach (var day in DayOfMonthOptions)
-                                    {
-                                        <option value="@day">@day</option>
-                                    }
-                                </select>
-                            </div>
-                        }
+                        <div>
+                            <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.Subscription.DayOfWeekLabel"]</label>
+                            <select class="mt-1 block w-full rounded-md border bg-background p-2 text-sm" @bind="_dayOfWeek">
+                                @foreach (var day in DayOfWeekOptions)
+                                {
+                                    <option value="@day">@Localizer[DayOfWeekKey(day)]</option>
+                                }
+                            </select>
+                        </div>
                         <div>
                             <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.Subscription.TimeLabel"]</label>
                             <BbInput Type="InputType.Time" @bind-Value="_time" Class="mt-1" />
                         </div>
+                    </div>
+                }
+                else if (_frequency == NotificationFrequency.Daily)
+                {
+                    <div>
+                        <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.Subscription.TimeLabel"]</label>
+                        <BbInput Type="InputType.Time" @bind-Value="_time" Class="mt-1" />
                     </div>
                 }
             }
@@ -88,13 +84,10 @@
         DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday,
     ];
 
-    private static readonly int[] DayOfMonthOptions = [.. Enumerable.Range(1, 31)];
-
     private bool _open;
     private bool _subscribed;
     private NotificationFrequency _frequency = NotificationFrequency.Instant;
     private DayOfWeek _dayOfWeek = DayOfWeek.Monday;
-    private int _dayOfMonth = 1;
     private string _time = "09:00";
 
     private static string DayOfWeekKey(DayOfWeek day) =>
