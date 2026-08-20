@@ -9,9 +9,14 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<PollCursor> PollCursors => Set<PollCursor>();
 
-    public DbSet<NotificationRecipient> NotificationRecipients => Set<NotificationRecipient>();
-
     public DbSet<ScreeningNote> ScreeningNotes => Set<ScreeningNote>();
+
+    public DbSet<NotificationSubscription> NotificationSubscriptions =>
+        Set<NotificationSubscription>();
+
+    public DbSet<NotificationEvent> NotificationEvents => Set<NotificationEvent>();
+
+    public DbSet<NotificationDelivery> NotificationDeliveries => Set<NotificationDelivery>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -40,23 +45,42 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.Property(c => c.LastSeenVersionId).IsConcurrencyToken();
         });
 
-        modelBuilder.Entity<NotificationRecipient>(entity =>
-        {
-            entity
-                .HasIndex(r => new
-                {
-                    r.TrialIdentifierSystem,
-                    r.TrialIdentifierValue,
-                    r.Email,
-                    r.Channel,
-                })
-                .IsUnique();
-        });
-
         modelBuilder.Entity<ScreeningNote>(entity =>
         {
             // The hot lookup path - GetNotesAsync/GetTimelineAsync both key off this.
             entity.HasIndex(n => n.ResearchSubjectIdentifier);
+        });
+
+        modelBuilder.Entity<NotificationSubscription>(entity =>
+        {
+            entity.HasIndex(s => new { s.TrialIdentifier, s.SubjectId }).IsUnique();
+        });
+
+        modelBuilder.Entity<NotificationEvent>(entity =>
+        {
+            entity.HasIndex(e => e.DedupeKey).IsUnique();
+            // The detector's per-trial materialization query - all events for a trial, newest first.
+            entity.HasIndex(e => new { e.TrialIdentifier, e.OccurredAt });
+        });
+
+        modelBuilder.Entity<NotificationDelivery>(entity =>
+        {
+            // The bell/feed's hot "unread in-app deliveries for this subject" query.
+            entity.HasIndex(d => new
+            {
+                d.SubjectId,
+                d.Channel,
+                d.ReadAt,
+            });
+            // The sender job's "due email deliveries" query.
+            entity.HasIndex(d => new
+            {
+                d.Channel,
+                d.SentAt,
+                d.ScheduledFor,
+            });
+            entity.HasIndex(d => d.NotificationEventId);
+            entity.HasIndex(d => d.NotificationSubscriptionId);
         });
     }
 }

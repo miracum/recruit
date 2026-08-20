@@ -382,17 +382,11 @@
   <data name="App.LoggedOut.BackToApp" xml:space="preserve">
     <value>Back to app</value>
   </data>
-  <data name="App.Notifications.UnknownPatient" xml:space="preserve">
-    <value>unknown patient</value>
-  </data>
   <data name="App.Errors.TrialsLoadFailed" xml:space="preserve">
     <value>The list of clinical trials could not be loaded from the FHIR server.</value>
   </data>
   <data name="App.Errors.PatientOverviewLoadFailed" xml:space="preserve">
     <value>The patient overview could not be loaded from the FHIR server.</value>
-  </data>
-  <data name="App.Errors.NotificationsLoadFailed" xml:space="preserve">
-    <value>Notifications could not be loaded from the FHIR server.</value>
   </data>
   <data name="App.Errors.PatientListLoadFailed" xml:space="preserve">
     <value>The patient list could not be loaded from the FHIR server.</value>
@@ -718,7 +712,13 @@
   <data name="App.Subscription.DaySunday" xml:space="preserve">
     <value>Sunday</value>
   </data>
-  <data name="App.Subscription.DoneButton" xml:space="preserve">
-    <value>Done</value>
+  <data name="App.Subscription.SaveButton" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="App.Subscription.SavedToast" xml:space="preserve">
+    <value>Notification preferences saved.</value>
+  </data>
+  <data name="App.Subscription.SaveErrorTitle" xml:space="preserve">
+    <value>Could not save notification preferences</value>
   </data>
 </root>

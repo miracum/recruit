@@ -31,13 +31,17 @@ else if (_summary is not null)
             }
         </div>
         <div class="flex shrink-0 items-center gap-2">
-            <NotificationSubscribeButton />
+            <NotificationSubscribeButton TrialIdentifier="_summary.TrialIdentifier" />
             @if (_canManageAccess)
             {
-                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Class="shrink-0" OnClick="@(() => Navigation.NavigateTo($"/trials/{ListId}/access"))">
-                    <Icon><LucideIcon Name="shield" Size="16" /></Icon>
-                    <ChildContent>@Localizer["App.PatientList.ManageAccessLink"]</ChildContent>
-                </BbButton>
+                <BbTooltip>
+                    <BbTooltipTrigger AsChild="true">
+                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Icon" Class="shrink-0" OnClick="@(() => Navigation.NavigateTo($"/trials/{ListId}/access"))">
+                            <LucideIcon Name="shield" Size="16" />
+                        </BbButton>
+                    </BbTooltipTrigger>
+                    <BbTooltipContent>@Localizer["App.PatientList.ManageAccessLink"]</BbTooltipContent>
+                </BbTooltip>
             }
         </div>
     </div>

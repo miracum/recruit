@@ -1,0 +1,124 @@
+@page "/notifications"
+@attribute [Authorize]
+@inject NotificationSubscriptionService NotificationSubscriptionService
+@inject ScreeningListService ScreeningListService
+@inject BreadcrumbState BreadcrumbState
+@inject IStringLocalizer<SharedResources> Localizer
+
+<PageTitle>@Localizer["App.Nav.Notifications"]</PageTitle>
+
+@if (_loading)
+{
+    <BbSkeleton Class="h-48 w-full" />
+}
+else if (_errorMessage is not null)
+{
+    <BbAlert Variant="AlertVariant.Danger">
+        <BbAlertTitle>@Localizer["App.Notifications.LoadErrorTitle"]</BbAlertTitle>
+        <BbAlertDescription>@_errorMessage</BbAlertDescription>
+    </BbAlert>
+}
+else if (_items.Count == 0)
+{
+    <BbEmpty Title="@Localizer["App.Notifications.EmptyTitle"]" Description="@Localizer["App.Notifications.EmptyDescription"]" />
+}
+else
+{
+    <div class="space-y-3">
+        @foreach (var item in _items)
+        {
+            <BbCard>
+                <BbCardContent>
+                    <div class="flex items-center justify-between gap-4">
+                        <div>
+                            <p class="font-medium">@Localizer["App.Notifications.MessageFormat", item.PatientDisplayName, item.StudyAcronym]</p>
+                            <p class="text-sm text-muted-foreground">
+                                @item.OccurredAt.LocalDateTime.ToString("g")
+                                &middot;
+                                @if (item.ListId is not null)
+                                {
+                                    <a href="/trials/@item.ListId/patients" class="hover:underline">@item.StudyAcronym</a>
+                                }
+                                else
+                                {
+                                    @item.StudyAcronym
+                                }
+                            </p>
+                        </div>
+                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="@(() => DismissAsync(item))">
+                            @Localizer["App.Notifications.Dismiss"]
+                        </BbButton>
+                    </div>
+                </BbCardContent>
+            </BbCard>
+        }
+    </div>
+}
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    private sealed record DisplayItem(
+        Guid DeliveryId,
+        string? ListId,
+        string StudyAcronym,
+        string PatientDisplayName,
+        DateTimeOffset OccurredAt
+    );
+
+    private List<DisplayItem> _items = [];
+    private bool _loading = true;
+    private string? _errorMessage;
+    private ClaimsPrincipal _user = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        BreadcrumbState.Set(new BreadcrumbItem(Localizer["App.Nav.Notifications"]));
+
+        _user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
+
+        try
+        {
+            var feedItems = await NotificationSubscriptionService.ListInAppFeedAsync(_user);
+
+            // Each unread item only carries the trial's stable identifier token - resolve the
+            // current List id/acronym once per distinct trial rather than per item, since several
+            // items commonly share the same trial.
+            var resolved = new Dictionary<string, (string ListId, string StudyAcronym)?>();
+            _items = [];
+            foreach (var feedItem in feedItems)
+            {
+                if (!resolved.TryGetValue(feedItem.TrialIdentifier, out var listInfo))
+                {
+                    listInfo = await ScreeningListService.ResolveListForTrialAsync(feedItem.TrialIdentifier);
+                    resolved[feedItem.TrialIdentifier] = listInfo;
+                }
+
+                _items.Add(
+                    new DisplayItem(
+                        feedItem.DeliveryId,
+                        listInfo?.ListId,
+                        listInfo?.StudyAcronym ?? feedItem.TrialIdentifier,
+                        feedItem.PatientDisplayName,
+                        feedItem.OccurredAt
+                    )
+                );
+            }
+        }
+        catch (Exception)
+        {
+            _errorMessage = Localizer["App.Notifications.LoadErrorFallback"];
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task DismissAsync(DisplayItem item)
+    {
+        await NotificationSubscriptionService.MarkReadAsync(item.DeliveryId, _user);
+        _items.Remove(item);
+    }
+}

@@ -221,95 +221,6 @@ public sealed class ScreeningListService(
             .ToList();
     }
 
-    /// <summary>
-    /// Flattens new-recommendation entries (List.entry.date within the configured window) across
-    /// every trial the user can access, for the notification view. Computed on-demand from the
-    /// same data the dashboard uses - there is no separate background scan, since a Blazor Server
-    /// background service has no per-user OIDC token to call FHIR with.
-    /// </summary>
-    public async Task<IReadOnlyList<NotificationEventDto>> GetNewRecommendationEventsAsync(
-        ClaimsPrincipal user,
-        int windowDays,
-        CancellationToken ct = default
-    )
-    {
-        var client = clientFactory.CreateClient();
-
-        var query = BuildScreeningListsQuery("current");
-
-        List<Resource> resources;
-        try
-        {
-            resources = await FhirBundleHelpers.GetAllPagesAsync(client, query, ct);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Failed to fetch screening lists for notifications");
-            throw new FhirAccessException(localizer["App.Errors.NotificationsLoadFailed"], ex);
-        }
-
-        var subjectsById = resources.OfType<ResearchSubject>().ToDictionary(rs => rs.Id!, rs => rs);
-        var patientsById = resources.OfType<Patient>().ToDictionary(p => p.Id!, p => p);
-        var lists = resources.OfType<FhirList>().ToList();
-        var events = new List<NotificationEventDto>();
-
-        var trialInfoByListId = BuildTrialInfoByListId(resources, lists);
-        var accessibleTrials = await accessService.GetAccessibleTrialIdentifiersAsync(user, ct);
-
-        foreach (
-            var (list, trialInfo) in GetAccessibleLists(lists, trialInfoByListId, accessibleTrials)
-        )
-        {
-            foreach (var entry in list.Entry ?? [])
-            {
-                if (
-                    entry.Date is not { } dateString
-                    || !DateTimeOffset.TryParse(dateString, out var recommendedDate)
-                    || recommendedDate < DateTimeOffset.UtcNow.AddDays(-windowDays)
-                )
-                {
-                    continue;
-                }
-
-                var subjectId = entry.Item?.Reference?.Split('/').LastOrDefault();
-                var subject =
-                    subjectId is not null && subjectsById.TryGetValue(subjectId, out var s)
-                        ? s
-                        : null;
-                var patientId = subject?.Individual?.Reference?.Split('/').LastOrDefault();
-                var patient =
-                    patientId is not null && patientsById.TryGetValue(patientId, out var p)
-                        ? p
-                        : null;
-                var patientName =
-                    FormatPatientName(patient)
-                    ?? patientId
-                    ?? localizer["App.Notifications.UnknownPatient"].Value;
-
-                events.Add(
-                    new NotificationEventDto
-                    {
-                        Id = $"new:{subjectId}",
-                        Kind = NotificationKind.NewRecommendation,
-                        ListId = list.Id!,
-                        TrialIdentifier = trialInfo.Identifier,
-                        StudyAcronym = trialInfo.Acronym!,
-                        PatientId = patientId,
-                        PatientName = patientName,
-                        Message = localizer[
-                            "App.Notifications.MessageFormat",
-                            patientName,
-                            trialInfo.Acronym!
-                        ],
-                        OccurredAt = recommendedDate,
-                    }
-                );
-            }
-        }
-
-        return events.OrderByDescending(e => e.OccurredAt).ToList();
-    }
-
     public async Task<(
         TrialSummaryDto Summary,
         IReadOnlyList<PatientListEntryDto> Patients
@@ -490,6 +401,47 @@ public sealed class ScreeningListService(
             logger.LogError(ex, "Failed to update status for List/{ListId}", listId);
             throw new FhirAccessException(localizer["App.Errors.TrialStatusUpdateFailed"], ex);
         }
+    }
+
+    /// <summary>
+    /// Resolves the current FHIR List id (and acronym) for a trial identified by its business
+    /// identifier token ("system|value" - see TrialIdentifier), for building a link back into this
+    /// app. Deliberately not cached anywhere - the FHIR List's logical id is server-local and can
+    /// change (e.g. if a study's screening list is ever recreated), unlike the trial identifier
+    /// itself, so callers that only have the token (the notification subsystem persists that, not
+    /// the List id - see NotificationEvent) resolve it fresh here. Not access-checked: callers must
+    /// already know the caller is entitled to see this trial.
+    /// </summary>
+    public async Task<(string ListId, string StudyAcronym)?> ResolveListForTrialAsync(
+        string trialIdentifierToken,
+        CancellationToken ct = default
+    )
+    {
+        var client = clientFactory.CreateClient();
+
+        var studyResources = await FhirBundleHelpers.GetAllPagesAsync(
+            client,
+            $"ResearchStudy?identifier={Uri.EscapeDataString(trialIdentifierToken)}",
+            ct
+        );
+        var study = studyResources.OfType<ResearchStudy>().FirstOrDefault();
+        if (study?.Id is null)
+        {
+            return null;
+        }
+
+        var listResources = await FhirBundleHelpers.GetAllPagesAsync(
+            client,
+            $"List?belongs-to-study=ResearchStudy/{study.Id}",
+            ct
+        );
+        var list = listResources.OfType<FhirList>().FirstOrDefault();
+        if (list?.Id is null)
+        {
+            return null;
+        }
+
+        return (list.Id, study.GetStudyAcronym() ?? list.Id);
     }
 
     /// <summary>

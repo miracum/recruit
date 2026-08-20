@@ -22,7 +22,6 @@ using RecruIT.List.Services.Auth;
 using RecruIT.List.Services.Fhir;
 using RecruIT.List.Services.Localization;
 using RecruIT.List.Services.Navigation;
-using RecruIT.List.Services.Notifications;
 using RecruIT.List.Services.Notify;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -248,12 +247,12 @@ builder.Services.AddScoped<ResearchSubjectService>();
 builder.Services.AddScoped<ScreeningNoteService>();
 builder.Services.AddScoped<PatientRecordService>();
 builder.Services.AddScoped<EligibilityCriteriaService>();
-builder.Services.AddScoped<NotificationDismissalService>();
 builder.Services.AddScoped<BreadcrumbState>();
 
 builder.Services.AddScoped<INotificationChannel, EmailNotificationChannel>();
-builder.Services.AddScoped<ScreeningListPollService>();
-builder.Services.AddScoped<NotificationDeliveryService>();
+builder.Services.AddScoped<NotificationSubscriptionService>();
+builder.Services.AddScoped<NotificationDetectorService>();
+builder.Services.AddScoped<NotificationSenderService>();
 
 var app = builder.Build();
 
@@ -282,19 +281,29 @@ await using (var scope = app.Services.CreateAsyncScope())
 }
 
 // Every list-next replica runs a Hangfire server (AddHangfireServer above); they self-coordinate
-// via the shared Postgres storage, so registering the recurring job on every replica's startup is
-// safe and idempotent (Hangfire dedupes by the job id, "poll-screening-lists"). Uses the DI-based
-// IRecurringJobManager rather than the static RecurringJob API, since the static API relies on
-// JobStorage.Current having already been initialized by AddHangfire's lazy configuration - which
-// hasn't necessarily happened yet this early.
+// via the shared Postgres storage, so registering the recurring jobs on every replica's startup is
+// safe and idempotent (Hangfire dedupes by job id). Uses the DI-based IRecurringJobManager rather
+// than the static RecurringJob API, since the static API relies on JobStorage.Current having
+// already been initialized by AddHangfire's lazy configuration - which hasn't necessarily happened
+// yet this early.
 await using (var scope = app.Services.CreateAsyncScope())
 {
     var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
-    recurringJobManager.AddOrUpdate<ScreeningListPollService>(
-        "poll-screening-lists",
+    recurringJobManager.AddOrUpdate<NotificationDetectorService>(
+        "detect-notification-events",
         s => s.PollAllTrialsAsync(CancellationToken.None),
         Cron.Minutely()
     );
+    recurringJobManager.AddOrUpdate<NotificationSenderService>(
+        "send-due-notification-emails",
+        s => s.SendDueAsync(CancellationToken.None),
+        Cron.MinuteInterval(10)
+    );
+    // AddOrUpdate only ever adds/updates - it never removes a job id that's stopped being
+    // registered, so the old "poll-screening-lists" recurring job (ScreeningListPollService, now
+    // deleted) would otherwise sit in Hangfire's storage forever, still firing every minute and
+    // failing to deserialize. Idempotent - a no-op once removed.
+    recurringJobManager.RemoveIfExists("poll-screening-lists");
 }
 
 // Keeps /metrics off the app's public-facing port: ASP.NET Core routing doesn't care which Kestrel

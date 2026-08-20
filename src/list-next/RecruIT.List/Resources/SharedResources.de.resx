@@ -441,17 +441,11 @@
   <data name="App.LoggedOut.Description" xml:space="preserve">
     <value>Sie wurden erfolgreich abgemeldet.</value>
   </data>
-  <data name="App.Notifications.UnknownPatient" xml:space="preserve">
-    <value>unbekannter Patient</value>
-  </data>
   <data name="App.Errors.TrialsLoadFailed" xml:space="preserve">
     <value>Die Liste der klinischen Studien konnte nicht vom FHIR-Server geladen werden.</value>
   </data>
   <data name="App.Errors.PatientOverviewLoadFailed" xml:space="preserve">
     <value>Die Patientenübersicht konnte nicht vom FHIR-Server geladen werden.</value>
-  </data>
-  <data name="App.Errors.NotificationsLoadFailed" xml:space="preserve">
-    <value>Benachrichtigungen konnten nicht vom FHIR-Server geladen werden.</value>
   </data>
   <data name="App.Errors.PatientListLoadFailed" xml:space="preserve">
     <value>Die Patientenliste konnte nicht vom FHIR-Server geladen werden.</value>
@@ -879,7 +873,13 @@
   <data name="App.Subscription.DaySunday" xml:space="preserve">
     <value>Sonntag</value>
   </data>
-  <data name="App.Subscription.DoneButton" xml:space="preserve">
-    <value>Fertig</value>
+  <data name="App.Subscription.SaveButton" xml:space="preserve">
+    <value>Speichern</value>
+  </data>
+  <data name="App.Subscription.SavedToast" xml:space="preserve">
+    <value>Benachrichtigungseinstellungen gespeichert.</value>
+  </data>
+  <data name="App.Subscription.SaveErrorTitle" xml:space="preserve">
+    <value>Benachrichtigungseinstellungen konnten nicht gespeichert werden</value>
   </data>
 </root>

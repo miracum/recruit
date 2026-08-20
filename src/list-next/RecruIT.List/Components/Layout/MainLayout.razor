@@ -3,6 +3,7 @@
 @implements IDisposable
 @inject BreadcrumbState BreadcrumbState
 @inject ScreeningListService ScreeningListService
+@inject NotificationSubscriptionService NotificationSubscriptionService
 @inject IStringLocalizer<SharedResources> Localizer
 @inject NavigationManager Navigation
 @inject ThemeService ThemeService
@@ -33,9 +34,15 @@
                         </BbSidebarMenuButton>
                     </BbSidebarMenuItem>
                     <BbSidebarMenuItem>
-                        <BbSidebarMenuButton Href="/notifications">
-                            <LucideIcon Name="bell" Size="16" />
-                            @Localizer["App.Nav.Notifications"]
+                        <BbSidebarMenuButton Href="/notifications" Class="justify-between">
+                            <span class="flex items-center gap-2">
+                                <LucideIcon Name="bell" Size="16" />
+                                @Localizer["App.Nav.Notifications"]
+                            </span>
+                            @if (_unreadNotificationCount > 0)
+                            {
+                                <BbBadge Variant="BadgeVariant.Destructive">@(_unreadNotificationCount > 9 ? "9+" : _unreadNotificationCount.ToString())</BbBadge>
+                            }
                         </BbSidebarMenuButton>
                     </BbSidebarMenuItem>
                     <AuthorizeView Roles="@TrialAccessService.AdminRole">
@@ -194,6 +201,7 @@
 
     private List<TrialSummaryDto> _trials = [];
     private string _trialSearch = string.Empty;
+    private int _unreadNotificationCount;
 
     private List<TrialSummaryDto> FilteredActiveTrials =>
         [.. _trials.Where(t => t.ListStatus == "current" && MatchesSearch(t))];
@@ -208,9 +216,10 @@
     {
         BreadcrumbState.Changed += OnBreadcrumbChanged;
 
+        var user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
+
         try
         {
-            var user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
             _trials = [.. await ScreeningListService.GetAccessibleTrialsAsync(user)];
         }
         catch
@@ -219,6 +228,16 @@
             // fails to load, pages that actually need trial data (Dashboard, PatientList) surface
             // their own error there. Just leave the sidebar list empty.
             _trials = [];
+        }
+
+        try
+        {
+            _unreadNotificationCount = await NotificationSubscriptionService.GetUnreadInAppCountAsync(user);
+        }
+        catch
+        {
+            // Best-effort - the nav item simply shows no badge if the count can't be computed.
+            _unreadNotificationCount = 0;
         }
     }
 

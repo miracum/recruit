@@ -1,16 +1,13 @@
 @inject IStringLocalizer<SharedResources> Localizer
+@inject NotificationSubscriptionService NotificationSubscriptionService
+@inject IJSRuntime JS
+@inject ToastService Toast
 
 <BbPopover Open="_open" OpenChanged="@(open => _open = open)">
     <BbPopoverTrigger AsChild="true">
-        <BbButton Variant="@(_subscribed ? ButtonVariant.Secondary : ButtonVariant.Outline)" Size="ButtonSize.Small"
-                  Class="relative shrink-0" AriaLabel="@Localizer["App.Subscription.ButtonLabel"]">
-            <Icon><LucideIcon Name="bell" Size="16" /></Icon>
-            <ChildContent>
-                @if (_subscribed)
-                {
-                    <span class="pointer-events-none absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-primary ring-2 ring-background" aria-hidden="true"></span>
-                }
-            </ChildContent>
+        <BbButton Variant="@(_subscribed ? ButtonVariant.Secondary : ButtonVariant.Outline)" Size="ButtonSize.Icon"
+                  Class="shrink-0" AriaLabel="@Localizer["App.Subscription.ButtonLabel"]">
+            <LucideIcon Name="@(_subscribed ? "bell-ring" : "bell")" Size="16" />
         </BbButton>
     </BbPopoverTrigger>
     <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.End" Class="w-80">
@@ -69,8 +66,8 @@
             }
 
             <div class="flex justify-end pt-1">
-                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="@(() => _open = false)">
-                    @Localizer["App.Subscription.DoneButton"]
+                <BbButton Variant="ButtonVariant.Default" Size="ButtonSize.Small" Loading="_saving" OnClick="SaveAsync">
+                    @Localizer["App.Subscription.SaveButton"]
                 </BbButton>
             </div>
         </div>
@@ -78,17 +75,85 @@
 </BbPopover>
 
 @code {
+    [Parameter, EditorRequired]
+    public required TrialIdentifier TrialIdentifier { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
     private static readonly DayOfWeek[] DayOfWeekOptions =
     [
         DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday,
         DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday,
     ];
 
+    private ClaimsPrincipal _user = new();
     private bool _open;
     private bool _subscribed;
+    private bool _saving;
     private NotificationFrequency _frequency = NotificationFrequency.Instant;
     private DayOfWeek _dayOfWeek = DayOfWeek.Monday;
     private string _time = "09:00";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
+
+        var subscription = await NotificationSubscriptionService.GetAsync(_user, TrialIdentifier);
+        if (subscription is not null)
+        {
+            _subscribed = true;
+            _frequency = subscription.Frequency;
+            _dayOfWeek = subscription.DayOfWeek ?? DayOfWeek.Monday;
+            _time = subscription.TimeOfDay?.ToString("HH:mm") ?? "09:00";
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        try
+        {
+            if (_subscribed)
+            {
+                // Read right before saving, not on init - JS interop needs the interactive circuit
+                // attached, and there's no reason to pay for it before the user actually subscribes.
+                var timeZoneId = await JS.InvokeAsync<string>(
+                    "eval",
+                    "Intl.DateTimeFormat().resolvedOptions().timeZone"
+                );
+                DayOfWeek? dayOfWeek = _frequency == NotificationFrequency.Weekly ? _dayOfWeek : null;
+                TimeOnly? timeOfDay =
+                    _frequency is NotificationFrequency.Daily or NotificationFrequency.Weekly
+                        ? TimeOnly.Parse(_time)
+                        : null;
+
+                await NotificationSubscriptionService.SubscribeAsync(
+                    _user,
+                    TrialIdentifier,
+                    _frequency,
+                    dayOfWeek,
+                    timeOfDay,
+                    timeZoneId
+                );
+            }
+            else
+            {
+                await NotificationSubscriptionService.UnsubscribeAsync(_user, TrialIdentifier);
+            }
+
+            Toast.Success(Localizer["App.Subscription.SavedToast"], Localizer["App.Common.Saved"]);
+            _open = false;
+        }
+        catch (Exception ex)
+        {
+            Toast.Error(ex.Message, Localizer["App.Subscription.SaveErrorTitle"]);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
 
     private static string DayOfWeekKey(DayOfWeek day) =>
         day switch
