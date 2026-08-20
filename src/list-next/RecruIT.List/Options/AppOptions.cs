@@ -31,6 +31,20 @@ public sealed class NotificationOptions
 }
 
 /// <summary>
+/// Off by default - exporting spans nobody collects is just per-request overhead for nothing, so
+/// this is opt-in per environment rather than always-on. The exporter destination itself
+/// (OTEL_EXPORTER_OTLP_ENDPOINT, _PROTOCOL, etc.) is deliberately not modeled here: the
+/// OpenTelemetry SDK already reads those standard env vars/config keys on its own, the same way
+/// the other OTEL_* instrumented services in src/hack/compose.yaml are configured.
+/// </summary>
+public sealed class TracingOptions
+{
+    public const string SectionName = "Tracing";
+
+    public bool Enabled { get; set; }
+}
+
+/// <summary>
 /// Config for the screening-list-change email notifier (Services/Notify). Deliberately a
 /// separate section from NotificationOptions above, which is about the in-app "is this
 /// recommendation new" UI threshold, not this background poller/mailer.
