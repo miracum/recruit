@@ -3,6 +3,7 @@ using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Localization;
@@ -109,6 +110,21 @@ builder.Services.AddDbContextFactory<AppDbContext>(options =>
         )
         .UseSnakeCaseNamingConvention()
 );
+
+// Blazor Server keeps one process per replica but many circuits/cookies across replicas - the
+// Data Protection key ring that encrypts auth cookies/antiforgery tokens needs to be shared so a
+// request landing on a different replica than the one that issued the cookie can still decrypt it
+// (relevant even with ingress session affinity, e.g. right after a scaling event). This must not
+// be scoped to Authorization:IsEnabled - app.UseAntiforgery() below is unconditional (Blazor
+// Server's own circuit handshake relies on it regardless of whether OIDC auth is on), so even an
+// auth-disabled deployment needs a shared key ring across replicas, not just a single-process
+// fallback. Persisted to the same Postgres database as AppDb rather than a separate Redis instance
+// - sticky sessions themselves are an ingress-level concern, documented in the README, not
+// implemented here.
+builder.Services.AddDbContext<DataProtectionKeyContext>(options =>
+    options.UseNpgsql(appDbConnectionString).UseSnakeCaseNamingConvention()
+);
+builder.Services.AddDataProtection().PersistKeysToDbContext<DataProtectionKeyContext>();
 
 // Hangfire coordinates the notification poller across all list-next replicas via this same
 // Postgres database - see Services/Notify and the notify-next plan for why (a plain
@@ -229,6 +245,10 @@ await using (var scope = app.Services.CreateAsyncScope())
     >();
     await using var db = await dbContextFactory.CreateDbContextAsync();
     await db.Database.MigrateAsync();
+
+    var dataProtectionKeyContext =
+        scope.ServiceProvider.GetRequiredService<DataProtectionKeyContext>();
+    await dataProtectionKeyContext.Database.MigrateAsync();
 }
 
 // Every list-next replica runs a Hangfire server (AddHangfireServer above); they self-coordinate
