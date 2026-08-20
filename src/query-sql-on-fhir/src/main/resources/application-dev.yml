@@ -13,10 +13,10 @@ server:
   port: 8090
 
 fhir:
-  url: "http://recruit-fhir-server.127.0.0.1.nip.io/fhir"
+  url: "http://localhost:8082/fhir"
 
 sql-on-fhir:
-  url: "http://localhost:8082/fhir"
+  url: ""
 
 # to configure logging levels
 logging:

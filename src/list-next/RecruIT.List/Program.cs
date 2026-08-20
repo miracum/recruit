@@ -96,20 +96,32 @@ builder
 var otelBuilder = builder
     .Services.AddOpenTelemetry()
     .WithMetrics(metrics =>
-        metrics.AddAspNetCoreInstrumentation().AddRuntimeInstrumentation().AddPrometheusExporter()
+        metrics
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddNpgsqlInstrumentation()
+            .AddRuntimeInstrumentation()
+            .AddPrometheusExporter()
     );
 
 var tracingEnabled = builder.Configuration.GetValue<bool>($"{TracingOptions.SectionName}:Enabled");
 
 // Opt-in rather than always-on: exporting spans to a collector nobody deployed is just
-// per-request overhead for nothing. AddOtlpExporter() with no config reads the standard
+// per-request overhead for nothing (metrics above stay unconditional since Prometheus scraping is
+// already always-on and cheap). AddOtlpExporter() with no config reads the standard
 // OTEL_EXPORTER_OTLP_ENDPOINT/_PROTOCOL/OTEL_SERVICE_NAME env vars (or appsettings keys of the
 // same name) itself - the same convention the other OTEL_*-instrumented services in
 // src/hack/compose.yaml already use, so no separate endpoint setting is needed here.
+// AddHttpClientInstrumentation covers every HttpClient in the app by DiagnosticSource, including
+// the named "fhir" client (Services/Fhir/FhirClientFactory) - there's no separate per-client setup.
 if (tracingEnabled)
 {
     otelBuilder.WithTracing(tracing =>
-        tracing.AddAspNetCoreInstrumentation().AddHttpClientInstrumentation().AddOtlpExporter()
+        tracing
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddNpgsql()
+            .AddOtlpExporter()
     );
 }
 
