@@ -6,6 +6,7 @@ using RecruIT.List.Data;
 using RecruIT.List.Data.Entities;
 using RecruIT.List.Models;
 using RecruIT.List.Options;
+using RecruIT.List.Services.Access;
 using RecruIT.List.Services.Fhir;
 using Task = System.Threading.Tasks.Task;
 
@@ -18,17 +19,29 @@ namespace RecruIT.List.Services.Notify;
 /// Frequency/DayOfWeek/TimeOfDay/TimeZoneId via NotificationScheduling, using the last time this
 /// subscription was actually sent (or its CreatedAt, if never sent) as the reference point. Due
 /// subscriptions get every pending delivery sent as one grouped email - several events queued for
-/// the same subscriber between ticks become one digest rather than several.
+/// the same subscriber between ticks become one digest rather than several. Subscriptions whose
+/// trial access has since been revoked are skipped and cleaned up the same way as ones that were
+/// unsubscribed - see TrialAccessService.GetGrantedPairsAsync (no IsAdmin bypass there; see its
+/// doc comment).
 /// </summary>
 public sealed class NotificationSenderService(
     IDbContextFactory<AppDbContext> dbContextFactory,
     ScreeningListService screeningListService,
+    TrialAccessService accessService,
     IOptions<NotifyMailerOptions> mailerOptions,
     INotificationChannel channel,
     ILogger<NotificationSenderService> logger
 )
 {
     private static readonly MjmlRenderer Renderer = new();
+
+    /// <summary>
+    /// A delivery that has failed to send for longer than this is given up on (removed) rather
+    /// than retried forever - generous enough to comfortably outlast a Monthly subscriber's own
+    /// cadence plus a prolonged SMTP outage, while still bounding retries for a permanently-bad
+    /// address.
+    /// </summary>
+    private static readonly TimeSpan MaxDeliveryAge = TimeSpan.FromDays(30);
 
     public async Task SendDueAsync(CancellationToken ct = default)
     {
@@ -52,6 +65,25 @@ public sealed class NotificationSenderService(
             .NotificationSubscriptions.Where(s => pendingSubscriptionIds.Contains(s.Id))
             .ToDictionaryAsync(s => s.Id, ct);
 
+        // One grouped query for every pending subscriber's last-sent time, instead of one query
+        // per subscriber inside the loop below.
+        var lastSentBySubscription = await db
+            .NotificationDeliveries.Where(d =>
+                pendingSubscriptionIds.Contains(d.NotificationSubscriptionId)
+                && d.Channel == NotificationChannel.Email
+                && d.SentAt != null
+            )
+            .GroupBy(d => d.NotificationSubscriptionId)
+            .Select(g => new { SubscriptionId = g.Key, LastSentAt = g.Max(d => d.SentAt) })
+            .ToDictionaryAsync(x => x.SubscriptionId, x => x.LastSentAt, ct);
+
+        var grantedPairs = await accessService.GetGrantedPairsAsync(
+            subscriptionsById.Values.Select(s => s.SubjectId).Distinct().ToList(),
+            subscriptionsById.Values.Select(s => s.Email).Distinct().ToList(),
+            ct
+        );
+
+        var toCleanUpSubscriptionIds = new List<Guid>();
         var dueSubscriptionIds = new List<Guid>();
         foreach (var subscriptionId in pendingSubscriptionIds)
         {
@@ -59,27 +91,26 @@ public sealed class NotificationSenderService(
             {
                 // Unsubscribed since these were queued - don't email them, just clean up rather
                 // than leaving them to be re-checked (and re-orphaned) forever.
-                var orphaned = await db
-                    .NotificationDeliveries.Where(d =>
-                        d.NotificationSubscriptionId == subscriptionId
-                        && d.Channel == NotificationChannel.Email
-                        && d.SentAt == null
-                    )
-                    .ToListAsync(ct);
-                db.NotificationDeliveries.RemoveRange(orphaned);
+                toCleanUpSubscriptionIds.Add(subscriptionId);
+                continue;
+            }
+
+            var hasAccess =
+                grantedPairs.Contains((subscription.SubjectId, subscription.TrialIdentifier))
+                || grantedPairs.Contains((subscription.Email, subscription.TrialIdentifier));
+            if (!hasAccess)
+            {
+                // Trial access was revoked since these were queued - same cleanup as an
+                // unsubscribe for the pending deliveries, but the subscription row itself is left
+                // alone in case access is restored later.
+                toCleanUpSubscriptionIds.Add(subscriptionId);
                 continue;
             }
 
             if (subscription.Frequency != NotificationFrequency.Instant)
             {
                 var lastSent =
-                    await db
-                        .NotificationDeliveries.Where(d =>
-                            d.NotificationSubscriptionId == subscriptionId
-                            && d.Channel == NotificationChannel.Email
-                            && d.SentAt != null
-                        )
-                        .MaxAsync(d => d.SentAt, ct)
+                    lastSentBySubscription.GetValueOrDefault(subscriptionId)
                     ?? subscription.CreatedAt;
 
                 var nextSlot = NotificationScheduling.ComputeEmailScheduledFor(
@@ -99,9 +130,21 @@ public sealed class NotificationSenderService(
             dueSubscriptionIds.Add(subscriptionId);
         }
 
+        if (toCleanUpSubscriptionIds.Count > 0)
+        {
+            var toRemove = await db
+                .NotificationDeliveries.Where(d =>
+                    toCleanUpSubscriptionIds.Contains(d.NotificationSubscriptionId)
+                    && d.Channel == NotificationChannel.Email
+                    && d.SentAt == null
+                )
+                .ToListAsync(ct);
+            db.NotificationDeliveries.RemoveRange(toRemove);
+        }
+
         if (dueSubscriptionIds.Count == 0)
         {
-            await db.SaveChangesAsync(ct); // persists any orphan cleanup above
+            await db.SaveChangesAsync(ct); // persists any cleanup above
             return;
         }
 
@@ -122,7 +165,11 @@ public sealed class NotificationSenderService(
         // Several events commonly share a trial (and several deliveries across groups commonly
         // share an event's trial too) - resolve each trial's current List id/acronym at most once
         // for this whole tick rather than once per delivery.
-        var listInfoByTrial = new Dictionary<string, (string ListId, string StudyAcronym)?>();
+        var listInfoByTrial = await screeningListService.ResolveListsForTrialsAsync(
+            due.Where(d => events.ContainsKey(d.NotificationEventId))
+                .Select(d => events[d.NotificationEventId].TrialIdentifier),
+            ct
+        );
 
         foreach (var group in due.GroupBy(d => d.NotificationSubscriptionId))
         {
@@ -143,17 +190,8 @@ public sealed class NotificationSenderService(
                     !listInfoByTrial.TryGetValue(
                         notificationEvent.TrialIdentifier,
                         out var listInfo
-                    )
+                    ) || listInfo is null
                 )
-                {
-                    listInfo = await screeningListService.ResolveListForTrialAsync(
-                        notificationEvent.TrialIdentifier,
-                        ct
-                    );
-                    listInfoByTrial[notificationEvent.TrialIdentifier] = listInfo;
-                }
-
-                if (listInfo is null)
                 {
                     logger.LogWarning(
                         "Could not resolve a screening list for trial {TrialIdentifier} - skipping delivery {DeliveryId} this tick",
@@ -206,6 +244,23 @@ public sealed class NotificationSenderService(
                     recipientEmail,
                     deliveries.Count
                 );
+
+                var stale = includedDeliveries
+                    .Where(d =>
+                        events.TryGetValue(d.NotificationEventId, out var e)
+                        && now - e.OccurredAt > MaxDeliveryAge
+                    )
+                    .ToList();
+                if (stale.Count > 0)
+                {
+                    logger.LogWarning(
+                        "Giving up on {Count} notification deliveries to {Email} - pending longer than {MaxAgeDays} days with repeated send failures",
+                        stale.Count,
+                        recipientEmail,
+                        MaxDeliveryAge.TotalDays
+                    );
+                    db.NotificationDeliveries.RemoveRange(stale);
+                }
             }
         }
 

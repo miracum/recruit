@@ -65,8 +65,7 @@ else
     {
         var user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
         _isAdmin = TrialAccessService.IsAdmin(user);
-        _recipientEmail =
-            user.FindFirst("email")?.Value ?? user.FindFirst(ClaimTypes.Email)?.Value ?? string.Empty;
+        _recipientEmail = user.GetEmail() ?? string.Empty;
 
         BreadcrumbState.Set(
             new BreadcrumbItem(Localizer["App.Common.AllTrialsBreadcrumb"], "/"),

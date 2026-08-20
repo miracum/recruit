@@ -63,16 +63,13 @@ public sealed class OidcEvents(
     /// </summary>
     private async Task ProvisionGrantsAsync(ClaimsPrincipal principal, CancellationToken ct)
     {
-        var email =
-            principal.FindFirst("email")?.Value ?? principal.FindFirst(ClaimTypes.Email)?.Value;
+        var email = principal.GetEmail();
         if (string.IsNullOrEmpty(email))
         {
             return;
         }
 
-        var subjectId =
-            principal.FindFirst("sub")?.Value
-            ?? principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var subjectId = principal.GetSubjectId();
         var displayName = principal.GetDisplayName();
 
         await using var db = await dbContextFactory.CreateDbContextAsync(ct);

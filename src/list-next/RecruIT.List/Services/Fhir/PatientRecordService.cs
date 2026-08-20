@@ -169,7 +169,7 @@ public sealed class PatientRecordService(
 
         var query =
             $"Observation?subject=Patient/{patientId}"
-            + $"&focus:ResearchStudy.identifier={Uri.EscapeDataString($"{trialIdentifier.System}|{trialIdentifier.Value}")}"
+            + $"&focus:ResearchStudy.identifier={Uri.EscapeDataString(trialIdentifier.ToToken())}"
             + $"&category={Uri.EscapeDataString($"{RecruIT.List.Services.Fhir.FhirConstants.SystemObservationCategory}|{RecruIT.List.Services.Fhir.FhirConstants.ObservationCategoryEligibilityAssessment}")}";
 
         List<Resource> resources;

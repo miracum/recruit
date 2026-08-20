@@ -43,25 +43,24 @@
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.Subscription.DayOfWeekLabel"]</label>
-                            <select class="mt-1 block w-full rounded-md border bg-background p-2 text-sm" @bind="_dayOfWeek">
-                                @foreach (var day in DayOfWeekOptions)
-                                {
-                                    <option value="@day">@Localizer[DayOfWeekKey(day)]</option>
-                                }
-                            </select>
+                            <BbSelect TValue="DayOfWeek" @bind-Value="_dayOfWeek" Class="mt-1 w-full">
+                                <BbSelectTrigger>
+                                    <BbSelectValue />
+                                </BbSelectTrigger>
+                                <BbSelectContent>
+                                    @foreach (var day in DayOfWeekOptions)
+                                    {
+                                        <BbSelectItem TValue="DayOfWeek" Value="@day" Text="@Localizer[DayOfWeekKey(day)]" />
+                                    }
+                                </BbSelectContent>
+                            </BbSelect>
                         </div>
-                        <div>
-                            <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.Subscription.TimeLabel"]</label>
-                            <BbInput Type="InputType.Time" @bind-Value="_time" Class="mt-1" />
-                        </div>
+                        @TimeInput
                     </div>
                 }
                 else if (_frequency == NotificationFrequency.Daily)
                 {
-                    <div>
-                        <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.Subscription.TimeLabel"]</label>
-                        <BbInput Type="InputType.Time" @bind-Value="_time" Class="mt-1" />
-                    </div>
+                    @TimeInput
                 }
             }
 
@@ -87,13 +86,22 @@
         DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday,
     ];
 
+    private static readonly TimeSpan DefaultTime = new(9, 0, 0);
+
     private ClaimsPrincipal _user = new();
     private bool _open;
     private bool _subscribed;
     private bool _saving;
     private NotificationFrequency _frequency = NotificationFrequency.Instant;
     private DayOfWeek _dayOfWeek = DayOfWeek.Monday;
-    private string _time = "09:00";
+    private TimeSpan? _time = DefaultTime;
+
+    /// <summary>The Daily/Weekly time-of-day input, identical in both frequencies' markup.</summary>
+    private RenderFragment TimeInput =>
+        @<div>
+            <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.Subscription.TimeLabel"]</label>
+            <BbTimePicker @bind-Value="_time" Format="TimeFormat.Hour24" Class="mt-1 h-9 w-full" />
+        </div>;
 
     protected override async Task OnInitializedAsync()
     {
@@ -105,7 +113,7 @@
             _subscribed = true;
             _frequency = subscription.Frequency;
             _dayOfWeek = subscription.DayOfWeek ?? DayOfWeek.Monday;
-            _time = subscription.TimeOfDay?.ToString("HH:mm") ?? "09:00";
+            _time = subscription.TimeOfDay?.ToTimeSpan() ?? DefaultTime;
         }
     }
 
@@ -125,7 +133,7 @@
                 DayOfWeek? dayOfWeek = _frequency == NotificationFrequency.Weekly ? _dayOfWeek : null;
                 TimeOnly? timeOfDay =
                     _frequency is NotificationFrequency.Daily or NotificationFrequency.Weekly
-                        ? TimeOnly.Parse(_time)
+                        ? TimeOnly.FromTimeSpan(_time ?? DefaultTime)
                         : null;
 
                 await NotificationSubscriptionService.SubscribeAsync(

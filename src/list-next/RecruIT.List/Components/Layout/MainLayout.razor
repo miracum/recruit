@@ -228,27 +228,37 @@
     {
         BreadcrumbState.Changed += OnBreadcrumbChanged;
 
-        var user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
-
         try
         {
-            _trials = [.. await ScreeningListService.GetAccessibleTrialsAsync(user)];
+            var user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
+
+            try
+            {
+                _trials = [.. await ScreeningListService.GetAccessibleTrialsAsync(user)];
+            }
+            catch
+            {
+                // The sidebar trial list is a navigation convenience, not the source of truth - if it
+                // fails to load, pages that actually need trial data (Dashboard, PatientList) surface
+                // their own error there. Just leave the sidebar list empty.
+                _trials = [];
+            }
+
+            try
+            {
+                _unreadNotificationCount = await NotificationSubscriptionService.GetUnreadInAppCountAsync(user);
+            }
+            catch
+            {
+                // Best-effort - the nav item simply shows no badge if the count can't be computed.
+                _unreadNotificationCount = 0;
+            }
         }
         catch
         {
-            // The sidebar trial list is a navigation convenience, not the source of truth - if it
-            // fails to load, pages that actually need trial data (Dashboard, PatientList) surface
-            // their own error there. Just leave the sidebar list empty.
+            // AuthStateTask itself failed (e.g. a token-refresh error) - leave both the sidebar
+            // list and the unread badge empty rather than taking down the whole app shell.
             _trials = [];
-        }
-
-        try
-        {
-            _unreadNotificationCount = await NotificationSubscriptionService.GetUnreadInAppCountAsync(user);
-        }
-        catch
-        {
-            // Best-effort - the nav item simply shows no badge if the count can't be computed.
             _unreadNotificationCount = 0;
         }
     }
@@ -293,10 +303,7 @@
 
     private static string GetFullName(ClaimsPrincipal user) => user.GetDisplayName() ?? string.Empty;
 
-    private static string GetEmail(ClaimsPrincipal user) =>
-        user.FindFirst("email")?.Value
-        ?? user.FindFirst(ClaimTypes.Email)?.Value
-        ?? string.Empty;
+    private static string GetEmail(ClaimsPrincipal user) => user.GetEmail() ?? string.Empty;
 
     private static List<string> GetRoles(ClaimsPrincipal user)
     {

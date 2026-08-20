@@ -445,6 +445,23 @@ public sealed class ScreeningListService(
     }
 
     /// <summary>
+    /// ResolveListForTrialAsync for each distinct token in tokens, at most once per token - the
+    /// "memoize across a batch of items that commonly repeat the same handful of trials" pattern
+    /// shared by the notification feed page and NotificationSenderService's digest loop.
+    /// </summary>
+    public async Task<
+        IReadOnlyDictionary<string, (string ListId, string StudyAcronym)?>
+    > ResolveListsForTrialsAsync(IEnumerable<string> tokens, CancellationToken ct = default)
+    {
+        var result = new Dictionary<string, (string ListId, string StudyAcronym)?>();
+        foreach (var token in tokens.Distinct())
+        {
+            result[token] = await ResolveListForTrialAsync(token, ct);
+        }
+        return result;
+    }
+
+    /// <summary>
     /// The List?code=...&amp;_include=... query shared by every method that scans screening lists
     /// across trials (dashboard, patient overview, notifications) - only the status filter varies.
     /// </summary>
@@ -561,7 +578,8 @@ public sealed class ScreeningListService(
 
     private sealed record TrialInfo(TrialIdentifier Identifier, string? Acronym, string? Title);
 
-    private static string? FormatPatientName(Patient? patient)
+    /// <summary>Internal so NotificationDetectorService can reuse it rather than reimplementing.</summary>
+    internal static string? FormatPatientName(Patient? patient)
     {
         var name = patient?.Name?.FirstOrDefault();
         if (name is null)

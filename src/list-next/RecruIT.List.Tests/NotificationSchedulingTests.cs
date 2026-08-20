@@ -137,7 +137,11 @@ public sealed class NotificationSchedulingTests
             occurredAt
         );
 
-        AssertLocal(result, Berlin, new DateTime(2026, 4, 1) + NotificationScheduling.MonthlyDigestTime.ToTimeSpan());
+        AssertLocal(
+            result,
+            Berlin,
+            new DateTime(2026, 4, 1) + NotificationScheduling.MonthlyDigestTime.ToTimeSpan()
+        );
     }
 
     [Fact]
@@ -154,7 +158,11 @@ public sealed class NotificationSchedulingTests
             occurredAt
         );
 
-        AssertLocal(result, Berlin, new DateTime(2026, 3, 1) + NotificationScheduling.MonthlyDigestTime.ToTimeSpan());
+        AssertLocal(
+            result,
+            Berlin,
+            new DateTime(2026, 3, 1) + NotificationScheduling.MonthlyDigestTime.ToTimeSpan()
+        );
     }
 
     [Fact]
@@ -208,7 +216,11 @@ public sealed class NotificationSchedulingTests
         Assert.NotEqual(berlin.UtcDateTime, tokyo.UtcDateTime);
     }
 
-    private static void AssertLocal(DateTimeOffset actual, string timeZoneId, DateTime expectedLocal)
+    private static void AssertLocal(
+        DateTimeOffset actual,
+        string timeZoneId,
+        DateTime expectedLocal
+    )
     {
         var timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
         var actualLocal = TimeZoneInfo.ConvertTime(actual, timeZone).DateTime;

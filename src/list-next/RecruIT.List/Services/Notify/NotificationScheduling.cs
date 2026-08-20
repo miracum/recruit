@@ -42,11 +42,26 @@ public static class NotificationScheduling
 
         var candidateLocal = frequency switch
         {
-            NotificationFrequency.Daily => NextDailyOccurrence(referenceLocal, timeOfDay!.Value),
+            NotificationFrequency.Daily => NextDailyOccurrence(
+                referenceLocal,
+                timeOfDay
+                    ?? throw new ArgumentException(
+                        "timeOfDay is required for Daily frequency.",
+                        nameof(timeOfDay)
+                    )
+            ),
             NotificationFrequency.Weekly => NextWeeklyOccurrence(
                 referenceLocal,
-                dayOfWeek!.Value,
-                timeOfDay!.Value
+                dayOfWeek
+                    ?? throw new ArgumentException(
+                        "dayOfWeek is required for Weekly frequency.",
+                        nameof(dayOfWeek)
+                    ),
+                timeOfDay
+                    ?? throw new ArgumentException(
+                        "timeOfDay is required for Weekly frequency.",
+                        nameof(timeOfDay)
+                    )
             ),
             NotificationFrequency.Monthly => NextMonthlyOccurrence(referenceLocal),
             _ => throw new ArgumentOutOfRangeException(
@@ -55,6 +70,37 @@ public static class NotificationScheduling
                 "Unhandled notification frequency."
             ),
         };
+
+        return ToLocalOffset(candidateLocal, timeZone);
+    }
+
+    /// <summary>
+    /// Resolves a candidate local wall-clock time to a UTC offset, handling the two DST edge cases
+    /// TimeZoneInfo.GetUtcOffset resolves silently rather than erroring on: a "spring forward" gap
+    /// (candidateLocal never actually occurs) and a "fall back" overlap (candidateLocal occurs
+    /// twice, at two different offsets).
+    /// </summary>
+    private static DateTimeOffset ToLocalOffset(DateTime candidateLocal, TimeZoneInfo timeZone)
+    {
+        if (timeZone.IsInvalidTime(candidateLocal))
+        {
+            // Round forward to the first instant the wall clock actually reaches once daylight
+            // time starts, rather than silently picking one side of the gap.
+            var probe = candidateLocal;
+            while (timeZone.IsInvalidTime(probe))
+            {
+                probe = probe.AddMinutes(1);
+            }
+            return new DateTimeOffset(probe, timeZone.GetUtcOffset(probe));
+        }
+
+        if (timeZone.IsAmbiguousTime(candidateLocal))
+        {
+            // Deterministically take the smaller (standard-time) offset so the result doesn't
+            // depend on which of the two occurrences .NET happens to default to.
+            var offset = timeZone.GetAmbiguousTimeOffsets(candidateLocal).Min();
+            return new DateTimeOffset(candidateLocal, offset);
+        }
 
         return new DateTimeOffset(candidateLocal, timeZone.GetUtcOffset(candidateLocal));
     }

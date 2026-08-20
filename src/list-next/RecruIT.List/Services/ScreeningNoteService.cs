@@ -41,8 +41,7 @@ public sealed class ScreeningNoteService(
             );
         }
 
-        var subjectId =
-            user.FindFirst("sub")?.Value ?? user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var subjectId = user.GetSubjectId();
         var authorDisplayName = GetAuthorDisplayName(user);
 
         await using var db = await dbContextFactory.CreateDbContextAsync(ct);
@@ -51,7 +50,7 @@ public sealed class ScreeningNoteService(
             {
                 Id = Guid.NewGuid(),
                 ResearchSubjectIdentifier = researchSubjectIdentifier,
-                TrialIdentifier = $"{trialIdentifier.System}|{trialIdentifier.Value}",
+                TrialIdentifier = trialIdentifier.ToToken(),
                 Text = text,
                 AuthorSubjectId = subjectId,
                 AuthorDisplayName = authorDisplayName,
@@ -100,5 +99,5 @@ public sealed class ScreeningNoteService(
     }
 
     private static string GetAuthorDisplayName(ClaimsPrincipal user) =>
-        user.GetDisplayName() ?? user.FindFirst(ClaimTypes.Email)?.Value ?? "unknown";
+        user.GetDisplayName() ?? user.GetEmail() ?? "unknown";
 }

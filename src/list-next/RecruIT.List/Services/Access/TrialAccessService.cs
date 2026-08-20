@@ -5,6 +5,7 @@ using RecruIT.List.Data;
 using RecruIT.List.Data.Entities;
 using RecruIT.List.Models;
 using RecruIT.List.Resources;
+using RecruIT.List.Services.Auth;
 
 namespace RecruIT.List.Services.Access;
 
@@ -278,8 +279,59 @@ public sealed class TrialAccessService(
     }
 
     private static (string? SubjectId, string? Email) GetUserKeys(ClaimsPrincipal user) =>
-        (
-            user.FindFirst("sub")?.Value ?? user.FindFirst(ClaimTypes.NameIdentifier)?.Value,
-            user.FindFirst("email")?.Value ?? user.FindFirst(ClaimTypes.Email)?.Value
-        );
+        (user.GetSubjectId(), user.GetEmail());
+
+    /// <summary>
+    /// Claims-free batched grant lookup for background/job contexts with no ClaimsPrincipal (e.g.
+    /// NotificationSenderService's recurring send job) - returns every currently-granted
+    /// (identity, trial token) pair among the given candidate subject ids/emails, so callers can
+    /// filter their own subject/email + trial combinations against the result with one query
+    /// instead of one per row. Unlike the ClaimsPrincipal-based methods above, there is no IsAdmin
+    /// bypass here: role claims aren't available outside an authenticated request, so a global
+    /// admin still needs their own grant row to keep receiving trial-scoped notifications sent
+    /// from the background.
+    /// </summary>
+    public async Task<IReadOnlySet<(string Identity, string TrialToken)>> GetGrantedPairsAsync(
+        IReadOnlyCollection<string> subjectIds,
+        IReadOnlyCollection<string> emails,
+        CancellationToken ct = default
+    )
+    {
+        if (subjectIds.Count == 0 && emails.Count == 0)
+        {
+            return new HashSet<(string, string)>();
+        }
+
+        await using var db = await dbContextFactory.CreateDbContextAsync(ct);
+        var grants = await db
+            .TrialAccessGrants.AsNoTracking()
+            .Where(g =>
+                (g.SubjectId != null && subjectIds.Contains(g.SubjectId))
+                || emails.Contains(g.Email)
+            )
+            .Select(g => new
+            {
+                g.SubjectId,
+                g.Email,
+                g.TrialIdentifierSystem,
+                g.TrialIdentifierValue,
+            })
+            .ToListAsync(ct);
+
+        var result = new HashSet<(string, string)>();
+        foreach (var g in grants)
+        {
+            var token = new TrialIdentifier(
+                g.TrialIdentifierSystem,
+                g.TrialIdentifierValue
+            ).ToToken();
+            if (g.SubjectId is not null)
+            {
+                result.Add((g.SubjectId, token));
+            }
+            result.Add((g.Email, token));
+        }
+
+        return result;
+    }
 }

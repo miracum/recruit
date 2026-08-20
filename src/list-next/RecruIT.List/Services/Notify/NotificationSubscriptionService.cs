@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using RecruIT.List.Data;
 using RecruIT.List.Data.Entities;
 using RecruIT.List.Models;
+using RecruIT.List.Services.Access;
+using RecruIT.List.Services.Auth;
 
 namespace RecruIT.List.Services.Notify;
 
@@ -11,12 +13,19 @@ namespace RecruIT.List.Services.Notify;
 /// (NotificationDelivery rows on the InApp channel). Mirrors TrialAccessService's shape, but every
 /// operation here only ever touches the caller's own row - there's no email-invite/backfill case
 /// like TrialAccessGrant has, since a subscription can only be created by the subscriber themselves
-/// while authenticated.
+/// while authenticated. A subscription outlives trial-access revocation (unsubscribing is a
+/// separate, explicit action), so the read paths that surface patient data - the feed and its
+/// unread count - re-check current access via TrialAccessService and filter accordingly; see
+/// NotificationSenderService for the equivalent check on the send path.
 /// </summary>
 public sealed class NotificationSubscriptionService(
-    IDbContextFactory<AppDbContext> dbContextFactory
+    IDbContextFactory<AppDbContext> dbContextFactory,
+    TrialAccessService accessService
 )
 {
+    /// <summary>Upper bound on how many unread items the in-app feed ever returns in one page.</summary>
+    private const int MaxFeedItems = 100;
+
     public async Task<NotificationSubscription?> GetAsync(
         ClaimsPrincipal user,
         TrialIdentifier trialIdentifier,
@@ -29,7 +38,7 @@ public sealed class NotificationSubscriptionService(
             return null;
         }
 
-        var token = Token(trialIdentifier);
+        var token = trialIdentifier.ToToken();
         await using var db = await dbContextFactory.CreateDbContextAsync(ct);
         return await db
             .NotificationSubscriptions.AsNoTracking()
@@ -54,7 +63,7 @@ public sealed class NotificationSubscriptionService(
             );
         }
 
-        var token = Token(trialIdentifier);
+        var token = trialIdentifier.ToToken();
         await using var db = await dbContextFactory.CreateDbContextAsync(ct);
         var existing = await db.NotificationSubscriptions.FirstOrDefaultAsync(
             s => s.TrialIdentifier == token && s.SubjectId == subjectId,
@@ -105,7 +114,7 @@ public sealed class NotificationSubscriptionService(
             return;
         }
 
-        var token = Token(trialIdentifier);
+        var token = trialIdentifier.ToToken();
         await using var db = await dbContextFactory.CreateDbContextAsync(ct);
         var existing = await db.NotificationSubscriptions.FirstOrDefaultAsync(
             s => s.TrialIdentifier == token && s.SubjectId == subjectId,
@@ -131,16 +140,34 @@ public sealed class NotificationSubscriptionService(
             return 0;
         }
 
+        var accessibleTokens = await GetAccessibleTokensAsync(user, ct);
+        if (accessibleTokens is not null && accessibleTokens.Count == 0)
+        {
+            return 0;
+        }
+
         await using var db = await dbContextFactory.CreateDbContextAsync(ct);
-        return await db
+        var unread = db
             .NotificationDeliveries.AsNoTracking()
-            .CountAsync(
-                d =>
-                    d.SubjectId == subjectId
-                    && d.Channel == NotificationChannel.InApp
-                    && d.ReadAt == null,
-                ct
+            .Where(d =>
+                d.SubjectId == subjectId
+                && d.Channel == NotificationChannel.InApp
+                && d.ReadAt == null
             );
+
+        if (accessibleTokens is null)
+        {
+            return await unread.CountAsync(ct);
+        }
+
+        return await unread
+            .Join(
+                db.NotificationEvents,
+                d => d.NotificationEventId,
+                e => e.Id,
+                (d, e) => e.TrialIdentifier
+            )
+            .CountAsync(token => accessibleTokens.Contains(token), ct);
     }
 
     public async Task<IReadOnlyList<NotificationFeedItemDto>> ListInAppFeedAsync(
@@ -150,6 +177,12 @@ public sealed class NotificationSubscriptionService(
     {
         var (subjectId, _) = GetUserKeys(user);
         if (subjectId is null)
+        {
+            return [];
+        }
+
+        var accessibleTokens = await GetAccessibleTokensAsync(user, ct);
+        if (accessibleTokens is not null && accessibleTokens.Count == 0)
         {
             return [];
         }
@@ -174,9 +207,32 @@ public sealed class NotificationSubscriptionService(
                         e.OccurredAt
                     )
             )
+            .OrderByDescending(item => item.OccurredAt)
+            .Take(MaxFeedItems)
             .ToListAsync(ct);
 
-        return items.OrderByDescending(item => item.OccurredAt).ToList();
+        // A subscription outlives trial-access revocation - drop anything for a trial the caller
+        // can no longer access rather than showing a revoked coordinator patient data for a trial
+        // they're no longer on. Filtered after the DB-level Take, so a caller with recently
+        // revoked access may see fewer than MaxFeedItems even when more unread rows exist; that's
+        // an acceptable trade-off for keeping this a single indexed query.
+        return accessibleTokens is null
+            ? items
+            : [.. items.Where(i => accessibleTokens.Contains(i.TrialIdentifier))];
+    }
+
+    /// <summary>
+    /// null means "admin, everything is accessible" (see TrialAccessService.CanAccessTrial) - kept
+    /// as null rather than expanded to a full trial list so callers can distinguish "no
+    /// restriction" from "restricted to zero trials" without a separate admin check.
+    /// </summary>
+    private async Task<IReadOnlySet<string>?> GetAccessibleTokensAsync(
+        ClaimsPrincipal user,
+        CancellationToken ct
+    )
+    {
+        var accessibleTrials = await accessService.GetAccessibleTrialIdentifiersAsync(user, ct);
+        return accessibleTrials?.Select(t => t.ToToken()).ToHashSet();
     }
 
     public async Task MarkReadAsync(
@@ -205,12 +261,6 @@ public sealed class NotificationSubscriptionService(
         await db.SaveChangesAsync(ct);
     }
 
-    private static string Token(TrialIdentifier trialIdentifier) =>
-        $"{trialIdentifier.System}|{trialIdentifier.Value}";
-
     private static (string? SubjectId, string? Email) GetUserKeys(ClaimsPrincipal user) =>
-        (
-            user.FindFirst("sub")?.Value ?? user.FindFirst(ClaimTypes.NameIdentifier)?.Value,
-            user.FindFirst("email")?.Value ?? user.FindFirst(ClaimTypes.Email)?.Value
-        );
+        (user.GetSubjectId(), user.GetEmail());
 }

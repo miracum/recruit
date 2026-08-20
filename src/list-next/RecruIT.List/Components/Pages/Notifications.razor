@@ -76,25 +76,23 @@ else
     {
         BreadcrumbState.Set(new BreadcrumbItem(Localizer["App.Nav.Notifications"]));
 
-        _user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
-
         try
         {
+            _user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
+
             var feedItems = await NotificationSubscriptionService.ListInAppFeedAsync(_user);
 
             // Each unread item only carries the trial's stable identifier token - resolve the
             // current List id/acronym once per distinct trial rather than per item, since several
             // items commonly share the same trial.
-            var resolved = new Dictionary<string, (string ListId, string StudyAcronym)?>();
+            var listInfoByTrial = await ScreeningListService.ResolveListsForTrialsAsync(
+                feedItems.Select(f => f.TrialIdentifier)
+            );
+
             _items = [];
             foreach (var feedItem in feedItems)
             {
-                if (!resolved.TryGetValue(feedItem.TrialIdentifier, out var listInfo))
-                {
-                    listInfo = await ScreeningListService.ResolveListForTrialAsync(feedItem.TrialIdentifier);
-                    resolved[feedItem.TrialIdentifier] = listInfo;
-                }
-
+                listInfoByTrial.TryGetValue(feedItem.TrialIdentifier, out var listInfo);
                 _items.Add(
                     new DisplayItem(
                         feedItem.DeliveryId,

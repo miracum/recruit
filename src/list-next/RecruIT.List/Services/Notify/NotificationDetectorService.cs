@@ -93,29 +93,65 @@ public sealed class NotificationDetectorService(
         }
 
         var previousVersionId = cursor.LastSeenVersionId;
+
+        // Read the previous version and compute the diff *before* touching the cursor - if this
+        // throws (transient network error, or the previous version was pruned server-side), the
+        // exception propagates to PollAllTrialsAsync's per-list catch and the cursor is left
+        // exactly where it was, so the next tick retries this same diff instead of silently and
+        // permanently skipping the patients it would have found.
+        var previous = await client.ReadAsync<FhirList>(
+            $"List/{listId}/_history/{previousVersionId}",
+            ct: ct
+        );
+        var newReferences = ScreeningListDiff.NewEntryReferences(previous, current);
+
         cursor.LastSeenVersionId = currentVersionId;
         cursor.UpdatedAt = DateTimeOffset.UtcNow;
+
+        if (newReferences.Count > 0)
+        {
+            await QueueNotificationsAsync(
+                client,
+                db,
+                listId,
+                current,
+                currentVersionId,
+                newReferences,
+                ct
+            );
+        }
+
         try
         {
             await db.SaveChangesAsync(ct);
         }
         catch (DbUpdateConcurrencyException)
         {
-            // another replica already claimed this version transition this tick.
-            return;
+            // another replica already claimed this version transition this tick - discard our
+            // in-memory cursor/event/delivery changes and let them handle it.
         }
-
-        var previous = await client.ReadAsync<FhirList>(
-            $"List/{listId}/_history/{previousVersionId}",
-            ct: ct
-        );
-
-        var newReferences = ScreeningListDiff.NewEntryReferences(previous, current);
-        if (newReferences.Count == 0)
+        catch (DbUpdateException)
         {
-            return;
+            // another replica already recorded these exact events (DedupeKey collision) - fine, skip.
         }
+    }
 
+    /// <summary>
+    /// Resolves the trial for `current` and, if resolvable, writes one NotificationEvent per
+    /// newly-diffed patient plus one NotificationDelivery per (event, subscription, channel) -
+    /// tracked on `db` but not saved here, so the caller can commit them atomically together with
+    /// the cursor advance that made this diff possible.
+    /// </summary>
+    private async Task QueueNotificationsAsync(
+        Hl7.Fhir.Rest.FhirClient client,
+        AppDbContext db,
+        string listId,
+        FhirList current,
+        string currentVersionId,
+        IReadOnlyList<string> newReferences,
+        CancellationToken ct
+    )
+    {
         var studyId = current
             .GetReferenceExtension(RecruIT.List.Services.Fhir.FhirConstants.UrlListBelongsToStudy)
             ?.GetReferencedId();
@@ -134,7 +170,7 @@ public sealed class NotificationDetectorService(
             return;
         }
 
-        var token = $"{trialIdentifier.System}|{trialIdentifier.Value}";
+        var token = trialIdentifier.ToToken();
         var subscriptions = await db
             .NotificationSubscriptions.AsNoTracking()
             .Where(s => s.TrialIdentifier == token)
@@ -156,48 +192,30 @@ public sealed class NotificationDetectorService(
 
             foreach (var subscription in subscriptions)
             {
-                db.NotificationDeliveries.Add(
-                    new NotificationDelivery
-                    {
-                        Id = Guid.NewGuid(),
-                        NotificationEventId = notificationEvent.Id,
-                        NotificationSubscriptionId = subscription.Id,
-                        SubjectId = subscription.SubjectId,
-                        Email = subscription.Email,
-                        Channel = NotificationChannel.InApp,
-                        ScheduledFor = notificationEvent.OccurredAt,
-                    }
-                );
-
-                // ScheduledFor is just "when this was queued" here - whether it's actually due
-                // yet for Daily/Weekly/Monthly subscribers is decided by NotificationSenderService
-                // against the subscription's *current* settings at send time, not baked in here.
-                // That's deliberate: it's what makes a subscriber's schedule change take effect on
-                // the very next tick, including for deliveries already queued before the change.
-                db.NotificationDeliveries.Add(
-                    new NotificationDelivery
-                    {
-                        Id = Guid.NewGuid(),
-                        NotificationEventId = notificationEvent.Id,
-                        NotificationSubscriptionId = subscription.Id,
-                        SubjectId = subscription.SubjectId,
-                        Email = subscription.Email,
-                        Channel = NotificationChannel.Email,
-                        ScheduledFor = notificationEvent.OccurredAt,
-                    }
-                );
+                foreach (var channel in DeliveryChannels)
+                {
+                    db.NotificationDeliveries.Add(
+                        new NotificationDelivery
+                        {
+                            Id = Guid.NewGuid(),
+                            NotificationEventId = notificationEvent.Id,
+                            NotificationSubscriptionId = subscription.Id,
+                            SubjectId = subscription.SubjectId,
+                            Email = subscription.Email,
+                            Channel = channel,
+                            ScheduledFor = notificationEvent.OccurredAt,
+                        }
+                    );
+                }
             }
         }
-
-        try
-        {
-            await db.SaveChangesAsync(ct);
-        }
-        catch (DbUpdateException)
-        {
-            // another replica already recorded these exact events (DedupeKey collision) - fine, skip.
-        }
     }
+
+    private static readonly NotificationChannel[] DeliveryChannels =
+    [
+        NotificationChannel.InApp,
+        NotificationChannel.Email,
+    ];
 
     private static async Task<string> ResolvePatientDisplayNameAsync(
         Hl7.Fhir.Rest.FhirClient client,
@@ -224,7 +242,7 @@ public sealed class NotificationDetectorService(
             }
 
             var patient = await client.ReadAsync<Patient>($"Patient/{patientId}", ct: ct);
-            return FormatPatientName(patient) ?? patientId;
+            return ScreeningListService.FormatPatientName(patient) ?? patientId;
         }
         catch (Exception)
         {
@@ -232,20 +250,5 @@ public sealed class NotificationDetectorService(
             // single patient/subject read failure.
             return "Unknown patient";
         }
-    }
-
-    private static string? FormatPatientName(Patient? patient)
-    {
-        var name = patient?.Name?.FirstOrDefault();
-        if (name is null)
-        {
-            return null;
-        }
-
-        var given = string.Join(' ', name.Given ?? []);
-        return string.Join(
-            ' ',
-            new[] { given, name.Family }.Where(s => !string.IsNullOrWhiteSpace(s))
-        );
     }
 }

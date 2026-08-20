@@ -13,4 +13,12 @@ public static class ClaimsPrincipalExtensions
         user.FindFirst("name")?.Value
         ?? user.FindFirst(ClaimTypes.Name)?.Value
         ?? user.Identity?.Name;
+
+    /// <summary>OIDC "sub" claim, falling back to the standard NameIdentifier claim type.</summary>
+    public static string? GetSubjectId(this ClaimsPrincipal user) =>
+        user.FindFirst("sub")?.Value ?? user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+    /// <summary>OIDC "email" claim, falling back to the standard Email claim type.</summary>
+    public static string? GetEmail(this ClaimsPrincipal user) =>
+        user.FindFirst("email")?.Value ?? user.FindFirst(ClaimTypes.Email)?.Value;
 }
