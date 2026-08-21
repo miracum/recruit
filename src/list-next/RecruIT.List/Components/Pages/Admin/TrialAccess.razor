@@ -146,7 +146,7 @@ else if (_trial is not null)
 
     protected override async Task OnInitializedAsync()
     {
-        _user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
+        _user = await AuthStateTask.GetUserAsync();
 
         try
         {

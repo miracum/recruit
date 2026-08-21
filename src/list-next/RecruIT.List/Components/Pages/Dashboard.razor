@@ -49,7 +49,6 @@ else
 
     private List<TrialSummaryDto> _trials = [];
     private bool _loading = true;
-    private bool _isAdmin;
     private string? _errorMessage;
     private ClaimsPrincipal _user = new();
 
@@ -63,8 +62,7 @@ else
     {
         BreadcrumbState.Set(new BreadcrumbItem(Localizer["App.Common.AllTrialsBreadcrumb"]));
 
-        _user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
-        _isAdmin = TrialAccessService.IsAdmin(_user);
+        _user = await AuthStateTask.GetUserAsync();
         await LoadAsync();
     }
 

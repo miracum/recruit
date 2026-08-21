@@ -15,15 +15,15 @@ public sealed class FhirClientFactory(
 {
     public const string HttpClientName = "fhir";
 
+    private static readonly FhirClientSettings Settings = new()
+    {
+        PreferredFormat = ResourceFormat.Json,
+        VerifyFhirVersion = false,
+    };
+
     public FhirClient CreateClient()
     {
         var httpClient = httpClientFactory.CreateClient(HttpClientName);
-        var settings = new FhirClientSettings
-        {
-            PreferredFormat = ResourceFormat.Json,
-            VerifyFhirVersion = false,
-        };
-
-        return new FhirClient(fhirOptions.Value.BaseUrl, httpClient, settings);
+        return new FhirClient(fhirOptions.Value.BaseUrl, httpClient, Settings);
     }
 }

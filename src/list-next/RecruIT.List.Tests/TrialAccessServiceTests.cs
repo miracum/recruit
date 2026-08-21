@@ -1,8 +1,7 @@
-using System.Security.Claims;
 using Microsoft.Extensions.Logging.Abstractions;
-using RecruIT.List.Data.Entities;
 using RecruIT.List.Models;
 using RecruIT.List.Services.Access;
+using static RecruIT.List.Tests.TestUsers;
 
 namespace RecruIT.List.Tests;
 
@@ -23,65 +22,8 @@ public sealed class TrialAccessServiceTests
         "STUDY-B"
     );
 
-    private static ClaimsPrincipal CreateUser(
-        string? sub = null,
-        string? email = null,
-        bool isAdmin = false
-    )
-    {
-        var claims = new List<Claim>();
-        if (sub is not null)
-        {
-            claims.Add(new Claim("sub", sub));
-        }
-
-        if (email is not null)
-        {
-            claims.Add(new Claim("email", email));
-        }
-
-        if (isAdmin)
-        {
-            claims.Add(new Claim("role", TrialAccessService.AdminRole));
-        }
-
-        var identity = new ClaimsIdentity(
-            claims,
-            authenticationType: "Test",
-            nameType: "preferred_username",
-            roleType: "role"
-        );
-        return new ClaimsPrincipal(identity);
-    }
-
     private static TrialAccessService CreateService(SqliteDbContextFactory factory) =>
         new(factory, new FakeStringLocalizer(), NullLogger<TrialAccessService>.Instance);
-
-    private static async Task SeedGrantAsync(
-        SqliteDbContextFactory factory,
-        TrialIdentifier trial,
-        string email,
-        TrialPermissionLevel level,
-        string? subjectId = null
-    )
-    {
-        await using var db = factory.CreateDbContext();
-        db.TrialAccessGrants.Add(
-            new TrialAccessGrant
-            {
-                Id = Guid.NewGuid(),
-                TrialIdentifierSystem = trial.System,
-                TrialIdentifierValue = trial.Value,
-                Email = email,
-                SubjectId = subjectId,
-                Level = level,
-                GrantedBy = "test",
-                GrantedAt = DateTimeOffset.UtcNow,
-                UpdatedAt = DateTimeOffset.UtcNow,
-            }
-        );
-        await db.SaveChangesAsync();
-    }
 
     [Fact]
     public async Task Configured_admin_role_is_used_for_admin_checks()

@@ -86,7 +86,7 @@ else
 
         try
         {
-            _user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
+            _user = await AuthStateTask.GetUserAsync();
             _patients = [.. await ScreeningListService.GetPatientsAcrossTrialsAsync(_user)];
         }
         catch (FhirAccessException ex)
@@ -107,7 +107,7 @@ else
     {
         _selectedPatient = membership;
         _canEditSelected = membership.TrialIdentifier is not null &&
-            await AccessService.GetPermissionAsync(_user, membership.TrialIdentifier) is { } level &&
-            level >= TrialPermissionLevel.Coordinator;
+            TrialAccessService.MeetsCoordinatorThreshold(
+                await AccessService.GetPermissionAsync(_user, membership.TrialIdentifier));
     }
 }

@@ -5,6 +5,7 @@ using RecruIT.List.Data.Entities;
 using RecruIT.List.Models;
 using RecruIT.List.Services.Fhir;
 using FhirList = Hl7.Fhir.Model.List;
+using ListFhirConstants = RecruIT.List.Services.Fhir.FhirConstants;
 using Task = System.Threading.Tasks.Task;
 
 namespace RecruIT.List.Services.Notify;
@@ -29,26 +30,31 @@ public sealed class NotificationDetectorService(
     /// duplicated as a hand-maintained config value, so it can't drift from the actual code system.
     /// </summary>
     private static readonly string ListSearchCriteria =
-        $"List?code={Uri.EscapeDataString(
-            $"{Fhir.FhirConstants.SystemScreeningList}|{RecruIT.List.Services.Fhir.FhirConstants.ScreeningListCode}"
-        )}";
+        $"List?code={Uri.EscapeDataString($"{ListFhirConstants.SystemScreeningList}|{ListFhirConstants.ScreeningListCode}")}";
 
     public async Task PollAllTrialsAsync(CancellationToken ct = default)
     {
         var client = clientFactory.CreateClient();
         var resources = await FhirBundleHelpers.GetAllPagesAsync(client, ListSearchCriteria, ct);
 
-        foreach (var list in resources.OfType<FhirList>())
+        // Lists are independent - polled concurrently, each with its own FhirClient (BaseFhirClient
+        // tracks last-request state as mutable instance fields, so a shared client isn't safe to
+        // call from multiple tasks at once).
+        await Task.WhenAll(
+            resources.OfType<FhirList>().Select(list => PollListSafeAsync(list, ct))
+        );
+    }
+
+    private async Task PollListSafeAsync(FhirList list, CancellationToken ct)
+    {
+        try
         {
-            try
-            {
-                await PollListAsync(client, list, ct);
-            }
-            catch (Exception ex)
-            {
-                // one misbehaving list must not stop the rest of this tick from being processed.
-                logger.LogError(ex, "Failed to poll List/{ListId}", list.Id);
-            }
+            await PollListAsync(clientFactory.CreateClient(), list, ct);
+        }
+        catch (Exception ex)
+        {
+            // one misbehaving list must not stop the rest of this tick from being processed.
+            logger.LogError(ex, "Failed to poll List/{ListId}", list.Id);
         }
     }
 
@@ -156,7 +162,7 @@ public sealed class NotificationDetectorService(
     )
     {
         var studyId = current
-            .GetReferenceExtension(RecruIT.List.Services.Fhir.FhirConstants.UrlListBelongsToStudy)
+            .GetReferenceExtension(ListFhirConstants.UrlListBelongsToStudy)
             ?.GetReferencedId();
         var study = studyId is not null
             ? await client.ReadAsync<ResearchStudy>($"ResearchStudy/{studyId}", ct: ct)
@@ -179,15 +185,22 @@ public sealed class NotificationDetectorService(
             .Where(s => s.TrialIdentifier == token)
             .ToListAsync(ct);
 
-        foreach (var reference in newReferences)
+        // Independent per-reference resolutions (each two sequential FHIR reads) - run concurrently,
+        // each with its own FhirClient rather than the shared `client` above (see PollAllTrialsAsync
+        // for why a FhirClient can't safely be called from multiple tasks at once).
+        var displayNames = await Task.WhenAll(
+            newReferences.Select(reference => ResolvePatientDisplayNameAsync(reference, ct))
+        );
+
+        for (var i = 0; i < newReferences.Count; i++)
         {
-            var patientDisplayName = await ResolvePatientDisplayNameAsync(client, reference, ct);
+            var reference = newReferences[i];
             var notificationEvent = new NotificationEvent
             {
                 Id = Guid.NewGuid(),
                 TrialIdentifier = token,
                 PatientReference = reference,
-                PatientDisplayName = patientDisplayName,
+                PatientDisplayName = displayNames[i],
                 OccurredAt = DateTimeOffset.UtcNow,
                 DedupeKey = $"{token}:{currentVersionId}:{reference}",
             };
@@ -220,8 +233,7 @@ public sealed class NotificationDetectorService(
         NotificationChannel.Email,
     ];
 
-    private static async Task<string> ResolvePatientDisplayNameAsync(
-        Hl7.Fhir.Rest.FhirClient client,
+    private async Task<string> ResolvePatientDisplayNameAsync(
         string researchSubjectReference,
         CancellationToken ct
     )
@@ -234,11 +246,12 @@ public sealed class NotificationDetectorService(
                 return "Unknown patient";
             }
 
+            var client = clientFactory.CreateClient();
             var subject = await client.ReadAsync<ResearchSubject>(
                 $"ResearchSubject/{subjectId}",
                 ct: ct
             );
-            var patientId = subject?.Individual?.Reference?.Split('/').LastOrDefault();
+            var patientId = subject?.Individual.GetReferencedId();
             if (patientId is null)
             {
                 return "Unknown patient";

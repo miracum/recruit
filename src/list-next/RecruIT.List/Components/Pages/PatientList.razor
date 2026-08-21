@@ -194,7 +194,7 @@ else if (_summary is not null)
 
     protected override async Task OnInitializedAsync()
     {
-        _user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
+        _user = await AuthStateTask.GetUserAsync();
         await LoadAsync();
     }
 
@@ -208,8 +208,8 @@ else if (_summary is not null)
             _summary = summary;
             _patients = [.. patients];
             var permission = await AccessService.GetPermissionAsync(_user, summary.TrialIdentifier);
-            _canEdit = permission is { } level && level >= TrialPermissionLevel.Coordinator;
-            _canManageAccess = permission is { } manageLevel && manageLevel >= TrialPermissionLevel.TrialAdmin;
+            _canEdit = TrialAccessService.MeetsCoordinatorThreshold(permission);
+            _canManageAccess = TrialAccessService.MeetsTrialAdminThreshold(permission);
             BreadcrumbState.Set(new BreadcrumbItem(Localizer["App.Common.AllTrialsBreadcrumb"], "/"), new BreadcrumbItem(summary.StudyAcronym));
 
             // Fire-and-forget rather than gating on OnAfterRenderAsync(firstRender): when

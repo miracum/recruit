@@ -62,11 +62,15 @@ internal static class FhirBundleHelpers
     /// </summary>
     public static string? GetResearchSubjectIdentifierToken(this ResearchSubject subject) =>
         subject.Identifier?.FirstOrDefault(i =>
-            i.System == RecruIT.List.Services.Fhir.FhirConstants.UrlResearchSubjectIdentifier
+            i.System == FhirConstants.UrlResearchSubjectIdentifier
         )
             is { System: { Length: > 0 } system, Value: { Length: > 0 } value }
             ? $"{system}|{value}"
             : null;
+
+    /// <summary>Parses a FHIR instant/date/dateTime string, or null if absent/unparsable.</summary>
+    public static DateTimeOffset? ParseFhirInstant(string? value) =>
+        value is not null && DateTimeOffset.TryParse(value, out var parsed) ? parsed : null;
 
     public static string GetStudyAcronym(this ResearchStudy study) =>
         study.GetMiiExStudieAkronym()?.Value is { Length: > 0 } acronym ? acronym : string.Empty;

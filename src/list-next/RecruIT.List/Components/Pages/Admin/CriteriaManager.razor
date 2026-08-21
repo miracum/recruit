@@ -271,7 +271,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
+        _user = await AuthStateTask.GetUserAsync();
         _isAdmin = TrialAccessService.IsAdmin(_user);
 
         BreadcrumbState.Set(

@@ -51,7 +51,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
+        var user = await AuthStateTask.GetUserAsync();
         _canManageAccess = await AccessService.CanManageAccessAsync(user, Trial.TrialIdentifier);
     }
 

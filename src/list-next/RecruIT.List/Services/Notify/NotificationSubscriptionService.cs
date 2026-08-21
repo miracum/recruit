@@ -32,7 +32,7 @@ public sealed class NotificationSubscriptionService(
         CancellationToken ct = default
     )
     {
-        var (subjectId, _) = GetUserKeys(user);
+        var (subjectId, _) = user.GetUserKeys();
         if (subjectId is null)
         {
             return null;
@@ -55,7 +55,7 @@ public sealed class NotificationSubscriptionService(
         CancellationToken ct = default
     )
     {
-        var (subjectId, email) = GetUserKeys(user);
+        var (subjectId, email) = user.GetUserKeys();
         if (subjectId is null || email is null)
         {
             throw new InvalidOperationException(
@@ -108,7 +108,7 @@ public sealed class NotificationSubscriptionService(
         CancellationToken ct = default
     )
     {
-        var (subjectId, _) = GetUserKeys(user);
+        var (subjectId, _) = user.GetUserKeys();
         if (subjectId is null)
         {
             return;
@@ -134,7 +134,7 @@ public sealed class NotificationSubscriptionService(
         CancellationToken ct = default
     )
     {
-        var (subjectId, _) = GetUserKeys(user);
+        var (subjectId, _) = user.GetUserKeys();
         if (subjectId is null)
         {
             return 0;
@@ -175,7 +175,7 @@ public sealed class NotificationSubscriptionService(
         CancellationToken ct = default
     )
     {
-        var (subjectId, _) = GetUserKeys(user);
+        var (subjectId, _) = user.GetUserKeys();
         if (subjectId is null)
         {
             return [];
@@ -248,7 +248,7 @@ public sealed class NotificationSubscriptionService(
         CancellationToken ct = default
     )
     {
-        var (subjectId, _) = GetUserKeys(user);
+        var (subjectId, _) = user.GetUserKeys();
         if (subjectId is null)
         {
             return;
@@ -267,7 +267,4 @@ public sealed class NotificationSubscriptionService(
         delivery.ReadAt = DateTimeOffset.UtcNow;
         await db.SaveChangesAsync(ct);
     }
-
-    private static (string? SubjectId, string? Email) GetUserKeys(ClaimsPrincipal user) =>
-        (user.GetSubjectId(), user.GetEmail());
 }

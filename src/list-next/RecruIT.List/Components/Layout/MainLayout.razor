@@ -2,7 +2,6 @@
 @inherits LayoutComponentBase
 @implements IDisposable
 @inject BreadcrumbState BreadcrumbState
-@inject ScreeningListService ScreeningListService
 @inject NotificationSubscriptionService NotificationSubscriptionService
 @inject IStringLocalizer<SharedResources> Localizer
 @inject NavigationManager Navigation
@@ -206,23 +205,7 @@
 
     private static readonly string AppVersionShort = AppVersion.Split('+')[0];
 
-    private static readonly string[] DotColors =
-    [
-        "bg-blue-500", "bg-green-500", "bg-orange-500", "bg-purple-500", "bg-pink-500", "bg-teal-500",
-    ];
-
-    private List<TrialSummaryDto> _trials = [];
-    private string _trialSearch = string.Empty;
     private int _unreadNotificationCount;
-
-    private List<TrialSummaryDto> FilteredActiveTrials =>
-        [.. _trials.Where(t => t.ListStatus == "current" && MatchesSearch(t))];
-
-    private List<TrialSummaryDto> FilteredInactiveTrials =>
-        [.. _trials.Where(t => t.ListStatus != "current" && MatchesSearch(t))];
-
-    private bool MatchesSearch(TrialSummaryDto trial) =>
-        string.IsNullOrWhiteSpace(_trialSearch) || trial.StudyAcronym.Contains(_trialSearch, StringComparison.OrdinalIgnoreCase);
 
     protected override async Task OnInitializedAsync()
     {
@@ -230,41 +213,16 @@
 
         try
         {
-            var user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
-
-            try
-            {
-                _trials = [.. await ScreeningListService.GetAccessibleTrialsAsync(user)];
-            }
-            catch
-            {
-                // The sidebar trial list is a navigation convenience, not the source of truth - if it
-                // fails to load, pages that actually need trial data (Dashboard, PatientList) surface
-                // their own error there. Just leave the sidebar list empty.
-                _trials = [];
-            }
-
-            try
-            {
-                _unreadNotificationCount = await NotificationSubscriptionService.GetUnreadInAppCountAsync(user);
-            }
-            catch
-            {
-                // Best-effort - the nav item simply shows no badge if the count can't be computed.
-                _unreadNotificationCount = 0;
-            }
+            var user = await AuthStateTask.GetUserAsync();
+            _unreadNotificationCount = await NotificationSubscriptionService.GetUnreadInAppCountAsync(user);
         }
         catch
         {
-            // AuthStateTask itself failed (e.g. a token-refresh error) - leave both the sidebar
-            // list and the unread badge empty rather than taking down the whole app shell.
-            _trials = [];
+            // Best-effort - the nav item simply shows no badge if the count can't be computed
+            // (including if AuthStateTask itself failed, e.g. a token-refresh error).
             _unreadNotificationCount = 0;
         }
     }
-
-    private static string TrialDotColor(string acronym) =>
-        DotColors[Math.Abs(acronym.GetHashCode()) % DotColors.Length];
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

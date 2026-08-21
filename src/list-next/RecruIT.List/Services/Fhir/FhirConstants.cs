@@ -48,17 +48,12 @@ public static class FhirConstants
     public static string ObservationCategoryEligibilityAssessment =>
         RecruIT.FhirConstants.Recruit.CodeSystems.EligibilityAssessmentCategory.EligibilityAssessment.Code();
 
-    public const string SystemSnomed = "http://snomed.info/sct";
-
     public const string SnomedCodeYes = "373066001";
     public const string SnomedCodeNo = "373067005";
-    public const string SnomedCodeUnknown = "261665006";
     public const string SnomedCodeIndeterminate = "82334004";
 
     public const string ListStatusCurrent = "current";
-    public const string ListStatusRetired = "retired";
 
     public static readonly string[] RecruitedStatuses = ["on-study"];
-    public static readonly string[] PendingStatuses = ["candidate", "screening", "eligible"];
     public static readonly string[] NotRecruitedStatuses = ["ineligible", "withdrawn"];
 }

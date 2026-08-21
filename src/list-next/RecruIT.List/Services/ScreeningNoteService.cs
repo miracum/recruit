@@ -51,7 +51,7 @@ public sealed class ScreeningNoteService(
                 Id = Guid.NewGuid(),
                 ResearchSubjectIdentifier = researchSubjectIdentifier,
                 TrialIdentifier = trialIdentifier.ToToken(),
-                Text = text,
+                Text = NoteHtmlSanitizer.Sanitize(text),
                 AuthorSubjectId = subjectId,
                 AuthorDisplayName = authorDisplayName,
                 CreatedAt = DateTimeOffset.UtcNow,

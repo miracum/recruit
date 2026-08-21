@@ -1,9 +1,9 @@
 using System.Security.Claims;
 using Microsoft.Extensions.Logging.Abstractions;
-using RecruIT.List.Data.Entities;
 using RecruIT.List.Models;
 using RecruIT.List.Services;
 using RecruIT.List.Services.Access;
+using static RecruIT.List.Tests.TestUsers;
 
 namespace RecruIT.List.Tests;
 
@@ -20,43 +20,6 @@ public sealed class ScreeningNoteServiceTests
     private const string SubjectBIdentifier =
         "https://fhir.example.org/research-subject-id|subject-b";
 
-    private static ClaimsPrincipal CreateUser(
-        string? sub = null,
-        string? email = null,
-        string? name = null,
-        bool isAdmin = false
-    )
-    {
-        var claims = new List<Claim>();
-        if (sub is not null)
-        {
-            claims.Add(new Claim("sub", sub));
-        }
-
-        if (email is not null)
-        {
-            claims.Add(new Claim("email", email));
-        }
-
-        if (name is not null)
-        {
-            claims.Add(new Claim("name", name));
-        }
-
-        if (isAdmin)
-        {
-            claims.Add(new Claim("role", TrialAccessService.AdminRole));
-        }
-
-        var identity = new ClaimsIdentity(
-            claims,
-            authenticationType: "Test",
-            nameType: "preferred_username",
-            roleType: "role"
-        );
-        return new ClaimsPrincipal(identity);
-    }
-
     private static (ScreeningNoteService Notes, SqliteDbContextFactory Factory) CreateService()
     {
         var factory = new SqliteDbContextFactory();
@@ -72,32 +35,6 @@ public sealed class ScreeningNoteServiceTests
             NullLogger<ScreeningNoteService>.Instance
         );
         return (notes, factory);
-    }
-
-    private static async Task SeedGrantAsync(
-        SqliteDbContextFactory factory,
-        TrialIdentifier trial,
-        string email,
-        TrialPermissionLevel level,
-        string subjectId
-    )
-    {
-        await using var db = factory.CreateDbContext();
-        db.TrialAccessGrants.Add(
-            new TrialAccessGrant
-            {
-                Id = Guid.NewGuid(),
-                TrialIdentifierSystem = trial.System,
-                TrialIdentifierValue = trial.Value,
-                Email = email,
-                SubjectId = subjectId,
-                Level = level,
-                GrantedBy = "test",
-                GrantedAt = DateTimeOffset.UtcNow,
-                UpdatedAt = DateTimeOffset.UtcNow,
-            }
-        );
-        await db.SaveChangesAsync();
     }
 
     [Fact]

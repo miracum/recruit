@@ -21,4 +21,12 @@ public static class ClaimsPrincipalExtensions
     /// <summary>OIDC "email" claim, falling back to the standard Email claim type.</summary>
     public static string? GetEmail(this ClaimsPrincipal user) =>
         user.FindFirst("email")?.Value ?? user.FindFirst(ClaimTypes.Email)?.Value;
+
+    /// <summary>
+    /// The two identities a user's TrialAccessGrant/NotificationSubscription rows are looked up by
+    /// - sub is primary, email is the fallback for grants created before the user's first login
+    /// (see OidcEvents, which backfills SubjectId once they do log in).
+    /// </summary>
+    public static (string? SubjectId, string? Email) GetUserKeys(this ClaimsPrincipal user) =>
+        (user.GetSubjectId(), user.GetEmail());
 }

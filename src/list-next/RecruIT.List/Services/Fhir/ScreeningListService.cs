@@ -54,7 +54,7 @@ public sealed class ScreeningListService(
             var (recruited, pending, notRecruited) = CountByStatus(
                 (list.Entry ?? []).Select(entry =>
                 {
-                    var subjectId = entry.Item?.Reference?.Split('/').LastOrDefault();
+                    var subjectId = entry.Item.GetReferencedId();
                     var subject =
                         subjectId is not null
                         && researchSubjectsById.TryGetValue(subjectId, out var s)
@@ -72,8 +72,7 @@ public sealed class ScreeningListService(
                     StudyAcronym = trialInfo.Acronym!,
                     StudyTitle = trialInfo.Title,
                     ListStatus =
-                        EnumUtility.GetLiteral(list.Status)
-                        ?? RecruIT.List.Services.Fhir.FhirConstants.ListStatusCurrent,
+                        EnumUtility.GetLiteral(list.Status) ?? FhirConstants.ListStatusCurrent,
                     RecruitedCount = recruited,
                     PendingCount = pending,
                     NotRecruitedCount = notRecruited,
@@ -124,13 +123,13 @@ public sealed class ScreeningListService(
         {
             foreach (var entry in list.Entry ?? [])
             {
-                var subjectId = entry.Item?.Reference?.Split('/').LastOrDefault();
+                var subjectId = entry.Item.GetReferencedId();
                 if (subjectId is null || !subjectsById.TryGetValue(subjectId, out var subject))
                 {
                     continue;
                 }
 
-                var patientId = subject.Individual?.Reference?.Split('/').LastOrDefault();
+                var patientId = subject.Individual.GetReferencedId();
                 if (patientId is null)
                 {
                     continue;
@@ -144,33 +143,12 @@ public sealed class ScreeningListService(
                     {
                         PatientId = patientId,
                         Name = FormatPatientName(patient),
-                        BirthDate =
-                            patient?.BirthDate is { } bd
-                            && DateTimeOffset.TryParse(bd, out var birthDate)
-                                ? birthDate
-                                : null,
+                        BirthDate = FhirBundleHelpers.ParseFhirInstant(patient?.BirthDate),
                         Gender = EnumUtility.GetLiteral(patient?.Gender),
                         Trials = [],
                     };
                     overviewsByPatient[patientId] = overview;
                 }
-
-                DateTimeOffset? recommendedDate =
-                    entry.Date is { } d && DateTimeOffset.TryParse(d, out var parsed)
-                        ? parsed
-                        : null;
-                var isFlaggedIneligible =
-                    entry.Flag?.Coding?.Any(c =>
-                        c.System
-                            == RecruIT
-                                .List
-                                .Services
-                                .Fhir
-                                .FhirConstants
-                                .SystemDeterminedSubjectStatus
-                        && c.Code
-                            == RecruIT.List.Services.Fhir.FhirConstants.DeterminedStatusIneligible
-                    ) ?? false;
 
                 overview.Trials.Add(
                     new PatientListEntryDto
@@ -181,19 +159,11 @@ public sealed class ScreeningListService(
                         Name = overview.Name,
                         BirthDate = overview.BirthDate,
                         Gender = overview.Gender,
-                        Phone = patient
-                            ?.Telecom?.FirstOrDefault(t =>
-                                t.System == ContactPoint.ContactPointSystem.Phone
-                            )
-                            ?.Value,
-                        Email = patient
-                            ?.Telecom?.FirstOrDefault(t =>
-                                t.System == ContactPoint.ContactPointSystem.Email
-                            )
-                            ?.Value,
+                        Phone = GetPhone(patient),
+                        Email = GetEmail(patient),
                         Status = EnumUtility.GetLiteral(subject.Status) ?? "candidate",
-                        RecommendedDate = recommendedDate,
-                        SystemDeterminedIneligible = isFlaggedIneligible,
+                        RecommendedDate = FhirBundleHelpers.ParseFhirInstant(entry.Date),
+                        SystemDeterminedIneligible = IsFlaggedIneligible(entry),
                         LastUpdated = subject.Meta?.LastUpdated,
                         ListId = list.Id,
                         StudyAcronym = trialInfo.Acronym,
@@ -299,25 +269,15 @@ public sealed class ScreeningListService(
 
         foreach (var entry in list.Entry ?? [])
         {
-            var subjectId = entry.Item?.Reference?.Split('/').LastOrDefault();
+            var subjectId = entry.Item.GetReferencedId();
             if (subjectId is null || !subjectsById.TryGetValue(subjectId, out var subject))
             {
                 continue;
             }
 
-            var patientId = subject.Individual?.Reference?.Split('/').LastOrDefault();
+            var patientId = subject.Individual.GetReferencedId();
             var patient =
                 patientId is not null && patientsById.TryGetValue(patientId, out var p) ? p : null;
-
-            var status = EnumUtility.GetLiteral(subject.Status) ?? "candidate";
-            DateTimeOffset? recommendedDate =
-                entry.Date is { } d && DateTimeOffset.TryParse(d, out var parsed) ? parsed : null;
-            var isFlaggedIneligible =
-                entry.Flag?.Coding?.Any(c =>
-                    c.System
-                        == RecruIT.List.Services.Fhir.FhirConstants.SystemDeterminedSubjectStatus
-                    && c.Code == RecruIT.List.Services.Fhir.FhirConstants.DeterminedStatusIneligible
-                ) ?? false;
 
             patientEntries.Add(
                 new PatientListEntryDto
@@ -327,25 +287,13 @@ public sealed class ScreeningListService(
                     PatientId = patientId ?? string.Empty,
                     Name = FormatPatientName(patient),
                     MedicalRecordNumber = patient?.GetMedicalRecordNumber(),
-                    BirthDate =
-                        patient?.BirthDate is { } bd
-                        && DateTimeOffset.TryParse(bd, out var birthDate)
-                            ? birthDate
-                            : null,
+                    BirthDate = FhirBundleHelpers.ParseFhirInstant(patient?.BirthDate),
                     Gender = EnumUtility.GetLiteral(patient?.Gender),
-                    Phone = patient
-                        ?.Telecom?.FirstOrDefault(t =>
-                            t.System == ContactPoint.ContactPointSystem.Phone
-                        )
-                        ?.Value,
-                    Email = patient
-                        ?.Telecom?.FirstOrDefault(t =>
-                            t.System == ContactPoint.ContactPointSystem.Email
-                        )
-                        ?.Value,
-                    Status = status,
-                    RecommendedDate = recommendedDate,
-                    SystemDeterminedIneligible = isFlaggedIneligible,
+                    Phone = GetPhone(patient),
+                    Email = GetEmail(patient),
+                    Status = EnumUtility.GetLiteral(subject.Status) ?? "candidate",
+                    RecommendedDate = FhirBundleHelpers.ParseFhirInstant(entry.Date),
+                    SystemDeterminedIneligible = IsFlaggedIneligible(entry),
                     LastUpdated = subject.Meta?.LastUpdated,
                 }
             );
@@ -363,9 +311,7 @@ public sealed class ScreeningListService(
             StudyTitle = study?.Title,
             StudyDescription = study?.Description,
             Criteria = criteria,
-            ListStatus =
-                EnumUtility.GetLiteral(list.Status)
-                ?? RecruIT.List.Services.Fhir.FhirConstants.ListStatusCurrent,
+            ListStatus = EnumUtility.GetLiteral(list.Status) ?? FhirConstants.ListStatusCurrent,
             RecruitedCount = recruited,
             PendingCount = pending,
             NotRecruitedCount = notRecruited,
@@ -453,20 +399,38 @@ public sealed class ScreeningListService(
         IReadOnlyDictionary<string, (string ListId, string StudyAcronym)?>
     > ResolveListsForTrialsAsync(IEnumerable<string> tokens, CancellationToken ct = default)
     {
-        var result = new Dictionary<string, (string ListId, string StudyAcronym)?>();
-        foreach (var token in tokens.Distinct())
-        {
-            result[token] = await ResolveListForTrialAsync(token, ct);
-        }
-        return result;
+        var distinctTokens = tokens.Distinct().ToList();
+        // Each ResolveListForTrialAsync call creates its own FhirClient, so these are safe to run
+        // concurrently - no shared client instance to race on.
+        var resolved = await Task.WhenAll(
+            distinctTokens.Select(token => ResolveListForTrialAsync(token, ct))
+        );
+        return distinctTokens.Zip(resolved).ToDictionary(x => x.First, x => x.Second);
     }
+
+    /// <summary>Whether a screening-list entry is flagged as system-determined-ineligible.</summary>
+    private static bool IsFlaggedIneligible(FhirList.EntryComponent entry) =>
+        entry.Flag?.Coding?.Any(c =>
+            c.System == FhirConstants.SystemDeterminedSubjectStatus
+            && c.Code == FhirConstants.DeterminedStatusIneligible
+        ) ?? false;
+
+    private static string? GetPhone(Patient? patient) =>
+        patient
+            ?.Telecom?.FirstOrDefault(t => t.System == ContactPoint.ContactPointSystem.Phone)
+            ?.Value;
+
+    private static string? GetEmail(Patient? patient) =>
+        patient
+            ?.Telecom?.FirstOrDefault(t => t.System == ContactPoint.ContactPointSystem.Email)
+            ?.Value;
 
     /// <summary>
     /// The List?code=...&amp;_include=... query shared by every method that scans screening lists
     /// across trials (dashboard, patient overview, notifications) - only the status filter varies.
     /// </summary>
     private static string BuildScreeningListsQuery(string status) =>
-        $"List?code={Uri.EscapeDataString($"{RecruIT.List.Services.Fhir.FhirConstants.SystemScreeningList}|{RecruIT.List.Services.Fhir.FhirConstants.ScreeningListCode}")}"
+        $"List?code={Uri.EscapeDataString($"{FhirConstants.SystemScreeningList}|{FhirConstants.ScreeningListCode}")}"
         + $"&status={status}"
         + "&_include=List:item"
         + "&_include:iterate=ResearchSubject:patient"
@@ -513,17 +477,11 @@ public sealed class ScreeningListService(
 
         foreach (var status in statuses)
         {
-            if (
-                status is not null
-                && RecruIT.List.Services.Fhir.FhirConstants.RecruitedStatuses.Contains(status)
-            )
+            if (status is not null && FhirConstants.RecruitedStatuses.Contains(status))
             {
                 recruited++;
             }
-            else if (
-                status is not null
-                && RecruIT.List.Services.Fhir.FhirConstants.NotRecruitedStatuses.Contains(status)
-            )
+            else if (status is not null && FhirConstants.NotRecruitedStatuses.Contains(status))
             {
                 notRecruited++;
             }

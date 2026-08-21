@@ -1,4 +1,3 @@
-@using Ganss.Xss
 @inject ResearchSubjectService ResearchSubjectService
 @inject IStringLocalizer<SharedResources> Localizer
 
@@ -54,8 +53,6 @@
 </div>
 
 @code {
-    private static readonly HtmlSanitizer Sanitizer = new();
-
     [Parameter, EditorRequired]
     public required PatientListEntryDto Patient { get; set; }
 
@@ -64,7 +61,7 @@
     private string? _loadedForSubjectId;
     private DateTimeOffset? _loadedForLastUpdated;
 
-    private static MarkupString RenderNote(string html) => new(Sanitizer.Sanitize(html));
+    private static MarkupString RenderNote(string html) => new(NoteHtmlSanitizer.Sanitize(html));
 
     protected override async Task OnParametersSetAsync()
     {

@@ -6,6 +6,7 @@ using Hl7.Fhir.Serialization;
 using Microsoft.Extensions.Localization;
 using RecruIT.List.Models;
 using RecruIT.List.Resources;
+using Task = System.Threading.Tasks.Task;
 
 namespace RecruIT.List.Services.Fhir;
 
@@ -52,25 +53,35 @@ public sealed class EligibilityCriteriaService(
         CancellationToken ct = default
     )
     {
-        var client = clientFactory.CreateClient();
-
         List<Resource> libraries;
         List<Resource> groups;
         List<Resource> studies;
         try
         {
-            libraries = await FhirBundleHelpers.GetAllPagesAsync(
-                client,
+            // Independent searches, run concurrently - each gets its own FhirClient rather than
+            // sharing one, since BaseFhirClient tracks last-request state (LastResult etc.) as
+            // mutable instance fields that aren't safe to touch from concurrent calls.
+            var librariesTask = FhirBundleHelpers.GetAllPagesAsync(
+                clientFactory.CreateClient(),
                 $"Library?type={Uri.EscapeDataString($"{SqlQueryLibraryTypeSystem}|{SqlQueryLibraryTypeCode}")}"
                     + "&_count=100&_sort=-_lastUpdated",
                 ct
             );
-            groups = await FhirBundleHelpers.GetAllPagesAsync(client, "Group?_count=100", ct);
-            studies = await FhirBundleHelpers.GetAllPagesAsync(
-                client,
+            var groupsTask = FhirBundleHelpers.GetAllPagesAsync(
+                clientFactory.CreateClient(),
+                "Group?_count=100",
+                ct
+            );
+            var studiesTask = FhirBundleHelpers.GetAllPagesAsync(
+                clientFactory.CreateClient(),
                 "ResearchStudy?_count=100",
                 ct
             );
+
+            await Task.WhenAll(librariesTask, groupsTask, studiesTask);
+            libraries = await librariesTask;
+            groups = await groupsTask;
+            studies = await studiesTask;
         }
         catch (Exception ex)
         {
@@ -162,10 +173,9 @@ public sealed class EligibilityCriteriaService(
                 // design, same as the "point a second study's characteristic at an existing Library"
                 // dedup story in docs/trino/eligibility-criteria-design.md.
                 var name = Slug.Create(criterion.DisplayText);
-                var identifierValue = Slug.Create(name);
                 var libraryId = ComputeIdentifierHashId(
                     FhirConstants.UrlUiCreatedEligibilityLibraryIdentifier,
-                    identifierValue
+                    name
                 );
 
                 var library = new Library
@@ -195,10 +205,7 @@ public sealed class EligibilityCriteriaService(
                     ],
                 };
                 library.Identifier.Add(
-                    new Identifier(
-                        FhirConstants.UrlUiCreatedEligibilityLibraryIdentifier,
-                        identifierValue
-                    )
+                    new Identifier(FhirConstants.UrlUiCreatedEligibilityLibraryIdentifier, name)
                 );
 
                 libraryEntries.Add(

@@ -44,7 +44,7 @@ public sealed class TrialAccessService(
             return AdminEffectiveLevel;
         }
 
-        var (subjectId, email) = GetUserKeys(user);
+        var (subjectId, email) = user.GetUserKeys();
         if (subjectId is null && email is null)
         {
             logger.LogWarning(
@@ -84,7 +84,7 @@ public sealed class TrialAccessService(
             return null;
         }
 
-        var (subjectId, email) = GetUserKeys(user);
+        var (subjectId, email) = user.GetUserKeys();
         if (subjectId is null && email is null)
         {
             logger.LogWarning(
@@ -129,18 +129,26 @@ public sealed class TrialAccessService(
         ClaimsPrincipal user,
         TrialIdentifier trialIdentifier,
         CancellationToken ct = default
-    ) =>
-        await GetPermissionAsync(user, trialIdentifier, ct) is { } level
-        && level >= TrialPermissionLevel.Coordinator;
+    ) => MeetsCoordinatorThreshold(await GetPermissionAsync(user, trialIdentifier, ct));
 
     /// <summary>Managing who else has access to a trial requires TrialAdmin (or global Admin).</summary>
     public async Task<bool> CanManageAccessAsync(
         ClaimsPrincipal user,
         TrialIdentifier trialIdentifier,
         CancellationToken ct = default
-    ) =>
-        await GetPermissionAsync(user, trialIdentifier, ct) is { } level
-        && level >= TrialPermissionLevel.TrialAdmin;
+    ) => MeetsTrialAdminThreshold(await GetPermissionAsync(user, trialIdentifier, ct));
+
+    /// <summary>
+    /// Same threshold CanPatchResearchSubjectAsync enforces, exposed for callers that already have a
+    /// level in hand (e.g. from one GetPermissionAsync call reused for several UI decisions) so they
+    /// don't need a second round-trip just to apply the same comparison.
+    /// </summary>
+    public static bool MeetsCoordinatorThreshold(TrialPermissionLevel? level) =>
+        level is { } l && l >= TrialPermissionLevel.Coordinator;
+
+    /// <summary>Same threshold CanManageAccessAsync enforces - see MeetsCoordinatorThreshold.</summary>
+    public static bool MeetsTrialAdminThreshold(TrialPermissionLevel? level) =>
+        level is { } l && l >= TrialPermissionLevel.TrialAdmin;
 
     /// <summary>Only admins may retire/reactivate a List (matches list-old's createPatchFilter).</summary>
     public bool CanPatchList(ClaimsPrincipal user) => IsAdmin(user);
@@ -154,7 +162,7 @@ public sealed class TrialAccessService(
     /// </summary>
     public static bool IsOwnGrant(TrialAccessGrant grant, ClaimsPrincipal user)
     {
-        var (subjectId, email) = GetUserKeys(user);
+        var (subjectId, email) = user.GetUserKeys();
         return (subjectId is not null && grant.SubjectId == subjectId)
             || (email is not null && grant.Email == email);
     }
@@ -189,7 +197,7 @@ public sealed class TrialAccessService(
         await EnsureCanManageAccessAsync(grantedBy, trialIdentifier, ct);
 
         var normalizedEmail = email.Trim();
-        var (granterSubjectId, granterEmail) = GetUserKeys(grantedBy);
+        var (granterSubjectId, granterEmail) = grantedBy.GetUserKeys();
         var granterIdentity = granterSubjectId ?? granterEmail ?? "unknown";
 
         await using var db = await dbContextFactory.CreateDbContextAsync(ct);
@@ -277,9 +285,6 @@ public sealed class TrialAccessService(
             );
         }
     }
-
-    private static (string? SubjectId, string? Email) GetUserKeys(ClaimsPrincipal user) =>
-        (user.GetSubjectId(), user.GetEmail());
 
     /// <summary>
     /// Claims-free batched grant lookup for background/job contexts with no ClaimsPrincipal (e.g.

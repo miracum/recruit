@@ -78,7 +78,7 @@ else
 
         try
         {
-            _user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
+            _user = await AuthStateTask.GetUserAsync();
 
             var feedItems = await NotificationSubscriptionService.ListInAppFeedAsync(_user);
 

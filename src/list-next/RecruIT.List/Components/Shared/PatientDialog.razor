@@ -149,8 +149,6 @@
     private static readonly string[] StatusOptions = ["candidate", "screening", "eligible", "ineligible", "on-study", "withdrawn"];
 
     private ClaimsPrincipal _user = new();
-    private PatientClinicalSummaryDto _summary = new();
-    private string? _loadedSummaryForSubjectId;
     private bool _statusSaving;
     private IReadOnlyList<CriterionStatusDto> _criteria = [];
     private bool _criteriaLoading;
@@ -158,54 +156,18 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        _user = AuthStateTask is not null ? (await AuthStateTask).User : new ClaimsPrincipal();
+        _user = await AuthStateTask.GetUserAsync();
 
         if (Patient is null)
         {
             return;
-        }
-
-        // Kicked off in parallel (not one `await` after another) so both loading flags flip to
-        // true before this method's own first yield - Blazor only renders once at that yield
-        // point, so a flag set after it wouldn't get an interim render showing its skeleton.
-        var pendingLoads = new List<Task>();
-
-        if (Patient.ResearchSubjectId != _loadedSummaryForSubjectId)
-        {
-            _loadedSummaryForSubjectId = Patient.ResearchSubjectId;
-            pendingLoads.Add(LoadClinicalSummaryAsync());
         }
 
         if (TrialIdentifier is not null && Patient.ResearchSubjectId != _loadedCriteriaForSubjectId)
         {
             _loadedCriteriaForSubjectId = Patient.ResearchSubjectId;
-            pendingLoads.Add(LoadEligibilityCriteriaAsync());
+            await LoadEligibilityCriteriaAsync();
         }
-
-        await Task.WhenAll(pendingLoads);
-    }
-
-    private async Task LoadClinicalSummaryAsync()
-    {
-        if (Patient is null)
-        {
-            return;
-        }
-
-        @* _summaryLoading = true;
-        try
-        {
-            _summary = await PatientRecordService.GetClinicalSummaryAsync(Patient.PatientId);
-        }
-        catch
-        {
-            // Best-effort - an empty clinical summary is preferable to blocking the dialog on a fetch failure.
-            _summary = new();
-        }
-        finally
-        {
-            _summaryLoading = false;
-        } *@
     }
 
     private async Task LoadEligibilityCriteriaAsync()
