@@ -21,14 +21,14 @@ public sealed class PollCursorConcurrencyTests : IAsyncLifetime
         "docker.io/library/postgres:18.4@sha256:a02db8cac496f15b094798a38254f14d6e00741f709360e5e00bb6668ea31636"
     ).Build();
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         await _postgres.StartAsync();
         await using var db = CreateContext();
         await db.Database.MigrateAsync();
     }
 
-    public async Task DisposeAsync() => await _postgres.DisposeAsync();
+    public async ValueTask DisposeAsync() => await _postgres.DisposeAsync();
 
     [Fact]
     public async Task TryAdvance_OnlyOneReplicaWinsConcurrentRace()
@@ -45,7 +45,7 @@ public sealed class PollCursorConcurrencyTests : IAsyncLifetime
                     UpdatedAt = DateTimeOffset.UtcNow,
                 }
             );
-            await setup.SaveChangesAsync();
+            await setup.SaveChangesAsync(TestContext.Current.CancellationToken);
         }
 
         // Two separate contexts, each with its own change tracker, simulate two replicas racing
@@ -53,8 +53,14 @@ public sealed class PollCursorConcurrencyTests : IAsyncLifetime
         await using var replicaA = CreateContext();
         await using var replicaB = CreateContext();
 
-        var cursorA = await replicaA.PollCursors.SingleAsync(c => c.ListId == listId);
-        var cursorB = await replicaB.PollCursors.SingleAsync(c => c.ListId == listId);
+        var cursorA = await replicaA.PollCursors.SingleAsync(
+            c => c.ListId == listId,
+            TestContext.Current.CancellationToken
+        );
+        var cursorB = await replicaB.PollCursors.SingleAsync(
+            c => c.ListId == listId,
+            TestContext.Current.CancellationToken
+        );
 
         cursorA.LastSeenVersionId = "2";
         cursorB.LastSeenVersionId = "2";
@@ -67,7 +73,10 @@ public sealed class PollCursorConcurrencyTests : IAsyncLifetime
         Assert.Single(results, won => won);
 
         await using var verify = CreateContext();
-        var finalCursor = await verify.PollCursors.SingleAsync(c => c.ListId == listId);
+        var finalCursor = await verify.PollCursors.SingleAsync(
+            c => c.ListId == listId,
+            TestContext.Current.CancellationToken
+        );
         Assert.Equal("2", finalCursor.LastSeenVersionId);
     }
 

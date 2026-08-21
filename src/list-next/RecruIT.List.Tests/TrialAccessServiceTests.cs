@@ -96,7 +96,13 @@ public sealed class TrialAccessServiceTests
             var service = CreateService(factory);
             var admin = CreateUser(sub: "admin-1", isAdmin: true);
 
-            Assert.True(await service.CanAccessTrialAsync(admin, TrialA));
+            Assert.True(
+                await service.CanAccessTrialAsync(
+                    admin,
+                    TrialA,
+                    TestContext.Current.CancellationToken
+                )
+            );
             Assert.True(service.CanPatchList(admin));
             Assert.True(service.CanDelete(admin));
         }
@@ -113,10 +119,25 @@ public sealed class TrialAccessServiceTests
         var service = CreateService(factory);
         var admin = CreateUser(sub: "admin-1", isAdmin: true);
 
-        Assert.True(await service.CanAccessTrialAsync(admin, TrialA));
-        Assert.True(await service.CanPatchResearchSubjectAsync(admin, TrialA));
-        Assert.True(await service.CanManageAccessAsync(admin, TrialA));
-        Assert.Null(await service.GetAccessibleTrialIdentifiersAsync(admin));
+        Assert.True(
+            await service.CanAccessTrialAsync(admin, TrialA, TestContext.Current.CancellationToken)
+        );
+        Assert.True(
+            await service.CanPatchResearchSubjectAsync(
+                admin,
+                TrialA,
+                TestContext.Current.CancellationToken
+            )
+        );
+        Assert.True(
+            await service.CanManageAccessAsync(admin, TrialA, TestContext.Current.CancellationToken)
+        );
+        Assert.Null(
+            await service.GetAccessibleTrialIdentifiersAsync(
+                admin,
+                TestContext.Current.CancellationToken
+            )
+        );
     }
 
     [Fact]
@@ -126,10 +147,22 @@ public sealed class TrialAccessServiceTests
         var service = CreateService(factory);
         var user = CreateUser(sub: "user-1", email: "user1@example.com");
 
-        Assert.False(await service.CanAccessTrialAsync(user, TrialA));
-        Assert.False(await service.CanPatchResearchSubjectAsync(user, TrialA));
-        Assert.False(await service.CanManageAccessAsync(user, TrialA));
-        Assert.Null(await service.GetPermissionAsync(user, TrialA));
+        Assert.False(
+            await service.CanAccessTrialAsync(user, TrialA, TestContext.Current.CancellationToken)
+        );
+        Assert.False(
+            await service.CanPatchResearchSubjectAsync(
+                user,
+                TrialA,
+                TestContext.Current.CancellationToken
+            )
+        );
+        Assert.False(
+            await service.CanManageAccessAsync(user, TrialA, TestContext.Current.CancellationToken)
+        );
+        Assert.Null(
+            await service.GetPermissionAsync(user, TrialA, TestContext.Current.CancellationToken)
+        );
     }
 
     [Fact]
@@ -146,9 +179,23 @@ public sealed class TrialAccessServiceTests
         var service = CreateService(factory);
         var viewer = CreateUser(sub: "viewer-1", email: "viewer@example.com");
 
-        Assert.True(await service.CanAccessTrialAsync(viewer, TrialA));
-        Assert.False(await service.CanPatchResearchSubjectAsync(viewer, TrialA));
-        Assert.False(await service.CanManageAccessAsync(viewer, TrialA));
+        Assert.True(
+            await service.CanAccessTrialAsync(viewer, TrialA, TestContext.Current.CancellationToken)
+        );
+        Assert.False(
+            await service.CanPatchResearchSubjectAsync(
+                viewer,
+                TrialA,
+                TestContext.Current.CancellationToken
+            )
+        );
+        Assert.False(
+            await service.CanManageAccessAsync(
+                viewer,
+                TrialA,
+                TestContext.Current.CancellationToken
+            )
+        );
     }
 
     [Fact]
@@ -165,9 +212,27 @@ public sealed class TrialAccessServiceTests
         var service = CreateService(factory);
         var coordinator = CreateUser(sub: "coord-1", email: "coord@example.com");
 
-        Assert.True(await service.CanAccessTrialAsync(coordinator, TrialA));
-        Assert.True(await service.CanPatchResearchSubjectAsync(coordinator, TrialA));
-        Assert.False(await service.CanManageAccessAsync(coordinator, TrialA));
+        Assert.True(
+            await service.CanAccessTrialAsync(
+                coordinator,
+                TrialA,
+                TestContext.Current.CancellationToken
+            )
+        );
+        Assert.True(
+            await service.CanPatchResearchSubjectAsync(
+                coordinator,
+                TrialA,
+                TestContext.Current.CancellationToken
+            )
+        );
+        Assert.False(
+            await service.CanManageAccessAsync(
+                coordinator,
+                TrialA,
+                TestContext.Current.CancellationToken
+            )
+        );
     }
 
     [Fact]
@@ -184,7 +249,13 @@ public sealed class TrialAccessServiceTests
         var service = CreateService(factory);
         var trialAdmin = CreateUser(sub: "ta-1", email: "trialadmin@example.com");
 
-        Assert.True(await service.CanManageAccessAsync(trialAdmin, TrialA));
+        Assert.True(
+            await service.CanManageAccessAsync(
+                trialAdmin,
+                TrialA,
+                TestContext.Current.CancellationToken
+            )
+        );
     }
 
     [Fact]
@@ -203,7 +274,13 @@ public sealed class TrialAccessServiceTests
         var service = CreateService(factory);
         var invitee = CreateUser(sub: "not-yet-linked-sub", email: "invitee@example.com");
 
-        Assert.True(await service.CanPatchResearchSubjectAsync(invitee, TrialA));
+        Assert.True(
+            await service.CanPatchResearchSubjectAsync(
+                invitee,
+                TrialA,
+                TestContext.Current.CancellationToken
+            )
+        );
     }
 
     [Fact]
@@ -220,8 +297,12 @@ public sealed class TrialAccessServiceTests
         var service = CreateService(factory);
         var user = CreateUser(sub: "user-1", email: "user@example.com");
 
-        Assert.True(await service.CanAccessTrialAsync(user, TrialA));
-        Assert.False(await service.CanAccessTrialAsync(user, TrialB));
+        Assert.True(
+            await service.CanAccessTrialAsync(user, TrialA, TestContext.Current.CancellationToken)
+        );
+        Assert.False(
+            await service.CanAccessTrialAsync(user, TrialB, TestContext.Current.CancellationToken)
+        );
     }
 
     [Fact]
@@ -238,7 +319,10 @@ public sealed class TrialAccessServiceTests
         var service = CreateService(factory);
         var user = CreateUser(sub: "user-1", email: "user@example.com");
 
-        var accessible = await service.GetAccessibleTrialIdentifiersAsync(user);
+        var accessible = await service.GetAccessibleTrialIdentifiersAsync(
+            user,
+            TestContext.Current.CancellationToken
+        );
 
         Assert.NotNull(accessible);
         Assert.Single(accessible);
@@ -265,7 +349,8 @@ public sealed class TrialAccessServiceTests
                 TrialA,
                 "someone-else@example.com",
                 TrialPermissionLevel.Viewer,
-                viewer
+                viewer,
+                TestContext.Current.CancellationToken
             )
         );
     }
@@ -289,13 +374,18 @@ public sealed class TrialAccessServiceTests
                 TrialA,
                 "trialadmin@example.com",
                 TrialPermissionLevel.Coordinator,
-                trialAdmin
+                trialAdmin,
+                TestContext.Current.CancellationToken
             )
         );
 
         Assert.Equal(
             TrialPermissionLevel.TrialAdmin,
-            await service.GetPermissionAsync(trialAdmin, TrialA)
+            await service.GetPermissionAsync(
+                trialAdmin,
+                TrialA,
+                TestContext.Current.CancellationToken
+            )
         );
     }
 
@@ -313,13 +403,21 @@ public sealed class TrialAccessServiceTests
         var service = CreateService(factory);
         var trialAdmin = CreateUser(sub: "ta-1", email: "trialadmin@example.com");
 
-        var ownGrant = Assert.Single(await service.ListGrantsAsync(TrialA, trialAdmin));
-
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            service.RevokeGrantAsync(ownGrant.Id, trialAdmin)
+        var ownGrant = Assert.Single(
+            await service.ListGrantsAsync(TrialA, trialAdmin, TestContext.Current.CancellationToken)
         );
 
-        Assert.True(await service.CanManageAccessAsync(trialAdmin, TrialA));
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+            service.RevokeGrantAsync(ownGrant.Id, trialAdmin, TestContext.Current.CancellationToken)
+        );
+
+        Assert.True(
+            await service.CanManageAccessAsync(
+                trialAdmin,
+                TrialA,
+                TestContext.Current.CancellationToken
+            )
+        );
     }
 
     [Fact]
@@ -341,7 +439,8 @@ public sealed class TrialAccessServiceTests
                 TrialA,
                 "admin@example.com",
                 TrialPermissionLevel.TrialAdmin,
-                admin
+                admin,
+                TestContext.Current.CancellationToken
             )
         );
     }
@@ -365,15 +464,36 @@ public sealed class TrialAccessServiceTests
             TrialA,
             "new@example.com",
             TrialPermissionLevel.Coordinator,
-            trialAdmin
+            trialAdmin,
+            TestContext.Current.CancellationToken
         );
-        Assert.True(await service.CanPatchResearchSubjectAsync(newUser, TrialA));
+        Assert.True(
+            await service.CanPatchResearchSubjectAsync(
+                newUser,
+                TrialA,
+                TestContext.Current.CancellationToken
+            )
+        );
 
-        var grants = await service.ListGrantsAsync(TrialA, trialAdmin);
+        var grants = await service.ListGrantsAsync(
+            TrialA,
+            trialAdmin,
+            TestContext.Current.CancellationToken
+        );
         var newGrant = Assert.Single(grants, g => g.Email == "new@example.com");
 
-        await service.RevokeGrantAsync(newGrant.Id, trialAdmin);
+        await service.RevokeGrantAsync(
+            newGrant.Id,
+            trialAdmin,
+            TestContext.Current.CancellationToken
+        );
 
-        Assert.False(await service.CanAccessTrialAsync(newUser, TrialA));
+        Assert.False(
+            await service.CanAccessTrialAsync(
+                newUser,
+                TrialA,
+                TestContext.Current.CancellationToken
+            )
+        );
     }
 }

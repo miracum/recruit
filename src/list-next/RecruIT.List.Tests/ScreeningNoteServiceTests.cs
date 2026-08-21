@@ -114,9 +114,18 @@ public sealed class ScreeningNoteServiceTests
         );
         var user = CreateUser(sub: "coord-1", email: "coord@example.com", name: "Coord Person");
 
-        await notes.AddNoteAsync(SubjectAIdentifier, "Patient looks eligible.", TrialA, user);
+        await notes.AddNoteAsync(
+            SubjectAIdentifier,
+            "Patient looks eligible.",
+            TrialA,
+            user,
+            TestContext.Current.CancellationToken
+        );
 
-        var result = await notes.GetNotesAsync(SubjectAIdentifier);
+        var result = await notes.GetNotesAsync(
+            SubjectAIdentifier,
+            TestContext.Current.CancellationToken
+        );
 
         var note = Assert.Single(result);
         Assert.Equal("Patient looks eligible.", note.Text);
@@ -138,11 +147,32 @@ public sealed class ScreeningNoteServiceTests
         );
         var user = CreateUser(sub: "coord-1", email: "coord@example.com");
 
-        await notes.AddNoteAsync(SubjectAIdentifier, "first", TrialA, user);
-        await notes.AddNoteAsync(SubjectAIdentifier, "second", TrialA, user);
-        await notes.AddNoteAsync(SubjectAIdentifier, "third", TrialA, user);
+        await notes.AddNoteAsync(
+            SubjectAIdentifier,
+            "first",
+            TrialA,
+            user,
+            TestContext.Current.CancellationToken
+        );
+        await notes.AddNoteAsync(
+            SubjectAIdentifier,
+            "second",
+            TrialA,
+            user,
+            TestContext.Current.CancellationToken
+        );
+        await notes.AddNoteAsync(
+            SubjectAIdentifier,
+            "third",
+            TrialA,
+            user,
+            TestContext.Current.CancellationToken
+        );
 
-        var result = await notes.GetNotesAsync(SubjectAIdentifier);
+        var result = await notes.GetNotesAsync(
+            SubjectAIdentifier,
+            TestContext.Current.CancellationToken
+        );
 
         Assert.Equal(["third", "second", "first"], result.Select(n => n.Text));
     }
@@ -161,11 +191,29 @@ public sealed class ScreeningNoteServiceTests
         );
         var user = CreateUser(sub: "coord-1", email: "coord@example.com");
 
-        await notes.AddNoteAsync(SubjectAIdentifier, "for subject A", TrialA, user);
-        await notes.AddNoteAsync(SubjectBIdentifier, "for subject B", TrialA, user);
+        await notes.AddNoteAsync(
+            SubjectAIdentifier,
+            "for subject A",
+            TrialA,
+            user,
+            TestContext.Current.CancellationToken
+        );
+        await notes.AddNoteAsync(
+            SubjectBIdentifier,
+            "for subject B",
+            TrialA,
+            user,
+            TestContext.Current.CancellationToken
+        );
 
-        var subjectANotes = await notes.GetNotesAsync(SubjectAIdentifier);
-        var subjectBNotes = await notes.GetNotesAsync(SubjectBIdentifier);
+        var subjectANotes = await notes.GetNotesAsync(
+            SubjectAIdentifier,
+            TestContext.Current.CancellationToken
+        );
+        var subjectBNotes = await notes.GetNotesAsync(
+            SubjectBIdentifier,
+            TestContext.Current.CancellationToken
+        );
 
         Assert.Equal("for subject A", Assert.Single(subjectANotes).Text);
         Assert.Equal("for subject B", Assert.Single(subjectBNotes).Text);
@@ -186,10 +234,18 @@ public sealed class ScreeningNoteServiceTests
         var viewer = CreateUser(sub: "viewer-1", email: "viewer@example.com");
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            notes.AddNoteAsync(SubjectAIdentifier, "not allowed", TrialA, viewer)
+            notes.AddNoteAsync(
+                SubjectAIdentifier,
+                "not allowed",
+                TrialA,
+                viewer,
+                TestContext.Current.CancellationToken
+            )
         );
 
-        Assert.Empty(await notes.GetNotesAsync(SubjectAIdentifier));
+        Assert.Empty(
+            await notes.GetNotesAsync(SubjectAIdentifier, TestContext.Current.CancellationToken)
+        );
     }
 
     [Fact]
@@ -213,9 +269,17 @@ public sealed class ScreeningNoteServiceTests
         );
         var user = new ClaimsPrincipal(identity);
 
-        await notes.AddNoteAsync(SubjectAIdentifier, "note text", TrialA, user);
+        await notes.AddNoteAsync(
+            SubjectAIdentifier,
+            "note text",
+            TrialA,
+            user,
+            TestContext.Current.CancellationToken
+        );
 
-        var note = Assert.Single(await notes.GetNotesAsync(SubjectAIdentifier));
+        var note = Assert.Single(
+            await notes.GetNotesAsync(SubjectAIdentifier, TestContext.Current.CancellationToken)
+        );
         Assert.Equal("coord@example.com", note.Author);
     }
 }
