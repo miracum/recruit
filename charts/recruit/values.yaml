@@ -795,11 +795,10 @@ listNext:
     scanIntervalSeconds: 60
 
   notifyMailer:
-    # -- FHIR search criteria used to find screening `List`s to poll for notification emails
-    listSearchCriteria: "List?code=https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type|screening-recommendations"
     # -- Used to link back to list-next from a notification email. If `listNext.ingress.enabled` is
-    # `true`, the ingress host is used instead. Must include a `[list_id]` placeholder.
-    screeningListLinkTemplate: "http://localhost:8080/recommendations/[list_id]"
+    # `true`, the ingress host is used instead. A composite format string (see .NET's String.Format)
+    # with a single `{0}` placeholder for the list id.
+    screeningListLinkTemplate: "http://localhost:8080/recommendations/{0}"
     # -- the sender email address for notification mails
     from: "recruit@example.com"
     # -- subject line template, with `[study_acronym]` replaced at send time

@@ -53,10 +53,10 @@ public sealed class NotifyMailerOptions
 {
     public const string SectionName = "NotifyMailer";
 
-    /// <summary>FHIR search criteria used to find screening `List`s to poll, e.g. `List?code=...`.</summary>
-    public required string ListSearchCriteria { get; set; }
-
-    /// <summary>Used to link back to the screening list web app from an email. Must include `[list_id]`.</summary>
+    /// <summary>
+    /// Used to link back to the screening list web app from an email - a composite format string
+    /// (see string.Format) with a single `{0}` placeholder for the list id.
+    /// </summary>
     public required string ScreeningListLinkTemplate { get; set; }
 
     /// <summary>The sender email address for notification mails.</summary>

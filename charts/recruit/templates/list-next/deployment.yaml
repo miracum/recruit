@@ -113,8 +113,6 @@ spec:
               value: {{ .notifications.stalledLeadWindowDays | quote }}
             - name: Notifications__ScanIntervalSeconds
               value: {{ .notifications.scanIntervalSeconds | quote }}
-            - name: NotifyMailer__ListSearchCriteria
-              value: {{ .notifyMailer.listSearchCriteria | quote }}
             - name: NotifyMailer__ScreeningListLinkTemplate
               value: {{ include "recruit.listNext.mail.screeningListLinkTemplate" $ }}
             - name: NotifyMailer__From

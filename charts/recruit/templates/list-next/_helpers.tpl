@@ -40,7 +40,7 @@ Get the screening list link template used in list-next's notification emails
 {{- if .Values.listNext.ingress.enabled -}}
     {{- $host := (index .Values.listNext.ingress.hosts 0).host }}
     {{- $protocol := (empty .Values.listNext.ingress.tls) | ternary "http" "https" }}
-    {{- printf "%s://%s/recommendations/[list_id]" $protocol $host -}}
+    {{- printf "%s://%s/recommendations/{0}" $protocol $host -}}
 {{- else -}}
     {{- .Values.listNext.notifyMailer.screeningListLinkTemplate | quote -}}
 {{- end -}}

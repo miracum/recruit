@@ -399,7 +399,17 @@ app.MapGet(
         ctx.Response.Cookies.Append(
             CookieRequestCultureProvider.DefaultCookieName,
             CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(resolvedCulture)),
-            new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1), IsEssential = true }
+            new CookieOptions
+            {
+                Expires = DateTimeOffset.UtcNow.AddYears(1),
+                IsEssential = true,
+                HttpOnly = true,
+                // Not hardcoded true: this app also runs over plain HTTP in local dev and in the
+                // Playwright E2E tests, where a hardcoded Secure flag would make the browser
+                // silently drop the cookie. Matches the SameAsRequest default already used by the
+                // OIDC cookie a few lines up.
+                Secure = ctx.Request.IsHttps,
+            }
         );
 
         return Results.LocalRedirect(string.IsNullOrEmpty(redirectUri) ? "/" : redirectUri);
@@ -412,3 +422,7 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 await app.RunAsync();
+
+// Exposes the top-level-statement-generated Program class to RecruIT.List.E2ETests, which needs
+// it as WebApplicationFactory<Program>'s type parameter.
+public partial class Program;

@@ -1,4 +1,6 @@
-using System.Net;
+using System.Reflection;
+using System.Text.Encodings.Web;
+using Fluid;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Mjml.Net;
@@ -34,6 +36,10 @@ public sealed class NotificationSenderService(
 )
 {
     private static readonly MjmlRenderer Renderer = new();
+
+    private static readonly TemplateOptions DigestTemplateOptions = CreateDigestTemplateOptions();
+
+    private static readonly IFluidTemplate DigestTemplate = LoadDigestTemplate();
 
     /// <summary>
     /// A delivery that has failed to send for longer than this is given up on (removed) rather
@@ -176,8 +182,7 @@ public sealed class NotificationSenderService(
             var deliveries = group.ToList();
             var recipientEmail = deliveries[0].Email;
 
-            var items =
-                new List<(string StudyAcronym, string PatientDisplayName, string ListUrl)>();
+            var items = new List<(string StudyAcronym, string ListUrl)>();
             var includedDeliveries = new List<NotificationDelivery>();
             foreach (var delivery in deliveries)
             {
@@ -204,9 +209,8 @@ public sealed class NotificationSenderService(
                 items.Add(
                     (
                         listInfo.Value.StudyAcronym,
-                        notificationEvent.PatientDisplayName,
-                        mailerOptions.Value.ScreeningListLinkTemplate.Replace(
-                            "[list_id]",
+                        string.Format(
+                            mailerOptions.Value.ScreeningListLinkTemplate,
                             listInfo.Value.ListId
                         )
                     )
@@ -225,7 +229,7 @@ public sealed class NotificationSenderService(
                 "[study_acronym]",
                 subjectAcronym
             );
-            var html = RenderHtml(items);
+            var html = RenderHtml(items.Count, subjectAcronym, items[0].ListUrl);
 
             try
             {
@@ -275,13 +279,9 @@ public sealed class NotificationSenderService(
     /// </summary>
     public async Task SendTestEmailAsync(string recipientEmail, CancellationToken ct = default)
     {
-        var sampleItems = new List<(string StudyAcronym, string PatientDisplayName, string ListUrl)>
+        var sampleItems = new List<(string StudyAcronym, string ListUrl)>
         {
-            (
-                "TEST-TRIAL",
-                "Test Patient",
-                mailerOptions.Value.ScreeningListLinkTemplate.Replace("[list_id]", "test")
-            ),
+            ("TEST-TRIAL", string.Format(mailerOptions.Value.ScreeningListLinkTemplate, "test")),
         };
 
         var subject =
@@ -290,46 +290,72 @@ public sealed class NotificationSenderService(
                 "[study_acronym]",
                 sampleItems[0].StudyAcronym
             );
-        var html = RenderHtml(sampleItems);
+        var html = RenderHtml(
+            sampleItems.Count,
+            sampleItems[0].StudyAcronym,
+            sampleItems[0].ListUrl
+        );
 
         await channel.SendAsync(recipientEmail, subject, html, ct);
     }
 
+    /// <summary>
+    /// Renders the digest email body from an aggregate count only - no patient names or other
+    /// per-subject data is ever passed to the template, since a subscriber must not learn who was
+    /// suggested from the notification email itself (data protection).
+    /// </summary>
     private static string RenderHtml(
-        IReadOnlyList<(string StudyAcronym, string PatientDisplayName, string ListUrl)> items
+        int numNewSubjects,
+        string studyAcronym,
+        string screeningListLink
     )
     {
-        var itemsHtml = string.Join(
-            "\n",
-            items.Select(i =>
-                $"""
-                    <mj-text font-size="14px" color="#4a4a4a" line-height="1.5">
-                      <b>{WebUtility.HtmlEncode(
-                        i.PatientDisplayName
-                    )}</b> was newly recommended for <b>{WebUtility.HtmlEncode(
-                        i.StudyAcronym
-                    )}</b> - <a href="{i.ListUrl}">open screening list</a>
-                    </mj-text>
-                    """
-            )
-        );
-
-        var mjml = $"""
-            <mjml>
-              <mj-body background-color="#f4f4f4">
-                <mj-section background-color="#ffffff" padding="24px">
-                  <mj-column>
-                    <mj-text font-size="18px" font-weight="bold" color="#1a1a1a">
-                      New patient suggestions
-                    </mj-text>
-                    {itemsHtml}
-                  </mj-column>
-                </mj-section>
-              </mj-body>
-            </mjml>
-            """;
+        var model = new DigestTemplateModel(numNewSubjects, studyAcronym, screeningListLink);
+        var context = new TemplateContext(model, DigestTemplateOptions);
+        var mjml = DigestTemplate.Render(context, HtmlEncoder.Default);
 
         var result = Renderer.Render(mjml);
         return result.Html;
     }
+
+    private static TemplateOptions CreateDigestTemplateOptions()
+    {
+        var options = new TemplateOptions();
+        options.MemberAccessStrategy.Register<DigestTemplateModel>();
+        return options;
+    }
+
+    /// <summary>
+    /// The digest MJML template is kept as a standalone, designer-editable file
+    /// (Templates/NotificationDigest.mjml.liquid) rather than a C# string, and embedded into the
+    /// assembly so it ships without relying on the output directory layout.
+    /// </summary>
+    private static IFluidTemplate LoadDigestTemplate()
+    {
+        var resourceName =
+            $"{typeof(NotificationSenderService).Namespace}.Templates.NotificationDigest.mjml.liquid";
+        using var stream =
+            Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName)
+            ?? throw new InvalidOperationException(
+                $"Embedded MJML template '{resourceName}' was not found."
+            );
+        using var reader = new StreamReader(stream);
+        var source = reader.ReadToEnd();
+
+        var parser = new FluidParser();
+        if (!parser.TryParse(source, out var template, out var error))
+        {
+            throw new InvalidOperationException(
+                $"Failed to parse MJML template '{resourceName}': {error}"
+            );
+        }
+
+        return template;
+    }
+
+    private sealed record DigestTemplateModel(
+        int NumNewSubjects,
+        string StudyAcronym,
+        string ScreeningListLink
+    );
 }

@@ -8,6 +8,7 @@
     <PackageReference Include="AspNetCore.HealthChecks.NpgSql" />
     <PackageReference Include="BlazorBlueprint.Components" />
     <PackageReference Include="EFCore.NamingConventions" />
+    <PackageReference Include="Fluid.Core" />
     <PackageReference Include="Hangfire.AspNetCore" />
     <PackageReference Include="Hangfire.PostgreSql" />
     <PackageReference Include="Hl7.Fhir.R4" />
@@ -34,5 +35,9 @@
 
   <ItemGroup>
     <ProjectReference Include="../RecruIT.FhirConstants/RecruIT.FhirConstants.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Services\Notify\Templates\*.liquid" />
   </ItemGroup>
 </Project>

@@ -1,10 +1,8 @@
 using Hl7.Fhir.Model;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using RecruIT.List.Data;
 using RecruIT.List.Data.Entities;
 using RecruIT.List.Models;
-using RecruIT.List.Options;
 using RecruIT.List.Services.Fhir;
 using FhirList = Hl7.Fhir.Model.List;
 using Task = System.Threading.Tasks.Task;
@@ -22,18 +20,23 @@ namespace RecruIT.List.Services.Notify;
 public sealed class NotificationDetectorService(
     FhirClientFactory clientFactory,
     IDbContextFactory<AppDbContext> dbContextFactory,
-    IOptions<NotifyMailerOptions> mailerOptions,
     ILogger<NotificationDetectorService> logger
 )
 {
+    /// <summary>
+    /// The `List?code=...` search for every screening list, regardless of status - built from the
+    /// same generated FhirConstants as ScreeningListService.BuildScreeningListsQuery rather than
+    /// duplicated as a hand-maintained config value, so it can't drift from the actual code system.
+    /// </summary>
+    private static readonly string ListSearchCriteria =
+        $"List?code={Uri.EscapeDataString(
+            $"{Fhir.FhirConstants.SystemScreeningList}|{RecruIT.List.Services.Fhir.FhirConstants.ScreeningListCode}"
+        )}";
+
     public async Task PollAllTrialsAsync(CancellationToken ct = default)
     {
         var client = clientFactory.CreateClient();
-        var resources = await FhirBundleHelpers.GetAllPagesAsync(
-            client,
-            mailerOptions.Value.ListSearchCriteria,
-            ct
-        );
+        var resources = await FhirBundleHelpers.GetAllPagesAsync(client, ListSearchCriteria, ct);
 
         foreach (var list in resources.OfType<FhirList>())
         {
