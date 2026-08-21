@@ -786,9 +786,21 @@ listNext:
   database:
     # -- Npgsql connection string for list-next's own data (trial access grants, notification poll
     # cursors, and the Hangfire job store backing its notification poller), e.g.
-    # `Host=postgres;Port=5432;Database=list_next`. Used as-is; omit credentials here and set them
-    # via `PGUSER`/`PGPASSWORD` in `listNext.extraEnv` instead (e.g. sourced from a Kubernetes secret).
+    # `Host=postgres;Port=5432;Database=list_next`. Omit credentials here and set them via
+    # `username`/`password` below instead - they are injected as `PGUSER`/`PGPASSWORD` env vars,
+    # which Npgsql falls back to for any credentials missing from the connection string.
     connectionString: ""
+    # -- the username to connect to the database as. Injected as the `PGUSER` env var, in both the
+    # Deployment and the migration Job. Leave empty to omit `PGUSER`/`PGPASSWORD` entirely.
+    username: ""
+    # -- the password used to connect to the database. Injected as the `PGPASSWORD` env var.
+    # Ignored if `existingSecret.name` is set.
+    password: ""
+    existingSecret:
+      # -- name of an existing Kubernetes secret that contains the database password
+      name: ""
+      # -- the key inside the existing secret containing the password
+      key: "db-password"
 
   auth:
     # -- if enabled, requires OIDC authentication before accessing list-next. If disabled, every

@@ -34,6 +34,28 @@ Get the name of the secret containing list-next's SMTP password
 {{- end -}}
 
 {{/*
+Get the name of the secret containing list-next's database password
+*/}}
+{{- define "recruit.listNext.database.secretName" -}}
+{{- if .Values.listNext.database.existingSecret.name -}}
+    {{ .Values.listNext.database.existingSecret.name | quote }}
+{{- else -}}
+    {{ printf "%s-%s" .Release.Name "list-next-db" | quote }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Get the key inside the secret containing list-next's database password
+*/}}
+{{- define "recruit.listNext.database.secretKey" -}}
+{{- if .Values.listNext.database.existingSecret.name -}}
+    {{ .Values.listNext.database.existingSecret.key | quote }}
+{{- else -}}
+    {{ "db-password" | quote }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Get the screening list link template used in list-next's notification emails
 */}}
 {{- define "recruit.listNext.mail.screeningListLinkTemplate" -}}

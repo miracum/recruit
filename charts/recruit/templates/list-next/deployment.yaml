@@ -150,6 +150,15 @@ spec:
             {{- end }}
             - name: ConnectionStrings__AppDb
               value: {{ .database.connectionString | quote }}
+            {{- if .database.username }}
+            - name: PGUSER
+              value: {{ .database.username | quote }}
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "recruit.listNext.database.secretName" $ }}
+                  key: {{ include "recruit.listNext.database.secretKey" $ }}
+            {{- end }}
             - name: Notifications__NewSuggestionWindowDays
               value: {{ .notifications.newSuggestionWindowDays | quote }}
             - name: Notifications__StalledLeadWindowDays
