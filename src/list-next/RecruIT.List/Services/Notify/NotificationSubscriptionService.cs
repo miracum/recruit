@@ -200,15 +200,22 @@ public sealed class NotificationSubscriptionService(
                 d => d.NotificationEventId,
                 e => e.Id,
                 (d, e) =>
-                    new NotificationFeedItemDto(
+                    new
+                    {
                         d.Id,
                         e.TrialIdentifier,
                         e.PatientDisplayName,
-                        e.OccurredAt
-                    )
+                        e.OccurredAt,
+                    }
             )
-            .OrderByDescending(item => item.OccurredAt)
+            .OrderByDescending(joined => joined.OccurredAt)
             .Take(MaxFeedItems)
+            .Select(joined => new NotificationFeedItemDto(
+                joined.Id,
+                joined.TrialIdentifier,
+                joined.PatientDisplayName,
+                joined.OccurredAt
+            ))
             .ToListAsync(ct);
 
         // A subscription outlives trial-access revocation - drop anything for a trial the caller
