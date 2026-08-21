@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using BlazorBlueprint.Components;
 using Hangfire;
 using Hangfire.PostgreSql;
@@ -391,7 +392,7 @@ if (!authDisabled)
             Results.Challenge(
                 new Microsoft.AspNetCore.Authentication.AuthenticationProperties
                 {
-                    RedirectUri = returnUrl ?? "/",
+                    RedirectUri = IsLocalUrl(returnUrl) ? returnUrl : "/",
                 },
                 [OpenIdConnectDefaults.AuthenticationScheme]
             )
@@ -407,7 +408,7 @@ if (!authDisabled)
             Results.SignOut(
                 new Microsoft.AspNetCore.Authentication.AuthenticationProperties
                 {
-                    RedirectUri = returnUrl ?? "/logged-out",
+                    RedirectUri = IsLocalUrl(returnUrl) ? returnUrl : "/logged-out",
                 },
                 [
                     CookieAuthenticationDefaults.AuthenticationScheme,
@@ -416,6 +417,16 @@ if (!authDisabled)
             )
     );
 }
+
+// AuthenticationProperties.RedirectUri (unlike Results.LocalRedirect below) isn't restricted to
+// local paths by the auth handlers that consume it, so /authentication/login and /logout must
+// validate returnUrl themselves before using it - otherwise a signed-in user could be bounced to
+// an attacker-controlled URL right after completing a real OIDC login. Mirrors the classic
+// ASP.NET Identity IsLocalUrl check: a bare "/path", not a protocol-relative "//host" or "/\host".
+static bool IsLocalUrl([NotNullWhen(true)] string? url) =>
+    !string.IsNullOrEmpty(url)
+    && url[0] == '/'
+    && (url.Length == 1 || (url[1] != '/' && url[1] != '\\'));
 
 app.MapGet(
     "/culture/set",
