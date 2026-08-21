@@ -14,7 +14,6 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using RecruIT.List.Components;
 using RecruIT.List.Data;
-using RecruIT.List.Models;
 using RecruIT.List.Options;
 using RecruIT.List.Services;
 using RecruIT.List.Services.Access;
@@ -25,6 +24,40 @@ using RecruIT.List.Services.Navigation;
 using RecruIT.List.Services.Notify;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Lets the dedicated migration Job (charts/recruit/templates/list-next/migrate-job.yaml) reuse
+// this exact image/entrypoint to run migrations and exit, without requiring Fhir__BaseUrl/Oidc/etc
+// - those are read unconditionally further down and would otherwise force the Job to carry
+// irrelevant app config just to avoid an unrelated startup throw. list-next's own Deployment pods
+// never set this; they wait for that Job via a wait-for-migration initContainer instead.
+if (builder.Configuration.GetValue<bool>("RunMigrationsOnly"))
+{
+    var migrateConnectionString =
+        builder.Configuration.GetConnectionString("AppDb")
+        ?? throw new InvalidOperationException("ConnectionStrings:AppDb must be configured.");
+
+    builder.Services.AddDbContextFactory<AppDbContext>(options =>
+        options
+            .UseNpgsql(migrateConnectionString, npgsql => npgsql.MapAppDbEnums())
+            .UseSnakeCaseNamingConvention()
+    );
+    builder.Services.AddDbContext<DataProtectionKeyContext>(options =>
+        options.UseNpgsql(migrateConnectionString).UseSnakeCaseNamingConvention()
+    );
+
+    var migrateApp = builder.Build();
+    await using var scope = migrateApp.Services.CreateAsyncScope();
+    var dbContextFactory = scope.ServiceProvider.GetRequiredService<
+        IDbContextFactory<AppDbContext>
+    >();
+    await using var db = await dbContextFactory.CreateDbContextAsync();
+    await db.Database.MigrateAsync();
+
+    var dataProtectionKeyContext =
+        scope.ServiceProvider.GetRequiredService<DataProtectionKeyContext>();
+    await dataProtectionKeyContext.Database.MigrateAsync();
+    return;
+}
 
 // A dedicated metrics port (separate from the app's HTTP_PORT) keeps /metrics off the
 // internet-facing listener - only the in-cluster ServiceMonitor needs to reach it. Configuring
@@ -130,13 +163,7 @@ if (tracingEnabled)
 // create a short-lived context per operation.
 builder.Services.AddDbContextFactory<AppDbContext>(options =>
     options
-        .UseNpgsql(
-            appDbConnectionString,
-            npgsql =>
-                npgsql
-                    .MapEnum<TrialPermissionLevel>("trial_permission_level")
-                    .MapEnum<NotificationChannel>("notification_channel")
-        )
+        .UseNpgsql(appDbConnectionString, npgsql => npgsql.MapAppDbEnums())
         .UseSnakeCaseNamingConvention()
 );
 

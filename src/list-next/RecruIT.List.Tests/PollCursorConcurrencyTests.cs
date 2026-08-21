@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using RecruIT.List.Data;
 using RecruIT.List.Data.Entities;
-using RecruIT.List.Models;
 using Testcontainers.PostgreSql;
 
 namespace RecruIT.List.Tests;
@@ -96,13 +95,7 @@ public sealed class PollCursorConcurrencyTests : IAsyncLifetime
     private AppDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseNpgsql(
-                _postgres.GetConnectionString(),
-                npgsql =>
-                    npgsql
-                        .MapEnum<TrialPermissionLevel>("trial_permission_level")
-                        .MapEnum<NotificationChannel>("notification_channel")
-            )
+            .UseNpgsql(_postgres.GetConnectionString(), npgsql => npgsql.MapAppDbEnums())
             .UseSnakeCaseNamingConvention()
             .Options;
         return new AppDbContext(options);

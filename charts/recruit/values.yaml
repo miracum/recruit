@@ -743,6 +743,29 @@ listNext:
     # -- whether to automount the SA token.
     automountServiceAccountToken: false
 
+  # -- settings for the Job that runs list-next's DB migrations once per image tag, ahead of the
+  # Deployment's pods (see the wait-for-migration initContainer below).
+  migrationJob:
+    # -- number of retries for the migration Job before it is considered failed
+    backoffLimit: 3
+    # -- delete the migration Job this many seconds after it finishes; set to `null` to disable.
+    # Acts as a safety net if the GitOps controller doesn't prune superseded Jobs - a new image tag
+    # always produces a differently-named Job, so old ones would otherwise accumulate.
+    ttlSecondsAfterFinished: 600
+    # -- annotations to add to the migration Job's pod
+    podAnnotations: {}
+    # -- set the migration Job container's resources according to one common preset (allowed
+    # values: none, nano, micro, small, medium, large, xlarge, 2xlarge). Ignored if `resources` is set.
+    resourcesPreset: "small"
+    # -- resource requests and limits for the migration Job container
+    resources: {}
+    # -- number of attempts (waitPollIntervalSeconds apart) the wait-for-migration initContainer
+    # polls the migration Job before giving up and failing the pod. The default (60 * 10s = 10 min)
+    # mirrors the grace period the old startupProbe gave in-process migrations.
+    waitMaxAttempts: 60
+    # -- seconds between wait-for-migration polls of the migration Job's status
+    waitPollIntervalSeconds: 10
+
   podDisruptionBudget:
     # -- create a PodDisruptionBudget resource
     enabled: false
@@ -1149,6 +1172,14 @@ curl: # +doc-gen:ignore
     registry: docker.io
     repository: curlimages/curl
     tag: 8.21.0@sha256:7c12af72ceb38b7432ab85e1a265cff6ae58e06f95539d539b654f2cfa64bb13
+
+# kubectl image used by the wait-for-migration initContainer to poll the list-next migration Job's
+# status.
+kubectl: # +doc-gen:ignore
+  image:
+    registry: docker.io
+    repository: rancher/kubectl
+    tag: v1.34.9@sha256:caffc74e47cf962edef931bc3c5eff73032a19d0487253b261c3c75cb3cf8e9e
 
 broadseaAtlasdb:
   # -- whether to deploy the OHDSI Broadsea Atlasdb (<https://github.com/OHDSI/Broadsea-Atlasdb>)

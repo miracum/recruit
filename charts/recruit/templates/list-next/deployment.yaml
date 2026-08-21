@@ -40,6 +40,49 @@ spec:
       serviceAccountName: {{ include "recruit.serviceAccountName" (dict "context" . "component" "list-next" "root" $) }}
       automountServiceAccountToken: {{ .serviceAccount.automountServiceAccountToken }}
       initContainers:
+        - name: wait-for-migration
+          image: {{ include "recruit.kubectl.image" $ }}
+          imagePullPolicy: IfNotPresent
+          {{- with $.Values.restrictedContainerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: JOB_NAME
+              value: {{ include "recruit.listNext.migrationJobName" $ }}
+            - name: NAMESPACE
+              value: {{ $.Release.Namespace }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              i=0
+              max_attempts={{ .migrationJob.waitMaxAttempts }}
+              while true; do
+                phase="$(kubectl get job "$JOB_NAME" -n "$NAMESPACE" \
+                  -o jsonpath='{.status.conditions[?(@.type=="Complete")].status}:{.status.conditions[?(@.type=="Failed")].status}')"
+                complete="${phase%%:*}"
+                failed="${phase##*:}"
+                if [ "$complete" = "True" ]; then
+                  echo "$(date): migration Job $JOB_NAME completed.";
+                  exit 0
+                fi
+                if [ "$failed" = "True" ]; then
+                  echo "$(date): migration Job $JOB_NAME failed - see 'kubectl logs job/$JOB_NAME -n $NAMESPACE'.";
+                  exit 1
+                fi
+                i=$((i + 1))
+                if [ "$i" -ge "$max_attempts" ]; then
+                  echo "$(date): timed out waiting for migration Job $JOB_NAME to complete.";
+                  exit 1
+                fi
+                echo "$(date): Waiting for migration Job $JOB_NAME to complete ($i/$max_attempts)";
+                sleep {{ .migrationJob.waitPollIntervalSeconds }};
+              done
+          volumeMounts:
+            - name: wait-for-migration-token
+              mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+              readOnly: true
         - name: wait-for-fhir-server
           image: {{ include "recruit.curl.image" $ }}
           imagePullPolicy: IfNotPresent
@@ -170,6 +213,22 @@ spec:
       volumes:
         - name: tmp-volume
           emptyDir: {}
+        - name: wait-for-migration-token
+          projected:
+            sources:
+              - serviceAccountToken:
+                  path: token
+                  expirationSeconds: 3607
+              - configMap:
+                  name: kube-root-ca.crt
+                  items:
+                    - key: ca.crt
+                      path: ca.crt
+              - downwardAPI:
+                  items:
+                    - path: namespace
+                      fieldRef:
+                        fieldPath: metadata.namespace
       {{- if .extraVolumes }}
         {{- toYaml .extraVolumes | nindent 8 }}
       {{- end }}
