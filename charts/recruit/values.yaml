@@ -801,8 +801,9 @@ listNext:
     screeningListLinkTemplate: "http://localhost:8080/recommendations/{0}"
     # -- the sender email address for notification mails
     from: "recruit@example.com"
-    # -- subject line template, with `[study_acronym]` replaced at send time
-    subjectTemplate: "MIRACUM Rekrutierungsunterstützung: neue Vorschläge für die Studie [study_acronym]"
+    # -- subject line template, a composite format string (see .NET's String.Format) with a single
+    # `{0}` placeholder for the study acronym
+    subjectTemplate: "MIRACUM Rekrutierungsunterstützung: neue Vorschläge für die Studie {0}"
     smtp:
       # -- hostname of the external SMTP mail server. Only used if `mailhog.enabled` is `false`
       host: ""

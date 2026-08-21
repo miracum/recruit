@@ -225,10 +225,7 @@ public sealed class NotificationSenderService(
 
             var acronyms = items.Select(i => i.StudyAcronym).Distinct().ToList();
             var subjectAcronym = acronyms.Count == 1 ? acronyms[0] : $"{acronyms.Count} trials";
-            var subject = mailerOptions.Value.SubjectTemplate.Replace(
-                "[study_acronym]",
-                subjectAcronym
-            );
+            var subject = string.Format(mailerOptions.Value.SubjectTemplate, subjectAcronym);
             var html = RenderHtml(items.Count, subjectAcronym, items[0].ListUrl);
 
             try
@@ -286,10 +283,7 @@ public sealed class NotificationSenderService(
 
         var subject =
             "[Test] "
-            + mailerOptions.Value.SubjectTemplate.Replace(
-                "[study_acronym]",
-                sampleItems[0].StudyAcronym
-            );
+            + string.Format(mailerOptions.Value.SubjectTemplate, sampleItems[0].StudyAcronym);
         var html = RenderHtml(
             sampleItems.Count,
             sampleItems[0].StudyAcronym,

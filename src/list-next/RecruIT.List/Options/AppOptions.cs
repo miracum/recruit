@@ -62,7 +62,10 @@ public sealed class NotifyMailerOptions
     /// <summary>The sender email address for notification mails.</summary>
     public required string From { get; set; }
 
-    /// <summary>Subject line template, with `[study_acronym]` replaced at send time.</summary>
+    /// <summary>
+    /// Subject line template - a composite format string (see string.Format) with a single `{0}`
+    /// placeholder for the study acronym.
+    /// </summary>
     public required string SubjectTemplate { get; set; }
 
     public required string SmtpHost { get; set; }
