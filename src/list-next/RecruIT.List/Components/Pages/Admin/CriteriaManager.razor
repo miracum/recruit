@@ -3,6 +3,7 @@
 @inject EligibilityCriteriaService CriteriaService
 @inject BreadcrumbState BreadcrumbState
 @inject DialogService DialogService
+@inject ToastService Toast
 @inject IStringLocalizer<SharedResources> Localizer
 
 <PageTitle>@Localizer["App.CriteriaManager.PageTitle"]</PageTitle>
@@ -114,7 +115,33 @@ else
         <BbTabsContent Value="study">
             <BbCard Class="mt-4">
                 <BbCardHeader>
-                    <BbCardTitle>@Localizer["App.CriteriaManager.StudySectionTitle"]</BbCardTitle>
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <BbCardTitle>@Localizer["App.CriteriaManager.StudySectionTitle"]</BbCardTitle>
+                        @if (_studyDraft.ExistingStudyId is null)
+                        {
+                            @if (_researchStudiesLoadErrorMessage is not null)
+                            {
+                                <span class="text-xs text-destructive">@_researchStudiesLoadErrorMessage</span>
+                            }
+                            else
+                            {
+                                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Disabled="_researchStudiesLoading"
+                                          OnClick="OpenResearchStudyPickerAsync">
+                                    <Icon><LucideIcon Name="search" Size="14" /></Icon>
+                                    <ChildContent>@Localizer["App.CriteriaManager.UseExistingStudyButton"]</ChildContent>
+                                </BbButton>
+                            }
+                        }
+                        else
+                        {
+                            <div class="flex flex-wrap items-center gap-2">
+                                <BbBadge Variant="BadgeVariant.Secondary">@Localizer["App.CriteriaManager.ExistingStudyBadge"]</BbBadge>
+                                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="ClearExistingStudy">
+                                    @Localizer["App.CriteriaManager.UseNewStudyButton"]
+                                </BbButton>
+                            </div>
+                        }
+                    </div>
                 </BbCardHeader>
                 <BbCardContent>
                     <div class="flex flex-wrap gap-3">
@@ -122,17 +149,17 @@ else
                             <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                                 @Localizer["App.CriteriaManager.StudyTitleLabel"] <span class="text-destructive">*</span>
                             </label>
-                            <BbInput @bind-Value="_studyDraft.Title" Required="true" Class="mt-1" />
+                            <BbInput @bind-Value="_studyDraft.Title" Required="true" Disabled="@(_studyDraft.ExistingStudyId is not null)" Class="mt-1" />
                         </div>
                         <div class="w-full max-w-xs">
                             <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.StudyAcronymLabel"]</label>
-                            <BbInput @bind-Value="_studyDraft.Acronym" Class="mt-1" />
+                            <BbInput @bind-Value="_studyDraft.Acronym" Disabled="@(_studyDraft.ExistingStudyId is not null)" Class="mt-1" />
                         </div>
                     </div>
 
                     <div class="mt-4">
                         <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.StudyDescriptionLabel"]</label>
-                        <textarea class="mt-1 block w-full rounded-md border bg-background p-2 text-sm" rows="3"
+                        <textarea class="mt-1 block w-full rounded-md border bg-background p-2 text-sm" rows="3" disabled="@(_studyDraft.ExistingStudyId is not null)"
                                   @bind="_studyDraft.Description" @bind:event="oninput"></textarea>
                     </div>
                 </BbCardContent>
@@ -188,7 +215,15 @@ else
 
             <BbCard Class="mt-6">
                 <BbCardHeader>
-                    <BbCardTitle>@Localizer["App.CriteriaManager.PreviewSectionTitle"]</BbCardTitle>
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <BbCardTitle>@Localizer["App.CriteriaManager.PreviewSectionTitle"]</BbCardTitle>
+                        <BbButton Variant="ButtonVariant.Default" Size="ButtonSize.Small" Disabled="@(!CanSubmit)"
+                                  Loading="_submitting" LoadingText="@Localizer["App.CriteriaManager.SubmittingButton"]"
+                                  OnClick="SubmitAsync">
+                            <Icon><LucideIcon Name="upload" Size="14" /></Icon>
+                            <ChildContent>@Localizer["App.CriteriaManager.SubmitButton"]</ChildContent>
+                        </BbButton>
+                    </div>
                 </BbCardHeader>
                 <BbCardContent>
                     <p class="mb-3 text-sm text-muted-foreground">@Localizer["App.CriteriaManager.PreviewDescription"]</p>
@@ -214,7 +249,18 @@ else
     private string _librarySearch = string.Empty;
     private string? _libraryLoadErrorMessage;
 
+    private List<ResearchStudySummaryDto> _researchStudies = [];
+    private bool _researchStudiesLoading = true;
+    private string? _researchStudiesLoadErrorMessage;
+
+    private bool _submitting;
+
     private string PreviewJson => CriteriaService.BuildPreviewJson(_studyDraft, _criteria);
+
+    /// <summary>A new study needs a Title to be worth submitting; an existing one always has one already.</summary>
+    private bool CanSubmit =>
+        !_submitting
+        && (_studyDraft.ExistingStudyId is not null || !string.IsNullOrWhiteSpace(_studyDraft.Title));
 
     private List<LibrarySummaryDto> FilteredLibraries =>
         [.. _libraries.Where(MatchesLibrarySearch)];
@@ -242,6 +288,11 @@ else
             return;
         }
 
+        await Task.WhenAll(LoadLibrariesAsync(), LoadResearchStudiesAsync());
+    }
+
+    private async Task LoadLibrariesAsync()
+    {
         try
         {
             _libraries = [.. await CriteriaService.SearchLibrariesAsync()];
@@ -253,6 +304,66 @@ else
         finally
         {
             _librariesLoading = false;
+        }
+    }
+
+    private async Task LoadResearchStudiesAsync()
+    {
+        try
+        {
+            _researchStudies = [.. await CriteriaService.SearchResearchStudiesAsync()];
+        }
+        catch (Exception ex)
+        {
+            _researchStudiesLoadErrorMessage = ex.Message;
+        }
+        finally
+        {
+            _researchStudiesLoading = false;
+        }
+    }
+
+    private async Task OpenResearchStudyPickerAsync()
+    {
+        var result = await DialogService.OpenAsync<ResearchStudyPickerDialog>(
+            new Dictionary<string, object?> { ["Studies"] = _researchStudies },
+            new DialogOpenOptions
+            {
+                Title = Localizer["App.CriteriaManager.StudyPickerDialogTitle"],
+                Description = Localizer["App.CriteriaManager.StudyPickerDialogDescription"],
+                Size = DialogSize.Large,
+            }
+        );
+
+        if (!result.Cancelled && result.GetData<ResearchStudySummaryDto>() is { } study)
+        {
+            _studyDraft = new ResearchStudyDraft
+            {
+                ExistingStudyId = study.Id,
+                Title = study.Title ?? study.Id,
+                Acronym = study.Acronym ?? string.Empty,
+                Description = study.Description ?? string.Empty,
+            };
+        }
+    }
+
+    private void ClearExistingStudy() => _studyDraft = new ResearchStudyDraft();
+
+    private async Task SubmitAsync()
+    {
+        _submitting = true;
+        try
+        {
+            await CriteriaService.SubmitAsync(_studyDraft, _criteria);
+            Toast.Success(Localizer["App.CriteriaManager.SubmitSuccessMessage"], Localizer["App.Common.Saved"]);
+        }
+        catch (Exception ex)
+        {
+            Toast.Error(ex.Message, Localizer["App.CriteriaManager.SubmitErrorTitle"]);
+        }
+        finally
+        {
+            _submitting = false;
         }
     }
 

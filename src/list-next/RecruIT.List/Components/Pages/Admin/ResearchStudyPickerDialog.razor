@@ -1,0 +1,66 @@
+@inject IStringLocalizer<SharedResources> Localizer
+
+<div class="flex flex-col gap-4">
+    <BbInput @bind-Value="_search" @bind:event="oninput"
+             Placeholder="@Localizer["App.CriteriaManager.StudySearchPlaceholder"]" />
+
+    @if (FilteredStudies.Count == 0)
+    {
+        <p class="text-sm text-muted-foreground">@Localizer["App.CriteriaManager.NoStudiesMessage"]</p>
+    }
+    else
+    {
+        <div class="flex max-h-[28rem] flex-col gap-3 overflow-auto">
+            @foreach (var study in FilteredStudies)
+            {
+                <div class="rounded-md border p-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <div class="font-medium">@(study.Title ?? study.Id)</div>
+                            @if (!string.IsNullOrWhiteSpace(study.Acronym))
+                            {
+                                <div class="text-xs text-muted-foreground">@study.Acronym</div>
+                            }
+                        </div>
+                        <BbButton Variant="ButtonVariant.Default" Size="ButtonSize.Small" OnClick="@(() => SelectAsync(study))">
+                            @Localizer["App.CriteriaManager.SelectCriterionButton"]
+                        </BbButton>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(study.Description))
+                    {
+                        <p class="mt-1 text-sm text-muted-foreground">@study.Description</p>
+                    }
+                </div>
+            }
+        </div>
+    }
+
+    <div class="flex justify-end">
+        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="CancelAsync">
+            @Localizer["App.CriteriaManager.CancelButton"]
+        </BbButton>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public IReadOnlyList<ResearchStudySummaryDto> Studies { get; set; } = [];
+
+    [CascadingParameter]
+    public IDialogReference DialogReference { get; set; } = default!;
+
+    private string _search = string.Empty;
+
+    private List<ResearchStudySummaryDto> FilteredStudies => [.. Studies.Where(MatchesSearch)];
+
+    private bool MatchesSearch(ResearchStudySummaryDto study) =>
+        string.IsNullOrWhiteSpace(_search)
+        || (study.Title?.Contains(_search, StringComparison.OrdinalIgnoreCase) ?? false)
+        || (study.Acronym?.Contains(_search, StringComparison.OrdinalIgnoreCase) ?? false)
+        || study.Id.Contains(_search, StringComparison.OrdinalIgnoreCase);
+
+    private Task SelectAsync(ResearchStudySummaryDto study) =>
+        DialogReference.CloseAsync(DialogResult.Ok(study));
+
+    private Task CancelAsync() => DialogReference.CancelAsync();
+}

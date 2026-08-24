@@ -501,6 +501,12 @@
   <data name="App.Errors.LibrariesLoadFailed" xml:space="preserve">
     <value>Library-Ressourcen konnten nicht geladen werden.</value>
   </data>
+  <data name="App.Errors.ResearchStudiesLoadFailed" xml:space="preserve">
+    <value>ResearchStudy-Ressourcen konnten nicht geladen werden.</value>
+  </data>
+  <data name="App.Errors.CriteriaSubmitFailed" xml:space="preserve">
+    <value>Die Ein- und Ausschlusskriterien konnten nicht an den FHIR-Server übermittelt werden.</value>
+  </data>
   <data name="App.Errors.PatientRecordUpdateFailed" xml:space="preserve">
     <value>Der Datensatz des Patienten konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut.</value>
   </data>
@@ -756,6 +762,27 @@
   <data name="App.CriteriaManager.StudyDescriptionLabel" xml:space="preserve">
     <value>Beschreibung</value>
   </data>
+  <data name="App.CriteriaManager.UseExistingStudyButton" xml:space="preserve">
+    <value>Bestehende Studie verwenden</value>
+  </data>
+  <data name="App.CriteriaManager.UseNewStudyButton" xml:space="preserve">
+    <value>Stattdessen neue Studie anlegen</value>
+  </data>
+  <data name="App.CriteriaManager.ExistingStudyBadge" xml:space="preserve">
+    <value>Bestehende Studie</value>
+  </data>
+  <data name="App.CriteriaManager.StudyPickerDialogTitle" xml:space="preserve">
+    <value>Bestehende Studie auswählen</value>
+  </data>
+  <data name="App.CriteriaManager.StudyPickerDialogDescription" xml:space="preserve">
+    <value>Suchen und wählen Sie eine bestehende ResearchStudy-Ressource aus, für die Kriterien erstellt werden sollen.</value>
+  </data>
+  <data name="App.CriteriaManager.StudySearchPlaceholder" xml:space="preserve">
+    <value>Suche nach Titel, Akronym oder ID...</value>
+  </data>
+  <data name="App.CriteriaManager.NoStudiesMessage" xml:space="preserve">
+    <value>Keine ResearchStudy-Ressourcen gefunden.</value>
+  </data>
   <data name="App.CriteriaManager.CriteriaSectionTitle" xml:space="preserve">
     <value>Ein- und Ausschlusskriterien</value>
   </data>
@@ -817,7 +844,19 @@
     <value>Vorschau</value>
   </data>
   <data name="App.CriteriaManager.PreviewDescription" xml:space="preserve">
-    <value>Dieses FHIR-Transaction-Bundle wird lokal erzeugt und nicht an den FHIR-Server gesendet. Kopieren Sie es zur manuellen Anwendung oder übergeben Sie es dem Prozess, der es später persistiert.</value>
+    <value>Dieses FHIR-Transaction-Bundle wird lokal erzeugt. Kopieren Sie es zur manuellen Anwendung, oder senden Sie es unten direkt mit „Übermitteln“ an den FHIR-Server.</value>
+  </data>
+  <data name="App.CriteriaManager.SubmitButton" xml:space="preserve">
+    <value>An FHIR-Server übermitteln</value>
+  </data>
+  <data name="App.CriteriaManager.SubmittingButton" xml:space="preserve">
+    <value>Wird übermittelt...</value>
+  </data>
+  <data name="App.CriteriaManager.SubmitSuccessMessage" xml:space="preserve">
+    <value>Die Ein- und Ausschlusskriterien wurden an den FHIR-Server übermittelt.</value>
+  </data>
+  <data name="App.CriteriaManager.SubmitErrorTitle" xml:space="preserve">
+    <value>Übermittlung fehlgeschlagen</value>
   </data>
   <data name="App.NotificationTest.PageTitle" xml:space="preserve">
     <value>Benachrichtigungstest</value>

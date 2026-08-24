@@ -12,11 +12,10 @@ namespace RecruIT.List.Services.Fhir;
 
 /// <summary>
 /// Backs the admin-only Criteria Manager page: lets an admin browse existing ResearchStudy and
-/// Library resources, and assemble the FHIR resources (ResearchStudy, Group, one Library per
-/// criterion) that a study's eligibility criteria would consist of, per
-/// docs/trino/eligibility-criteria-design.md. The authoring side is not persisted - actually
-/// creating these resources against the FHIR server is a separate, not-yet-built step; that part
-/// only builds and serializes a preview so an admin can inspect/copy the result.
+/// Library resources, assemble the FHIR resources (ResearchStudy, Group, one Library per criterion)
+/// that a study's eligibility criteria would consist of, per
+/// docs/trino/eligibility-criteria-design.md, and submit that same Bundle as a transaction against
+/// the FHIR server.
 /// </summary>
 public sealed class EligibilityCriteriaService(
     FhirClientFactory clientFactory,
@@ -40,6 +39,14 @@ public sealed class EligibilityCriteriaService(
     /// </summary>
     private const string SqlTextExtensionUrl =
         "https://sql-on-fhir.org/ig/StructureDefinition/sql-text";
+
+    /// <summary>
+    /// Every ResearchStudy resource returned by the last SearchResearchStudiesAsync call, keyed by
+    /// id - lets BuildPreviewBundle embed the exact, unmodified resource for a study picked via the
+    /// "use an existing study" flow without a second (and necessarily synchronous, since preview
+    /// building happens from a Razor property getter) round trip to the FHIR server.
+    /// </summary>
+    private Dictionary<string, ResearchStudy> _researchStudiesById = [];
 
     /// <summary>
     /// Lists every Library resource on the FHIR server (the eligibility-criterion catalog), each
@@ -135,6 +142,45 @@ public sealed class EligibilityCriteriaService(
             : study.Title ?? study.Id ?? "?";
 
     /// <summary>
+    /// Lists every ResearchStudy resource on the FHIR server, for the "use an existing study"
+    /// picker - caches the full resources by id so BuildPreviewBundle can later embed whichever one
+    /// gets picked without another round trip.
+    /// </summary>
+    public async Task<IReadOnlyList<ResearchStudySummaryDto>> SearchResearchStudiesAsync(
+        CancellationToken ct = default
+    )
+    {
+        List<Resource> resources;
+        try
+        {
+            resources = await FhirBundleHelpers.GetAllPagesAsync(
+                clientFactory.CreateClient(),
+                "ResearchStudy?_count=100&_sort=-_lastUpdated",
+                ct
+            );
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to search ResearchStudy resources");
+            throw new FhirAccessException(localizer["App.Errors.ResearchStudiesLoadFailed"], ex);
+        }
+
+        var studies = resources.OfType<ResearchStudy>().Where(s => s.Id is not null).ToList();
+        _researchStudiesById = studies.ToDictionary(s => s.Id!, s => s);
+
+        return studies
+            .Select(s => new ResearchStudySummaryDto(
+                s.Id!,
+                s.Title,
+                s.GetStudyAcronym() is { Length: > 0 } acronym ? acronym : null,
+                s.Description,
+                s.Status?.ToString()
+            ))
+            .OrderBy(s => s.Title ?? s.Id, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    /// <summary>
     /// Assembles the draft into a preview-only FHIR transaction Bundle and serializes it to
     /// pretty-printed JSON. Bundle shape: one Library entry per newly-authored criterion, one Group
     /// entry referencing all of them (plus any reused-by-reference criteria) via
@@ -149,7 +195,31 @@ public sealed class EligibilityCriteriaService(
         return new FhirJsonSerializer().SerializeToString(bundle, pretty: true);
     }
 
-    private static Bundle BuildPreviewBundle(
+    /// <summary>
+    /// Assembles the same Bundle as BuildPreviewJson and actually submits it as a transaction
+    /// against the FHIR server, upserting every resource in it at once.
+    /// </summary>
+    public async Task SubmitAsync(
+        ResearchStudyDraft studyDraft,
+        IReadOnlyList<CriterionDraft> criteria,
+        CancellationToken ct = default
+    )
+    {
+        var bundle = BuildPreviewBundle(studyDraft, criteria);
+        var client = clientFactory.CreateClient();
+
+        try
+        {
+            await client.TransactionAsync(bundle, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to submit eligibility criteria transaction bundle");
+            throw new FhirAccessException(localizer["App.Errors.CriteriaSubmitFailed"], ex);
+        }
+    }
+
+    private Bundle BuildPreviewBundle(
         ResearchStudyDraft studyDraft,
         IReadOnlyList<CriterionDraft> criteria
     )
@@ -245,22 +315,19 @@ public sealed class EligibilityCriteriaService(
             Characteristic = characteristics,
         };
 
-        // A UI-assigned, title-derived identifier shared by the Group and ResearchStudy below (each
-        // under their own resource-specific system, so they still hash to different ids) - same
-        // story as the ad hoc Library criteria above, which only ever have
-        // FhirConstants.UrlUiCreatedEligibilityLibraryIdentifier to go on. Always computable (Title
-        // is never null), so both always get a deterministic update-as-create id, never a plain POST
-        // with a server-assigned one. There's currently no way to author against an existing
-        // ResearchStudy through this page - every submission creates or replaces the one this
-        // identifier hashes to.
-        var uiCreatedIdentifierValue = Slug.Create(studyDraft.Title);
+        // A UI-assigned identifier that anchors the Group's identity, shared with the ResearchStudy
+        // below when it's newly-authored (each under their own resource-specific system, so they
+        // still hash to different ids) - same story as the ad hoc Library criteria above. For a
+        // study picked via the "use an existing study" flow, its own FHIR id anchors the Group's
+        // identity instead, so re-authoring criteria for that study always targets the same Group.
+        var groupIdentifierValue = studyDraft.ExistingStudyId ?? Slug.Create(studyDraft.Title);
 
         group.Identifier.Add(
-            new Identifier(FhirConstants.UrlEligibilityGroupIdentifier, uiCreatedIdentifierValue)
+            new Identifier(FhirConstants.UrlEligibilityGroupIdentifier, groupIdentifierValue)
         );
         var groupId = ComputeIdentifierHashId(
             FhirConstants.UrlEligibilityGroupIdentifier,
-            uiCreatedIdentifierValue
+            groupIdentifierValue
         );
         group.Id = groupId;
         var groupReference = new ResourceReference($"Group/{groupId}");
@@ -274,6 +341,55 @@ public sealed class EligibilityCriteriaService(
             },
         };
 
+        var studyEntry = studyDraft.ExistingStudyId is { } existingStudyId
+            ? BuildExistingStudyEntry(existingStudyId, groupReference)
+            : BuildNewStudyEntry(studyDraft, groupReference);
+
+        var bundle = new Bundle { Type = Bundle.BundleType.Transaction };
+        bundle.Entry.Add(studyEntry);
+        bundle.Entry.Add(groupEntry);
+        bundle.Entry.AddRange(libraryEntries);
+
+        return bundle;
+    }
+
+    /// <summary>
+    /// Embeds the picked ResearchStudy exactly as last fetched by SearchResearchStudiesAsync, except
+    /// that Enrollment is replaced with a single reference to the criteria Group - a study only ever
+    /// screens against the one eligibility Group this page is authoring, so any previously-enrolled
+    /// Group(s) (this page's own past output, or otherwise) are dropped rather than kept alongside it.
+    /// </summary>
+    private Bundle.EntryComponent BuildExistingStudyEntry(
+        string existingStudyId,
+        ResourceReference groupReference
+    )
+    {
+        if (!_researchStudiesById.TryGetValue(existingStudyId, out var existingStudy))
+        {
+            throw new InvalidOperationException(
+                $"ResearchStudy/{existingStudyId} is not among the last-searched studies."
+            );
+        }
+
+        var study = (ResearchStudy)existingStudy.DeepCopy();
+        study.Enrollment = [groupReference];
+
+        return new Bundle.EntryComponent
+        {
+            Resource = study,
+            Request = new Bundle.RequestComponent
+            {
+                Method = Bundle.HTTPVerb.PUT,
+                Url = $"ResearchStudy/{study.Id}",
+            },
+        };
+    }
+
+    private static Bundle.EntryComponent BuildNewStudyEntry(
+        ResearchStudyDraft studyDraft,
+        ResourceReference groupReference
+    )
+    {
         var study = new ResearchStudy
         {
             Status = ResearchStudy.ResearchStudyStatus.Active,
@@ -291,6 +407,9 @@ public sealed class EligibilityCriteriaService(
             );
         }
 
+        // Always computable (Title is never null), so a newly-authored study always gets a
+        // deterministic update-as-create id, never a plain POST with a server-assigned one.
+        var uiCreatedIdentifierValue = Slug.Create(studyDraft.Title);
         study.Identifier.Add(
             new Identifier(
                 FhirConstants.UrlUiCreatedResearchStudyIdentifier,
@@ -302,7 +421,8 @@ public sealed class EligibilityCriteriaService(
             uiCreatedIdentifierValue
         );
         study.Id = studyId;
-        var studyEntry = new Bundle.EntryComponent
+
+        return new Bundle.EntryComponent
         {
             Resource = study,
             Request = new Bundle.RequestComponent
@@ -311,13 +431,6 @@ public sealed class EligibilityCriteriaService(
                 Url = $"ResearchStudy/{studyId}",
             },
         };
-
-        var bundle = new Bundle { Type = Bundle.BundleType.Transaction };
-        bundle.Entry.Add(studyEntry);
-        bundle.Entry.Add(groupEntry);
-        bundle.Entry.AddRange(libraryEntries);
-
-        return bundle;
     }
 
     /// <summary>
