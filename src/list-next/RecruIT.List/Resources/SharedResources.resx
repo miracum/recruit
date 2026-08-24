@@ -598,26 +598,17 @@
   <data name="App.CriteriaManager.CriteriaSectionTitle" xml:space="preserve">
     <value>Eligibility criteria</value>
   </data>
-  <data name="App.CriteriaManager.InclusionColumnTitle" xml:space="preserve">
-    <value>Inclusion criteria</value>
+  <data name="App.CriteriaManager.NoCriteriaMessage" xml:space="preserve">
+    <value>No criteria added yet.</value>
   </data>
-  <data name="App.CriteriaManager.ExclusionColumnTitle" xml:space="preserve">
-    <value>Exclusion criteria</value>
-  </data>
-  <data name="App.CriteriaManager.NoInclusionCriteriaMessage" xml:space="preserve">
-    <value>No inclusion criteria added yet.</value>
-  </data>
-  <data name="App.CriteriaManager.NoExclusionCriteriaMessage" xml:space="preserve">
-    <value>No exclusion criteria added yet.</value>
+  <data name="App.CriteriaManager.CriteriaSummary" xml:space="preserve">
+    <value>{0} inclusion · {1} exclusion</value>
   </data>
   <data name="App.CriteriaManager.AddFromLibraryButton" xml:space="preserve">
     <value>Add from library</value>
   </data>
-  <data name="App.CriteriaManager.NewInclusionCriterionButton" xml:space="preserve">
-    <value>New inclusion criterion</value>
-  </data>
-  <data name="App.CriteriaManager.NewExclusionCriterionButton" xml:space="preserve">
-    <value>New exclusion criterion</value>
+  <data name="App.CriteriaManager.NewCriterionButton" xml:space="preserve">
+    <value>New criterion</value>
   </data>
   <data name="App.CriteriaManager.LibraryPickerDialogTitle" xml:space="preserve">
     <value>Select a criterion from the library</value>
@@ -631,11 +622,14 @@
   <data name="App.CriteriaManager.CancelButton" xml:space="preserve">
     <value>Cancel</value>
   </data>
-  <data name="App.CriteriaManager.MoveToInclusionButton" xml:space="preserve">
-    <value>Move to inclusion</value>
+  <data name="App.CriteriaManager.InclusionToggleLabel" xml:space="preserve">
+    <value>Incl</value>
   </data>
-  <data name="App.CriteriaManager.MoveToExclusionButton" xml:space="preserve">
-    <value>Move to exclusion</value>
+  <data name="App.CriteriaManager.ExclusionToggleLabel" xml:space="preserve">
+    <value>Excl</value>
+  </data>
+  <data name="App.CriteriaManager.CriterionTypeGroupLabel" xml:space="preserve">
+    <value>Criterion type</value>
   </data>
   <data name="App.CriteriaManager.MoveUpButton" xml:space="preserve">
     <value>Move up</value>
@@ -643,11 +637,8 @@
   <data name="App.CriteriaManager.MoveDownButton" xml:space="preserve">
     <value>Move down</value>
   </data>
-  <data name="App.CriteriaManager.FromLibraryBadge" xml:space="preserve">
-    <value>From library</value>
-  </data>
-  <data name="App.CriteriaManager.CriterionDisplayTextLabel" xml:space="preserve">
-    <value>Title</value>
+  <data name="App.CriteriaManager.CriterionDisplayTextPlaceholder" xml:space="preserve">
+    <value>e.g. Histologically confirmed Stage III melanoma</value>
   </data>
   <data name="App.CriteriaManager.CriterionNamePreviewLabel" xml:space="preserve">
     <value>Library name</value>

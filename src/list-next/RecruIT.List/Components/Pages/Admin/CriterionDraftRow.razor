@@ -2,31 +2,34 @@
 
 <div class="rounded-md border p-3">
     <div class="flex flex-wrap items-start justify-between gap-2">
-        <div class="min-w-48 flex-1">
-            <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                @Localizer["App.CriteriaManager.CriterionDisplayTextLabel"]
-                @if (!IsFromLibrary)
+        <div class="flex min-w-48 flex-1 items-start gap-3">
+            <span class="mt-1 shrink-0 text-xs font-medium tabular-nums text-muted-foreground">@Index.ToString("D2")</span>
+            <div class="min-w-0 flex-1">
+                @if (IsFromLibrary)
                 {
-                    <span class="text-destructive">*</span>
+                    <p class="text-sm">@Criterion.DisplayText</p>
                 }
-            </label>
-            @if (IsFromLibrary)
-            {
-                <p class="mt-1 text-sm">@Criterion.DisplayText</p>
-            }
-            else
-            {
-                <BbInput @bind-Value="Criterion.DisplayText" @bind:event="oninput" @bind:after="OnChanged.InvokeAsync" Required="true" Class="mt-1" />
-                <p class="mt-1 text-xs text-muted-foreground">
-                    @Localizer["App.CriteriaManager.CriterionNamePreviewLabel"]: <code>@LibraryName</code>
-                </p>
-            }
+                else
+                {
+                    <BbInput @bind-Value="Criterion.DisplayText" @bind:event="oninput" @bind:after="OnChanged.InvokeAsync"
+                             Required="true" Placeholder="@Localizer["App.CriteriaManager.CriterionDisplayTextPlaceholder"]" />
+                    <p class="mt-1 text-xs text-muted-foreground">
+                        @Localizer["App.CriteriaManager.CriterionNamePreviewLabel"]: <code>@LibraryName</code>
+                    </p>
+                }
+            </div>
         </div>
         <div class="flex flex-wrap items-center gap-1">
-            @if (IsFromLibrary)
-            {
-                <BbBadge Variant="BadgeVariant.Secondary">@Localizer["App.CriteriaManager.FromLibraryBadge"]</BbBadge>
-            }
+            <div class="flex" role="group" aria-label="@Localizer["App.CriteriaManager.CriterionTypeGroupLabel"]">
+                <BbButton Variant="@(Criterion.Exclude ? ButtonVariant.Outline : ButtonVariant.Secondary)" Size="ButtonSize.Small"
+                          Class="rounded-r-none" OnClick="@(() => OnSetExclude.InvokeAsync(false))">
+                    @Localizer["App.CriteriaManager.InclusionToggleLabel"]
+                </BbButton>
+                <BbButton Variant="@(Criterion.Exclude ? ButtonVariant.Secondary : ButtonVariant.Outline)" Size="ButtonSize.Small"
+                          Class="-ml-px rounded-l-none" OnClick="@(() => OnSetExclude.InvokeAsync(true))">
+                    @Localizer["App.CriteriaManager.ExclusionToggleLabel"]
+                </BbButton>
+            </div>
             <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Disabled="!CanMoveUp"
                       OnClick="OnMoveUp" title="@Localizer["App.CriteriaManager.MoveUpButton"]">
                 <LucideIcon Name="chevron-up" Size="14" />
@@ -35,13 +38,8 @@
                       OnClick="OnMoveDown" title="@Localizer["App.CriteriaManager.MoveDownButton"]">
                 <LucideIcon Name="chevron-down" Size="14" />
             </BbButton>
-            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="OnMoveToOtherColumn">
-                @(Criterion.Exclude
-                    ? Localizer["App.CriteriaManager.MoveToInclusionButton"]
-                    : Localizer["App.CriteriaManager.MoveToExclusionButton"])
-            </BbButton>
-            <BbButton Variant="ButtonVariant.Destructive" Size="ButtonSize.Small" OnClick="OnRemove">
-                @Localizer["App.CriteriaManager.RemoveCriterionButton"]
+            <BbButton Variant="ButtonVariant.Destructive" Size="ButtonSize.Small" OnClick="OnRemove" title="@Localizer["App.CriteriaManager.RemoveCriterionButton"]">
+                <LucideIcon Name="trash-2" Size="14" />
             </BbButton>
         </div>
     </div>
@@ -77,6 +75,10 @@
     [Parameter, EditorRequired]
     public required CriterionDraft Criterion { get; set; }
 
+    /// <summary>1-based position within the unified criteria list, shown as "01", "02", ...</summary>
+    [Parameter, EditorRequired]
+    public required int Index { get; set; }
+
     [Parameter]
     public bool CanMoveUp { get; set; }
 
@@ -90,7 +92,7 @@
     public EventCallback OnMoveDown { get; set; }
 
     [Parameter]
-    public EventCallback OnMoveToOtherColumn { get; set; }
+    public EventCallback<bool> OnSetExclude { get; set; }
 
     [Parameter]
     public EventCallback OnRemove { get; set; }

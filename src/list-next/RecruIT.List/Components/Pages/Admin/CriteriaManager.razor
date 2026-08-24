@@ -140,90 +140,49 @@ else
 
             <BbCard Class="mt-6">
                 <BbCardHeader>
-                    <BbCardTitle>@Localizer["App.CriteriaManager.CriteriaSectionTitle"]</BbCardTitle>
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <BbCardTitle>@Localizer["App.CriteriaManager.CriteriaSectionTitle"]</BbCardTitle>
+                        @if (_criteria.Count > 0)
+                        {
+                            <span class="text-sm text-muted-foreground">
+                                @Localizer["App.CriteriaManager.CriteriaSummary", InclusionCriteria.Count, ExclusionCriteria.Count]
+                            </span>
+                        }
+                    </div>
                 </BbCardHeader>
                 <BbCardContent>
-                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                        @{
-                            var inclusion = InclusionCriteria;
-                        }
-                        <div>
-                            <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
-                                <h3 class="text-sm font-semibold">@Localizer["App.CriteriaManager.InclusionColumnTitle"]</h3>
-                                <div class="flex flex-wrap gap-2">
-                                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="@(() => OpenLibraryPickerAsync(exclude: false))">
-                                        <Icon><LucideIcon Name="library" Size="14" /></Icon>
-                                        <ChildContent>@Localizer["App.CriteriaManager.AddFromLibraryButton"]</ChildContent>
-                                    </BbButton>
-                                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="@(() => AddCriterion(exclude: false))">
-                                        <Icon><LucideIcon Name="plus" Size="14" /></Icon>
-                                        <ChildContent>@Localizer["App.CriteriaManager.NewInclusionCriterionButton"]</ChildContent>
-                                    </BbButton>
-                                </div>
-                            </div>
-                            @if (inclusion.Count == 0)
-                            {
-                                <p class="text-sm text-muted-foreground">@Localizer["App.CriteriaManager.NoInclusionCriteriaMessage"]</p>
-                            }
-                            else
-                            {
-                                <div class="flex flex-col gap-3">
-                                    @for (var i = 0; i < inclusion.Count; i++)
-                                    {
-                                        var criterion = inclusion[i];
-                                        var isFirst = i == 0;
-                                        var isLast = i == inclusion.Count - 1;
-                                        <CriterionDraftRow Criterion="criterion" CanMoveUp="!isFirst" CanMoveDown="!isLast"
-                                                            OnMoveUp="@(() => MoveCriterion(criterion, -1))"
-                                                            OnMoveDown="@(() => MoveCriterion(criterion, 1))"
-                                                            OnMoveToOtherColumn="@(() => ToggleCriterionColumn(criterion))"
-                                                            OnRemove="@(() => RemoveCriterion(criterion))"
-                                                            OnChanged="StateHasChanged" />
-                                    }
-                                </div>
-                            }
-                        </div>
-
-                        @{
-                            var exclusion = ExclusionCriteria;
-                        }
-                        <div>
-                            <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
-                                <h3 class="text-sm font-semibold">@Localizer["App.CriteriaManager.ExclusionColumnTitle"]</h3>
-                                <div class="flex flex-wrap gap-2">
-                                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="@(() => OpenLibraryPickerAsync(exclude: true))">
-                                        <Icon><LucideIcon Name="library" Size="14" /></Icon>
-                                        <ChildContent>@Localizer["App.CriteriaManager.AddFromLibraryButton"]</ChildContent>
-                                    </BbButton>
-                                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="@(() => AddCriterion(exclude: true))">
-                                        <Icon><LucideIcon Name="plus" Size="14" /></Icon>
-                                        <ChildContent>@Localizer["App.CriteriaManager.NewExclusionCriterionButton"]</ChildContent>
-                                    </BbButton>
-                                </div>
-                            </div>
-                            @if (exclusion.Count == 0)
-                            {
-                                <p class="text-sm text-muted-foreground">@Localizer["App.CriteriaManager.NoExclusionCriteriaMessage"]</p>
-                            }
-                            else
-                            {
-                                <div class="flex flex-col gap-3">
-                                    @for (var i = 0; i < exclusion.Count; i++)
-                                    {
-                                        var criterion = exclusion[i];
-                                        var isFirst = i == 0;
-                                        var isLast = i == exclusion.Count - 1;
-                                        <CriterionDraftRow Criterion="criterion" CanMoveUp="!isFirst" CanMoveDown="!isLast"
-                                                            OnMoveUp="@(() => MoveCriterion(criterion, -1))"
-                                                            OnMoveDown="@(() => MoveCriterion(criterion, 1))"
-                                                            OnMoveToOtherColumn="@(() => ToggleCriterionColumn(criterion))"
-                                                            OnRemove="@(() => RemoveCriterion(criterion))"
-                                                            OnChanged="StateHasChanged" />
-                                    }
-                                </div>
-                            }
-                        </div>
+                    <div class="mb-4 flex flex-wrap items-center gap-2">
+                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="OpenLibraryPickerAsync">
+                            <Icon><LucideIcon Name="library" Size="14" /></Icon>
+                            <ChildContent>@Localizer["App.CriteriaManager.AddFromLibraryButton"]</ChildContent>
+                        </BbButton>
+                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="AddCriterion">
+                            <Icon><LucideIcon Name="plus" Size="14" /></Icon>
+                            <ChildContent>@Localizer["App.CriteriaManager.NewCriterionButton"]</ChildContent>
+                        </BbButton>
                     </div>
+
+                    @if (_criteria.Count == 0)
+                    {
+                        <p class="text-sm text-muted-foreground">@Localizer["App.CriteriaManager.NoCriteriaMessage"]</p>
+                    }
+                    else
+                    {
+                        <div class="flex flex-col gap-3">
+                            @for (var i = 0; i < _criteria.Count; i++)
+                            {
+                                var criterion = _criteria[i];
+                                var isFirst = i == 0;
+                                var isLast = i == _criteria.Count - 1;
+                                <CriterionDraftRow Index="i + 1" Criterion="criterion" CanMoveUp="!isFirst" CanMoveDown="!isLast"
+                                                    OnMoveUp="@(() => MoveCriterion(criterion, -1))"
+                                                    OnMoveDown="@(() => MoveCriterion(criterion, 1))"
+                                                    OnSetExclude="@(exclude => SetCriterionExclude(criterion, exclude))"
+                                                    OnRemove="@(() => RemoveCriterion(criterion))"
+                                                    OnChanged="StateHasChanged" />
+                            }
+                        </div>
+                    }
                 </BbCardContent>
             </BbCard>
 
@@ -297,9 +256,9 @@ else
         }
     }
 
-    private void AddCriterion(bool exclude) => _criteria.Add(new CriterionDraft { Exclude = exclude });
+    private void AddCriterion() => _criteria.Add(new CriterionDraft());
 
-    private async Task OpenLibraryPickerAsync(bool exclude)
+    private async Task OpenLibraryPickerAsync()
     {
         var result = await DialogService.OpenAsync<LibraryCriterionPickerDialog>(
             new Dictionary<string, object?> { ["Libraries"] = _libraries },
@@ -313,16 +272,15 @@ else
 
         if (!result.Cancelled && result.GetData<LibrarySummaryDto>() is { } library)
         {
-            AddCriterionFromLibrary(library, exclude);
+            AddCriterionFromLibrary(library);
         }
     }
 
-    private void AddCriterionFromLibrary(LibrarySummaryDto library, bool exclude) =>
+    private void AddCriterionFromLibrary(LibrarySummaryDto library) =>
         _criteria.Add(
             new CriterionDraft
             {
                 DisplayText = library.Title ?? library.Name ?? library.Id,
-                Exclude = exclude,
                 ExistingLibraryReference = $"Library/{library.Id}",
                 Sql = library.Sql ?? string.Empty,
             }
@@ -330,26 +288,18 @@ else
 
     private void RemoveCriterion(CriterionDraft criterion) => _criteria.Remove(criterion);
 
-    private void ToggleCriterionColumn(CriterionDraft criterion) => criterion.Exclude = !criterion.Exclude;
+    private void SetCriterionExclude(CriterionDraft criterion, bool exclude) => criterion.Exclude = exclude;
 
-    /// <summary>
-    /// Moves a criterion up/down within its own column (inclusion/exclusion), not the whole list -
-    /// resolves neighbors from the filtered column view, then swaps positions in the flat backing
-    /// list so both columns' filtered views reflect the new order.
-    /// </summary>
+    /// <summary>Moves a criterion up/down within the single, unified criteria order.</summary>
     private void MoveCriterion(CriterionDraft criterion, int direction)
     {
-        var column = criterion.Exclude ? ExclusionCriteria : InclusionCriteria;
-        var columnIndex = column.IndexOf(criterion);
-        var targetIndex = columnIndex + direction;
-        if (targetIndex < 0 || targetIndex >= column.Count)
+        var index = _criteria.IndexOf(criterion);
+        var targetIndex = index + direction;
+        if (targetIndex < 0 || targetIndex >= _criteria.Count)
         {
             return;
         }
 
-        var neighbor = column[targetIndex];
-        var i = _criteria.IndexOf(criterion);
-        var j = _criteria.IndexOf(neighbor);
-        (_criteria[i], _criteria[j]) = (_criteria[j], _criteria[i]);
+        (_criteria[index], _criteria[targetIndex]) = (_criteria[targetIndex], _criteria[index]);
     }
 }
