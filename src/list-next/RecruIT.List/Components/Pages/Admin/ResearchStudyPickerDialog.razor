@@ -1,38 +1,52 @@
 @inject IStringLocalizer<SharedResources> Localizer
+@inject IBbLocalizer BbLocalizer
+@inject EligibilityCriteriaService CriteriaService
 
-<div class="flex flex-col gap-4">
-    <BbInput @bind-Value="_search" @bind:event="oninput"
-             Placeholder="@Localizer["App.CriteriaManager.StudySearchPlaceholder"]" />
-
-    @if (FilteredStudies.Count == 0)
+<div class="flex min-w-0 flex-col gap-4">
+    @if (_initialLoading)
     {
-        <p class="text-sm text-muted-foreground">@Localizer["App.CriteriaManager.NoStudiesMessage"]</p>
+        <div class="flex flex-col items-center justify-center gap-3 py-12 text-sm text-muted-foreground">
+            <BbSpinner Size="SpinnerSize.Large" />
+            <span>@BbLocalizer["DataView.Loading"]</span>
+        </div>
+    }
+    else if (_errorMessage is not null)
+    {
+        <BbAlert Variant="AlertVariant.Danger">
+            <BbAlertDescription>@_errorMessage</BbAlertDescription>
+        </BbAlert>
     }
     else
     {
-        <div class="flex max-h-[28rem] flex-col gap-3 overflow-auto">
-            @foreach (var study in FilteredStudies)
-            {
-                <div class="rounded-md border p-3">
-                    <div class="flex flex-wrap items-center justify-between gap-2">
-                        <div>
-                            <div class="font-medium">@(study.Title ?? study.Id)</div>
-                            @if (!string.IsNullOrWhiteSpace(study.Acronym))
-                            {
-                                <div class="text-xs text-muted-foreground">@study.Acronym</div>
-                            }
-                        </div>
-                        <BbButton Variant="ButtonVariant.Default" Size="ButtonSize.Small" OnClick="@(() => SelectAsync(study))">
-                            @Localizer["App.CriteriaManager.SelectCriterionButton"]
-                        </BbButton>
+        @* BbDataView's own toolbar search has no debounce knob, and searching on every keystroke
+           is a visible round trip in Blazor Server - so this filters client-side (same as
+           BbDataView's own would, just debounced) and reuses its "DataView.SearchPlaceholder" key
+           rather than adding a near-duplicate translation. *@
+        <BbInput @bind-Value="_filter" UpdateTiming="UpdateTiming.Debounced" DebounceInterval="300"
+                 Placeholder="@BbLocalizer["DataView.SearchPlaceholder"]" />
+
+        <BbDataView TItem="ResearchStudySummaryDto" Data="FilteredResults" ShowToolbar="false" ShowPagination="false"
+                    EnableInfiniteScroll ScrollHeight="28rem" InitialPageSize="20"
+                    Class="min-w-0" ListClass="min-w-0">
+            <ListTemplate Context="study">
+                <div class="flex w-full min-w-0 items-center justify-between gap-3 rounded-md border p-3">
+                    <div class="min-w-0 flex-1">
+                        @if (!string.IsNullOrWhiteSpace(study.Acronym))
+                        {
+                            <div class="truncate text-base font-semibold">@study.Acronym</div>
+                            <div class="truncate text-xs text-muted-foreground">@(study.Title ?? study.Id)</div>
+                        }
+                        else
+                        {
+                            <div class="truncate text-base font-semibold">@(study.Title ?? study.Id)</div>
+                        }
                     </div>
-                    @if (!string.IsNullOrWhiteSpace(study.Description))
-                    {
-                        <p class="mt-1 text-sm text-muted-foreground">@study.Description</p>
-                    }
+                    <BbButton Variant="ButtonVariant.Default" Size="ButtonSize.Small" Class="shrink-0" OnClick="@(() => SelectAsync(study))">
+                        @Localizer["App.CriteriaManager.SelectCriterionButton"]
+                    </BbButton>
                 </div>
-            }
-        </div>
+            </ListTemplate>
+        </BbDataView>
     }
 
     <div class="flex justify-end">
@@ -43,21 +57,37 @@
 </div>
 
 @code {
-    [Parameter]
-    public IReadOnlyList<ResearchStudySummaryDto> Studies { get; set; } = [];
-
     [CascadingParameter]
     public IDialogReference DialogReference { get; set; } = default!;
 
-    private string _search = string.Empty;
+    private List<ResearchStudySummaryDto> _results = [];
+    private string _filter = string.Empty;
+    private bool _initialLoading = true;
+    private string? _errorMessage;
 
-    private List<ResearchStudySummaryDto> FilteredStudies => [.. Studies.Where(MatchesSearch)];
+    private List<ResearchStudySummaryDto> FilteredResults => [.. _results.Where(MatchesFilter)];
 
-    private bool MatchesSearch(ResearchStudySummaryDto study) =>
-        string.IsNullOrWhiteSpace(_search)
-        || (study.Title?.Contains(_search, StringComparison.OrdinalIgnoreCase) ?? false)
-        || (study.Acronym?.Contains(_search, StringComparison.OrdinalIgnoreCase) ?? false)
-        || study.Id.Contains(_search, StringComparison.OrdinalIgnoreCase);
+    private bool MatchesFilter(ResearchStudySummaryDto study) =>
+        string.IsNullOrWhiteSpace(_filter)
+        || (study.Title?.Contains(_filter, StringComparison.OrdinalIgnoreCase) ?? false)
+        || (study.Acronym?.Contains(_filter, StringComparison.OrdinalIgnoreCase) ?? false)
+        || study.Id.Contains(_filter, StringComparison.OrdinalIgnoreCase);
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _results = [.. await CriteriaService.GetResearchStudiesAsync()];
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _initialLoading = false;
+        }
+    }
 
     private Task SelectAsync(ResearchStudySummaryDto study) =>
         DialogReference.CloseAsync(DialogResult.Ok(study));

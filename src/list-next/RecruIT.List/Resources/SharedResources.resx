@@ -616,12 +616,6 @@
   <data name="App.CriteriaManager.StudyPickerDialogDescription" xml:space="preserve">
     <value>Search and select an existing ResearchStudy resource to author criteria for.</value>
   </data>
-  <data name="App.CriteriaManager.StudySearchPlaceholder" xml:space="preserve">
-    <value>Search by title, acronym or id...</value>
-  </data>
-  <data name="App.CriteriaManager.NoStudiesMessage" xml:space="preserve">
-    <value>No ResearchStudy resources found.</value>
-  </data>
   <data name="App.CriteriaManager.CriteriaSectionTitle" xml:space="preserve">
     <value>Eligibility criteria</value>
   </data>

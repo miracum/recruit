@@ -777,12 +777,6 @@
   <data name="App.CriteriaManager.StudyPickerDialogDescription" xml:space="preserve">
     <value>Suchen und wählen Sie eine bestehende ResearchStudy-Ressource aus, für die Kriterien erstellt werden sollen.</value>
   </data>
-  <data name="App.CriteriaManager.StudySearchPlaceholder" xml:space="preserve">
-    <value>Suche nach Titel, Akronym oder ID...</value>
-  </data>
-  <data name="App.CriteriaManager.NoStudiesMessage" xml:space="preserve">
-    <value>Keine ResearchStudy-Ressourcen gefunden.</value>
-  </data>
   <data name="App.CriteriaManager.CriteriaSectionTitle" xml:space="preserve">
     <value>Ein- und Ausschlusskriterien</value>
   </data>

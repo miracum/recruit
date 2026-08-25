@@ -119,18 +119,10 @@ else
                         <BbCardTitle>@Localizer["App.CriteriaManager.StudySectionTitle"]</BbCardTitle>
                         @if (_studyDraft.ExistingStudyId is null)
                         {
-                            @if (_researchStudiesLoadErrorMessage is not null)
-                            {
-                                <span class="text-xs text-destructive">@_researchStudiesLoadErrorMessage</span>
-                            }
-                            else
-                            {
-                                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Disabled="_researchStudiesLoading"
-                                          OnClick="OpenResearchStudyPickerAsync">
-                                    <Icon><LucideIcon Name="search" Size="14" /></Icon>
-                                    <ChildContent>@Localizer["App.CriteriaManager.UseExistingStudyButton"]</ChildContent>
-                                </BbButton>
-                            }
+                            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="OpenResearchStudyPickerAsync">
+                                <Icon><LucideIcon Name="search" Size="14" /></Icon>
+                                <ChildContent>@Localizer["App.CriteriaManager.UseExistingStudyButton"]</ChildContent>
+                            </BbButton>
                         }
                         else
                         {
@@ -249,10 +241,6 @@ else
     private string _librarySearch = string.Empty;
     private string? _libraryLoadErrorMessage;
 
-    private List<ResearchStudySummaryDto> _researchStudies = [];
-    private bool _researchStudiesLoading = true;
-    private string? _researchStudiesLoadErrorMessage;
-
     private bool _submitting;
 
     private string PreviewJson => CriteriaService.BuildPreviewJson(_studyDraft, _criteria);
@@ -288,7 +276,7 @@ else
             return;
         }
 
-        await Task.WhenAll(LoadLibrariesAsync(), LoadResearchStudiesAsync());
+        await LoadLibrariesAsync();
     }
 
     private async Task LoadLibrariesAsync()
@@ -307,26 +295,9 @@ else
         }
     }
 
-    private async Task LoadResearchStudiesAsync()
-    {
-        try
-        {
-            _researchStudies = [.. await CriteriaService.SearchResearchStudiesAsync()];
-        }
-        catch (Exception ex)
-        {
-            _researchStudiesLoadErrorMessage = ex.Message;
-        }
-        finally
-        {
-            _researchStudiesLoading = false;
-        }
-    }
-
     private async Task OpenResearchStudyPickerAsync()
     {
         var result = await DialogService.OpenAsync<ResearchStudyPickerDialog>(
-            new Dictionary<string, object?> { ["Studies"] = _researchStudies },
             new DialogOpenOptions
             {
                 Title = Localizer["App.CriteriaManager.StudyPickerDialogTitle"],

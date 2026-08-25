@@ -41,12 +41,15 @@ public sealed class EligibilityCriteriaService(
         "https://sql-on-fhir.org/ig/StructureDefinition/sql-text";
 
     /// <summary>
-    /// Every ResearchStudy resource returned by the last SearchResearchStudiesAsync call, keyed by
-    /// id - lets BuildPreviewBundle embed the exact, unmodified resource for a study picked via the
-    /// "use an existing study" flow without a second (and necessarily synchronous, since preview
-    /// building happens from a Razor property getter) round trip to the FHIR server.
+    /// Every ResearchStudy resource returned by GetResearchStudiesAsync, keyed by id - lets
+    /// BuildPreviewBundle embed the exact, unmodified resource for a study picked via the "use an
+    /// existing study" flow without a second (and necessarily synchronous, since preview building
+    /// happens from a Razor property getter) round trip to the FHIR server.
     /// </summary>
-    private Dictionary<string, ResearchStudy> _researchStudiesById = [];
+    private readonly Dictionary<string, ResearchStudy> _researchStudiesById = [];
+
+    /// <summary>GetResearchStudiesAsync's result, fetched at most once per circuit - see its own doc comment.</summary>
+    private List<ResearchStudySummaryDto>? _cachedResearchStudySummaries;
 
     /// <summary>
     /// Lists every Library resource on the FHIR server (the eligibility-criterion catalog), each
@@ -142,33 +145,43 @@ public sealed class EligibilityCriteriaService(
             : study.Title ?? study.Id ?? "?";
 
     /// <summary>
-    /// Lists every ResearchStudy resource on the FHIR server, for the "use an existing study"
-    /// picker - caches the full resources by id so BuildPreviewBundle can later embed whichever one
-    /// gets picked without another round trip.
+    /// Fetches every ResearchStudy resource on the FHIR server, once per circuit, for the "use an
+    /// existing study" picker: assumed to comfortably fit in memory (on the order of up to ~1000
+    /// resources), which lets the picker search and lazily reveal them purely client-side rather
+    /// than depend on server-side search support that isn't universal - e.g. Blaze doesn't support
+    /// the ":contains" string-search modifier a server-side title search would otherwise need.
     /// </summary>
-    public async Task<IReadOnlyList<ResearchStudySummaryDto>> SearchResearchStudiesAsync(
+    public async Task<IReadOnlyList<ResearchStudySummaryDto>> GetResearchStudiesAsync(
         CancellationToken ct = default
     )
     {
+        if (_cachedResearchStudySummaries is { } cached)
+        {
+            return cached;
+        }
+
         List<Resource> resources;
         try
         {
             resources = await FhirBundleHelpers.GetAllPagesAsync(
                 clientFactory.CreateClient(),
-                "ResearchStudy?_count=100&_sort=-_lastUpdated",
+                "ResearchStudy?_count=100&_sort=title",
                 ct
             );
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to search ResearchStudy resources");
+            logger.LogError(ex, "Failed to fetch ResearchStudy resources");
             throw new FhirAccessException(localizer["App.Errors.ResearchStudiesLoadFailed"], ex);
         }
 
         var studies = resources.OfType<ResearchStudy>().Where(s => s.Id is not null).ToList();
-        _researchStudiesById = studies.ToDictionary(s => s.Id!, s => s);
+        foreach (var study in studies)
+        {
+            _researchStudiesById[study.Id!] = study;
+        }
 
-        return studies
+        var summaries = studies
             .Select(s => new ResearchStudySummaryDto(
                 s.Id!,
                 s.Title,
@@ -178,6 +191,9 @@ public sealed class EligibilityCriteriaService(
             ))
             .OrderBy(s => s.Title ?? s.Id, StringComparer.OrdinalIgnoreCase)
             .ToList();
+
+        _cachedResearchStudySummaries = summaries;
+        return summaries;
     }
 
     /// <summary>
@@ -354,7 +370,7 @@ public sealed class EligibilityCriteriaService(
     }
 
     /// <summary>
-    /// Embeds the picked ResearchStudy exactly as last fetched by SearchResearchStudiesAsync, except
+    /// Embeds the picked ResearchStudy exactly as last fetched by GetResearchStudiesAsync, except
     /// that Enrollment is replaced with a single reference to the criteria Group - a study only ever
     /// screens against the one eligibility Group this page is authoring, so any previously-enrolled
     /// Group(s) (this page's own past output, or otherwise) are dropped rather than kept alongside it.
