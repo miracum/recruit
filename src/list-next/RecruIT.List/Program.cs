@@ -265,7 +265,11 @@ else
 // (the app calling FHIR as itself, not as any particular user) should replace this later.
 builder.Services.AddHttpClient(
     FhirClientFactory.HttpClientName,
-    client => client.BaseAddress = new Uri(fhirBaseUrl)
+    client =>
+    {
+        client.BaseAddress = new Uri(fhirBaseUrl);
+        client.DefaultRequestHeaders.Add("Prefer", "handling=strict");
+    }
 );
 
 builder.Services.AddScoped<TrialAccessService>();
