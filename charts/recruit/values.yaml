@@ -724,6 +724,26 @@ listNext:
   # -- specify how many old ReplicaSets for this Deployment you want to retain.
   revisionHistoryLimit: 5
 
+  # -- seconds the kubelet waits after starting pod termination (preStop hook + SIGTERM) before
+  # force-killing the container. Must comfortably exceed `lifecycle.preStop.sleep.seconds` below,
+  # plus however long the app itself takes to finish in-flight requests after SIGTERM.
+  terminationGracePeriodSeconds: 30
+
+  # Delays SIGTERM by a few seconds after a pod is marked for termination (e.g. during
+  # `kubectl rollout restart` or a `helm upgrade`). This closes a race between the pod being
+  # removed from Service endpoints/ingress upstreams - which happens asynchronously - and the app
+  # actually stopping: without it, clients can see 502s because traffic keeps arriving for a
+  # moment after the app has already stopped listening. Uses Kubernetes' native `sleep` lifecycle
+  # action rather than an `exec` hook, since list-next's base image is chiseled and has no shell to
+  # run `sleep` in. Requires Kubernetes >=1.30 (or >=1.29 with the `PodLifecycleSleepAction`
+  # feature gate enabled) - set `enabled: false` on older clusters.
+  # @ignore
+  lifecycle: # +doc-gen:ignore
+    enabled: true
+    preStop:
+      sleep:
+        seconds: 10
+
   # the list-next module's image
   # @ignore
   image: # +doc-gen:ignore

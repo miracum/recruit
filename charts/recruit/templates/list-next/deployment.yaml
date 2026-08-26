@@ -39,6 +39,7 @@ spec:
         {{- toYaml .podSecurityContext | nindent 8 }}
       serviceAccountName: {{ include "recruit.serviceAccountName" (dict "context" . "component" "list-next" "root" $) }}
       automountServiceAccountToken: {{ .serviceAccount.automountServiceAccountToken }}
+      terminationGracePeriodSeconds: {{ .terminationGracePeriodSeconds }}
       initContainers:
         - name: wait-for-migration
           image: {{ include "recruit.kubectl.image" $ }}
@@ -113,6 +114,10 @@ spec:
             - name: http-metrics
               containerPort: 8081
               protocol: TCP
+          {{- if .lifecycle.enabled }}
+          lifecycle:
+            {{- include "common.tplvalues.render" (dict "value" (omit .lifecycle "enabled") "context" $) | nindent 12 }}
+          {{- end }}
           {{- if .livenessProbe.enabled }}
           livenessProbe:
             {{- include "common.tplvalues.render" (dict "value" (omit .livenessProbe "enabled") "context" $) | nindent 12 }}
