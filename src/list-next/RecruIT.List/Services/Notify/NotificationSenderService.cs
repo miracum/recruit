@@ -177,6 +177,11 @@ public sealed class NotificationSenderService(
             ct
         );
 
+        // One SMTP session for every due recipient this tick, rather than reconnecting and
+        // re-authenticating per recipient - real SMTP relays commonly rate-limit new connections
+        // per source, so a batch of digests is exactly the kind of connection burst that trips it.
+        await using var batch = await channel.BeginBatchAsync(ct);
+
         foreach (var group in due.GroupBy(d => d.NotificationSubscriptionId))
         {
             var deliveries = group.ToList();
@@ -230,7 +235,7 @@ public sealed class NotificationSenderService(
 
             try
             {
-                await channel.SendAsync(recipientEmail, subject, html, ct);
+                await batch.SendAsync(recipientEmail, subject, html, ct);
                 var sentAt = DateTimeOffset.UtcNow;
                 foreach (var delivery in includedDeliveries)
                 {
@@ -290,7 +295,8 @@ public sealed class NotificationSenderService(
             sampleItems[0].ListUrl
         );
 
-        await channel.SendAsync(recipientEmail, subject, html, ct);
+        await using var batch = await channel.BeginBatchAsync(ct);
+        await batch.SendAsync(recipientEmail, subject, html, ct);
     }
 
     /// <summary>
