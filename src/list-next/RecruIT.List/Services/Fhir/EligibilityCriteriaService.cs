@@ -163,9 +163,12 @@ public sealed class EligibilityCriteriaService(
         List<Resource> resources;
         try
         {
+            // No _sort param: even "_sort=title" isn't universal (Blaze rejects it - "Unknown
+            // search-param `title` in sort clause"), and since every resource gets fetched anyway,
+            // sorting client-side below is both simpler and actually portable.
             resources = await FhirBundleHelpers.GetAllPagesAsync(
                 clientFactory.CreateClient(),
-                "ResearchStudy?_count=100&_sort=title",
+                "ResearchStudy?_count=100",
                 ct
             );
         }
