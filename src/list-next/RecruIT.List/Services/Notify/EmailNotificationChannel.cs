@@ -26,7 +26,7 @@ public sealed class EmailNotificationChannel(IOptions<NotifyMailerOptions> maile
 
         using var client = new SmtpClient();
         await client.ConnectAsync(options.SmtpHost, options.SmtpPort, SecureSocketOptions.Auto, ct);
-        if (!string.IsNullOrEmpty(options.SmtpUsername))
+        if (!string.IsNullOrEmpty(options.SmtpUsername) && client.AuthenticationMechanisms.Count > 0)
         {
             await client.AuthenticateAsync(options.SmtpUsername, options.SmtpPassword ?? "", ct);
         }
