@@ -4,13 +4,11 @@ namespace RecruIT.List.Services.Fhir;
 
 public static class FhirConstants
 {
-    public static string SystemScreeningList =>
-        Recruit.CodeSystems.Urls.ScreeningListType;
+    public static string SystemScreeningList => Recruit.CodeSystems.Urls.ScreeningListType;
     public static string ScreeningListCode =>
         Recruit.CodeSystems.ScreeningListType.ScreeningRecommendations.Code();
 
-    public static string UrlListBelongsToStudy =>
-        Recruit.Extensions.Urls.BelongsToStudy;
+    public static string UrlListBelongsToStudy => Recruit.Extensions.Urls.BelongsToStudy;
 
     public static string UrlResearchSubjectIdentifier =>
         Recruit.NamingSystems.ResearchSubjectId.Uri;
@@ -42,8 +40,7 @@ public static class FhirConstants
     /// pre-created through this UI is the one a later successful poll updates in place rather than
     /// duplicates.
     /// </summary>
-    public static string UrlScreeningListIdentifier =>
-        Recruit.NamingSystems.ScreeningListId.Uri;
+    public static string UrlScreeningListIdentifier => Recruit.NamingSystems.ScreeningListId.Uri;
 
     public const string SystemIdentifierType = "http://terminology.hl7.org/CodeSystem/v2-0203";
     public const string IdentifierTypeMedicalRecordNumber = "MR";

@@ -251,15 +251,22 @@ public sealed class ScreeningListService(
             .ToDictionary(l => l.Id!, l => l);
         var criteria = (group?.Characteristic ?? [])
             .Where(c => !string.IsNullOrEmpty(c.Code?.Text))
-            .Select(c => new CriterionDefinitionDto
+            .Select(c =>
             {
-                DisplayText = c.Code!.Text!,
-                Exclude = c.Exclude ?? false,
-                Sql =
-                    (c.Value as ResourceReference).GetReferencedId() is { } libraryId
-                    && librariesById.TryGetValue(libraryId, out var library)
-                        ? library.GetSqlText()
-                        : null,
+                // Prefer the Library's own (current) title over Code.Text, a snapshot of the
+                // criterion's display text taken when the characteristic was authored - the two
+                // can drift once a Library is renamed, or reused with a different label, after the
+                // fact. Sql is resolved from the same Library lookup, so this falls back to Code.Text
+                // only when the reference doesn't resolve to a Library we fetched.
+                var library = (c.Value as ResourceReference).GetReferencedId() is { } libraryId
+                    ? librariesById.GetValueOrDefault(libraryId)
+                    : null;
+                return new CriterionDefinitionDto
+                {
+                    DisplayText = library?.Title ?? c.Code!.Text!,
+                    Exclude = c.Exclude ?? false,
+                    Sql = library?.GetSqlText(),
+                };
             })
             .ToList();
 
