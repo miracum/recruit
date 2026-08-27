@@ -154,6 +154,14 @@ else
                         <textarea class="mt-1 block w-full rounded-md border bg-background p-2 text-sm" rows="3" disabled="@(_studyDraft.ExistingStudyId is not null)"
                                   @bind="_studyDraft.Description" @bind:event="oninput"></textarea>
                     </div>
+
+                    <div class="mt-4 flex items-start gap-2">
+                        <BbCheckbox @bind-Checked="_studyDraft.CreateEmptyScreeningList" Id="create-empty-screening-list" Class="mt-0.5" />
+                        <div>
+                            <BbLabel For="create-empty-screening-list">@Localizer["App.CriteriaManager.CreateEmptyScreeningListLabel"]</BbLabel>
+                            <p class="text-xs text-muted-foreground">@Localizer["App.CriteriaManager.CreateEmptyScreeningListDescription"]</p>
+                        </div>
+                    </div>
                 </BbCardContent>
             </BbCard>
 

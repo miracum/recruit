@@ -5,15 +5,15 @@ namespace RecruIT.List.Services.Fhir;
 public static class FhirConstants
 {
     public static string SystemScreeningList =>
-        RecruIT.FhirConstants.Recruit.CodeSystems.Urls.ScreeningListType;
+        Recruit.CodeSystems.Urls.ScreeningListType;
     public static string ScreeningListCode =>
-        RecruIT.FhirConstants.Recruit.CodeSystems.ScreeningListType.ScreeningRecommendations.Code();
+        Recruit.CodeSystems.ScreeningListType.ScreeningRecommendations.Code();
 
     public static string UrlListBelongsToStudy =>
-        RecruIT.FhirConstants.Recruit.Extensions.Urls.BelongsToStudy;
+        Recruit.Extensions.Urls.BelongsToStudy;
 
     public static string UrlResearchSubjectIdentifier =>
-        RecruIT.FhirConstants.Recruit.NamingSystems.ResearchSubjectId.Uri;
+        Recruit.NamingSystems.ResearchSubjectId.Uri;
 
     /// <summary>
     /// The identifier system for an eligibility Group's business identifier, which is the study's
@@ -21,11 +21,11 @@ public static class FhirConstants
     /// convention as ScreeningListId for the study's List.
     /// </summary>
     public static string UrlEligibilityGroupIdentifier =>
-        RecruIT.FhirConstants.Recruit.NamingSystems.EligibilityGroupId.Uri;
+        Recruit.NamingSystems.EligibilityGroupId.Uri;
 
     /// <summary>The identifier system for a criterion Library authored directly through this UI.</summary>
     public static string UrlUiCreatedEligibilityLibraryIdentifier =>
-        RecruIT.FhirConstants.Recruit.NamingSystems.UiCreatedEligibilityLibraryId.Uri;
+        Recruit.NamingSystems.UiCreatedEligibilityLibraryId.Uri;
 
     /// <summary>
     /// The identifier system for a ResearchStudy authored directly through this UI - independent of
@@ -34,7 +34,16 @@ public static class FhirConstants
     /// such business identifier exists yet.
     /// </summary>
     public static string UrlUiCreatedResearchStudyIdentifier =>
-        RecruIT.FhirConstants.Recruit.NamingSystems.UiCreatedResearchStudyId.Uri;
+        Recruit.NamingSystems.UiCreatedResearchStudyId.Uri;
+
+    /// <summary>
+    /// The identifier system for a screening List's business identifier - same system
+    /// query-sql-on-fhir's EligibilityBundleBuilder keys its own List updates off of, so a List
+    /// pre-created through this UI is the one a later successful poll updates in place rather than
+    /// duplicates.
+    /// </summary>
+    public static string UrlScreeningListIdentifier =>
+        Recruit.NamingSystems.ScreeningListId.Uri;
 
     public const string SystemIdentifierType = "http://terminology.hl7.org/CodeSystem/v2-0203";
     public const string IdentifierTypeMedicalRecordNumber = "MR";
@@ -44,9 +53,9 @@ public static class FhirConstants
     public const string DeterminedStatusIneligible = "ineligible";
 
     public static string SystemObservationCategory =>
-        RecruIT.FhirConstants.Recruit.CodeSystems.Urls.EligibilityAssessmentCategory;
+        Recruit.CodeSystems.Urls.EligibilityAssessmentCategory;
     public static string ObservationCategoryEligibilityAssessment =>
-        RecruIT.FhirConstants.Recruit.CodeSystems.EligibilityAssessmentCategory.EligibilityAssessment.Code();
+        Recruit.CodeSystems.EligibilityAssessmentCategory.EligibilityAssessment.Code();
 
     public const string SnomedCodeYes = "373066001";
     public const string SnomedCodeNo = "373067005";

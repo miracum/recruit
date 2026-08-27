@@ -6,6 +6,7 @@ using Hl7.Fhir.Serialization;
 using Microsoft.Extensions.Localization;
 using RecruIT.List.Models;
 using RecruIT.List.Resources;
+using FhirList = Hl7.Fhir.Model.List;
 using Task = System.Threading.Tasks.Task;
 
 namespace RecruIT.List.Services.Fhir;
@@ -360,7 +361,7 @@ public sealed class EligibilityCriteriaService(
             },
         };
 
-        var studyEntry = studyDraft.ExistingStudyId is { } existingStudyId
+        var (studyEntry, study) = studyDraft.ExistingStudyId is { } existingStudyId
             ? BuildExistingStudyEntry(existingStudyId, groupReference)
             : BuildNewStudyEntry(studyDraft, groupReference);
 
@@ -368,6 +369,11 @@ public sealed class EligibilityCriteriaService(
         bundle.Entry.Add(studyEntry);
         bundle.Entry.Add(groupEntry);
         bundle.Entry.AddRange(libraryEntries);
+
+        if (studyDraft.CreateEmptyScreeningList)
+        {
+            bundle.Entry.Add(BuildScreeningListEntry(study));
+        }
 
         return bundle;
     }
@@ -378,7 +384,7 @@ public sealed class EligibilityCriteriaService(
     /// screens against the one eligibility Group this page is authoring, so any previously-enrolled
     /// Group(s) (this page's own past output, or otherwise) are dropped rather than kept alongside it.
     /// </summary>
-    private Bundle.EntryComponent BuildExistingStudyEntry(
+    private (Bundle.EntryComponent Entry, ResearchStudy Study) BuildExistingStudyEntry(
         string existingStudyId,
         ResourceReference groupReference
     )
@@ -393,7 +399,7 @@ public sealed class EligibilityCriteriaService(
         var study = (ResearchStudy)existingStudy.DeepCopy();
         study.Enrollment = [groupReference];
 
-        return new Bundle.EntryComponent
+        var entry = new Bundle.EntryComponent
         {
             Resource = study,
             Request = new Bundle.RequestComponent
@@ -402,9 +408,10 @@ public sealed class EligibilityCriteriaService(
                 Url = $"ResearchStudy/{study.Id}",
             },
         };
+        return (entry, study);
     }
 
-    private static Bundle.EntryComponent BuildNewStudyEntry(
+    private static (Bundle.EntryComponent Entry, ResearchStudy Study) BuildNewStudyEntry(
         ResearchStudyDraft studyDraft,
         ResourceReference groupReference
     )
@@ -441,13 +448,66 @@ public sealed class EligibilityCriteriaService(
         );
         study.Id = studyId;
 
-        return new Bundle.EntryComponent
+        var entry = new Bundle.EntryComponent
         {
             Resource = study,
             Request = new Bundle.RequestComponent
             {
                 Method = Bundle.HTTPVerb.PUT,
                 Url = $"ResearchStudy/{studyId}",
+            },
+        };
+        return (entry, study);
+    }
+
+    /// <summary>
+    /// Builds an empty (no entry) screening List for the given study, in the same shape and under
+    /// the same update-as-create identity query-sql-on-fhir's EligibilityBundleBuilder uses - so a
+    /// later successful poll updates this same List in place (adding its own entries) rather than
+    /// creating a duplicate. Opt-in only (ResearchStudyDraft.CreateEmptyScreeningList): a study may
+    /// already have a real List with recruited patients, and this would silently wipe its entries.
+    /// </summary>
+    private static Bundle.EntryComponent BuildScreeningListEntry(ResearchStudy study)
+    {
+        // Matches EligibilityBundleBuilder's own id/identifier derivation: the study's own first
+        // business identifier value, or "" if it has none (same as Hapi's getIdentifierFirstRep()).
+        var studyIdentifierValue = study.Identifier.FirstOrDefault()?.Value ?? string.Empty;
+
+        var list = new FhirList
+        {
+            Status = FhirList.ListStatus.Current,
+            Mode = ListMode.Working,
+            Code = new CodeableConcept(
+                FhirConstants.SystemScreeningList,
+                FhirConstants.ScreeningListCode
+            ),
+        };
+        list.Identifier.Add(
+            new Identifier(FhirConstants.UrlScreeningListIdentifier, studyIdentifierValue)
+        );
+        list.Extension.Add(
+            new Extension(
+                FhirConstants.UrlListBelongsToStudy,
+                new ResourceReference($"ResearchStudy/{study.Id}")
+                {
+                    Display = StudyDisplayName(study),
+                }
+            )
+        );
+
+        var listId = ComputeIdentifierHashId(
+            FhirConstants.UrlScreeningListIdentifier,
+            studyIdentifierValue
+        );
+        list.Id = listId;
+
+        return new Bundle.EntryComponent
+        {
+            Resource = list,
+            Request = new Bundle.RequestComponent
+            {
+                Method = Bundle.HTTPVerb.PUT,
+                Url = $"List/{listId}",
             },
         };
     }

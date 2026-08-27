@@ -607,6 +607,12 @@
   <data name="App.CriteriaManager.StudyDescriptionLabel" xml:space="preserve">
     <value>Description</value>
   </data>
+  <data name="App.CriteriaManager.CreateEmptyScreeningListLabel" xml:space="preserve">
+    <value>Also create an empty screening List for this study</value>
+  </data>
+  <data name="App.CriteriaManager.CreateEmptyScreeningListDescription" xml:space="preserve">
+    <value>Makes the study appear on the Trials dashboard immediately, before it has ever been polled for matches. Leave unchecked if this study may already have a List with recruited patients - submitting would overwrite it with an empty one.</value>
+  </data>
   <data name="App.CriteriaManager.UseExistingStudyButton" xml:space="preserve">
     <value>Use an existing study</value>
   </data>

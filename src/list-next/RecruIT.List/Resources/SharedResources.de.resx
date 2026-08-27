@@ -768,6 +768,12 @@
   <data name="App.CriteriaManager.StudyDescriptionLabel" xml:space="preserve">
     <value>Beschreibung</value>
   </data>
+  <data name="App.CriteriaManager.CreateEmptyScreeningListLabel" xml:space="preserve">
+    <value>Zusätzlich eine leere Screening-List für diese Studie anlegen</value>
+  </data>
+  <data name="App.CriteriaManager.CreateEmptyScreeningListDescription" xml:space="preserve">
+    <value>Lässt die Studie sofort im Trials-Dashboard erscheinen, noch bevor sie erstmals auf Treffer geprüft wurde. Nicht aktivieren, wenn für diese Studie bereits eine List mit rekrutierten Patienten existieren könnte - beim Absenden würde diese durch eine leere überschrieben.</value>
+  </data>
   <data name="App.CriteriaManager.UseExistingStudyButton" xml:space="preserve">
     <value>Bestehende Studie verwenden</value>
   </data>
