@@ -220,6 +220,12 @@
   <data name="App.PatientList.CriterionSqlLabel" xml:space="preserve">
     <value>Underlying SQL</value>
   </data>
+  <data name="App.PatientList.FunnelSectionTitle" xml:space="preserve">
+    <value>Attrition funnel</value>
+  </data>
+  <data name="App.PatientList.FunnelTotalPopulationLabel" xml:space="preserve">
+    <value>Total screened</value>
+  </data>
   <data name="App.PatientDialog.TabClinicalSummary" xml:space="preserve">
     <value>Clinical summary</value>
   </data>

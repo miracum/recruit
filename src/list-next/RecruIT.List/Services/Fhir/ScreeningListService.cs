@@ -68,6 +68,7 @@ public sealed class ScreeningListService(
                 new TrialSummaryDto
                 {
                     ListId = list.Id!,
+                    StudyId = trialInfo.StudyId,
                     TrialIdentifier = trialInfo.Identifier,
                     StudyAcronym = trialInfo.Acronym!,
                     StudyTitle = trialInfo.Title,
@@ -306,6 +307,9 @@ public sealed class ScreeningListService(
         var summary = new TrialSummaryDto
         {
             ListId = list.Id!,
+            // study is guaranteed non-null here: acronym/trialIdentifier above are both derived
+            // from it, and the guard above already rejected a null/empty either of those.
+            StudyId = study!.Id!,
             TrialIdentifier = trialIdentifier,
             StudyAcronym = acronym,
             StudyTitle = study?.Title,
@@ -527,14 +531,24 @@ public sealed class ScreeningListService(
 
             if (study.GetTrialIdentifier() is { } identifier)
             {
-                result[list.Id] = new TrialInfo(identifier, study.GetStudyAcronym(), study.Title);
+                result[list.Id] = new TrialInfo(
+                    identifier,
+                    study.GetStudyAcronym(),
+                    study.Title,
+                    studyId
+                );
             }
         }
 
         return result;
     }
 
-    private sealed record TrialInfo(TrialIdentifier Identifier, string? Acronym, string? Title);
+    private sealed record TrialInfo(
+        TrialIdentifier Identifier,
+        string? Acronym,
+        string? Title,
+        string StudyId
+    );
 
     /// <summary>Internal so NotificationDetectorService can reuse it rather than reimplementing.</summary>
     internal static string? FormatPatientName(Patient? patient)

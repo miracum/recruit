@@ -306,7 +306,7 @@ public class EligibilityBundleBuilder {
 
     var studyReference =
         new Reference("ResearchStudy/" + studyId).setDisplay(getStudyAcronym(study));
-    screeningList.addExtension(Recruit.Extensions.screeningListBelongsToStudy(studyReference));
+    screeningList.addExtension(Recruit.Extensions.belongsToStudy(studyReference));
 
     for (var patientId : patientIds) {
       var individualReferenceValue = "Patient/" + patientId;
@@ -413,7 +413,8 @@ public class EligibilityBundleBuilder {
     return value;
   }
 
-  private String getStudyAcronym(ResearchStudy study) {
+  /** Package-visible so {@link FunnelReportBuilder} can reuse it for the funnel's Measure title. */
+  static String getStudyAcronym(ResearchStudy study) {
     var acronym = Studie.Extensions.getMiiExStudieAkronym(study);
     if (acronym != null && StringUtils.hasText(acronym.getValue())) {
       return acronym.getValue();

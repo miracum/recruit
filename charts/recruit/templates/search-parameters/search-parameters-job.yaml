@@ -70,8 +70,6 @@ spec:
           env:
             - name: FHIR_URL
               value: {{ include "recruit.fhirserver.url" . }}
-            - name: TRIGGER_REINDEX
-              value: {{ .Values.createSearchParameters.reindex | quote }}
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -83,17 +81,6 @@ spec:
                 -H "Content-Type: application/fhir+json" \
                 --data @/fhir/search-parameters-transaction-upsert.json \
                 "$FHIR_URL"
-
-              if [ "$TRIGGER_REINDEX" = "true" ]; then
-                echo "Triggering \$reindex operation on $FHIR_URL..."
-                curl --fail-with-body --retry 5 --retry-delay 5 --retry-connrefused --retry-all-errors \
-                  -X POST \
-                  -H "Content-Type: application/fhir+json" \
-                  --data '{"resourceType":"Parameters","parameter":[{"name":"url","valueString":"ResearchStudy?"},{"name":"url","valueString":"Group?"},{"name":"url","valueString":"List?"}]}' \
-                  "$FHIR_URL/\$reindex"
-              else
-                echo "Skipping \$reindex operation (createSearchParameters.reindex is disabled)."
-              fi
           volumeMounts:
             - name: search-parameters
               mountPath: /fhir

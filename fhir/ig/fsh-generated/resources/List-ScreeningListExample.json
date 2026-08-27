@@ -9,7 +9,7 @@
   "mode": "working",
   "extension": [
     {
-      "url": "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study",
+      "url": "https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study",
       "valueReference": {
         "reference": "ResearchStudy/RecruitResearchStudyExample",
         "display": "SAMPLE STUDY"

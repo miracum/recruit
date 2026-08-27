@@ -24,7 +24,8 @@ public record PatientEligibilityResult(String patientId, List<CriterionOutcome> 
     return result;
   }
 
-  private static Boolean kleeneAnd(Boolean a, Boolean b) {
+  /** Package-visible so {@link SqlQueryExecutor}'s funnel computation can reuse the same merge. */
+  static Boolean kleeneAnd(Boolean a, Boolean b) {
     if (Boolean.FALSE.equals(a) || Boolean.FALSE.equals(b)) {
       return Boolean.FALSE;
     }

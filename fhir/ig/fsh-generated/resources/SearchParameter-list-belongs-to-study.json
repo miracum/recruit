@@ -10,7 +10,7 @@
   "status": "active",
   "code": "belongs-to-study",
   "type": "reference",
-  "expression": "List.extension('https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study').value.ofType(Reference)",
+  "expression": "List.extension('https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study').value.ofType(Reference)",
   "target": [
     "ResearchStudy"
   ]

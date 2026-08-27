@@ -279,6 +279,12 @@
   <data name="App.PatientList.CriterionSqlLabel" xml:space="preserve">
     <value>Zugrunde liegendes SQL</value>
   </data>
+  <data name="App.PatientList.FunnelSectionTitle" xml:space="preserve">
+    <value>Trichteranalyse</value>
+  </data>
+  <data name="App.PatientList.FunnelTotalPopulationLabel" xml:space="preserve">
+    <value>Gesamt gescreent</value>
+  </data>
   <data name="App.PatientDialog.TabClinicalSummary" xml:space="preserve">
     <value>Klinische Zusammenfassung</value>
   </data>

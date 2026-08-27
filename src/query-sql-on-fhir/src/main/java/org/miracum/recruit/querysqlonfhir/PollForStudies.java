@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Component
 public class PollForStudies {
@@ -34,21 +35,38 @@ public class PollForStudies {
 
   private final SqlQueryExecutor sqlQueryExecutor;
   private final EligibilityBundleBuilder bundleBuilder;
+  private final FunnelReportBuilder funnelReportBuilder;
   private final IGenericClient fhirClient;
   private final boolean dryRun;
   private final int maxResearchSubjects;
+  private final boolean funnelEnabled;
+  private final String funnelTotalPopulationSql;
 
   public PollForStudies(
       SqlQueryExecutor sqlQueryExecutor,
       EligibilityBundleBuilder bundleBuilder,
+      FunnelReportBuilder funnelReportBuilder,
       IGenericClient fhirClient,
       @Value("${query-sql-on-fhir.dry-run:false}") boolean dryRun,
-      @Value("${query-sql-on-fhir.max-research-subjects:-1}") int maxResearchSubjects) {
+      @Value("${query-sql-on-fhir.max-research-subjects:-1}") int maxResearchSubjects,
+      @Value("${query-sql-on-fhir.funnel.enabled:false}") boolean funnelEnabled,
+      @Value("${query-sql-on-fhir.funnel.total-population-sql:}") String funnelTotalPopulationSql) {
     this.sqlQueryExecutor = sqlQueryExecutor;
     this.bundleBuilder = bundleBuilder;
+    this.funnelReportBuilder = funnelReportBuilder;
     this.fhirClient = fhirClient;
     this.dryRun = dryRun;
     this.maxResearchSubjects = maxResearchSubjects;
+    this.funnelEnabled = funnelEnabled;
+    this.funnelTotalPopulationSql = funnelTotalPopulationSql;
+
+    // Writing a funnel MeasureReport without a real anchor count would silently misrepresent the
+    // "total population" step as 0 - fail at startup instead of producing a wrong report.
+    if (funnelEnabled && !StringUtils.hasText(funnelTotalPopulationSql)) {
+      throw new IllegalStateException(
+          "query-sql-on-fhir.funnel.enabled is true but "
+              + "query-sql-on-fhir.funnel.total-population-sql is not configured");
+    }
   }
 
   /**
@@ -184,6 +202,31 @@ public class PollForStudies {
     var listBundle =
         bundleBuilder.buildScreeningListBundle(study, patientIds, previousScreeningList);
     fhirClient.transaction().withBundle(listBundle).execute();
+
+    if (funnelEnabled) {
+      submitFunnelReport(study, criteria, effectiveDate);
+    }
+  }
+
+  /**
+   * Computes and publishes the study's attrition funnel (see {@link FunnelResult}) as a {@code
+   * Measure}/{@code MeasureReport} pair. Deliberately isolated from the candidate-list processing
+   * above with its own try/catch: the funnel is a secondary, best-effort reporting concern, and a
+   * failure computing or submitting it (e.g. a misconfigured {@code total-population-sql}) must not
+   * mark an otherwise-successful poll cycle as failed, nor prevent the next study from being
+   * processed - {@link #pollForStudies}'s own per-study isolation exists for the latter, but would
+   * also incorrectly count this study's cycle as failed even though its candidates were already
+   * submitted successfully above.
+   */
+  private void submitFunnelReport(
+      ResearchStudy study, List<EligibilityCriterion> criteria, Date effectiveDate) {
+    try {
+      var funnel = sqlQueryExecutor.computeFunnel(criteria, funnelTotalPopulationSql);
+      var funnelBundle = funnelReportBuilder.buildFunnelReportBundle(study, funnel, effectiveDate);
+      fhirClient.transaction().withBundle(funnelBundle).execute();
+    } catch (Exception ex) {
+      log.error("Failed to compute/submit attrition funnel for study {}", study.getId(), ex);
+    }
   }
 
   /**
@@ -233,6 +276,27 @@ public class PollForStudies {
           c.exclude() ? "exclusion" : "inclusion",
           metCounts[i],
           unknownCounts[i]);
+    }
+
+    // Only gated on total-population-sql being configured, not on funnel.enabled - dry-run never
+    // writes to FHIR either way, so this is a way to preview the funnel before turning writing on.
+    if (StringUtils.hasText(funnelTotalPopulationSql)) {
+      logDryRunFunnel(study, criteria);
+    }
+  }
+
+  private void logDryRunFunnel(ResearchStudy study, List<EligibilityCriterion> criteria) {
+    var funnel = sqlQueryExecutor.computeFunnel(criteria, funnelTotalPopulationSql);
+    log.info(
+        "Dry run attrition funnel for study {}: {} total patients screened",
+        study.getId(),
+        funnel.totalPopulation());
+    for (var step : funnel.steps()) {
+      log.info(
+          "  After '{}' ({}): {} remaining",
+          step.criterion().displayText(),
+          step.criterion().exclude() ? "exclusion" : "inclusion",
+          step.remainingCount());
     }
   }
 

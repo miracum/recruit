@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -53,6 +54,11 @@ import org.springframework.stereotype.Component;
  * uses a different dialect), the merge falls back to resolving each criterion's full-population
  * result independently and merging them in application memory - this does not scale as well and
  * should be avoided for large patient populations.
+ *
+ * <p>{@link #computeFunnel} answers a different question against the same criteria: not "who are
+ * the candidates" but "how many patients survive after each cumulative step" - the attrition
+ * funnel. It reuses the same generated-CTE building blocks (see {@link #buildCriteriaJoinPlan}) but
+ * as a single row of aggregate counts rather than one row per patient.
  */
 @Component
 public class SqlQueryExecutor {
@@ -106,6 +112,104 @@ public class SqlQueryExecutor {
         "Study has a mix of Trino-direct and sql-on-fhir-delegated criteria; falling back to "
             + "resolving each criterion independently and merging in application memory.");
     evaluateWithFallbackMerge(criteria, onResult);
+  }
+
+  /**
+   * Computes the study's attrition funnel (see {@link FunnelResult}): {@code totalPopulationSql} is
+   * run as an independent scalar count - deliberately not derived from {@code crit_0}, since a
+   * criterion's SQL (especially the anchor) may already apply a narrowing {@code WHERE} clause and
+   * so isn't reliable as "everyone who was screened" - and each criterion's cumulative
+   * remaining-candidate count is then computed either via one aggregate Trino query (see {@link
+   * #buildFunnelQuery}) or, on the delegated/mixed fallback path, from the same per-criterion maps
+   * {@link #resolveRawCriterionResults} already resolves into memory for {@link
+   * #evaluateWithFallbackMerge} - so, unlike the streaming Trino path, this doesn't add a second
+   * full resolution pass on that already-non-scalable path.
+   */
+  public FunnelResult computeFunnel(
+      List<EligibilityCriterion> criteria, String totalPopulationSql) {
+    if (criteria.isEmpty()) {
+      return new FunnelResult(0, List.of());
+    }
+
+    var totalPopulation = jdbcTemplate.queryForObject(totalPopulationSql, Long.class);
+
+    if (criteria.stream().allMatch(this::isTrinoDirect)) {
+      return computeFunnelAgainstTrino(criteria, totalPopulation);
+    }
+
+    log.warn(
+        "Study has a mix of Trino-direct and sql-on-fhir-delegated criteria; falling back to "
+            + "resolving each criterion independently and merging in application memory for the "
+            + "attrition funnel too.");
+    return computeFunnelWithFallbackMerge(criteria, totalPopulation);
+  }
+
+  private FunnelResult computeFunnelAgainstTrino(
+      List<EligibilityCriterion> criteria, long totalPopulation) {
+    var sql = buildFunnelQuery(criteria);
+    log.info(
+        "Running attrition funnel query for {} criteria against Trino:\n{}", criteria.size(), sql);
+
+    var steps =
+        jdbcTemplate.query(
+            sql,
+            (ResultSetExtractor<List<FunnelResult.Step>>)
+                rs -> {
+                  if (!rs.next()) {
+                    throw new IllegalStateException("Attrition funnel query returned no rows");
+                  }
+                  var result = new ArrayList<FunnelResult.Step>();
+                  for (var i = 0; i < criteria.size(); i++) {
+                    var remaining =
+                        (Number)
+                            JdbcUtils.getResultSetValue(
+                                rs, rs.findColumn("crit_" + i + "_remaining"));
+                    result.add(new FunnelResult.Step(criteria.get(i), remaining.longValue()));
+                  }
+                  return result;
+                });
+
+    return new FunnelResult(totalPopulation, steps);
+  }
+
+  /**
+   * Mirrors {@link #evaluateWithFallbackMerge}'s per-patient Kleene merge, but incrementally: each
+   * patient's cumulative AND is tracked across the loop over criteria (rather than recomputed from
+   * scratch per step), so this stays O(criteria x patients) - the same complexity {@link
+   * #evaluateWithFallbackMerge} already accepts on this non-scalable path.
+   */
+  private FunnelResult computeFunnelWithFallbackMerge(
+      List<EligibilityCriterion> criteria, long totalPopulation) {
+    var perCriterionResults = criteria.stream().map(this::resolveRawCriterionResults).toList();
+
+    var allPatientIds = new LinkedHashSet<String>();
+    perCriterionResults.forEach(m -> allPatientIds.addAll(m.keySet()));
+
+    var cumulativeMet = new HashMap<String, Boolean>();
+    allPatientIds.forEach(id -> cumulativeMet.put(id, Boolean.TRUE));
+
+    var steps = new ArrayList<FunnelResult.Step>();
+    for (var i = 0; i < criteria.size(); i++) {
+      var criterion = criteria.get(i);
+      var raw = perCriterionResults.get(i);
+
+      long remaining = 0;
+      for (var patientId : allPatientIds) {
+        var r = raw.get(patientId);
+        var met = r == null || r.met() == null ? null : (criterion.exclude() != r.met());
+        var updated = PatientEligibilityResult.kleeneAnd(cumulativeMet.get(patientId), met);
+        cumulativeMet.put(patientId, updated);
+
+        var passes =
+            requireAllCriteriaMet ? Boolean.TRUE.equals(updated) : !Boolean.FALSE.equals(updated);
+        if (passes) {
+          remaining++;
+        }
+      }
+      steps.add(new FunnelResult.Step(criterion, remaining));
+    }
+
+    return new FunnelResult(totalPopulation, steps);
   }
 
   private boolean isTrinoDirect(EligibilityCriterion criterion) {
@@ -216,32 +320,15 @@ public class SqlQueryExecutor {
    */
   private String buildMergedQuery(
       List<EligibilityCriterion> criteria, List<Set<String>> criterionColumns) {
-    var ctes = new StringBuilder();
+    var plan = buildCriteriaJoinPlan(criteria);
     var selectColumns = new StringBuilder();
-    var joins = new StringBuilder();
-    var terms = new ArrayList<String>();
 
     for (var i = 0; i < criteria.size(); i++) {
-      var criterion = criteria.get(i);
       var alias = "crit_" + i;
       var columns = criterionColumns.get(i);
-
-      ctes.append(i == 0 ? "WITH " : ",\n     ")
-          .append(alias)
-          .append(" AS (\n")
-          .append("SELECT DISTINCT * FROM (\n")
-          .append(trinoSql(criterion))
-          .append("\n) AS ")
-          .append(alias)
-          .append("_raw\n)");
-
-      // exclude negation is applied once, here, generically - criterion SQL always computes the
-      // raw, un-negated predicate. Indeterminate is a passthrough - it never participates in the
-      // merge/exclude logic, it's only carried through for display once is_met is null.
-      var effectiveMetExpr =
-          criterion.exclude()
-              ? "(NOT " + alias + "." + IS_MET_COLUMN + ")"
-              : "(" + alias + "." + IS_MET_COLUMN + ")";
+      // Indeterminate/note are a pure passthrough - they never participate in the merge/exclude
+      // logic below, they're only carried through for display once is_met is null.
+      var effectiveMetExpr = plan.terms().get(i);
 
       String indeterminateExpr;
       if (columns.contains(IS_INDETERMINATE_COLUMN)) {
@@ -276,7 +363,55 @@ public class SqlQueryExecutor {
           .append(alias)
           .append("_")
           .append(RESULT_NOTE_COLUMN);
-      terms.add(effectiveMetExpr);
+    }
+
+    var overallExpr = String.join(" AND ", plan.terms());
+
+    // IS DISTINCT FROM FALSE = candidate or unknown; IS NOT DISTINCT FROM TRUE = confirmed only
+    var whereFilter =
+        requireAllCriteriaMet ? ") IS NOT DISTINCT FROM TRUE" : ") IS DISTINCT FROM FALSE";
+    return plan.ctes()
+        + "\nSELECT\n    crit_0.patient_id AS patient_id"
+        + selectColumns
+        + "\n"
+        + plan.joins()
+        + "\nWHERE ("
+        + overallExpr
+        + whereFilter;
+  }
+
+  /**
+   * The generated-SQL skeleton shared by {@link #buildMergedQuery} and {@link #buildFunnelQuery}:
+   * one {@code SELECT DISTINCT}-deduplicated CTE per criterion (see {@link #buildMergedQuery}'s own
+   * doc comment for why), the {@code LEFT JOIN}s anchoring every criterion back to {@code crit_0},
+   * and each criterion's already-exclude-negated {@code is_met} term. What differs between the two
+   * queries is only what gets {@code SELECT}ed on top of this - one patient-detail row with a
+   * {@code WHERE} filter, the other a single row of cascading aggregate counts.
+   */
+  private CriteriaJoinPlan buildCriteriaJoinPlan(List<EligibilityCriterion> criteria) {
+    var ctes = new StringBuilder();
+    var joins = new StringBuilder();
+    var terms = new ArrayList<String>();
+
+    for (var i = 0; i < criteria.size(); i++) {
+      var criterion = criteria.get(i);
+      var alias = "crit_" + i;
+
+      ctes.append(i == 0 ? "WITH " : ",\n     ")
+          .append(alias)
+          .append(" AS (\n")
+          .append("SELECT DISTINCT * FROM (\n")
+          .append(trinoSql(criterion))
+          .append("\n) AS ")
+          .append(alias)
+          .append("_raw\n)");
+
+      // exclude negation is applied once, here, generically - criterion SQL always computes the
+      // raw, un-negated predicate.
+      terms.add(
+          criterion.exclude()
+              ? "(NOT " + alias + "." + IS_MET_COLUMN + ")"
+              : "(" + alias + "." + IS_MET_COLUMN + ")");
 
       if (i == 0) {
         joins.append("FROM ").append(alias);
@@ -290,19 +425,42 @@ public class SqlQueryExecutor {
       }
     }
 
-    var overallExpr = String.join(" AND ", terms);
+    return new CriteriaJoinPlan(ctes.toString(), joins.toString(), terms);
+  }
 
-    // IS DISTINCT FROM FALSE = candidate or unknown; IS NOT DISTINCT FROM TRUE = confirmed only
-    var whereFilter =
-        requireAllCriteriaMet ? ") IS NOT DISTINCT FROM TRUE" : ") IS DISTINCT FROM FALSE";
-    return ctes
-        + "\nSELECT\n    crit_0.patient_id AS patient_id"
-        + selectColumns
-        + "\n"
-        + joins
-        + "\nWHERE ("
-        + overallExpr
-        + whereFilter;
+  private record CriteriaJoinPlan(String ctes, String joins, List<String> terms) {}
+
+  /**
+   * The attrition funnel's cascading step counts, computed as a single aggregate query rather than
+   * materializing any per-patient row: {@code crit_i_remaining} is the count of patients still a
+   * candidate or unknown (same {@code IS DISTINCT FROM FALSE}/{@code IS NOT DISTINCT FROM TRUE}
+   * semantics as {@link #buildMergedQuery}) after cumulatively AND-ing criteria {@code 0..i}.
+   * Unlike the merged query, this can't benefit from a {@code WHERE} pushdown that skips excluded
+   * patients before they're counted - the funnel needs their count too - so this is a materially
+   * more expensive scan of the same CTEs, not a cheaper variant of it.
+   */
+  private String buildFunnelQuery(List<EligibilityCriterion> criteria) {
+    var plan = buildCriteriaJoinPlan(criteria);
+    var selectColumns = new StringBuilder();
+    var cumulativeTerms = new ArrayList<String>();
+
+    for (var i = 0; i < criteria.size(); i++) {
+      cumulativeTerms.add(plan.terms().get(i));
+      var cumulativeExpr = String.join(" AND ", cumulativeTerms);
+      var filterCondition =
+          requireAllCriteriaMet
+              ? "(" + cumulativeExpr + ") IS NOT DISTINCT FROM TRUE"
+              : "(" + cumulativeExpr + ") IS DISTINCT FROM FALSE";
+      selectColumns
+          .append(i == 0 ? "\n    " : ",\n    ")
+          .append("COUNT(*) FILTER (WHERE ")
+          .append(filterCondition)
+          .append(") AS crit_")
+          .append(i)
+          .append("_remaining");
+    }
+
+    return plan.ctes() + "\nSELECT" + selectColumns + "\n" + plan.joins();
   }
 
   /**

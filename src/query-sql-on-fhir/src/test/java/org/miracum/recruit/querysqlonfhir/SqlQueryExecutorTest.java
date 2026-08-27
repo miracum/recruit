@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -364,5 +365,106 @@ class SqlQueryExecutorTest {
 
     assertThat(results).extracting(PatientEligibilityResult::patientId).containsExactly("pat-1");
     verifyNoInteractions(jdbcTemplate);
+  }
+
+  private static final String TOTAL_POPULATION_SQL = "SELECT COUNT(*) FROM fhir.qs.patient";
+
+  @Test
+  void computeFunnel_withEmptyCriteria_returnsEmptyAndTouchesNothing() {
+    var result = sut.computeFunnel(List.of(), TOTAL_POPULATION_SQL);
+
+    assertThat(result.totalPopulation()).isZero();
+    assertThat(result.steps()).isEmpty();
+    verifyNoInteractions(jdbcTemplate, sqlOnFhirClient);
+  }
+
+  @Test
+  void computeFunnel_withAllTrinoDirectCriteria_returnsCascadingCounts() {
+    var ageCriterion = new EligibilityCriterion(trinoLibrary(SQL_AGE), "Age >= 18", false);
+    var chemoCriterion = new EligibilityCriterion(trinoLibrary(SQL_CHEMO), "No prior chemo", true);
+
+    when(jdbcTemplate.queryForObject(eq(TOTAL_POPULATION_SQL), eq(Long.class))).thenReturn(12000L);
+    when(jdbcTemplate.query(anyString(), any(ResultSetExtractor.class)))
+        .thenAnswer(
+            invocation -> {
+              ResultSetExtractor<?> extractor = invocation.getArgument(1);
+              return extractor.extractData(
+                  fakeResultSet(List.of(row("crit_0_remaining", 8400L, "crit_1_remaining", 847L))));
+            });
+
+    var funnel = sut.computeFunnel(List.of(ageCriterion, chemoCriterion), TOTAL_POPULATION_SQL);
+
+    assertThat(funnel.totalPopulation()).isEqualTo(12000L);
+    assertThat(funnel.steps())
+        .extracting(FunnelResult.Step::remainingCount)
+        .containsExactly(8400L, 847L);
+    assertThat(funnel.steps())
+        .extracting(step -> step.criterion().displayText())
+        .containsExactly("Age >= 18", "No prior chemo");
+    verifyNoInteractions(sqlOnFhirClient);
+  }
+
+  @Test
+  void computeFunnel_generatesFunnelQueryWithCascadingFilterConditions() {
+    var include = new EligibilityCriterion(trinoLibrary(SQL_AGE), "Age >= 18", false);
+    var exclude = new EligibilityCriterion(trinoLibrary(SQL_CHEMO), "No prior chemo", true);
+
+    when(jdbcTemplate.queryForObject(eq(TOTAL_POPULATION_SQL), eq(Long.class))).thenReturn(0L);
+    when(jdbcTemplate.query(anyString(), any(ResultSetExtractor.class)))
+        .thenAnswer(
+            invocation -> {
+              ResultSetExtractor<?> extractor = invocation.getArgument(1);
+              return extractor.extractData(
+                  fakeResultSet(List.of(row("crit_0_remaining", 0L, "crit_1_remaining", 0L))));
+            });
+
+    var captor = ArgumentCaptor.forClass(String.class);
+    sut.computeFunnel(List.of(include, exclude), TOTAL_POPULATION_SQL);
+    verify(jdbcTemplate, atLeastOnce()).query(captor.capture(), any(ResultSetExtractor.class));
+
+    var sql = captor.getValue();
+    assertThat(sql)
+        .contains("WITH crit_0 AS (\nSELECT DISTINCT * FROM (\n" + SQL_AGE + "\n) AS crit_0_raw\n)")
+        .contains("crit_1 AS (\nSELECT DISTINCT * FROM (\n" + SQL_CHEMO + "\n) AS crit_1_raw\n)")
+        .contains("LEFT JOIN crit_1 ON crit_1.patient_id = crit_0.patient_id")
+        .contains(
+            "COUNT(*) FILTER (WHERE ((crit_0.is_met)) IS DISTINCT FROM FALSE) AS crit_0_remaining")
+        .contains(
+            "COUNT(*) FILTER (WHERE ((crit_0.is_met) AND (NOT crit_1.is_met)) "
+                + "IS DISTINCT FROM FALSE) AS crit_1_remaining");
+  }
+
+  /**
+   * Same fixture as {@link
+   * #evaluateEligibility_withMixOfTrinoAndSqlOnFhirCriteria_mergesInApplicationMemory} - pat-2 is
+   * excluded once the chemo criterion is cumulatively applied (step 1), pat-1 and pat-3 (unknown)
+   * remain.
+   */
+  @Test
+  void computeFunnel_withMixOfTrinoAndSqlOnFhirCriteria_mergesInApplicationMemory() {
+    var trinoIncluded = new EligibilityCriterion(trinoLibrary(SQL_AGE), "Age >= 18", false);
+    var delegatedExcluded =
+        new EligibilityCriterion(sqlOnFhirLibrary(SQL_CHEMO), "No prior chemo", true);
+
+    when(jdbcTemplate.queryForObject(eq(TOTAL_POPULATION_SQL), eq(Long.class))).thenReturn(3L);
+    when(jdbcTemplate.queryForList(contains("age")))
+        .thenReturn(
+            List.of(
+                row("patient_id", "pat-1", "is_met", true),
+                row("patient_id", "pat-2", "is_met", true),
+                row("patient_id", "pat-3", "is_met", true)));
+
+    stubSqlOnFhirResponse(
+        parametersWithRows(
+            List.of(
+                row("patient_id", "pat-1", "is_met", false),
+                row("patient_id", "pat-2", "is_met", true))));
+
+    var funnel = sut.computeFunnel(List.of(trinoIncluded, delegatedExcluded), TOTAL_POPULATION_SQL);
+
+    assertThat(funnel.totalPopulation()).isEqualTo(3L);
+    assertThat(funnel.steps())
+        .extracting(FunnelResult.Step::remainingCount)
+        .containsExactly(3L, 2L);
   }
 }

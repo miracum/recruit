@@ -4,6 +4,9 @@ public sealed class TrialSummaryDto
 {
     public required string ListId { get; init; }
 
+    /// <summary>The ResearchStudy's own FHIR logical id - e.g. to look up its attrition funnel via EligibilityFunnelService.</summary>
+    public required string StudyId { get; init; }
+
     /// <summary>The trial's stable business identity - see TrialIdentifier. Drives all access checks.</summary>
     public required TrialIdentifier TrialIdentifier { get; init; }
 

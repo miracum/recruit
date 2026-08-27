@@ -423,7 +423,7 @@
           {
             "code": "Extension",
             "profile": [
-              "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study"
+              "https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study"
             ]
           }
         ],
@@ -1643,7 +1643,7 @@
           {
             "code": "Extension",
             "profile": [
-              "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study"
+              "https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study"
             ]
           }
         ]

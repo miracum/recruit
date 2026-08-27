@@ -28,10 +28,18 @@
     "resource": [
       {
         "reference": {
+          "reference": "StructureDefinition/belongs-to-study"
+        },
+        "name": "Clinical study reference",
+        "description": "A reference to the clinical study that a resource concerns - a List's screened candidates, or a MeasureReport's eligibility attrition funnel",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
           "reference": "StructureDefinition/eligibility-assessment-derived-from-library"
         },
         "name": "Eligibility assessment derived-from Library",
-        "description": "A reference to the eligibility-criterion Library resource this assessment was derived from. Observation.derivedFrom does not accept Library as a target type, so this extension carries the reference instead.",
+        "description": "A reference to the eligibility-criterion Library resource this assessment - or, on a MeasureReport's attrition-funnel population, this cumulative step - was derived from. Neither Observation.derivedFrom nor MeasureReport.group.population has a slot accepting Library as a target type, so this extension carries the reference instead.",
         "exampleBoolean": false
       },
       {
@@ -40,6 +48,22 @@
         },
         "name": "EligibilityAssessmentIdentifierSystem",
         "description": "The identifier system for a per-criterion eligibility Observation's business identifier. Derived from the ResearchSubject identifier and the Library identifier of the eligibility criterion.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "NamingSystem/eligibility-funnel-measure-id"
+        },
+        "name": "EligibilityFunnelMeasureIdentifierSystem",
+        "description": "The identifier system for a study's attrition-funnel Measure's business identifier - used as the conditional-update key, keyed on the same value as the study's own identifier.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "NamingSystem/eligibility-funnel-report-id"
+        },
+        "name": "EligibilityFunnelReportIdentifierSystem",
+        "description": "The identifier system for a study's attrition-funnel MeasureReport's business identifier - used as the conditional-update key, keyed on the same value as the study's own identifier.",
         "exampleBoolean": false
       },
       {
@@ -76,6 +100,14 @@
       },
       {
         "reference": {
+          "reference": "SearchParameter/measurereport-belongs-to-study"
+        },
+        "name": "MeasureReportBelongsToStudy",
+        "description": "The ResearchStudy a MeasureReport's eligibility attrition funnel pertains to",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
           "reference": "SearchParameter/observation-derived-from-library"
         },
         "name": "ObservationDerivedFromLibrary",
@@ -104,6 +136,14 @@
         },
         "name": "recruIT eligibility assessment result",
         "description": "The SNOMED CT qualifier values a per-criterion eligibility assessment's value may be set to, indicating whether the criterion is met, not met, unknown, or indeterminate.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "CodeSystem/eligibility-funnel-population-type"
+        },
+        "name": "recruIT eligibility funnel population type",
+        "description": "The two population kinds making up a study's attrition-funnel MeasureReport.group.population: the total screened population, and the population remaining after cumulatively applying one more criterion.",
         "exampleBoolean": false
       },
       {
@@ -150,14 +190,6 @@
         },
         "name": "ResearchSubjectIdentifierSystem",
         "description": "The identifier system for a recruIT-created ResearchSubject's business identifier",
-        "exampleBoolean": false
-      },
-      {
-        "reference": {
-          "reference": "StructureDefinition/screening-list-belongs-to-study"
-        },
-        "name": "Screening list clinical study reference",
-        "description": "A reference to the clinical study that this screening list contains study candidates for",
         "exampleBoolean": false
       },
       {

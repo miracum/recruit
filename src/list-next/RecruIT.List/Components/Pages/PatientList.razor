@@ -1,6 +1,7 @@
 @page "/trials/{ListId}/patients"
 @attribute [Authorize]
 @inject ScreeningListService ScreeningListService
+@inject EligibilityFunnelService FunnelService
 @inject PatientRecordService PatientRecordService
 @inject TrialAccessService AccessService
 @inject BreadcrumbState BreadcrumbState
@@ -87,6 +88,30 @@ else if (_summary is not null)
                 }
             </div>
         </div>
+    }
+
+    @if (FunnelChartData is { Count: > 0 })
+    {
+        <BbCollapsible @bind-Open="_funnelExpanded" Class="mb-4 rounded-md border">
+            <BbCollapsibleTrigger>
+                <BbButton Variant="ButtonVariant.Ghost" Class="h-auto w-full rounded-b-none px-3 py-2 text-sm font-medium">
+                    <ChildContent>
+                        <span class="flex w-full items-center justify-between">
+                            <span>@Localizer["App.PatientList.FunnelSectionTitle"]</span>
+                            <LucideIcon Name="@(_funnelExpanded ? "chevron-up" : "chevron-down")" Size="16" />
+                        </span>
+                    </ChildContent>
+                </BbButton>
+            </BbCollapsibleTrigger>
+            <BbCollapsibleContent>
+                <div class="border-t p-3">
+                    <BbFunnelChart Data="@FunnelChartData" Height="280px">
+                        <BbChartTooltip />
+                        <BbFunnel DataKey="value" NameKey="stage" Sort="FunnelSort.None" />
+                    </BbFunnelChart>
+                </div>
+            </BbCollapsibleContent>
+        </BbCollapsible>
     }
 
     @if (_patients.Count == 0)
@@ -178,6 +203,8 @@ else if (_summary is not null)
 
     private TrialSummaryDto? _summary;
     private List<PatientListEntryDto> _patients = [];
+    private List<FunnelStepDto>? _funnelSteps;
+    private bool _funnelExpanded;
     private bool _loading = true;
     private bool _canEdit;
     private bool _canManageAccess;
@@ -191,6 +218,18 @@ else if (_summary is not null)
     private List<CriterionDefinitionDto> InclusionCriteria => _summary?.Criteria.Where(c => !c.Exclude).ToList() ?? [];
 
     private List<CriterionDefinitionDto> ExclusionCriteria => _summary?.Criteria.Where(c => c.Exclude).ToList() ?? [];
+
+    private List<FunnelChartPoint>? FunnelChartData =>
+        _funnelSteps
+            ?.Select(s => new FunnelChartPoint(
+                s.IsTotalPopulation
+                    ? Localizer["App.PatientList.FunnelTotalPopulationLabel"].Value
+                    : s.Label ?? string.Empty,
+                s.Count
+            ))
+            .ToList();
+
+    private record FunnelChartPoint(string Stage, int Value);
 
     protected override async Task OnInitializedAsync()
     {
@@ -211,6 +250,7 @@ else if (_summary is not null)
             _canEdit = TrialAccessService.MeetsCoordinatorThreshold(permission);
             _canManageAccess = TrialAccessService.MeetsTrialAdminThreshold(permission);
             BreadcrumbState.Set(new BreadcrumbItem(Localizer["App.Common.AllTrialsBreadcrumb"], "/"), new BreadcrumbItem(summary.StudyAcronym));
+            _funnelSteps = await TryLoadFunnelAsync(summary.StudyId);
 
             // Fire-and-forget rather than gating on OnAfterRenderAsync(firstRender): when
             // GetListWithPatientsAsync resolves fast enough (e.g. a warm connection from in-app
@@ -237,6 +277,24 @@ else if (_summary is not null)
         finally
         {
             _loading = false;
+        }
+    }
+
+    /// <summary>
+    /// The funnel is an optional, best-effort enhancement - most studies won't have one yet (the
+    /// query-sql-on-fhir feature flag producing it defaults to off), and a failure fetching it
+    /// shouldn't block the rest of the page from loading.
+    /// </summary>
+    private async Task<List<FunnelStepDto>?> TryLoadFunnelAsync(string studyId)
+    {
+        try
+        {
+            var steps = await FunnelService.GetFunnelAsync(studyId);
+            return steps?.ToList();
+        }
+        catch (Exception)
+        {
+            return null;
         }
     }
 

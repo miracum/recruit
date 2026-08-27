@@ -31,8 +31,8 @@ Description: "The SNOMED CT qualifier values a per-criterion eligibility assessm
 Extension: EligibilityAssessmentDerivedFromLibrary
 Id: eligibility-assessment-derived-from-library
 Title: "Eligibility assessment derived-from Library"
-Description: "A reference to the eligibility-criterion Library resource this assessment was derived from. Observation.derivedFrom does not accept Library as a target type, so this extension carries the reference instead."
-Context: Observation
+Description: "A reference to the eligibility-criterion Library resource this assessment - or, on a MeasureReport's attrition-funnel population, this cumulative step - was derived from. Neither Observation.derivedFrom nor MeasureReport.group.population has a slot accepting Library as a target type, so this extension carries the reference instead."
+Context: Observation, MeasureReport.group.population
 * value[x] only Reference(Library)
 
 Instance: EligibilityAssessmentIdentifierSystem

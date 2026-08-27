@@ -71,10 +71,6 @@ createSearchParameters:
   # -- whether to install/update the SearchParameter resources on every `helm upgrade`. Only takes effect if
   # `fhirserver.enabled=true` or `externalFhirServer.url` is set.
   enabled: true
-  # -- whether to also trigger a FHIR `$reindex` operation on the server after installing/updating the SearchParameter
-  # resources, so that resources already stored on the server get indexed using the new search parameters. This can
-  # be a slow, resource-intensive operation depending on the amount of data already stored, so it is disabled by default.
-  reindex: false
   # -- number of retries for the Job before it is considered failed
   backoffLimit: 3
   # -- automatically delete the Job this many seconds after it finished. Set to `null` to disable.

@@ -10,7 +10,7 @@ public static class FhirConstants
         RecruIT.FhirConstants.Recruit.CodeSystems.ScreeningListType.ScreeningRecommendations.Code();
 
     public static string UrlListBelongsToStudy =>
-        RecruIT.FhirConstants.Recruit.Extensions.Urls.ScreeningListBelongsToStudy;
+        RecruIT.FhirConstants.Recruit.Extensions.Urls.BelongsToStudy;
 
     public static string UrlResearchSubjectIdentifier =>
         RecruIT.FhirConstants.Recruit.NamingSystems.ResearchSubjectId.Uri;

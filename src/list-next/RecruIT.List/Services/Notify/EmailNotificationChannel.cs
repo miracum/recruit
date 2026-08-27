@@ -27,7 +27,11 @@ public sealed class EmailNotificationChannel(IOptions<NotifyMailerOptions> maile
                 && client.AuthenticationMechanisms.Count > 0
             )
             {
-                await client.AuthenticateAsync(options.SmtpUsername, options.SmtpPassword ?? "", ct);
+                await client.AuthenticateAsync(
+                    options.SmtpUsername,
+                    options.SmtpPassword ?? "",
+                    ct
+                );
             }
         }
         catch

@@ -27,6 +27,15 @@ public final class Recruit {
     }
 
     /**
+     * The canonical URL {@code https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type}.
+     *
+     * @return {@code https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type}
+     */
+    public static String eligibilityFunnelPopulationType() {
+      return "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type";
+    }
+
+    /**
      * The canonical URL {@code https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type}.
      *
      * @return {@code https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type}
@@ -84,6 +93,65 @@ public final class Recruit {
        * @throws IllegalArgumentException if no constant has that code
        */
       public static @NonNull EligibilityAssessmentCategory fromValueOrThrow(@NonNull String code) {
+        return fromValue(code).orElseThrow(() -> new IllegalArgumentException("Unknown code: " + code));
+      }
+    }
+
+    public enum EligibilityFunnelPopulationType {
+      /**
+       * {@code total-population} - Total population
+       */
+      TOTAL_POPULATION("total-population", "Total population"),
+
+      /**
+       * {@code after-criterion} - After criterion
+       */
+      AFTER_CRITERION("after-criterion", "After criterion");
+
+      private final @NonNull String code;
+
+      private final @Nullable String display;
+
+      EligibilityFunnelPopulationType(@NonNull String code, @Nullable String display) {
+        this.code = code;
+        this.display = display;
+      }
+
+      /**
+       * @return the CodeSystem URL {@code https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type}
+       */
+      public @NonNull String system(@NonNull EligibilityFunnelPopulationType this) {
+        return "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type";
+      }
+
+      /**
+       * @return a new {@link Coding} for this concept, with system {@code https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type}
+       */
+      public @NonNull Coding coding(@NonNull EligibilityFunnelPopulationType this) {
+        return new Coding("https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type", code, display);
+      }
+
+      /**
+       * @param code the FHIR code to look up
+       * @return an {@link Optional} containing the constant whose {@code code} matches, or empty if none matches
+       */
+      public static Optional<@NonNull EligibilityFunnelPopulationType> fromValue(
+          @NonNull String code) {
+        for (EligibilityFunnelPopulationType value : values()) {
+          if (value.code.equals(code)) {
+            return Optional.of(value);
+          }
+        }
+        return Optional.empty();
+      }
+
+      /**
+       * @param code the FHIR code to look up
+       * @return the constant whose {@code code} matches
+       * @throws IllegalArgumentException if no constant has that code
+       */
+      public static @NonNull EligibilityFunnelPopulationType fromValueOrThrow(
+          @NonNull String code) {
         return fromValue(code).orElseThrow(() -> new IllegalArgumentException("Unknown code: " + code));
       }
     }
@@ -178,6 +246,16 @@ public final class Recruit {
     }
 
     /**
+     * A new {@link Extension} for the canonical URL {@code https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study}.
+     *
+     * @param value the extension value
+     * @return a new {@link Extension} with url {@code https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study} and the given value
+     */
+    public static @NonNull Extension belongsToStudy(@NonNull Reference value) {
+      return new Extension("https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study", value);
+    }
+
+    /**
      * A new {@link Extension} for the canonical URL {@code https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library}.
      *
      * @param value the extension value
@@ -189,13 +267,18 @@ public final class Recruit {
     }
 
     /**
-     * A new {@link Extension} for the canonical URL {@code https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study}.
+     * Gets the value of extension {@code https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study} from {@code resource}, or {@code null} if absent.
      *
-     * @param value the extension value
-     * @return a new {@link Extension} with url {@code https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study} and the given value
+     * @param resource the resource or element to read from
+     * @return the extension value, or {@code null}
      */
-    public static @NonNull Extension screeningListBelongsToStudy(@NonNull Reference value) {
-      return new Extension("https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study", value);
+    public static @Nullable Reference getBelongsToStudy(@NonNull IBaseHasExtensions resource) {
+      for (var e : resource.getExtension()) {
+        if ("https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study".equals(e.getUrl())) {
+          return (Reference) ((Extension) e).getValue();
+        }
+      }
+      return null;
     }
 
     /**
@@ -214,24 +297,15 @@ public final class Recruit {
       return null;
     }
 
-    /**
-     * Gets the value of extension {@code https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study} from {@code resource}, or {@code null} if absent.
-     *
-     * @param resource the resource or element to read from
-     * @return the extension value, or {@code null}
-     */
-    public static @Nullable Reference getScreeningListBelongsToStudy(
-        @NonNull IBaseHasExtensions resource) {
-      for (var e : resource.getExtension()) {
-        if ("https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study".equals(e.getUrl())) {
-          return (Reference) ((Extension) e).getValue();
-        }
-      }
-      return null;
-    }
-
     public static final class Urls {
       private Urls() {
+      }
+
+      /**
+       * @return the extension URL {@code https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study}
+       */
+      public static @NonNull String belongsToStudy() {
+        return "https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study";
       }
 
       /**
@@ -239,13 +313,6 @@ public final class Recruit {
        */
       public static @NonNull String eligibilityAssessmentDerivedFromLibrary() {
         return "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library";
-      }
-
-      /**
-       * @return the extension URL {@code https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study}
-       */
-      public static @NonNull String screeningListBelongsToStudy() {
-        return "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study";
       }
     }
   }
@@ -266,6 +333,36 @@ public final class Recruit {
        */
       public static @NonNull String uri() {
         return "https://miracum.github.io/recruit/fhir/identifiers/eligibility-assessment-id";
+      }
+    }
+
+    /**
+     * The identifier system for a study's attrition-funnel Measure's business identifier - used as the conditional-update key, keyed on the same value as the study's own identifier.
+     */
+    public static final class EligibilityFunnelMeasureId {
+      private EligibilityFunnelMeasureId() {
+      }
+
+      /**
+       * @return {@code https://miracum.github.io/recruit/fhir/identifiers/eligibility-funnel-measure-id}
+       */
+      public static @NonNull String uri() {
+        return "https://miracum.github.io/recruit/fhir/identifiers/eligibility-funnel-measure-id";
+      }
+    }
+
+    /**
+     * The identifier system for a study's attrition-funnel MeasureReport's business identifier - used as the conditional-update key, keyed on the same value as the study's own identifier.
+     */
+    public static final class EligibilityFunnelReportId {
+      private EligibilityFunnelReportId() {
+      }
+
+      /**
+       * @return {@code https://miracum.github.io/recruit/fhir/identifiers/eligibility-funnel-report-id}
+       */
+      public static @NonNull String uri() {
+        return "https://miracum.github.io/recruit/fhir/identifiers/eligibility-funnel-report-id";
       }
     }
 

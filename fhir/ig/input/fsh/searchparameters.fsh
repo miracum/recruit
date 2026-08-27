@@ -33,7 +33,7 @@ Usage: #definition
 * status = #active
 * code = #belongs-to-study
 * type = #reference
-* expression = "List.extension('https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study').value.ofType(Reference)"
+* expression = "List.extension('https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study').value.ofType(Reference)"
 * target = #ResearchStudy
 
 Instance: ObservationDerivedFromLibrary
@@ -46,8 +46,21 @@ Usage: #definition
 * status = #active
 * code = #derived-from-library
 * type = #reference
-* expression = "Observation.extension('https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-observation-derived-from-library').value.ofType(Reference)"
+* expression = "Observation.extension('https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library').value.ofType(Reference)"
 * target = #Library
+
+Instance: MeasureReportBelongsToStudy
+InstanceOf: SearchParameter
+Usage: #definition
+* id = "measurereport-belongs-to-study"
+* name = "MeasureReportBelongsToStudy"
+* description = "The ResearchStudy a MeasureReport's eligibility attrition funnel pertains to"
+* base = #MeasureReport
+* status = #active
+* code = #belongs-to-study
+* type = #reference
+* expression = "MeasureReport.extension('https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study').value.ofType(Reference)"
+* target = #ResearchStudy
 
 Instance: RecruitSearchParametersTransaction
 InstanceOf: Bundle
@@ -66,3 +79,6 @@ Usage: #definition
 * entry[3].resource = ObservationDerivedFromLibrary
 * entry[3].request.method = #PUT
 * entry[3].request.url = "SearchParameter/observation-derived-from-library"
+* entry[4].resource = MeasureReportBelongsToStudy
+* entry[4].request.method = #PUT
+* entry[4].request.url = "SearchParameter/measurereport-belongs-to-study"

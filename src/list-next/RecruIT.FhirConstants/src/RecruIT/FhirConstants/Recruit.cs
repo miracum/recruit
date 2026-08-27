@@ -13,6 +13,10 @@ public static class Recruit
             public static string EligibilityAssessmentCategory =>
                 "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category";
 
+            /// <summary>The canonical URL <c>https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type</c>.</summary>
+            public static string EligibilityFunnelPopulationType =>
+                "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type";
+
             /// <summary>The canonical URL <c>https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type</c>.</summary>
             public static string ScreeningListType =>
                 "https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type";
@@ -23,6 +27,16 @@ public static class Recruit
         {
             /// <summary><c>eligibility-assessment</c> - Eligibility assessment</summary>
             EligibilityAssessment,
+        }
+
+        /// <summary>Concepts for <c>https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type</c>.</summary>
+        public enum EligibilityFunnelPopulationType
+        {
+            /// <summary><c>total-population</c> - Total population</summary>
+            TotalPopulation,
+
+            /// <summary><c>after-criterion</c> - After criterion</summary>
+            AfterCriterion,
         }
 
         /// <summary>Concepts for <c>https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type</c>.</summary>
@@ -52,14 +66,23 @@ public static class Recruit
     {
         public static class Urls
         {
+            /// <summary>The extension URL <c>https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study</c>.</summary>
+            public static string BelongsToStudy =>
+                "https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study";
+
             /// <summary>The extension URL <c>https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library</c>.</summary>
             public static string EligibilityAssessmentDerivedFromLibrary =>
                 "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library";
-
-            /// <summary>The extension URL <c>https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study</c>.</summary>
-            public static string ScreeningListBelongsToStudy =>
-                "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study";
         }
+
+        /// <summary>A new <see cref="Extension"/> for <c>https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study</c>.</summary>
+        /// <param name="value">The extension value.</param>
+        /// <returns>A new <see cref="Extension"/> with url <c>https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study</c> and the given value.</returns>
+        public static Extension BelongsToStudy(ResourceReference value) =>
+            new(
+                "https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study",
+                value
+            );
 
         /// <summary>A new <see cref="Extension"/> for <c>https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library</c>.</summary>
         /// <param name="value">The extension value.</param>
@@ -67,15 +90,6 @@ public static class Recruit
         public static Extension EligibilityAssessmentDerivedFromLibrary(ResourceReference value) =>
             new(
                 "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library",
-                value
-            );
-
-        /// <summary>A new <see cref="Extension"/> for <c>https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study</c>.</summary>
-        /// <param name="value">The extension value.</param>
-        /// <returns>A new <see cref="Extension"/> with url <c>https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study</c> and the given value.</returns>
-        public static Extension ScreeningListBelongsToStudy(ResourceReference value) =>
-            new(
-                "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study",
                 value
             );
     }
@@ -88,6 +102,22 @@ public static class Recruit
             /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/eligibility-assessment-id</c></summary>
             public static string Uri =>
                 "https://miracum.github.io/recruit/fhir/identifiers/eligibility-assessment-id";
+        }
+
+        /// <summary>The identifier system for a study's attrition-funnel Measure's business identifier - used as the conditional-update key, keyed on the same value as the study's own identifier.</summary>
+        public static class EligibilityFunnelMeasureId
+        {
+            /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/eligibility-funnel-measure-id</c></summary>
+            public static string Uri =>
+                "https://miracum.github.io/recruit/fhir/identifiers/eligibility-funnel-measure-id";
+        }
+
+        /// <summary>The identifier system for a study's attrition-funnel MeasureReport's business identifier - used as the conditional-update key, keyed on the same value as the study's own identifier.</summary>
+        public static class EligibilityFunnelReportId
+        {
+            /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/eligibility-funnel-report-id</c></summary>
+            public static string Uri =>
+                "https://miracum.github.io/recruit/fhir/identifiers/eligibility-funnel-report-id";
         }
 
         /// <summary>The identifier system for the Group containing references to one or more eligibility criteria Library resources</summary>
@@ -196,6 +226,58 @@ public static class EligibilityAssessmentCategoryExtensions
         FromValue(code) ?? throw new ArgumentException($"Unknown code: {code}", nameof(code));
 }
 
+/// <summary>Extension methods for <see cref="Recruit.CodeSystems.EligibilityFunnelPopulationType"/>.</summary>
+public static class EligibilityFunnelPopulationTypeExtensions
+{
+    /// <returns>The CodeSystem URL <c>https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type</c>.</returns>
+    public static string Url(this Recruit.CodeSystems.EligibilityFunnelPopulationType _) =>
+        "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type";
+
+    /// <returns>The FHIR code for this concept.</returns>
+    public static string Code(this Recruit.CodeSystems.EligibilityFunnelPopulationType value) =>
+        value switch
+        {
+            Recruit.CodeSystems.EligibilityFunnelPopulationType.TotalPopulation =>
+                "total-population",
+            Recruit.CodeSystems.EligibilityFunnelPopulationType.AfterCriterion => "after-criterion",
+            _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+        };
+
+    /// <returns>The display label for this concept, or <c>null</c> if none.</returns>
+    public static string? Display(this Recruit.CodeSystems.EligibilityFunnelPopulationType value) =>
+        value switch
+        {
+            Recruit.CodeSystems.EligibilityFunnelPopulationType.TotalPopulation =>
+                "Total population",
+            Recruit.CodeSystems.EligibilityFunnelPopulationType.AfterCriterion => "After criterion",
+            _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+        };
+
+    /// <returns>A new <see cref="Coding"/> for this concept.</returns>
+    public static Coding Coding(this Recruit.CodeSystems.EligibilityFunnelPopulationType value) =>
+        new(value.Url(), value.Code(), value.Display());
+
+    /// <param name="code">The FHIR code to look up.</param>
+    /// <returns>The matching <see cref="Recruit.CodeSystems.EligibilityFunnelPopulationType"/>, or <c>null</c> if none matches.</returns>
+    public static Recruit.CodeSystems.EligibilityFunnelPopulationType? FromValue(string code) =>
+        code switch
+        {
+            "total-population" => Recruit
+                .CodeSystems
+                .EligibilityFunnelPopulationType
+                .TotalPopulation,
+            "after-criterion" => Recruit.CodeSystems.EligibilityFunnelPopulationType.AfterCriterion,
+            _ => null,
+        };
+
+    /// <param name="code">The FHIR code to look up.</param>
+    /// <returns>The matching <see cref="Recruit.CodeSystems.EligibilityFunnelPopulationType"/>.</returns>
+    /// <exception cref="ArgumentException">If no constant has that code.</exception>
+    public static Recruit.CodeSystems.EligibilityFunnelPopulationType FromValueOrThrow(
+        string code
+    ) => FromValue(code) ?? throw new ArgumentException($"Unknown code: {code}", nameof(code));
+}
+
 /// <summary>Extension methods for <see cref="Recruit.CodeSystems.ScreeningListType"/>.</summary>
 public static class ScreeningListTypeExtensions
 {
@@ -247,17 +329,17 @@ public static class ScreeningListTypeExtensions
 /// <summary>Extension methods for reading <see cref="Recruit.Extensions"/> from FHIR resources.</summary>
 public static class RecruitFhirExtensions
 {
+    /// <summary>Gets the value of extension <c>https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study</c> from <paramref name="resource"/>, or <c>null</c> if absent.</summary>
+    public static ResourceReference? GetBelongsToStudy(this IExtendable resource) =>
+        resource.GetExtensionValue<ResourceReference>(
+            "https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study"
+        );
+
     /// <summary>Gets the value of extension <c>https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library</c> from <paramref name="resource"/>, or <c>null</c> if absent.</summary>
     public static ResourceReference? GetEligibilityAssessmentDerivedFromLibrary(
         this IExtendable resource
     ) =>
         resource.GetExtensionValue<ResourceReference>(
             "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library"
-        );
-
-    /// <summary>Gets the value of extension <c>https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study</c> from <paramref name="resource"/>, or <c>null</c> if absent.</summary>
-    public static ResourceReference? GetScreeningListBelongsToStudy(this IExtendable resource) =>
-        resource.GetExtensionValue<ResourceReference>(
-            "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study"
         );
 }

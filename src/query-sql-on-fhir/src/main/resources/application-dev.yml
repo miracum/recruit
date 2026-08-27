@@ -8,6 +8,8 @@ query-sql-on-fhir:
   schedule:
     # every 5 seconds
     cron: "*/5 * * * * *"
+  funnel:
+    enabled: true
 
 # Overrides the application.yml default of disabled: false here is otel.sdk.disabled's own
 # standard OTEL_SDK_DISABLED var, just flipped for local dev. No endpoint override needed - the

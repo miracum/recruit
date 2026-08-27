@@ -279,6 +279,7 @@ builder.Services.AddScoped<ResearchSubjectService>();
 builder.Services.AddScoped<ScreeningNoteService>();
 builder.Services.AddScoped<PatientRecordService>();
 builder.Services.AddScoped<EligibilityCriteriaService>();
+builder.Services.AddScoped<EligibilityFunnelService>();
 builder.Services.AddScoped<BreadcrumbState>();
 
 builder.Services.AddScoped<INotificationChannel, EmailNotificationChannel>();

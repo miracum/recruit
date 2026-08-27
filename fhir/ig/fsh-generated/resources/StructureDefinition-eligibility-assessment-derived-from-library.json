@@ -5,7 +5,7 @@
   "name": "EligibilityAssessmentDerivedFromLibrary",
   "title": "Eligibility assessment derived-from Library",
   "status": "active",
-  "description": "A reference to the eligibility-criterion Library resource this assessment was derived from. Observation.derivedFrom does not accept Library as a target type, so this extension carries the reference instead.",
+  "description": "A reference to the eligibility-criterion Library resource this assessment - or, on a MeasureReport's attrition-funnel population, this cumulative step - was derived from. Neither Observation.derivedFrom nor MeasureReport.group.population has a slot accepting Library as a target type, so this extension carries the reference instead.",
   "fhirVersion": "4.0.1",
   "mapping": [
     {
@@ -20,6 +20,10 @@
     {
       "expression": "Observation",
       "type": "element"
+    },
+    {
+      "expression": "MeasureReport.group.population",
+      "type": "element"
     }
   ],
   "type": "Extension",
@@ -31,7 +35,7 @@
         "id": "Extension",
         "path": "Extension",
         "short": "Eligibility assessment derived-from Library",
-        "definition": "A reference to the eligibility-criterion Library resource this assessment was derived from. Observation.derivedFrom does not accept Library as a target type, so this extension carries the reference instead.",
+        "definition": "A reference to the eligibility-criterion Library resource this assessment - or, on a MeasureReport's attrition-funnel population, this cumulative step - was derived from. Neither Observation.derivedFrom nor MeasureReport.group.population has a slot accepting Library as a target type, so this extension carries the reference instead.",
         "min": 0,
         "max": "*",
         "base": {
@@ -249,7 +253,7 @@
         "id": "Extension",
         "path": "Extension",
         "short": "Eligibility assessment derived-from Library",
-        "definition": "A reference to the eligibility-criterion Library resource this assessment was derived from. Observation.derivedFrom does not accept Library as a target type, so this extension carries the reference instead."
+        "definition": "A reference to the eligibility-criterion Library resource this assessment - or, on a MeasureReport's attrition-funnel population, this cumulative step - was derived from. Neither Observation.derivedFrom nor MeasureReport.group.population has a slot accepting Library as a target type, so this extension carries the reference instead."
       },
       {
         "id": "Extension.extension",
