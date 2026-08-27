@@ -280,7 +280,7 @@
     <value>Zugrunde liegendes SQL</value>
   </data>
   <data name="App.PatientList.FunnelSectionTitle" xml:space="preserve">
-    <value>Trichteranalyse</value>
+    <value>Patientenzahl nach Kriterien</value>
   </data>
   <data name="App.PatientList.FunnelTotalPopulationLabel" xml:space="preserve">
     <value>Gesamt gescreent</value>
