@@ -92,22 +92,6 @@
       },
       {
         "reference": {
-          "reference": "SearchParameter/list-belongs-to-study"
-        },
-        "name": "ListBelongsToStudy",
-        "description": "The ResearchStudy the list manages candidates for",
-        "exampleBoolean": false
-      },
-      {
-        "reference": {
-          "reference": "SearchParameter/measurereport-belongs-to-study"
-        },
-        "name": "MeasureReportBelongsToStudy",
-        "description": "The ResearchStudy a MeasureReport's eligibility attrition funnel pertains to",
-        "exampleBoolean": false
-      },
-      {
-        "reference": {
           "reference": "SearchParameter/observation-derived-from-library"
         },
         "name": "ObservationDerivedFromLibrary",
@@ -206,6 +190,14 @@
         },
         "name": "ScreeningListIdentifierSystem",
         "description": "The identifier system for a screening List's business identifier, which is the study's own identifier - used as the conditional-update key for a study's screening List.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "SearchParameter/belongs-to-study"
+        },
+        "name": "SearchParameterBelongsToStudy",
+        "description": "The ResearchStudy a List or MeasureReport pertains to",
         "exampleBoolean": false
       },
       {

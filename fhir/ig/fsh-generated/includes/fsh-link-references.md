@@ -6,8 +6,6 @@
 [eligibility-group-id]: NamingSystem-eligibility-group-id.html
 [eligibility-library-id]: NamingSystem-eligibility-library-id.html
 [group-characteristic]: SearchParameter-group-characteristic.html
-[list-belongs-to-study]: SearchParameter-list-belongs-to-study.html
-[measurereport-belongs-to-study]: SearchParameter-measurereport-belongs-to-study.html
 [observation-derived-from-library]: SearchParameter-observation-derived-from-library.html
 [EligibilityAssessment]: StructureDefinition-eligibility-assessment.html
 [EligibilityAssessmentCategory]: CodeSystem-eligibility-assessment-category.html
@@ -21,6 +19,7 @@
 [research-subject-id]: NamingSystem-research-subject-id.html
 [ScreeningList]: StructureDefinition-screening-list.html
 [screening-list-id]: NamingSystem-screening-list-id.html
+[belongs-to-study]: SearchParameter-belongs-to-study.html
 [superset-synced-eligibility-library-id]: NamingSystem-superset-synced-eligibility-library-id.html
 [ScreeningListExample]: List-ScreeningListExample.html
 [ui-created-eligibility-library-id]: NamingSystem-ui-created-eligibility-library-id.html

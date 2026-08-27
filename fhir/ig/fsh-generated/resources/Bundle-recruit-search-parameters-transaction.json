@@ -49,24 +49,25 @@
     {
       "resource": {
         "resourceType": "SearchParameter",
-        "id": "list-belongs-to-study",
-        "url": "https://miracum.github.io/recruit/fhir/SearchParameter/list-belongs-to-study",
-        "name": "ListBelongsToStudy",
-        "description": "The ResearchStudy the list manages candidates for",
+        "id": "belongs-to-study",
+        "url": "https://miracum.github.io/recruit/fhir/SearchParameter/belongs-to-study",
+        "name": "BelongsToStudy",
+        "description": "The ResearchStudy a List or MeasureReport pertains to",
         "base": [
-          "List"
+          "List",
+          "MeasureReport"
         ],
         "status": "active",
         "code": "belongs-to-study",
         "type": "reference",
-        "expression": "List.extension('https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study').value.ofType(Reference)",
+        "expression": "extension('https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study').value.ofType(Reference)",
         "target": [
           "ResearchStudy"
         ]
       },
       "request": {
         "method": "PUT",
-        "url": "SearchParameter/list-belongs-to-study"
+        "url": "SearchParameter/belongs-to-study"
       }
     },
     {
@@ -90,29 +91,6 @@
       "request": {
         "method": "PUT",
         "url": "SearchParameter/observation-derived-from-library"
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "SearchParameter",
-        "id": "measurereport-belongs-to-study",
-        "url": "https://miracum.github.io/recruit/fhir/SearchParameter/measurereport-belongs-to-study",
-        "name": "MeasureReportBelongsToStudy",
-        "description": "The ResearchStudy a MeasureReport's eligibility attrition funnel pertains to",
-        "base": [
-          "MeasureReport"
-        ],
-        "status": "active",
-        "code": "belongs-to-study",
-        "type": "reference",
-        "expression": "MeasureReport.extension('https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study').value.ofType(Reference)",
-        "target": [
-          "ResearchStudy"
-        ]
-      },
-      "request": {
-        "method": "PUT",
-        "url": "SearchParameter/measurereport-belongs-to-study"
       }
     }
   ]

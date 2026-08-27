@@ -1,0 +1,18 @@
+{
+  "resourceType": "SearchParameter",
+  "id": "belongs-to-study",
+  "url": "https://miracum.github.io/recruit/fhir/SearchParameter/belongs-to-study",
+  "name": "BelongsToStudy",
+  "description": "The ResearchStudy a List or MeasureReport pertains to",
+  "base": [
+    "List",
+    "MeasureReport"
+  ],
+  "status": "active",
+  "code": "belongs-to-study",
+  "type": "reference",
+  "expression": "extension('https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study').value.ofType(Reference)",
+  "target": [
+    "ResearchStudy"
+  ]
+}
