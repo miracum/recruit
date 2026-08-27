@@ -107,7 +107,7 @@ else if (_summary is not null)
                 <div class="border-t p-3">
                     <BbFunnelChart Data="@FunnelChartData" Height="280px">
                         <BbChartTooltip />
-                        <BbFunnel DataKey="value" NameKey="stage" Sort="FunnelSort.None" LabelFormatter="{b}: {c}" />
+                        <BbFunnel DataKey="value" NameKey="stage" Sort="FunnelSort.None" LabelFormatter="{b}: {c}" MinSize="15%" />
                     </BbFunnelChart>
                 </div>
             </BbCollapsibleContent>
