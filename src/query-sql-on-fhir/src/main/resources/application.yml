@@ -58,9 +58,18 @@ sql-on-fhir:
 # nothing, so this is opt-in per environment rather than always-on. This is the OpenTelemetry
 # Spring Boot starter's own standard property (bound from the OTEL_SDK_DISABLED env var like any
 # other OTEL_* var, e.g. OTEL_EXPORTER_OTLP_ENDPOINT/OTEL_SERVICE_NAME) - no app-specific flag.
+#
+# metrics/logs exporters are off regardless: this app already has its own metrics (management.*
+# below, scraped via Prometheus) and console logging pattern, and a traces-only backend like
+# Jaeger doesn't implement the OTLP logs endpoint anyway - without this, enabling the SDK produces
+# "Failed to export logs. Server responded with HTTP status code 404." once a log line is emitted.
 otel:
   sdk:
     disabled: true
+  metrics:
+    exporter: none
+  logs:
+    exporter: none
 
 logging:
   pattern:
