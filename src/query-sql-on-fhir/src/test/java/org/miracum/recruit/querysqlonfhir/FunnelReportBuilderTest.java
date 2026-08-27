@@ -200,4 +200,37 @@ class FunnelReportBuilderTest {
     assertThat(measure.getStatus())
         .isEqualTo(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
   }
+
+  @Test
+  void buildFunnelReportBundle_measureListsOneLibraryPerCriterion() {
+    var sut = new FunnelReportBuilder(false);
+    var study = studyWithIdentifier("study-1", "trial-042");
+    var age = new EligibilityCriterion(libraryWithId("lib-age"), "Age >= 18 years", false);
+    var chemo = new EligibilityCriterion(libraryWithId("lib-chemo"), "No prior chemo", true);
+    var funnel = funnelWith(1000, age, chemo);
+
+    var bundle = sut.buildFunnelReportBundle(study, funnel, new Date());
+    var measure = (Measure) bundle.getEntry().get(0).getResource();
+
+    assertThat(measure.getLibrary())
+        .extracting(org.hl7.fhir.r4.model.CanonicalType::getValue)
+        .containsExactly("Library/lib-age", "Library/lib-chemo");
+  }
+
+  @Test
+  void buildFunnelReportBundle_measureListsEachDistinctLibraryOnlyOnce() {
+    var sut = new FunnelReportBuilder(false);
+    var study = studyWithIdentifier("study-1", "trial-042");
+    var sharedLibrary = libraryWithId("lib-shared");
+    var firstUse = new EligibilityCriterion(sharedLibrary, "Shared criterion", false);
+    var secondUse = new EligibilityCriterion(sharedLibrary, "Shared criterion again", false);
+    var funnel = funnelWith(1000, firstUse, secondUse);
+
+    var bundle = sut.buildFunnelReportBundle(study, funnel, new Date());
+    var measure = (Measure) bundle.getEntry().get(0).getResource();
+
+    assertThat(measure.getLibrary())
+        .extracting(org.hl7.fhir.r4.model.CanonicalType::getValue)
+        .containsExactly("Library/lib-shared");
+  }
 }

@@ -3,6 +3,7 @@ package org.miracum.recruit.querysqlonfhir;
 import io.github.dizuker.tofhir.IdUtils;
 import io.github.miracum.recruit.Recruit;
 import java.util.Date;
+import java.util.List;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -68,7 +69,7 @@ public class FunnelReportBuilder {
         "https://miracum.github.io/recruit/fhir/Measure/"
             + IdUtils.fromIdentifier(measureIdentifier).getIdPart();
 
-    var measure = buildMeasure(study, measureCanonicalUrl);
+    var measure = buildMeasure(study, measureCanonicalUrl, funnel.steps());
     measure.addIdentifier(measureIdentifier);
     addPutEntry(bundle, measure, ResourceType.Measure, measureIdentifier);
 
@@ -83,12 +84,24 @@ public class FunnelReportBuilder {
     return bundle;
   }
 
-  private Measure buildMeasure(ResearchStudy study, String canonicalUrl) {
+  private Measure buildMeasure(
+      ResearchStudy study, String canonicalUrl, List<FunnelResult.Step> steps) {
     var measure = new Measure();
     measure.setUrl(canonicalUrl);
     measure.setStatus(Enumerations.PublicationStatus.ACTIVE);
     measure.setTitle(
         EligibilityBundleBuilder.getStudyAcronym(study) + " eligibility attrition funnel");
+
+    // Measure.library is normally CQL logic backing a computed score - nothing here is evaluated
+    // that way, but it's still the correct, spec-native place to record which criterion Libraries
+    // this Measure's funnel steps were derived from, one reference per distinct Library (a
+    // criterion Library referenced by more than one characteristic would otherwise be listed
+    // once per use).
+    steps.stream()
+        .map(step -> step.criterion().library().getIdElement().getIdPart())
+        .distinct()
+        .forEach(libraryId -> measure.addLibrary("Library/" + libraryId));
+
     return measure;
   }
 
