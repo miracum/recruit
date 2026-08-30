@@ -12,8 +12,40 @@ permissions:
   contents: read
 
 jobs:
+  build-ig:
+    name: Build FHIR IG
+    runs-on: ubuntu-24.04
+    container: ghcr.io/miracum/ig-build-tools:v2.2.47@sha256:c58ede7211013eedbc2819bcd4843996dcfc1998e04a0fc84740c2cf3b04c6f3
+    steps:
+      - name: Add workspace as safe directory
+        run: |
+          git config --global --add safe.directory /__w/recruit/recruit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Cache FHIR packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: /root/.fhir/packages
+          key: fhir-packages-${{ hashFiles('fhir/package.json') }}
+
+      - name: Build FHIR IG
+        working-directory: fhir/ig
+        run: java -jar /usr/local/bin/publisher.jar -ig ig.ini -tx n/a
+
+      - name: Upload FHIR IG output
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: fhir-ig
+          path: fhir/ig/output
+          retention-days: 1
+
   deploy:
     name: Deploy Documentation
+    needs:
+      - build-ig
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -28,12 +60,14 @@ jobs:
       - run: pip install --require-hashes -r docs/requirements.txt
       - run: mkdocs build --strict --verbose --site-dir=./site
 
-      # - name: build FHIR IG
-      #   uses: ghcr.io/miracum/ig-build-tools:v1.0.74@sha256:c33b9cef9076d91f5caa5f4229b0b3591ec8edbfe9986a40b981b1ee6394287c
-      #   working-directory: fhir/ig
-      #   run: java -jar /usr/local/bin/publisher.jar -ig ig.ini
-      # - name: copy FHIR IG output into mkdocs site
-      #   run: cp -r fhir/ig/output/ site/fhir
+      - name: Download FHIR IG output
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: fhir-ig
+          path: fhir/ig/output
+
+      - name: Copy FHIR IG output into mkdocs site
+        run: cp -r fhir/ig/output/. site/fhir
 
       - run: mkdocs gh-deploy --force
         if: ${{ github.event_name != 'pull_request' }}
