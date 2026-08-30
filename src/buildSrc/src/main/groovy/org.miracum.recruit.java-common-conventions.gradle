@@ -13,9 +13,9 @@ group = 'org.miracum.recruit'
 version = '10.5.7' // x-release-please-version
 
 java {
-  toolchain {
-    languageVersion = JavaLanguageVersion.of(25)
-  }
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
 }
 
 repositories {

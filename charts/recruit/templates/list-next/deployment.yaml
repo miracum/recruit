@@ -1,0 +1,250 @@
+{{- with .Values.listNext -}}
+{{- if .enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "recruit.fullname" $ }}-list-next
+  labels:
+    {{- include "recruit.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: list-next
+  {{- with $.Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .replicaCount }}
+  revisionHistoryLimit: {{ .revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      {{- include "recruit.matchLabels" $ | nindent 6 }}
+      app.kubernetes.io/component: list-next
+  template:
+    metadata:
+      labels:
+        {{- include "recruit.podLabels" $ | nindent 8 }}
+        app.kubernetes.io/component: list-next
+        {{- with .extraPodLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with $.Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with $.Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .podSecurityContext | nindent 8 }}
+      serviceAccountName: {{ include "recruit.serviceAccountName" (dict "context" . "component" "list-next" "root" $) }}
+      automountServiceAccountToken: {{ .serviceAccount.automountServiceAccountToken }}
+      terminationGracePeriodSeconds: {{ .terminationGracePeriodSeconds }}
+      initContainers:
+        - name: wait-for-migration
+          image: {{ include "recruit.kubectl.image" $ }}
+          imagePullPolicy: IfNotPresent
+          {{- with $.Values.restrictedContainerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: JOB_NAME
+              value: {{ include "recruit.listNext.migrationJobName" $ }}
+            - name: NAMESPACE
+              value: {{ $.Release.Namespace }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              i=0
+              max_attempts={{ .migrationJob.waitMaxAttempts }}
+              while true; do
+                phase="$(kubectl get job "$JOB_NAME" -n "$NAMESPACE" \
+                  -o jsonpath='{.status.conditions[?(@.type=="Complete")].status}:{.status.conditions[?(@.type=="Failed")].status}')"
+                complete="${phase%%:*}"
+                failed="${phase##*:}"
+                if [ "$complete" = "True" ]; then
+                  echo "$(date): migration Job $JOB_NAME completed.";
+                  exit 0
+                fi
+                if [ "$failed" = "True" ]; then
+                  echo "$(date): migration Job $JOB_NAME failed - see 'kubectl logs job/$JOB_NAME -n $NAMESPACE'.";
+                  exit 1
+                fi
+                i=$((i + 1))
+                if [ "$i" -ge "$max_attempts" ]; then
+                  echo "$(date): timed out waiting for migration Job $JOB_NAME to complete.";
+                  exit 1
+                fi
+                echo "$(date): Waiting for migration Job $JOB_NAME to complete ($i/$max_attempts)";
+                sleep {{ .migrationJob.waitPollIntervalSeconds }};
+              done
+          volumeMounts:
+            - name: wait-for-migration-token
+              mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+              readOnly: true
+        - name: wait-for-fhir-server
+          image: {{ include "recruit.curl.image" $ }}
+          imagePullPolicy: IfNotPresent
+          {{- with $.Values.restrictedContainerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: FHIR_URL
+              value: {{ include "recruit.fhirserver.url" $ }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              until [ "$(curl -s -o /dev/null -L -w '%{http_code}' "$FHIR_URL/metadata")" == "200" ]; do
+                echo "$(date): Waiting for FHIR server @ $FHIR_URL to be up";
+                sleep 15;
+              done;
+      containers:
+        - name: list-next
+          image: "{{ .image.registry }}/{{ .image.repository }}:{{ .image.tag }}"
+          securityContext:
+            {{- toYaml .securityContext | nindent 12 }}
+          imagePullPolicy: {{ .image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: http-metrics
+              containerPort: 8081
+              protocol: TCP
+          {{- if .lifecycle.enabled }}
+          lifecycle:
+            {{- include "common.tplvalues.render" (dict "value" (omit .lifecycle "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .livenessProbe.enabled }}
+          livenessProbe:
+            {{- include "common.tplvalues.render" (dict "value" (omit .livenessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .readinessProbe.enabled }}
+          readinessProbe:
+            {{- include "common.tplvalues.render" (dict "value" (omit .readinessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .startupProbe.enabled }}
+          startupProbe:
+            {{- include "common.tplvalues.render" (dict "value" (omit .startupProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .resources }}
+          resources: {{- toYaml .resources | nindent 12 }}
+          {{- else if ne .resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .resourcesPreset) | nindent 12 }}
+          {{- end }}
+          env:
+            - name: Fhir__BaseUrl
+              value: {{ include "recruit.fhirserver.url" $ }}
+            - name: Auth__Disabled
+              value: {{ .auth.enabled | ternary "false" "true" | quote }}
+            {{- if .auth.enabled }}
+            - name: Oidc__Authority
+              value: {{ .auth.oidc.authority | quote }}
+            - name: Oidc__ClientId
+              value: {{ .auth.oidc.clientId | quote }}
+            - name: Oidc__ClientSecret
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "recruit.listNext.oidc.secretName" $ }}
+                  key: {{ include "recruit.listNext.oidc.secretKey" $ }}
+            - name: Oidc__RoleClaimType
+              value: {{ .auth.oidc.roleClaimType | quote }}
+            {{- end }}
+            - name: ConnectionStrings__AppDb
+              value: {{ .database.connectionString | quote }}
+            {{- if .database.username }}
+            - name: PGUSER
+              value: {{ .database.username | quote }}
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "recruit.listNext.database.secretName" $ }}
+                  key: {{ include "recruit.listNext.database.secretKey" $ }}
+            {{- end }}
+            - name: Notifications__NewSuggestionWindowDays
+              value: {{ .notifications.newSuggestionWindowDays | quote }}
+            - name: Notifications__StalledLeadWindowDays
+              value: {{ .notifications.stalledLeadWindowDays | quote }}
+            - name: Notifications__ScanIntervalSeconds
+              value: {{ .notifications.scanIntervalSeconds | quote }}
+            - name: NotifyMailer__ScreeningListLinkTemplate
+              value: {{ include "recruit.listNext.mail.screeningListLinkTemplate" $ }}
+            - name: NotifyMailer__From
+              value: {{ .notifyMailer.from | quote }}
+            - name: NotifyMailer__SubjectTemplate
+              value: {{ .notifyMailer.subjectTemplate | quote }}
+            - name: NotifyMailer__SmtpHost
+              {{- if $.Values.mailhog.enabled }}
+              value: {{ include "recruit.mailhog.fullname" $ }}
+              {{- else }}
+              value: {{ .notifyMailer.smtp.host | quote }}
+              {{- end }}
+            - name: NotifyMailer__SmtpPort
+              {{- if $.Values.mailhog.enabled }}
+              value: "1025"
+              {{- else }}
+              value: {{ .notifyMailer.smtp.port | quote }}
+              {{- end }}
+            - name: NotifyMailer__SmtpUsername
+              {{- if $.Values.mailhog.enabled }}
+              value: "mailhog"
+              {{- else }}
+              value: {{ .notifyMailer.smtp.username | quote }}
+              {{- end }}
+            - name: NotifyMailer__SmtpPassword
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "recruit.listNext.mail.secretName" $ }}
+                  key: smtp-password
+            {{- if .extraEnv }}
+            {{ toYaml .extraEnv | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp-volume
+          {{- if .extraVolumeMounts }}
+            {{- toYaml .extraVolumeMounts | nindent 12 }}
+          {{- end }}
+      {{- with .nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      volumes:
+        - name: tmp-volume
+          emptyDir: {}
+        - name: wait-for-migration-token
+          projected:
+            sources:
+              - serviceAccountToken:
+                  path: token
+                  expirationSeconds: 3607
+              - configMap:
+                  name: kube-root-ca.crt
+                  items:
+                    - key: ca.crt
+                      path: ca.crt
+              - downwardAPI:
+                  items:
+                    - path: namespace
+                      fieldRef:
+                        fieldPath: metadata.namespace
+      {{- if .extraVolumes }}
+        {{- toYaml .extraVolumes | nindent 8 }}
+      {{- end }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,92 @@
+{{- if and .Values.createSearchParameters.enabled (or .Values.fhirserver.enabled (ne .Values.externalFhirServer.url "")) -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "recruit.fullname" . }}-search-parameters
+  labels:
+    {{- include "recruit.labels" . | nindent 4 }}
+    app.kubernetes.io/component: search-parameters
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: {{ .Values.createSearchParameters.backoffLimit }}
+  {{- with .Values.createSearchParameters.ttlSecondsAfterFinished }}
+  ttlSecondsAfterFinished: {{ . }}
+  {{- end }}
+  template:
+    metadata:
+      {{- with .Values.createSearchParameters.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "recruit.labels" . | nindent 8 }}
+        app.kubernetes.io/component: search-parameters
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: wait-for-fhir-server
+          image: {{ include "recruit.curl.image" . }}
+          imagePullPolicy: IfNotPresent
+          {{- with .Values.restrictedContainerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.createSearchParameters.resources }}
+          resources: {{- toYaml .Values.createSearchParameters.resources | nindent 12 }}
+          {{- else if ne .Values.createSearchParameters.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.createSearchParameters.resourcesPreset) | nindent 12 }}
+          {{- end }}
+          env:
+            - name: FHIR_URL
+              value: {{ include "recruit.fhirserver.url" . }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              until [ "$(curl -s -o /dev/null -L -w '%{http_code}' "$FHIR_URL/metadata")" == "200" ]; do
+                echo "$(date): Waiting for FHIR server to be up";
+                sleep 15;
+              done;
+      containers:
+        - name: search-parameters
+          image: {{ include "recruit.curl.image" . }}
+          imagePullPolicy: IfNotPresent
+          {{- with .Values.restrictedContainerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.createSearchParameters.resources }}
+          resources: {{- toYaml .Values.createSearchParameters.resources | nindent 12 }}
+          {{- else if ne .Values.createSearchParameters.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.createSearchParameters.resourcesPreset) | nindent 12 }}
+          {{- end }}
+          env:
+            - name: FHIR_URL
+              value: {{ include "recruit.fhirserver.url" . }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+
+              echo "Installing SearchParameter resources on $FHIR_URL..."
+              curl --fail-with-body --retry 5 --retry-delay 5 --retry-connrefused --retry-all-errors \
+                -X POST \
+                -H "Content-Type: application/fhir+json" \
+                --data @/fhir/search-parameters-transaction-upsert.json \
+                "$FHIR_URL"
+          volumeMounts:
+            - name: search-parameters
+              mountPath: /fhir
+              readOnly: true
+      volumes:
+        - name: search-parameters
+          configMap:
+            name: {{ include "recruit.fullname" . }}-search-parameters
+{{- end -}}

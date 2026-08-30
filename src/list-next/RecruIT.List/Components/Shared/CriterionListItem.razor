@@ -1,0 +1,24 @@
+@inject IStringLocalizer<SharedResources> Localizer
+
+<li class="flex items-start gap-2">
+    <span class="criteria-bullet" aria-hidden="true"></span>
+    @if (!string.IsNullOrEmpty(Criterion.Sql))
+    {
+        <BbPopover>
+            <BbPopoverTrigger AsChild="false" Class="text-left hover:underline">@Criterion.DisplayText</BbPopoverTrigger>
+            <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.Start" style="width: 36rem;">
+                <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.PatientList.CriterionSqlLabel"]</span>
+                <pre class="mt-2 rounded-md border bg-muted p-2 text-xs" style="max-height: 16rem; overflow: auto;"><code>@Criterion.Sql</code></pre>
+            </BbPopoverContent>
+        </BbPopover>
+    }
+    else
+    {
+        <span>@Criterion.DisplayText</span>
+    }
+</li>
+
+@code {
+    [Parameter, EditorRequired]
+    public required CriterionDefinitionDto Criterion { get; set; }
+}

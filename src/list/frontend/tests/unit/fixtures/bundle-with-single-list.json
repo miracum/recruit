@@ -16,7 +16,7 @@
         "id": "792",
         "extension": [
           {
-            "url": "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy",
+            "url": "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study",
             "valueReference": {
               "reference": "ResearchStudy/790",
               "display": "PROSa"

@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: "jdbc:postgresql://localhost:5432/superset"
+    username: "superset"
+    password: "superset"
+
+fhir:
+  url: "http://recruit-fhir-server.127.0.0.1.nip.io/fhir"
+
+logging:
+  level:
+    org:
+      springframework: "INFO"
+      miracum:
+        recruit:
+          supersetlibrarysync: "DEBUG"

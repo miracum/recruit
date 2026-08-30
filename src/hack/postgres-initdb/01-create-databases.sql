@@ -1,0 +1,4 @@
+CREATE DATABASE fhir;
+CREATE DATABASE metastore;
+CREATE DATABASE recruit_notify_jobs;
+CREATE DATABASE recruit;

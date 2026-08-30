@@ -1,0 +1,38 @@
+spring:
+  datasource:
+    url: "jdbc:trino://localhost:8080/fhir/default"
+    username: "trino"
+    password: ""
+
+query-sql-on-fhir:
+  schedule:
+    # every 5 seconds
+    cron: "*/5 * * * * *"
+  funnel:
+    enabled: true
+
+# Overrides the application.yml default of disabled: false here is otel.sdk.disabled's own
+# standard OTEL_SDK_DISABLED var, just flipped for local dev. No endpoint override needed - the
+# OTLP default of localhost:4318 already matches where src/hack/compose.yaml publishes jaeger's
+# OTLP/HTTP receiver for host-side processes.
+otel:
+  sdk:
+    disabled: false
+
+server:
+  port: 8090
+
+fhir:
+  url: "http://localhost:8082/fhir"
+
+sql-on-fhir:
+  url: ""
+
+# to configure logging levels
+logging:
+  level:
+    org:
+      springframework: "INFO"
+      miracum:
+        recruit:
+          querysqlonfhir: "DEBUG"

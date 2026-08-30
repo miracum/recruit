@@ -1,0 +1,45 @@
+/*
+ * Typed Java constants (CodeSystem/Profile/Extension canonical URLs) for the recruIT FHIR
+ * Implementation Guide (../../fhir/ig), generated via ig-codegen. See README.md for how to
+ * regenerate.
+ */
+
+// Scoped to this build script only (not buildSrc): ig-codegen backs the generateIgConstants task
+// below and nothing else in this module - it has no business being on every other module's build
+// script classpath.
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'io.github.diz-uker:ig-codegen:0.2.14'
+    }
+}
+
+import io.github.dizuker.igcodegen.IgPackageScanner
+import io.github.dizuker.igcodegen.JavaConstantsGenerator
+import tools.jackson.databind.ObjectMapper
+
+plugins {
+    id 'org.miracum.recruit.java-library-conventions'
+}
+
+dependencies {
+    api 'ca.uhn.hapi.fhir:hapi-fhir-structures-r4:8.10.0'
+    api 'org.jspecify:jspecify:1.0.0'
+}
+
+tasks.register('generateIgConstants') {
+    group = 'codegen'
+    description = 'Regenerates the constant classes'
+    def resourcesDir = layout.projectDirectory.dir('../../fhir/ig/fsh-generated/resources')
+    def outputDir = layout.projectDirectory.dir('src/main/java')
+    doLast {
+        def scanner = new IgPackageScanner(new ObjectMapper())
+        def model = scanner.scan(resourcesDir.asFile.toPath(), 'io.github.miracum.recruit', '0.1.0')
+        def generatedFile = JavaConstantsGenerator.writeTo(
+            model, 'io.github.miracum.recruit', 'Recruit', outputDir.asFile.toPath())
+        logger.lifecycle('Generated {}', generatedFile)
+    }
+    notCompatibleWithConfigurationCache('reads from the sushi-built fhir/ig/fsh-generated output')
+}

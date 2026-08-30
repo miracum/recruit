@@ -1,0 +1,259 @@
+{
+  "resourceType": "ImplementationGuide",
+  "id": "recruit",
+  "url": "https://miracum.github.io/recruit/fhir/ImplementationGuide/recruit",
+  "version": "0.1.0",
+  "name": "RecruITIG",
+  "title": "recruIT FHIR IG",
+  "status": "active",
+  "publisher": "MIRACUM",
+  "contact": [
+    {
+      "name": "MIRACUM",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "https://miracum.org"
+        }
+      ]
+    }
+  ],
+  "description": "FHIR Implementation Guide for the recruIT clinical trial patient recruitment support system.",
+  "packageId": "recruit",
+  "license": "AGPL-3.0-or-later",
+  "fhirVersion": [
+    "4.0.1"
+  ],
+  "definition": {
+    "resource": [
+      {
+        "reference": {
+          "reference": "StructureDefinition/belongs-to-study"
+        },
+        "name": "Clinical study reference",
+        "description": "A reference to the clinical study that a resource concerns - a List's screened candidates, or a MeasureReport's eligibility attrition funnel",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "StructureDefinition/eligibility-assessment-derived-from-library"
+        },
+        "name": "Eligibility assessment derived-from Library",
+        "description": "A reference to the eligibility-criterion Library resource this assessment - or, on a MeasureReport's attrition-funnel population, this cumulative step - was derived from. Neither Observation.derivedFrom nor MeasureReport.group.population has a slot accepting Library as a target type, so this extension carries the reference instead.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "NamingSystem/eligibility-assessment-id"
+        },
+        "name": "EligibilityAssessmentIdentifierSystem",
+        "description": "The identifier system for a per-criterion eligibility Observation's business identifier. Derived from the ResearchSubject identifier and the Library identifier of the eligibility criterion.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "NamingSystem/eligibility-funnel-measure-id"
+        },
+        "name": "EligibilityFunnelMeasureIdentifierSystem",
+        "description": "The identifier system for a study's attrition-funnel Measure's business identifier - used as the conditional-update key, keyed on the same value as the study's own identifier.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "NamingSystem/eligibility-funnel-report-id"
+        },
+        "name": "EligibilityFunnelReportIdentifierSystem",
+        "description": "The identifier system for a study's attrition-funnel MeasureReport's business identifier - used as the conditional-update key, keyed on the same value as the study's own identifier.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "NamingSystem/eligibility-group-id"
+        },
+        "name": "EligibilityGroupIdentifierSystem",
+        "description": "The identifier system for the Group containing references to one or more eligibility criteria Library resources",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "NamingSystem/eligibility-library-id"
+        },
+        "name": "EligibilityLibraryIdentifierSystem",
+        "description": "The identifier system for a criterion expressed in a Library resource",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "SearchParameter/group-characteristic"
+        },
+        "name": "GroupCharacteristic",
+        "description": "An entity referenced in a characteristic",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "SearchParameter/observation-derived-from-library"
+        },
+        "name": "ObservationDerivedFromLibrary",
+        "description": "The Library resource containing the eligibility criterion this Observation was derived from",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "StructureDefinition/eligibility-assessment"
+        },
+        "name": "recruIT eligibility assessment",
+        "description": "A per-criterion eligibility Assessment produced by the query engine, indicating whether a single eligibility criterion is met for a ResearchSubject.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "CodeSystem/eligibility-assessment-category"
+        },
+        "name": "recruIT eligibility assessment category",
+        "description": "A custom, non-standard Observation.category code identifying the per-criterion eligibility Assessments produced by the query eligibility engine..",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "ValueSet/eligibility-assessment-result"
+        },
+        "name": "recruIT eligibility assessment result",
+        "description": "The SNOMED CT qualifier values a per-criterion eligibility assessment's value may be set to, indicating whether the criterion is met, not met, unknown, or indeterminate.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "CodeSystem/eligibility-funnel-population-type"
+        },
+        "name": "recruIT eligibility funnel population type",
+        "description": "The two population kinds making up a study's attrition-funnel MeasureReport.group.population: the total screened population, and the population remaining after cumulatively applying one more criterion.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "CodeSystem/screening-list-type"
+        },
+        "name": "recruIT screening list type",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "StructureDefinition/research-study"
+        },
+        "name": "RecruitResearchStudy",
+        "description": "A profile for the ResearchStudy resource used to represent a clinical trial.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "ResearchStudy/RecruitResearchStudyExample"
+        },
+        "name": "RecruitResearchStudyExample",
+        "description": "An example of a recruIT ResearchStudy.",
+        "exampleCanonical": "https://miracum.github.io/recruit/fhir/StructureDefinition/research-study"
+      },
+      {
+        "reference": {
+          "reference": "Bundle/recruit-search-parameters-transaction"
+        },
+        "name": "RecruitSearchParametersTransaction",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "SearchParameter/researchstudy-enrollment"
+        },
+        "name": "ResearchStudyEnrollment",
+        "description": "The Group resource representing the study enrollment",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "NamingSystem/research-subject-id"
+        },
+        "name": "ResearchSubjectIdentifierSystem",
+        "description": "The identifier system for a recruIT-created ResearchSubject's business identifier",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "StructureDefinition/screening-list"
+        },
+        "name": "ScreeningList",
+        "description": "A profile for the List resource used to represent a list of identified study candidates.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "NamingSystem/screening-list-id"
+        },
+        "name": "ScreeningListIdentifierSystem",
+        "description": "The identifier system for a screening List's business identifier, which is the study's own identifier - used as the conditional-update key for a study's screening List.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "SearchParameter/belongs-to-study"
+        },
+        "name": "SearchParameterBelongsToStudy",
+        "description": "The ResearchStudy a List or MeasureReport pertains to",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "NamingSystem/superset-synced-eligibility-library-id"
+        },
+        "name": "SupersetSyncedEligibilityLibraryIdentifierSystem",
+        "description": "The identifier system for a criterion expressed in a Library resource when synced from a Superset instance.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "List/ScreeningListExample"
+        },
+        "name": "Test",
+        "description": "An example of a screening list.",
+        "exampleCanonical": "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list"
+      },
+      {
+        "reference": {
+          "reference": "NamingSystem/ui-created-eligibility-library-id"
+        },
+        "name": "UICreatedEligibilityLibraryIdentifierSystem",
+        "description": "The identifier system for a criterion expressed in a Library resource created via the UI.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "NamingSystem/ui-created-research-study-id"
+        },
+        "name": "UICreatedResearchStudyIdentifierSystem",
+        "description": "The identifier system for a ResearchStudy resource created via the UI.",
+        "exampleBoolean": false
+      }
+    ],
+    "page": {
+      "nameUrl": "toc.html",
+      "title": "Table of Contents",
+      "generation": "html",
+      "page": [
+        {
+          "nameUrl": "index.html",
+          "title": "Home",
+          "generation": "markdown"
+        }
+      ]
+    },
+    "parameter": [
+      {
+        "code": "copyrightyear",
+        "value": "2022+"
+      },
+      {
+        "code": "releaselabel",
+        "value": "trial-use"
+      }
+    ]
+  }
+}

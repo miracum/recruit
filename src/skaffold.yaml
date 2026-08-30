@@ -5,17 +5,25 @@ metadata:
 build:
   artifacts:
     - image: ghcr.io/miracum/recruit/query
-      jib:
-        project: query
-        type: gradle
-    - image: ghcr.io/miracum/recruit/query-fhir-trino
-      jib:
-        project: query-fhir-trino
-        type: gradle
+      docker:
+        dockerfile: Dockerfile
+        buildArgs:
+          MODULE: query
+    - image: ghcr.io/miracum/recruit/query-sql-on-fhir
+      docker:
+        dockerfile: Dockerfile
+        buildArgs:
+          MODULE: query-sql-on-fhir
     - image: ghcr.io/miracum/recruit/notify
-      jib:
-        project: notify
-        type: gradle
+      docker:
+        dockerfile: Dockerfile
+        buildArgs:
+          MODULE: notify
+    - image: ghcr.io/miracum/recruit/list-next
+      docker:
+        dockerfile: Dockerfile
+        buildArgs:
+          MODULE: list-next
     - image: ghcr.io/miracum/recruit/list
       context: list
       docker:

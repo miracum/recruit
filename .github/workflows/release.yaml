@@ -15,8 +15,8 @@ on:
         description: "Digest (sha256:...) of the released list image, as produced by its build job"
         required: true
         type: string
-      query-fhir-trino-image-digest:
-        description: "Digest (sha256:...) of the released query-fhir-trino image, as produced by its build job"
+      query-sql-on-fhir-image-digest:
+        description: "Digest (sha256:...) of the released query-sql-on-fhir image, as produced by its build job"
         required: true
         type: string
     secrets:
@@ -70,14 +70,14 @@ jobs:
           LIST_DIGEST: ${{ inputs.list-image-digest }}
           QUERY_DIGEST: ${{ inputs.query-image-digest }}
           NOTIFY_DIGEST: ${{ inputs.notify-image-digest }}
-          QUERY_FHIR_TRINO_DIGEST: ${{ inputs.query-fhir-trino-image-digest }}
+          QUERY_SQL_ON_FHIR_DIGEST: ${{ inputs.query-sql-on-fhir-image-digest }}
         run: |
           json="$(jq -cn \
             --arg list "${LIST_DIGEST}" \
             --arg query "${QUERY_DIGEST}" \
             --arg notify "${NOTIFY_DIGEST}" \
-            --arg query_fhir_trino "${QUERY_FHIR_TRINO_DIGEST}" \
-            '{"list": $list, "query": $query, "notify": $notify, "query-fhir-trino": $query_fhir_trino}')"
+            --arg query_sql_on_fhir "${QUERY_SQL_ON_FHIR_DIGEST}" \
+            '{"list": $list, "query": $query, "notify": $notify, "query-sql-on-fhir": $query_sql_on_fhir}')"
           echo "json=${json}" >> "$GITHUB_OUTPUT"
 
       - name: Add helm repos and update deps
@@ -90,7 +90,7 @@ jobs:
           DIGESTS: ${{ steps.digests.outputs.json }}
         run: |
           # maps the values.yaml key for each module's image block to its module/repository name
-          declare -A key_for=( [list]=list [query]=query [notify]=notify [query-fhir-trino]=queryFhirTrino )
+          declare -A key_for=( [list]=list [query]=query [notify]=notify [query-sql-on-fhir]=querySqlOnFhir )
           for module in "${!key_for[@]}"; do
             key="${key_for[$module]}"
             digest="$(jq -r --arg k "${module}" '.[$k]' <<<"${DIGESTS}")"
@@ -150,7 +150,7 @@ jobs:
         env:
           DIGESTS: ${{ needs.publish-helm-chart.outputs.image-digests }}
         run: |
-          for module in list query notify query-fhir-trino; do
+          for module in list query notify query-sql-on-fhir; do
             digest="$(jq -r --arg k "${module}" '.[$k]' <<<"${DIGESTS}")"
             current="$(yq -r ".services.${module}.image" docker-compose/docker-compose.yaml)"
             updated="$(sed -E "s/(RECRUIT_IMAGE_TAG:-[^}]*)/\1@${digest}/" <<<"${current}")"

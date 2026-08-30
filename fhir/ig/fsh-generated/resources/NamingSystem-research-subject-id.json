@@ -1,0 +1,16 @@
+{
+  "resourceType": "NamingSystem",
+  "id": "research-subject-id",
+  "description": "The identifier system for a recruIT-created ResearchSubject's business identifier",
+  "name": "ResearchSubjectIdentifier",
+  "status": "active",
+  "kind": "identifier",
+  "date": "2026-08-15",
+  "uniqueId": [
+    {
+      "type": "uri",
+      "value": "https://miracum.github.io/recruit/fhir/identifiers/research-subject-id",
+      "preferred": true
+    }
+  ]
+}

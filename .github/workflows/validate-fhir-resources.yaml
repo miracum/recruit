@@ -9,16 +9,30 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   validate-fhir-resource:
     name: Validate FHIR resources
     runs-on: ubuntu-24.04
-    container: ghcr.io/miracum/ig-build-tools:v2.2.47@sha256:c58ede7211013eedbc2819bcd4843996dcfc1998e04a0fc84740c2cf3b04c6f3
+    container: ghcr.io/miracum/ig-build-tools:v2.2.48@sha256:15cdabfe5eccf66da197b19fa4e723ff7ba80ac127948d3bcf1164b5631dccc8
     steps:
+      - name: Add workspace as safe directory
+        run: |
+          git config --global --add safe.directory /__w/recruit/recruit
+
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
+      - name: Cache FHIR packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: /root/.fhir/packages
+          key: fhir-packages-${{ hashFiles('fhir/package.json') }}
 
       - name: Restore FHIR package dependencies
         working-directory: fhir/
@@ -27,6 +41,20 @@ jobs:
 
       - name: Validate generated FHIR resources
         working-directory: fhir/
-        shell: bash
         run: |
           find ../src/ -name "*.fhir.json" -exec fhir validate --verbose --fail "{}" \;
+
+      - name: Check fsh-generated search-parameters Bundle is up-to-date with the FSH source
+        continue-on-error: true
+        run: |
+          # clean rebuild: a stale committed file left over from a since-renamed FSH
+          # instance wouldn't otherwise show up as a diff, since sushi doesn't delete output
+          # for resources it no longer generates.
+          rm -rf fhir/ig/fsh-generated
+          sushi --snapshot fhir/ig
+          if git diff --exit-code -- fhir/ig/fsh-generated; then
+            echo -e "\033[0;32mfsh-generated search-parameters Bundle is up to date\033[0m ✔"
+          else
+            echo -e "\033[0;31mfsh-generated search-parameters Bundle is outdated! Please run \`npx fsh-sushi --snapshot fhir/ig\` locally and push the changes.\033[0m ❌"
+            exit 1
+          fi

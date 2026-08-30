@@ -59,11 +59,14 @@ Extra labels to apply to every pod
 {{- end -}}
 
 {{/*
-Create the name of the service account to use
+Create the name of the service account to use.
+Expects a dict with "context" (the component's values, e.g. .Values.notify), "component" (e.g.
+"notify") and "root" (the chart's root context, i.e. $) - root is needed because "recruit.fullname"
+reads .Values/.Chart/.Release from the top level, which isn't reachable from "context" alone.
 */}}
 {{- define "recruit.serviceAccountName" -}}
 {{- if .context.serviceAccount.create }}
-{{- default (printf "%s-%s" (include "recruit.fullname" .) .component) .context.serviceAccount.name }}
+{{- default (printf "%s-%s" (include "recruit.fullname" .root) .component) .context.serviceAccount.name }}
 {{- else }}
 {{- default "default" .context.serviceAccount.name }}
 {{- end }}
@@ -228,6 +231,41 @@ Image used to for the PostgreSQL readiness init containers
 {{- end -}}
 
 {{/*
+curlimages/curl image used by various init containers and helper Jobs across the chart.
+*/}}
+{{- define "recruit.curl.image" -}}
+{{- $registry := .Values.curl.image.registry -}}
+{{- $repository := .Values.curl.image.repository -}}
+{{- $tag := .Values.curl.image.tag -}}
+{{ printf "%s/%s:%s" $registry $repository $tag}}
+{{- end -}}
+
+{{/*
+kubectl image used by the wait-for-migration initContainer to poll the list-next migration Job's
+status.
+*/}}
+{{- define "recruit.kubectl.image" -}}
+{{- $registry := .Values.kubectl.image.registry -}}
+{{- $repository := .Values.kubectl.image.repository -}}
+{{- $tag := .Values.kubectl.image.tag -}}
+{{ printf "%s/%s:%s" $registry $repository $tag}}
+{{- end -}}
+
+{{/*
+Name of the list-next DB-migration Job, derived from the list-next image tag (not
+.Release.Revision - unreliable under GitOps rendering via `helm template`, since GitOps
+controllers don't track real Helm release revisions). Same tag -> same name -> idempotent
+re-syncs; changed tag -> new name -> new Job, with the old one pruned by the GitOps controller (or
+via ttlSecondsAfterFinished as a fallback). Reserves the trailing 17 characters ("-migrate-" + 8
+hex chars) so the hash suffix is never truncated away. Job names are capped at 63 characters by
+Kubernetes - they back the "job-name" pod label, whose value is limited by K8s label-value rules.
+*/}}
+{{- define "recruit.listNext.migrationJobName" -}}
+{{- $prefix := printf "%s-list-next" (include "recruit.fullname" .) | trunc 46 | trimSuffix "-" -}}
+{{- printf "%s-migrate-%s" $prefix (.Values.listNext.image.tag | sha256sum | trunc 8) -}}
+{{- end -}}
+
+{{/*
 Create a default fully qualified postgresql name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
@@ -241,10 +279,10 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 Return the Trino credentials secret name
 */}}
 {{- define "recruit.trino.secret.name" -}}
-{{- if .Values.queryFhirTrino.trino.auth.existingSecret.name  -}}
-    {{ printf "%s" (tpl .Values.queryFhirTrino.trino.auth.existingSecret.name $) }}
+{{- if .Values.querySqlOnFhir.trino.auth.existingSecret.name  -}}
+    {{ printf "%s" (tpl .Values.querySqlOnFhir.trino.auth.existingSecret.name $) }}
 {{- else -}}
-    {{ printf "%s-%s" (include "recruit.fullname" . ) "query-fhir-trino-secret" }}
+    {{ printf "%s-%s" (include "recruit.fullname" . ) "query-sql-on-fhir-secret" }}
 {{- end -}}
 {{- end -}}
 
@@ -252,8 +290,8 @@ Return the Trino credentials secret name
 Return the Trino credentials secret key
 */}}
 {{- define "recruit.trino.secret.key" -}}
-{{- if .Values.queryFhirTrino.trino.auth.existingSecret.name  -}}
-    {{ printf "%s" (tpl .Values.queryFhirTrino.trino.auth.existingSecret.key $) }}
+{{- if .Values.querySqlOnFhir.trino.auth.existingSecret.name  -}}
+    {{ printf "%s" (tpl .Values.querySqlOnFhir.trino.auth.existingSecret.key $) }}
 {{- else -}}
     {{ printf "%s" "trino-password" }}
 {{- end -}}
@@ -263,5 +301,5 @@ Return the Trino credentials secret key
 Return the Trino password
 */}}
 {{- define "recruit.trino.password" -}}
-    {{ printf "%s" (tpl .Values.queryFhirTrino.trino.auth.password $) }}
+    {{ printf "%s" (tpl .Values.querySqlOnFhir.trino.auth.password $) }}
 {{- end -}}

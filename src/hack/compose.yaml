@@ -1,29 +1,6 @@
 services:
-  traefik:
-    image: docker.io/library/traefik:v3.7.8@sha256:4299bbed850421258fc5448c2e0e6ad350981d4d335a68de11b92448aedbefe5
-    restart: unless-stopped
-    ipc: none
-    security_opt:
-      - "no-new-privileges:true"
-    cap_drop:
-      - ALL
-    read_only: true
-    command:
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-    ports:
-      - "127.0.0.1:80:80"
-    volumes:
-      # kics-scan ignore-line
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-    deploy:
-      resources:
-        limits:
-          memory: 128m
-
   fhir:
-    image: docker.io/hapiproject/hapi:v8.0.0@sha256:bf6ecbb4492361ae258a2bde6d4daf4c505b1a98e0925745aa0689e95b2d157e
+    image: docker.io/hapiproject/hapi:v8.10.0-3@sha256:55213612779ab3eeec919226b7bad378f0061ade823393a61d7dd46dd5087a3d
     restart: unless-stopped
     cap_drop:
       - ALL
@@ -40,7 +17,7 @@ services:
       - /app/target
     privileged: false
     environment:
-      SPRING_DATASOURCE_URL: "jdbc:postgresql://fhir-db:5432/fhir?currentSchema=public"
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://db:5432/fhir?currentSchema=public"
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_DATASOURCE_DRIVERCLASSNAME: org.postgresql.Driver
@@ -56,32 +33,30 @@ services:
       OTEL_LOGS_EXPORTER: "none"
       OTEL_TRACES_EXPORTER: "otlp"
       OTEL_SERVICE_NAME: "hapi-fhir-jpaserver"
-      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4318"
     depends_on:
-      traefik:
+      db:
         condition: service_started
-      fhir-db:
-        condition: service_started
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.fhir.loadbalancer.server.port=8080"
-      - "traefik.http.routers.fhir.rule=Host(`recruit-fhir-server.127.0.0.1.nip.io`)"
-      - "traefik.http.routers.fhir.entrypoints=web"
+    ports:
+      - "127.0.0.1:8082:8080"
 
-  fhir-db:
+  db:
     image: docker.io/library/postgres:18.4@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a
     restart: unless-stopped
     deploy:
       resources:
         limits:
-          memory: 512m
+          memory: 1024m
     ipc: private
     security_opt:
       - "no-new-privileges:true"
     privileged: false
     environment:
       POSTGRES_PASSWORD: postgres # pragma: allowlist secret
-      POSTGRES_DB: fhir
+    volumes:
+      - ./postgres-initdb:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "127.0.0.1:5432:5432"
 
   broadsea-atlasdb:
     image: docker.io/ohdsi/broadsea-atlasdb:2.3.0@sha256:25d5000bd02427ea992d5ad20b1a6f2e7807a673122f83494be4ab477a0f6bf9
@@ -146,10 +121,6 @@ services:
       OTEL_EXPORTER_JAEGER_ENDPOINT: "http://jaeger:14250"
     depends_on:
       - broadsea-atlasdb
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.ohdsi-webapi.rule=Host(`recruit-ohdsi.127.0.0.1.nip.io`) && PathPrefix(`/WebAPI`)"
-      - "traefik.http.routers.ohdsi-webapi.entrypoints=web"
 
   ohdsi-atlas:
     image: docker.io/ohdsi/atlas:2.15.0@sha256:6814e8c5b5366b50bc197b1eb2881689e5852784742b91b9636eec514f5a555e
@@ -172,10 +143,6 @@ services:
       WEBAPI_URL: ""
     volumes:
       - ./config-local.js:/usr/share/nginx/html/atlas/js/config-local.js:ro
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.ohdsi-atlas.rule=Host(`recruit-ohdsi.127.0.0.1.nip.io`) && PathPrefix(`/atlas`)"
-      - "traefik.http.routers.ohdsi-atlas.entrypoints=web"
 
   list:
     build:
@@ -203,11 +170,6 @@ services:
       OTEL_EXPORTER_JAEGER_AGENT_HOST: "jaeger"
     ports:
       - "127.0.0.1:8085:8080"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.recruit-list.loadbalancer.server.port=8080"
-      - "traefik.http.routers.recruit-list.rule=Host(`recruit-list.127.0.0.1.nip.io`)"
-      - "traefik.http.routers.recruit-list.entrypoints=web"
 
   notify:
     build:
@@ -274,13 +236,13 @@ services:
       QUERY_SCHEDULE_UNIXCRON: "* * * * *"
       QUERY_SELECTOR_MATCHLABELS: ""
 
-  query-fhir-trino:
+  query-sql-on-fhir:
     build:
       context: ..
       args:
-        MODULE_NAME: query-fhir-trino
+        MODULE_NAME: query-sql-on-fhir
     profiles:
-      - query-fhir-trino
+      - query-sql-on-fhir
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -294,27 +256,38 @@ services:
       SPRING_DATASOURCE_URL: "jdbc:trino://trino:8080/fhir/default"
       SPRING_DATASOURCE_USERNAME: "trino"
       SPRING_DATASOURCE_PASSWORD: ""
+      # Set this if you stand up a sql-on-fhir server (e.g. Pathling) separately.
+      SQL_ON_FHIR_URL: ""
+      OTEL_SDK_DISABLED: "false"
+      OTEL_METRICS_EXPORTER: "none"
+      OTEL_LOGS_EXPORTER: "none"
+      OTEL_TRACES_EXPORTER: "otlp"
+      OTEL_SERVICE_NAME: "query-sql-on-fhir"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4318"
     volumes:
       - type: tmpfs
         target: /tmp
         tmpfs:
           size: 1024
+    depends_on:
+      # ensures the Delta tables are converted, uploaded, and registered in the Hive metastore -
+      # i.e. actually queryable via Trino - before this module starts polling for studies.
+      warehousekeeper:
+        condition: service_completed_successfully
 
   jaeger:
     image: docker.io/jaegertracing/jaeger:2.20.0@sha256:46a886260e04002d8f45e213fc39063fa11a50446048fdaa64786fc0840cb9f8
+    environment:
+      COLLECTOR_OTLP_ENABLED: true
     ports:
       - "127.0.0.1:16686:16686"
       - "127.0.0.1:6831:6831/udp"
       - "127.0.0.1:6832:6832/udp"
       - "127.0.0.1:14250:14250/tcp"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.jaeger.loadbalancer.server.port=16686"
-      - "traefik.http.routers.jaeger.rule=Host(`recruit-jaeger.127.0.0.1.nip.io`)"
-      - "traefik.http.routers.jaeger.entrypoints=web"
+      - "127.0.0.1:4318:4318"
 
   maildev:
-    image: docker.io/maildev/maildev:2.2.1@sha256:180ef51f65eefebb0e7122d8308813c1fd7bff164bc440ce5a3c2feee167a810
+    image: docker.io/maildev/maildev:3.0.0-rc.1@sha256:ad6d46b7c47617c141961649a9ed5e50069aed53e94ca5359a59b3e1459925da
     restart: unless-stopped
     ipc: none
     security_opt:
@@ -332,28 +305,6 @@ services:
     ports:
       - "127.0.0.1:3025:1025"
       - "127.0.0.1:2080:1080"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.maildev.loadbalancer.server.port=1080"
-      - "traefik.http.routers.maildev.rule=Host(`recruit-maildev.127.0.0.1.nip.io`)"
-      - "traefik.http.routers.maildev.entrypoints=web"
-
-  notify-ha-db:
-    image: docker.io/library/postgres:18.4@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 512m
-    ipc: private
-    security_opt:
-      - "no-new-privileges:true"
-    privileged: false
-    environment:
-      POSTGRES_PASSWORD: postgres # pragma: allowlist secret
-      POSTGRES_DB: recruit_notify_jobs
-    ports:
-      - "127.0.0.1:6432:5432"
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.7.0@sha256:0f198be292568439d700cdbfb893e69a6009bb43a94a06a945b1d3d506c76b13
@@ -382,23 +333,17 @@ services:
         target: /opt/keycloak/data/import/recruit-realm-export.json
         read_only: true
     ports:
-      - 8083:8080
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
-      - "traefik.http.routers.keycloak.rule=Host(`recruit-keycloak.127.0.0.1.nip.io`)"
-      - "traefik.http.routers.keycloak.entrypoints=web"
+      - "127.0.0.1:8083:8080"
 
   minio:
-    image: docker.io/minio/minio:RELEASE.2025-07-23T15-54-02Z@sha256:d249d1fb6966de4d8ad26c04754b545205ff15a62e4fd19ebd0f26fa5baacbc0
-    profiles:
-      - trino
+    image: docker.io/minio/minio:RELEASE.2025-09-07T16-13-09Z@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e
     ipc: none
     security_opt:
       - "no-new-privileges:true"
     cap_drop:
       - ALL
     privileged: false
+    command: server /data --console-address ":9001"
     environment:
       MINIO_UPDATE: "off"
       MINIO_CALLHOME_ENABLE: "off"
@@ -417,8 +362,6 @@ services:
 
   wait-for-minio:
     image: docker.io/curlimages/curl:8.21.0@sha256:7c12af72ceb38b7432ab85e1a265cff6ae58e06f95539d539b654f2cfa64bb13
-    profiles:
-      - trino
     ipc: none
     security_opt:
       - "no-new-privileges:true"
@@ -442,8 +385,6 @@ services:
   create-bucket:
     image: docker.io/minio/minio:RELEASE.2025-07-23T15-54-02Z@sha256:d249d1fb6966de4d8ad26c04754b545205ff15a62e4fd19ebd0f26fa5baacbc0
     restart: on-failure
-    profiles:
-      - trino
     cap_drop:
       - ALL
     privileged: false
@@ -462,8 +403,6 @@ services:
   upload-to-fhir-server:
     # the image is overkill, but it is the only one that has the necessary tools and is up-to-date
     image: ghcr.io/chgl/kube-powertools:v2.5.61@sha256:f5b8f167380f8da88753a3e0c986e203e0cfdc75c851b0c0af48dcfec0c8df9f
-    profiles:
-      - trino
     ipc: none
     security_opt:
       - "no-new-privileges:true"
@@ -477,6 +416,7 @@ services:
     working_dir: /synthea/
     command:
       - |
+        set -euo pipefail
         until [ "$(curl -s -o /dev/null -L -w "%{http_code}" "$$FHIR_SERVER_BASE_URL/metadata")" == "200" ]; do
             echo "$(date): Waiting for FHIR server @ $$FHIR_SERVER_BASE_URL to be up";
             sleep 5;
@@ -484,114 +424,60 @@ services:
         echo "Server is up. Sending resources.";
         ls -lsa /synthea/
         /synthea/post-transactions.sh
+        echo "Loading SearchParameter resources.";
+        curl --fail-with-body --retry-connrefused -X POST -H "Content-Type: application/fhir+json" --data @/fhir/search-parameters-transaction-upsert.json "$$FHIR_SERVER_BASE_URL"
+        curl --fail-with-body --retry-connrefused -X POST -H "Content-Type: application/fhir+json" --data @/fhir/trino-sql-study-transaction-upsert.json "$$FHIR_SERVER_BASE_URL"
     volumes:
       - ./synthea/:/synthea/
+      # ./fhir/search-parameters-transaction-upsert.json is a symlink pointing outside of ./fhir/.
+      # Mounting ./fhir/ as a whole would carry that symlink into the container, and Docker
+      # resolves mount targets through existing symlinks - so a later mount at the same path
+      # would follow it and (since /fhir/ is a live bind mount) recreate the resolved directory
+      # tree back on the host. Mount each file individually by its real path instead.
+      - ./fhir/trino-sql-study-transaction-upsert.json:/fhir/trino-sql-study-transaction-upsert.json:ro
+      - ../../fhir/ig/fsh-generated/resources/Bundle-recruit-search-parameters-transaction.json:/fhir/search-parameters-transaction-upsert.json:ro
     depends_on:
       fhir:
         condition: service_started
 
-  pathling:
-    image: docker.io/aehrc/pathling:7.2.0@sha256:31b5ef50294e55136ae2278c2d0b8435a96a15b5da040ec785effb51875d08d3
-    profiles:
-      - trino
+  convert-to-delta:
+    image: docker.io/library/eclipse-temurin:21-jre@sha256:8cef5fc7bebe421363ab543a2f4db5caf7d119d8db67d56b0f56c485d2de4d55
     ipc: none
     security_opt:
       - "no-new-privileges:true"
     cap_drop:
       - ALL
     privileged: false
-    environment:
-      JAVA_TOOL_OPTIONS: |
-        -Xmx12g
-        -Xss64m
-        -XX:G1HeapRegionSize=32M
-        -XX:+ExplicitGCInvokesConcurrent
-        -XX:+ExitOnOutOfMemoryError
-        -XX:+HeapDumpOnOutOfMemoryError
-        -Duser.timezone=UTC
-        --add-exports=java.base/sun.nio.ch=ALL-UNNAMED
-        --add-opens=java.base/java.net=ALL-UNNAMED
-        --add-opens=java.base/java.nio=ALL-UNNAMED
-        --add-opens=java.base/java.util=ALL-UNNAMED
-        --add-opens=java.base/java.lang.invoke=ALL-UNNAMED
-      pathling.storage.warehouseUrl: s3a://fhir
-      pathling.storage.cacheDatasets: "false"
-      pathling.query.cacheResults: "false"
-      pathling.import.allowableSources: file:///tmp/import/
-      pathling.terminology.enabled: "false"
-      pathling.terminology.serverUrl: http://localhost:8080/i-dont-exist
-      fs.s3a.endpoint: "http://minio:9000"
-      fs.s3a.access.key: "admin"
-      # kics-scan ignore-line
-      fs.s3a.secret.key: "miniopass" # gitleaks:allow
-      fs.s3a.impl: "org.apache.hadoop.fs.s3a.S3AFileSystem"
-      fs.s3a.path.style.access: "true"
-      spark.sql.parquet.compression.codec: "zstd"
-      spark.io.compression.codec: "zstd"
-      parquet.compression.codec.zstd.level: "9"
-      spark.serializer: "org.apache.spark.serializer.KryoSerializer"
-      spark.master: "local[*]"
-      spark.driver.memory: 10g
-    ports:
-      - "127.0.0.1:8082:8080"
-      - "127.0.0.1:4040:4040"
+    restart: "no"
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        export PATH="$$HOME/.local/bin:$$PATH"
+        uvx pathling@9.8.0 \
+          --spark-conf spark.jars.packages=org.apache.hadoop:hadoop-aws:3.4.1 \
+          --spark-conf spark.hadoop.fs.s3a.endpoint=http://minio:9000 \
+          --spark-conf spark.hadoop.fs.s3a.access.key=admin \
+          --spark-conf spark.hadoop.fs.s3a.secret.key=miniopass \
+          --spark-conf spark.hadoop.fs.s3a.path.style.access=true \
+          --spark-conf spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem \
+          --spark-conf spark.hadoop.fs.s3a.connection.ssl.enabled=false \
+          run -c '
+        data_source = pathling.read.ndjson("/tmp/import")
+        data_source.write.delta("s3a://fhir/default", save_mode="overwrite")
+        '
     volumes:
       - ./synthea/bulk/fhir/:/tmp/import/:ro
     depends_on:
-      wait-for-minio:
+      create-bucket:
         condition: service_completed_successfully
-
-  wait-for-pathling:
-    image: docker.io/curlimages/curl:8.21.0@sha256:7c12af72ceb38b7432ab85e1a265cff6ae58e06f95539d539b654f2cfa64bb13
-    profiles:
-      - trino
-    ipc: none
-    security_opt:
-      - "no-new-privileges:true"
-    cap_drop:
-      - ALL
-    privileged: false
-    restart: "no"
-    environment:
-      PATHLING_URL: http://pathling:8080
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        until [ "$(curl -s -o /dev/null -L -w "%{http_code}" "$$PATHLING_URL/fhir/metadata")" == "200" ]; do
-            echo "$(date): Waiting for pathling server @ $$PATHLING_URL to be up";
-            sleep 5;
-        done;
-    depends_on:
-      pathling:
-        condition: service_started
-
-  import-resources:
-    image: docker.io/curlimages/curl:8.21.0@sha256:7c12af72ceb38b7432ab85e1a265cff6ae58e06f95539d539b654f2cfa64bb13
-    profiles:
-      - trino
-    ipc: none
-    security_opt:
-      - "no-new-privileges:true"
-    cap_drop:
-      - ALL
-    privileged: false
-    restart: "no"
-    environment:
-      PATHLING_URL: http://pathling:8080
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        curl --fail -X POST --header 'Content-Type: application/fhir+json' --data @/tmp/pathling-import-request.json --url 'http://pathling:8080/fhir/$$import'
-    volumes:
-      - ./pathling-import-request.json:/tmp/pathling-import-request.json:ro
-    depends_on:
-      wait-for-pathling:
-        condition: service_completed_successfully
+    deploy:
+      resources:
+        limits:
+          memory: 4G
 
   warehousekeeper:
-    image: ghcr.io/miracum/util-images/warehousekeeper:v0.1.14@sha256:78b8944559c48b609fb0b0127bb19e39fe9eed915cb22e4de31f39bb0222191e
-    profiles:
-      - trino
+    image: ghcr.io/bzkf/fhir-to-lakehouse:v1.13.16@sha256:6dc63a645b48523eb0696a2aff94072a70274b256b8698e5682765941f287c17
     ipc: none
     security_opt:
       - "no-new-privileges:true"
@@ -608,42 +494,20 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
-        python3 /opt/warehousekeeper/warehousekeeper.py register --bucket-name=fhir --database-name-prefix=default/ --hive-metastore=thrift://hive-metastore:9083
-        python3 /opt/warehousekeeper/warehousekeeper.py vacuum   --bucket-name=fhir --database-name-prefix=default/ --retention-hours=0 --dry-run=false --enforce-retention-duration=false
+        python3 /app/src/lakehousekeeper.py register --bucket-name=fhir --database-name-prefix=default/ --hive-metastore=thrift://hive-metastore:9083
+        python3 /app/src/lakehousekeeper.py vacuum   --bucket-name=fhir --database-name-prefix=default/ --retention-hours=0 --dry-run=false --enforce-retention-duration=false
     volumes:
       - ./config/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf:ro
     depends_on:
-      import-resources:
+      convert-to-delta:
         condition: service_completed_successfully
       hive-metastore:
         condition: service_started
       trino:
         condition: service_started
 
-  metastore-db:
-    image: docker.io/library/postgres:18.4@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a
-    profiles:
-      - trino
-    ipc: private
-    security_opt:
-      - "no-new-privileges:true"
-    cap_drop:
-      - ALL
-    privileged: false
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: hive
-      POSTGRES_PASSWORD: hive
-      POSTGRES_DB: metastore
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-
   hive-metastore:
     image: ghcr.io/miracum/util-images/hive-metastore:v1.3.3@sha256:14fbdf84706986894a4dafbf4963147bad6bf5f155ce0381c0292424932bdc50
-    profiles:
-      - trino
     ipc: none
     security_opt:
       - "no-new-privileges:true"
@@ -655,15 +519,15 @@ services:
       SERVICE_NAME: metastore
       DB_DRIVER: postgres
       SERVICE_OPTS: |
-        -Djavax.jdo.option.ConnectionUserName=hive
-        -Djavax.jdo.option.ConnectionPassword=hive
+        -Djavax.jdo.option.ConnectionUserName=postgres
+        -Djavax.jdo.option.ConnectionPassword=postgres
       AWS_ACCESS_KEY_ID: "admin"
       AWS_SECRET_ACCESS_KEY: "miniopass"
       AWS_DEFAULT_REGION: "eu-central-1"
     volumes:
       - ./config/hive-site.xml:/opt/hive/conf/hive-site.xml:ro
     depends_on:
-      metastore-db:
+      db:
         condition: service_started
     deploy:
       resources:
@@ -672,8 +536,6 @@ services:
 
   trino:
     image: docker.io/trinodb/trino:483@sha256:db58cc93e593a2706553745f276bb119c9810e69918be56ecde088ba7ccb0534
-    profiles:
-      - trino
     ipc: none
     security_opt:
       - "no-new-privileges:true"
@@ -687,8 +549,7 @@ services:
     ports:
       - "127.0.0.1:8080:8080"
     volumes:
-      - ./config/trino/etc:/usr/lib/trino/etc:ro
-      - ./config/trino/catalog:/etc/trino/catalog:ro
+      - ./config/trino/etc:/etc/trino:ro
     depends_on:
       hive-metastore:
         condition: service_started

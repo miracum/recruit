@@ -1,0 +1,152 @@
+@using System.Text.RegularExpressions
+@inject ScreeningNoteService ScreeningNoteService
+@inject ToastService Toast
+@inject IStringLocalizer<SharedResources> Localizer
+
+<div>
+    <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.Patient.Notes"]</span>
+
+    <div class="mt-2 max-h-48 space-y-2 overflow-y-auto">
+        @if (_loading)
+        {
+            <BbSkeleton Class="h-14 w-full" />
+        }
+        else if (_notes.Count == 0)
+        {
+            <p class="text-sm text-muted-foreground">@Localizer["App.PatientNotes.Empty"]</p>
+        }
+        else
+        {
+            @foreach (var note in _notes)
+            {
+                <div class="rounded border bg-muted/40 p-3">
+                    <p class="text-xs text-muted-foreground">
+                        @(note.Time?.LocalDateTime.ToString("g") ?? Localizer["App.PatientNotes.UnknownTime"])
+                        @if (!string.IsNullOrEmpty(note.Author))
+                        {
+                            <span> &middot; @note.Author</span>
+                        }
+                    </p>
+                    <div class="prose prose-sm dark:prose-invert max-w-none text-sm [&_p]:mb-2 [&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4 [&_li]:mb-1 [&_strong]:font-bold [&_em]:italic">@RenderNote(note.Text)</div>
+                </div>
+            }
+        }
+    </div>
+
+    @if (CanEdit && Patient.ResearchSubjectIdentifier is not null)
+    {
+        <BbRichTextEditor @bind-Value="_noteDraftHtml" Placeholder="@Localizer["App.PatientNotes.Placeholder"]" Class="mt-3" MinHeight="120px" />
+        <div class="mt-2 flex items-center justify-end gap-3">
+            <SaveStatusIndicator Saving="_saving" />
+            <BbButton Variant="ButtonVariant.Default" Disabled="@(IsNoteDraftEmpty || _saving)"
+                      Loading="_saving" OnClick="SaveNoteAsync">
+                @Localizer["App.PatientNotes.AddButton"]
+            </BbButton>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public required PatientListEntryDto Patient { get; set; }
+
+    [Parameter, EditorRequired]
+    public required TrialIdentifier TrialIdentifier { get; set; }
+
+    [Parameter]
+    public bool CanEdit { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    private static readonly Regex HtmlTagRegex = new("<[^>]+>", RegexOptions.Compiled);
+
+    private List<ScreeningNoteDto> _notes = [];
+    private bool _loading;
+    private string _noteDraftHtml = string.Empty;
+    private string? _loadedForSubjectId;
+    private ClaimsPrincipal _user = new();
+    private bool _saving;
+
+    /// <summary>Quill emits markup like "&lt;p&gt;&lt;br&gt;&lt;/p&gt;" for an empty editor, so a plain string check isn't enough.</summary>
+    private bool IsNoteDraftEmpty => IsEffectivelyEmpty(_noteDraftHtml);
+
+    private static bool IsEffectivelyEmpty(string html) =>
+        string.IsNullOrWhiteSpace(HtmlTagRegex.Replace(html, string.Empty).Replace("&nbsp;", " "));
+
+    /// <summary>
+    /// ScreeningNoteService.AddNoteAsync sanitizes before persisting, so this is redundant
+    /// defense-in-depth against the storage invariant ever being violated (e.g. a row written some
+    /// other way) - cheap and harmless given NoteHtmlSanitizer.Sanitize is idempotent.
+    /// </summary>
+    private static MarkupString RenderNote(string html) => new(NoteHtmlSanitizer.Sanitize(html));
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _user = await AuthStateTask.GetUserAsync();
+
+        if (Patient.ResearchSubjectId != _loadedForSubjectId)
+        {
+            _loadedForSubjectId = Patient.ResearchSubjectId;
+            _noteDraftHtml = string.Empty;
+            await LoadNotesAsync();
+        }
+    }
+
+    private async Task LoadNotesAsync()
+    {
+        if (Patient.ResearchSubjectIdentifier is not { } researchSubjectIdentifier)
+        {
+            _notes = [];
+            return;
+        }
+
+        _loading = true;
+        try
+        {
+            _notes = [.. await ScreeningNoteService.GetNotesAsync(researchSubjectIdentifier)];
+        }
+        catch
+        {
+            // Best-effort - an empty notes list is preferable to blocking on a fetch failure.
+            _notes = [];
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task SaveNoteAsync()
+    {
+        if (IsNoteDraftEmpty || Patient.ResearchSubjectIdentifier is not { } researchSubjectIdentifier)
+        {
+            return;
+        }
+
+        var sanitizedHtml = NoteHtmlSanitizer.Sanitize(_noteDraftHtml);
+        if (IsEffectivelyEmpty(sanitizedHtml))
+        {
+            return;
+        }
+
+        _saving = true;
+        StateHasChanged();
+
+        try
+        {
+            await ScreeningNoteService.AddNoteAsync(researchSubjectIdentifier, sanitizedHtml, TrialIdentifier, _user);
+            Toast.Success(Localizer["App.Toast.NoteSaved"], Localizer["App.Common.Saved"]);
+            _noteDraftHtml = string.Empty;
+            await LoadNotesAsync();
+        }
+        catch (Exception ex)
+        {
+            Toast.Error(ex.Message, Localizer["App.Toast.NoteSaveError"]);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}

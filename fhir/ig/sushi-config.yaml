@@ -4,12 +4,12 @@
 # │  see: https://fshschool.org/docs/sushi/configuration/.                                         │
 # ╰────────────────────────────────────────────────────────────────────────────────────────────────╯
 id: recruit
-canonical: https://fhir.miracum.org/recruit
-name: recruIT FHIR Implementation Guide
+canonical: https://miracum.github.io/recruit/fhir
+name: RecruITIG
 title: recruIT FHIR IG
-description: FHIR Implementation Guide for the MIRACUM recruIT patient recruitment support system
-status: draft # draft | active | retired | unknown
-version: 0.1.0
+description: FHIR Implementation Guide for the recruIT clinical trial patient recruitment support system.
+status: active # draft | active | retired | unknown
+version: 0.1.0 # x-release-please-version
 fhirVersion: 4.0.1 # https://www.hl7.org/fhir/valueset-FHIR-version.html
 copyrightYear: 2022+
 releaseLabel: trial-use # ci-build | draft | qa-preview | ballot | trial-use | release | update | normative+trial-use

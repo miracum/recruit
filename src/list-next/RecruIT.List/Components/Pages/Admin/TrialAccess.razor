@@ -1,0 +1,266 @@
+@page "/trials/{ListId}/access"
+@attribute [Authorize]
+@using RecruIT.List.Data.Entities
+@inject ScreeningListService ScreeningListService
+@inject TrialAccessService AccessService
+@inject ToastService Toast
+@inject BreadcrumbState BreadcrumbState
+@inject IStringLocalizer<SharedResources> Localizer
+
+<PageTitle>@Localizer["App.TrialAccess.PageTitle"]</PageTitle>
+
+@if (_loading)
+{
+    <BbSkeleton Class="mb-4 h-8 w-64" />
+    <BbSkeleton Class="h-64 w-full" />
+}
+else if (_errorMessage is not null)
+{
+    <BbAlert Variant="AlertVariant.Danger">
+        <BbAlertTitle>@Localizer["App.TrialAccess.LoadErrorTitle"]</BbAlertTitle>
+        <BbAlertDescription>@_errorMessage</BbAlertDescription>
+    </BbAlert>
+}
+else if (_trial is not null)
+{
+    <h2 class="text-lg font-medium">@_trial.StudyAcronym</h2>
+    @if (!string.IsNullOrEmpty(_trial.StudyTitle))
+    {
+        <p class="mt-1 text-sm text-muted-foreground">@_trial.StudyTitle</p>
+    }
+
+    <BbCard Class="mt-6">
+        <BbCardHeader>
+            <BbCardTitle>@Localizer["App.TrialAccess.AddGrantTitle"]</BbCardTitle>
+        </BbCardHeader>
+        <BbCardContent>
+            <div class="flex flex-wrap items-end gap-3">
+                <div class="w-full max-w-sm min-w-64">
+                    <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.TrialAccess.EmailLabel"]</label>
+                    <BbInput @bind-Value="_newEmail" Placeholder="@Localizer["App.TrialAccess.EmailPlaceholder"]" Class="mt-1" />
+                </div>
+                <div>
+                    <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.TrialAccess.LevelLabel"]</label>
+                    <select class="mt-1 block rounded-md border bg-background p-2 text-sm" @bind="_newLevel">
+                        @foreach (var level in LevelOptions)
+                        {
+                            <option value="@level">@Localizer[LevelLabelKey(level)]</option>
+                        }
+                    </select>
+                </div>
+                <BbButton Variant="ButtonVariant.Default" Disabled="@(_saving || string.IsNullOrWhiteSpace(_newEmail))" OnClick="AddGrantAsync">
+                    @Localizer["App.TrialAccess.AddButton"]
+                </BbButton>
+            </div>
+        </BbCardContent>
+    </BbCard>
+
+    <BbCard Class="mt-6">
+        <BbCardHeader>
+            <BbCardTitle>@Localizer["App.TrialAccess.GrantsTitle"]</BbCardTitle>
+        </BbCardHeader>
+        <BbCardContent>
+            @if (_grants.Count == 0)
+            {
+                <BbEmpty Title="@Localizer["App.TrialAccess.EmptyTitle"]" Description="@Localizer["App.TrialAccess.EmptyDescription"]" />
+            }
+            else
+            {
+                <BbDataTable TData="TrialAccessGrant" Data="_grants" ShowPagination="false" IsLoading="false">
+                    <Columns>
+                        <BbDataTableColumn TData="TrialAccessGrant" TValue="string" Header="@Localizer["App.TrialAccess.ColumnEmail"]">
+                            <CellTemplate Context="g">
+                                <div>
+                                    <span class="font-medium">@(g.DisplayName ?? g.Email)</span>
+                                    @if (!string.IsNullOrEmpty(g.DisplayName))
+                                    {
+                                        <p class="text-xs text-muted-foreground">@g.Email</p>
+                                    }
+                                    @if (g.SubjectId is null)
+                                    {
+                                        <BbBadge Variant="BadgeVariant.Outline" Class="mt-1">@Localizer["App.TrialAccess.PendingBadge"]</BbBadge>
+                                    }
+                                </div>
+                            </CellTemplate>
+                        </BbDataTableColumn>
+                        <BbDataTableColumn TData="TrialAccessGrant" TValue="string" Header="@Localizer["App.TrialAccess.ColumnLevel"]">
+                            <CellTemplate Context="g">
+                                @if (TrialAccessService.IsOwnGrant(g, _user))
+                                {
+                                    <span title="@Localizer["App.TrialAccess.CannotModifyOwnGrantHint"]">
+                                        <BbBadge Variant="BadgeVariant.Secondary">@Localizer[LevelLabelKey(g.Level)]</BbBadge>
+                                    </span>
+                                }
+                                else
+                                {
+                                    <select class="rounded-md border bg-background p-1.5 text-sm"
+                                            value="@g.Level" @onchange="e => ChangeLevelAsync(g, ParseLevel(e.Value))">
+                                        @foreach (var level in LevelOptions)
+                                        {
+                                            <option value="@level">@Localizer[LevelLabelKey(level)]</option>
+                                        }
+                                    </select>
+                                }
+                            </CellTemplate>
+                        </BbDataTableColumn>
+                        <BbDataTableColumn TData="TrialAccessGrant" TValue="DateTimeOffset" Header="@Localizer["App.TrialAccess.ColumnGrantedAt"]" Property="g => g.GrantedAt" Sortable="true">
+                            <CellTemplate Context="g">
+                                @g.GrantedAt.LocalDateTime.ToString("g")
+                            </CellTemplate>
+                        </BbDataTableColumn>
+                        <BbDataTableColumn TData="TrialAccessGrant" TValue="string" Header="">
+                            <CellTemplate Context="g">
+                                <span title="@(TrialAccessService.IsOwnGrant(g, _user) ? Localizer["App.TrialAccess.CannotModifyOwnGrantHint"].Value : null)">
+                                    <BbButton Variant="ButtonVariant.Destructive" Disabled="@TrialAccessService.IsOwnGrant(g, _user)" OnClick="() => RevokeGrantAsync(g.Id)">
+                                        @Localizer["App.TrialAccess.RevokeButton"]
+                                    </BbButton>
+                                </span>
+                            </CellTemplate>
+                        </BbDataTableColumn>
+                    </Columns>
+                </BbDataTable>
+            }
+        </BbCardContent>
+    </BbCard>
+}
+
+@code {
+    [Parameter]
+    public string ListId { get; set; } = string.Empty;
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    private static readonly TrialPermissionLevel[] LevelOptions =
+        [TrialPermissionLevel.Viewer, TrialPermissionLevel.Coordinator, TrialPermissionLevel.TrialAdmin];
+
+    private TrialSummaryDto? _trial;
+    private List<TrialAccessGrant> _grants = [];
+    private bool _loading = true;
+    private bool _saving;
+    private string? _errorMessage;
+    private ClaimsPrincipal _user = new();
+
+    private string _newEmail = string.Empty;
+    private TrialPermissionLevel _newLevel = TrialPermissionLevel.Viewer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _user = await AuthStateTask.GetUserAsync();
+
+        try
+        {
+            var (trial, _) = await ScreeningListService.GetListWithPatientsAsync(ListId, _user);
+
+            if (!await AccessService.CanManageAccessAsync(_user, trial.TrialIdentifier))
+            {
+                _errorMessage = Localizer["App.Errors.NotAuthorizedManageAccess"];
+                return;
+            }
+
+            _trial = trial;
+
+            BreadcrumbState.Set(
+                new BreadcrumbItem(Localizer["App.Common.AllTrialsBreadcrumb"], "/"),
+                new BreadcrumbItem(trial.StudyAcronym, $"/trials/{ListId}/patients"),
+                new BreadcrumbItem(Localizer["App.TrialAccess.Breadcrumb"]));
+
+            await LoadGrantsAsync();
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        catch (FhirAccessException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        catch (Exception)
+        {
+            _errorMessage = Localizer["App.TrialAccess.LoadErrorFallback"];
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task LoadGrantsAsync()
+    {
+        if (_trial is null)
+        {
+            return;
+        }
+
+        _grants = [.. await AccessService.ListGrantsAsync(_trial.TrialIdentifier, _user)];
+    }
+
+    private async Task AddGrantAsync()
+    {
+        if (_trial is null || string.IsNullOrWhiteSpace(_newEmail))
+        {
+            return;
+        }
+
+        _saving = true;
+        try
+        {
+            await AccessService.AddOrUpdateGrantAsync(_trial.TrialIdentifier, _newEmail.Trim(), _newLevel, _user);
+            Toast.Success(Localizer["App.TrialAccess.GrantSaved"], Localizer["App.Common.Saved"]);
+            _newEmail = string.Empty;
+            _newLevel = TrialPermissionLevel.Viewer;
+            await LoadGrantsAsync();
+        }
+        catch (Exception ex)
+        {
+            Toast.Error(ex.Message, Localizer["App.TrialAccess.GrantSaveError"]);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private async Task ChangeLevelAsync(TrialAccessGrant grant, TrialPermissionLevel newLevel)
+    {
+        if (_trial is null || newLevel == grant.Level)
+        {
+            return;
+        }
+
+        try
+        {
+            await AccessService.AddOrUpdateGrantAsync(_trial.TrialIdentifier, grant.Email, newLevel, _user);
+            await LoadGrantsAsync();
+        }
+        catch (Exception ex)
+        {
+            Toast.Error(ex.Message, Localizer["App.TrialAccess.GrantSaveError"]);
+        }
+    }
+
+    private async Task RevokeGrantAsync(Guid grantId)
+    {
+        try
+        {
+            await AccessService.RevokeGrantAsync(grantId, _user);
+            Toast.Success(Localizer["App.TrialAccess.GrantRevoked"], Localizer["App.Common.Saved"]);
+            await LoadGrantsAsync();
+        }
+        catch (Exception ex)
+        {
+            Toast.Error(ex.Message, Localizer["App.TrialAccess.GrantRevokeError"]);
+        }
+    }
+
+    private static TrialPermissionLevel ParseLevel(object? value) =>
+        Enum.TryParse<TrialPermissionLevel>(value?.ToString(), out var level) ? level : TrialPermissionLevel.Viewer;
+
+    private static string LevelLabelKey(TrialPermissionLevel level) => level switch
+    {
+        TrialPermissionLevel.Viewer => "App.TrialAccess.LevelViewer",
+        TrialPermissionLevel.Coordinator => "App.TrialAccess.LevelCoordinator",
+        TrialPermissionLevel.TrialAdmin => "App.TrialAccess.LevelTrialAdmin",
+        _ => "App.TrialAccess.LevelViewer",
+    };
+}
