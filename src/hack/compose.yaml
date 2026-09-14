@@ -287,7 +287,7 @@ services:
       - "127.0.0.1:4318:4318"
 
   maildev:
-    image: docker.io/maildev/maildev:3.0.0-rc.1@sha256:ad6d46b7c47617c141961649a9ed5e50069aed53e94ca5359a59b3e1459925da
+    image: docker.io/maildev/maildev:3.0.0-rc.3@sha256:272239339ccda09531014608436367c26d8ee645e0b17952dd00601050d0340a
     restart: unless-stopped
     ipc: none
     security_opt:
