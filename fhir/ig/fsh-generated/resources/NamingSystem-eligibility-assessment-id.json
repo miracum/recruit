@@ -1,0 +1,16 @@
+{
+  "resourceType": "NamingSystem",
+  "id": "eligibility-assessment-id",
+  "description": "The identifier system for a per-criterion eligibility Observation's business identifier. Derived from the ResearchSubject identifier and the Library identifier of the eligibility criterion.",
+  "name": "EligibilityAssessmentIdentifier",
+  "status": "active",
+  "kind": "identifier",
+  "date": "2026-08-14",
+  "uniqueId": [
+    {
+      "type": "uri",
+      "value": "https://miracum.github.io/recruit/fhir/identifiers/eligibility-assessment-id",
+      "preferred": true
+    }
+  ]
+}

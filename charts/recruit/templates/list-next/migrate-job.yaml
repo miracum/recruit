@@ -1,0 +1,100 @@
+{{- with .Values.listNext -}}
+{{- if .enabled -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "recruit.listNext.migrationJobName" $ }}
+  labels:
+    {{- include "recruit.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: list-next-migrate
+spec:
+  backoffLimit: {{ .migrationJob.backoffLimit }}
+  {{- with .migrationJob.ttlSecondsAfterFinished }}
+  ttlSecondsAfterFinished: {{ . }}
+  {{- end }}
+  template:
+    metadata:
+      {{- with .migrationJob.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "recruit.labels" $ | nindent 8 }}
+        app.kubernetes.io/component: list-next-migrate
+    spec:
+      restartPolicy: Never
+      # This pod never talks to the Kubernetes API - only the Deployment's wait-for-migration
+      # initContainer does (see deployment.yaml).
+      automountServiceAccountToken: false
+      {{- with $.Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .podSecurityContext | nindent 8 }}
+      containers:
+        - name: migrate
+          image: "{{ .image.registry }}/{{ .image.repository }}:{{ .image.tag }}"
+          imagePullPolicy: {{ .image.pullPolicy }}
+          securityContext:
+            {{- toYaml .securityContext | nindent 12 }}
+          {{- if .migrationJob.resources }}
+          resources: {{- toYaml .migrationJob.resources | nindent 12 }}
+          {{- else if ne .migrationJob.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .migrationJob.resourcesPreset) | nindent 12 }}
+          {{- end }}
+          env:
+            - name: RunMigrationsOnly
+              value: "true"
+            - name: ConnectionStrings__AppDb
+              value: {{ .database.connectionString | quote }}
+            {{- if .database.username }}
+            - name: PGUSER
+              value: {{ .database.username | quote }}
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "recruit.listNext.database.secretName" $ }}
+                  key: {{ include "recruit.listNext.database.secretKey" $ }}
+            {{- end }}
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp-volume
+      volumes:
+        - name: tmp-volume
+          emptyDir: {}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "recruit.fullname" $ }}-list-next-wait-for-migration
+  labels:
+    {{- include "recruit.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: list-next
+rules:
+  # Only "get" - the wait-for-migration initContainer only ever does `kubectl get job <name>`,
+  # never list/watch. (Also: resourceNames doesn't restrict list/watch in RBAC, so scoping those
+  # verbs here would be misleading - they'd effectively apply namespace-wide, not just to this Job.)
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    resourceNames:
+      - {{ include "recruit.listNext.migrationJobName" $ }}
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "recruit.fullname" $ }}-list-next-wait-for-migration
+  labels:
+    {{- include "recruit.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: list-next
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "recruit.fullname" $ }}-list-next-wait-for-migration
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "recruit.serviceAccountName" (dict "context" . "component" "list-next" "root" $) }}
+    namespace: {{ $.Release.Namespace }}
+{{- end -}}
+{{- end -}}

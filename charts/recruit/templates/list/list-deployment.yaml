@@ -37,11 +37,11 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .Values.list.podSecurityContext | nindent 8 }}
-      serviceAccountName: {{ include "recruit.serviceAccountName" (dict "context" .Values.list "component" "list") }}
+      serviceAccountName: {{ include "recruit.serviceAccountName" (dict "context" .Values.list "component" "list" "root" $) }}
       automountServiceAccountToken: {{ .Values.list.serviceAccount.automountServiceAccountToken }}
       initContainers:
         - name: wait-for-fhir-server
-          image: "{{ .Values.curl.image.registry }}/{{ .Values.curl.image.repository }}:{{ .Values.curl.image.tag }}"
+          image: {{ include "recruit.curl.image" . }}
           imagePullPolicy: IfNotPresent
           {{- with .Values.restrictedContainerSecurityContext }}
           securityContext:
@@ -67,24 +67,14 @@ spec:
             - name: http
               containerPort: 8080
               protocol: TCP
+          {{- if .Values.list.livenessProbe.enabled }}
           livenessProbe:
-            httpGet:
-              path: /api/health/liveness
-              port: http
-            initialDelaySeconds: {{ .Values.list.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.list.livenessProbe.periodSeconds }}
-            timeoutSeconds: {{ .Values.list.livenessProbe.timeoutSeconds }}
-            successThreshold: {{ .Values.list.livenessProbe.successThreshold }}
-            failureThreshold: {{ .Values.list.livenessProbe.failureThreshold }}
+            {{- include "common.tplvalues.render" (dict "value" (omit .Values.list.livenessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.list.readinessProbe.enabled }}
           readinessProbe:
-            httpGet:
-              path: /api/health/readiness
-              port: http
-            initialDelaySeconds: {{ .Values.list.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.list.readinessProbe.periodSeconds }}
-            timeoutSeconds: {{ .Values.list.readinessProbe.timeoutSeconds }}
-            successThreshold: {{ .Values.list.readinessProbe.successThreshold }}
-            failureThreshold: {{ .Values.list.readinessProbe.failureThreshold }}
+            {{- include "common.tplvalues.render" (dict "value" (omit .Values.list.readinessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
           {{- if .Values.list.resources }}
           resources: {{- toYaml .Values.list.resources | nindent 12 }}
           {{- else if ne .Values.list.resourcesPreset "none" }}

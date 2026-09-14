@@ -88,12 +88,12 @@ jobs:
           name: ghcr.io-miracum-recruit-query-${{ inputs.image-tag }}
           path: /tmp/ghcr.io-miracum-recruit-query-${{ inputs.image-tag }}
 
-      - name: Download query-fhir-trino image artifact
+      - name: Download query-sql-on-fhir image artifact
         if: ${{ github.event_name == 'pull_request' }}
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: ghcr.io-miracum-recruit-query-fhir-trino-${{ inputs.image-tag }}
-          path: /tmp/ghcr.io-miracum-recruit-query-fhir-trino-${{ inputs.image-tag }}
+          name: ghcr.io-miracum-recruit-query-sql-on-fhir-${{ inputs.image-tag }}
+          path: /tmp/ghcr.io-miracum-recruit-query-sql-on-fhir-${{ inputs.image-tag }}
 
       - name: Load container images
         if: ${{ github.event_name == 'pull_request' }}
@@ -103,7 +103,7 @@ jobs:
           kind load image-archive "/tmp/ghcr.io-miracum-recruit-list-${IMAGE_TAG}/image.tar"
           kind load image-archive "/tmp/ghcr.io-miracum-recruit-notify-${IMAGE_TAG}/image.tar"
           kind load image-archive "/tmp/ghcr.io-miracum-recruit-query-${IMAGE_TAG}/image.tar"
-          kind load image-archive "/tmp/ghcr.io-miracum-recruit-query-fhir-trino-${IMAGE_TAG}/image.tar"
+          kind load image-archive "/tmp/ghcr.io-miracum-recruit-query-sql-on-fhir-${IMAGE_TAG}/image.tar"
 
       - name: Load tester image
         run: |
@@ -133,8 +133,8 @@ jobs:
             --set "notify.image.tag=${IMAGE_TAG}" \
             --set "list.image.repository=${GITHUB_REPOSITORY}/list" \
             --set "list.image.tag=${IMAGE_TAG}" \
-            --set "queryFhirTrino.image.repository=${GITHUB_REPOSITORY}/query-fhir-trino" \
-            --set "queryFhirTrino.image.tag=${IMAGE_TAG}" \
+            --set "querySqlOnFhir.image.repository=${GITHUB_REPOSITORY}/query-sql-on-fhir" \
+            --set "querySqlOnFhir.image.tag=${IMAGE_TAG}" \
             -f charts/recruit/values-integrationtest.yaml \
             --wait --timeout=25m \
             recruit charts/recruit/

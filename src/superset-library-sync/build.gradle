@@ -1,0 +1,29 @@
+plugins {
+    id 'org.miracum.recruit.java-application-conventions'
+}
+
+// this is a one-shot CLI tool, not a long-running web service, so it doesn't need most of what
+// java-application-conventions pulls in for the actual application modules.
+configurations.configureEach {
+    exclude group: 'org.springframework.boot', module: 'spring-boot-starter-webmvc'
+    exclude group: 'org.springframework.boot', module: 'spring-boot-starter-actuator'
+}
+
+// spring-cloud-stream isn't covered by Spring Boot's own dependency-management BOM, so its
+// version has to be pinned separately - kept aligned with whatever Spring Cloud release train
+// supports the Spring Boot version java-application-conventions pulls in.
+dependencyManagement {
+    imports {
+        mavenBom 'org.springframework.cloud:spring-cloud-dependencies:2025.1.2'
+    }
+}
+
+dependencies {
+    implementation project(':fhir-constants')
+    implementation 'io.github.diz-uker:to-fhir-starter:0.2.14'
+    implementation 'com.github.slugify:slugify:4.0.1'
+    implementation 'org.springframework.cloud:spring-cloud-starter-stream-kafka'
+    implementation 'org.miracum:kafka-fhir-serializer:3.0.0'
+
+    testImplementation 'com.approvaltests:approvaltests:31.0.0'
+}

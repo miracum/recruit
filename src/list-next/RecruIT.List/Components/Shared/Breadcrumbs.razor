@@ -1,0 +1,31 @@
+@if (Items.Count > 0)
+{
+    <BbBreadcrumb>
+        <BbBreadcrumbList>
+            @for (var i = 0; i < Items.Count; i++)
+            {
+                var item = Items[i];
+                var isLast = i == Items.Count - 1;
+                <BbBreadcrumbItem>
+                    @if (isLast || item.Href is null)
+                    {
+                        <BbBreadcrumbPage>@item.Text</BbBreadcrumbPage>
+                    }
+                    else
+                    {
+                        <BbBreadcrumbLink Href="@item.Href">@item.Text</BbBreadcrumbLink>
+                    }
+                </BbBreadcrumbItem>
+                @if (!isLast)
+                {
+                    <BbBreadcrumbSeparator />
+                }
+            }
+        </BbBreadcrumbList>
+    </BbBreadcrumb>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public required IReadOnlyList<BreadcrumbItem> Items { get; set; }
+}

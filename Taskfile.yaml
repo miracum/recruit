@@ -41,7 +41,7 @@ tasks:
           ghcr.io/{{ .IMAGE_REPOSITORY }}/query:{{ .IMAGE_TAG }} \
           ghcr.io/{{ .IMAGE_REPOSITORY }}/notify:{{ .IMAGE_TAG }} \
           ghcr.io/{{ .IMAGE_REPOSITORY }}/list:{{ .IMAGE_TAG }} \
-          ghcr.io/{{ .IMAGE_REPOSITORY }}/query-fhir-trino:{{ .IMAGE_TAG }}
+          ghcr.io/{{ .IMAGE_REPOSITORY }}/query-sql-on-fhir:{{ .IMAGE_TAG }}
       - |
         helm upgrade --dependency-update  --install --create-namespace -n recruit \
           --set query.image.repository={{ .IMAGE_REPOSITORY }}/query \
@@ -50,8 +50,8 @@ tasks:
           --set notify.image.tag={{ .IMAGE_TAG }} \
           --set list.image.repository={{ .IMAGE_REPOSITORY }}/list \
           --set list.image.tag={{ .IMAGE_TAG }} \
-          --set queryFhirTrino.image.repository={{ .IMAGE_REPOSITORY }}/query-fhir-trino \
-          --set queryFhirTrino.image.tag={{ .IMAGE_TAG }} \
+          --set querySqlOnFhir.image.repository={{ .IMAGE_REPOSITORY }}/query-sql-on-fhir \
+          --set querySqlOnFhir.image.tag={{ .IMAGE_TAG }} \
           -f charts/recruit/values-integrationtest.yaml \
           --wait --timeout=20m \
           recruit charts/recruit/

@@ -1,0 +1,25 @@
+{{- with .Values.listNext -}}
+{{- if .enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "recruit.fullname" $ }}-list-next
+  labels:
+    {{- include "recruit.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: list-next
+spec:
+  type: {{ .service.type }}
+  ports:
+    - port: {{ .service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: {{ .service.metricsPort }}
+      targetPort: http-metrics
+      protocol: TCP
+      name: http-metrics
+  selector:
+    {{- include "recruit.matchLabels" $ | nindent 4 }}
+    app.kubernetes.io/component: list-next
+{{- end -}}
+{{- end -}}

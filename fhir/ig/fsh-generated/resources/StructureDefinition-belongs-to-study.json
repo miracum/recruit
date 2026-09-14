@@ -1,0 +1,57 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "belongs-to-study",
+  "url": "https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study",
+  "name": "BelongsToStudy",
+  "title": "Clinical study reference",
+  "status": "active",
+  "description": "A reference to the clinical study that a resource concerns - a List's screened candidates, or a MeasureReport's eligibility attrition funnel",
+  "fhirVersion": "4.0.1",
+  "kind": "complex-type",
+  "abstract": false,
+  "context": [
+    {
+      "expression": "List",
+      "type": "element"
+    },
+    {
+      "expression": "MeasureReport",
+      "type": "element"
+    }
+  ],
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Extension",
+        "path": "Extension",
+        "short": "Clinical study reference",
+        "definition": "A reference to the clinical study that a resource concerns - a List's screened candidates, or a MeasureReport's eligibility attrition funnel"
+      },
+      {
+        "id": "Extension.extension",
+        "path": "Extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "fixedUri": "https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study"
+      },
+      {
+        "id": "Extension.value[x]",
+        "path": "Extension.value[x]",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "https://miracum.github.io/recruit/fhir/StructureDefinition/research-study"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

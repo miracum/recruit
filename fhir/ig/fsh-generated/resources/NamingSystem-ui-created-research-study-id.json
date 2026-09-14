@@ -1,0 +1,16 @@
+{
+  "resourceType": "NamingSystem",
+  "id": "ui-created-research-study-id",
+  "description": "The identifier system for a ResearchStudy resource created via the UI.",
+  "name": "UICreatedResearchStudyIdentifier",
+  "status": "active",
+  "kind": "identifier",
+  "date": "2026-08-14",
+  "uniqueId": [
+    {
+      "type": "uri",
+      "value": "https://miracum.github.io/recruit/fhir/identifiers/ui-created-research-study-id",
+      "preferred": true
+    }
+  ]
+}

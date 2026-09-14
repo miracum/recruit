@@ -1,0 +1,57 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "eligibility-assessment-derived-from-library",
+  "url": "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library",
+  "name": "EligibilityAssessmentDerivedFromLibrary",
+  "title": "Eligibility assessment derived-from Library",
+  "status": "active",
+  "description": "A reference to the eligibility-criterion Library resource this assessment - or, on a MeasureReport's attrition-funnel population, this cumulative step - was derived from. Neither Observation.derivedFrom nor MeasureReport.group.population has a slot accepting Library as a target type, so this extension carries the reference instead.",
+  "fhirVersion": "4.0.1",
+  "kind": "complex-type",
+  "abstract": false,
+  "context": [
+    {
+      "expression": "Observation",
+      "type": "element"
+    },
+    {
+      "expression": "MeasureReport.group.population",
+      "type": "element"
+    }
+  ],
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Extension",
+        "path": "Extension",
+        "short": "Eligibility assessment derived-from Library",
+        "definition": "A reference to the eligibility-criterion Library resource this assessment - or, on a MeasureReport's attrition-funnel population, this cumulative step - was derived from. Neither Observation.derivedFrom nor MeasureReport.group.population has a slot accepting Library as a target type, so this extension carries the reference instead."
+      },
+      {
+        "id": "Extension.extension",
+        "path": "Extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "fixedUri": "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library"
+      },
+      {
+        "id": "Extension.value[x]",
+        "path": "Extension.value[x]",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Library"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

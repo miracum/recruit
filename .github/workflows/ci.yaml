@@ -18,13 +18,17 @@ on:
 permissions:
   contents: read
 
+# cancel a superseded PR run (a new push to the same PR obsoletes the old one), but never cancel an
+# in-progress push-to-master/release/merge_group run - those shouldn't be interrupted partway.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
-  # the build job is intentionally *not* a matrix: a matrix job's outputs (notably the
-  # per-module image-digest) are only visible to downstream jobs for the last matrix
-  # instance to complete, not all of them. Splitting into one job per module lets the
-  # release job reference each module's actual, unambiguous build-time digest directly,
-  # instead of having to re-resolve it from the registry later (which would leave a
-  # window for the tag to be repointed between build and release).
   build-query:
     name: build query
     permissions:
@@ -36,11 +40,13 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@7eaa603620c450f73fd25d6b68c37795ef4be999 # v1.22.8
+    uses: miracum/.github/.github/workflows/standard-build.yaml@869881c224354c744e09f1d9bba9d47b5c698b44 # v1.26.0
     with:
       image: ghcr.io/${{ github.repository }}/query
       build-context: "src/"
       enable-build-test-layer: true
+      enable-build-cache: false
+      enable-buildkit-cache-mount-caching: true
       build-args: |
         MODULE_NAME=query
     secrets:
@@ -57,11 +63,13 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@7eaa603620c450f73fd25d6b68c37795ef4be999 # v1.22.8
+    uses: miracum/.github/.github/workflows/standard-build.yaml@869881c224354c744e09f1d9bba9d47b5c698b44 # v1.26.0
     with:
       image: ghcr.io/${{ github.repository }}/notify
       build-context: "src/"
       enable-build-test-layer: true
+      enable-build-cache: false
+      enable-buildkit-cache-mount-caching: true
       build-args: |
         MODULE_NAME=notify
     secrets:
@@ -78,7 +86,7 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@7eaa603620c450f73fd25d6b68c37795ef4be999 # v1.22.8
+    uses: miracum/.github/.github/workflows/standard-build.yaml@869881c224354c744e09f1d9bba9d47b5c698b44 # v1.26.0
     with:
       image: ghcr.io/${{ github.repository }}/list
       build-context: "src/list/"
@@ -88,8 +96,8 @@ jobs:
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
 
-  build-query-fhir-trino:
-    name: build query-fhir-trino
+  build-list-next:
+    name: build list-next
     permissions:
       contents: write
       pull-requests: write
@@ -99,15 +107,108 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@7eaa603620c450f73fd25d6b68c37795ef4be999 # v1.22.8
+    uses: miracum/.github/.github/workflows/standard-build.yaml@869881c224354c744e09f1d9bba9d47b5c698b44 # v1.26.0
     with:
-      image: ghcr.io/${{ github.repository }}/query-fhir-trino
-      build-context: "src/"
-      enable-build-test-layer: true
-      build-args: |
-        MODULE_NAME=query-fhir-trino
+      image: ghcr.io/${{ github.repository }}/list-next
+      build-context: "src/list-next/"
+      enable-buildkit-cache-mount-caching: true
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  build-query-sql-on-fhir:
+    name: build query-sql-on-fhir
+    permissions:
+      contents: write
+      pull-requests: write
+      security-events: write
+      actions: read
+      packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    uses: miracum/.github/.github/workflows/standard-build.yaml@869881c224354c744e09f1d9bba9d47b5c698b44 # v1.26.0
+    with:
+      image: ghcr.io/${{ github.repository }}/query-sql-on-fhir
+      build-context: "src/"
+      enable-build-test-layer: true
+      enable-build-cache: false
+      enable-buildkit-cache-mount-caching: true
+      build-args: |
+        MODULE_NAME=query-sql-on-fhir
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  build-superset-library-sync:
+    name: build superset-library-sync
+    permissions:
+      contents: write
+      pull-requests: write
+      security-events: write
+      actions: read
+      packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    uses: miracum/.github/.github/workflows/standard-build.yaml@869881c224354c744e09f1d9bba9d47b5c698b44 # v1.26.0
+    with:
+      image: ghcr.io/${{ github.repository }}/superset-library-sync
+      build-context: "src/"
+      enable-build-test-layer: true
+      enable-build-cache: false
+      enable-buildkit-cache-mount-caching: true
+      build-args: |
+        MODULE_NAME=superset-library-sync
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-pr-helm-chart:
+    name: publish pr helm chart
+    # only for same-repo PRs: forked PRs don't get a GITHUB_TOKEN with packages:write.
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write # to push the PR's pre-release Helm chart to ghcr.io
+    needs:
+      - build-query
+      - build-notify
+      - build-list
+      - build-query-sql-on-fhir
+      - build-list-next
+    env:
+      # the image tag is the same for all modules, so it doesn't matter which build job we read it from.
+      IMAGE_TAG: ${{ needs.build-query.outputs.image-version }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add helm repos and build chart dependencies
+        run: |
+          helm repo add hapifhir https://hapifhir.github.io/hapi-fhir-jpaserver-starter
+          helm dependency build charts/recruit
+
+      - name: Point chart at this PR's images and version it as a pre-release
+        run: |
+          for key in query notify list querySqlOnFhir listNext; do
+            yq -i ".${key}.image.tag = \"${IMAGE_TAG}\"" charts/recruit/values.yaml
+          done
+          yq -i ".version = \"0.0.0-pr${PR_NUMBER}\" | .appVersion = \"${IMAGE_TAG}\"" charts/recruit/Chart.yaml
+
+      - name: Package and push Helm chart
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          helm package charts/recruit/
+          helm push "recruit-0.0.0-pr${PR_NUMBER}.tgz" "oci://ghcr.io/${GITHUB_REPOSITORY}/charts"
 
   test:
     name: test
@@ -116,7 +217,8 @@ jobs:
       - build-query
       - build-notify
       - build-list
-      - build-query-fhir-trino
+      - build-query-sql-on-fhir
+      - build-superset-library-sync
     strategy:
       fail-fast: false
       matrix:
@@ -127,7 +229,8 @@ jobs:
             e2e-test-directory: "tests/e2e/"
           - module: "list"
             e2e-test-directory: "frontend/tests/e2e/"
-          - module: "query-fhir-trino"
+          - module: "query-sql-on-fhir"
+          - module: "superset-library-sync"
     env:
       IMAGE_NAME: ghcr.io/${{ github.repository }}/${{ matrix.module }}
       # the image tag is the same for all modules, so it doesn't matter which build job we read it from.
@@ -136,7 +239,6 @@ jobs:
       # <https://docs.docker.com/storage/containerd/>
       # via <https://github.com/docker/setup-buildx-action/issues/257>
       - name: Set up containerd image store
-        shell: bash
         run: |
           [ -f /etc/docker/daemon.json ] || echo "{}" | sudo tee /etc/docker/daemon.json
           jq '. | .+{"features": {"containerd-snapshotter": true}}' /etc/docker/daemon.json > /tmp/docker-daemon-with-containerd.json
@@ -174,14 +276,12 @@ jobs:
           docker image ls
 
       - name: Pull image if not in PR
-        shell: bash
         if: ${{ github.event_name != 'pull_request' }}
         run: |
           docker pull "${IMAGE_NAME}:${IMAGE_TAG}"
           docker image ls -a
 
       - name: Run container structure tests
-        shell: bash
         run: |
           curl -LO https://github.com/GoogleContainerTools/container-structure-test/releases/download/v1.22.1/container-structure-test-linux-amd64
           chmod +x container-structure-test-linux-amd64
@@ -190,7 +290,6 @@ jobs:
 
       - name: Run isolated smoke test
         if: ${{ matrix.e2e-test-directory != ''}}
-        shell: bash
         working-directory: src/${{ matrix.module }}
         env:
           E2E_TEST_DIRECTORY: ${{ matrix.e2e-test-directory }}
@@ -200,7 +299,6 @@ jobs:
 
       - name: Print test logs and stop all running containers
         if: ${{ matrix.e2e-test-directory != '' && always()}}
-        shell: bash
         working-directory: src/${{ matrix.module }}
         continue-on-error: true
         env:
@@ -214,7 +312,7 @@ jobs:
       - build-query
       - build-notify
       - build-list
-      - build-query-fhir-trino
+      - build-query-sql-on-fhir
       - test
     uses: ./.github/workflows/test-k8s-installation.yaml
     with:
@@ -225,7 +323,7 @@ jobs:
       - build-query
       - build-notify
       - build-list
-      - build-query-fhir-trino
+      - build-query-sql-on-fhir
       - test
     uses: ./.github/workflows/test-compose-installation.yaml
     with:
@@ -236,11 +334,10 @@ jobs:
     # it's sufficient to just run tests then.
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
     permissions:
-      actions: read
-      attestations: write
+      actions: read # for the build provenance attestation step in release.yaml's prepare-artifacts
+      attestations: write # release.yaml's prepare-artifacts job attests the release checksums
       contents: write # for release notes
-      # for creating OIDC tokens for signing.
-      id-token: write
+      id-token: write # for creating OIDC tokens for signing
       packages: write # for uploading container images, signatures, and attestations.
     needs:
       - k8s-test
@@ -250,13 +347,13 @@ jobs:
       - build-query
       - build-notify
       - build-list
-      - build-query-fhir-trino
+      - build-query-sql-on-fhir
     uses: ./.github/workflows/release.yaml
     with:
       query-image-digest: ${{ needs.build-query.outputs.image-digest }}
       notify-image-digest: ${{ needs.build-notify.outputs.image-digest }}
       list-image-digest: ${{ needs.build-list.outputs.image-digest }}
-      query-fhir-trino-image-digest: ${{ needs.build-query-fhir-trino.outputs.image-digest }}
+      query-sql-on-fhir-image-digest: ${{ needs.build-query-sql-on-fhir.outputs.image-digest }}
     secrets:
       token: ${{ secrets.MIRACUM_BOT_SEMANTIC_RELEASE_TOKEN }}
 
@@ -264,14 +361,15 @@ jobs:
     uses: miracum/.github/.github/workflows/standard-lint.yaml@7eaa603620c450f73fd25d6b68c37795ef4be999 # v1.22.8
     permissions:
       contents: read
-      pull-requests: write
-      issues: write
-      security-events: write
-      actions: read
+      pull-requests: write # for MegaLinter's PR comment with lint results
+      issues: write # for MegaLinter's PR comment/annotations
+      security-events: write # for uploading CodeQL's SARIF results to the Security tab
+      actions: read # required by the CodeQL analysis steps
     with:
       enable-validate-gradle-wrapper: false
       codeql-languages: '["javascript", "java"]'
       enable-codeql: true
+      java-version: "25"
       enable-verify-base-image-signature: false
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}

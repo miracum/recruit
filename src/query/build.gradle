@@ -6,7 +6,6 @@
 
 plugins {
     id 'org.miracum.recruit.java-application-conventions'
-    id 'ua.eshepelyuk.ManifestClasspath' version '1.0.0'
 }
 
 dependencies {

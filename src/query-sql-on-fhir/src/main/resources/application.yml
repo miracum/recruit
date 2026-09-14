@@ -1,0 +1,101 @@
+query-sql-on-fhir:
+  version: "10.5.7" # x-release-please-version
+  # "scheduled" (default): run forever, triggering a poll cycle on the cron schedule below.
+  # "one-shot": run a single poll cycle, then exit - non-zero if any study failed to process.
+  # Intended for running this module as a Job/Argo Workflow step instead of a long-running
+  # service; the cron schedule below is ignored in this mode.
+  run-mode: scheduled
+  schedule:
+    # every 1 hour
+    cron: "@hourly"
+  # max number of patients' (ResearchSubject + per-criterion Observation) entries per transaction
+  # bundle - a study's full candidate set is submitted as one or more bundles of at most this size,
+  # rather than a single unbounded transaction, to stay under the FHIR server's transaction limits.
+  transaction-bundle-chunk-size: 500
+  # When true, run the eligibility queries and log a per-criterion breakdown of how many patients
+  # would be submitted, but do not write anything to the FHIR server. Useful for estimating the
+  # scope of a query before committing, especially when the candidate population might be very large.
+  dry-run: false
+  # When false (default), patients with unknown eligibility for at least one criterion (missing data)
+  # are included as candidates for human review. When true, only patients who definitively satisfy
+  # every criterion are submitted - unknowns are dropped, eliminating data-gap-driven population
+  # inflation at the cost of potentially missing patients with incomplete records.
+  require-all-criteria-met: false
+  # Abort processing a study if the total number of candidate ResearchSubjects (all-met + unknown)
+  # would exceed this value. -1 (default) disables the check. Use dry-run mode first to measure
+  # the expected count before setting a threshold.
+  max-research-subjects: -1
+  funnel:
+    # When true, additionally compute and publish each study's eligibility attrition funnel (how
+    # many patients remain after cumulatively applying each criterion, in Group.characteristic
+    # order) as a Measure/MeasureReport pair every poll cycle. Disabled by default: unlike the main
+    # eligibility query, the funnel query cannot benefit from filter-pushdown (it needs a count of
+    # excluded patients too), so it is a materially more expensive query against the same data -
+    # enable only once that cost has been measured for your Trino deployment.
+    enabled: false
+    # A standalone "SELECT COUNT(*) FROM ..." query defining the funnel's anchor "total population"
+    # step - deliberately independent of the first criterion's own SQL, which may already apply a
+    # narrowing WHERE clause and so cannot be trusted as "everyone who was screened" (see
+    # eligibility-criteria-design.md's anchor-criterion-scope warning). E.g.
+    # "SELECT COUNT(*) FROM fhir.qs.patient". Required (validated at startup) when funnel.enabled
+    # is true; also used to preview the funnel in dry-run mode even when funnel.enabled is false.
+    total-population-sql: "SELECT COUNT(*) FROM Patient"
+
+fhir:
+  url: ""
+  server:
+    # call, connect, read, and write timeout to the FHIR server in seconds
+    timeout-in-seconds: 300
+  use-update-as-create: false
+
+# base URL of a sql-on-fhir server (e.g. Pathling) implementing the $sqlquery-run operation.
+# only required if any of the polled SQLQuery Library resources depend on ViewDefinitions
+# (via relatedArtifact) or use a SQL dialect other than trino.
+sql-on-fhir:
+  url: ""
+
+# Disabled by default: exporting spans to a collector nobody deployed is just overhead for
+# nothing, so this is opt-in per environment rather than always-on. This is the OpenTelemetry
+# Spring Boot starter's own standard property (bound from the OTEL_SDK_DISABLED env var like any
+# other OTEL_* var, e.g. OTEL_EXPORTER_OTLP_ENDPOINT/OTEL_SERVICE_NAME) - no app-specific flag.
+#
+# metrics/logs exporters are off regardless: this app already has its own metrics (management.*
+# below, scraped via Prometheus) and console logging pattern, and a traces-only backend like
+# Jaeger doesn't implement the OTLP logs endpoint anyway - without this, enabling the SDK produces
+# "Failed to export logs. Server responded with HTTP status code 404." once a log line is emitted.
+otel:
+  sdk:
+    disabled: true
+  metrics:
+    exporter: none
+  logs:
+    exporter: none
+
+logging:
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:%5p}) %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m %X %n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
+
+spring:
+  datasource:
+    driver-class-name: io.trino.jdbc.TrinoDriver
+    url: ""
+    username: ""
+    password: ""
+  profiles:
+    active: dev
+  application:
+    name: query-sql-on-fhir
+
+management:
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "health,prometheus"
+
+server:
+  shutdown: graceful

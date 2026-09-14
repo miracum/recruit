@@ -1,0 +1,17 @@
+{
+  "resourceType": "CodeSystem",
+  "status": "active",
+  "content": "complete",
+  "name": "EligibilityAssessmentCategory",
+  "id": "eligibility-assessment-category",
+  "title": "recruIT eligibility assessment category",
+  "description": "A custom, non-standard Observation.category code identifying the per-criterion eligibility Assessments produced by the query eligibility engine..",
+  "url": "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category",
+  "concept": [
+    {
+      "code": "eligibility-assessment",
+      "display": "Eligibility assessment"
+    }
+  ],
+  "count": 1
+}

@@ -141,7 +141,7 @@
         ],
         "extension": [
           {
-            "url": "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy",
+            "url": "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study",
             "valueReference": {
               "reference": "ResearchStudy/1",
               "display": "AMICA"
@@ -152,7 +152,7 @@
         "code": {
           "coding": [
             {
-              "system": "https://fhir.miracum.org/uc1/CodeSystem/screeningList",
+              "system": "https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type",
               "code": "screening-recommendations"
             }
           ]

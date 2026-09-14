@@ -2051,7 +2051,7 @@
     "resource": {
       "resourceType": "List",
       "extension": [ {
-        "url": "https://fhir.miracum.org/uc1/StructureDefinition/belongsToStudy",
+        "url": "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list-belongs-to-study",
         "valueReference": {
           "reference": "urn:uuid:guid_2",
           "display": "Testcohort"
@@ -2066,7 +2066,7 @@
       "title": "Screening list for the 'Testcohort' study",
       "code": {
         "coding": [ {
-          "system": "https://fhir.miracum.org/uc1/CodeSystem/screeningList",
+          "system": "https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type",
           "code": "screening-recommendations"
         } ]
       },

@@ -1,0 +1,29 @@
+{
+  "resourceType": "List",
+  "id": "ScreeningListExample",
+  "meta": {
+    "profile": [
+      "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list"
+    ]
+  },
+  "mode": "working",
+  "extension": [
+    {
+      "url": "https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study",
+      "valueReference": {
+        "reference": "ResearchStudy/RecruitResearchStudyExample",
+        "display": "SAMPLE STUDY"
+      }
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "code": "screening-recommendations",
+        "system": "https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type"
+      }
+    ]
+  },
+  "status": "current",
+  "title": "Test"
+}

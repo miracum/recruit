@@ -1,0 +1,74 @@
+@inject IStringLocalizer<SharedResources> Localizer
+
+<div class="flex flex-col gap-4">
+    <BbInput @bind-Value="_search" @bind:event="oninput"
+             Placeholder="@Localizer["App.CriteriaManager.LibrarySearchPlaceholder"]" />
+
+    @if (FilteredLibraries.Count == 0)
+    {
+        <p class="text-sm text-muted-foreground">@Localizer["App.CriteriaManager.NoLibrariesMessage"]</p>
+    }
+    else
+    {
+        <div class="flex max-h-[28rem] flex-col gap-3 overflow-auto">
+            @foreach (var library in FilteredLibraries)
+            {
+                <div class="rounded-md border p-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <div class="font-medium">@(library.Title ?? library.Id)</div>
+                            @if (!string.IsNullOrWhiteSpace(library.Name))
+                            {
+                                <div class="text-xs text-muted-foreground">@library.Name</div>
+                            }
+                        </div>
+                        <BbButton Variant="ButtonVariant.Default" Size="ButtonSize.Small" OnClick="@(() => SelectAsync(library))">
+                            @Localizer["App.CriteriaManager.SelectCriterionButton"]
+                        </BbButton>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(library.Description))
+                    {
+                        <p class="mt-1 text-sm text-muted-foreground">@library.Description</p>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(library.Sql))
+                    {
+                        <details class="mt-3">
+                            <summary class="cursor-pointer text-xs font-medium uppercase tracking-wide text-muted-foreground hover:text-foreground">
+                                @Localizer["App.CriteriaManager.CriterionSqlLabel"]
+                            </summary>
+                            <pre class="mt-2 max-h-48 overflow-auto rounded-md border bg-muted p-3 text-xs"><code>@library.Sql</code></pre>
+                        </details>
+                    }
+                </div>
+            }
+        </div>
+    }
+
+    <div class="flex justify-end">
+        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="CancelAsync">
+            @Localizer["App.CriteriaManager.CancelButton"]
+        </BbButton>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public IReadOnlyList<LibrarySummaryDto> Libraries { get; set; } = [];
+
+    [CascadingParameter]
+    public IDialogReference DialogReference { get; set; } = default!;
+
+    private string _search = string.Empty;
+
+    private List<LibrarySummaryDto> FilteredLibraries => [.. Libraries.Where(MatchesSearch)];
+
+    private bool MatchesSearch(LibrarySummaryDto library) =>
+        string.IsNullOrWhiteSpace(_search)
+        || (library.Title?.Contains(_search, StringComparison.OrdinalIgnoreCase) ?? false)
+        || library.Id.Contains(_search, StringComparison.OrdinalIgnoreCase);
+
+    private Task SelectAsync(LibrarySummaryDto library) =>
+        DialogReference.CloseAsync(DialogResult.Ok(library));
+
+    private Task CancelAsync() => DialogReference.CancelAsync();
+}

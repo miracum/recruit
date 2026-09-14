@@ -1,0 +1,14 @@
+{
+  "resourceType": "SearchParameter",
+  "id": "group-characteristic",
+  "url": "https://miracum.github.io/recruit/fhir/SearchParameter/group-characteristic",
+  "name": "GroupCharacteristic",
+  "description": "An entity referenced in a characteristic",
+  "base": [
+    "Group"
+  ],
+  "status": "active",
+  "code": "characteristic",
+  "type": "reference",
+  "expression": "Group.characteristic.value.ofType(Reference)"
+}

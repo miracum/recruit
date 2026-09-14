@@ -1,0 +1,32 @@
+@inject IStringLocalizer<SharedResources> Localizer
+
+<BbBadge Variant="Variant" Class="@ColorClass">@Localizer[StatusDisplay.GetKey(Status)]</BbBadge>
+
+@code {
+    [Parameter, EditorRequired]
+    public required string Status { get; set; }
+
+    private BadgeVariant Variant => Status switch
+    {
+        "ineligible" => BadgeVariant.Destructive,
+        "withdrawn" => BadgeVariant.Outline,
+        _ => BadgeVariant.Secondary,
+    };
+
+    // "screening"/"eligible"/"on-study" need semantic colors the built-in Badge variants don't
+    // cover (only Default/Secondary/Destructive/Outline exist, and Default/Secondary are
+    // deliberately grayscale in this theme - only Destructive has real chroma). These are plain
+    // CSS classes (app.css) against theme.css's accent tokens rather than Tailwind utilities -
+    // this app has no Tailwind build step of its own, so arbitrary utility classes not already
+    // used somewhere inside BlazorBlueprint.Components aren't present in its precompiled CSS
+    // bundle and silently render as nothing. app.css loads after blazorblueprint.css, so these
+    // still win the cascade. "candidate"/"withdrawn" stay neutral/muted on purpose - nothing's
+    // been determined yet, or the trial's already over for that patient.
+    private string? ColorClass => Status switch
+    {
+        "screening" => "status-badge-screening",
+        "eligible" => "status-badge-eligible",
+        "on-study" => "status-badge-on-study",
+        _ => null,
+    };
+}

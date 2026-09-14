@@ -1,0 +1,115 @@
+@inject IStringLocalizer<SharedResources> Localizer
+
+<div class="rounded-md border p-3">
+    <div class="flex flex-wrap items-start justify-between gap-2">
+        <div class="flex min-w-48 flex-1 items-start gap-3">
+            <span class="mt-1 shrink-0 text-xs font-medium tabular-nums text-muted-foreground">@Index.ToString("D2")</span>
+            <div class="min-w-0 flex-1">
+                @if (IsFromLibrary)
+                {
+                    <p class="text-sm">@Criterion.DisplayText</p>
+                }
+                else
+                {
+                    <BbInput @bind-Value="Criterion.DisplayText" @bind:event="oninput" @bind:after="OnChanged.InvokeAsync"
+                             Required="true" Placeholder="@Localizer["App.CriteriaManager.CriterionDisplayTextPlaceholder"]" />
+                    <p class="mt-1 text-xs text-muted-foreground">
+                        @Localizer["App.CriteriaManager.CriterionNamePreviewLabel"]: <code>@LibraryName</code>
+                    </p>
+                }
+            </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-1">
+            <div class="flex" role="group" aria-label="@Localizer["App.CriteriaManager.CriterionTypeGroupLabel"]">
+                <BbButton Variant="@(Criterion.Exclude ? ButtonVariant.Outline : ButtonVariant.Secondary)" Size="ButtonSize.Small"
+                          Class="rounded-r-none" OnClick="@(() => OnSetExclude.InvokeAsync(false))">
+                    @Localizer["App.CriteriaManager.InclusionToggleLabel"]
+                </BbButton>
+                <BbButton Variant="@(Criterion.Exclude ? ButtonVariant.Secondary : ButtonVariant.Outline)" Size="ButtonSize.Small"
+                          Class="-ml-px rounded-l-none" OnClick="@(() => OnSetExclude.InvokeAsync(true))">
+                    @Localizer["App.CriteriaManager.ExclusionToggleLabel"]
+                </BbButton>
+            </div>
+            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Disabled="!CanMoveUp"
+                      OnClick="OnMoveUp" title="@Localizer["App.CriteriaManager.MoveUpButton"]">
+                <LucideIcon Name="chevron-up" Size="14" />
+            </BbButton>
+            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Disabled="!CanMoveDown"
+                      OnClick="OnMoveDown" title="@Localizer["App.CriteriaManager.MoveDownButton"]">
+                <LucideIcon Name="chevron-down" Size="14" />
+            </BbButton>
+            <BbButton Variant="ButtonVariant.Destructive" Size="ButtonSize.Small" OnClick="OnRemove" title="@Localizer["App.CriteriaManager.RemoveCriterionButton"]">
+                <LucideIcon Name="trash-2" Size="14" />
+            </BbButton>
+        </div>
+    </div>
+
+    @if (IsFromLibrary)
+    {
+        @if (!string.IsNullOrWhiteSpace(Criterion.Sql))
+        {
+            <details class="mt-3">
+                <summary class="cursor-pointer text-xs font-medium uppercase tracking-wide text-muted-foreground hover:text-foreground">
+                    @Localizer["App.CriteriaManager.CriterionSqlLabel"]
+                </summary>
+                <pre class="mt-2 max-h-64 overflow-auto rounded-md border bg-muted p-3 text-xs"><code>@Criterion.Sql</code></pre>
+            </details>
+        }
+    }
+    else
+    {
+        <div class="mt-3">
+            <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.CriterionDescriptionLabel"]</label>
+            <textarea class="mt-1 block w-full rounded-md border bg-background p-2 text-sm" rows="2"
+                      @bind="Criterion.Description" @bind:event="oninput" @bind:after="OnChanged.InvokeAsync"></textarea>
+        </div>
+        <div class="mt-3">
+            <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.CriterionSqlLabel"]</label>
+            <textarea class="mt-1 block w-full rounded-md border bg-background p-2 font-mono text-xs" rows="4"
+                      @bind="Criterion.Sql" @bind:event="oninput" @bind:after="OnChanged.InvokeAsync"></textarea>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public required CriterionDraft Criterion { get; set; }
+
+    /// <summary>1-based position within the unified criteria list, shown as "01", "02", ...</summary>
+    [Parameter, EditorRequired]
+    public required int Index { get; set; }
+
+    [Parameter]
+    public bool CanMoveUp { get; set; }
+
+    [Parameter]
+    public bool CanMoveDown { get; set; }
+
+    [Parameter]
+    public EventCallback OnMoveUp { get; set; }
+
+    [Parameter]
+    public EventCallback OnMoveDown { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnSetExclude { get; set; }
+
+    [Parameter]
+    public EventCallback OnRemove { get; set; }
+
+    /// <summary>
+    /// Raised after any in-place edit to this row's own bound fields (Title/Description/Sql). A
+    /// child component's @bind only triggers *its own* re-render, not the parent's - without this,
+    /// CriteriaManager's live Preview panel (which reads the same, mutated CriterionDraft instance)
+    /// would silently go stale while typing, only catching up on some unrelated parent-level event
+    /// like adding/removing/moving a criterion.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnChanged { get; set; }
+
+    /// <summary>Library-backed criteria show their (read-only) source SQL; ad hoc ones are edited inline.</summary>
+    private bool IsFromLibrary => !string.IsNullOrWhiteSpace(Criterion.ExistingLibraryReference);
+
+    /// <summary>Live preview of the Library.name a new ad hoc criterion would be saved with.</summary>
+    private string LibraryName => Slug.Create(Criterion.DisplayText);
+}

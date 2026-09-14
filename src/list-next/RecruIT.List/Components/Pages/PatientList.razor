@@ -1,0 +1,328 @@
+@page "/trials/{ListId}/patients"
+@attribute [Authorize]
+@inject ScreeningListService ScreeningListService
+@inject EligibilityFunnelService FunnelService
+@inject PatientRecordService PatientRecordService
+@inject TrialAccessService AccessService
+@inject BreadcrumbState BreadcrumbState
+@inject NavigationManager Navigation
+@inject IStringLocalizer<SharedResources> Localizer
+
+<PageTitle>@(_summary?.StudyAcronym ?? Localizer["App.Nav.Patients"])</PageTitle>
+
+@if (_loading)
+{
+    <BbSkeleton Class="mb-4 h-8 w-64" />
+    <BbSkeleton Class="h-96 w-full" />
+}
+else if (_errorMessage is not null)
+{
+    <BbAlert Variant="AlertVariant.Danger">
+        <BbAlertTitle>@Localizer["App.PatientList.LoadErrorTitle"]</BbAlertTitle>
+        <BbAlertDescription>@_errorMessage</BbAlertDescription>
+    </BbAlert>
+}
+else if (_summary is not null)
+{
+    <div class="flex items-start justify-between gap-4">
+        <div>
+            @if (!string.IsNullOrEmpty(_summary.StudyTitle))
+            {
+                <h2 class="text-lg font-medium">@_summary.StudyTitle</h2>
+            }
+        </div>
+        <div class="flex shrink-0 items-center gap-2">
+            <NotificationSubscribeButton TrialIdentifier="_summary.TrialIdentifier" />
+            @if (_canManageAccess)
+            {
+                <BbTooltip>
+                    <BbTooltipTrigger AsChild="true">
+                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Icon" Class="shrink-0" OnClick="@(() => Navigation.NavigateTo($"/trials/{ListId}/access"))">
+                            <LucideIcon Name="shield" Size="16" />
+                        </BbButton>
+                    </BbTooltipTrigger>
+                    <BbTooltipContent>@Localizer["App.PatientList.ManageAccessLink"]</BbTooltipContent>
+                </BbTooltip>
+            }
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(_summary.StudyDescription))
+    {
+        <p class="mt-1 text-sm text-muted-foreground">@_summary.StudyDescription</p>
+    }
+
+    @if (_summary.Criteria.Count > 0)
+    {
+        <div class="mt-3 grid grid-cols-2 gap-6 mb-4">
+            <div>
+                <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.PatientList.InclusionCriteria"]</span>
+                @if (InclusionCriteria.Count == 0)
+                {
+                    <p class="mt-1.5 text-sm text-muted-foreground">@Localizer["App.PatientList.NoCriteria"]</p>
+                }
+                else
+                {
+                    <ul class="mt-1.5 space-y-1 text-sm">
+                        @foreach (var criterion in InclusionCriteria)
+                        {
+                            <CriterionListItem Criterion="criterion" />
+                        }
+                    </ul>
+                }
+            </div>
+            <div class="criteria-column-divider pl-6">
+                <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.PatientList.ExclusionCriteria"]</span>
+                @if (ExclusionCriteria.Count == 0)
+                {
+                    <p class="mt-1.5 text-sm text-muted-foreground">@Localizer["App.PatientList.NoCriteria"]</p>
+                }
+                else
+                {
+                    <ul class="mt-1.5 space-y-1 text-sm">
+                        @foreach (var criterion in ExclusionCriteria)
+                        {
+                            <CriterionListItem Criterion="criterion" />
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+    }
+
+    @if (FunnelChartData is { Count: > 0 })
+    {
+        <BbCollapsible @bind-Open="_funnelExpanded" Class="mb-4 rounded-md border">
+            <BbCollapsibleTrigger>
+                <BbButton Variant="ButtonVariant.Ghost" Class="h-auto w-full rounded-b-none px-3 py-2 text-sm font-medium">
+                    <ChildContent>
+                        <span class="flex w-full items-center justify-between">
+                            <span>@Localizer["App.PatientList.FunnelSectionTitle"]</span>
+                            <LucideIcon Name="@(_funnelExpanded ? "chevron-up" : "chevron-down")" Size="16" />
+                        </span>
+                    </ChildContent>
+                </BbButton>
+            </BbCollapsibleTrigger>
+            <BbCollapsibleContent>
+                <div class="border-t p-3">
+                    <BbFunnelChart Data="@FunnelChartData" Height="280px">
+                        <BbChartTooltip />
+                        <BbFunnel DataKey="value" NameKey="stage" Sort="FunnelSort.None" LabelFormatter="{b}: {c}" MinSize="15%" />
+                    </BbFunnelChart>
+                </div>
+            </BbCollapsibleContent>
+        </BbCollapsible>
+    }
+
+    @if (_patients.Count == 0)
+    {
+        <BbEmpty Title="@Localizer["App.PatientList.EmptyTitle"]" Description="@Localizer["App.PatientList.EmptyDescription"]" />
+    }
+    else
+    {
+        <BbDataTable TData="PatientListEntryDto" Data="_patients" ShowPagination="true"
+                     PageSizes="new[] { 10, 25, 50, 100 }" InitialPageSize="25" IsLoading="false">
+            <Columns>
+                <BbDataTableColumn TData="PatientListEntryDto" TValue="DateTimeOffset?" Header="@Localizer["App.PatientList.ColumnRecommended"]" Property="p => p.RecommendedDate" Sortable="true">
+                    <CellTemplate Context="p">
+                        <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
+                            @(p.RecommendedDate?.LocalDateTime.ToString("d") ?? "-")
+                        </div>
+                    </CellTemplate>
+                </BbDataTableColumn>
+                <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="@Localizer["App.PatientList.ColumnName"]" Property="p => p.Name ?? p.MedicalRecordNumber ?? p.PatientId" Sortable="true">
+                    <CellTemplate Context="p">
+                        <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
+                            <span class="font-medium hover:underline">@(p.Name ?? p.MedicalRecordNumber ?? p.PatientId)</span>
+                            @if (p.IsNew(NewSuggestionWindowDays))
+                            {
+                                <BbBadge Variant="BadgeVariant.Default" Class="ml-2">@Localizer["App.PatientList.NewBadge"]</BbBadge>
+                            }
+                        </div>
+                    </CellTemplate>
+                </BbDataTableColumn>
+                <BbDataTableColumn TData="PatientListEntryDto" TValue="int?" Header="@Localizer["App.PatientList.ColumnDemographics"]" Width="140px">
+                    <CellTemplate Context="p">
+                        <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
+                            @(p.Age is not null ? p.Age.ToString() : Localizer["App.Common.AgeUnknown"].Value)
+                            <span class="mx-1.5 text-muted-foreground">&middot;</span>
+                            @(p.Gender is not null ? Localizer[GenderDisplay.GetKey(p.Gender)].Value : Localizer["App.Common.Unknown"].Value)
+                        </div>
+                    </CellTemplate>
+                </BbDataTableColumn>
+                <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="@Localizer["App.PatientList.ColumnStatus"]">
+                    <CellTemplate Context="p">
+                        <div class="-m-4 flex flex-wrap items-center gap-2 cursor-pointer p-4" @onclick="() => OpenPatient(p)">
+                            <StatusBadge Status="@p.Status" />
+                            @if (p.SystemDeterminedIneligible)
+                            {
+                                <BbBadge Variant="BadgeVariant.Outline">@Localizer["App.PatientList.SystemIneligibleBadge"]</BbBadge>
+                            }
+                        </div>
+                    </CellTemplate>
+                </BbDataTableColumn>
+                <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="@Localizer["App.PatientList.ColumnLocation"]">
+                    <CellTemplate Context="p">
+                        <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
+                            @if (p.LastKnownLocationLoaded)
+                            {
+                                @(p.LastKnownLocation ?? Localizer["App.Common.Unknown"].Value)
+                            }
+                            else
+                            {
+                                <BbSkeleton Class="h-4 w-24" />
+                            }
+                        </div>
+                    </CellTemplate>
+                </BbDataTableColumn>
+                <BbDataTableColumn TData="PatientListEntryDto" TValue="DateTimeOffset?" Header="@Localizer["App.PatientList.ColumnUpdated"]" Property="p => p.LastUpdated" Sortable="true">
+                    <CellTemplate Context="p">
+                        <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
+                            @(p.LastUpdated?.LocalDateTime.ToString("g") ?? "-")
+                        </div>
+                    </CellTemplate>
+                </BbDataTableColumn>
+            </Columns>
+        </BbDataTable>
+    }
+
+    <PatientDialog Patient="_selectedPatient" PatientChanged="p => _selectedPatient = p"
+                   Acronym="@_summary.StudyAcronym" StudyTitle="@_summary.StudyTitle"
+                   TrialIdentifier="_summary.TrialIdentifier" CanEdit="_canEdit" />
+}
+
+@code {
+    [Parameter]
+    public string ListId { get; set; } = string.Empty;
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    [Inject]
+    private IOptions<NotificationOptions> NotificationOptionsAccessor { get; set; } = default!;
+
+    private TrialSummaryDto? _summary;
+    private List<PatientListEntryDto> _patients = [];
+    private List<FunnelStepDto>? _funnelSteps;
+    private bool _funnelExpanded;
+    private bool _loading = true;
+    private bool _canEdit;
+    private bool _canManageAccess;
+    private string? _errorMessage;
+    private ClaimsPrincipal _user = new();
+
+    private PatientListEntryDto? _selectedPatient;
+
+    private int NewSuggestionWindowDays => NotificationOptionsAccessor.Value.NewSuggestionWindowDays;
+
+    private List<CriterionDefinitionDto> InclusionCriteria => _summary?.Criteria.Where(c => !c.Exclude).ToList() ?? [];
+
+    private List<CriterionDefinitionDto> ExclusionCriteria => _summary?.Criteria.Where(c => c.Exclude).ToList() ?? [];
+
+    private List<FunnelChartPoint>? FunnelChartData =>
+        _funnelSteps
+            ?.Select(s => new FunnelChartPoint(
+                s.IsTotalPopulation
+                    ? Localizer["App.PatientList.FunnelTotalPopulationLabel"].Value
+                    : s.Label ?? string.Empty,
+                s.Count
+            ))
+            .ToList();
+
+    private record FunnelChartPoint(string Stage, int Value);
+
+    protected override async Task OnInitializedAsync()
+    {
+        _user = await AuthStateTask.GetUserAsync();
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _errorMessage = null;
+        try
+        {
+            var (summary, patients) = await ScreeningListService.GetListWithPatientsAsync(ListId, _user);
+            _summary = summary;
+            _patients = [.. patients];
+            var permission = await AccessService.GetPermissionAsync(_user, summary.TrialIdentifier);
+            _canEdit = TrialAccessService.MeetsCoordinatorThreshold(permission);
+            _canManageAccess = TrialAccessService.MeetsTrialAdminThreshold(permission);
+            BreadcrumbState.Set(new BreadcrumbItem(Localizer["App.Common.AllTrialsBreadcrumb"], "/"), new BreadcrumbItem(summary.StudyAcronym));
+            _funnelSteps = await TryLoadFunnelAsync(summary.StudyId);
+
+            // Fire-and-forget rather than gating on OnAfterRenderAsync(firstRender): when
+            // GetListWithPatientsAsync resolves fast enough (e.g. a warm connection from in-app
+            // navigation), Blazor can fold the whole initial load into a single render, so the
+            // "first" OnAfterRenderAsync would already be past firstRender=true and this would
+            // never fire on a cold/direct page load where the fetch takes longer.
+            if (_patients.Count > 0)
+            {
+                _ = LoadLocationsInBackgroundAsync();
+            }
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        catch (FhirAccessException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        catch (Exception)
+        {
+            _errorMessage = Localizer["App.PatientList.LoadErrorFallback"];
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    /// <summary>
+    /// The funnel is an optional, best-effort enhancement - most studies won't have one yet (the
+    /// query-sql-on-fhir feature flag producing it defaults to off), and a failure fetching it
+    /// shouldn't block the rest of the page from loading.
+    /// </summary>
+    private async Task<List<FunnelStepDto>?> TryLoadFunnelAsync(string studyId)
+    {
+        try
+        {
+            var steps = await FunnelService.GetFunnelAsync(studyId);
+            return steps?.ToList();
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    private async Task LoadLocationsInBackgroundAsync()
+    {
+        using var throttle = new SemaphoreSlim(8);
+        var tasks = _patients.Select(async patient =>
+        {
+            await throttle.WaitAsync();
+            try
+            {
+                var location = await PatientRecordService.GetLatestLocationAsync(patient.PatientId);
+                patient.LastKnownLocation = location?.LocationName;
+            }
+            catch
+            {
+                patient.LastKnownLocation = null;
+            }
+            finally
+            {
+                patient.LastKnownLocationLoaded = true;
+                throttle.Release();
+                await InvokeAsync(StateHasChanged);
+            }
+        });
+
+        await Task.WhenAll(tasks);
+    }
+
+    private void OpenPatient(PatientListEntryDto patient) => _selectedPatient = patient;
+}

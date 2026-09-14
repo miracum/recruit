@@ -1,0 +1,22 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "research-study",
+  "url": "https://miracum.github.io/recruit/fhir/StructureDefinition/research-study",
+  "name": "RecruitResearchStudy",
+  "status": "active",
+  "description": "A profile for the ResearchStudy resource used to represent a clinical trial.",
+  "fhirVersion": "4.0.1",
+  "kind": "resource",
+  "abstract": false,
+  "type": "ResearchStudy",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/ResearchStudy",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "ResearchStudy",
+        "path": "ResearchStudy"
+      }
+    ]
+  }
+}

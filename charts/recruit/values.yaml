@@ -65,6 +65,24 @@ fhirserver:
     - name: SPRING_FLYWAY_BASELINE_ON_MIGRATE
       value: "true"
 
+# installs the custom SearchParameter resources required by recruIT (e.g. by the list and query-sql-on-fhir modules)
+# via a Helm `pre-upgrade` hook Job, using `curl`.
+createSearchParameters:
+  # -- whether to install/update the SearchParameter resources on every `helm upgrade`. Only takes effect if
+  # `fhirserver.enabled=true` or `externalFhirServer.url` is set.
+  enabled: true
+  # -- number of retries for the Job before it is considered failed
+  backoffLimit: 3
+  # -- automatically delete the Job this many seconds after it finished. Set to `null` to disable.
+  ttlSecondsAfterFinished: 600
+  # -- annotations to add to the Job's pod
+  podAnnotations: {}
+  # -- set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if `resources` is set.
+  # More information: <https://github.com/miracum/charts/blob/master/charts/common/templates/_resources.tpl#L1>
+  resourcesPreset: "nano"
+  # -- configure the job pod's resource requests and limits
+  resources: {}
+
 externalFhirServer:
   # -- URL of an external FHIR Server - only used when `fhirserver.enabled` is set to `false`
   url: ""
@@ -235,17 +253,27 @@ query:
   # implemented as an init container that waits on notify's `/actuator/health` endpoint
   shouldWaitForNotify: false
 
-  # -- configuration for the container's readiness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # -- configuration for the container's readiness probe. Set `enabled: false` to disable it.
+  # See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
   # @ignore
   readinessProbe: # +doc-gen:ignore
+    enabled: true
+    httpGet:
+      path: /readyz
+      port: http
     failureThreshold: 3
     initialDelaySeconds: 30
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 5
-  # -- configuration for the container's liveness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # -- configuration for the container's liveness probe. Set `enabled: false` to disable it.
+  # See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
   # @ignore
   livenessProbe: # +doc-gen:ignore
+    enabled: true
+    httpGet:
+      path: /livez
+      port: http
     failureThreshold: 3
     initialDelaySeconds: 30
     periodSeconds: 10
@@ -428,17 +456,27 @@ notify:
     #    hosts:
     #      - notify-example.local
 
-  # -- configuration for the container's readiness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # -- configuration for the container's readiness probe. Set `enabled: false` to disable it.
+  # See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
   # @ignore
   readinessProbe: # +doc-gen:ignore
+    enabled: true
+    httpGet:
+      path: /readyz
+      port: http
     failureThreshold: 5
     initialDelaySeconds: 30
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 10
-  # -- configuration for the container's liveness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # -- configuration for the container's liveness probe. Set `enabled: false` to disable it.
+  # See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
   # @ignore
   livenessProbe: # +doc-gen:ignore
+    enabled: true
+    httpGet:
+      path: /livez
+      port: http
     failureThreshold: 3
     initialDelaySeconds: 30
     periodSeconds: 10
@@ -604,17 +642,27 @@ list:
   # -- resource requests and limits for the container
   resources: {}
 
-  # Configuration for the container's readiness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # Configuration for the container's readiness probe. Set `enabled: false` to disable it.
+  # See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
   # @ignore
   readinessProbe: # +doc-gen:ignore
+    enabled: true
+    httpGet:
+      path: /api/health/readiness
+      port: http
     failureThreshold: 3
     initialDelaySeconds: 20
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 5
-  # Configuration for the container's liveness probe. See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # Configuration for the container's liveness probe. Set `enabled: false` to disable it.
+  # See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
   # @ignore
   livenessProbe: # +doc-gen:ignore
+    enabled: true
+    httpGet:
+      path: /api/health/liveness
+      port: http
     failureThreshold: 3
     initialDelaySeconds: 20
     periodSeconds: 10
@@ -662,7 +710,298 @@ list:
     seccompProfile:
       type: RuntimeDefault
 
-queryFhirTrino:
+listNext:
+  # -- Whether the list-next module should be enabled. list-next is the .NET-based successor to
+  # the list module; it is a separate deployment with its own database and is not a drop-in
+  # replacement yet, so both can run side-by-side during the migration.
+  enabled: false
+  # -- Number of replicas for the list-next module. A fault-tolerant number of replicas is recommended.
+  replicaCount: 1
+  # -- specify how many old ReplicaSets for this Deployment you want to retain.
+  revisionHistoryLimit: 5
+
+  # -- seconds the kubelet waits after starting pod termination (preStop hook + SIGTERM) before
+  # force-killing the container. Must comfortably exceed `lifecycle.preStop.sleep.seconds` below,
+  # plus however long the app itself takes to finish in-flight requests after SIGTERM.
+  terminationGracePeriodSeconds: 30
+
+  # Delays SIGTERM by a few seconds after a pod is marked for termination (e.g. during
+  # `kubectl rollout restart` or a `helm upgrade`). This closes a race between the pod being
+  # removed from Service endpoints/ingress upstreams - which happens asynchronously - and the app
+  # actually stopping: without it, clients can see 502s because traffic keeps arriving for a
+  # moment after the app has already stopped listening. Uses Kubernetes' native `sleep` lifecycle
+  # action rather than an `exec` hook, since list-next's base image is chiseled and has no shell to
+  # run `sleep` in. Requires Kubernetes >=1.30 (or >=1.29 with the `PodLifecycleSleepAction`
+  # feature gate enabled) - set `enabled: false` on older clusters.
+  # @ignore
+  lifecycle: # +doc-gen:ignore
+    enabled: true
+    preStop:
+      sleep:
+        seconds: 10
+
+  # the list-next module's image
+  # @ignore
+  image: # +doc-gen:ignore
+    registry: ghcr.io
+    repository: miracum/recruit/list-next
+    tag: v10.5.7 # x-release-please-version
+    pullPolicy: IfNotPresent
+
+  serviceAccount:
+    # -- Specifies whether a service account should be created.
+    create: false
+    # -- Annotations to add to the service account
+    annotations: {}
+    # -- The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+    # -- whether to automount the SA token.
+    automountServiceAccountToken: false
+
+  # -- settings for the Job that runs list-next's DB migrations once per image tag, ahead of the
+  # Deployment's pods (see the wait-for-migration initContainer below).
+  migrationJob:
+    # -- number of retries for the migration Job before it is considered failed
+    backoffLimit: 3
+    # -- delete the migration Job this many seconds after it finishes; set to `null` to disable.
+    # Acts as a safety net if the GitOps controller doesn't prune superseded Jobs - a new image tag
+    # always produces a differently-named Job, so old ones would otherwise accumulate.
+    ttlSecondsAfterFinished: 600
+    # -- annotations to add to the migration Job's pod
+    podAnnotations: {}
+    # -- set the migration Job container's resources according to one common preset (allowed
+    # values: none, nano, micro, small, medium, large, xlarge, 2xlarge). Ignored if `resources` is set.
+    resourcesPreset: "small"
+    # -- resource requests and limits for the migration Job container
+    resources: {}
+    # -- number of attempts (waitPollIntervalSeconds apart) the wait-for-migration initContainer
+    # polls the migration Job before giving up and failing the pod. The default (60 * 10s = 10 min)
+    # mirrors the grace period the old startupProbe gave in-process migrations.
+    waitMaxAttempts: 60
+    # -- seconds between wait-for-migration polls of the migration Job's status
+    waitPollIntervalSeconds: 10
+
+  podDisruptionBudget:
+    # -- create a PodDisruptionBudget resource
+    enabled: false
+    # -- Minimum available instances; ignored if there is no PodDisruptionBudget
+    minAvailable: 1
+    # -- Maximum unavailable instances; ignored if there is no PodDisruptionBudget
+    maxUnavailable: ""
+
+  # -- the service used to expose the list-next module
+  service:
+    # -- service type
+    type: ClusterIP
+    # -- service port for the HTTP endpoint
+    port: 8080
+    # -- service port for the Prometheus metrics endpoint
+    metricsPort: 8081
+
+  database:
+    # -- Npgsql connection string for list-next's own data (trial access grants, notification poll
+    # cursors, and the Hangfire job store backing its notification poller), e.g.
+    # `Host=postgres;Port=5432;Database=list_next`. Omit credentials here and set them via
+    # `username`/`password` below instead - they are injected as `PGUSER`/`PGPASSWORD` env vars,
+    # which Npgsql falls back to for any credentials missing from the connection string.
+    connectionString: ""
+    # -- the username to connect to the database as. Injected as the `PGUSER` env var, in both the
+    # Deployment and the migration Job. Leave empty to omit `PGUSER`/`PGPASSWORD` entirely.
+    username: ""
+    # -- the password used to connect to the database. Injected as the `PGPASSWORD` env var.
+    # Ignored if `existingSecret.name` is set.
+    password: ""
+    existingSecret:
+      # -- name of an existing Kubernetes secret that contains the database password
+      name: ""
+      # -- the key inside the existing secret containing the password
+      key: "db-password"
+
+  auth:
+    # -- if enabled, requires OIDC authentication before accessing list-next. If disabled, every
+    # visitor is treated as an authenticated admin - only safe for local development/testing.
+    enabled: false
+    oidc:
+      # -- the OIDC authority/issuer URL
+      authority: ""
+      # -- the OIDC client id
+      clientId: ""
+      # -- the OIDC client secret. Ignored if `existingSecret.name` is set
+      clientSecret: ""
+      existingSecret:
+        # -- name of an existing Kubernetes Secret containing the OIDC client secret
+        name: ""
+        # -- key inside the existing secret
+        key: "oidc-client-secret"
+      # -- the claim type used to map roles from the ID token, e.g. `role` or `realm_access.roles`
+      roleClaimType: "role"
+
+  notifications:
+    # -- a screening recommendation is highlighted as new if it first appeared within this many days
+    newSuggestionWindowDays: 7
+    # -- a pending recommendation is highlighted as stalled if untouched for this many days
+    stalledLeadWindowDays: 14
+    # -- how often, in seconds, list-next scans for screening list changes to notify about
+    scanIntervalSeconds: 60
+
+  notifyMailer:
+    # -- Used to link back to list-next from a notification email. If `listNext.ingress.enabled` is
+    # `true`, the ingress host is used instead. A composite format string (see .NET's String.Format)
+    # with a single `{0}` placeholder for the list id.
+    screeningListLinkTemplate: "http://localhost:8080/recommendations/{0}"
+    # -- the sender email address for notification mails
+    from: "recruit@example.com"
+    # -- subject line template, a composite format string (see .NET's String.Format) with a single
+    # `{0}` placeholder for the study acronym
+    subjectTemplate: "MIRACUM Rekrutierungsunterstützung: neue Vorschläge für die Studie {0}"
+    smtp:
+      # -- hostname of the external SMTP mail server. Only used if `mailhog.enabled` is `false`
+      host: ""
+      # -- mailserver port
+      port: 25
+      # -- mailserver username
+      username: ""
+      # -- mailserver password
+      password: ""
+      # -- name of an existing secret containing an `smtp-password` key to use instead of the password above
+      existingSecret: ""
+
+  metrics:
+    serviceMonitor:
+      # -- if enabled, creates a ServiceMonitor instance for Prometheus Operator-based monitoring
+      enabled: false
+      # -- additional labels
+      additionalLabels: {}
+      # namespace: monitoring
+      # interval: 30s
+      # scrapeTimeout: 10s
+
+  # -- specify extra environment vars on the container
+  extraEnv: []
+
+  # -- specify additional labels to apply to the list-next pod
+  extraPodLabels: {}
+
+  ingress:
+    # -- if enabled, create an ingress resource to access list-next
+    enabled: false
+    # -- name of the IngressClass resource to use for this ingress
+    ingressClassName: ""
+    # -- additional annotations for the Ingress resource
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: list-next.127.0.0.1.nip.io
+        paths:
+          - "/"
+    # -- TLS configuration
+    tls: []
+    #  - secretName: list-next-example-tls
+    #    hosts:
+    #      - list-next-example.local
+
+  # -- set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if primary.resources is set (primary.resources is recommended for production).
+  # More information: <https://github.com/miracum/charts/blob/master/charts/common/templates/_resources.tpl#L1>
+  resourcesPreset: "small"
+
+  # -- resource requests and limits for the container
+  resources: {}
+
+  # Configuration for the container's readiness probe. Set `enabled: false` to disable it.
+  # See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # @ignore
+  readinessProbe: # +doc-gen:ignore
+    enabled: true
+    httpGet:
+      path: /readyz
+      port: http
+    failureThreshold: 3
+    initialDelaySeconds: 20
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
+  # Configuration for the container's liveness probe. Set `enabled: false` to disable it.
+  # See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # @ignore
+  livenessProbe: # +doc-gen:ignore
+    enabled: true
+    httpGet:
+      path: /livez
+      port: http
+    failureThreshold: 3
+    initialDelaySeconds: 20
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
+  # Configuration for the container's startup probe. Set `enabled: false` to disable it. list-next
+  # runs EF Core migrations and installs the Hangfire schema before it starts listening at all, so
+  # this gives it a generous, one-time grace period to finish that instead of being judged against
+  # livenessProbe's much tighter steady-state budget (which would otherwise risk killing the
+  # container mid-migration on a slow first start).
+  # See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+  # @ignore
+  startupProbe: # +doc-gen:ignore
+    enabled: true
+    httpGet:
+      path: /livez
+      port: http
+    failureThreshold: 30
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
+
+  # -- node labels for pod assignment
+  # see: <https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/>
+  nodeSelector: {}
+
+  # -- tolerations for pod assignment
+  # see: <https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/>
+  tolerations: []
+
+  # -- affinity for pod assignment
+  # see: <https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity>
+  affinity: {}
+
+  # -- security context for the pod
+  podSecurityContext: {}
+
+  # -- pod topology spread configuration
+  # see: <https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#api>
+  topologySpreadConstraints: []
+    # - maxSkew: 1
+    #   topologyKey: topology.kubernetes.io/zone
+    #   whenUnsatisfiable: ScheduleAnyway
+    #   labelSelector:
+    #     matchLabels:
+    #       app.kubernetes.io/component: list-next
+    #       app.kubernetes.io/instance: recruit
+
+  # -- security context for the container
+  # @ignore
+  securityContext: # +doc-gen:ignore
+    privileged: false
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    runAsNonRoot: true
+    # matches $APP_UID in the list-next Dockerfile's base image (mcr.microsoft.com/dotnet/aspnet)
+    runAsUser: 1654
+    runAsGroup: 1654
+    readOnlyRootFilesystem: true
+    seccompProfile:
+      type: RuntimeDefault
+
+  # -- extra volumes
+  extraVolumes: []
+
+  # -- extra volumes to mount inside the container
+  extraVolumeMounts: []
+
+querySqlOnFhir:
   # -- Whether the Trino SQL-based query module should be enabled
   enabled: false
   # -- Number of replicas of the query module to run.
@@ -675,7 +1014,7 @@ queryFhirTrino:
   # @ignore
   image: # +doc-gen:ignore
     registry: ghcr.io
-    repository: miracum/recruit/query-fhir-trino
+    repository: miracum/recruit/query-sql-on-fhir
     tag: v10.5.7 # x-release-please-version
     pullPolicy: IfNotPresent
 
@@ -731,6 +1070,12 @@ queryFhirTrino:
         name: ""
         # -- the key containing the password
         key: "trino-password"
+
+  sqlOnFhir:
+    # -- base URL of a sql-on-fhir server (e.g. Pathling) implementing the SQLQueryRun operation,
+    #    used for SQLQuery Library resources that depend on a ViewDefinition or use a SQL dialect
+    #    other than trino. e.g. `http://pathling:8080/fhir`
+    url: ""
 
   # -- a Spring cron expression defining the execution schedule of the query module
   schedule: "@hourly"
@@ -820,7 +1165,7 @@ queryFhirTrino:
     #   whenUnsatisfiable: ScheduleAnyway
     #   labelSelector:
     #     matchLabels:
-    #       app.kubernetes.io/component: query-fhir-trino
+    #       app.kubernetes.io/component: query-sql-on-fhir
     #       app.kubernetes.io/instance: recruit
 
   # -- extra volumes
@@ -855,6 +1200,15 @@ curl: # +doc-gen:ignore
     registry: docker.io
     repository: curlimages/curl
     tag: 8.21.0@sha256:7c12af72ceb38b7432ab85e1a265cff6ae58e06f95539d539b654f2cfa64bb13
+
+# kubectl image used by the wait-for-migration initContainer to poll the list-next migration Job's
+# status. Needs a shell (the initContainer's poll loop runs as a /bin/sh script), which rules out
+# minimal/distroless kubectl images that ship only the binary.
+kubectl: # +doc-gen:ignore
+  image:
+    registry: docker.io
+    repository: alpine/k8s
+    tag: 1.34.9@sha256:72c921a10c53ab749674e828ad12b776d006481c852bba7dd89e149ceed666f3
 
 broadseaAtlasdb:
   # -- whether to deploy the OHDSI Broadsea Atlasdb (<https://github.com/OHDSI/Broadsea-Atlasdb>)

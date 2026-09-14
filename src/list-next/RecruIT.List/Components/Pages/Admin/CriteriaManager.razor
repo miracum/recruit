@@ -1,0 +1,395 @@
+@page "/admin/criteria"
+@attribute [Authorize]
+@inject EligibilityCriteriaService CriteriaService
+@inject BreadcrumbState BreadcrumbState
+@inject DialogService DialogService
+@inject ToastService Toast
+@inject IStringLocalizer<SharedResources> Localizer
+
+<PageTitle>@Localizer["App.CriteriaManager.PageTitle"]</PageTitle>
+
+@if (!_isAdmin)
+{
+    <BbAlert Variant="AlertVariant.Danger">
+        <BbAlertDescription>@Localizer["App.Errors.NotAuthorizedAdminOnly"]</BbAlertDescription>
+    </BbAlert>
+}
+else
+{
+    <BbTabs DefaultValue="study">
+        <BbTabsList>
+            <BbTabsTrigger Value="study">@Localizer["App.CriteriaManager.StudyTabTitle"]</BbTabsTrigger>
+            <BbTabsTrigger Value="library">@Localizer["App.CriteriaManager.LibraryTabTitle"] (@_libraries.Count)</BbTabsTrigger>
+        </BbTabsList>
+
+        <BbTabsContent Value="library">
+            <BbCard Class="mt-4">
+                <BbCardHeader>
+                    <BbCardTitle>@Localizer["App.CriteriaManager.LibrarySectionTitle"]</BbCardTitle>
+                </BbCardHeader>
+                <BbCardContent>
+                    <p class="mb-3 text-sm text-muted-foreground">@Localizer["App.CriteriaManager.LibrarySectionDescription"]</p>
+
+                    @if (_librariesLoading)
+                    {
+                        <BbSkeleton Class="h-24 w-full" />
+                    }
+                    else if (_libraryLoadErrorMessage is not null)
+                    {
+                        <BbAlert Variant="AlertVariant.Danger">
+                            <BbAlertDescription>@_libraryLoadErrorMessage</BbAlertDescription>
+                        </BbAlert>
+                    }
+                    else
+                    {
+                        <BbInput @bind-Value="_librarySearch" @bind:event="oninput"
+                                 Placeholder="@Localizer["App.CriteriaManager.LibrarySearchPlaceholder"]" Class="mb-4 max-w-sm" />
+
+                        @if (FilteredLibraries.Count == 0)
+                        {
+                            <p class="text-sm text-muted-foreground">@Localizer["App.CriteriaManager.NoLibrariesMessage"]</p>
+                        }
+                        else
+                        {
+                            <div class="flex flex-col gap-4">
+                                @foreach (var library in FilteredLibraries)
+                                {
+                                    <div class="rounded-md border p-3">
+                                        <div class="flex flex-wrap items-center justify-between gap-2">
+                                            <div>
+                                                <div class="font-medium">@(library.Title ?? library.Id)</div>
+                                                @if (!string.IsNullOrWhiteSpace(library.Name))
+                                                {
+                                                    <div class="text-xs text-muted-foreground">@library.Name</div>
+                                                }
+                                            </div>
+                                            <div class="flex flex-col items-end gap-1">
+                                                @if (library.Status is not null)
+                                                {
+                                                    <BbBadge Variant="BadgeVariant.Secondary">@library.Status</BbBadge>
+                                                }
+                                                @if (library.LastUpdated is not null)
+                                                {
+                                                    <span class="text-xs text-muted-foreground">
+                                                        @Localizer["App.CriteriaManager.LastUpdatedLabel"]: @library.LastUpdated.Value.LocalDateTime.ToString("g")
+                                                    </span>
+                                                }
+                                            </div>
+                                        </div>
+                                        @if (!string.IsNullOrWhiteSpace(library.Description))
+                                        {
+                                            <p class="mt-1 text-sm text-muted-foreground">@library.Description</p>
+                                        }
+                                        <div class="mt-2 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+                                            <span>@(Localizer["App.CriteriaManager.LibraryUsedByLabel"]):</span>
+                                            @if (library.UsedByStudyDisplayNames.Count == 0)
+                                            {
+                                                <span>@Localizer["App.CriteriaManager.LibraryNotUsedLabel"]</span>
+                                            }
+                                            else
+                                            {
+                                                @foreach (var studyName in library.UsedByStudyDisplayNames)
+                                                {
+                                                    <BbBadge Variant="BadgeVariant.Outline">@studyName</BbBadge>
+                                                }
+                                            }
+                                        </div>
+                                        @if (!string.IsNullOrWhiteSpace(library.Sql))
+                                        {
+                                            <details class="mt-3">
+                                                <summary class="cursor-pointer text-xs font-medium uppercase tracking-wide text-muted-foreground hover:text-foreground">
+                                                    @Localizer["App.CriteriaManager.CriterionSqlLabel"]
+                                                </summary>
+                                                <pre class="mt-2 max-h-64 overflow-auto rounded-md border bg-muted p-3 text-xs"><code>@library.Sql</code></pre>
+                                            </details>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+                </BbCardContent>
+            </BbCard>
+        </BbTabsContent>
+
+        <BbTabsContent Value="study">
+            <BbCard Class="mt-4">
+                <BbCardHeader>
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <BbCardTitle>@Localizer["App.CriteriaManager.StudySectionTitle"]</BbCardTitle>
+                        @if (_studyDraft.ExistingStudyId is null)
+                        {
+                            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="OpenResearchStudyPickerAsync">
+                                <Icon><LucideIcon Name="search" Size="14" /></Icon>
+                                <ChildContent>@Localizer["App.CriteriaManager.UseExistingStudyButton"]</ChildContent>
+                            </BbButton>
+                        }
+                        else
+                        {
+                            <div class="flex flex-wrap items-center gap-2">
+                                <BbBadge Variant="BadgeVariant.Secondary">@Localizer["App.CriteriaManager.ExistingStudyBadge"]</BbBadge>
+                                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="ClearExistingStudy">
+                                    @Localizer["App.CriteriaManager.UseNewStudyButton"]
+                                </BbButton>
+                            </div>
+                        }
+                    </div>
+                </BbCardHeader>
+                <BbCardContent>
+                    <div class="flex flex-wrap gap-3">
+                        <div class="min-w-64 flex-1">
+                            <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                                @Localizer["App.CriteriaManager.StudyTitleLabel"] <span class="text-destructive">*</span>
+                            </label>
+                            <BbInput @bind-Value="_studyDraft.Title" Required="true" Disabled="@(_studyDraft.ExistingStudyId is not null)" Class="mt-1" />
+                        </div>
+                        <div class="w-full max-w-xs">
+                            <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.StudyAcronymLabel"]</label>
+                            <BbInput @bind-Value="_studyDraft.Acronym" Disabled="@(_studyDraft.ExistingStudyId is not null)" Class="mt-1" />
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.CriteriaManager.StudyDescriptionLabel"]</label>
+                        <textarea class="mt-1 block w-full rounded-md border bg-background p-2 text-sm" rows="3" disabled="@(_studyDraft.ExistingStudyId is not null)"
+                                  @bind="_studyDraft.Description" @bind:event="oninput"></textarea>
+                    </div>
+
+                    <div class="mt-4 flex items-start gap-2">
+                        <BbCheckbox @bind-Checked="_studyDraft.CreateEmptyScreeningList" Id="create-empty-screening-list" Class="mt-0.5" />
+                        <div>
+                            <BbLabel For="create-empty-screening-list">@Localizer["App.CriteriaManager.CreateEmptyScreeningListLabel"]</BbLabel>
+                            <p class="text-xs text-muted-foreground">@Localizer["App.CriteriaManager.CreateEmptyScreeningListDescription"]</p>
+                        </div>
+                    </div>
+                </BbCardContent>
+            </BbCard>
+
+            <BbCard Class="mt-6">
+                <BbCardHeader>
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <BbCardTitle>@Localizer["App.CriteriaManager.CriteriaSectionTitle"]</BbCardTitle>
+                        @if (_criteria.Count > 0)
+                        {
+                            <span class="text-sm text-muted-foreground">
+                                @Localizer["App.CriteriaManager.CriteriaSummary", InclusionCriteria.Count, ExclusionCriteria.Count]
+                            </span>
+                        }
+                    </div>
+                </BbCardHeader>
+                <BbCardContent>
+                    <div class="mb-4 flex flex-wrap items-center gap-2">
+                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="OpenLibraryPickerAsync">
+                            <Icon><LucideIcon Name="library" Size="14" /></Icon>
+                            <ChildContent>@Localizer["App.CriteriaManager.AddFromLibraryButton"]</ChildContent>
+                        </BbButton>
+                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="AddCriterion">
+                            <Icon><LucideIcon Name="plus" Size="14" /></Icon>
+                            <ChildContent>@Localizer["App.CriteriaManager.NewCriterionButton"]</ChildContent>
+                        </BbButton>
+                    </div>
+
+                    @if (_criteria.Count == 0)
+                    {
+                        <p class="text-sm text-muted-foreground">@Localizer["App.CriteriaManager.NoCriteriaMessage"]</p>
+                    }
+                    else
+                    {
+                        <div class="flex flex-col gap-3">
+                            @for (var i = 0; i < _criteria.Count; i++)
+                            {
+                                var criterion = _criteria[i];
+                                var isFirst = i == 0;
+                                var isLast = i == _criteria.Count - 1;
+                                <CriterionDraftRow Index="i + 1" Criterion="criterion" CanMoveUp="!isFirst" CanMoveDown="!isLast"
+                                                    OnMoveUp="@(() => MoveCriterion(criterion, -1))"
+                                                    OnMoveDown="@(() => MoveCriterion(criterion, 1))"
+                                                    OnSetExclude="@(exclude => SetCriterionExclude(criterion, exclude))"
+                                                    OnRemove="@(() => RemoveCriterion(criterion))"
+                                                    OnChanged="StateHasChanged" />
+                            }
+                        </div>
+                    }
+                </BbCardContent>
+            </BbCard>
+
+            <BbCard Class="mt-6">
+                <BbCardHeader>
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <BbCardTitle>@Localizer["App.CriteriaManager.PreviewSectionTitle"]</BbCardTitle>
+                        <BbButton Variant="ButtonVariant.Default" Size="ButtonSize.Small" Disabled="@(!CanSubmit)"
+                                  Loading="_submitting" LoadingText="@Localizer["App.CriteriaManager.SubmittingButton"]"
+                                  OnClick="SubmitAsync">
+                            <Icon><LucideIcon Name="upload" Size="14" /></Icon>
+                            <ChildContent>@Localizer["App.CriteriaManager.SubmitButton"]</ChildContent>
+                        </BbButton>
+                    </div>
+                </BbCardHeader>
+                <BbCardContent>
+                    <p class="mb-3 text-sm text-muted-foreground">@Localizer["App.CriteriaManager.PreviewDescription"]</p>
+                    <pre class="max-h-[32rem] overflow-auto rounded-md border bg-muted p-3 text-xs"><code>@PreviewJson</code></pre>
+                </BbCardContent>
+            </BbCard>
+        </BbTabsContent>
+    </BbTabs>
+}
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    private bool _isAdmin;
+    private ClaimsPrincipal _user = new();
+
+    private ResearchStudyDraft _studyDraft = new();
+    private readonly List<CriterionDraft> _criteria = [];
+
+    private List<LibrarySummaryDto> _libraries = [];
+    private bool _librariesLoading = true;
+    private string _librarySearch = string.Empty;
+    private string? _libraryLoadErrorMessage;
+
+    private bool _submitting;
+
+    private string PreviewJson => CriteriaService.BuildPreviewJson(_studyDraft, _criteria);
+
+    /// <summary>A new study needs a Title to be worth submitting; an existing one always has one already.</summary>
+    private bool CanSubmit =>
+        !_submitting
+        && (_studyDraft.ExistingStudyId is not null || !string.IsNullOrWhiteSpace(_studyDraft.Title));
+
+    private List<LibrarySummaryDto> FilteredLibraries =>
+        [.. _libraries.Where(MatchesLibrarySearch)];
+
+    private List<CriterionDraft> InclusionCriteria => [.. _criteria.Where(c => !c.Exclude)];
+
+    private List<CriterionDraft> ExclusionCriteria => [.. _criteria.Where(c => c.Exclude)];
+
+    private bool MatchesLibrarySearch(LibrarySummaryDto library) =>
+        string.IsNullOrWhiteSpace(_librarySearch)
+        || (library.Title?.Contains(_librarySearch, StringComparison.OrdinalIgnoreCase) ?? false)
+        || library.Id.Contains(_librarySearch, StringComparison.OrdinalIgnoreCase);
+
+    protected override async Task OnInitializedAsync()
+    {
+        _user = await AuthStateTask.GetUserAsync();
+        _isAdmin = TrialAccessService.IsAdmin(_user);
+
+        BreadcrumbState.Set(
+            new BreadcrumbItem(Localizer["App.Common.AllTrialsBreadcrumb"], "/"),
+            new BreadcrumbItem(Localizer["App.CriteriaManager.Breadcrumb"]));
+
+        if (!_isAdmin)
+        {
+            return;
+        }
+
+        await LoadLibrariesAsync();
+    }
+
+    private async Task LoadLibrariesAsync()
+    {
+        try
+        {
+            _libraries = [.. await CriteriaService.SearchLibrariesAsync()];
+        }
+        catch (Exception ex)
+        {
+            _libraryLoadErrorMessage = ex.Message;
+        }
+        finally
+        {
+            _librariesLoading = false;
+        }
+    }
+
+    private async Task OpenResearchStudyPickerAsync()
+    {
+        var result = await DialogService.OpenAsync<ResearchStudyPickerDialog>(
+            new DialogOpenOptions
+            {
+                Title = Localizer["App.CriteriaManager.StudyPickerDialogTitle"],
+                Description = Localizer["App.CriteriaManager.StudyPickerDialogDescription"],
+                Size = DialogSize.Large,
+            }
+        );
+
+        if (!result.Cancelled && result.GetData<ResearchStudySummaryDto>() is { } study)
+        {
+            _studyDraft = new ResearchStudyDraft
+            {
+                ExistingStudyId = study.Id,
+                Title = study.Title ?? study.Id,
+                Acronym = study.Acronym ?? string.Empty,
+                Description = study.Description ?? string.Empty,
+            };
+        }
+    }
+
+    private void ClearExistingStudy() => _studyDraft = new ResearchStudyDraft();
+
+    private async Task SubmitAsync()
+    {
+        _submitting = true;
+        try
+        {
+            await CriteriaService.SubmitAsync(_studyDraft, _criteria);
+            Toast.Success(Localizer["App.CriteriaManager.SubmitSuccessMessage"], Localizer["App.Common.Saved"]);
+        }
+        catch (Exception ex)
+        {
+            Toast.Error(ex.Message, Localizer["App.CriteriaManager.SubmitErrorTitle"]);
+        }
+        finally
+        {
+            _submitting = false;
+        }
+    }
+
+    private void AddCriterion() => _criteria.Add(new CriterionDraft());
+
+    private async Task OpenLibraryPickerAsync()
+    {
+        var result = await DialogService.OpenAsync<LibraryCriterionPickerDialog>(
+            new Dictionary<string, object?> { ["Libraries"] = _libraries },
+            new DialogOpenOptions
+            {
+                Title = Localizer["App.CriteriaManager.LibraryPickerDialogTitle"],
+                Description = Localizer["App.CriteriaManager.LibraryPickerDialogDescription"],
+                Size = DialogSize.Large,
+            }
+        );
+
+        if (!result.Cancelled && result.GetData<LibrarySummaryDto>() is { } library)
+        {
+            AddCriterionFromLibrary(library);
+        }
+    }
+
+    private void AddCriterionFromLibrary(LibrarySummaryDto library) =>
+        _criteria.Add(
+            new CriterionDraft
+            {
+                DisplayText = library.Title ?? library.Name ?? library.Id,
+                ExistingLibraryReference = $"Library/{library.Id}",
+                Sql = library.Sql ?? string.Empty,
+            }
+        );
+
+    private void RemoveCriterion(CriterionDraft criterion) => _criteria.Remove(criterion);
+
+    private void SetCriterionExclude(CriterionDraft criterion, bool exclude) => criterion.Exclude = exclude;
+
+    /// <summary>Moves a criterion up/down within the single, unified criteria order.</summary>
+    private void MoveCriterion(CriterionDraft criterion, int direction)
+    {
+        var index = _criteria.IndexOf(criterion);
+        var targetIndex = index + direction;
+        if (targetIndex < 0 || targetIndex >= _criteria.Count)
+        {
+            return;
+        }
+
+        (_criteria[index], _criteria[targetIndex]) = (_criteria[targetIndex], _criteria[index]);
+    }
+}
