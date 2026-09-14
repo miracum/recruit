@@ -1,4 +1,6 @@
+using System.Net;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Rest;
 using Microsoft.Extensions.Localization;
 using RecruIT.List.Models;
 using RecruIT.List.Resources;
@@ -19,6 +21,15 @@ public sealed class PatientRecordService(
 )
 {
     /// <summary>
+    /// Whether this FHIR server rejected "_sort=-date" on an Encounter search. Not every server can
+    /// sort by it - Blaze only sorts on _id and _lastUpdated and answers anything else with a 400
+    /// ("Unknown search-param `date` in sort clause"). Latched process-wide (not per circuit, like
+    /// this scoped service's other state) because it's a property of the server this instance talks
+    /// to: the fallback then costs one wasted round trip in total rather than one per patient.
+    /// </summary>
+    private static volatile bool _encounterDateSortUnsupported;
+
+    /// <summary>
     /// Finds the most recent Encounter with a usable location for the patient. There is no bulk
     /// "latest per patient" FHIR query, so this is fetched per-patient/on-demand, mirroring
     /// list-old's fetchLatestEncounterWithLocation.
@@ -28,23 +39,10 @@ public sealed class PatientRecordService(
         CancellationToken ct = default
     )
     {
-        var client = clientFactory.CreateClient();
-
-        // Deliberately a single-page fetch, not FhirBundleHelpers.GetAllPagesAsync: _count=5
-        // + _sort=-date already gives us the only encounters we could ever use (we return on the
-        // first one with a usable location), and a FHIR server re-runs _include=Encounter:location
-        // on every page it emits - so following "next" links here would re-add the same Location
-        // resources already seen on an earlier page, and the OfType<Location>().ToDictionary(...)
-        // below would throw on the resulting duplicate id the moment a patient's encounters span
-        // more than one page and share a location (common - that's most patients).
-        Bundle? bundle;
+        List<Resource> resources;
         try
         {
-            bundle =
-                await client.GetAsync(
-                    $"Encounter?subject=Patient/{patientId}&_count=5&_include=Encounter:location&_sort=-date&_pretty=false",
-                    ct
-                ) as Bundle;
+            resources = await FetchEncountersWithLocationsAsync(patientId, ct);
         }
         catch (Exception ex)
         {
@@ -52,16 +50,19 @@ public sealed class PatientRecordService(
             return null;
         }
 
-        var resources =
-            bundle?.Entry.Where(e => e.Resource is not null).Select(e => e.Resource!).ToList()
-            ?? [];
-
+        // Deduplicated rather than handed straight to ToDictionary: a FHIR server re-runs
+        // _include=Encounter:location for every page it emits, so the paged fallback below sees the
+        // same Location id once per page it appears on, and ToDictionary would throw on the repeat.
         var locationsById = resources
             .OfType<Location>()
+            .DistinctBy(l => l.Id)
             .ToDictionary(l => $"Location/{l.Id}", l => l);
+
+        // Parsed rather than compared as strings: without a server-side sort, being newest-first is
+        // this method's whole correctness, and FHIR instants vary in offset and precision.
         var encounters = resources
             .OfType<Encounter>()
-            .OrderByDescending(e => e.Period?.Start)
+            .OrderByDescending(e => FhirBundleHelpers.ParseFhirInstant(e.Period?.Start))
             .ToList();
 
         foreach (var encounter in encounters)
@@ -98,6 +99,56 @@ public sealed class PatientRecordService(
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// The patient's encounters plus their _include'd Locations - newest-first when the server can
+    /// sort them for us, unordered when it can't (see <see cref="_encounterDateSortUnsupported"/>);
+    /// either way GetLatestLocationAsync sorts what comes back.
+    /// </summary>
+    private async Task<List<Resource>> FetchEncountersWithLocationsAsync(
+        string patientId,
+        CancellationToken ct
+    )
+    {
+        var query =
+            $"Encounter?subject=Patient/{patientId}&_include=Encounter:location&_pretty=false";
+
+        if (!_encounterDateSortUnsupported)
+        {
+            try
+            {
+                // Deliberately a single-page fetch, not FhirBundleHelpers.GetAllPagesAsync:
+                // _count=5 + _sort=-date already gives us the only encounters we could ever use,
+                // since we return on the first one with a usable location.
+                var bundle =
+                    await clientFactory.CreateClient().GetAsync($"{query}&_count=5&_sort=-date", ct)
+                    as Bundle;
+
+                return bundle
+                        ?.Entry.Where(e => e.Resource is not null)
+                        .Select(e => e.Resource!)
+                        .ToList()
+                    ?? [];
+            }
+            catch (FhirOperationException ex) when (ex.Status == HttpStatusCode.BadRequest)
+            {
+                logger.LogInformation(
+                    ex,
+                    "FHIR server rejected '_sort=-date' on Encounter search - falling back to fetching each patient's encounters unsorted and ordering them client-side"
+                );
+                _encounterDateSortUnsupported = true;
+            }
+        }
+
+        // Unsorted, "the newest 5" means nothing - the server may return any five of the patient's
+        // encounters - so the whole history has to come back for the ordering above to find the
+        // latest one.
+        return await FhirBundleHelpers.GetAllPagesAsync(
+            clientFactory.CreateClient(),
+            $"{query}&_count=100",
+            ct
+        );
     }
 
     /// <summary>

@@ -19,6 +19,7 @@ public sealed class FhirClientFactory(
     {
         PreferredFormat = ResourceFormat.Json,
         VerifyFhirVersion = false,
+        PreferredParameterHandling = SearchParameterHandling.Strict,
     };
 
     public FhirClient CreateClient()
