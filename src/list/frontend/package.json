@@ -39,7 +39,7 @@
     "eslint-plugin-oxlint": "1.76.0",
     "eslint-plugin-vue": "10.10.0",
     "globals": "17.8.0",
-    "js-yaml": "5.2.2",
+    "js-yaml": "5.4.1",
     "jsdom": "30.0.1",
     "oxfmt": "0.61.0",
     "oxlint": "1.76.0",
