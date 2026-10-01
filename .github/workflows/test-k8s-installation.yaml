@@ -14,7 +14,7 @@ permissions:
 jobs:
   test:
     name: Test installation on k8s
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       # <https://docs.docker.com/storage/containerd/>
       # via <https://github.com/docker/setup-buildx-action/issues/257>
