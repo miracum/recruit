@@ -22,7 +22,7 @@
     "buefy": "3.0.10",
     "bulma": "1.0.4",
     "csv-stringify": "6.8.1",
-    "fhirclient": "2.6.3",
+    "fhirclient": "3.0.0",
     "fhirpath": "5.1.0",
     "vue": "3.5.40",
     "vue-router": "5.2.0"
