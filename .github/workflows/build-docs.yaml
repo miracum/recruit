@@ -38,8 +38,8 @@ jobs:
       # only pull request runs restore the cache: release and workflow_dispatch runs publish the
       # site, so they only check for an entry and never restore anything another run could have written.
       # zizmor can't evaluate the lookup-only expression, hence the ignore.
-      - name: Cache FHIR packages
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0 # zizmor: ignore[cache-poisoning]
+      - name: Cache FHIR packages # zizmor: ignore[cache-poisoning]
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: /root/.fhir/packages
           key: fhir-packages-${{ hashFiles('fhir/package.json') }}
