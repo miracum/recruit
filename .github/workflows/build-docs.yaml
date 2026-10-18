@@ -5,6 +5,7 @@ on:
       - master
     paths:
       - docs/**
+      - overrides/**
       - fhir/**
       - zensical.toml
       - pyproject.toml

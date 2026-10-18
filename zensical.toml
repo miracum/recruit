@@ -15,8 +15,9 @@ edit_uri = "edit/master/docs/"
 docs_dir = "docs"
 
 nav = [
-  { "Introduction" = "index.md" },
+  { "Home" = "index.md" },
   { "Getting started" = [
+    "getting-started/introduction.md",
     "getting-started/installation.md",
     "getting-started/creating-your-first-study.md",
   ] },
@@ -48,6 +49,8 @@ nav = [
 extra_css = ["_css/extra.css"]
 
 [project.theme]
+# overrides/home.html renders the landing page's hero
+custom_dir = "overrides"
 language = "en"
 logo = "_img/miracum-logo-transparent-256x256.png"
 favicon = "_img/favicon.ico"

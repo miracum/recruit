@@ -10,3 +10,134 @@
 [data-md-color-scheme="slate"] {
   --md-typeset-a-color: #4e5cc2;
 }
+
+/* Landing page (docs/index.md, overrides/home.html) */
+
+.rc-hero {
+  background: linear-gradient(135deg, #1b2259 0%, #2b3787 100%);
+  color: #fff;
+}
+
+.rc-hero__inner {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: center;
+  padding: 2.5rem 0.8rem;
+}
+
+@media screen and (min-width: 60em) {
+  .rc-hero__inner {
+    grid-template-columns: 5fr 6fr;
+    gap: 3rem;
+    padding: 4rem 0.8rem;
+  }
+}
+
+.rc-hero__eyebrow {
+  margin: 0 0 0.8rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.rc-hero__title {
+  margin: 0 0 1rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: inherit;
+}
+
+@media screen and (min-width: 60em) {
+  .rc-hero__title {
+    font-size: 2rem;
+  }
+}
+
+.rc-hero__lead {
+  max-width: 32rem;
+  margin: 0 0 1.6rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+.rc-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.rc-hero .md-button {
+  margin: 0;
+  border: 0.1rem solid rgb(255 255 255 / 60%);
+  background-color: transparent;
+  color: #fff;
+}
+
+.rc-hero .md-button--primary {
+  border-color: #fff;
+  background-color: #fff;
+  color: #1b2259;
+}
+
+.rc-hero .md-button:hover,
+.rc-hero .md-button:focus {
+  border-color: #fff;
+  background-color: rgb(255 255 255 / 15%);
+  color: #fff;
+}
+
+.rc-hero .md-button--primary:hover,
+.rc-hero .md-button--primary:focus {
+  background-color: rgb(255 255 255 / 85%);
+  color: #1b2259;
+}
+
+.rc-hero__visual {
+  margin: 0;
+}
+
+.rc-hero__visual img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: top left;
+  border-radius: 0.5rem;
+  box-shadow: 0 1rem 2.5rem rgb(0 0 0 / 35%);
+}
+
+.rc-features .twemoji.lg {
+  height: 2rem;
+  color: var(--md-typeset-a-color);
+}
+
+.rc-features .twemoji.lg svg {
+  width: 2rem;
+  max-height: none;
+}
+
+.md-typeset img.rc-diagram {
+  display: block;
+  margin: 0 auto;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background-color: #fff;
+}
+
+.md-typeset .rc-cta {
+  margin-top: 3rem;
+  padding: 2rem 1rem;
+  border-radius: 0.5rem;
+  background-color: var(--md-code-bg-color);
+  text-align: center;
+}
+
+.md-typeset .rc-cta h2 {
+  margin-top: 0;
+}
