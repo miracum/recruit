@@ -278,7 +278,7 @@ jobs:
       - build-list
       - build-query-sql-on-fhir
       - test
-    uses: ./.github/workflows/test-k8s-installation.yaml
+    uses: $/.github/workflows/test-k8s-installation.yaml
     with:
       image-tag: ${{ needs.build-query.outputs.image-version }}
 
@@ -289,7 +289,7 @@ jobs:
       - build-list
       - build-query-sql-on-fhir
       - test
-    uses: ./.github/workflows/test-compose-installation.yaml
+    uses: $/.github/workflows/test-compose-installation.yaml
     with:
       image-tag: ${{ needs.build-query.outputs.image-version }}
 
@@ -312,7 +312,7 @@ jobs:
       - build-notify
       - build-list
       - build-query-sql-on-fhir
-    uses: ./.github/workflows/release.yaml
+    uses: $/.github/workflows/release.yaml
     with:
       query-image-digest: ${{ needs.build-query.outputs.image-digest }}
       notify-image-digest: ${{ needs.build-notify.outputs.image-digest }}
