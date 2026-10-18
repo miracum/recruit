@@ -34,13 +34,11 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      security-events: write
-      actions: read
       packages: write
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@869881c224354c744e09f1d9bba9d47b5c698b44 # v1.26.0
+    uses: miracum/.github/.github/workflows/standard-build.yaml@704047074ac99fc4c0990f8b8377086069323116 # v1.30.0
     with:
       image: ghcr.io/${{ github.repository }}/query
       build-context: "src/"
@@ -49,21 +47,17 @@ jobs:
       enable-buildkit-cache-mount-caching: true
       build-args: |
         MODULE_NAME=query
-    secrets:
-      github-token: ${{ secrets.GITHUB_TOKEN }}
 
   build-notify:
     name: build notify
     permissions:
       contents: write
       pull-requests: write
-      security-events: write
-      actions: read
       packages: write
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@869881c224354c744e09f1d9bba9d47b5c698b44 # v1.26.0
+    uses: miracum/.github/.github/workflows/standard-build.yaml@704047074ac99fc4c0990f8b8377086069323116 # v1.30.0
     with:
       image: ghcr.io/${{ github.repository }}/notify
       build-context: "src/"
@@ -72,61 +66,49 @@ jobs:
       enable-buildkit-cache-mount-caching: true
       build-args: |
         MODULE_NAME=notify
-    secrets:
-      github-token: ${{ secrets.GITHUB_TOKEN }}
 
   build-list:
     name: build list
     permissions:
       contents: write
       pull-requests: write
-      security-events: write
-      actions: read
       packages: write
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@869881c224354c744e09f1d9bba9d47b5c698b44 # v1.26.0
+    uses: miracum/.github/.github/workflows/standard-build.yaml@704047074ac99fc4c0990f8b8377086069323116 # v1.30.0
     with:
       image: ghcr.io/${{ github.repository }}/list
       build-context: "src/list/"
       enable-build-test-layer: true
       build-args: |
         MODULE_NAME=list
-    secrets:
-      github-token: ${{ secrets.GITHUB_TOKEN }}
 
   build-list-next:
     name: build list-next
     permissions:
       contents: write
       pull-requests: write
-      security-events: write
-      actions: read
       packages: write
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@869881c224354c744e09f1d9bba9d47b5c698b44 # v1.26.0
+    uses: miracum/.github/.github/workflows/standard-build.yaml@704047074ac99fc4c0990f8b8377086069323116 # v1.30.0
     with:
       image: ghcr.io/${{ github.repository }}/list-next
       build-context: "src/list-next/"
       enable-buildkit-cache-mount-caching: true
-    secrets:
-      github-token: ${{ secrets.GITHUB_TOKEN }}
 
   build-query-sql-on-fhir:
     name: build query-sql-on-fhir
     permissions:
       contents: write
       pull-requests: write
-      security-events: write
-      actions: read
       packages: write
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@869881c224354c744e09f1d9bba9d47b5c698b44 # v1.26.0
+    uses: miracum/.github/.github/workflows/standard-build.yaml@704047074ac99fc4c0990f8b8377086069323116 # v1.30.0
     with:
       image: ghcr.io/${{ github.repository }}/query-sql-on-fhir
       build-context: "src/"
@@ -135,21 +117,17 @@ jobs:
       enable-buildkit-cache-mount-caching: true
       build-args: |
         MODULE_NAME=query-sql-on-fhir
-    secrets:
-      github-token: ${{ secrets.GITHUB_TOKEN }}
 
   build-superset-library-sync:
     name: build superset-library-sync
     permissions:
       contents: write
       pull-requests: write
-      security-events: write
-      actions: read
       packages: write
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@869881c224354c744e09f1d9bba9d47b5c698b44 # v1.26.0
+    uses: miracum/.github/.github/workflows/standard-build.yaml@704047074ac99fc4c0990f8b8377086069323116 # v1.30.0
     with:
       image: ghcr.io/${{ github.repository }}/superset-library-sync
       build-context: "src/"
@@ -158,14 +136,12 @@ jobs:
       enable-buildkit-cache-mount-caching: true
       build-args: |
         MODULE_NAME=superset-library-sync
-    secrets:
-      github-token: ${{ secrets.GITHUB_TOKEN }}
 
   publish-pr-helm-chart:
     name: publish pr helm chart
     # only for same-repo PRs: forked PRs don't get a GITHUB_TOKEN with packages:write.
     if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       packages: write # to push the PR's pre-release Helm chart to ghcr.io
@@ -212,7 +188,7 @@ jobs:
 
   test:
     name: test
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs:
       - build-query
       - build-notify
@@ -236,18 +212,6 @@ jobs:
       # the image tag is the same for all modules, so it doesn't matter which build job we read it from.
       IMAGE_TAG: ${{ needs.build-query.outputs.image-version }}
     steps:
-      # <https://docs.docker.com/storage/containerd/>
-      # via <https://github.com/docker/setup-buildx-action/issues/257>
-      - name: Set up containerd image store
-        run: |
-          [ -f /etc/docker/daemon.json ] || echo "{}" | sudo tee /etc/docker/daemon.json
-          jq '. | .+{"features": {"containerd-snapshotter": true}}' /etc/docker/daemon.json > /tmp/docker-daemon-with-containerd.json
-          sudo mv /tmp/docker-daemon-with-containerd.json /etc/docker/daemon.json
-          cat /etc/docker/daemon.json
-          sudo systemctl restart docker
-
-          docker info -f '{{ .DriverStatus }}'
-
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -358,7 +322,7 @@ jobs:
       token: ${{ secrets.MIRACUM_BOT_SEMANTIC_RELEASE_TOKEN }}
 
   lint:
-    uses: miracum/.github/.github/workflows/standard-lint.yaml@7eaa603620c450f73fd25d6b68c37795ef4be999 # v1.22.8
+    uses: miracum/.github/.github/workflows/standard-lint.yaml@704047074ac99fc4c0990f8b8377086069323116 # v1.30.0
     permissions:
       contents: read
       pull-requests: write # for MegaLinter's PR comment with lint results
@@ -370,6 +334,3 @@ jobs:
       codeql-languages: '["javascript", "java"]'
       enable-codeql: true
       java-version: "25"
-      enable-verify-base-image-signature: false
-    secrets:
-      github-token: ${{ secrets.GITHUB_TOKEN }}

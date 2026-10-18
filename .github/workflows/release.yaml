@@ -29,7 +29,7 @@ permissions: {}
 jobs:
   publish-helm-chart:
     name: publish helm chart
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       packages: write
@@ -118,7 +118,7 @@ jobs:
 
   prepare-artifacts:
     name: prepare artifacts
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs:
       - publish-helm-chart
     permissions:
