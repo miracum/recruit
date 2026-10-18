@@ -1,6 +1,6 @@
 # Introduction
 
-![recruIT Graphical Abstract](_img/diagrams/recruit-graphical-abstract.png)
+![recruIT Graphical Abstract](../_img/diagrams/recruit-graphical-abstract.png)
 
 recruIT is a software to assist with the recruitment of patients for clinical trials.
 
@@ -12,11 +12,11 @@ and eligibility criteria can be defined using [OHDSI Atlas](https://ohdsi.github
 
 !!! tip
 
-    Don't have or want to use the OHDSI stack? Check out the new way to [run recruIT directly on tabular FHIR data here](trino/index.md).
+    Don't have or want to use the OHDSI stack? Check out the new way to [run recruIT directly on tabular FHIR data here](../trino/index.md).
 
 Internally, the modules communicate using HL7 FHIR® via a central FHIR server.
 
-[Get Started 🚀](./getting-started/installation.md){ .md-button .md-button--primary}
+[Get Started 🚀](installation.md){ .md-button .md-button--primary}
 
 ## Architecture
 
@@ -25,7 +25,7 @@ Of the 5 presented modules, recruIT implements the notification module (`notify`
 and the query module (`query`). The patient data module is based on the OMOP CDM, [OHDSI Atlas](https://ohdsi.github.io/TheBookOfOhdsi/OhdsiAnalyticsTools.html#atlas)
 is used to define trial metadata.
 
-![recruIT Architecture](_img/diagrams/recruit-components.svg)
+![recruIT Architecture](../_img/diagrams/recruit-components.svg)
 
 ### Query Module
 
