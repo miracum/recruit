@@ -49,11 +49,13 @@ nav = [
 extra_css = ["_css/extra.css"]
 
 [project.theme]
-# overrides/home.html renders the landing page's hero
+# overrides/ holds the landing page's hero (home.html), the theme-aware logo and the extra favicons
 custom_dir = "overrides"
 language = "en"
-logo = "_img/miracum-logo-transparent-256x256.png"
-favicon = "_img/favicon.ico"
+# overrides/partials/logo.html shows the light or dark variant of the mark, this one is the fallback
+logo = "_img/logo/web/mark-light-96.png"
+# overrides/main.html adds the 16px favicon and the icon for iOS home screens
+favicon = "_img/logo/favicon-48.png"
 features = [
   "content.action.edit",
   "content.code.annotate",
@@ -71,7 +73,7 @@ features = [
   "toc.follow",
 ]
 
-# "custom" picks up the MIRACUM colors defined in _css/extra.css.
+# "custom" picks up the recruIT brand colors defined in _css/extra.css.
 [[project.theme.palette]]
 media = "(prefers-color-scheme)"
 toggle.icon = "lucide/sun-moon"
