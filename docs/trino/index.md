@@ -21,7 +21,7 @@ and contains the FHIR ID of the Patient ressource satisfying the eligibility cri
 
 The `query-sql-on-fhir` module is part of both the compose-based setup and the Helm chart deployment but needs to be enabled using `--profile=trino`
 for compose, and `query-sql-on-fhir.enabled=true` for the chart. Both assume that Trino and the required Delta Lake tables are already available.
-The best way to try it out with sample data is following [the development setup](../development/contributing.md#setup-for-the-trino-sql-based-query-module).
+The best way to try it out with sample data is following [the development setup](../development/contributing.md#setup-for-local-development).
 
 The diagram below shows the changes compared to the default setup using OMOP:
 

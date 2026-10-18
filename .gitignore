@@ -1,4 +1,4 @@
-# MkDocs documentation
+# documentation site build output (zensical.toml)
 site/
 
 megalinter-reports/
@@ -417,7 +417,7 @@ venv.bak/
 # Rope project settings
 .ropeproject
 
-# mkdocs documentation
+# documentation site build output
 /site
 
 # mypy

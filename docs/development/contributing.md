@@ -20,7 +20,7 @@ This will start these development fixtures:
 - Hive Metastore
 - Trino
 
-To additoinally start the OMOP-specific services, add `--profile=omop`:
+To additionally start the OMOP-specific services, add `--profile=omop`:
 
 ```sh
 docker compose -f hack/compose.yaml --profile=omop up
