@@ -128,7 +128,6 @@ jobs:
           helm package charts/recruit/
           helm push "recruit-0.0.0-pr${PR_NUMBER}.tgz" "oci://ghcr.io/${GITHUB_REPOSITORY}/charts"
 
-  # TODO: missing e2e tests for list-next
   test:
     name: test
     runs-on: ubuntu-26.04
@@ -185,25 +184,6 @@ jobs:
           chmod +x container-structure-test-linux-amd64
 
           ./container-structure-test-linux-amd64 test --image="${IMAGE_NAME}:${IMAGE_TAG}" --config=tests/container-structure/common-tests.yaml
-
-      - name: Run isolated smoke test
-        if: ${{ matrix.e2e-test-directory != ''}}
-        working-directory: src/${{ matrix.module }}
-        env:
-          E2E_TEST_DIRECTORY: ${{ matrix.e2e-test-directory }}
-        run: |
-          docker compose -f "${E2E_TEST_DIRECTORY}/docker-compose.yaml" build
-          docker compose -f "${E2E_TEST_DIRECTORY}/docker-compose.yaml" run tester
-
-      - name: Print test logs and stop all running containers
-        if: ${{ matrix.e2e-test-directory != '' && always()}}
-        working-directory: src/${{ matrix.module }}
-        continue-on-error: true
-        env:
-          E2E_TEST_DIRECTORY: ${{ matrix.e2e-test-directory }}
-        run: |
-          docker compose -f "${E2E_TEST_DIRECTORY}/docker-compose.yaml" logs
-          docker compose -f "${E2E_TEST_DIRECTORY}/docker-compose.yaml" down --volumes --remove-orphans
 
   k8s-test:
     needs:

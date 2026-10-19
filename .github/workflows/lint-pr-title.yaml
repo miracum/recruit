@@ -38,11 +38,7 @@ jobs:
             secret
             license
             deps
-
             list
-            notify
             query
-
             helm
-
             master
