@@ -5,8 +5,8 @@
 [project]
 site_name = "recruIT"
 site_url = "https://miracum.github.io/recruit/"
-site_description = "A Cloud-Native Clinical Trial Recruitment Support System based on HL7 FHIR and the OMOP CDM."
-copyright = "Copyright &copy; miracum.org"
+site_description = "A Cloud-Native Clinical Trial Recruitment Support System based on HL7 FHIR."
+copyright = "Copyright &copy; The recruIT Developers"
 
 repo_url = "https://github.com/miracum/recruit"
 repo_name = "miracum/recruit"
@@ -50,7 +50,7 @@ extra_css = ["_css/extra.css"]
 
 [project.theme]
 # overrides/ holds the landing page's hero (home.html), the theme-aware logo and the extra favicons
-custom_dir = "overrides"
+custom_dir = "docs/overrides"
 language = "en"
 # overrides/partials/logo.html shows the light or dark variant of the mark, this one is the fallback
 logo = "_img/logo/web/mark-light-96.png"
