@@ -24,21 +24,9 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      # via <https://github.com/helm/chart-testing/issues/577>
-      - run: |
-          git branch "master" "origin/master"
-
-      - name: Check if documentation is up-to-date
-        run: |
-          generate-docs.sh
-          if git diff --exit-code HEAD; then
-            echo -e "\033[0;32mDocumentation up to date\033[0m ✔"
-          else
-            echo -e "\033[0;31mDocumentation outdated! Please run generate-docs.sh locally and push the changes.\033[0m ❌"
-            git diff --color
-            exit 1
-          fi
-
+      # docs up-to-date checks and ct lint/install run in ci.yaml's chart job via
+      # miracum/.github's standard-chart-publish workflow. This only covers the extra checks that
+      # workflow doesn't do.
       - name: Install Task
         uses: arduino/setup-task@c0bc642852239c2689f73f4ea6459c29405f3c52 # v3.0.0
         with:
@@ -48,9 +36,6 @@ jobs:
         run: |
           task helm-add-repos
           task helm-update-dependencies
-
-      - name: Run chart-testing (lint)
-        run: ct lint --config .github/ct/ct.yaml
 
       - name: Run ArtifactHub lint
         run: ah lint --kind=helm
