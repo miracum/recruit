@@ -20,59 +20,45 @@ This will start these development fixtures:
 - Hive Metastore
 - Trino
 
-To additionally start the OMOP-specific services, add `--profile=omop`:
-
-```sh
-docker compose -f hack/compose.yaml --profile=omop up
-```
-
-which starts:
-
-- OHDSI WebAPI
-- OHDSI ATLAS
-- Broadsea Atlasdb - a pre-filled OMOP database
-
 If you want to start any of the recruIT modules as containers, you can specify the corresponding `--profile` switch.
-For example, when working on the query module, it might be useful to run the screening list and the notify module
-for debugging. The following will start all development dependencies as well as build and run the list and notify containers:
+For example, when working on the query module, it might be useful to run the screening
+list for debugging. The following will start all development dependencies as well as
+build and run the list container:
 
 ```sh
-docker compose -f hack/compose.yaml --profile=omop --profile=notify --profile=list build
-docker compose -f hack/compose.yaml --profile=omop --profile=notify --profile=list up
+docker compose -f hack/compose.yaml --profile=list build
+docker compose -f hack/compose.yaml --profile=list up
 ```
 
 You can then start the query module via gradle by running
 
 ```sh
-./gradlew :query:bootRun
+./gradlew :query-sql-on-fhir:bootRun
 ```
 
 ## Building Container Images
 
-### notify & query
+### query
 
-Both the notify and query module are Java applications that can be build using Gradle.
-Therefore, they also share the same Dockerfile for building the container and can optionally
-also be built using [jib](https://github.com/GoogleContainerTools/jib).
+The query module is a Java applications that can be built using Gradle.
+Therefore, they also share the same Dockerfile for building the image.
 
 #### Using Dockerfile
 
 From the `/src` directory, run
 
 ```sh
-export MODULE_NAME=query
+export MODULE_NAME=query-sql-on-fhir
 docker build -t "ghcr.io/miracum/recruit/${MODULE_NAME}:local" --build-arg=MODULE_NAME=${MODULE_NAME} .
 ```
 
-The `--build-arg` `MODULE_NAME` can be either `notify`, `query-sql-on-fhir`, or `query` (default).
-
 ### list
 
-The list module is a NodeJS app with a Vue frontend and can be built via Dockerfile.
-From the `/src/list` directory, run:
+The list module is a C# Blazor server app and can be built via Dockerfile.
+From the `/src/list-next` directory, run:
 
 ```sh
-docker build -t ghcr.io/miracum/recruit/list:local .
+docker build -t ghcr.io/miracum/recruit/list-next:local .
 ```
 
 ## Skaffold

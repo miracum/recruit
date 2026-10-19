@@ -3,14 +3,6 @@ name: release
 on:
   workflow_call:
     inputs:
-      query-image-digest:
-        description: "Digest (sha256:...) of the released query image, as produced by its build job"
-        required: true
-        type: string
-      notify-image-digest:
-        description: "Digest (sha256:...) of the released notify image, as produced by its build job"
-        required: true
-        type: string
       list-image-digest:
         description: "Digest (sha256:...) of the released list image, as produced by its build job"
         required: true
@@ -68,8 +60,6 @@ jobs:
         # build and release for the tag to be repointed to a different image.
         env:
           LIST_DIGEST: ${{ inputs.list-image-digest }}
-          QUERY_DIGEST: ${{ inputs.query-image-digest }}
-          NOTIFY_DIGEST: ${{ inputs.notify-image-digest }}
           QUERY_SQL_ON_FHIR_DIGEST: ${{ inputs.query-sql-on-fhir-image-digest }}
         run: |
           json="$(jq -cn \

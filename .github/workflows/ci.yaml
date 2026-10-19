@@ -29,61 +29,6 @@ defaults:
     shell: bash
 
 jobs:
-  build-query:
-    name: build query
-    permissions:
-      contents: write
-      pull-requests: write
-      packages: write
-      id-token: write
-      attestations: write
-      artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@704047074ac99fc4c0990f8b8377086069323116 # v1.30.0
-    with:
-      image: ghcr.io/${{ github.repository }}/query
-      build-context: "src/"
-      enable-build-test-layer: true
-      enable-build-cache: false
-      enable-buildkit-cache-mount-caching: true
-      build-args: |
-        MODULE_NAME=query
-
-  build-notify:
-    name: build notify
-    permissions:
-      contents: write
-      pull-requests: write
-      packages: write
-      id-token: write
-      attestations: write
-      artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@704047074ac99fc4c0990f8b8377086069323116 # v1.30.0
-    with:
-      image: ghcr.io/${{ github.repository }}/notify
-      build-context: "src/"
-      enable-build-test-layer: true
-      enable-build-cache: false
-      enable-buildkit-cache-mount-caching: true
-      build-args: |
-        MODULE_NAME=notify
-
-  build-list:
-    name: build list
-    permissions:
-      contents: write
-      pull-requests: write
-      packages: write
-      id-token: write
-      attestations: write
-      artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@704047074ac99fc4c0990f8b8377086069323116 # v1.30.0
-    with:
-      image: ghcr.io/${{ github.repository }}/list
-      build-context: "src/list/"
-      enable-build-test-layer: true
-      build-args: |
-        MODULE_NAME=list
-
   build-list-next:
     name: build list-next
     permissions:
@@ -146,14 +91,11 @@ jobs:
       contents: read
       packages: write # to push the PR's pre-release Helm chart to ghcr.io
     needs:
-      - build-query
-      - build-notify
-      - build-list
       - build-query-sql-on-fhir
       - build-list-next
     env:
       # the image tag is the same for all modules, so it doesn't matter which build job we read it from.
-      IMAGE_TAG: ${{ needs.build-query.outputs.image-version }}
+      IMAGE_TAG: ${{ needs.build-list-next.outputs.image-version }}
       PR_NUMBER: ${{ github.event.pull_request.number }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -186,31 +128,23 @@ jobs:
           helm package charts/recruit/
           helm push "recruit-0.0.0-pr${PR_NUMBER}.tgz" "oci://ghcr.io/${GITHUB_REPOSITORY}/charts"
 
+  # TODO: missing e2e tests for list-next
   test:
     name: test
     runs-on: ubuntu-26.04
     needs:
-      - build-query
-      - build-notify
-      - build-list
       - build-query-sql-on-fhir
       - build-superset-library-sync
     strategy:
       fail-fast: false
       matrix:
         include:
-          - module: "query"
-            e2e-test-directory: "tests/e2e/"
-          - module: "notify"
-            e2e-test-directory: "tests/e2e/"
-          - module: "list"
-            e2e-test-directory: "frontend/tests/e2e/"
           - module: "query-sql-on-fhir"
           - module: "superset-library-sync"
     env:
       IMAGE_NAME: ghcr.io/${{ github.repository }}/${{ matrix.module }}
       # the image tag is the same for all modules, so it doesn't matter which build job we read it from.
-      IMAGE_TAG: ${{ needs.build-query.outputs.image-version }}
+      IMAGE_TAG: ${{ needs.build-query-sql-on-fhir.outputs.image-version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -273,25 +207,19 @@ jobs:
 
   k8s-test:
     needs:
-      - build-query
-      - build-notify
-      - build-list
       - build-query-sql-on-fhir
       - test
     uses: $/.github/workflows/test-k8s-installation.yaml
     with:
-      image-tag: ${{ needs.build-query.outputs.image-version }}
+      image-tag: ${{ needs.build-query-sql-on-fhir.outputs.image-version }}
 
   docker-compose-test:
     needs:
-      - build-query
-      - build-notify
-      - build-list
       - build-query-sql-on-fhir
       - test
     uses: $/.github/workflows/test-compose-installation.yaml
     with:
-      image-tag: ${{ needs.build-query.outputs.image-version }}
+      image-tag: ${{ needs.build-query-sql-on-fhir.outputs.image-version }}
 
   release:
     # the docker compose image tags only change on releases, so
@@ -308,15 +236,11 @@ jobs:
       - docker-compose-test
       # listed directly (even though they're already transitively required via k8s-test/
       # docker-compose-test) so their per-module image-digest outputs are addressable here.
-      - build-query
-      - build-notify
-      - build-list
       - build-query-sql-on-fhir
+      - build-list-next
     uses: $/.github/workflows/release.yaml
     with:
-      query-image-digest: ${{ needs.build-query.outputs.image-digest }}
-      notify-image-digest: ${{ needs.build-notify.outputs.image-digest }}
-      list-image-digest: ${{ needs.build-list.outputs.image-digest }}
+      list-image-digest: ${{ needs.build-list-next.outputs.image-digest }}
       query-sql-on-fhir-image-digest: ${{ needs.build-query-sql-on-fhir.outputs.image-digest }}
     secrets:
       token: ${{ secrets.MIRACUM_BOT_SEMANTIC_RELEASE_TOKEN }}
