@@ -9,4 +9,4 @@
  */
 
 rootProject.name = 'recruit'
-include('fhir-constants', 'notify', 'query', 'query-sql-on-fhir', 'superset-library-sync', 'tester')
+include('fhir-constants', 'query-sql-on-fhir', 'superset-library-sync', 'tester')

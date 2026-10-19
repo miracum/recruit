@@ -12,30 +12,21 @@ hide:
 
 <div class="grid cards rc-features" markdown>
 
-- :lucide-scan-search:{ .lg } **Eligibility criteria in OHDSI Atlas**
+- :lucide-scan-search:{ .lg } **Eligibility criteria as SQL**
 
     ---
 
-    Define a trial's inclusion and exclusion criteria as a cohort in [OHDSI Atlas](https://ohdsi.github.io/TheBookOfOhdsi/OhdsiAnalyticsTools.html#atlas).
-    The query module regularly generates it against your OMOP CDM database.
+    Define a trial's inclusion and exclusion criteria as a cohort using Trino-SQL against
+    FHIR ressources encoded as Delta Lake tables.
 
     [:octicons-arrow-right-24: Create your first study](getting-started/creating-your-first-study.md)
-
-- :lucide-table:{ .lg } **Or SQL directly on FHIR data**
-
-    ---
-
-    No OMOP stack? Write the criteria as SQL and run it with [Trino](https://trino.io/) against FHIR
-    resources stored as Delta Lake tables. _Experimental._
-
-    [:octicons-arrow-right-24: Trino query module](trino/index.md)
 
 - :lucide-list-checks:{ .lg } **Screening lists**
 
     ---
 
-    Study teams review candidates in a web-based screening list: track each one's recruitment
-    status, add notes, look at a pseudonymized patient record, and export the list as CSV.
+    Study teams can review candidates in a web-based screening list: track each one's recruitment
+    status, add notes, and view the change history.
 
     [:octicons-arrow-right-24: Customize the user interface](configuration/ui-configuration.md)
 
@@ -43,17 +34,16 @@ hide:
 
     ---
 
-    Using FHIR Subscriptions, the notification module emails the right people as soon as
-    new candidates are added to one of their screening lists.
+    Subscribe to email notifications as soon as new candidates are added to one of
+    the screening lists, or get updated about new candidates on a regular schedule.
 
     [:octicons-arrow-right-24: Configuration options](configuration/options.md)
 
-- :lucide-shield-check:{ .lg } **Secure and privacy-preserving**
+- :lucide-shield-check:{ .lg } **Secure**
 
     ---
 
-    Keycloak-based sign-in, access to screening lists limited to the people subscribed to them,
-    optional de-pseudonymization, and signed container images with SLSA provenance.
+    OIDC-based sign-in with the access to screening lists configurable per-user.
 
     [:octicons-arrow-right-24: Security](configuration/security.md)
 

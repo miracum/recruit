@@ -18,8 +18,8 @@
         <h1 class="rc-hero__title">Find eligible patients for clinical trials, automatically</h1>
         <p class="rc-hero__lead">
           {{ config.site_name }} regularly screens your clinical data for patients who match a trial's
-          eligibility criteria, puts them on a screening list for the study team, and notifies the
-          team by email whenever new candidates turn up.
+          eligibility criteria, puts them on a screening list, and notifies the team whenever new
+          candidates turn up.
         </p>
         <div class="rc-hero__actions md-typeset">
           <a href="{{ 'getting-started/installation/' | url }}" class="md-button md-button--primary">
@@ -32,10 +32,14 @@
       </div>
       <figure class="rc-hero__visual">
         <img
-          src="{{ '_img/docker-compose/list-sample-m.png' | url }}"
+          class="rc-hero__img--light"
+          src="{{ '_img/screenshots/screeninglist-list-view-light.png' | url }}"
           alt="A recruIT screening list showing candidate patients with their recruitment status"
-          width="2007"
-          height="1657"
+        />
+        <img
+          class="rc-hero__img--dark"
+          src="{{ '_img/screenshots/screeninglist-list-view-dark.png' | url }}"
+          alt="A recruIT screening list showing candidate patients with their recruitment status"
         />
       </figure>
     </div>

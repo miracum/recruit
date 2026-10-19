@@ -24,11 +24,14 @@
 }
 
 /*
-  overrides/partials/logo.html renders both variants of the mark, hide the one not matching the scheme.
+  overrides/partials/logo.html renders both variants of the mark and overrides/home.html both variants
+  of the hero screenshot, hide the one not matching the scheme.
   !important, as the theme sets the logo's display with more specific selectors in the header and drawer.
 */
 body:not([data-md-color-scheme="slate"]) img.rc-logo--dark,
-[data-md-color-scheme="slate"] img.rc-logo--light {
+[data-md-color-scheme="slate"] img.rc-logo--light,
+body:not([data-md-color-scheme="slate"]) img.rc-hero__img--dark,
+[data-md-color-scheme="slate"] img.rc-hero__img--light {
   display: none !important;
 }
 
@@ -139,7 +142,6 @@ body:not([data-md-color-scheme="slate"]) img.rc-logo--dark,
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 16 / 10;
   object-fit: cover;
   object-position: top left;
   border-radius: 0.5rem;
