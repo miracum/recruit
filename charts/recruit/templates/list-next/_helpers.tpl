@@ -1,18 +1,18 @@
 {{/* vim: set filetype=mustache: */}}
 
 {{/*
-Get the name of the secret containing list-next's OIDC client secret
+Get the name of the secret containing list's OIDC client secret
 */}}
 {{- define "recruit.listNext.oidc.secretName" -}}
 {{- if .Values.listNext.auth.oidc.existingSecret.name -}}
     {{ .Values.listNext.auth.oidc.existingSecret.name | quote }}
 {{- else -}}
-    {{ printf "%s-%s" .Release.Name "list-next-oidc" | quote }}
+    {{ printf "%s-%s" .Release.Name "list-oidc" | quote }}
 {{- end -}}
 {{- end -}}
 
 {{/*
-Get the key inside the secret containing list-next's OIDC client secret
+Get the key inside the secret containing list's OIDC client secret
 */}}
 {{- define "recruit.listNext.oidc.secretKey" -}}
 {{- if .Values.listNext.auth.oidc.existingSecret.name -}}
@@ -23,29 +23,29 @@ Get the key inside the secret containing list-next's OIDC client secret
 {{- end -}}
 
 {{/*
-Get the name of the secret containing list-next's SMTP password
+Get the name of the secret containing list's SMTP password
 */}}
 {{- define "recruit.listNext.mail.secretName" -}}
 {{- if .Values.listNext.notifyMailer.smtp.existingSecret -}}
     {{ .Values.listNext.notifyMailer.smtp.existingSecret | quote }}
 {{- else -}}
-    {{ printf "%s-%s" .Release.Name "list-next-smtp" | quote }}
+    {{ printf "%s-%s" .Release.Name "list-smtp" | quote }}
 {{- end -}}
 {{- end -}}
 
 {{/*
-Get the name of the secret containing list-next's database password
+Get the name of the secret containing list's database password
 */}}
 {{- define "recruit.listNext.database.secretName" -}}
 {{- if .Values.listNext.database.existingSecret.name -}}
     {{ .Values.listNext.database.existingSecret.name | quote }}
 {{- else -}}
-    {{ printf "%s-%s" .Release.Name "list-next-db" | quote }}
+    {{ printf "%s-%s" .Release.Name "list-db" | quote }}
 {{- end -}}
 {{- end -}}
 
 {{/*
-Get the key inside the secret containing list-next's database password
+Get the key inside the secret containing list's database password
 */}}
 {{- define "recruit.listNext.database.secretKey" -}}
 {{- if .Values.listNext.database.existingSecret.name -}}
@@ -56,7 +56,7 @@ Get the key inside the secret containing list-next's database password
 {{- end -}}
 
 {{/*
-Get the screening list link template used in list-next's notification emails
+Get the screening list link template used in list's notification emails
 */}}
 {{- define "recruit.listNext.mail.screeningListLinkTemplate" -}}
 {{- if .Values.listNext.ingress.enabled -}}

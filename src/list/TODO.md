@@ -1,4 +1,4 @@
-# list-next feature plans
+# list feature plans
 
 Working plans for features discussed but not yet built. Each section is a rough
 design, not a spec — flesh out further before implementing.
@@ -27,7 +27,7 @@ low-frequency, latency-tolerant signal.
   open, deletes on close/`IAsyncDisposable`.
 - A Hangfire recurring job (same clustered-poll mechanism
   `Services/Notify/NotificationDetectorService.cs` already uses — "Hangfire
-  guarantees exactly one list-next replica fires per tick") runs every few
+  guarantees exactly one list replica fires per tick") runs every few
   seconds, not the notification poller's ~60s: reads rows for currently-open
   patients, diffs against the last snapshot per replica, and pushes changes to
   subscribed components via a local in-process pub/sub → `InvokeAsync(StateHasChanged)`.
@@ -146,7 +146,7 @@ half-wired, the other doesn't exist at all:
 `notifications.stalledLeadWindowDays: 14` ("a pending recommendation is
 highlighted as stalled if untouched for this many days"), and the Helm
 deployment template already passes it through as
-`Notifications__StalledLeadWindowDays` (`charts/recruit/templates/list-next/deployment.yaml:164`).
+`Notifications__StalledLeadWindowDays` (`charts/recruit/templates/list/deployment.yaml:164`).
 But `Options/AppOptions.cs`'s `NotificationOptions` has no
 `StalledLeadWindowDays` property, and nothing in the codebase reads that env
 var — it's currently a no-op config value. To close the loop:

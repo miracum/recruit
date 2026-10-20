@@ -2,7 +2,7 @@
 **/build/
 **/bin/
 list/
-list-next/
+list/
 gradle/
 hack/
 tests/

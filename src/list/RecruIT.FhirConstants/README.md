@@ -6,8 +6,8 @@ Generated C# constant classes for the canonical `CodeSystem`/`StructureDefinitio
 same [`ig-codegen`](https://github.com/diz-uker/to-fhir/tree/main/ig-codegen) library that produces
 `../../fhir-constants` (the Java equivalent, consumed by `query-sql-on-fhir`).
 
-Lives under `src/list-next/` alongside `RecruIT.List/` and `RecruIT.List.Tests/` rather than as a
-`src/`-level sibling module: `RecruIT.List`'s container build uses `src/list-next/` (where its
+Lives under `src/list/` alongside `RecruIT.List/` and `RecruIT.List.Tests/` rather than as a
+`src/`-level sibling module: `RecruIT.List`'s container build uses `src/list/` (where its
 `Dockerfile` lives) as its Docker build context, so a project reference to a directory outside that
 context wouldn't resolve during `docker build`.
 
@@ -37,7 +37,7 @@ directly, via `io.github.diz-uker.ig-codegen-core`'s lower-level
 1. From the repo root, run `npx fsh-sushi fhir/ig --snapshot` to (re-)generate
    `fhir/ig/fsh-generated/resources`.
 2. Run
-   `dotnet build src/list-next/RecruIT.FhirConstants/RecruIT.FhirConstants.csproj -t:GenerateIgConstants`.
+   `dotnet build src/list/RecruIT.FhirConstants/RecruIT.FhirConstants.csproj -t:GenerateIgConstants`.
 3. Review the diff in `src/`, commit it.
 
 ## Usage

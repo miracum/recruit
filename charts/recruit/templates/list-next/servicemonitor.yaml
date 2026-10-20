@@ -4,13 +4,13 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "recruit.fullname" $ }}-list-next
+  name: {{ include "recruit.fullname" $ }}-list
   {{- if .metrics.serviceMonitor.namespace }}
   namespace: {{ .metrics.serviceMonitor.namespace }}
   {{- end }}
   labels:
     {{- include "recruit.labels" $ | nindent 4 }}
-    app.kubernetes.io/component: list-next
+    app.kubernetes.io/component: list
     {{- if .metrics.serviceMonitor.additionalLabels }}
     {{- toYaml .metrics.serviceMonitor.additionalLabels | nindent 4 }}
     {{- end }}
@@ -30,7 +30,7 @@ spec:
   selector:
     matchLabels:
       {{- include "recruit.matchLabels" $ | nindent 6 }}
-      app.kubernetes.io/component: list-next
+      app.kubernetes.io/component: list
 {{- end }}
 {{- end }}
 {{- end }}

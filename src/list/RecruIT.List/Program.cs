@@ -26,10 +26,10 @@ using RecruIT.List.Services.Notify;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Lets the dedicated migration Job (charts/recruit/templates/list-next/migrate-job.yaml) reuse
+// Lets the dedicated migration Job (charts/recruit/templates/list/migrate-job.yaml) reuse
 // this exact image/entrypoint to run migrations and exit, without requiring Fhir__BaseUrl/Oidc/etc
 // - those are read unconditionally further down and would otherwise force the Job to carry
-// irrelevant app config just to avoid an unrelated startup throw. list-next's own Deployment pods
+// irrelevant app config just to avoid an unrelated startup throw. list's own Deployment pods
 // never set this; they wait for that Job via a wait-for-migration initContainer instead.
 if (builder.Configuration.GetValue<bool>("RunMigrationsOnly"))
 {
@@ -183,7 +183,7 @@ builder.Services.AddDbContext<DataProtectionKeyContext>(options =>
 );
 builder.Services.AddDataProtection().PersistKeysToDbContext<DataProtectionKeyContext>();
 
-// Hangfire coordinates the notification poller across all list-next replicas via this same
+// Hangfire coordinates the notification poller across all list replicas via this same
 // Postgres database - see Services/Notify and the notify-next plan for why (a plain
 // UPDATE ... WHERE last_seen_version_id = @original concurrency-token check on PollCursor is the
 // actual dedup mechanism; Hangfire just gives each replica a clustered recurring trigger and a
@@ -313,7 +313,7 @@ await using (var scope = app.Services.CreateAsyncScope())
     await dataProtectionKeyContext.Database.MigrateAsync();
 }
 
-// Every list-next replica runs a Hangfire server (AddHangfireServer above); they self-coordinate
+// Every list replica runs a Hangfire server (AddHangfireServer above); they self-coordinate
 // via the shared Postgres storage, so registering the recurring jobs on every replica's startup is
 // safe and idempotent (Hangfire dedupes by job id). Uses the DI-based IRecurringJobManager rather
 // than the static RecurringJob API, since the static API relies on JobStorage.Current having
@@ -341,7 +341,7 @@ await using (var scope = app.Services.CreateAsyncScope())
 
 // Keeps /metrics off the app's public-facing port: ASP.NET Core routing doesn't care which Kestrel
 // listener accepted a connection, so without this, ingress traffic (which forwards "/" to the same
-// port list-next's main listener serves) could reach the Prometheus exporter too - defeating the
+// port list's main listener serves) could reach the Prometheus exporter too - defeating the
 // point of a separate metrics port. Checks the actual accepted connection's local port rather than
 // RequireHost's Host-header matching, since the Host header can desync from the real port behind
 // port-forwarding/NAT. /livez and /readyz don't get the same treatment: kubelet always probes the

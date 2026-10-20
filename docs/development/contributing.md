@@ -55,10 +55,10 @@ docker build -t "ghcr.io/miracum/recruit/${MODULE_NAME}:local" --build-arg=MODUL
 ### list
 
 The list module is a C# Blazor server app and can be built via Dockerfile.
-From the `/src/list-next` directory, run:
+From the `/src/list` directory, run:
 
 ```sh
-docker build -t ghcr.io/miracum/recruit/list-next:local .
+docker build -t ghcr.io/miracum/recruit/list:local .
 ```
 
 ## Skaffold

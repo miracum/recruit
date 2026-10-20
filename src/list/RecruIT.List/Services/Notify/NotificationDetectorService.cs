@@ -11,7 +11,7 @@ using Task = System.Threading.Tasks.Task;
 namespace RecruIT.List.Services.Notify;
 
 /// <summary>
-/// Recurring, cluster-wide poll trigger (Hangfire guarantees exactly one `list-next` replica fires
+/// Recurring, cluster-wide poll trigger (Hangfire guarantees exactly one `list` replica fires
 /// per tick) - same detection technique as the old ScreeningListPollService (plain FHIR search +
 /// vread against `List` version history, via PollCursor and ScreeningListDiff), but instead of
 /// delivering immediately, it writes one NotificationEvent per newly-diffed patient and

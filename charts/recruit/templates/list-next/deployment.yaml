@@ -3,10 +3,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "recruit.fullname" $ }}-list-next
+  name: {{ include "recruit.fullname" $ }}-list
   labels:
     {{- include "recruit.labels" $ | nindent 4 }}
-    app.kubernetes.io/component: list-next
+    app.kubernetes.io/component: list
   {{- with $.Values.deploymentAnnotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -17,12 +17,12 @@ spec:
   selector:
     matchLabels:
       {{- include "recruit.matchLabels" $ | nindent 6 }}
-      app.kubernetes.io/component: list-next
+      app.kubernetes.io/component: list
   template:
     metadata:
       labels:
         {{- include "recruit.podLabels" $ | nindent 8 }}
-        app.kubernetes.io/component: list-next
+        app.kubernetes.io/component: list
         {{- with .extraPodLabels }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -37,7 +37,7 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .podSecurityContext | nindent 8 }}
-      serviceAccountName: {{ include "recruit.serviceAccountName" (dict "context" . "component" "list-next" "root" $) }}
+      serviceAccountName: {{ include "recruit.serviceAccountName" (dict "context" . "component" "list" "root" $) }}
       automountServiceAccountToken: {{ .serviceAccount.automountServiceAccountToken }}
       terminationGracePeriodSeconds: {{ .terminationGracePeriodSeconds }}
       initContainers:
@@ -102,7 +102,7 @@ spec:
                 sleep 15;
               done;
       containers:
-        - name: list-next
+        - name: list
           image: "{{ .image.registry }}/{{ .image.repository }}:{{ .image.tag }}"
           securityContext:
             {{- toYaml .securityContext | nindent 12 }}

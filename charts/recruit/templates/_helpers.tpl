@@ -241,7 +241,7 @@ curlimages/curl image used by various init containers and helper Jobs across the
 {{- end -}}
 
 {{/*
-kubectl image used by the wait-for-migration initContainer to poll the list-next migration Job's
+kubectl image used by the wait-for-migration initContainer to poll the list migration Job's
 status.
 */}}
 {{- define "recruit.kubectl.image" -}}
@@ -252,7 +252,7 @@ status.
 {{- end -}}
 
 {{/*
-Name of the list-next DB-migration Job, derived from the list-next image tag (not
+Name of the list DB-migration Job, derived from the list image tag (not
 .Release.Revision - unreliable under GitOps rendering via `helm template`, since GitOps
 controllers don't track real Helm release revisions). Same tag -> same name -> idempotent
 re-syncs; changed tag -> new name -> new Job, with the old one pruned by the GitOps controller (or
@@ -261,7 +261,7 @@ hex chars) so the hash suffix is never truncated away. Job names are capped at 6
 Kubernetes - they back the "job-name" pod label, whose value is limited by K8s label-value rules.
 */}}
 {{- define "recruit.listNext.migrationJobName" -}}
-{{- $prefix := printf "%s-list-next" (include "recruit.fullname" .) | trunc 46 | trimSuffix "-" -}}
+{{- $prefix := printf "%s-list" (include "recruit.fullname" .) | trunc 46 | trimSuffix "-" -}}
 {{- printf "%s-migrate-%s" $prefix (.Values.listNext.image.tag | sha256sum | trunc 8) -}}
 {{- end -}}
 

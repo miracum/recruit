@@ -19,11 +19,11 @@ build:
         dockerfile: Dockerfile
         buildArgs:
           MODULE: notify
-    - image: ghcr.io/miracum/recruit/list-next
+    - image: ghcr.io/miracum/recruit/list
       docker:
         dockerfile: Dockerfile
         buildArgs:
-          MODULE: list-next
+          MODULE: list
     - image: ghcr.io/miracum/recruit/list
       context: list
       docker:

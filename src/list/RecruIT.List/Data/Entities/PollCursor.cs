@@ -3,7 +3,7 @@ namespace RecruIT.List.Data.Entities;
 /// <summary>
 /// One row per screening `List`, tracking how far the notification poller has progressed for it.
 /// `LastSeenVersionId` doubles as an EF Core concurrency token (see AppDbContext.OnModelCreating):
-/// when multiple `list-next` replicas race to advance the same list's cursor, only one `SaveChanges`
+/// when multiple `list` replicas race to advance the same list's cursor, only one `SaveChanges`
 /// wins - the others get a DbUpdateConcurrencyException, which is the "another replica already
 /// claimed this version transition" signal.
 /// </summary>

@@ -45,7 +45,7 @@ import org.springframework.util.StringUtils;
  * conditional one, for FHIR servers (e.g. Blaze) that don't support conditional references here.
  *
  * <p>Either way, a ResearchSubject that already exists is never rewritten by this class: once
- * created, its {@code status} is owned by list-next (see {@code ResearchSubjectService.cs}), which
+ * created, its {@code status} is owned by list (see {@code ResearchSubjectService.cs}), which
  * updates it via a version-aware PUT as users triage candidates. Without {@code useUpdateAsCreate},
  * this falls out of the FHIR server's conditional-create semantics for free (a {@code POST} with
  * {@code If-None-Exist} is a no-op if a match already exists). With {@code useUpdateAsCreate}, a
@@ -149,7 +149,7 @@ public class EligibilityBundleBuilder {
         // Already created by a previous poll cycle. A PUT is a full replace, and this
         // freshly
         // built subject only knows CANDIDATE - PUTting it again would reset a status
-        // list-next
+        // list
         // has since moved on, and drop any notes appended there. Leave it alone; its
         // Observations
         // are still refreshed below regardless.
@@ -170,7 +170,7 @@ public class EligibilityBundleBuilder {
     // controls how the
     // subject is addressed on the wire (a direct id vs. a conditional reference).
     // This identifier
-    // is what list-next keys its screening-notes table on, so it must be stable and
+    // is what list keys its screening-notes table on, so it must be stable and
     // present
     // either way.
     subject

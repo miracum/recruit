@@ -711,11 +711,11 @@ list:
       type: RuntimeDefault
 
 listNext:
-  # -- Whether the list-next module should be enabled. list-next is the .NET-based successor to
+  # -- Whether the list module should be enabled. list is the .NET-based successor to
   # the list module; it is a separate deployment with its own database and is not a drop-in
   # replacement yet, so both can run side-by-side during the migration.
   enabled: false
-  # -- Number of replicas for the list-next module. A fault-tolerant number of replicas is recommended.
+  # -- Number of replicas for the list module. A fault-tolerant number of replicas is recommended.
   replicaCount: 1
   # -- specify how many old ReplicaSets for this Deployment you want to retain.
   revisionHistoryLimit: 5
@@ -730,7 +730,7 @@ listNext:
   # removed from Service endpoints/ingress upstreams - which happens asynchronously - and the app
   # actually stopping: without it, clients can see 502s because traffic keeps arriving for a
   # moment after the app has already stopped listening. Uses Kubernetes' native `sleep` lifecycle
-  # action rather than an `exec` hook, since list-next's base image is chiseled and has no shell to
+  # action rather than an `exec` hook, since list's base image is chiseled and has no shell to
   # run `sleep` in. Requires Kubernetes >=1.30 (or >=1.29 with the `PodLifecycleSleepAction`
   # feature gate enabled) - set `enabled: false` on older clusters.
   # @ignore
@@ -740,11 +740,11 @@ listNext:
       sleep:
         seconds: 10
 
-  # the list-next module's image
+  # the list module's image
   # @ignore
   image: # +doc-gen:ignore
     registry: ghcr.io
-    repository: miracum/recruit/list-next
+    repository: miracum/recruit/list
     tag: v10.5.7 # x-release-please-version
     pullPolicy: IfNotPresent
 
@@ -759,7 +759,7 @@ listNext:
     # -- whether to automount the SA token.
     automountServiceAccountToken: false
 
-  # -- settings for the Job that runs list-next's DB migrations once per image tag, ahead of the
+  # -- settings for the Job that runs list's DB migrations once per image tag, ahead of the
   # Deployment's pods (see the wait-for-migration initContainer below).
   migrationJob:
     # -- number of retries for the migration Job before it is considered failed
@@ -790,7 +790,7 @@ listNext:
     # -- Maximum unavailable instances; ignored if there is no PodDisruptionBudget
     maxUnavailable: ""
 
-  # -- the service used to expose the list-next module
+  # -- the service used to expose the list module
   service:
     # -- service type
     type: ClusterIP
@@ -800,7 +800,7 @@ listNext:
     metricsPort: 8081
 
   database:
-    # -- Npgsql connection string for list-next's own data (trial access grants, notification poll
+    # -- Npgsql connection string for list's own data (trial access grants, notification poll
     # cursors, and the Hangfire job store backing its notification poller), e.g.
     # `Host=postgres;Port=5432;Database=list_next`. Omit credentials here and set them via
     # `username`/`password` below instead - they are injected as `PGUSER`/`PGPASSWORD` env vars,
@@ -819,7 +819,7 @@ listNext:
       key: "db-password"
 
   auth:
-    # -- if enabled, requires OIDC authentication before accessing list-next. If disabled, every
+    # -- if enabled, requires OIDC authentication before accessing list. If disabled, every
     # visitor is treated as an authenticated admin - only safe for local development/testing.
     enabled: false
     oidc:
@@ -842,11 +842,11 @@ listNext:
     newSuggestionWindowDays: 7
     # -- a pending recommendation is highlighted as stalled if untouched for this many days
     stalledLeadWindowDays: 14
-    # -- how often, in seconds, list-next scans for screening list changes to notify about
+    # -- how often, in seconds, list scans for screening list changes to notify about
     scanIntervalSeconds: 60
 
   notifyMailer:
-    # -- Used to link back to list-next from a notification email. If `listNext.ingress.enabled` is
+    # -- Used to link back to list from a notification email. If `listNext.ingress.enabled` is
     # `true`, the ingress host is used instead. A composite format string (see .NET's String.Format)
     # with a single `{0}` placeholder for the list id.
     screeningListLinkTemplate: "http://localhost:8080/recommendations/{0}"
@@ -880,11 +880,11 @@ listNext:
   # -- specify extra environment vars on the container
   extraEnv: []
 
-  # -- specify additional labels to apply to the list-next pod
+  # -- specify additional labels to apply to the list pod
   extraPodLabels: {}
 
   ingress:
-    # -- if enabled, create an ingress resource to access list-next
+    # -- if enabled, create an ingress resource to access list
     enabled: false
     # -- name of the IngressClass resource to use for this ingress
     ingressClassName: ""
@@ -893,14 +893,14 @@ listNext:
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
     hosts:
-      - host: list-next.127.0.0.1.nip.io
+      - host: list.127.0.0.1.nip.io
         paths:
           - "/"
     # -- TLS configuration
     tls: []
-    #  - secretName: list-next-example-tls
+    #  - secretName: list-example-tls
     #    hosts:
-    #      - list-next-example.local
+    #      - list-example.local
 
   # -- set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if primary.resources is set (primary.resources is recommended for production).
   # More information: <https://github.com/miracum/charts/blob/master/charts/common/templates/_resources.tpl#L1>
@@ -935,7 +935,7 @@ listNext:
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 5
-  # Configuration for the container's startup probe. Set `enabled: false` to disable it. list-next
+  # Configuration for the container's startup probe. Set `enabled: false` to disable it. list
   # runs EF Core migrations and installs the Hangfire schema before it starts listening at all, so
   # this gives it a generous, one-time grace period to finish that instead of being judged against
   # livenessProbe's much tighter steady-state budget (which would otherwise risk killing the
@@ -976,7 +976,7 @@ listNext:
     #   whenUnsatisfiable: ScheduleAnyway
     #   labelSelector:
     #     matchLabels:
-    #       app.kubernetes.io/component: list-next
+    #       app.kubernetes.io/component: list
     #       app.kubernetes.io/instance: recruit
 
   # -- security context for the container
@@ -988,7 +988,7 @@ listNext:
       drop:
         - ALL
     runAsNonRoot: true
-    # matches $APP_UID in the list-next Dockerfile's base image (mcr.microsoft.com/dotnet/aspnet)
+    # matches $APP_UID in the list Dockerfile's base image (mcr.microsoft.com/dotnet/aspnet)
     runAsUser: 1654
     runAsGroup: 1654
     readOnlyRootFilesystem: true
@@ -1201,7 +1201,7 @@ curl: # +doc-gen:ignore
     repository: curlimages/curl
     tag: 8.21.0@sha256:7c12af72ceb38b7432ab85e1a265cff6ae58e06f95539d539b654f2cfa64bb13
 
-# kubectl image used by the wait-for-migration initContainer to poll the list-next migration Job's
+# kubectl image used by the wait-for-migration initContainer to poll the list migration Job's
 # status. Needs a shell (the initContainer's poll loop runs as a /bin/sh script), which rules out
 # minimal/distroless kubectl images that ship only the binary.
 kubectl: # +doc-gen:ignore

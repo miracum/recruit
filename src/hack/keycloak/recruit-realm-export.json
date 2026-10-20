@@ -102,7 +102,7 @@
           "attributes": {}
         }
       ],
-      "list-next": [
+      "list": [
         {
           "id": "1c7a4e2b-6f3d-4a8e-9d2c-8b5f6e1a9c40",
           "name": "admin",
@@ -439,7 +439,7 @@
           "realmRoles": [],
           "clientRoles": {
             "recruit-list": ["admin"],
-            "list-next": ["admin"]
+            "list": ["admin"]
           },
           "subGroups": []
         }
@@ -855,8 +855,8 @@
     },
     {
       "id": "b8b2be02-c65d-462f-ae5b-a7d7f29208e5",
-      "clientId": "list-next",
-      "name": "recruIT Screening List (list-next)",
+      "clientId": "list",
+      "name": "recruIT Screening List (list)",
       "description": "",
       "rootUrl": "http://localhost:5237",
       "adminUrl": "http://localhost:5237",
@@ -865,7 +865,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "list-next-dev-secret",
+      "secret": "list-dev-secret",
       "redirectUris": ["http://localhost:5237/*", "http://127.0.0.1:5237/*"],
       "webOrigins": ["+"],
       "notBefore": 0,
@@ -896,12 +896,12 @@
       "protocolMappers": [
         {
           "id": "9d3f1a5c-2e6b-4c8a-9f0d-5b1e7c4a8d62",
-          "name": "list-next client roles",
+          "name": "list client roles",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-usermodel-client-role-mapper",
           "consentRequired": false,
           "config": {
-            "usermodel.clientRoleMapping.clientId": "list-next",
+            "usermodel.clientRoleMapping.clientId": "list",
             "multivalued": "true",
             "userinfo.token.claim": "true",
             "id.token.claim": "true",

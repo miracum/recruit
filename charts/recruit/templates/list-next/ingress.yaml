@@ -1,6 +1,6 @@
 {{- if and .Values.listNext.enabled .Values.listNext.ingress.enabled -}}
 {{- $fullName := include "recruit.fullname" . -}}
-{{- $serviceName := printf "%s-list-next" $fullName -}}
+{{- $serviceName := printf "%s-list" $fullName -}}
 {{- $servicePort := .Values.listNext.service.port -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -8,7 +8,7 @@ metadata:
   name: {{ $serviceName }}
   labels:
     {{- include "recruit.labels" . | nindent 4 }}
-    app.kubernetes.io/component: list-next
+    app.kubernetes.io/component: list
   {{- with .Values.listNext.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}

@@ -3,10 +3,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "recruit.fullname" $ }}-list-next
+  name: {{ include "recruit.fullname" $ }}-list
   labels:
     {{- include "recruit.labels" $ | nindent 4 }}
-    app.kubernetes.io/component: list-next
+    app.kubernetes.io/component: list
 spec:
   type: {{ .service.type }}
   ports:
@@ -20,6 +20,6 @@ spec:
       name: http-metrics
   selector:
     {{- include "recruit.matchLabels" $ | nindent 4 }}
-    app.kubernetes.io/component: list-next
+    app.kubernetes.io/component: list
 {{- end -}}
 {{- end -}}

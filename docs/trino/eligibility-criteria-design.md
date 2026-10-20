@@ -18,7 +18,7 @@ tell, from the resulting FHIR data, *which* individual criteria a patient
 does or doesn't satisfy - only the collapsed pass/fail outcome of the whole
 query.
 
-The goal of this design is to let `list-next` show, per patient, a
+The goal of this design is to let `list` show, per patient, a
 per-criterion breakdown with four states:
 
 - **met** - the criterion is satisfied
@@ -405,7 +405,7 @@ Notes:
   every resource, so no server-side setup is needed. `code.text` is for
   display only; `identifier` (or a resolved `derivedFromLibrary`) is the
   computable join key for "all Observations for criterion X" (e.g. in a
-  SQL-on-FHIR ViewDefinition or a `list-next` query).
+  SQL-on-FHIR ViewDefinition or a `list` query).
 
 ## Bundle size at scale
 
@@ -459,7 +459,7 @@ the main indicator that the anchor criterion order should be revised - see the
   - Extend `createScreeningListBundle` to also emit one `Observation` entry
     per `(patient, criterion)` for every patient added to the bundle, and to
     chunk large bundles into multiple transactions.
-- `list-next`:
+- `list`:
   - A read method (e.g. on `ResearchSubjectService`, or a new
     `EligibilityService`) querying
     `Observation?subject=Patient/{id}&focus=ResearchStudy/{studyId}&category=eligibility-assessment`,
@@ -471,7 +471,7 @@ the main indicator that the anchor criterion order should be revised - see the
 ## Open questions / follow-ups
 
 - Exact chunk size for batched transaction bundles.
-- Whether `list-next` needs a distinct visual treatment for "unknown"
+- Whether `list` needs a distinct visual treatment for "unknown"
   overall status on the patient list (today's `SystemDeterminedIneligible`
   flag only covers "system says no," not "system can't tell").
 - Whether excluded (`overall_met = false`) patients need an audit trail at

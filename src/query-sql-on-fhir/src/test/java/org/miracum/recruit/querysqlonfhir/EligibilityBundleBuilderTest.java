@@ -71,7 +71,7 @@ class EligibilityBundleBuilderTest {
 
   /**
    * The clobbering scenario this guards against: a subject that already exists (its status may
-   * since have been changed by list-next) must not be rewritten by a later poll cycle, or its
+   * since have been changed by list) must not be rewritten by a later poll cycle, or its
    * status would be silently reset to CANDIDATE.
    */
   @Test
@@ -106,7 +106,7 @@ class EligibilityBundleBuilderTest {
   }
 
   /**
-   * list-next keys its screening-notes table on this identifier rather than the FHIR logical id, so
+   * list keys its screening-notes table on this identifier rather than the FHIR logical id, so
    * it must be set unconditionally - independent of whether the subject is addressed via
    * conditional POST or update-as-create PUT.
    */
