@@ -64,8 +64,6 @@ jobs:
 
   build-site:
     name: Build Documentation
-    needs:
-      - build-ig
     runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -83,13 +81,34 @@ jobs:
       - name: Build site
         run: uv run --locked zensical build --strict
 
+      - name: Upload site
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: site
+          path: site/
+          retention-days: 1
+
+  # the site and the IG build independently, this job puts the IG into the site's fhir/ directory
+  assemble:
+    name: Assemble Pages
+    needs:
+      - build-ig
+      - build-site
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Download site
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: site
+          path: site
+
       - name: Download FHIR IG output
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: fhir-ig
           path: site/fhir
 
-      - name: Upload site
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: site/
@@ -99,7 +118,7 @@ jobs:
     name: Deploy Documentation
     if: ${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master') }}
     needs:
-      - build-site
+      - assemble
     runs-on: ubuntu-26.04
     permissions:
       pages: write
