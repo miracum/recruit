@@ -8,7 +8,7 @@ build:
       docker:
         dockerfile: Dockerfile
         buildArgs:
-          MODULE: query-sql-on-fhir
+          MODULE_NAME: query-sql-on-fhir
     - image: ghcr.io/open-recruit/recruit/list
       context: list
       docker:

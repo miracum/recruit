@@ -4,7 +4,7 @@ WORKDIR /home/gradle/project
 
 COPY . .
 
-ARG MODULE_NAME=query
+ARG MODULE_NAME=query-sql-on-fhir
 RUN --mount=type=cache,target=/home/gradle/.gradle/caches/modules-2 <<EOF
 gradle clean ":${MODULE_NAME}:build" -x test --info
 java -Djarmode=tools -jar ${MODULE_NAME}/build/libs/*.jar extract --layers --launcher --force \
@@ -21,7 +21,7 @@ EOF
 FROM gcr.io/distroless/java25-debian13:nonroot@sha256:2ce7f9eb870273fcb76131cf1e3b0f3e4ef48ee86679166cae1d53fe035c47aa
 WORKDIR /app
 
-ARG MODULE_NAME=query
+ARG MODULE_NAME=query-sql-on-fhir
 COPY --from=build /home/gradle/project/${MODULE_NAME}/dependencies/ ./
 COPY --from=build /home/gradle/project/${MODULE_NAME}/spring-boot-loader/ ./
 COPY --from=build /home/gradle/project/${MODULE_NAME}/snapshot-dependencies/ ./
