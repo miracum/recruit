@@ -10,29 +10,40 @@ hide:
 
 ## Features
 
+<!-- the first card spans two columns, so the five cards fill whole rows; the layout is in _css/extra.css -->
 <div class="grid cards rc-features" markdown>
 
 - :lucide-scan-search:{ .lg } **Eligibility criteria as SQL**
 
-    ---
-
     Define a trial's inclusion and exclusion criteria as a cohort using Trino-SQL against
-    FHIR ressources encoded as Delta Lake tables.
+    FHIR ressources encoded as Delta Lake tables. Each criterion is a query that decides, per patient,
+    whether it is met:
+
+    ```sql
+    SELECT p.id AS patient_id,
+           CASE WHEN p.birth_date IS NULL THEN NULL
+                ELSE date_diff('year', date(p.birth_date), current_date) >= 18
+           END AS is_met,
+           CAST(NULL AS BOOLEAN) AS is_indeterminate,
+           CAST(NULL AS VARCHAR) AS result_note
+    FROM fhir.default.patient p
+    ```
 
     [:octicons-arrow-right-24: Create your first study](getting-started/creating-your-first-study.md)
 
 - :lucide-list-checks:{ .lg } **Screening lists**
 
-    ---
-
     Study teams can review candidates in a web-based screening list: track each one's recruitment
     status, add notes, and view the change history.
+
+    <span class="rc-status">candidate</span> <span class="rc-status">screening</span>
+    <span class="rc-status">eligible</span> <span class="rc-status">ineligible</span>
+    <span class="rc-status">on-study</span> <span class="rc-status">withdrawn</span>
+    { .rc-statuses }
 
     [:octicons-arrow-right-24: Customize the user interface](configuration/ui-configuration.md)
 
 - :lucide-mail:{ .lg } **Email notifications**
-
-    ---
 
     Subscribe to email notifications as soon as new candidates are added to one of
     the screening lists, or get updated about new candidates on a regular schedule.
@@ -41,15 +52,11 @@ hide:
 
 - :lucide-shield-check:{ .lg } **Secure**
 
-    ---
-
     OIDC-based sign-in with the access to screening lists configurable per-user.
 
     [:octicons-arrow-right-24: Security](configuration/security.md)
 
 - :lucide-cloud:{ .lg } **Cloud-native**
-
-    ---
 
     Deploy with Docker Compose or the Helm chart: high availability, service meshes, network
     policies, Prometheus metrics and OpenTelemetry tracing included.

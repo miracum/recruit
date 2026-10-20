@@ -148,14 +148,93 @@ body:not([data-md-color-scheme="slate"]) img.rc-hero__img--dark,
   box-shadow: 0 1rem 2.5rem rgb(0 0 0 / 35%);
 }
 
+/*
+  Features: the theme's auto-fit columns leave a gap after an odd number of cards, so the columns are
+  set explicitly and the first card spans two of them. That fills whole rows with five cards: one
+  wide card plus two rows of two, or one row of a wide card and one card, then a row of three.
+  minmax(0, 1fr) instead of 1fr, so the SQL example scrolls instead of widening its column.
+*/
+.md-typeset .grid.rc-features {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.8rem;
+}
+
+@media screen and (width >= 45em) {
+  .md-typeset .grid.rc-features {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .md-typeset .grid.rc-features > ul > li:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media screen and (width >= 60em) {
+  .md-typeset .grid.rc-features {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .md-typeset .grid.rc-features > ul > li:first-child {
+    grid-column: span 2;
+  }
+}
+
+/* stack each card's content so the link sits at the bottom, aligned across a row */
+.md-typeset .grid.rc-features > ul > li {
+  display: flex;
+  flex-direction: column;
+  padding: 1.2rem;
+}
+
+.md-typeset .grid.rc-features > ul > li > * {
+  min-width: 0;
+}
+
+.md-typeset .grid.rc-features > ul > li > :last-child {
+  margin-top: auto;
+  padding-top: 0.4rem;
+}
+
+.md-typeset .grid.rc-features .highlight {
+  margin: 0 0 1em;
+}
+
+/* the icon sits in a tinted badge above the card's title */
 .rc-features .twemoji.lg {
-  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  margin-bottom: 0.8rem;
+  border-radius: 0.5rem;
+  background-color: var(--md-accent-fg-color--transparent);
   color: var(--rc-orange);
 }
 
 .rc-features .twemoji.lg svg {
-  width: 2rem;
+  width: 1.4rem;
   max-height: none;
+}
+
+.md-typeset .rc-features li > p:first-child strong {
+  font-size: 0.9rem;
+}
+
+/* the ResearchSubject statuses a screening list tracks, styled like the list module's status chips */
+.md-typeset .rc-statuses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.md-typeset .rc-status {
+  padding: 0.15rem 0.6rem;
+  border: 0.05rem solid var(--md-default-fg-color--lighter);
+  border-radius: 1rem;
+  color: var(--md-default-fg-color--light);
+  font-family: var(--md-code-font-family);
+  font-size: 0.65rem;
 }
 
 .md-typeset img.rc-diagram {
