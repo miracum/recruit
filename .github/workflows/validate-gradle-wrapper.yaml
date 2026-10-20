@@ -7,6 +7,11 @@ on:
     branches:
       - master
 
+# a new push to the same PR or branch supersedes the run of the previous commit
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 

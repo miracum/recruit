@@ -18,11 +18,11 @@ on:
 permissions:
   contents: read
 
-# cancel a superseded PR run (a new push to the same PR obsoletes the old one), but never cancel an
-# in-progress push-to-master/release/merge_group run - those shouldn't be interrupted partway.
+# only the latest commit of a PR or branch is worth testing, so a new push cancels the run it
+# supersedes. Release and merge_group runs each have their own ref and never cancel one another.
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: true
 
 defaults:
   run:
