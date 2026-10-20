@@ -586,6 +586,7 @@ curl: # +doc-gen:ignore
 # kubectl image used by the wait-for-migration initContainer to poll the list migration Job's
 # status. Needs a shell (the initContainer's poll loop runs as a /bin/sh script), which rules out
 # minimal/distroless kubectl images that ship only the binary.
+# @ignore
 kubectl: # +doc-gen:ignore
   image:
     registry: docker.io

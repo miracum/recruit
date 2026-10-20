@@ -90,7 +90,7 @@ jobs:
       - build-query-sql-on-fhir
       # only lint, install, and publish the chart once the images it points at have passed all tests
       # (this already depends on the container structure `test` job).
-      - docker-compose-test
+      - compose-test
     uses: miracum/.github/.github/workflows/standard-chart-publish.yaml@6611917e0cbce3777825e93e3f725c98a437c060 # v1.31.0
     permissions:
       contents: read
@@ -194,7 +194,7 @@ jobs:
 
           ./container-structure-test-linux-amd64 test --image="${IMAGE_NAME}:${IMAGE_TAG}" --config=tests/container-structure/common-tests.yaml
 
-  docker-compose-test:
+  compose-test:
     needs:
       - build-query-sql-on-fhir
       - build-list
@@ -202,6 +202,28 @@ jobs:
     uses: $/.github/workflows/test-compose-installation.yaml
     with:
       image-tag: ${{ needs.build-query-sql-on-fhir.outputs.image-version }}
+
+  # single stable job to mark as required in the branch ruleset, instead of listing every job (and
+  # every matrix/reusable-workflow job name) there. Runs even if a dependency failed or was skipped,
+  # since GitHub treats a skipped required check as passing.
+  required-checks:
+    name: required checks
+    if: ${{ always() }}
+    needs:
+      - chart
+      - compose-test
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Fail unless all required jobs succeeded
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Results of the required jobs: ${RESULTS}"
+          for result in ${RESULTS}; do
+            if [ "${result}" != "success" ]; then
+              exit 1
+            fi
+          done
 
   release:
     # the docker compose image tags only change on releases, so
@@ -214,9 +236,9 @@ jobs:
       id-token: write # for creating OIDC tokens for signing
       packages: read # to pull the published Helm chart from ghcr.io
     needs:
-      - docker-compose-test
+      - compose-test
       # listed directly (even though they're already transitively required via
-      # docker-compose-test) so their per-module image-digest outputs are addressable here.
+      # compose-test) so their per-module image-digest outputs are addressable here.
       - build-query-sql-on-fhir
       - build-list
       - chart
