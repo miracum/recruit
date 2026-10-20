@@ -38,29 +38,6 @@ list:
   podDisruptionBudget:
     enabled: true
 
-notify:
-  podDisruptionBudget:
-    enabled: true
-  ha:
-    enabled: true
-  rules:
-    schedules:
-      everyMorning: "0 0 8 1/1 * ? *"
-
-    trials:
-      - acronym: "*"
-        subscriptions:
-          - email: "everything@example.com"
-
-      - acronym: "SAMPLE"
-        accessibleBy:
-          users:
-            - "user1"
-            - "user.two@example.com"
-        subscriptions:
-          - email: "everyMorning@example.com"
-            notify: "everyMorning"
-
 postgres:
   enabled: true
   auth:

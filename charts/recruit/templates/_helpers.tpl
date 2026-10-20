@@ -60,8 +60,8 @@ Extra labels to apply to every pod
 
 {{/*
 Create the name of the service account to use.
-Expects a dict with "context" (the component's values, e.g. .Values.notify), "component" (e.g.
-"notify") and "root" (the chart's root context, i.e. $) - root is needed because "recruit.fullname"
+Expects a dict with "context" (the component's values, e.g. .Values.list), "component" (e.g.
+"list") and "root" (the chart's root context, i.e. $) - root is needed because "recruit.fullname"
 reads .Values/.Chart/.Release from the top level, which isn't reachable from "context" alone.
 */}}
 {{- define "recruit.serviceAccountName" -}}
@@ -91,17 +91,6 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- define "recruit.mailhog.fullname" -}}
 {{- $name := default "mailhog" .Values.mailhog.nameOverride -}}
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{/*
-Get the SMTP server credentials secret.
-*/}}
-{{- define "recruit.mail.server.secretName" -}}
-{{- if .Values.notify.mail.server.existingSecret -}}
-    {{- printf "%s" .Values.notify.mail.server.existingSecret -}}
-{{- else -}}
-    {{ printf "%s-%s" .Release.Name "smtp" }}
-{{- end -}}
 {{- end -}}
 
 {{- define "recruit.omop.db.host" -}}

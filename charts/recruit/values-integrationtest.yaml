@@ -10,7 +10,6 @@ query:
   # run every minute
   schedule: "* * * * *"
   cohortSelectorLabels: []
-  shouldWaitForNotify: true
   omop:
     host: broadsea-atlasdb
     port: 5432
@@ -25,29 +24,6 @@ query:
   extraEnv:
     - name: QUERY_WEBAPI_COHORT_CACHE_SCHEMA
       value: webapi
-
-notify:
-  resourcesPreset: "none"
-  ha:
-    enabled: true
-  rules:
-    schedules:
-      everyMorning: "0 0 8 1/1 * ? *"
-
-    trials:
-      - acronym: "*"
-        subscriptions:
-          - email: "everything@example.com"
-
-      - acronym: "Demo new users of diclofenac"
-        accessibleBy:
-          users:
-            - "user1"
-            - "user.two@example.com"
-        subscriptions:
-          - email: "everyMorning@example.com"
-            notify: "everyMorning"
-          - email: "demo@example.com"
 
 postgres:
   resourcesPreset: "none"
