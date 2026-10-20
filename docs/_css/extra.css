@@ -56,7 +56,7 @@ body:not([data-md-color-scheme="slate"]) img.rc-hero__img--dark,
   padding: 2.5rem 0.8rem;
 }
 
-@media screen and (min-width: 60em) {
+@media screen and (width >= 60em) {
   .rc-hero__inner {
     grid-template-columns: 5fr 6fr;
     gap: 3rem;
@@ -88,7 +88,7 @@ body:not([data-md-color-scheme="slate"]) img.rc-hero__img--dark,
   color: inherit;
 }
 
-@media screen and (min-width: 60em) {
+@media screen and (width >= 60em) {
   .rc-hero__title {
     font-size: 2rem;
   }

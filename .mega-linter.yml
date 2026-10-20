@@ -32,6 +32,8 @@ DISABLE_LINTERS:
   - REPOSITORY_KINGFISHER
   # redundant with trivy
   - REPOSITORY_OSV_SCANNER
+  # deprecated action, doesnt recognize ubuntu 26 runners
+  - ACTION_ACTIONLINT
 
 SHOW_ELAPSED_TIME: true
 FILEIO_REPORTER: false
