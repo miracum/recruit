@@ -221,22 +221,6 @@ body:not([data-md-color-scheme="slate"]) img.rc-hero__img--dark,
   font-size: 0.9rem;
 }
 
-/* the ResearchSubject statuses a screening list tracks, styled like the list module's status chips */
-.md-typeset .rc-statuses {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.md-typeset .rc-status {
-  padding: 0.15rem 0.6rem;
-  border: 0.05rem solid var(--md-default-fg-color--lighter);
-  border-radius: 1rem;
-  color: var(--md-default-fg-color--light);
-  font-family: var(--md-code-font-family);
-  font-size: 0.65rem;
-}
-
 .md-typeset img.rc-diagram {
   display: block;
   margin: 0 auto;
