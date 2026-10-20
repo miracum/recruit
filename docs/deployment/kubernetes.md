@@ -414,8 +414,7 @@ helm upgrade --install \
 
 helm upgrade --install \
   --namespace=recruit \
-  -f charts/recruit/values-integrationtest.yaml \
-  --set query.enabled=false \
+  -f charts/recruit/ci/integration-values.yaml \
   recruit charts/recruit/
 
 argo submit -n recruit --wait --log docs/_snippets/k8s/query-argo-workflow.yaml

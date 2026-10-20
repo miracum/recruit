@@ -91,7 +91,7 @@ spec:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ include "recruit.fullname" $ }}-list-wait-for-migration
+  name: {{ include "common.names.fullname" $ }}-list-wait-for-migration
   labels:
     {{- include "recruit.labels" $ | nindent 4 }}
     app.kubernetes.io/component: list
@@ -108,14 +108,14 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ include "recruit.fullname" $ }}-list-wait-for-migration
+  name: {{ include "common.names.fullname" $ }}-list-wait-for-migration
   labels:
     {{- include "recruit.labels" $ | nindent 4 }}
     app.kubernetes.io/component: list
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: {{ include "recruit.fullname" $ }}-list-wait-for-migration
+  name: {{ include "common.names.fullname" $ }}-list-wait-for-migration
 subjects:
   - kind: ServiceAccount
     name: {{ include "recruit.serviceAccountName" (dict "context" . "component" "list" "root" $) }}

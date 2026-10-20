@@ -1,72 +1,23 @@
 {{/* vim: set filetype=mustache: */}}
 {{/*
-Expand the name of the chart.
-*/}}
-{{- define "recruit.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{/*
-Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-If release name contains chart name it will be used as a full name.
-*/}}
-{{- define "recruit.fullname" -}}
-{{- if .Values.fullnameOverride -}}
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- if contains $name .Release.Name -}}
-{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Create chart name and version as used by the chart label.
-*/}}
-{{- define "recruit.chart" -}}
-{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{/*
-Common labels
+Standard Kubernetes labels (see the common chart's "common.labels.standard") plus `extraLabels`.
 */}}
 {{- define "recruit.labels" -}}
-helm.sh/chart: {{ include "recruit.chart" . }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{ include "recruit.matchLabels" . }}
-{{- if .Values.extraLabels }}
-    {{- toYaml .Values.extraLabels }}
+{{ include "common.labels.standard" . }}
+{{- with .Values.extraLabels }}
+{{ toYaml . }}
 {{- end }}
-{{- end -}}
-
-{{/*
-Labels to use on deploy.spec.selector.matchLabels and svc.spec.selector
-*/}}
-{{- define "recruit.matchLabels" -}}
-app.kubernetes.io/name: {{ include "recruit.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end -}}
-
-{{/*
-Extra labels to apply to every pod
-*/}}
-{{- define "recruit.podLabels" -}}
-{{ include "recruit.matchLabels" . }}
 {{- end -}}
 
 {{/*
 Create the name of the service account to use.
 Expects a dict with "context" (the component's values, e.g. .Values.list), "component" (e.g.
-"list") and "root" (the chart's root context, i.e. $) - root is needed because "recruit.fullname"
+"list") and "root" (the chart's root context, i.e. $) - root is needed because "common.names.fullname"
 reads .Values/.Chart/.Release from the top level, which isn't reachable from "context" alone.
 */}}
 {{- define "recruit.serviceAccountName" -}}
 {{- if .context.serviceAccount.create }}
-{{- default (printf "%s-%s" (include "recruit.fullname" .root) .component) .context.serviceAccount.name }}
+{{- default (printf "%s-%s" (include "common.names.fullname" .root) .component) .context.serviceAccount.name }}
 {{- else }}
 {{- default "default" .context.serviceAccount.name }}
 {{- end }}
@@ -85,20 +36,10 @@ Get the FHIR server URL.
 {{- end -}}
 
 {{/*
-Create a default fully qualified maildev name, mirroring the maildev chart's own "maildev.fullname".
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+Fully qualified name of the included maildev chart. Only valid if `maildev.enabled=true`.
 */}}
 {{- define "recruit.maildev.fullname" -}}
-{{- if .Values.maildev.fullnameOverride -}}
-{{- .Values.maildev.fullnameOverride | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- $name := default "maildev" .Values.maildev.nameOverride -}}
-{{- if contains $name .Release.Name -}}
-{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-{{- end -}}
+{{- include "maildev.fullname" (index .Subcharts "maildev") -}}
 {{- end -}}
 
 {{/*
@@ -142,17 +83,15 @@ hex chars) so the hash suffix is never truncated away. Job names are capped at 6
 Kubernetes - they back the "job-name" pod label, whose value is limited by K8s label-value rules.
 */}}
 {{- define "recruit.list.migrationJobName" -}}
-{{- $prefix := printf "%s-list" (include "recruit.fullname" .) | trunc 46 | trimSuffix "-" -}}
+{{- $prefix := printf "%s-list" (include "common.names.fullname" .) | trunc 46 | trimSuffix "-" -}}
 {{- printf "%s-migrate-%s" $prefix (.Values.list.image.tag | sha256sum | trunc 8) -}}
 {{- end -}}
 
 {{/*
-Create a default fully qualified postgresql name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+Fully qualified name of the included postgres chart. Only valid if `postgres.enabled=true`.
 */}}
 {{- define "recruit.postgresql.fullname" -}}
-{{- $name := default "postgres" .Values.postgres.nameOverride -}}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- include "postgres.fullname" (index .Subcharts "postgres") -}}
 {{- end -}}
 
 
@@ -163,7 +102,7 @@ Return the Trino credentials secret name
 {{- if .Values.querySqlOnFhir.trino.auth.existingSecret.name  -}}
     {{ printf "%s" (tpl .Values.querySqlOnFhir.trino.auth.existingSecret.name $) }}
 {{- else -}}
-    {{ printf "%s-%s" (include "recruit.fullname" . ) "query-sql-on-fhir-secret" }}
+    {{ printf "%s-%s" (include "common.names.fullname" . ) "query-sql-on-fhir-secret" }}
 {{- end -}}
 {{- end -}}
 

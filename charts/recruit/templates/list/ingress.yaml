@@ -1,5 +1,5 @@
 {{- if and .Values.list.enabled .Values.list.ingress.enabled -}}
-{{- $fullName := include "recruit.fullname" . -}}
+{{- $fullName := include "common.names.fullname" . -}}
 {{- $serviceName := printf "%s-list" $fullName -}}
 {{- $servicePort := .Values.list.service.port -}}
 apiVersion: networking.k8s.io/v1

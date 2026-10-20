@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "recruit.fullname" . }}-search-parameters
+  name: {{ include "common.names.fullname" . }}-search-parameters
   labels:
     {{- include "recruit.labels" . | nindent 4 }}
     app.kubernetes.io/component: search-parameters
@@ -88,5 +88,5 @@ spec:
       volumes:
         - name: search-parameters
           configMap:
-            name: {{ include "recruit.fullname" . }}-search-parameters
+            name: {{ include "common.names.fullname" . }}-search-parameters
 {{- end -}}

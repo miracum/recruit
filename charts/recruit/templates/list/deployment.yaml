@@ -3,7 +3,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "recruit.fullname" $ }}-list
+  name: {{ include "common.names.fullname" $ }}-list
   labels:
     {{- include "recruit.labels" $ | nindent 4 }}
     app.kubernetes.io/component: list
@@ -16,12 +16,12 @@ spec:
   revisionHistoryLimit: {{ .revisionHistoryLimit }}
   selector:
     matchLabels:
-      {{- include "recruit.matchLabels" $ | nindent 6 }}
+      {{- include "common.labels.matchLabels" $ | nindent 6 }}
       app.kubernetes.io/component: list
   template:
     metadata:
       labels:
-        {{- include "recruit.podLabels" $ | nindent 8 }}
+        {{- include "common.labels.matchLabels" $ | nindent 8 }}
         app.kubernetes.io/component: list
         {{- with .extraPodLabels }}
           {{- toYaml . | nindent 8 }}

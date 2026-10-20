@@ -32,7 +32,7 @@ dependencies:
     condition: postgres.enabled
   - name: common
     repository: oci://ghcr.io/miracum/charts
-    version: 0.1.1
+    version: 0.2.0
 version: 10.5.7 # x-release-please-version
 appVersion: 10.5.7 # x-release-please-version
 annotations:
