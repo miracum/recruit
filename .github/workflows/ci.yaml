@@ -100,8 +100,8 @@ jobs:
       artifact-metadata: write # required by actions/attest-build-provenance
     with:
       chart-path: charts/recruit
-      # published as ghcr.io/miracum/recruit/charts/recruit rather than the default
-      # ghcr.io/miracum/recruit/recruit, matching the location the chart has always been published to.
+      # published as ghcr.io/<owner>/recruit/charts/recruit rather than the default
+      # ghcr.io/<owner>/recruit/recruit, matching the location the chart has always been published to.
       registry: ghcr.io/${{ github.repository }}/charts
       # stable per PR (no commit sha), so every push to the same PR overwrites this one OCI tag
       # instead of piling up a new prerelease version per commit. Empty on every other event,

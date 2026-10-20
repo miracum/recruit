@@ -138,7 +138,7 @@ list:
   # @ignore
   image: # +doc-gen:ignore
     registry: ghcr.io
-    repository: miracum/recruit/list
+    repository: open-recruit/recruit/list
     tag: v10.5.7 # x-release-please-version
     pullPolicy: IfNotPresent
 
@@ -410,7 +410,7 @@ querySqlOnFhir:
   # @ignore
   image: # +doc-gen:ignore
     registry: ghcr.io
-    repository: miracum/recruit/query-sql-on-fhir
+    repository: open-recruit/recruit/query-sql-on-fhir
     tag: v10.5.7 # x-release-please-version
     pullPolicy: IfNotPresent
 

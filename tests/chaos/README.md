@@ -34,9 +34,9 @@ helm upgrade --install argo-workflows argo/argo-workflows \
     -n argo-workflows \
     -f argo-workflows-values.yaml
 
-docker build --build-context fixtures=tester/ -f ../../src/tester/Dockerfile -t ghcr.io/miracum/recruit/tester:v1 ../../src/
+docker build --build-context fixtures=tester/ -f ../../src/tester/Dockerfile -t ghcr.io/open-recruit/recruit/tester:v1 ../../src/
 
-kind load docker-image ghcr.io/miracum/recruit/tester:v1
+kind load docker-image ghcr.io/open-recruit/recruit/tester:v1
 
 argo submit argo-workflow.yaml -n recruit --watch
 ```

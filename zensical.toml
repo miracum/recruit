@@ -8,8 +8,8 @@ site_url = "https://open-recruit.github.io/recruit/"
 site_description = "A Cloud-Native Clinical Trial Recruitment Support System based on HL7 FHIR."
 copyright = "Copyright &copy; The recruIT Developers"
 
-repo_url = "https://github.com/miracum/recruit"
-repo_name = "miracum/recruit"
+repo_url = "https://github.com/open-recruit/recruit"
+repo_name = "open-recruit/recruit"
 edit_uri = "edit/master/docs/"
 
 docs_dir = "docs"
@@ -101,7 +101,7 @@ name = "MIRACUM Website"
 
 [[project.extra.social]]
 icon = "fontawesome/brands/github"
-link = "https://github.com/miracum/recruit"
+link = "https://github.com/open-recruit/recruit"
 name = "recruIT on GitHub"
 
 [project.markdown_extensions]

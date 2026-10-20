@@ -7,7 +7,7 @@ build:
     push: false
     useBuildkit: true
   artifacts:
-    - image: ghcr.io/miracum/recruit/chaos-tester
+    - image: ghcr.io/open-recruit/recruit/chaos-tester
       context: tester
       docker:
         dockerfile: Dockerfile

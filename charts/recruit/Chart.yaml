@@ -12,7 +12,7 @@ keywords:
 maintainers:
   - name: chgl
 sources:
-  - https://github.com/miracum/recruit/tree/master/charts/recruit
+  - https://github.com/open-recruit/recruit/tree/master/charts/recruit
 deprecated: false
 kubeVersion: ">= 1.21.0"
 icon: https://open-recruit.github.io/recruit/_img/miracum-recruit-k8s-logo.png

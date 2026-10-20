@@ -74,7 +74,7 @@ flowchart LR
 
     fhir[("HAPI FHIR server")]
     sql[("Trino or SQL on FHIR server<br/>patient data as tables")]
-    superset["Apache Superset"]
+    superset["Apache Superset<br/>(optional)"]
     db[("PostgreSQL")]
     smtp["SMTP server"]
     oidc["OIDC provider"]

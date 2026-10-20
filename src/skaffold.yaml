@@ -17,7 +17,7 @@ build:
     push: false
     tryImportMissing: true
     useBuildkit: true
-manifests:
+deploy:
   helm:
     flags:
       install:
@@ -31,16 +31,12 @@ manifests:
           - hack/k8s/values-dev.yaml
         wait: true
         skipBuildDependencies: true
-deploy:
-  helm:
-    releases:
-      - name: recruit
-        chartPath: helm
-        createNamespace: true
-        namespace: recruit
-        valuesFiles:
-          - hack/k8s/values-dev.yaml
-        skipBuildDependencies: true
-    flags:
-      install:
-        - --timeout=15m
+        # point the chart at the images skaffold just built. The keys are the artifact image names
+        # above with every non-alphanumeric character replaced by `_`.
+        setValueTemplates:
+          list.image.registry: "{{.IMAGE_DOMAIN_ghcr_io_open_recruit_recruit_list}}"
+          list.image.repository: "{{.IMAGE_REPO_NO_DOMAIN_ghcr_io_open_recruit_recruit_list}}"
+          list.image.tag: "{{.IMAGE_TAG_ghcr_io_open_recruit_recruit_list}}"
+          querySqlOnFhir.image.registry: "{{.IMAGE_DOMAIN_ghcr_io_open_recruit_recruit_query_sql_on_fhir}}"
+          querySqlOnFhir.image.repository: "{{.IMAGE_REPO_NO_DOMAIN_ghcr_io_open_recruit_recruit_query_sql_on_fhir}}"
+          querySqlOnFhir.image.tag: "{{.IMAGE_TAG_ghcr_io_open_recruit_recruit_query_sql_on_fhir}}"
