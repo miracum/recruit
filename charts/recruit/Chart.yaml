@@ -21,13 +21,13 @@ dependencies:
     alias: fhirserver
     name: hapi-fhir-jpaserver
     repository: https://hapifhir.github.io/hapi-fhir-jpaserver-starter
-    version: 0.23.0
+    version: 0.24.0
   - condition: maildev.enabled
     name: maildev
     repository: https://maildev.github.io/helm/
     version: 0.2.0
   - name: postgres
-    version: 0.19.10
+    version: 0.21.1
     repository: oci://registry-1.docker.io/cloudpirates
     condition: postgres.enabled
   - name: common
