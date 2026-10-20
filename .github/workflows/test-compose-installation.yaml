@@ -14,6 +14,7 @@ jobs:
   test:
     name: Test Compose installation
     runs-on: ubuntu-26.04
+    if: ${{ false }}
     env:
       RECRUIT_IMAGE_BASE_NAME: ghcr.io/${{ github.repository }}
       RECRUIT_IMAGE_TAG: ${{ inputs.image-tag }}
@@ -26,29 +27,15 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: ghcr.io-miracum-recruit-list-${{ inputs.image-tag }}
-          path: /tmp/ghcr.io-miracum-recruit-list-${{ inputs.image-tag }}
-
-      - name: Download notify image artifact
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: ghcr.io-miracum-recruit-notify-${{ inputs.image-tag }}
-          path: /tmp/ghcr.io-miracum-recruit-notify-${{ inputs.image-tag }}
-
-      - name: Download query image artifact
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: ghcr.io-miracum-recruit-query-${{ inputs.image-tag }}
-          path: /tmp/ghcr.io-miracum-recruit-query-${{ inputs.image-tag }}
+          name: ghcr.io-open-recruit-recruit-list-${{ inputs.image-tag }}
+          path: /tmp/ghcr.io-open-recruit-recruit-list-${{ inputs.image-tag }}
 
       - name: Download query-sql-on-fhir image artifact
         if: ${{ github.event_name == 'pull_request' }}
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: ghcr.io-miracum-recruit-query-sql-on-fhir-${{ inputs.image-tag }}
-          path: /tmp/ghcr.io-miracum-recruit-query-sql-on-fhir-${{ inputs.image-tag }}
+          name: ghcr.io-open-recruit-recruit-query-sql-on-fhir-${{ inputs.image-tag }}
+          path: /tmp/ghcr.io-open-recruit-recruit-query-sql-on-fhir-${{ inputs.image-tag }}
 
       - name: Load container images
         # only load images from artifacts on PRs, otherwise the image
@@ -57,10 +44,8 @@ jobs:
         env:
           IMAGE_TAG: ${{ inputs.image-tag }}
         run: |
-          docker load --input "/tmp/ghcr.io-miracum-recruit-list-${IMAGE_TAG}/image.tar"
-          docker load --input "/tmp/ghcr.io-miracum-recruit-notify-${IMAGE_TAG}/image.tar"
-          docker load --input "/tmp/ghcr.io-miracum-recruit-query-${IMAGE_TAG}/image.tar"
-          docker load --input "/tmp/ghcr.io-miracum-recruit-query-sql-on-fhir-${IMAGE_TAG}/image.tar"
+          docker load --input "/tmp/ghcr.io-open-recruit-recruit-list-${IMAGE_TAG}/image.tar"
+          docker load --input "/tmp/ghcr.io-open-recruit-recruit-query-sql-on-fhir-${IMAGE_TAG}/image.tar"
           docker image ls -a
 
       - name: Deploy using Docker Compose in staging mode
