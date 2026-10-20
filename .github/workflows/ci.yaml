@@ -197,7 +197,14 @@ jobs:
       - test
     uses: $/.github/workflows/test-k8s-installation.yaml
     with:
-      image-tag: ${{ needs.build-query-sql-on-fhir.outputs.image-version }}
+      # forked PRs never get their images pushed to ghcr.io, so kind wouldn't be able to pull
+      # them - an empty tag falls back to the chart's default image tags there.
+      image-tag: >-
+        ${{
+          (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name)
+          && needs.build-query-sql-on-fhir.outputs.image-version
+          || ''
+        }}
 
   docker-compose-test:
     needs:

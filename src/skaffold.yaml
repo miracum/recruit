@@ -4,32 +4,15 @@ metadata:
   name: recruit
 build:
   artifacts:
-    - image: ghcr.io/miracum/recruit/query
-      docker:
-        dockerfile: Dockerfile
-        buildArgs:
-          MODULE: query
-    - image: ghcr.io/miracum/recruit/query-sql-on-fhir
+    - image: ghcr.io/open-recruit/recruit/query-sql-on-fhir
       docker:
         dockerfile: Dockerfile
         buildArgs:
           MODULE: query-sql-on-fhir
-    - image: ghcr.io/miracum/recruit/notify
-      docker:
-        dockerfile: Dockerfile
-        buildArgs:
-          MODULE: notify
-    - image: ghcr.io/miracum/recruit/list
-      docker:
-        dockerfile: Dockerfile
-        buildArgs:
-          MODULE: list
-    - image: ghcr.io/miracum/recruit/list
+    - image: ghcr.io/open-recruit/recruit/list
       context: list
       docker:
         dockerfile: Dockerfile
-        buildArgs:
-          VERSION: "{{ .IMAGE_TAG }}"
   local:
     push: false
     tryImportMissing: true

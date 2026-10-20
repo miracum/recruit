@@ -4,9 +4,12 @@ on:
   workflow_call:
     inputs:
       image-tag:
-        description: "Name of the image tag to test with"
+        description: >-
+          Image tag of the list and query-sql-on-fhir images to test with. Leave empty to use the
+          tags baked into the chart's values.yaml, e.g. for forked PRs whose images are never pushed.
         type: string
-        required: true
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -40,111 +43,72 @@ jobs:
         with:
           cluster_name: kind
 
-      # # TODO: consolidate with chaos-testing workflow
-      # - name: Install testing prerequisites
-      #   run: |
-      #     curl -sL -o - https://github.com/argoproj/argo-workflows/releases/download/v4.0.5/argo-linux-amd64.gz | gunzip > argo
-      #     chmod +x ./argo
+      - name: Load tester image
+        run: |
+          kind load docker-image ghcr.io/miracum/recruit/tester:v1
 
-      #     kubectl create namespace recruit
+      # TODO: consolidate with chaos-testing workflow
+      - name: Install testing prerequisites
+        run: |
+          curl -sL -o - https://github.com/argoproj/argo-workflows/releases/download/v4.0.5/argo-linux-amd64.gz | gunzip > argo
+          chmod +x ./argo
 
-      #     helm upgrade --install argo-workflows oci://ghcr.io/argoproj/argo-helm/argo-workflows  \
-      #         --create-namespace \
-      #         -n argo-workflows \
-      #         -f tests/chaos/argo-workflows-values.yaml \
-      #         --version 1.0.13
+          kubectl create namespace recruit
 
-      # - name: Download list image artifact
-      #   if: ${{ github.event_name == 'pull_request' }}
-      #   uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-      #   with:
-      #     name: ghcr.io-miracum-recruit-list-${{ inputs.image-tag }}
-      #     path: /tmp/ghcr.io-miracum-recruit-list-${{ inputs.image-tag }}
+          helm upgrade --install argo-workflows oci://ghcr.io/argoproj/argo-helm/argo-workflows \
+            --create-namespace \
+            -n argo-workflows \
+            -f tests/chaos/argo-workflows-values.yaml \
+            --version 1.0.13
 
-      # - name: Download notify image artifact
-      #   if: ${{ github.event_name == 'pull_request' }}
-      #   uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-      #   with:
-      #     name: ghcr.io-miracum-recruit-notify-${{ inputs.image-tag }}
-      #     path: /tmp/ghcr.io-miracum-recruit-notify-${{ inputs.image-tag }}
+      - name: Add helm repos and build deps of recruit chart
+        run: |
+          helm repo add hapifhir https://hapifhir.github.io/hapi-fhir-jpaserver-starter
+          helm repo add maildev https://maildev.github.io/helm/
+          helm dependency build charts/recruit
 
-      # - name: Download query image artifact
-      #   if: ${{ github.event_name == 'pull_request' }}
-      #   uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-      #   with:
-      #     name: ghcr.io-miracum-recruit-query-${{ inputs.image-tag }}
-      #     path: /tmp/ghcr.io-miracum-recruit-query-${{ inputs.image-tag }}
+      - name: Install chart
+        env:
+          IMAGE_TAG: ${{ inputs.image-tag }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          image_args=()
+          if [ -n "${IMAGE_TAG}" ]; then
+            # image.repository is set to make it easier to run in forks - particularly to test releases.
+            image_args=(
+              --set "list.image.repository=${GITHUB_REPOSITORY}/list"
+              --set "list.image.tag=${IMAGE_TAG}"
+              --set "querySqlOnFhir.image.repository=${GITHUB_REPOSITORY}/query-sql-on-fhir"
+              --set "querySqlOnFhir.image.tag=${IMAGE_TAG}"
+            )
+          fi
 
-      # - name: Download query-sql-on-fhir image artifact
-      #   if: ${{ github.event_name == 'pull_request' }}
-      #   uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-      #   with:
-      #     name: ghcr.io-miracum-recruit-query-sql-on-fhir-${{ inputs.image-tag }}
-      #     path: /tmp/ghcr.io-miracum-recruit-query-sql-on-fhir-${{ inputs.image-tag }}
+          helm install -n recruit \
+            "${image_args[@]}" \
+            -f charts/recruit/values-integrationtest.yaml \
+            --wait --timeout=20m \
+            recruit charts/recruit/
 
-      # - name: Load container images
-      #   if: ${{ github.event_name == 'pull_request' }}
-      #   env:
-      #     IMAGE_TAG: ${{ inputs.image-tag }}
-      #   run: |
-      #     kind load image-archive "/tmp/ghcr.io-miracum-recruit-list-${IMAGE_TAG}/image.tar"
-      #     kind load image-archive "/tmp/ghcr.io-miracum-recruit-notify-${IMAGE_TAG}/image.tar"
-      #     kind load image-archive "/tmp/ghcr.io-miracum-recruit-query-${IMAGE_TAG}/image.tar"
-      #     kind load image-archive "/tmp/ghcr.io-miracum-recruit-query-sql-on-fhir-${IMAGE_TAG}/image.tar"
+      - name: Run helm test
+        run: |
+          helm test -n recruit recruit
 
-      # - name: Load tester image
-      #   run: |
-      #     kind load docker-image ghcr.io/miracum/recruit/tester:v1
+      - name: Run e2e testing workflow
+        # TODO: the tester still asserts against the removed mailhog API, so this is expected to fail
+        # until it's been migrated to maildev.
+        continue-on-error: true
+        run: |
+          ./argo submit tests/integration/argo-workflow.yaml -n recruit --wait --log
 
-      # - name: Install Task
-      #   uses: arduino/setup-task@c0bc642852239c2689f73f4ea6459c29405f3c52 # v3.0.0
-      #   with:
-      #     repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Print cluster logs
+        if: always()
+        run: |
+          kubectl cluster-info dump -o yaml | tee kind-cluster-dump.txt
 
-      # - name: Add helm repos and update deps of recruit chart
-      #   run: |
-      #     task helm-add-repos
-      #     task helm-update-dependencies
-      #     helm dependency build charts/recruit
-
-      # - name: Install chart
-      #   env:
-      #     IMAGE_TAG: ${{ inputs.image-tag }}
-      #     GITHUB_REPOSITORY: ${{ github.repository }}
-      #   run: |
-      #     # image.repository is set to make it easier to run in forks - particularly to test releases.
-      #     helm install --create-namespace -n recruit \
-      #       --set "query.image.repository=${GITHUB_REPOSITORY}/query" \
-      #       --set "query.image.tag=${IMAGE_TAG}" \
-      #       --set "notify.image.repository=${GITHUB_REPOSITORY}/notify" \
-      #       --set "notify.image.tag=${IMAGE_TAG}" \
-      #       --set "list.image.repository=${GITHUB_REPOSITORY}/list" \
-      #       --set "list.image.tag=${IMAGE_TAG}" \
-      #       --set "querySqlOnFhir.image.repository=${GITHUB_REPOSITORY}/query-sql-on-fhir" \
-      #       --set "querySqlOnFhir.image.tag=${IMAGE_TAG}" \
-      #       -f charts/recruit/values-integrationtest.yaml \
-      #       --wait --timeout=25m \
-      #       recruit charts/recruit/
-
-      # - name: Run helm test
-      #   run: |
-      #     helm test -n recruit recruit
-
-      # - name: Run e2e testing workflow
-      #   # TODO: temporarily ignore failures - seems like a false negative
-      #   continue-on-error: true
-      #   run: |
-      #     ./argo submit tests/integration/argo-workflow.yaml -n recruit --wait --log
-
-      # - name: Print cluster logs
-      #   if: always()
-      #   run: |
-      #     kubectl cluster-info dump -o yaml | tee kind-cluster-dump.txt
-
-      # - name: Upload cluster dump
-      #   if: always()
-      #   uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-      #   with:
-      #     name: kind-cluster-dump.txt
-      #     path: |
-      #       kind-cluster-dump.txt
+      - name: Upload cluster dump
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: kind-cluster-dump.txt
+          path: |
+            kind-cluster-dump.txt
