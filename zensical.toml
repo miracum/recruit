@@ -1,10 +1,10 @@
-# Documentation site, published to https://miracum.github.io/recruit/ on every release by
+# Documentation site, published to https://open-recruit.github.io/recruit/ on every release by
 # .github/workflows/build-docs.yaml.
 # Preview locally with `uv run zensical serve`. The site's sources live in docs/.
 
 [project]
 site_name = "recruIT"
-site_url = "https://miracum.github.io/recruit/"
+site_url = "https://open-recruit.github.io/recruit/"
 site_description = "A Cloud-Native Clinical Trial Recruitment Support System based on HL7 FHIR."
 copyright = "Copyright &copy; The recruIT Developers"
 
@@ -43,7 +43,7 @@ nav = [
   ] },
   # built from fhir/ig/ and copied into the site by .github/workflows/build-docs.yaml, so it is only
   # available on the published site, not with `zensical serve`
-  { "FHIR Implementation Guide" = "https://miracum.github.io/recruit/fhir/" },
+  { "FHIR Implementation Guide" = "https://open-recruit.github.io/recruit/fhir/" },
 ]
 
 extra_css = ["_css/extra.css"]

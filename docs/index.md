@@ -69,7 +69,7 @@ recruIT is made up of three modules that talk to each other via HL7 FHIR® throu
 2. The **list** module shows these recommendations to the study team, who record their screening decisions.
 3. The **notify** module tells the team by email whenever new recommendations arrive.
 
-All FHIR resources recruIT uses are described in its [FHIR Implementation Guide](https://miracum.github.io/recruit/fhir/).
+All FHIR resources recruIT uses are described in its [FHIR Implementation Guide](https://open-recruit.github.io/recruit/fhir/).
 
 [:octicons-arrow-right-24: Read the architecture overview](getting-started/introduction.md)
 

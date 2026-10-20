@@ -7,7 +7,7 @@
 [![SLSA 3](https://slsa.dev/images/gh-badge-level3.svg)](https://slsa.dev)
 ![License](https://img.shields.io/github/license/miracum/recruit)
 
-See the documentation site at <https://miracum.github.io/recruit> for more information.
+See the documentation site at <https://open-recruit.github.io/recruit> for more information.
 
 ## Build Documentation
 

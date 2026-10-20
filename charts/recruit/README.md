@@ -353,4 +353,4 @@ notify:
 
 ## Distributed Tracing
 
-See the documentation on distributed tracing for more information: <https://miracum.github.io/recruit/deployment/kubernetes/#distributed-tracing>.
+See the documentation on distributed tracing for more information: <https://open-recruit.github.io/recruit/deployment/kubernetes/#distributed-tracing>.

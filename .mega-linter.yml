@@ -34,6 +34,9 @@ DISABLE_LINTERS:
   - REPOSITORY_OSV_SCANNER
   # deprecated action, doesnt recognize ubuntu 26 runners
   - ACTION_ACTIONLINT
+  # redundant with the standard-lint zizmor scan job. The bundled zizmor (v1.25.0 in MegaLinter 10.1.0)
+  # is also too old to parse the `uses: $/...` self-repository syntax (needs >= v1.30.0)
+  - ACTION_ZIZMOR
 
 SHOW_ELAPSED_TIME: true
 FILEIO_REPORTER: false
@@ -82,6 +85,3 @@ REPOSITORY_KICS_CONFIG_FILE: .kics.yaml
 DISABLE_ERRORS_LINTERS:
   - REPOSITORY_TRIVY
   - REPOSITORY_KICS
-
-ACTION_ZIZMOR_UNSECURED_ENV_VARIABLES:
-  - GITHUB_TOKEN
