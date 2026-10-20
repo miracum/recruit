@@ -31,5 +31,62 @@ jobs:
           permission-pull-requests: write
 
       - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        id: release
         with:
           token: ${{ steps.app-token.outputs.token }}
+
+      # once a release is out, start the next release's chart changelog from scratch, so the chart's
+      # artifacthub.io/changes annotation only lists what changed since. Opened as a PR instead of
+      # pushed to master, so it passes the branch ruleset's required checks - and by the release bot
+      # rather than GITHUB_TOKEN, since PRs created by GITHUB_TOKEN don't trigger those checks.
+      - name: Checkout
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          # needed to push the branch for the PR below
+          persist-credentials: true
+
+      - name: Open PR resetting the chart changelog
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+          TAG_NAME: ${{ steps.release.outputs.tag_name }}
+        run: |
+          # a single, fixed branch: if the PR from a previous release hasn't been merged yet, it's
+          # rebuilt on top of this release and updated in place instead of opening another one.
+          branch="chore/reset-chart-changelog"
+          open_pr="$(gh pr list --head "${branch}" --state open --json number --jq '.[0].number // empty')"
+
+          python3 -I .github/scripts/reset-chart-changes.py charts/recruit/Chart.yaml
+
+          if git diff --quiet; then
+            echo "The chart changelog already only lists the image tag update, nothing to reset."
+            if [ -n "${open_pr}" ]; then
+              gh pr close "${open_pr}" --delete-branch \
+                --comment "Closing: as of ${TAG_NAME}, the chart changelog no longer needs a reset."
+            fi
+            exit 0
+          fi
+
+          bot_user_id="$(gh api "/users/${APP_SLUG}[bot]" --jq .id)"
+          git config user.name "${APP_SLUG}[bot]"
+          git config user.email "${bot_user_id}+${APP_SLUG}[bot]@users.noreply.github.com"
+
+          git switch --force-create "${branch}"
+          git commit --all --message "chore: reset chart changelog after ${TAG_NAME}"
+          git push --force origin "${branch}"
+
+          title="chore: reset chart changelog after ${TAG_NAME}"
+          body="Resets the \`artifacthub.io/changes\` annotation in \`charts/recruit/Chart.yaml\` to only the image tag update entry, now that ${TAG_NAME} has been released. Add the next release's chart changes below it."
+          if [ -n "${open_pr}" ]; then
+            gh pr edit "${open_pr}" --title "${title}" --body "${body}"
+          else
+            gh pr create --base master --head "${branch}" --title "${title}" --body "${body}"
+          fi
+
+          # merges (via the merge queue) as soon as the ruleset's requirements are met. Re-enabled on
+          # every run, since the force-push above dismisses earlier approvals. Squash is the only merge
+          # method allowed in this repo; with the merge queue, the queue's own method applies anyway.
+          gh pr merge "${branch}" --auto --squash
