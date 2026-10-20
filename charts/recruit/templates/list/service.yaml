@@ -1,9 +1,9 @@
-{{- with .Values.listNext -}}
+{{- with .Values.list -}}
 {{- if .enabled -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "recruit.fullname" $ }}-list
+  name: {{ include "common.names.fullname" $ }}-list
   labels:
     {{- include "recruit.labels" $ | nindent 4 }}
     app.kubernetes.io/component: list
@@ -19,7 +19,7 @@ spec:
       protocol: TCP
       name: http-metrics
   selector:
-    {{- include "recruit.matchLabels" $ | nindent 4 }}
+    {{- include "common.labels.matchLabels" $ | nindent 4 }}
     app.kubernetes.io/component: list
 {{- end -}}
 {{- end -}}

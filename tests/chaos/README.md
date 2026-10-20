@@ -16,11 +16,7 @@ kubectl wait --for=condition=ready pod \
 
 kubectl apply -f cnpg.yaml -n recruit
 
-helm upgrade --install -n recruit -f recruit-values.yaml --set notify.replicaCount=1 --wait recruit ../../charts/recruit
-
-helm upgrade --install -n recruit -f recruit-values.yaml --set notify.replicaCount=2 --wait recruit ../../charts/recruit
-
-helm upgrade --install -n recruit -f recruit-values.yaml --set notify.replicaCount=3 --wait recruit ../../charts/recruit
+helm upgrade --install -n recruit -f recruit-values.yaml --wait recruit ../../charts/recruit
 
 helm repo add chaos-mesh https://charts.chaos-mesh.org
 MSYS_NO_PATHCONV=1 helm upgrade --install chaos-mesh chaos-mesh/chaos-mesh \
@@ -38,9 +34,9 @@ helm upgrade --install argo-workflows argo/argo-workflows \
     -n argo-workflows \
     -f argo-workflows-values.yaml
 
-docker build --build-context fixtures=tester/ -f ../../src/tester/Dockerfile -t ghcr.io/miracum/recruit/tester:v1 ../../src/
+docker build --build-context fixtures=tester/ -f ../../src/tester/Dockerfile -t ghcr.io/open-recruit/recruit/tester:v1 ../../src/
 
-kind load docker-image ghcr.io/miracum/recruit/tester:v1
+kind load docker-image ghcr.io/open-recruit/recruit/tester:v1
 
 argo submit argo-workflow.yaml -n recruit --watch
 ```

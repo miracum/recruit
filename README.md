@@ -1,10 +1,10 @@
 # recruIT
 
-[![OpenSSF Scorecard](https://img.shields.io/ossf-scorecard/github.com/miracum/recruit?label=openssf%20scorecard&style=flat)](https://scorecard.dev/viewer/?uri=github.com/miracum/recruit)
+[![OpenSSF Scorecard](https://img.shields.io/ossf-scorecard/github.com/open-recruit/recruit?label=openssf%20scorecard&style=flat)](https://scorecard.dev/viewer/?uri=github.com/open-recruit/recruit)
 [![SLSA 3](https://slsa.dev/images/gh-badge-level3.svg)](https://slsa.dev)
-![License](https://img.shields.io/github/license/miracum/recruit)
+![License](https://img.shields.io/github/license/open-recruit/recruit)
 
-See the documentation site at <https://open-recruit.github.io/recruit> for more information.
+See the documentation site at <https://openrecruit.dev/> for more information.
 
 ## Build Documentation
 

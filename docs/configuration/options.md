@@ -20,19 +20,16 @@ using the `.staging.env` file.
 
 ## Screening List
 
-| Variable                        | Description                                                                                                                                                                                | Staging Default Value                    |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
-| KEYCLOAK_DISABLED               | Disable Keycloak authentication for the screening list.                                                                                                                                    | `false`                                  |
-| KEYCLOAK_CLIENT_ID              | Keycloak client id for the screening list component.                                                                                                                                       | `uc1-screeninglist`                      |
-| KEYCLOAK_REALM                  | The Keycloak realm.                                                                                                                                                                        | `MIRACUM`                                |
-| KEYCLOAK_AUTH_URL               | Base URL of the Keycloak server (no `/auth` suffix for Keycloak 17+, unless the server has `KC_HTTP_RELATIVE_PATH=/auth` set for backwards compatibility).                                 | `http://host.docker.internal:38086`      |
-| DE_PSEUDONYMIZATION_ENABLED     | Whether or not the resources from the FHIR server should be de-pseudonymized before being displayed in the screening list. See [De-Pseudonymization for details](./de-pseudonymization.md) | `false`                                  |
-| DE_PSEUDONYMIZATION_SERVICE_URL | The URL to the [FHIR Pseudonymizer](https://github.com/miracum/fhir-pseudonymizer) service used for de-pseudonymization.                                                                   | `""`                                     |
-| DE_PSEUDONYMIZATION_API_KEY     | The API key used to authenticate against the FHIR Pseudonymizer                                                                                                                            | `""`                                     |
-| HIDE_DEMOGRAPHICS               | Don't show age and gender of the persons                                                                                                                                                   | `false`                                  |
-| HIDE_LAST_VISIT                 | Don't show the last visit information                                                                                                                                                      | `false`                                  |
-| HIDE_EHR_BUTTON                 | Don't show the button to show EHR information of the person                                                                                                                                | `false`                                  |
-| PROXY_IS_SECURE_BACKEND         | If `FHIR_URL` points to a server using HTTPS, then you should set this to `1` or `true`                                                                                                    | `false`                                  |
+| Variable                | Description                                                                                                                                                | Staging Default Value               |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| KEYCLOAK_DISABLED       | Disable Keycloak authentication for the screening list.                                                                                                    | `false`                             |
+| KEYCLOAK_CLIENT_ID      | Keycloak client id for the screening list component.                                                                                                       | `uc1-screeninglist`                 |
+| KEYCLOAK_REALM          | The Keycloak realm.                                                                                                                                        | `MIRACUM`                           |
+| KEYCLOAK_AUTH_URL       | Base URL of the Keycloak server (no `/auth` suffix for Keycloak 17+, unless the server has `KC_HTTP_RELATIVE_PATH=/auth` set for backwards compatibility). | `http://host.docker.internal:38086` |
+| HIDE_DEMOGRAPHICS       | Don't show age and gender of the persons                                                                                                                   | `false`                             |
+| HIDE_LAST_VISIT         | Don't show the last visit information                                                                                                                      | `false`                             |
+| HIDE_EHR_BUTTON         | Don't show the button to show EHR information of the person                                                                                                | `false`                             |
+| PROXY_IS_SECURE_BACKEND | If `FHIR_URL` points to a server using HTTPS, then you should set this to `1` or `true`                                                                    | `false`                             |
 
 ## Query Module
 

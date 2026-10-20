@@ -1,20 +1,3 @@
-ohdsi:
-  postgres:
-    auth:
-      # kics-scan ignore-line
-      postgresPassword: ohdsi
-    primary:
-      service:
-        annotations:
-          config.linkerd.io/opaque-ports: "5432"
-      resources:
-        limits:
-          memory: 2Gi
-          cpu: 2500m
-        requests:
-          memory: 256Mi
-          cpu: 250m
-
 fhirserver:
   postgres:
     auth:
@@ -32,40 +15,12 @@ fhirserver:
           memory: 256Mi
           cpu: 250m
 
-query: {}
-
 list:
   podDisruptionBudget:
     enabled: true
 
-notify:
-  podDisruptionBudget:
-    enabled: true
-  ha:
-    enabled: true
-  rules:
-    schedules:
-      everyMorning: "0 0 8 1/1 * ? *"
-
-    trials:
-      - acronym: "*"
-        subscriptions:
-          - email: "everything@example.com"
-
-      - acronym: "SAMPLE"
-        accessibleBy:
-          users:
-            - "user1"
-            - "user.two@example.com"
-        subscriptions:
-          - email: "everyMorning@example.com"
-            notify: "everyMorning"
-
 postgres:
   enabled: true
-  auth:
-    # kics-scan ignore-line
-    postgresPassword: recruit-notify-ha
   primary:
     service:
       annotations:
@@ -77,9 +32,3 @@ postgres:
       requests:
         memory: 256Mi
         cpu: 250m
-
-mailhog:
-  automountServiceAccountToken: true
-  service:
-    annotations:
-      config.linkerd.io/opaque-ports: "1025"

@@ -1,8 +1,8 @@
-{{- if or .Values.list.enabled (or .Values.query.enabled .Values.notify.enabled)}}
+{{- if .Values.list.enabled }}
 apiVersion: v1
 kind: Pod
 metadata:
-  name: "{{ include "recruit.fullname" . }}-test-health-probes"
+  name: "{{ include "common.names.fullname" . }}-test-health-probes"
   labels:
     {{- include "recruit.labels" . | nindent 4 }}
     app.kubernetes.io/component: test-health-probes
@@ -17,51 +17,7 @@ spec:
       image: {{ include "recruit.curl.image" . }}
       imagePullPolicy: IfNotPresent
       command: ["curl", "--fail-with-body"]
-      args: ["http://{{ include "recruit.fullname" . }}-list:{{ .Values.list.service.port }}/api/health/readiness"]
-      {{- with .Values.restrictedContainerSecurityContext }}
-      securityContext:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- if .Values.tests.resources }}
-      resources: {{- toYaml .Values.tests.resources | nindent 8 }}
-      {{- else if ne .Values.tests.resourcesPreset "none" }}
-      resources: {{- include "common.resources.preset" (dict "type" .Values.tests.resourcesPreset) | nindent 8 }}
-      {{- end }}
-      livenessProbe:
-        exec:
-          command: ["true"]
-      readinessProbe:
-        exec:
-          command: ["true"]
-  {{- end }}
-  {{- if .Values.query.enabled }}
-    - name: check-query-health
-      image: {{ include "recruit.curl.image" . }}
-      imagePullPolicy: IfNotPresent
-      command: ["curl", "--fail-with-body"]
-      args: ["http://{{ include "recruit.fullname" . }}-query:{{ .Values.query.service.metricsPort }}/actuator/health"]
-      {{- with .Values.restrictedContainerSecurityContext }}
-      securityContext:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- if .Values.tests.resources }}
-      resources: {{- toYaml .Values.tests.resources | nindent 8 }}
-      {{- else if ne .Values.tests.resourcesPreset "none" }}
-      resources: {{- include "common.resources.preset" (dict "type" .Values.tests.resourcesPreset) | nindent 8 }}
-      {{- end }}
-      livenessProbe:
-        exec:
-          command: ["true"]
-      readinessProbe:
-        exec:
-          command: ["true"]
-  {{- end }}
-  {{- if .Values.notify.enabled }}
-    - name: check-notify-health
-      image: {{ include "recruit.curl.image" . }}
-      imagePullPolicy: IfNotPresent
-      command: ["curl", "--fail-with-body"]
-      args: ["http://{{ include "recruit.fullname" . }}-notify:{{ .Values.notify.service.metricsPort }}/actuator/health"]
+      args: ["http://{{ include "common.names.fullname" . }}-list:{{ .Values.list.service.port }}/readyz"]
       {{- with .Values.restrictedContainerSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}

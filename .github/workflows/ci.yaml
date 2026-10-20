@@ -89,8 +89,7 @@ jobs:
       - build-list
       - build-query-sql-on-fhir
       # only lint, install, and publish the chart once the images it points at have passed all tests
-      # (both of these already depend on the container structure `test` job).
-      - k8s-test
+      # (this already depends on the container structure `test` job).
       - docker-compose-test
     uses: miracum/.github/.github/workflows/standard-chart-publish.yaml@6611917e0cbce3777825e93e3f725c98a437c060 # v1.31.0
     permissions:
@@ -101,8 +100,8 @@ jobs:
       artifact-metadata: write # required by actions/attest-build-provenance
     with:
       chart-path: charts/recruit
-      # published as ghcr.io/miracum/recruit/charts/recruit rather than the default
-      # ghcr.io/miracum/recruit/recruit, matching the location the chart has always been published to.
+      # published as ghcr.io/<owner>/recruit/charts/recruit rather than the default
+      # ghcr.io/<owner>/recruit/recruit, matching the location the chart has always been published to.
       registry: ghcr.io/${{ github.repository }}/charts
       # stable per PR (no commit sha), so every push to the same PR overwrites this one OCI tag
       # instead of piling up a new prerelease version per commit. Empty on every other event,
@@ -113,15 +112,21 @@ jobs:
       app-version: ${{ github.event_name == 'pull_request' && needs.build-list.outputs.image-version || '' }}
       lint-config: .github/ct/ct.yaml
       install-config: .github/ct/install.yaml
+      # this is the only place the chart is deployed to a cluster, so it must also run when only the
+      # app images changed, not just the chart - ct install then tests those images via
+      # helm-extra-set-args below. Installs every ci/*-values.yaml file and runs `helm test` on each.
+      install-all: true
+      k8s-versions: '["1.36.1"]'
       extra-helm-repos: |
         hapifhir=https://hapifhir.github.io/hapi-fhir-jpaserver-starter
+        maildev=https://maildev.github.io/helm/
       # test ct install against the images this PR just built instead of the tags baked into
       # values.yaml. Restricted to same-repo PRs: forked PRs never get their images pushed to
       # ghcr.io, so kind wouldn't be able to pull them - falls back to the chart's default tags there.
       helm-extra-set-args: >-
         ${{
           (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name)
-          && format('--set=listNext.image.tag={0},querySqlOnFhir.image.tag={0}', needs.build-list.outputs.image-version)
+          && format('--set=list.image.tag={0},querySqlOnFhir.image.tag={0}', needs.build-list.outputs.image-version)
           || ''
         }}
       # pins every app image in the published chart to the exact digest its build job produced. On PRs
@@ -129,7 +134,7 @@ jobs:
       # releases the release-please managed tag in values.yaml is kept, i.e. `v1.2.3@sha256:...`.
       # The chart is only published on those two events, so this has no effect on any other.
       images: |
-        .listNext.image.tag=${{ github.event_name == 'pull_request' && needs.build-list.outputs.image-version || '' }}@${{ needs.build-list.outputs.image-digest }}
+        .list.image.tag=${{ github.event_name == 'pull_request' && needs.build-list.outputs.image-version || '' }}@${{ needs.build-list.outputs.image-digest }}
         .querySqlOnFhir.image.tag=${{ github.event_name == 'pull_request' && needs.build-query-sql-on-fhir.outputs.image-version || '' }}@${{ needs.build-query-sql-on-fhir.outputs.image-digest }}
 
   test:
@@ -189,15 +194,6 @@ jobs:
 
           ./container-structure-test-linux-amd64 test --image="${IMAGE_NAME}:${IMAGE_TAG}" --config=tests/container-structure/common-tests.yaml
 
-  k8s-test:
-    needs:
-      - build-query-sql-on-fhir
-      - build-list
-      - test
-    uses: $/.github/workflows/test-k8s-installation.yaml
-    with:
-      image-tag: ${{ needs.build-query-sql-on-fhir.outputs.image-version }}
-
   docker-compose-test:
     needs:
       - build-query-sql-on-fhir
@@ -218,9 +214,8 @@ jobs:
       id-token: write # for creating OIDC tokens for signing
       packages: read # to pull the published Helm chart from ghcr.io
     needs:
-      - k8s-test
       - docker-compose-test
-      # listed directly (even though they're already transitively required via k8s-test/
+      # listed directly (even though they're already transitively required via
       # docker-compose-test) so their per-module image-digest outputs are addressable here.
       - build-query-sql-on-fhir
       - build-list

@@ -4,7 +4,7 @@ title: "recruIT: A cloud-native clinical trial recruitment support system based 
 version: 10.4.0 # x-release-please-version
 doi: 10.1016/j.compbiomed.2024.108411
 date-released: 2024-04-06
-url: "https://github.com/miracum/recruit"
+url: "https://github.com/open-recruit/recruit"
 authors:
   - family-names: "Gulden"
     given-names: "Christian"

@@ -1,9 +1,9 @@
 {{- with .Values.list -}}
-{{- if .podDisruptionBudget.enabled }}
+{{- if and .enabled .podDisruptionBudget.enabled }}
 kind: PodDisruptionBudget
 apiVersion: policy/v1
 metadata:
-  name: {{ include "recruit.fullname" $ }}-list
+  name: {{ include "common.names.fullname" $ }}-list
   labels:
     {{- include "recruit.labels" $ | nindent 4 }}
 spec:
@@ -15,6 +15,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "recruit.matchLabels" $ | nindent 6 }}
+      {{- include "common.labels.matchLabels" $ | nindent 6 }}
+      app.kubernetes.io/component: list
 {{- end }}
 {{- end }}

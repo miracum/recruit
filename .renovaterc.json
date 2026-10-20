@@ -8,7 +8,7 @@
   "packageRules": [
     {
       "pinDigests": false,
-      "matchPackageNames": ["/^ghcr.io/miracum/recruit/"]
+      "matchPackageNames": ["/^ghcr.io/open-recruit/recruit/"]
     }
   ]
 }

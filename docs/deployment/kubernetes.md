@@ -360,27 +360,6 @@ The following values enable tracing for the query, list, and notify module, the 
   <figcaption>Jaeger Trace timeline for interacting with the screening list</figcaption>
 </figure>
 
-## Screening List De-Pseudonymization
-
-!!! info
-
-    Requires version 9.3.0 or later of the recruIT Helm chart.
-
-You can optionally deploy both the [FHIR Pseudonymizer](https://github.com/miracum/fhir-pseudonymizer) and
-[Vfps](https://github.com/miracum/vfps) as a pseudonym service backend to allow for de-pseudonymizing
-patient and visit identifiers stored in OMOP or the FHIR server prior to displaying them on the screening list.
-
-The background is detailed in [De-Pseudonymization](../configuration/de-pseudonymization.md).
-
-The following values.yaml enable the included FHIR Pseudonymizer and Vfps as a pseudonym service.
-When Vfps is installed, it uses another PostgreSQL database which is naturally empty and does not contain
-any pre-defined namespaces or pseudonyms. It is up to the user to pseudonymize the resources stored inside
-the FHIR server used by the screening list.
-
-```yaml title="values-kind-recruit-de-pseudonymization.yaml"
---8<-- "_snippets/k8s/values-kind-recruit-de-pseudonymization.yaml"
-```
-
 ## CloudNativePG for HA databases
 
 Install the CloudNativePG operator first
@@ -390,7 +369,7 @@ Install the CloudNativePG operator first
 kubectl apply -f https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.18/releases/cnpg-1.18.0.yaml
 ```
 
-Next, create PostgreSQL clusters and pre-configured users for OHDSI, the HAPI FHIR server, the Vfps pseudonymization service,
+Next, create PostgreSQL clusters and pre-configured users for OHDSI, the HAPI FHIR server,
 and the notify module:
 
 ```yaml title="cnpg-clusters.yaml"
@@ -435,8 +414,7 @@ helm upgrade --install \
 
 helm upgrade --install \
   --namespace=recruit \
-  -f charts/recruit/values-integrationtest.yaml \
-  --set query.enabled=false \
+  -f charts/recruit/ci/integration-values.yaml \
   recruit charts/recruit/
 
 argo submit -n recruit --wait --log docs/_snippets/k8s/query-argo-workflow.yaml

@@ -39,18 +39,3 @@ notify:
 
 postgres:
   enabled: false
-
-fhir-pseudonymizer:
-  enabled: true
-  vfps:
-    postgres:
-      enabled: false
-    database:
-      host: "vfps-db-rw"
-      port: 5432
-      database: "vfps"
-      username: "vfps_user"
-      password: ""
-      existingSecret: "vfps-db-app-user"
-      existingSecretKey: "password"
-      schema: "vfps"

@@ -4,7 +4,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "recruit.fullname" $ }}-query-sql-on-fhir
+  name: {{ include "common.names.fullname" $ }}-query-sql-on-fhir
   {{- if .metrics.serviceMonitor.namespace }}
   namespace: {{ .metrics.serviceMonitor.namespace }}
   {{- end }}
@@ -29,7 +29,7 @@ spec:
       - {{ $.Release.Namespace }}
   selector:
     matchLabels:
-      {{- include "recruit.matchLabels" $ | nindent 6 }}
+      {{- include "common.labels.matchLabels" $ | nindent 6 }}
       app.kubernetes.io/component: query-sql-on-fhir
 {{- end }}
 {{- end }}

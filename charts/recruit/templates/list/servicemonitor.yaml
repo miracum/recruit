@@ -1,10 +1,10 @@
-{{- with .Values.listNext -}}
+{{- with .Values.list -}}
 {{- if .enabled -}}
 {{- if .metrics.serviceMonitor.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "recruit.fullname" $ }}-list
+  name: {{ include "common.names.fullname" $ }}-list
   {{- if .metrics.serviceMonitor.namespace }}
   namespace: {{ .metrics.serviceMonitor.namespace }}
   {{- end }}
@@ -29,7 +29,7 @@ spec:
       - {{ $.Release.Namespace }}
   selector:
     matchLabels:
-      {{- include "recruit.matchLabels" $ | nindent 6 }}
+      {{- include "common.labels.matchLabels" $ | nindent 6 }}
       app.kubernetes.io/component: list
 {{- end }}
 {{- end }}

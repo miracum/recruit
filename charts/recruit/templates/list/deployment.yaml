@@ -1,9 +1,9 @@
-{{- with .Values.listNext -}}
+{{- with .Values.list -}}
 {{- if .enabled -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "recruit.fullname" $ }}-list
+  name: {{ include "common.names.fullname" $ }}-list
   labels:
     {{- include "recruit.labels" $ | nindent 4 }}
     app.kubernetes.io/component: list
@@ -16,12 +16,12 @@ spec:
   revisionHistoryLimit: {{ .revisionHistoryLimit }}
   selector:
     matchLabels:
-      {{- include "recruit.matchLabels" $ | nindent 6 }}
+      {{- include "common.labels.matchLabels" $ | nindent 6 }}
       app.kubernetes.io/component: list
   template:
     metadata:
       labels:
-        {{- include "recruit.podLabels" $ | nindent 8 }}
+        {{- include "common.labels.matchLabels" $ | nindent 8 }}
         app.kubernetes.io/component: list
         {{- with .extraPodLabels }}
           {{- toYaml . | nindent 8 }}
@@ -50,7 +50,7 @@ spec:
           {{- end }}
           env:
             - name: JOB_NAME
-              value: {{ include "recruit.listNext.migrationJobName" $ }}
+              value: {{ include "recruit.list.migrationJobName" $ }}
             - name: NAMESPACE
               value: {{ $.Release.Namespace }}
           command: ["/bin/sh", "-c"]
@@ -148,21 +148,21 @@ spec:
             - name: Oidc__ClientSecret
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "recruit.listNext.oidc.secretName" $ }}
-                  key: {{ include "recruit.listNext.oidc.secretKey" $ }}
+                  name: {{ include "recruit.list.oidc.secretName" $ }}
+                  key: {{ include "recruit.list.oidc.secretKey" $ }}
             - name: Oidc__RoleClaimType
               value: {{ .auth.oidc.roleClaimType | quote }}
             {{- end }}
             - name: ConnectionStrings__AppDb
-              value: {{ .database.connectionString | quote }}
-            {{- if .database.username }}
+              value: {{ include "recruit.list.database.connectionString" $ }}
+            {{- with (include "recruit.list.database.username" $) }}
             - name: PGUSER
-              value: {{ .database.username | quote }}
+              value: {{ . | quote }}
             - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "recruit.listNext.database.secretName" $ }}
-                  key: {{ include "recruit.listNext.database.secretKey" $ }}
+                  name: {{ include "recruit.list.database.secretName" $ }}
+                  key: {{ include "recruit.list.database.secretKey" $ }}
             {{- end }}
             - name: Notifications__NewSuggestionWindowDays
               value: {{ .notifications.newSuggestionWindowDays | quote }}
@@ -171,33 +171,33 @@ spec:
             - name: Notifications__ScanIntervalSeconds
               value: {{ .notifications.scanIntervalSeconds | quote }}
             - name: NotifyMailer__ScreeningListLinkTemplate
-              value: {{ include "recruit.listNext.mail.screeningListLinkTemplate" $ }}
+              value: {{ include "recruit.list.mail.screeningListLinkTemplate" $ }}
             - name: NotifyMailer__From
               value: {{ .notifyMailer.from | quote }}
             - name: NotifyMailer__SubjectTemplate
               value: {{ .notifyMailer.subjectTemplate | quote }}
             - name: NotifyMailer__SmtpHost
-              {{- if $.Values.mailhog.enabled }}
-              value: {{ include "recruit.mailhog.fullname" $ }}
+              {{- if $.Values.maildev.enabled }}
+              value: {{ printf "%s-smtp" (include "recruit.maildev.fullname" $) }}
               {{- else }}
               value: {{ .notifyMailer.smtp.host | quote }}
               {{- end }}
             - name: NotifyMailer__SmtpPort
-              {{- if $.Values.mailhog.enabled }}
-              value: "1025"
+              {{- if $.Values.maildev.enabled }}
+              value: {{ $.Values.maildev.ports.smtp | quote }}
               {{- else }}
               value: {{ .notifyMailer.smtp.port | quote }}
               {{- end }}
             - name: NotifyMailer__SmtpUsername
-              {{- if $.Values.mailhog.enabled }}
-              value: "mailhog"
+              {{- if $.Values.maildev.enabled }}
+              value: ""
               {{- else }}
               value: {{ .notifyMailer.smtp.username | quote }}
               {{- end }}
             - name: NotifyMailer__SmtpPassword
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "recruit.listNext.mail.secretName" $ }}
+                  name: {{ include "recruit.list.mail.secretName" $ }}
                   key: smtp-password
             {{- if .extraEnv }}
             {{ toYaml .extraEnv | nindent 12 }}
