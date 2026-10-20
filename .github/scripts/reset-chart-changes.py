@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Reset a chart's `artifacthub.io/changes` annotation to only the image tag update entry.
+"""Reset a chart's `artifacthub.io/changes` annotation to only the image tag entry.
 
-Run after a release, so the next release's changelog starts from scratch. The entry that is kept is
-the one carrying the `# x-release-please-version` marker, i.e. the "updated recruIT image tags"
-line that release-please bumps on every release. Works line by line instead of round-tripping the
-YAML, so that marker (which is part of the annotation's string value) and the rest of the file's
-formatting and comments stay untouched.
+Run after a release, so the next release's changelog starts from scratch. The entry
+that is kept is the one carrying the `# x-release-please-version` marker, i.e. the
+"updated recruIT image tags" line that release-please bumps on every release. Works
+line by line instead of round-tripping the YAML, so that marker (which is part of the
+annotation's string value) and the rest of the file's formatting and comments stay
+untouched.
 
 Usage: reset-chart-changes.py <path to Chart.yaml>
 """
@@ -33,7 +34,8 @@ def main(chart_path: str) -> None:
 
     key_indent = indent_of(lines[key_index])
 
-    # the annotation's block scalar spans every following line indented deeper than its key
+    # the annotation's block scalar spans every following line indented deeper than
+    # its key
     block_end = key_index + 1
     while block_end < len(lines) and (
         not lines[block_end].strip() or indent_of(lines[block_end]) > key_indent
@@ -41,8 +43,9 @@ def main(chart_path: str) -> None:
         block_end += 1
     block = lines[key_index + 1 : block_end]
 
-    # split the block into its list entries, each starting at a "- " line at the list's own indent
-    # (deeper "- " lines belong to nested lists inside an entry, e.g. its `links`)
+    # split the block into its list entries, each starting at a "- " line at the list's
+    # own indent (deeper "- " lines belong to nested lists inside an entry, e.g. its
+    # `links`)
     entry_indent = next(
         (indent_of(line) for line in block if line.lstrip().startswith("- ")), None
     )
@@ -56,10 +59,12 @@ def main(chart_path: str) -> None:
     kept = [entry for entry in entries if any(VERSION_MARKER in line for line in entry)]
     if len(kept) != 1:
         sys.exit(
-            f"Expected exactly one changes entry marked with '{VERSION_MARKER}', found {len(kept)}"
+            f"Expected exactly one changes entry marked with '{VERSION_MARKER}', "
+            f"found {len(kept)}"
         )
 
-    # block scalars use strip chomping (`|-`), so don't leave trailing blank lines behind
+    # block scalars use strip chomping (`|-`), so don't leave trailing blank lines
+    # behind
     entry = kept[0]
     while entry and not entry[-1].strip():
         entry.pop()
