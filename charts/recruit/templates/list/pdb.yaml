@@ -1,5 +1,5 @@
-{{- with .Values.list -}}
-{{- if .podDisruptionBudget.enabled }}
+{{- with .Values.listNext -}}
+{{- if and .enabled .podDisruptionBudget.enabled }}
 kind: PodDisruptionBudget
 apiVersion: policy/v1
 metadata:
@@ -16,5 +16,6 @@ spec:
   selector:
     matchLabels:
       {{- include "recruit.matchLabels" $ | nindent 6 }}
+      app.kubernetes.io/component: list
 {{- end }}
 {{- end }}

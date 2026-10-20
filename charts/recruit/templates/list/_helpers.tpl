@@ -1,49 +1,69 @@
 {{/* vim: set filetype=mustache: */}}
 
 {{/*
-Get the name of the secret containing the FHIR Pseudonymizer API key
+Get the name of the secret containing list's OIDC client secret
 */}}
-{{- define "recruit.list.fhirPseudonymizer.apiKey.secretName" -}}
-{{- if (index .Values "fhir-pseudonymizer" "enabled") -}}
-    {{ include "fhir-pseudonymizer.fhirPseudonymizerApiKeySecretName" (index .Subcharts "fhir-pseudonymizer") }}
-{{- else if .Values.list.dePseudonymization.existingApiKeySecret.name -}}
-    {{ .Values.list.dePseudonymization.existingApiKeySecret.name | quote }}
+{{- define "recruit.listNext.oidc.secretName" -}}
+{{- if .Values.listNext.auth.oidc.existingSecret.name -}}
+    {{ .Values.listNext.auth.oidc.existingSecret.name | quote }}
 {{- else -}}
-    {{ include "recruit.fullname" . }}-list-fhir-pseudonymizer-api-key
+    {{ printf "%s-%s" .Release.Name "list-oidc" | quote }}
 {{- end -}}
 {{- end -}}
 
 {{/*
-Get the name of the key inside the secret containing the FHIR Pseudonymizer API key
+Get the key inside the secret containing list's OIDC client secret
 */}}
-{{- define "recruit.list.fhirPseudonymizer.apiKey.secretKey" -}}
-{{- if (index .Values "fhir-pseudonymizer" "enabled") -}}
-    {{ "APIKEY" }}
-{{- else if .Values.list.dePseudonymization.existingApiKeySecret.name -}}
-    {{ .Values.list.dePseudonymization.existingApiKeySecret.key | quote }}
+{{- define "recruit.listNext.oidc.secretKey" -}}
+{{- if .Values.listNext.auth.oidc.existingSecret.name -}}
+    {{ .Values.listNext.auth.oidc.existingSecret.key | quote }}
 {{- else -}}
-    {{ "fhir-pseudonymizer-api-key" }}
+    {{ "oidc-client-secret" | quote }}
 {{- end -}}
 {{- end -}}
 
 {{/*
-Get the FHIR pseudonymizer URL
+Get the name of the secret containing list's SMTP password
 */}}
-{{- define "recruit.list.fhirPseudonymizer.serviceUrl" -}}
-{{- if (index .Values "fhir-pseudonymizer" "enabled") -}}
-    {{- printf "http://%s:%d/fhir" (include "fhir-pseudonymizer.fullname" (index .Subcharts "fhir-pseudonymizer")) 8080 -}}
+{{- define "recruit.listNext.mail.secretName" -}}
+{{- if .Values.listNext.notifyMailer.smtp.existingSecret -}}
+    {{ .Values.listNext.notifyMailer.smtp.existingSecret | quote }}
 {{- else -}}
-    {{ .Values.list.dePseudonymization.serviceUrl | quote }}
+    {{ printf "%s-%s" .Release.Name "list-smtp" | quote }}
 {{- end -}}
 {{- end -}}
 
 {{/*
-True if the FHIR pseudonymizer has an API key configured
+Get the name of the secret containing list's database password
 */}}
-{{- define "recruit.list.fhirPseudonymizer.isApiKeyAuthEnabled" -}}
-{{- if (index .Values "fhir-pseudonymizer" "enabled") -}}
-    {{- (include "fhir-pseudonymizer.isApiKeyAuthEnabled" (index .Subcharts "fhir-pseudonymizer")) -}}
+{{- define "recruit.listNext.database.secretName" -}}
+{{- if .Values.listNext.database.existingSecret.name -}}
+    {{ .Values.listNext.database.existingSecret.name | quote }}
 {{- else -}}
-    {{ true }}
+    {{ printf "%s-%s" .Release.Name "list-db" | quote }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Get the key inside the secret containing list's database password
+*/}}
+{{- define "recruit.listNext.database.secretKey" -}}
+{{- if .Values.listNext.database.existingSecret.name -}}
+    {{ .Values.listNext.database.existingSecret.key | quote }}
+{{- else -}}
+    {{ "db-password" | quote }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Get the screening list link template used in list's notification emails
+*/}}
+{{- define "recruit.listNext.mail.screeningListLinkTemplate" -}}
+{{- if .Values.listNext.ingress.enabled -}}
+    {{- $host := (index .Values.listNext.ingress.hosts 0).host }}
+    {{- $protocol := (empty .Values.listNext.ingress.tls) | ternary "http" "https" }}
+    {{- printf "%s://%s/recommendations/{0}" $protocol $host -}}
+{{- else -}}
+    {{- .Values.listNext.notifyMailer.screeningListLinkTemplate | quote -}}
 {{- end -}}
 {{- end -}}
