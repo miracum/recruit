@@ -8,5 +8,5 @@ Description: "The identifier system for a recruIT-created ResearchSubject's busi
 * kind = #identifier
 * date = "2026-08-15"
 * uniqueId.type = #uri
-* uniqueId.value = "https://miracum.github.io/recruit/fhir/identifiers/research-subject-id"
+* uniqueId.value = "https://openrecruit.dev/fhir/identifiers/research-subject-id"
 * uniqueId.preferred = true

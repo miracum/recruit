@@ -8,7 +8,7 @@
       "resourceType": "Library",
       "id": "fd7cba3817f1d47b05aeef91c1a7ccd0372f732dd50588740174d0a59376d236",
       "identifier": [ {
-        "system": "https://miracum.github.io/recruit/fhir/identifiers/superset-synced-eligibility-library-id",
+        "system": "https://openrecruit.dev/fhir/identifiers/superset-synced-eligibility-library-id",
         "value": "patientbloodpressure"
       } ],
       "version": "1.0.0",

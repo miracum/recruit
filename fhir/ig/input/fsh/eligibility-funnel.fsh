@@ -15,7 +15,7 @@ Description: "The identifier system for a study's attrition-funnel Measure's bus
 * kind = #identifier
 * date = "2026-08-27"
 * uniqueId.type = #uri
-* uniqueId.value = "https://miracum.github.io/recruit/fhir/identifiers/eligibility-funnel-measure-id"
+* uniqueId.value = "https://openrecruit.dev/fhir/identifiers/eligibility-funnel-measure-id"
 * uniqueId.preferred = true
 
 Instance: EligibilityFunnelReportIdentifierSystem
@@ -28,5 +28,5 @@ Description: "The identifier system for a study's attrition-funnel MeasureReport
 * kind = #identifier
 * date = "2026-08-27"
 * uniqueId.type = #uri
-* uniqueId.value = "https://miracum.github.io/recruit/fhir/identifiers/eligibility-funnel-report-id"
+* uniqueId.value = "https://openrecruit.dev/fhir/identifiers/eligibility-funnel-report-id"
 * uniqueId.preferred = true

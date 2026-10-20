@@ -34,7 +34,7 @@ Usage: #definition
 * status = #active
 * code = #belongs-to-study
 * type = #reference
-* expression = "extension('https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study').value.ofType(Reference)"
+* expression = "extension('https://openrecruit.dev/fhir/StructureDefinition/belongs-to-study').value.ofType(Reference)"
 * target = #ResearchStudy
 
 Instance: ObservationDerivedFromLibrary
@@ -47,7 +47,7 @@ Usage: #definition
 * status = #active
 * code = #derived-from-library
 * type = #reference
-* expression = "Observation.extension('https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library').value.ofType(Reference)"
+* expression = "Observation.extension('https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment-derived-from-library').value.ofType(Reference)"
 * target = #Library
 
 Instance: RecruitSearchParametersTransaction

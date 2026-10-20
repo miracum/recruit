@@ -45,5 +45,5 @@ Description: "The identifier system for a per-criterion eligibility Observation'
 * kind = #identifier
 * date = "2026-08-14"
 * uniqueId.type = #uri
-* uniqueId.value = "https://miracum.github.io/recruit/fhir/identifiers/eligibility-assessment-id"
+* uniqueId.value = "https://openrecruit.dev/fhir/identifiers/eligibility-assessment-id"
 * uniqueId.preferred = true

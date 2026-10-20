@@ -8,7 +8,7 @@
       "resourceType": "Library",
       "id": "90f126698123eb6bee575612f30171e26484cc5bbf9e92397746ee7738f3a142",
       "identifier": [ {
-        "system": "https://miracum.github.io/recruit/fhir/identifiers/superset-synced-eligibility-library-id",
+        "system": "https://openrecruit.dev/fhir/identifiers/superset-synced-eligibility-library-id",
         "value": "minimal"
       } ],
       "name": "Minimal",

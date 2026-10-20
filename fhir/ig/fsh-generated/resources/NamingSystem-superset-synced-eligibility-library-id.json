@@ -9,7 +9,7 @@
   "uniqueId": [
     {
       "type": "uri",
-      "value": "https://miracum.github.io/recruit/fhir/identifiers/superset-synced-eligibility-library-id",
+      "value": "https://openrecruit.dev/fhir/identifiers/superset-synced-eligibility-library-id",
       "preferred": true
     }
   ]
