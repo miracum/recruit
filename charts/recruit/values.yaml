@@ -20,9 +20,8 @@ podAnnotations: {}
 # -- additionally labels to apply to all deployments
 extraLabels: {}
 
-# configure the init container used to wait for postgres database connectivity
-# used by the query module to wait for the OMOP database and the list module's migration Job
-# to wait for the included PostgreSQL database
+# configure the init container used by the list module's migration Job to wait for
+# the included PostgreSQL database
 waitForPostgresInitContainer:
   # image to use for the init container which waits until the database
   # is ready to accept connections
@@ -33,7 +32,7 @@ waitForPostgresInitContainer:
     tag: 18.4@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a
     pullPolicy: IfNotPresent
 
-# container security context applied to init containers used by the query and list modules.
+# container security context applied to init containers used by the list and query modules.
 # also used by the Helm test job pods
 # @ignore
 restrictedContainerSecurityContext: # +doc-gen:ignore
@@ -54,7 +53,7 @@ fhirserver:
   # See <https://github.com/hapifhir/hapi-fhir-jpaserver-starter/tree/master/charts/hapi-fhir-jpaserver#values> for options.
   enabled: true
   postgres:
-    # -- overrides the chart's postgres server name to avoid conflicts with the included ohdsi chart
+    # -- overrides the chart's postgres server name to avoid conflicts with the included postgres chart
     nameOverride: "fhir-server-postgres"
   # -- extra environment variables set for the HAPI FHIR server
   extraEnv:
@@ -87,242 +86,25 @@ externalFhirServer:
   # -- URL of an external FHIR Server - only used when `fhirserver.enabled` is set to `false`
   url: ""
 
-mailhog:
+maildev:
   # -- Whether the included SMTP test server should be used. Not required for a production deployment.
-  # See <https://github.com/codecentric/helm-charts/blob/master/charts/mailhog/values.yaml> for available options.
+  # See <https://github.com/maildev/helm/blob/main/charts/maildev/values.yaml> for available options.
   enabled: true
   # @ignore
-  image: # +doc-gen:ignore
-    pullPolicy: IfNotPresent
-  # @ignore
-  containerSecurityContext: # +doc-gen:ignore
-    runAsNonRoot: true
-    seccompProfile:
-      type: RuntimeDefault
-ohdsi:
-  # -- Whether the included OHDSI chart should be installed.
-  # See <https://github.com/chgl/charts/tree/master/charts/ohdsi/values.yaml> for available options.
-  enabled: true
-  postgres:
-    # -- overrides the chart's postgres server name to avoid conflicts with the included HAPI FHIR server chart
-    nameOverride: "ohdsi-postgres"
-  cdmInitJob:
-    # -- to make sure the job runs only once, set this to `false` after the first installation completed
-    enabled: false
-    # @ignore
-    image: # +doc-gen:ignore
-      registry: ghcr.io
-      repository: miracum/recruit/omop/init
-      tag: v3.3.2-cdm5.3.1@sha256:40521fabaa73f9d01daec43ba9d510fc0f89b73714515006b70333c4b043d52c
-    # @ignore
-    securityContext: # +doc-gen:ignore
-      allowPrivilegeEscalation: false
-      capabilities:
-        drop:
-          - ALL
-      readOnlyRootFilesystem: false
-      runAsNonRoot: true
-      runAsUser: 10001
-      runAsGroup: 10001
-      seccompProfile:
-        type: RuntimeDefault
-    resources:
-      limits:
-        cpu: 2000m
-        memory: 512Mi
-        ephemeral-storage: 16Gi
-      requests:
-        cpu: 2000m
-        memory: 512Mi
-        ephemeral-storage: 16Gi
-    # extraEnv:
-    #   - name: SETUP_SYNPUF
-    #     value: "true"
-  # @ignore
-  achilles: # +doc-gen:ignore
-    schemas:
-      cdm: "cds_cdm"
-      vocab: "cds_cdm"
-      res: "cds_results"
-    sourceName: "CDS-CDMV5"
-
-query:
-  # -- Whether the query module should be enabled
-  enabled: true
-  # -- Number of replicas of the query module to run.
-  # Running more than one replica for this component is discouraged.
-  replicaCount: 1
-  # -- specify how many old ReplicaSets for this Deployment you want to retain.
-  revisionHistoryLimit: 5
-
-  # the query module's image
-  # @ignore
-  image: # +doc-gen:ignore
-    registry: ghcr.io
-    repository: miracum/recruit/query
-    tag: v10.5.7 # x-release-please-version
-    pullPolicy: IfNotPresent
-
-  serviceAccount:
-    # -- Specifies whether a service account should be created.
+  serviceAccount: # +doc-gen:ignore
     create: false
-    # -- Annotations to add to the service account
-    annotations: {}
-    # -- The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
-    name: ""
-    # -- whether to automount the SA token.
-    automountServiceAccountToken: false
-
-  metrics:
-    serviceMonitor:
-      # -- if enabled, creates a ServiceMonitor instance for Prometheus Operator-based monitoring
-      enabled: false
-      # -- additional labels to apply the the ServiceMonitor object, eg. `release: prometheus`
-      additionalLabels: {}
-      # namespace: monitoring
-      # interval: 30s
-      # scrapeTimeout: 10s
-
-  # -- extra environment vars on the container
-  extraEnv: []
-
-  # -- specify additional labels to apply to the query pod
-  extraPodLabels: {}
-
-  # -- the service used to expose the query module web port
-  service:
-    # -- the service type
-    type: ClusterIP
-    # -- the service port for the HTTP endpoint
-    port: 8080
-    # -- the service port for the actuator/metrics endpoint
-    metricsPort: 8081
-
-  webAPI:
-    # -- URL of the ATLAS WebAPI endpoint. Usually ends in /WebAPI.
-    url: "http://example:8080/WebAPI"
-    # -- name of the OMOP datasource used to generate the cohorts from.
-    dataSource: "CDS-CDMV5"
-    # -- configure authentication settings for the WebAPI
-    auth:
-      # -- set to true if the WebAPI requires authentication to access
-      enabled: false
-      # -- the login method/path to use. See <https://github.com/OHDSI/Atlas/blob/master/js/config/app.js#L20> for a list of possible values
-      loginPath: "/user/login/db"
-      # -- the username to login as. Note that this user needs permissions to query and generate cohorts
-      username: ""
-      # -- the password used for login.
-      password: ""
-      # -- use an existing secret to retrieve the login credentials from
-      existingSecret:
-        # -- name of an existing Kubernetes secret that contains the user password
-        name: ""
-        # -- the key containing the password
-        key: "webApiAuthPassword"
-
-  # -- a UNIX cron expression defining the execution schedule of the query module
-  schedule: "*/5 * * * *"
-
-  omop:
-    # -- hostname of the OHDSI OMOP db
-    host: "localhost"
-    # -- port of the db
-    port: 5432
-    # -- name of the db
-    database: OHDSI
-    # -- username to access the db
-    username: postgres
-    # -- password to access the db
-    password: postgres
-    # -- name of an existing secret to use instead of `omop.password`. Must include an `omop-password` key.
-    existingSecret: ""
-    # -- name of the database schema containing the results of the cohort generation
-    resultsSchema: cds_results
-    # -- name of the database schema containing the actual clinical data
-    cdmSchema: cds_cdm
-
-  # -- list of labels which must occur in a cohort's name or definition (enclosed in []-brackets) to be processed by the query module.
-  # Example:
-  # --set cohortSelectorLabels[0]=UC1
-  # --set cohortSelectorLabels[1]=Test
-  cohortSelectorLabels:
-    - "UC1"
-
-  # -- configuration for the container's readiness probe. Set `enabled: false` to disable it.
-  # See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
-  # @ignore
-  readinessProbe: # +doc-gen:ignore
-    enabled: true
-    httpGet:
-      path: /readyz
-      port: http
-    failureThreshold: 3
-    initialDelaySeconds: 30
-    periodSeconds: 10
-    successThreshold: 1
-    timeoutSeconds: 5
-  # -- configuration for the container's liveness probe. Set `enabled: false` to disable it.
-  # See <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
-  # @ignore
-  livenessProbe: # +doc-gen:ignore
-    enabled: true
-    httpGet:
-      path: /livez
-      port: http
-    failureThreshold: 3
-    initialDelaySeconds: 30
-    periodSeconds: 10
-    successThreshold: 1
-    timeoutSeconds: 5
-
-  # -- set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if primary.resources is set (primary.resources is recommended for production).
-  # More information: <https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15>
-  resourcesPreset: "medium"
-
-  # -- resource requests and limits for the container
-  resources: {}
-
-  # -- node labels for pod assignment
-  # see: <https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/>
-  nodeSelector: {}
-
-  # -- tolerations for pod assignment
-  # see: <https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/>
-  tolerations: []
-
-  # -- affinity for pod assignment
-  # see: <https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity>
-  affinity: {}
-
-  # -- security context for the pod
-  podSecurityContext: {}
-
-  # -- security context for the container
   # @ignore
   securityContext: # +doc-gen:ignore
-    privileged: false
+    allowPrivilegeEscalation: false
     capabilities:
       drop:
         - ALL
     runAsNonRoot: true
-    runAsUser: 65532
-    runAsGroup: 65532
-    readOnlyRootFilesystem: true
-    allowPrivilegeEscalation: false
+    # the `node` user of the maildev image
+    runAsUser: 1000
+    runAsGroup: 1000
     seccompProfile:
       type: RuntimeDefault
-
-  # -- pod topology spread configuration
-  # see: <https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#api>
-  topologySpreadConstraints: []
-    # - maxSkew: 1
-    #   topologyKey: topology.kubernetes.io/zone
-    #   whenUnsatisfiable: ScheduleAnyway
-    #   labelSelector:
-    #     matchLabels:
-    #       app.kubernetes.io/component: query
-    #       app.kubernetes.io/instance: recruit
 
 list:
   # -- Whether the list module should be enabled. Requires a PostgreSQL database, see `list.database`.
@@ -470,7 +252,7 @@ list:
     # `{0}` placeholder for the study acronym
     subjectTemplate: "MIRACUM Rekrutierungsunterstützung: neue Vorschläge für die Studie {0}"
     smtp:
-      # -- hostname of the external SMTP mail server. Only used if `mailhog.enabled` is `false`
+      # -- hostname of the external SMTP mail server. Only used if `maildev.enabled` is `false`
       host: ""
       # -- mailserver port
       port: 25
@@ -788,7 +570,7 @@ postgres:
   # -- enable the included postgres DB. Used by the list module unless `list.database.connectionString`
   # is set.
   enabled: true
-  # -- override the default name to avoid conflicts with the HAPI and OHDSI charts
+  # -- override the default name to avoid conflicts with the HAPI FHIR server chart
   nameOverride: "recruit-postgres"
   auth:
     # -- set the default database name to `recruit`
@@ -809,11 +591,6 @@ kubectl: # +doc-gen:ignore
     registry: docker.io
     repository: alpine/k8s
     tag: 1.34.9@sha256:72c921a10c53ab749674e828ad12b776d006481c852bba7dd89e149ceed666f3
-
-broadseaAtlasdb:
-  # -- whether to deploy the OHDSI Broadsea Atlasdb (<https://github.com/OHDSI/Broadsea-Atlasdb>)
-  # currently only used by internal integration tests. See [./values-integrationtest.yaml](values-integrationtest.yaml)
-  enabled: false
 
 tests:
   automountServiceAccountToken: false

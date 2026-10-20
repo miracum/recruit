@@ -115,6 +115,7 @@ jobs:
       install-config: .github/ct/install.yaml
       extra-helm-repos: |
         hapifhir=https://hapifhir.github.io/hapi-fhir-jpaserver-starter
+        maildev=https://maildev.github.io/helm/
       # test ct install against the images this PR just built instead of the tags baked into
       # values.yaml. Restricted to same-repo PRs: forked PRs never get their images pushed to
       # ghcr.io, so kind wouldn't be able to pull them - falls back to the chart's default tags there.

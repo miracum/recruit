@@ -76,12 +76,10 @@ jobs:
               -f argo-workflows-values.yaml \
               --version 0.20.8
 
-      - name: Install and scale-up recruIT
+      - name: Install recruIT
         working-directory: tests/chaos
         run: |
-          helm upgrade --install -n recruit -f recruit-values.yaml --set notify.replicaCount=1 --wait recruit ../../charts/recruit
-          helm upgrade --install -n recruit -f recruit-values.yaml --set notify.replicaCount=2 --wait recruit ../../charts/recruit
-          helm upgrade --install -n recruit -f recruit-values.yaml --set notify.replicaCount=3 --wait recruit ../../charts/recruit
+          helm upgrade --install -n recruit -f recruit-values.yaml --wait recruit ../../charts/recruit
 
       - name: Run chaos testing workflow
         working-directory: tests/chaos

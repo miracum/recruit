@@ -85,127 +85,19 @@ Get the FHIR server URL.
 {{- end -}}
 
 {{/*
-Create a default fully qualified mailhog name.
+Create a default fully qualified maildev name, mirroring the maildev chart's own "maildev.fullname".
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
-{{- define "recruit.mailhog.fullname" -}}
-{{- $name := default "mailhog" .Values.mailhog.nameOverride -}}
+{{- define "recruit.maildev.fullname" -}}
+{{- if .Values.maildev.fullnameOverride -}}
+{{- .Values.maildev.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default "maildev" .Values.maildev.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
-
-{{- define "recruit.omop.db.host" -}}
-{{- if .Values.ohdsi.enabled -}}
-    {{ include "ohdsi.database.host" .Subcharts.ohdsi }}
-{{- else -}}
-    {{ .Values.query.omop.host }}
-{{- end -}}
-{{- end -}}
-
-{{- define "recruit.omop.db.port" -}}
-{{- if .Values.ohdsi.enabled -}}
-    {{ include "ohdsi.database.port" .Subcharts.ohdsi }}
-{{- else -}}
-    {{ .Values.query.omop.port }}
-{{- end -}}
-{{- end -}}
-
-{{- define "recruit.omop.db.user" -}}
-{{- if .Values.ohdsi.enabled -}}
-    {{ include "ohdsi.database.user" .Subcharts.ohdsi }}
-{{- else -}}
-    {{ .Values.query.omop.username }}
-{{- end -}}
-{{- end -}}
-
-{{- define "recruit.omop.db.name" -}}
-{{- if .Values.ohdsi.enabled -}}
-    {{ include "ohdsi.database.name" .Subcharts.ohdsi }}
-{{- else -}}
-    {{ .Values.query.omop.database }}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Get the OMOP JDBC URL.
-*/}}
-{{- define "recruit.omop.jdbcUrl" -}}
-{{- $host := include "recruit.omop.db.host" . }}
-{{- $port := include "recruit.omop.db.port" . | int64 }}
-{{- $database := include "recruit.omop.db.name" . }}
-{{- $appName := printf "%s-query" (include "recruit.fullname" .) -}}
-{{- (printf "jdbc:postgresql://%s:%d/%s?ApplicationName=%s" $host $port $database $appName) | quote -}}
-{{- end -}}
-
-{{/*
-Get the OHDSI WebAPI URL.
-*/}}
-{{- define "recruit.omop.webApiUrl" -}}
-{{- if .Values.ohdsi.enabled -}}
-    {{- if .Values.ohdsi.atlas.webApiUrl -}}
-        {{ .Values.ohdsi.atlas.webApiUrl }}
-    {{- else -}}
-        {{- printf "http://%s-%s:%d/WebAPI" .Release.Name "ohdsi-webapi" (int64 .Values.ohdsi.webApi.service.port) -}}
-    {{- end -}}
-{{- else -}}
-    {{ .Values.query.webAPI.url }}
-{{- end -}}
-{{- end -}}
-
-{{- define "recruit.utils.joinListWithComma" -}}
-{{- $local := dict "first" true -}}
-{{- range $k, $v := . -}}{{- if not $local.first -}},{{- end -}}{{- $v -}}{{- $_ := set $local "first" false -}}{{- end -}}
-{{- end -}}
-
-{{/*
-Return the OMOP credentials secret name
-*/}}
-{{- define "recruit.omopSecretName" -}}
-{{- if .Values.ohdsi.enabled -}}
-    {{ include "ohdsi.webapi.db-secret-name" .Subcharts.ohdsi }}
-{{- else -}}
-    {{- if .Values.query.omop.existingSecret -}}
-        {{ printf "%s" (tpl .Values.query.omop.existingSecret $) }}
-    {{- else -}}
-        {{ printf "%s-%s" (include "recruit.fullname" . ) "query-omop-secret" }}
-    {{- end -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return the OMOP credentials secret key
-*/}}
-{{- define "recruit.omopSecretKey" -}}
-{{- if .Values.ohdsi.enabled -}}
-    {{ include "ohdsi.webapi.db-secret-key" .Subcharts.ohdsi }}
-{{- else -}}
-    {{ printf "%s" "omop-password" }}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return the OMOP DB password when not using an existing secret
-*/}}
-{{- define "recruit.omop.password" -}}
-{{- if .Values.ohdsi.enabled -}}
-    {{ .Values.ohdsi.webApi.db.password}}
-{{- else -}}
-    {{ .Values.query.omop.password }}
-{{- end -}}
-{{- end -}}
-
-{{- define "recruit.webApiSecretName" -}}
-{{- if .Values.query.webAPI.auth.existingSecret.name -}}
-    {{ printf "%s" (tpl .Values.query.webAPI.auth.existingSecret.name $) }}
-{{- else -}}
-    {{ printf "%s-%s" .Release.Name "query-webapi-secret" }}
-{{- end -}}
-{{- end -}}
-
-{{- define "recruit.webApiSecretKey" -}}
-{{- if .Values.query.webAPI.auth.existingSecret.key -}}
-    {{ printf "%s" (tpl .Values.query.webAPI.auth.existingSecret.key $) }}
-{{- else -}}
-    {{ printf "%s" "webApiAuthPassword" }}
 {{- end -}}
 {{- end -}}
 

@@ -15,6 +15,7 @@ tasks:
   helm-add-repos:
     cmds:
       - helm repo add hapifhir https://hapifhir.github.io/hapi-fhir-jpaserver-starter
+      - helm repo add maildev https://maildev.github.io/helm/
 
   helm-update-dependencies:
     cmds:
@@ -38,13 +39,10 @@ tasks:
       - |
         kind load docker-image \
           ghcr.io/miracum/recruit/tester:v1 \
-          ghcr.io/{{ .IMAGE_REPOSITORY }}/query:{{ .IMAGE_TAG }} \
           ghcr.io/{{ .IMAGE_REPOSITORY }}/list:{{ .IMAGE_TAG }} \
           ghcr.io/{{ .IMAGE_REPOSITORY }}/query-sql-on-fhir:{{ .IMAGE_TAG }}
       - |
         helm upgrade --dependency-update  --install --create-namespace -n recruit \
-          --set query.image.repository={{ .IMAGE_REPOSITORY }}/query \
-          --set query.image.tag={{ .IMAGE_TAG }} \
           --set list.image.repository={{ .IMAGE_REPOSITORY }}/list \
           --set list.image.tag={{ .IMAGE_TAG }} \
           --set querySqlOnFhir.image.repository={{ .IMAGE_REPOSITORY }}/query-sql-on-fhir \

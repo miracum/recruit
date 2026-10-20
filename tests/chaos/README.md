@@ -16,11 +16,7 @@ kubectl wait --for=condition=ready pod \
 
 kubectl apply -f cnpg.yaml -n recruit
 
-helm upgrade --install -n recruit -f recruit-values.yaml --set notify.replicaCount=1 --wait recruit ../../charts/recruit
-
-helm upgrade --install -n recruit -f recruit-values.yaml --set notify.replicaCount=2 --wait recruit ../../charts/recruit
-
-helm upgrade --install -n recruit -f recruit-values.yaml --set notify.replicaCount=3 --wait recruit ../../charts/recruit
+helm upgrade --install -n recruit -f recruit-values.yaml --wait recruit ../../charts/recruit
 
 helm repo add chaos-mesh https://charts.chaos-mesh.org
 MSYS_NO_PATHCONV=1 helm upgrade --install chaos-mesh chaos-mesh/chaos-mesh \

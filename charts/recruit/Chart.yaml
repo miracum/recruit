@@ -8,7 +8,6 @@ keywords:
   - fhir
   - clinical trials
   - patient recruitment
-  - omop cdm
   - ctrss
 maintainers:
   - name: chgl
@@ -23,14 +22,10 @@ dependencies:
     name: hapi-fhir-jpaserver
     repository: https://hapifhir.github.io/hapi-fhir-jpaserver-starter
     version: 0.23.0
-  - condition: mailhog.enabled
-    name: mailhog
-    repository: oci://ghcr.io/codecentric/helm-charts
-    version: 5.8.0
-  - condition: ohdsi.enabled
-    name: ohdsi
-    repository: oci://ghcr.io/chgl/charts
-    version: 0.25.83
+  - condition: maildev.enabled
+    name: maildev
+    repository: https://maildev.github.io/helm/
+    version: 0.2.0
   - name: postgres
     version: 0.19.10
     repository: oci://registry-1.docker.io/cloudpirates
@@ -54,8 +49,6 @@ annotations:
     - name: Deployment Instructions
       url: https://open-recruit.github.io/recruit/deployment/kubernetes/
   artifacthub.io/screenshots: |
-    - title: Definition of eligibility criteria in the OHDSI ATLAS tool
-      url: https://open-recruit.github.io/recruit/_img/atlas-first-cohort/atlas-test-cohort-definition.png
     - title: Screening list overview
       url: https://open-recruit.github.io/recruit/_img/atlas-first-cohort/list-overview-with-test-study.png
     - title: Screening recommendations for a test study

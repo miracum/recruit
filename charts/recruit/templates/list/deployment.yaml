@@ -177,20 +177,20 @@ spec:
             - name: NotifyMailer__SubjectTemplate
               value: {{ .notifyMailer.subjectTemplate | quote }}
             - name: NotifyMailer__SmtpHost
-              {{- if $.Values.mailhog.enabled }}
-              value: {{ include "recruit.mailhog.fullname" $ }}
+              {{- if $.Values.maildev.enabled }}
+              value: {{ printf "%s-smtp" (include "recruit.maildev.fullname" $) }}
               {{- else }}
               value: {{ .notifyMailer.smtp.host | quote }}
               {{- end }}
             - name: NotifyMailer__SmtpPort
-              {{- if $.Values.mailhog.enabled }}
-              value: "1025"
+              {{- if $.Values.maildev.enabled }}
+              value: {{ $.Values.maildev.ports.smtp | quote }}
               {{- else }}
               value: {{ .notifyMailer.smtp.port | quote }}
               {{- end }}
             - name: NotifyMailer__SmtpUsername
-              {{- if $.Values.mailhog.enabled }}
-              value: "mailhog"
+              {{- if $.Values.maildev.enabled }}
+              value: ""
               {{- else }}
               value: {{ .notifyMailer.smtp.username | quote }}
               {{- end }}

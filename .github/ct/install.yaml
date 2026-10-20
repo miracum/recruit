@@ -2,5 +2,6 @@ chart-dirs:
   - charts
 chart-repos:
   - hapifhir=https://hapifhir.github.io/hapi-fhir-jpaserver-starter
+  - maildev=https://maildev.github.io/helm/
 debug: true
 remote: origin
