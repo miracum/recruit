@@ -1,4 +1,4 @@
-{{- with .Values.listNext -}}
+{{- with .Values.list -}}
 {{- if and .enabled .podDisruptionBudget.enabled }}
 kind: PodDisruptionBudget
 apiVersion: policy/v1

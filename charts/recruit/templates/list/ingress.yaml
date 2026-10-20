@@ -1,7 +1,7 @@
-{{- if and .Values.listNext.enabled .Values.listNext.ingress.enabled -}}
+{{- if and .Values.list.enabled .Values.list.ingress.enabled -}}
 {{- $fullName := include "recruit.fullname" . -}}
 {{- $serviceName := printf "%s-list" $fullName -}}
-{{- $servicePort := .Values.listNext.service.port -}}
+{{- $servicePort := .Values.list.service.port -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -9,17 +9,17 @@ metadata:
   labels:
     {{- include "recruit.labels" . | nindent 4 }}
     app.kubernetes.io/component: list
-  {{- with .Values.listNext.ingress.annotations }}
+  {{- with .Values.list.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- with .Values.listNext.ingress.ingressClassName }}
+  {{- with .Values.list.ingress.ingressClassName }}
   ingressClassName: {{ . }}
   {{- end }}
-{{- if .Values.listNext.ingress.tls }}
+{{- if .Values.list.ingress.tls }}
   tls:
-  {{- range .Values.listNext.ingress.tls }}
+  {{- range .Values.list.ingress.tls }}
     - hosts:
       {{- range .hosts }}
         - {{ . | quote }}
@@ -28,7 +28,7 @@ spec:
   {{- end }}
 {{- end }}
   rules:
-  {{- range .Values.listNext.ingress.hosts }}
+  {{- range .Values.list.ingress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:

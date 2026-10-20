@@ -260,9 +260,9 @@ via ttlSecondsAfterFinished as a fallback). Reserves the trailing 17 characters 
 hex chars) so the hash suffix is never truncated away. Job names are capped at 63 characters by
 Kubernetes - they back the "job-name" pod label, whose value is limited by K8s label-value rules.
 */}}
-{{- define "recruit.listNext.migrationJobName" -}}
+{{- define "recruit.list.migrationJobName" -}}
 {{- $prefix := printf "%s-list" (include "recruit.fullname" .) | trunc 46 | trimSuffix "-" -}}
-{{- printf "%s-migrate-%s" $prefix (.Values.listNext.image.tag | sha256sum | trunc 8) -}}
+{{- printf "%s-migrate-%s" $prefix (.Values.list.image.tag | sha256sum | trunc 8) -}}
 {{- end -}}
 
 {{/*

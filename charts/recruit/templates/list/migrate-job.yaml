@@ -1,9 +1,9 @@
-{{- with .Values.listNext -}}
+{{- with .Values.list -}}
 {{- if .enabled -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "recruit.listNext.migrationJobName" $ }}
+  name: {{ include "recruit.list.migrationJobName" $ }}
   labels:
     {{- include "recruit.labels" $ | nindent 4 }}
     app.kubernetes.io/component: list-migrate
@@ -32,6 +32,30 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .podSecurityContext | nindent 8 }}
+      {{- if (include "recruit.list.database.useIncludedPostgres" $) }}
+      initContainers:
+        - name: wait-for-db
+          image: {{ include "recruit.waitforDB.image" $ }}
+          imagePullPolicy: {{ $.Values.waitForPostgresInitContainer.image.pullPolicy }}
+          {{- with $.Values.restrictedContainerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: PGHOST
+              value: {{ include "recruit.postgresql.fullname" $ | quote }}
+            - name: PGPORT
+              value: "5432"
+            - name: PGUSER
+              value: {{ include "recruit.list.database.username" $ | quote }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              until pg_isready; do
+                echo "Waiting for DB ${PGUSER}@${PGHOST}:${PGPORT} to be up";
+                sleep 5;
+              done;
+      {{- end }}
       containers:
         - name: migrate
           image: "{{ .image.registry }}/{{ .image.repository }}:{{ .image.tag }}"
@@ -47,15 +71,15 @@ spec:
             - name: RunMigrationsOnly
               value: "true"
             - name: ConnectionStrings__AppDb
-              value: {{ .database.connectionString | quote }}
-            {{- if .database.username }}
+              value: {{ include "recruit.list.database.connectionString" $ }}
+            {{- with (include "recruit.list.database.username" $) }}
             - name: PGUSER
-              value: {{ .database.username | quote }}
+              value: {{ . | quote }}
             - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "recruit.listNext.database.secretName" $ }}
-                  key: {{ include "recruit.listNext.database.secretKey" $ }}
+                  name: {{ include "recruit.list.database.secretName" $ }}
+                  key: {{ include "recruit.list.database.secretKey" $ }}
             {{- end }}
           volumeMounts:
             - mountPath: /tmp
@@ -78,7 +102,7 @@ rules:
   - apiGroups: ["batch"]
     resources: ["jobs"]
     resourceNames:
-      - {{ include "recruit.listNext.migrationJobName" $ }}
+      - {{ include "recruit.list.migrationJobName" $ }}
     verbs: ["get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1

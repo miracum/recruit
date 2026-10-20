@@ -121,7 +121,7 @@ jobs:
       helm-extra-set-args: >-
         ${{
           (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name)
-          && format('--set=listNext.image.tag={0},querySqlOnFhir.image.tag={0}', needs.build-list.outputs.image-version)
+          && format('--set=list.image.tag={0},querySqlOnFhir.image.tag={0}', needs.build-list.outputs.image-version)
           || ''
         }}
       # pins every app image in the published chart to the exact digest its build job produced. On PRs
@@ -129,7 +129,7 @@ jobs:
       # releases the release-please managed tag in values.yaml is kept, i.e. `v1.2.3@sha256:...`.
       # The chart is only published on those two events, so this has no effect on any other.
       images: |
-        .listNext.image.tag=${{ github.event_name == 'pull_request' && needs.build-list.outputs.image-version || '' }}@${{ needs.build-list.outputs.image-digest }}
+        .list.image.tag=${{ github.event_name == 'pull_request' && needs.build-list.outputs.image-version || '' }}@${{ needs.build-list.outputs.image-digest }}
         .querySqlOnFhir.image.tag=${{ github.event_name == 'pull_request' && needs.build-query-sql-on-fhir.outputs.image-version || '' }}@${{ needs.build-query-sql-on-fhir.outputs.image-digest }}
 
   test:

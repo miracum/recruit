@@ -32,7 +32,6 @@ nav = [
     "configuration/ui-configuration.md",
     "configuration/security.md",
     "configuration/existing-fhir-server.md",
-    "configuration/de-pseudonymization.md",
   ] },
   { "Trino query module" = [
     "trino/index.md",

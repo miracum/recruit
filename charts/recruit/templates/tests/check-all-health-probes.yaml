@@ -17,7 +17,7 @@ spec:
       image: {{ include "recruit.curl.image" . }}
       imagePullPolicy: IfNotPresent
       command: ["curl", "--fail-with-body"]
-      args: ["http://{{ include "recruit.fullname" . }}-list:{{ .Values.list.service.port }}/api/health/readiness"]
+      args: ["http://{{ include "recruit.fullname" . }}-list:{{ .Values.list.service.port }}/readyz"]
       {{- with .Values.restrictedContainerSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}

@@ -58,34 +58,6 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: vfps-db-app-user
-type: kubernetes.io/basic-auth
-stringData:
-  password: vfps
-  username: vfps_user
----
-apiVersion: postgresql.cnpg.io/v1
-kind: Cluster
-metadata:
-  name: vfps-db
-spec:
-  instances: 3
-  primaryUpdateStrategy: unsupervised
-  replicationSlots:
-    highAvailability:
-      enabled: true
-  storage:
-    size: 64Gi
-  bootstrap:
-    initdb:
-      database: vfps
-      owner: vfps_user
-      secret:
-        name: vfps-db-app-user
----
-apiVersion: v1
-kind: Secret
-metadata:
   name: recruit-notify-db-app-user
 type: kubernetes.io/basic-auth
 stringData:

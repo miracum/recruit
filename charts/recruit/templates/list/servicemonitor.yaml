@@ -1,4 +1,4 @@
-{{- with .Values.listNext -}}
+{{- with .Values.list -}}
 {{- if .enabled -}}
 {{- if .metrics.serviceMonitor.enabled }}
 apiVersion: monitoring.coreos.com/v1

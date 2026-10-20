@@ -1,4 +1,4 @@
-{{- with .Values.listNext -}}
+{{- with .Values.list -}}
 {{- if .enabled -}}
 apiVersion: apps/v1
 kind: Deployment
@@ -50,7 +50,7 @@ spec:
           {{- end }}
           env:
             - name: JOB_NAME
-              value: {{ include "recruit.listNext.migrationJobName" $ }}
+              value: {{ include "recruit.list.migrationJobName" $ }}
             - name: NAMESPACE
               value: {{ $.Release.Namespace }}
           command: ["/bin/sh", "-c"]
@@ -148,21 +148,21 @@ spec:
             - name: Oidc__ClientSecret
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "recruit.listNext.oidc.secretName" $ }}
-                  key: {{ include "recruit.listNext.oidc.secretKey" $ }}
+                  name: {{ include "recruit.list.oidc.secretName" $ }}
+                  key: {{ include "recruit.list.oidc.secretKey" $ }}
             - name: Oidc__RoleClaimType
               value: {{ .auth.oidc.roleClaimType | quote }}
             {{- end }}
             - name: ConnectionStrings__AppDb
-              value: {{ .database.connectionString | quote }}
-            {{- if .database.username }}
+              value: {{ include "recruit.list.database.connectionString" $ }}
+            {{- with (include "recruit.list.database.username" $) }}
             - name: PGUSER
-              value: {{ .database.username | quote }}
+              value: {{ . | quote }}
             - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "recruit.listNext.database.secretName" $ }}
-                  key: {{ include "recruit.listNext.database.secretKey" $ }}
+                  name: {{ include "recruit.list.database.secretName" $ }}
+                  key: {{ include "recruit.list.database.secretKey" $ }}
             {{- end }}
             - name: Notifications__NewSuggestionWindowDays
               value: {{ .notifications.newSuggestionWindowDays | quote }}
@@ -171,7 +171,7 @@ spec:
             - name: Notifications__ScanIntervalSeconds
               value: {{ .notifications.scanIntervalSeconds | quote }}
             - name: NotifyMailer__ScreeningListLinkTemplate
-              value: {{ include "recruit.listNext.mail.screeningListLinkTemplate" $ }}
+              value: {{ include "recruit.list.mail.screeningListLinkTemplate" $ }}
             - name: NotifyMailer__From
               value: {{ .notifyMailer.from | quote }}
             - name: NotifyMailer__SubjectTemplate
@@ -197,7 +197,7 @@ spec:
             - name: NotifyMailer__SmtpPassword
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "recruit.listNext.mail.secretName" $ }}
+                  name: {{ include "recruit.list.mail.secretName" $ }}
                   key: smtp-password
             {{- if .extraEnv }}
             {{ toYaml .extraEnv | nindent 12 }}
