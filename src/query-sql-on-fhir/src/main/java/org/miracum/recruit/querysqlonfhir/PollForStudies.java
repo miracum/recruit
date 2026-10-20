@@ -346,8 +346,8 @@ public class PollForStudies {
   /**
    * Ids of every ResearchSubject already on the server for this study - only called in
    * update-as-create mode, to keep {@link EligibilityBundleBuilder} from PUTting over (and thereby
-   * resetting the status of) a subject list has since updated. Paginates through the full
-   * result set since a study can have far more subjects than fit on one page.
+   * resetting the status of) a subject list has since updated. Paginates through the full result
+   * set since a study can have far more subjects than fit on one page.
    */
   private Set<String> fetchExistingResearchSubjectIds(ResearchStudy study) {
     var studyReference = "ResearchStudy/" + study.getIdElement().getIdPart();

@@ -31,8 +31,8 @@ import org.springframework.stereotype.Component;
  * <p>Both resources are addressed the same way {@link EligibilityBundleBuilder}'s screening {@code
  * List} already is: PUT unconditionally every cycle (either update-as-create by a computed id, or a
  * conditional PUT by business identifier), never skipped-if-existing - unlike {@code
- * ResearchSubject}, neither resource has any list-owned state a later poll cycle could
- * clobber, so there's no reason to special-case an already-existing one.
+ * ResearchSubject}, neither resource has any list-owned state a later poll cycle could clobber, so
+ * there's no reason to special-case an already-existing one.
  */
 @Component
 public class FunnelReportBuilder {
