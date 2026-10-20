@@ -1,6 +1,3 @@
-> [!WARNING]
-> This repository is no longer maintained. Future work has moved to <https://github.com/open-recruit/recruit>.
-
 # recruIT
 
 [![OpenSSF Scorecard](https://img.shields.io/ossf-scorecard/github.com/miracum/recruit?label=openssf%20scorecard&style=flat)](https://scorecard.dev/viewer/?uri=github.com/miracum/recruit)
