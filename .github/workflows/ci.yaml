@@ -192,6 +192,7 @@ jobs:
   k8s-test:
     needs:
       - build-query-sql-on-fhir
+      - build-list
       - test
     uses: ./.github/workflows/test-k8s-installation.yaml
     with:
@@ -200,6 +201,7 @@ jobs:
   docker-compose-test:
     needs:
       - build-query-sql-on-fhir
+      - build-list
       - test
     uses: ./.github/workflows/test-compose-installation.yaml
     with:
@@ -230,7 +232,7 @@ jobs:
       chart-name: ${{ needs.chart.outputs.chart-name }}
       chart-version: ${{ needs.chart.outputs.chart-version }}
     secrets:
-      token: ${{ secrets.MIRACUM_BOT_SEMANTIC_RELEASE_TOKEN }}
+      token: ${{ secrets.GITHUB_TOKEN }}
 
   lint:
     uses: miracum/.github/.github/workflows/standard-lint.yaml@6611917e0cbce3777825e93e3f725c98a437c060 # v1.31.0
@@ -242,6 +244,6 @@ jobs:
       actions: read # required by the CodeQL analysis steps
     with:
       enable-validate-gradle-wrapper: false
-      codeql-languages: '["javascript", "java"]'
+      codeql-languages: '["java", "csharp"]'
       enable-codeql: true
       java-version: "25"

@@ -17,8 +17,6 @@
         "src/list/Dockerfile",
         "src/list/Directory.Build.props",
         "src/buildSrc/src/main/groovy/org.miracum.recruit.java-common-conventions.gradle",
-        "src/notify/src/main/resources/application.yml",
-        "src/query/src/main/resources/application.yml",
         "src/query-sql-on-fhir/src/main/resources/application.yml",
         "docker-compose/docker-compose.yaml",
         "docs/configuration/security.md",
