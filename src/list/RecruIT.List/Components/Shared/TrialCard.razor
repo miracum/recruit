@@ -1,0 +1,61 @@
+@inject IStringLocalizer<SharedResources> Localizer
+
+<div class="h-full cursor-pointer transition-shadow hover:shadow-md" @onclick="NavigateToPatients">
+    <BbCard Class="flex h-full flex-col">
+        <BbCardHeader>
+            <div class="flex items-start justify-between gap-2">
+                <div class="space-y-1">
+                    <BbCardTitle>@Trial.StudyAcronym</BbCardTitle>
+                    <BbCardDescription>@Trial.StudyTitle</BbCardDescription>
+                </div>
+                <div class="flex items-center gap-1" @onclick:stopPropagation="true">
+                    @if (_canManageAccess)
+                    {
+                        <BbTooltip>
+                            <BbTooltipTrigger AsChild="true">
+                                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Icon" OnClick="NavigateToAccess">
+                                    <LucideIcon Name="shield" Size="16" />
+                                </BbButton>
+                            </BbTooltipTrigger>
+                            <BbTooltipContent>@Localizer["App.PatientList.ManageAccessLink"]</BbTooltipContent>
+                        </BbTooltip>
+                    }
+                    <NotificationSubscribeButton TrialIdentifier="Trial.TrialIdentifier" />
+                </div>
+            </div>
+        </BbCardHeader>
+        <BbCardContent Class="flex-1">
+            <div class="grid grid-cols-3 gap-4">
+                <MetricTile Label="@Localizer["App.TrialCard.Recruited"]" Value="Trial.RecruitedCount" />
+                <MetricTile Label="@Localizer["App.TrialCard.Pending"]" Value="Trial.PendingCount" />
+                <MetricTile Label="@Localizer["App.TrialCard.NotRecruited"]" Value="Trial.NotRecruitedCount" />
+            </div>
+        </BbCardContent>
+    </BbCard>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public required TrialSummaryDto Trial { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    [Inject]
+    private NavigationManager Navigation { get; set; } = default!;
+
+    [Inject]
+    private TrialAccessService AccessService { get; set; } = default!;
+
+    private bool _canManageAccess;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await AuthStateTask.GetUserAsync();
+        _canManageAccess = await AccessService.CanManageAccessAsync(user, Trial.TrialIdentifier);
+    }
+
+    private void NavigateToPatients() => Navigation.NavigateTo($"/trials/{Trial.ListId}/patients");
+
+    private void NavigateToAccess() => Navigation.NavigateTo($"/trials/{Trial.ListId}/access");
+}

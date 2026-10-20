@@ -1,43 +1,41 @@
-FROM docker.io/library/node:24.18.0-slim@sha256:6f7b03f7c2c8e2e784dcf9295400527b9b1270fd37b7e9a7285cf83b6951452d AS base
+FROM mcr.microsoft.com/dotnet/sdk:10.0.402@sha256:0d99ebf1ccad15037b5c98c9fe8979d6b8dbac23812feae2277a0b277b5c5ffa AS build
+
+WORKDIR /src
+
+# Copy files that affect dependency resolution first.
+# Changes to application source won't invalidate the restore layer.
+COPY Directory.Build.props Directory.Packages.props ./
+
+COPY RecruIT.List/RecruIT.List.csproj RecruIT.List/
+COPY RecruIT.FhirConstants/RecruIT.FhirConstants.csproj RecruIT.FhirConstants/
+
+# Persist NuGet packages between builds.
+RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
+    --mount=type=cache,id=nuget-http,target=/root/.local/share/NuGet/http-cache \
+    dotnet restore RecruIT.List/RecruIT.List.csproj
+
+# Now copy the actual source.
+# Changes here don't invalidate the restore layer above.
+COPY . .
+
+# No --no-restore here: RecruIT.List is a Blazor project, and the SDK only adds the implicit
+# Microsoft.AspNetCore.App.Internal.Assets package - which is what puts blazor.web.js under
+# wwwroot/_framework - once it can see the actual .razor files. The restore layer above ran
+# against just the .csproj (no source yet), so its project.assets.json is missing that package;
+# reusing it via --no-restore silently produces a publish output with no wwwroot/_framework at
+# all (a 404 on /_framework/blazor.web.js at runtime, not a build failure). Restoring again here,
+# now that the full source is present, is cheap since the packages are already cached above.
+RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
+    --mount=type=cache,id=nuget-http,target=/root/.local/share/NuGet/http-cache \
+    dotnet publish RecruIT.List/RecruIT.List.csproj \
+        --configuration Release \
+        --output /app/publish \
+        --no-self-contained
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.13-resolute-chiseled-extra@sha256:e662e2bbca99a18b0922af83d794a212495e737e15ee8b56ffde9fcd24b0cba5
 WORKDIR /app
 
-COPY package.json ./
-COPY package-lock.json ./
+COPY --from=build /app/publish .
 
-FROM base AS build-frontend
-COPY frontend/package.json ./frontend/package.json
-
-RUN npm clean-install --workspace=frontend
-
-COPY frontend/ ./frontend/
-
-ARG VERSION=v10.5.7 # x-release-please-version
-ENV VITE_APP_VERSION=${VERSION} \
-    NODE_ENV=production
-
-RUN npm run build --workspace=frontend
-
-FROM build-frontend AS test
-COPY server/ ./server/
-RUN npm run test:unit --workspace=frontend
-
-FROM base AS build-server
-COPY server/package.json ./server/
-RUN npm clean-install --workspace=server
-COPY server/*.js ./server/
-
-FROM gcr.io/distroless/nodejs24-debian13:nonroot@sha256:af85d11ce7ef10172855a6e3649e3e8125b1b9e3ca41849ec2918036f05cb212
-WORKDIR /app
-USER 65532:65532
-# Port 8081 is currently not used, but exposed to make
-# container-structure-tests across Spring Boot/Node JS
-# more sharable. It might eventually be used to expose
-# metrics on a dedicated port.
-EXPOSE 8080/tcp 8081/tcp
-CMD [ "/app/server/index.js" ]
-
-COPY --from=build-server /app/server server
-COPY --from=build-server /app/node_modules server/node_modules
-COPY --from=build-frontend /app/frontend/dist dist
-
-COPY --from=base /app/package*.json /app
+USER 1654:1654
+ENTRYPOINT ["dotnet", "RecruIT.List.dll"]

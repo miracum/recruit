@@ -1,0 +1,96 @@
+@inject IStringLocalizer<SharedResources> Localizer
+@inject IBbLocalizer BbLocalizer
+@inject EligibilityCriteriaService CriteriaService
+
+<div class="flex min-w-0 flex-col gap-4">
+    @if (_initialLoading)
+    {
+        <div class="flex flex-col items-center justify-center gap-3 py-12 text-sm text-muted-foreground">
+            <BbSpinner Size="SpinnerSize.Large" />
+            <span>@BbLocalizer["DataView.Loading"]</span>
+        </div>
+    }
+    else if (_errorMessage is not null)
+    {
+        <BbAlert Variant="AlertVariant.Danger">
+            <BbAlertDescription>@_errorMessage</BbAlertDescription>
+        </BbAlert>
+    }
+    else
+    {
+        @* BbDataView's own toolbar search has no debounce knob, and searching on every keystroke
+           is a visible round trip in Blazor Server - so this filters client-side (same as
+           BbDataView's own would, just debounced) and reuses its "DataView.SearchPlaceholder" key
+           rather than adding a near-duplicate translation. *@
+        <BbInput @bind-Value="_filter" UpdateTiming="UpdateTiming.Debounced" DebounceInterval="300"
+                 Placeholder="@BbLocalizer["DataView.SearchPlaceholder"]" />
+
+        <BbDataView TItem="ResearchStudySummaryDto" Data="FilteredResults" ShowToolbar="false" ShowPagination="false"
+                    EnableInfiniteScroll ScrollHeight="28rem" InitialPageSize="20"
+                    Class="min-w-0" ListClass="min-w-0">
+            <ListTemplate Context="study">
+                <div class="flex w-full min-w-0 items-center justify-between gap-3 rounded-md border p-3">
+                    <div class="min-w-0 flex-1">
+                        @if (!string.IsNullOrWhiteSpace(study.Acronym))
+                        {
+                            <div class="truncate text-base font-semibold">@study.Acronym</div>
+                            <div class="truncate text-xs text-muted-foreground">@(study.Title ?? study.Id)</div>
+                        }
+                        else
+                        {
+                            <div class="truncate text-base font-semibold">@(study.Title ?? study.Id)</div>
+                        }
+                    </div>
+                    <BbButton Variant="ButtonVariant.Default" Size="ButtonSize.Small" Class="shrink-0" OnClick="@(() => SelectAsync(study))">
+                        @Localizer["App.CriteriaManager.SelectCriterionButton"]
+                    </BbButton>
+                </div>
+            </ListTemplate>
+        </BbDataView>
+    }
+
+    <div class="flex justify-end">
+        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="CancelAsync">
+            @Localizer["App.CriteriaManager.CancelButton"]
+        </BbButton>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    public IDialogReference DialogReference { get; set; } = default!;
+
+    private List<ResearchStudySummaryDto> _results = [];
+    private string _filter = string.Empty;
+    private bool _initialLoading = true;
+    private string? _errorMessage;
+
+    private List<ResearchStudySummaryDto> FilteredResults => [.. _results.Where(MatchesFilter)];
+
+    private bool MatchesFilter(ResearchStudySummaryDto study) =>
+        string.IsNullOrWhiteSpace(_filter)
+        || (study.Title?.Contains(_filter, StringComparison.OrdinalIgnoreCase) ?? false)
+        || (study.Acronym?.Contains(_filter, StringComparison.OrdinalIgnoreCase) ?? false)
+        || study.Id.Contains(_filter, StringComparison.OrdinalIgnoreCase);
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _results = [.. await CriteriaService.GetResearchStudiesAsync()];
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _initialLoading = false;
+        }
+    }
+
+    private Task SelectAsync(ResearchStudySummaryDto study) =>
+        DialogReference.CloseAsync(DialogResult.Ok(study));
+
+    private Task CancelAsync() => DialogReference.CancelAsync();
+}

@@ -7,13 +7,18 @@ on:
       - edited
       - synchronize
 
+# a new push to the same PR or branch supersedes the run of the previous commit
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
   lint:
     name: Validate PR title
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
         env:
@@ -38,11 +43,7 @@ jobs:
             secret
             license
             deps
-
             list
-            notify
             query
-
             helm
-
             master

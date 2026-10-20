@@ -1,0 +1,16 @@
+{
+  "resourceType": "CodeSystem",
+  "status": "active",
+  "content": "complete",
+  "name": "CodeSystemScreeningList",
+  "id": "screening-list-type",
+  "title": "recruIT screening list type",
+  "url": "https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type",
+  "concept": [
+    {
+      "code": "screening-recommendations",
+      "display": "Screening recommendations"
+    }
+  ],
+  "count": 1
+}

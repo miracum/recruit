@@ -9,7 +9,8 @@
     "package-lock.json",
     "report",
     "**/*.svg",
-    "mkdocs.yml",
+    "zensical.toml",
+    "uv.lock",
     "docker-compose/*",
     ".gitlab-ci.yml",
     ".*.json"
@@ -37,6 +38,7 @@
     "pseudonymization",
     "pseudonymize",
     "mkdocs",
+    "zensical",
     "automerge",
     "hapiproject",
     "UNIXCRON",

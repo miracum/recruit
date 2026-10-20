@@ -1,0 +1,14 @@
+@inject IStringLocalizer<SharedResources> Localizer
+
+@if (Saving)
+{
+    <span class="inline-flex items-center gap-1.5 text-xs text-muted-foreground" role="status">
+        <BbSpinner Size="SpinnerSize.Small" Class="h-3.5 w-3.5" />
+        @Localizer["App.Common.Saving"]
+    </span>
+}
+
+@code {
+    [Parameter]
+    public bool Saving { get; set; }
+}

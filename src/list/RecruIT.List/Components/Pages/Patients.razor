@@ -1,0 +1,113 @@
+@page "/patients"
+@attribute [Authorize]
+@inject ScreeningListService ScreeningListService
+@inject TrialAccessService AccessService
+@inject BreadcrumbState BreadcrumbState
+@inject IStringLocalizer<SharedResources> Localizer
+
+<PageTitle>@Localizer["App.Nav.Patients"]</PageTitle>
+
+@if (_loading)
+{
+    <BbSkeleton Class="mb-4 h-8 w-64" />
+    <BbSkeleton Class="h-96 w-full" />
+}
+else if (_errorMessage is not null)
+{
+    <BbAlert Variant="AlertVariant.Danger">
+        <BbAlertTitle>@Localizer["App.PatientsPage.LoadErrorTitle"]</BbAlertTitle>
+        <BbAlertDescription>@_errorMessage</BbAlertDescription>
+    </BbAlert>
+}
+else if (_patients.Count == 0)
+{
+    <BbEmpty Title="@Localizer["App.PatientsPage.EmptyTitle"]" Description="@Localizer["App.PatientsPage.EmptyDescription"]" />
+}
+else
+{
+    <BbDataTable TData="PatientOverviewDto" Data="_patients" ShowPagination="true"
+                 PageSizes="new[] { 10, 25, 50, 100 }" InitialPageSize="25" IsLoading="false">
+        <Columns>
+            <BbDataTableColumn TData="PatientOverviewDto" TValue="string" Header="@Localizer["App.PatientList.ColumnName"]" Property="p => p.Name ?? p.PatientId" Sortable="true">
+                <CellTemplate Context="p">
+                    <span class="font-medium">@(p.Name ?? p.PatientId)</span>
+                </CellTemplate>
+            </BbDataTableColumn>
+            <BbDataTableColumn TData="PatientOverviewDto" TValue="int?" Header="@Localizer["App.PatientList.ColumnDemographics"]" Width="140px">
+                <CellTemplate Context="p">
+                    @(p.Age is not null ? p.Age.ToString() : Localizer["App.Common.AgeUnknown"].Value)
+                    <span class="mx-1.5 text-muted-foreground">&middot;</span>
+                    @(p.Gender is not null ? Localizer[GenderDisplay.GetKey(p.Gender)].Value : Localizer["App.Common.Unknown"].Value)
+                </CellTemplate>
+            </BbDataTableColumn>
+            <BbDataTableColumn TData="PatientOverviewDto" TValue="int" Header="@Localizer["App.PatientsPage.ColumnStudies"]">
+                <CellTemplate Context="p">
+                    <div class="flex flex-wrap gap-1.5">
+                        @foreach (var membership in p.Trials)
+                        {
+                            <div class="-m-0.5 flex cursor-pointer items-center gap-1 rounded-md p-0.5 hover:bg-accent"
+                                 @onclick="() => OpenPatient(membership)">
+                                <span class="text-sm font-medium">@membership.StudyAcronym</span>
+                                <StatusBadge Status="@membership.Status" />
+                            </div>
+                        }
+                    </div>
+                </CellTemplate>
+            </BbDataTableColumn>
+            <BbDataTableColumn TData="PatientOverviewDto" TValue="DateTimeOffset?" Header="@Localizer["App.PatientList.ColumnUpdated"]"
+                               Property="p => p.Trials.Max(t => t.LastUpdated)" Sortable="true">
+                <CellTemplate Context="p">
+                    @(p.Trials.Max(t => t.LastUpdated)?.LocalDateTime.ToString("g") ?? "-")
+                </CellTemplate>
+            </BbDataTableColumn>
+        </Columns>
+    </BbDataTable>
+
+    <PatientDialog Patient="_selectedPatient" PatientChanged="p => _selectedPatient = p"
+                   Acronym="@(_selectedPatient?.StudyAcronym ?? string.Empty)" StudyTitle="@_selectedPatient?.StudyTitle"
+                   TrialIdentifier="_selectedPatient?.TrialIdentifier" CanEdit="_canEditSelected" />
+}
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    private List<PatientOverviewDto> _patients = [];
+    private bool _loading = true;
+    private string? _errorMessage;
+    private ClaimsPrincipal _user = new();
+
+    private PatientListEntryDto? _selectedPatient;
+    private bool _canEditSelected;
+
+    protected override async Task OnInitializedAsync()
+    {
+        BreadcrumbState.Set(new BreadcrumbItem(Localizer["App.Nav.Patients"]));
+
+        try
+        {
+            _user = await AuthStateTask.GetUserAsync();
+            _patients = [.. await ScreeningListService.GetPatientsAcrossTrialsAsync(_user)];
+        }
+        catch (FhirAccessException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        catch (Exception)
+        {
+            _errorMessage = Localizer["App.PatientsPage.LoadErrorFallback"];
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task OpenPatient(PatientListEntryDto membership)
+    {
+        _selectedPatient = membership;
+        _canEditSelected = membership.TrialIdentifier is not null &&
+            TrialAccessService.MeetsCoordinatorThreshold(
+                await AccessService.GetPermissionAsync(_user, membership.TrialIdentifier));
+    }
+}

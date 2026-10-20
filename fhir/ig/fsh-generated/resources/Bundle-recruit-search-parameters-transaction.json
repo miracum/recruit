@@ -1,0 +1,97 @@
+{
+  "resourceType": "Bundle",
+  "id": "recruit-search-parameters-transaction",
+  "type": "transaction",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "SearchParameter",
+        "id": "researchstudy-enrollment",
+        "url": "https://miracum.github.io/recruit/fhir/SearchParameter/researchstudy-enrollment",
+        "name": "ResearchStudyEnrollment",
+        "description": "The Group resource representing the study enrollment",
+        "base": [
+          "ResearchStudy"
+        ],
+        "status": "active",
+        "code": "enrollment",
+        "type": "reference",
+        "expression": "ResearchStudy.enrollment",
+        "target": [
+          "Group"
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "SearchParameter/researchstudy-enrollment"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "SearchParameter",
+        "id": "group-characteristic",
+        "url": "https://miracum.github.io/recruit/fhir/SearchParameter/group-characteristic",
+        "name": "GroupCharacteristic",
+        "description": "An entity referenced in a characteristic",
+        "base": [
+          "Group"
+        ],
+        "status": "active",
+        "code": "characteristic",
+        "type": "reference",
+        "expression": "Group.characteristic.value.ofType(Reference)"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "SearchParameter/group-characteristic"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "SearchParameter",
+        "id": "belongs-to-study",
+        "url": "https://miracum.github.io/recruit/fhir/SearchParameter/belongs-to-study",
+        "name": "BelongsToStudy",
+        "description": "The ResearchStudy a List or MeasureReport pertains to",
+        "base": [
+          "List",
+          "MeasureReport"
+        ],
+        "status": "active",
+        "code": "belongs-to-study",
+        "type": "reference",
+        "expression": "extension('https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study').value.ofType(Reference)",
+        "target": [
+          "ResearchStudy"
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "SearchParameter/belongs-to-study"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "SearchParameter",
+        "id": "observation-derived-from-library",
+        "url": "https://miracum.github.io/recruit/fhir/SearchParameter/observation-derived-from-library",
+        "name": "ObservationDerivedFromLibrary",
+        "description": "The Library resource containing the eligibility criterion this Observation was derived from",
+        "base": [
+          "Observation"
+        ],
+        "status": "active",
+        "code": "derived-from-library",
+        "type": "reference",
+        "expression": "Observation.extension('https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library').value.ofType(Reference)",
+        "target": [
+          "Library"
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "SearchParameter/observation-derived-from-library"
+      }
+    }
+  ]
+}

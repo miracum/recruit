@@ -1,0 +1,52 @@
+{#-
+  Landing page template, used by docs/index.md via `template: home.html`. The hero is rendered here
+  because it spans the full page width; everything below it is the page's Markdown content.
+-#}
+{% extends "main.html" %}
+
+{% block hero %}
+  <section class="rc-hero">
+    <div class="md-grid rc-hero__inner">
+      <div class="rc-hero__text">
+        <img
+          class="rc-hero__logo"
+          src="{{ '_img/logo/logo-horizontal-dark.png' | url }}"
+          alt="{{ config.site_name }}"
+          width="800"
+          height="263"
+        />
+        <h1 class="rc-hero__title">Find eligible patients for clinical trials, automatically</h1>
+        <p class="rc-hero__lead">
+          {{ config.site_name }} regularly screens your clinical data for patients who match a trial's
+          eligibility criteria, puts them on a screening list, and notifies the team whenever new
+          candidates turn up.
+        </p>
+        <div class="rc-hero__actions md-typeset">
+          <a href="{{ 'getting-started/installation/' | url }}" class="md-button md-button--primary">
+            Get started
+          </a>
+          <a href="{{ 'getting-started/introduction/' | url }}" class="md-button">
+            How it works
+          </a>
+        </div>
+      </div>
+      <figure class="rc-hero__visual">
+        <img
+          class="rc-hero__img--light"
+          src="{{ '_img/screenshots/screeninglist-list-view-light.png' | url }}"
+          alt="A recruIT screening list showing candidate patients with their recruitment status"
+        />
+        <img
+          class="rc-hero__img--dark"
+          src="{{ '_img/screenshots/screeninglist-list-view-dark.png' | url }}"
+          alt="A recruIT screening list showing candidate patients with their recruitment status"
+        />
+      </figure>
+    </div>
+  </section>
+{% endblock %}
+
+{#- skip the default title and edit button: the hero already introduces the page -#}
+{% block content %}
+  {{ page.content }}
+{% endblock %}

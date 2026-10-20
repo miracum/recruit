@@ -1,0 +1,88 @@
+@page "/"
+@attribute [Authorize]
+@inject ScreeningListService ScreeningListService
+@inject ToastService Toast
+@inject BreadcrumbState BreadcrumbState
+@inject IStringLocalizer<SharedResources> Localizer
+
+<PageTitle>@Localizer["App.Nav.Trials"]</PageTitle>
+
+@if (_loading)
+{
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <BbSkeleton Class="h-40 w-full" />
+        <BbSkeleton Class="h-40 w-full" />
+        <BbSkeleton Class="h-40 w-full" />
+    </div>
+}
+else if (_errorMessage is not null)
+{
+    <BbAlert Variant="AlertVariant.Danger">
+        <BbAlertTitle>@Localizer["App.Dashboard.LoadErrorTitle"]</BbAlertTitle>
+        <BbAlertDescription>@_errorMessage</BbAlertDescription>
+    </BbAlert>
+}
+else if (_trials.Count == 0)
+{
+    <BbEmpty Title="@Localizer["App.Dashboard.EmptyTitle"]"
+             Description="@Localizer["App.Dashboard.EmptyDescription"]" />
+}
+else
+{
+    <BbTabs DefaultValue="active">
+        <BbTabsList>
+            <BbTabsTrigger Value="active">@Localizer["App.Dashboard.ActiveTab"] (@ActiveTrials.Count)</BbTabsTrigger>
+            <BbTabsTrigger Value="inactive">@Localizer["App.Dashboard.InactiveTab"] (@InactiveTrials.Count)</BbTabsTrigger>
+        </BbTabsList>
+        <BbTabsContent Value="active">
+            <TrialGrid Trials="ActiveTrials" EmptyMessage="@Localizer["App.Dashboard.NoActiveTrials"]" />
+        </BbTabsContent>
+        <BbTabsContent Value="inactive">
+            <TrialGrid Trials="InactiveTrials" EmptyMessage="@Localizer["App.Dashboard.NoInactiveTrials"]" />
+        </BbTabsContent>
+    </BbTabs>
+}
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    private List<TrialSummaryDto> _trials = [];
+    private bool _loading = true;
+    private string? _errorMessage;
+    private ClaimsPrincipal _user = new();
+
+    // TODO: once ResearchStudy.status is available, derive Active/Inactive (and finer states) from
+    // that instead of the FHIR List.status current/retired flag.
+    private List<TrialSummaryDto> ActiveTrials => [.. _trials.Where(t => t.ListStatus == "current")];
+
+    private List<TrialSummaryDto> InactiveTrials => [.. _trials.Where(t => t.ListStatus != "current")];
+
+    protected override async Task OnInitializedAsync()
+    {
+        BreadcrumbState.Set(new BreadcrumbItem(Localizer["App.Common.AllTrialsBreadcrumb"]));
+
+        _user = await AuthStateTask.GetUserAsync();
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            _trials = [.. await ScreeningListService.GetAccessibleTrialsAsync(_user)];
+        }
+        catch (FhirAccessException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        catch (Exception)
+        {
+            _errorMessage = Localizer["App.Dashboard.LoadErrorFallback"];
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

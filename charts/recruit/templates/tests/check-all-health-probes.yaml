@@ -14,7 +14,7 @@ spec:
   containers:
   {{- if .Values.list.enabled }}
     - name: check-list-health
-      image: "{{ .Values.curl.image.registry }}/{{ .Values.curl.image.repository }}:{{ .Values.curl.image.tag }}"
+      image: {{ include "recruit.curl.image" . }}
       imagePullPolicy: IfNotPresent
       command: ["curl", "--fail-with-body"]
       args: ["http://{{ include "recruit.fullname" . }}-list:{{ .Values.list.service.port }}/api/health/readiness"]
@@ -36,7 +36,7 @@ spec:
   {{- end }}
   {{- if .Values.query.enabled }}
     - name: check-query-health
-      image: "{{ .Values.curl.image.registry }}/{{ .Values.curl.image.repository }}:{{ .Values.curl.image.tag }}"
+      image: {{ include "recruit.curl.image" . }}
       imagePullPolicy: IfNotPresent
       command: ["curl", "--fail-with-body"]
       args: ["http://{{ include "recruit.fullname" . }}-query:{{ .Values.query.service.metricsPort }}/actuator/health"]
@@ -58,7 +58,7 @@ spec:
   {{- end }}
   {{- if .Values.notify.enabled }}
     - name: check-notify-health
-      image: "{{ .Values.curl.image.registry }}/{{ .Values.curl.image.repository }}:{{ .Values.curl.image.tag }}"
+      image: {{ include "recruit.curl.image" . }}
       imagePullPolicy: IfNotPresent
       command: ["curl", "--fail-with-body"]
       args: ["http://{{ include "recruit.fullname" . }}-notify:{{ .Values.notify.service.metricsPort }}/actuator/health"]

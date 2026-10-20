@@ -1,0 +1,16 @@
+{
+  "resourceType": "NamingSystem",
+  "id": "superset-synced-eligibility-library-id",
+  "description": "The identifier system for a criterion expressed in a Library resource when synced from a Superset instance.",
+  "name": "SupersetSyncedEligibilityLibraryIdentifier",
+  "status": "active",
+  "kind": "identifier",
+  "date": "2026-08-14",
+  "uniqueId": [
+    {
+      "type": "uri",
+      "value": "https://miracum.github.io/recruit/fhir/identifiers/superset-synced-eligibility-library-id",
+      "preferred": true
+    }
+  ]
+}

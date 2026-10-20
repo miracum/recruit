@@ -4,18 +4,16 @@
 [![SLSA 3](https://slsa.dev/images/gh-badge-level3.svg)](https://slsa.dev)
 ![License](https://img.shields.io/github/license/miracum/recruit)
 
-See the documentation site at <https://miracum.github.io/recruit> for more information.
+See the documentation site at <https://open-recruit.github.io/recruit> for more information.
 
 ## Build Documentation
 
-The static documentation site is build using [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/).
-See the [official installation instructions](https://squidfunk.github.io/mkdocs-material/getting-started/#installation)
-for installing the `mkdocs` tool.
-
-Then you can just run the following to build and serve the documentation locally and open your browser at <http://localhost:8000/>.
+The static documentation site is built using [Zensical](https://zensical.org/) and configured in [zensical.toml](zensical.toml).
+With [uv](https://docs.astral.sh/uv/) installed, run the following to build and serve the documentation locally
+and open your browser at <http://localhost:8000/>:
 
 ```sh
-mkdocs serve
+uv run zensical serve
 ```
 
 ## Build FHIR IG

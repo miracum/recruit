@@ -1,0 +1,16 @@
+{
+  "resourceType": "NamingSystem",
+  "id": "eligibility-group-id",
+  "description": "The identifier system for the Group containing references to one or more eligibility criteria Library resources",
+  "name": "EligibilityGroupIdentifier",
+  "status": "active",
+  "kind": "identifier",
+  "date": "2026-08-14",
+  "uniqueId": [
+    {
+      "type": "uri",
+      "value": "https://miracum.github.io/recruit/fhir/identifiers/eligibility-group-id",
+      "preferred": true
+    }
+  ]
+}

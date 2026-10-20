@@ -1,0 +1,134 @@
+# Documentation site, published to https://open-recruit.github.io/recruit/ on every release by
+# .github/workflows/build-docs.yaml.
+# Preview locally with `uv run zensical serve`. The site's sources live in docs/.
+
+[project]
+site_name = "recruIT"
+site_url = "https://open-recruit.github.io/recruit/"
+site_description = "A Cloud-Native Clinical Trial Recruitment Support System based on HL7 FHIR."
+copyright = "Copyright &copy; The recruIT Developers"
+
+repo_url = "https://github.com/miracum/recruit"
+repo_name = "miracum/recruit"
+edit_uri = "edit/master/docs/"
+
+docs_dir = "docs"
+
+nav = [
+  { "Home" = "index.md" },
+  { "Getting started" = [
+    "getting-started/introduction.md",
+    "getting-started/installation.md",
+    "getting-started/creating-your-first-study.md",
+  ] },
+  { "Deployment" = [
+    "deployment/docker-compose.md",
+    "deployment/kubernetes.md",
+    "deployment/observability.md",
+    "deployment/resource-requirements.md",
+  ] },
+  { "Configuration" = [
+    "configuration/options.md",
+    "configuration/ui-configuration.md",
+    "configuration/security.md",
+    "configuration/existing-fhir-server.md",
+    "configuration/de-pseudonymization.md",
+  ] },
+  { "Trino query module" = [
+    "trino/index.md",
+    "trino/eligibility-criteria-design.md",
+  ] },
+  { "Development" = [
+    "development/contributing.md",
+  ] },
+  # built from fhir/ig/ and copied into the site by .github/workflows/build-docs.yaml, so it is only
+  # available on the published site, not with `zensical serve`
+  { "FHIR Implementation Guide" = "https://open-recruit.github.io/recruit/fhir/" },
+]
+
+extra_css = ["_css/extra.css"]
+
+[project.theme]
+# overrides/ holds the landing page's hero (home.html), the theme-aware logo and the extra favicons
+custom_dir = "docs/overrides"
+language = "en"
+# overrides/partials/logo.html shows the light or dark variant of the mark, this one is the fallback
+logo = "_img/logo/web/mark-light-96.png"
+# overrides/main.html adds the 16px favicon and the icon for iOS home screens
+favicon = "_img/logo/favicon-48.png"
+features = [
+  "content.action.edit",
+  "content.code.annotate",
+  "content.code.copy",
+  "content.tabs.link",
+  "navigation.expand",
+  "navigation.footer",
+  "navigation.indexes",
+  "navigation.instant",
+  "navigation.path",
+  "navigation.sections",
+  "navigation.top",
+  "navigation.tracking",
+  "search.highlight",
+  "toc.follow",
+]
+
+# "custom" picks up the recruIT brand colors defined in _css/extra.css.
+[[project.theme.palette]]
+media = "(prefers-color-scheme)"
+toggle.icon = "lucide/sun-moon"
+toggle.name = "Switch to light mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+primary = "custom"
+accent = "custom"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+primary = "custom"
+accent = "custom"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to system preference"
+
+[[project.extra.social]]
+icon = "fontawesome/solid/globe"
+link = "https://www.miracum.org/"
+name = "MIRACUM Website"
+
+[[project.extra.social]]
+icon = "fontawesome/brands/github"
+link = "https://github.com/miracum/recruit"
+name = "recruIT on GitHub"
+
+[project.markdown_extensions]
+abbr = {}
+admonition = {}
+attr_list = {}
+def_list = {}
+footnotes = {}
+md_in_html = {}
+tables = {}
+toc.permalink = true
+pymdownx.details = {}
+pymdownx.emoji.emoji_generator = "zensical.extensions.emoji.to_svg"
+pymdownx.emoji.emoji_index = "zensical.extensions.emoji.twemoji"
+pymdownx.highlight.anchor_linenums = true
+pymdownx.highlight.line_spans = "__span"
+pymdownx.highlight.pygments_lang_class = true
+pymdownx.inlinehilite = {}
+pymdownx.keys = {}
+pymdownx.magiclink = {}
+# the Kubernetes guide includes the sample values files from docs/_snippets/
+pymdownx.snippets.base_path = ["docs"]
+pymdownx.snippets.check_paths = true
+pymdownx.superfences.custom_fences = [
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
+]
+pymdownx.tabbed.alternate_style = true
+pymdownx.tabbed.combine_header_slug = true
+pymdownx.tasklist.custom_checkbox = true

@@ -18,134 +18,137 @@ on:
 permissions:
   contents: read
 
+# only the latest commit of a PR or branch is worth testing, so a new push cancels the run it
+# supersedes. Release and merge_group runs each have their own ref and never cancel one another.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
-  # the build job is intentionally *not* a matrix: a matrix job's outputs (notably the
-  # per-module image-digest) are only visible to downstream jobs for the last matrix
-  # instance to complete, not all of them. Splitting into one job per module lets the
-  # release job reference each module's actual, unambiguous build-time digest directly,
-  # instead of having to re-resolve it from the registry later (which would leave a
-  # window for the tag to be repointed between build and release).
-  build-query:
-    name: build query
-    permissions:
-      contents: write
-      pull-requests: write
-      security-events: write
-      actions: read
-      packages: write
-      id-token: write
-      attestations: write
-      artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@7eaa603620c450f73fd25d6b68c37795ef4be999 # v1.22.8
-    with:
-      image: ghcr.io/${{ github.repository }}/query
-      build-context: "src/"
-      enable-build-test-layer: true
-      build-args: |
-        MODULE_NAME=query
-    secrets:
-      github-token: ${{ secrets.GITHUB_TOKEN }}
-
-  build-notify:
-    name: build notify
-    permissions:
-      contents: write
-      pull-requests: write
-      security-events: write
-      actions: read
-      packages: write
-      id-token: write
-      attestations: write
-      artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@7eaa603620c450f73fd25d6b68c37795ef4be999 # v1.22.8
-    with:
-      image: ghcr.io/${{ github.repository }}/notify
-      build-context: "src/"
-      enable-build-test-layer: true
-      build-args: |
-        MODULE_NAME=notify
-    secrets:
-      github-token: ${{ secrets.GITHUB_TOKEN }}
-
   build-list:
     name: build list
     permissions:
       contents: write
       pull-requests: write
-      security-events: write
-      actions: read
       packages: write
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@7eaa603620c450f73fd25d6b68c37795ef4be999 # v1.22.8
+    uses: miracum/.github/.github/workflows/standard-build.yaml@6611917e0cbce3777825e93e3f725c98a437c060 # v1.31.0
     with:
       image: ghcr.io/${{ github.repository }}/list
       build-context: "src/list/"
-      enable-build-test-layer: true
-      build-args: |
-        MODULE_NAME=list
-    secrets:
-      github-token: ${{ secrets.GITHUB_TOKEN }}
+      enable-buildkit-cache-mount-caching: true
 
-  build-query-fhir-trino:
-    name: build query-fhir-trino
+  build-query-sql-on-fhir:
+    name: build query-sql-on-fhir
     permissions:
       contents: write
       pull-requests: write
-      security-events: write
-      actions: read
       packages: write
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@7eaa603620c450f73fd25d6b68c37795ef4be999 # v1.22.8
+    uses: miracum/.github/.github/workflows/standard-build.yaml@6611917e0cbce3777825e93e3f725c98a437c060 # v1.31.0
     with:
-      image: ghcr.io/${{ github.repository }}/query-fhir-trino
+      image: ghcr.io/${{ github.repository }}/query-sql-on-fhir
       build-context: "src/"
       enable-build-test-layer: true
+      enable-build-cache: false
+      enable-buildkit-cache-mount-caching: true
       build-args: |
-        MODULE_NAME=query-fhir-trino
-    secrets:
-      github-token: ${{ secrets.GITHUB_TOKEN }}
+        MODULE_NAME=query-sql-on-fhir
+
+  build-superset-library-sync:
+    name: build superset-library-sync
+    permissions:
+      contents: write
+      pull-requests: write
+      packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    uses: miracum/.github/.github/workflows/standard-build.yaml@6611917e0cbce3777825e93e3f725c98a437c060 # v1.31.0
+    with:
+      image: ghcr.io/${{ github.repository }}/superset-library-sync
+      build-context: "src/"
+      enable-build-test-layer: true
+      enable-build-cache: false
+      enable-buildkit-cache-mount-caching: true
+      build-args: |
+        MODULE_NAME=superset-library-sync
+
+  chart:
+    name: chart
+    needs:
+      # for their image-version/image-digest outputs
+      - build-list
+      - build-query-sql-on-fhir
+      # only lint, install, and publish the chart once the images it points at have passed all tests
+      # (both of these already depend on the container structure `test` job).
+      - k8s-test
+      - docker-compose-test
+    uses: miracum/.github/.github/workflows/standard-chart-publish.yaml@6611917e0cbce3777825e93e3f725c98a437c060 # v1.31.0
+    permissions:
+      contents: read
+      packages: write # to push the chart and its signature/attestation to ghcr.io
+      id-token: write # for keyless chart signing and OIDC-based attestations
+      attestations: write # to publish build provenance attestations
+      artifact-metadata: write # required by actions/attest-build-provenance
+    with:
+      chart-path: charts/recruit
+      # published as ghcr.io/miracum/recruit/charts/recruit rather than the default
+      # ghcr.io/miracum/recruit/recruit, matching the location the chart has always been published to.
+      registry: ghcr.io/${{ github.repository }}/charts
+      # stable per PR (no commit sha), so every push to the same PR overwrites this one OCI tag
+      # instead of piling up a new prerelease version per commit. Empty on every other event,
+      # which falls back to the workflow's own default: release events use the release tag,
+      # everything else uses Chart.yaml's version.
+      version: ${{ github.event_name == 'pull_request' && format('0.0.0-pr{0}', github.event.pull_request.number) || '' }}
+      # the image tag is the same for all modules, so it doesn't matter which build job we read it from.
+      app-version: ${{ github.event_name == 'pull_request' && needs.build-list.outputs.image-version || '' }}
+      lint-config: .github/ct/ct.yaml
+      install-config: .github/ct/install.yaml
+      extra-helm-repos: |
+        hapifhir=https://hapifhir.github.io/hapi-fhir-jpaserver-starter
+      # test ct install against the images this PR just built instead of the tags baked into
+      # values.yaml. Restricted to same-repo PRs: forked PRs never get their images pushed to
+      # ghcr.io, so kind wouldn't be able to pull them - falls back to the chart's default tags there.
+      helm-extra-set-args: >-
+        ${{
+          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name)
+          && format('--set=listNext.image.tag={0},querySqlOnFhir.image.tag={0}', needs.build-list.outputs.image-version)
+          || ''
+        }}
+      # pins every app image in the published chart to the exact digest its build job produced. On PRs
+      # the tag is also replaced with the PR's image tag, so the PR chart deploys the PR's images; on
+      # releases the release-please managed tag in values.yaml is kept, i.e. `v1.2.3@sha256:...`.
+      # The chart is only published on those two events, so this has no effect on any other.
+      images: |
+        .listNext.image.tag=${{ github.event_name == 'pull_request' && needs.build-list.outputs.image-version || '' }}@${{ needs.build-list.outputs.image-digest }}
+        .querySqlOnFhir.image.tag=${{ github.event_name == 'pull_request' && needs.build-query-sql-on-fhir.outputs.image-version || '' }}@${{ needs.build-query-sql-on-fhir.outputs.image-digest }}
 
   test:
     name: test
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs:
-      - build-query
-      - build-notify
-      - build-list
-      - build-query-fhir-trino
+      - build-query-sql-on-fhir
+      - build-superset-library-sync
     strategy:
       fail-fast: false
       matrix:
         include:
-          - module: "query"
-            e2e-test-directory: "tests/e2e/"
-          - module: "notify"
-            e2e-test-directory: "tests/e2e/"
-          - module: "list"
-            e2e-test-directory: "frontend/tests/e2e/"
-          - module: "query-fhir-trino"
+          - module: "query-sql-on-fhir"
+          - module: "superset-library-sync"
     env:
       IMAGE_NAME: ghcr.io/${{ github.repository }}/${{ matrix.module }}
       # the image tag is the same for all modules, so it doesn't matter which build job we read it from.
-      IMAGE_TAG: ${{ needs.build-query.outputs.image-version }}
+      IMAGE_TAG: ${{ needs.build-query-sql-on-fhir.outputs.image-version }}
     steps:
-      # <https://docs.docker.com/storage/containerd/>
-      # via <https://github.com/docker/setup-buildx-action/issues/257>
-      - name: Set up containerd image store
-        shell: bash
-        run: |
-          [ -f /etc/docker/daemon.json ] || echo "{}" | sudo tee /etc/docker/daemon.json
-          jq '. | .+{"features": {"containerd-snapshotter": true}}' /etc/docker/daemon.json > /tmp/docker-daemon-with-containerd.json
-          sudo mv /tmp/docker-daemon-with-containerd.json /etc/docker/daemon.json
-          cat /etc/docker/daemon.json
-          sudo systemctl restart docker
-
-          docker info -f '{{ .DriverStatus }}'
-
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -174,104 +177,73 @@ jobs:
           docker image ls
 
       - name: Pull image if not in PR
-        shell: bash
         if: ${{ github.event_name != 'pull_request' }}
         run: |
           docker pull "${IMAGE_NAME}:${IMAGE_TAG}"
           docker image ls -a
 
       - name: Run container structure tests
-        shell: bash
         run: |
           curl -LO https://github.com/GoogleContainerTools/container-structure-test/releases/download/v1.22.1/container-structure-test-linux-amd64
           chmod +x container-structure-test-linux-amd64
 
           ./container-structure-test-linux-amd64 test --image="${IMAGE_NAME}:${IMAGE_TAG}" --config=tests/container-structure/common-tests.yaml
 
-      - name: Run isolated smoke test
-        if: ${{ matrix.e2e-test-directory != ''}}
-        shell: bash
-        working-directory: src/${{ matrix.module }}
-        env:
-          E2E_TEST_DIRECTORY: ${{ matrix.e2e-test-directory }}
-        run: |
-          docker compose -f "${E2E_TEST_DIRECTORY}/docker-compose.yaml" build
-          docker compose -f "${E2E_TEST_DIRECTORY}/docker-compose.yaml" run tester
-
-      - name: Print test logs and stop all running containers
-        if: ${{ matrix.e2e-test-directory != '' && always()}}
-        shell: bash
-        working-directory: src/${{ matrix.module }}
-        continue-on-error: true
-        env:
-          E2E_TEST_DIRECTORY: ${{ matrix.e2e-test-directory }}
-        run: |
-          docker compose -f "${E2E_TEST_DIRECTORY}/docker-compose.yaml" logs
-          docker compose -f "${E2E_TEST_DIRECTORY}/docker-compose.yaml" down --volumes --remove-orphans
-
   k8s-test:
     needs:
-      - build-query
-      - build-notify
+      - build-query-sql-on-fhir
       - build-list
-      - build-query-fhir-trino
       - test
-    uses: ./.github/workflows/test-k8s-installation.yaml
+    uses: $/.github/workflows/test-k8s-installation.yaml
     with:
-      image-tag: ${{ needs.build-query.outputs.image-version }}
+      image-tag: ${{ needs.build-query-sql-on-fhir.outputs.image-version }}
 
   docker-compose-test:
     needs:
-      - build-query
-      - build-notify
+      - build-query-sql-on-fhir
       - build-list
-      - build-query-fhir-trino
       - test
-    uses: ./.github/workflows/test-compose-installation.yaml
+    uses: $/.github/workflows/test-compose-installation.yaml
     with:
-      image-tag: ${{ needs.build-query.outputs.image-version }}
+      image-tag: ${{ needs.build-query-sql-on-fhir.outputs.image-version }}
 
   release:
     # the docker compose image tags only change on releases, so
     # it's sufficient to just run tests then.
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
     permissions:
-      actions: read
-      attestations: write
+      actions: read # for the build provenance attestation step in release.yaml's prepare-artifacts
+      attestations: write # release.yaml's prepare-artifacts job attests the release checksums
       contents: write # for release notes
-      # for creating OIDC tokens for signing.
-      id-token: write
-      packages: write # for uploading container images, signatures, and attestations.
+      id-token: write # for creating OIDC tokens for signing
+      packages: read # to pull the published Helm chart from ghcr.io
     needs:
       - k8s-test
       - docker-compose-test
       # listed directly (even though they're already transitively required via k8s-test/
       # docker-compose-test) so their per-module image-digest outputs are addressable here.
-      - build-query
-      - build-notify
+      - build-query-sql-on-fhir
       - build-list
-      - build-query-fhir-trino
-    uses: ./.github/workflows/release.yaml
+      - chart
+    uses: $/.github/workflows/release.yaml
     with:
-      query-image-digest: ${{ needs.build-query.outputs.image-digest }}
-      notify-image-digest: ${{ needs.build-notify.outputs.image-digest }}
       list-image-digest: ${{ needs.build-list.outputs.image-digest }}
-      query-fhir-trino-image-digest: ${{ needs.build-query-fhir-trino.outputs.image-digest }}
+      query-sql-on-fhir-image-digest: ${{ needs.build-query-sql-on-fhir.outputs.image-digest }}
+      chart-name: ${{ needs.chart.outputs.chart-name }}
+      chart-version: ${{ needs.chart.outputs.chart-version }}
     secrets:
-      token: ${{ secrets.MIRACUM_BOT_SEMANTIC_RELEASE_TOKEN }}
+      token: ${{ secrets.GITHUB_TOKEN }}
 
   lint:
-    uses: miracum/.github/.github/workflows/standard-lint.yaml@7eaa603620c450f73fd25d6b68c37795ef4be999 # v1.22.8
+    uses: miracum/.github/.github/workflows/standard-lint.yaml@6611917e0cbce3777825e93e3f725c98a437c060 # v1.31.0
     permissions:
       contents: read
-      pull-requests: write
-      issues: write
-      security-events: write
-      actions: read
+      pull-requests: write # for MegaLinter's PR comment with lint results
+      issues: write # for MegaLinter's PR comment/annotations
+      security-events: write # for uploading CodeQL's SARIF results to the Security tab
+      actions: read # required by the CodeQL analysis steps
     with:
       enable-validate-gradle-wrapper: false
-      codeql-languages: '["javascript", "java"]'
+      codeql-languages: '["java", "csharp"]'
       enable-codeql: true
-      enable-verify-base-image-signature: false
-    secrets:
-      github-token: ${{ secrets.GITHUB_TOKEN }}
+      java-version: "25"

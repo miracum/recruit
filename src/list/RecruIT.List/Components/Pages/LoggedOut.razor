@@ -1,0 +1,11 @@
+@page "/logged-out"
+@layout EmptyLayout
+@inject IStringLocalizer<SharedResources> Localizer
+
+<div class="flex flex-col items-center gap-6 px-4 text-center">
+    <h1 class="text-3xl font-semibold">@Localizer["App.LoggedOut.Title"]</h1>
+    <a href="/authentication/login"
+       class="rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+        @Localizer["App.LoggedOut.BackToApp"]
+    </a>
+</div>

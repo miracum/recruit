@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "recruit.fullname" . }}-search-parameters
+  labels:
+    {{- include "recruit.labels" . | nindent 4 }}
+    app.kubernetes.io/component: search-parameters
+data:
+  search-parameters-transaction-upsert.json: |
+    {{- .Files.Get "files/fhir/search-parameters-transaction-upsert.json" | nindent 4 }}

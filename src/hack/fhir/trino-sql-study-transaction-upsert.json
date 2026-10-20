@@ -43,7 +43,7 @@
         "id": "be24c1a6-b052-4360-871b-0a1b7b6bdfb4",
         "identifier": [
           {
-            "system": "https://miracum.github.io/recruit/fhir/identifiers/trino-sql-criteria-group-id",
+            "system": "https://miracum.github.io/recruit/fhir/identifiers/eligibility-group-id",
             "value": "bronchitis"
           }
         ],
@@ -65,15 +65,27 @@
               "reference": "Library/bb4e037a-0a43-4fee-befc-b9ed598c3e64"
             },
             "code": {
-              "coding": [
-                {
-                  "system": "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-criteria-types",
-                  "code": "trino-sql"
-                }
-              ],
-              "text": "Trino SQL-encoded eligibility criteria"
+              "text": "Bronchitis diagnosis"
             },
             "exclude": false
+          },
+          {
+            "valueReference": {
+              "reference": "Library/12b09320-2426-43e9-930d-64f151d39e68"
+            },
+            "code": {
+              "text": "Age > 18 years"
+            },
+            "exclude": false
+          },
+          {
+            "valueReference": {
+              "reference": "Library/9be54194-a4d9-4835-bf9e-21314e4f046c"
+            },
+            "code": {
+              "text": "No prior sepsis"
+            },
+            "exclude": true
           }
         ]
       },
@@ -94,23 +106,115 @@
           }
         ],
         "status": "active",
+        "title": "Bronchitis diagnosis",
+        "name": "bronchitis",
+        "description": "Active bronchitis diagnosis (SNOMED CT code 10509002).",
         "type": {
           "coding": [
             {
-              "code": "logic-library"
+              "system": "https://sql-on-fhir.org/ig/CodeSystem/LibraryTypesCodes",
+              "code": "sql-query"
             }
           ]
         },
         "content": [
           {
-            "contentType": "text/x-trino",
-            "data": "U0VMRUNUIERJU1RJTkNUIHBhdGllbnQuaWQgQVMgcGF0aWVudF9pZA0KRlJPTSBmaGlyLmRlZmF1bHQucGF0aWVudCBBUyBwYXRpZW50DQpMRUZUIEpPSU4NCiAgICBmaGlyLmRlZmF1bHQuY29uZGl0aW9uDQogICAgT04gY29uZGl0aW9uLnN1YmplY3QucmVmZXJlbmNlID0gQ09OQ0FUKCdQYXRpZW50LycsIHBhdGllbnQuaWQpLA0KICAgIFVOTkVTVChjb25kaXRpb24uY29kZS5jb2RpbmcpIEFTIGNvbmRpdGlvbl9jb2RpbmcNCldIRVJFDQogICAgY29uZGl0aW9uX2NvZGluZy5zeXN0ZW0gPSAnaHR0cDovL3Nub21lZC5pbmZvL3NjdCcNCiAgICBBTkQgY29uZGl0aW9uX2NvZGluZy5jb2RlIElOICgnMTA1MDkwMDInKQ=="
+            "extension": [
+              {
+                "url": "https://sql-on-fhir.org/ig/StructureDefinition/sql-text",
+                "valueString": "SELECT\n    patient.id AS patient_id,\n    EXISTS (\n        SELECT 1\n        FROM\n            fhir.default.condition,\n            UNNEST(condition.code.coding) AS condition_coding\n        WHERE\n            condition.subject.reference = CONCAT('Patient/', patient.id)\n            AND condition_coding.system = 'http://snomed.info/sct'\n            AND condition_coding.code IN ('10509002')\n    ) AS is_met,\n    CAST(NULL AS BOOLEAN) AS is_indeterminate,\n    CAST(NULL AS VARCHAR) AS result_note\nFROM fhir.default.patient AS patient"
+              }
+            ],
+            "contentType": "application/sql;dialect=trino",
+            "data": "U0VMRUNUCiAgICBwYXRpZW50LmlkIEFTIHBhdGllbnRfaWQsCiAgICBFWElTVFMgKAogICAgICAgIFNFTEVDVCAxCiAgICAgICAgRlJPTQogICAgICAgICAgICBmaGlyLmRlZmF1bHQuY29uZGl0aW9uLAogICAgICAgICAgICBVTk5FU1QoY29uZGl0aW9uLmNvZGUuY29kaW5nKSBBUyBjb25kaXRpb25fY29kaW5nCiAgICAgICAgV0hFUkUKICAgICAgICAgICAgY29uZGl0aW9uLnN1YmplY3QucmVmZXJlbmNlID0gQ09OQ0FUKCdQYXRpZW50LycsIHBhdGllbnQuaWQpCiAgICAgICAgICAgIEFORCBjb25kaXRpb25fY29kaW5nLnN5c3RlbSA9ICdodHRwOi8vc25vbWVkLmluZm8vc2N0JwogICAgICAgICAgICBBTkQgY29uZGl0aW9uX2NvZGluZy5jb2RlIElOICgnMTA1MDkwMDInKQogICAgKSBBUyBpc19tZXQsCiAgICBDQVNUKE5VTEwgQVMgQk9PTEVBTikgQVMgaXNfaW5kZXRlcm1pbmF0ZSwKICAgIENBU1QoTlVMTCBBUyBWQVJDSEFSKSBBUyByZXN1bHRfbm90ZQpGUk9NIGZoaXIuZGVmYXVsdC5wYXRpZW50IEFTIHBhdGllbnQ="
           }
         ]
       },
       "request": {
         "method": "PUT",
         "url": "Library/bb4e037a-0a43-4fee-befc-b9ed598c3e64"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:12b09320-2426-43e9-930d-64f151d39e68",
+      "resource": {
+        "resourceType": "Library",
+        "id": "12b09320-2426-43e9-930d-64f151d39e68",
+        "identifier": [
+          {
+            "system": "https://miracum.github.io/recruit/fhir/identifiers/trino-sql-criteria-library-id",
+            "value": "age-over-18"
+          }
+        ],
+        "title": "Age over 18",
+        "name": "age-over-18",
+        "description": "Patient is over 18 years old.",
+        "status": "active",
+        "type": {
+          "coding": [
+            {
+              "system": "https://sql-on-fhir.org/ig/CodeSystem/LibraryTypesCodes",
+              "code": "sql-query"
+            }
+          ]
+        },
+        "content": [
+          {
+            "extension": [
+              {
+                "url": "https://sql-on-fhir.org/ig/StructureDefinition/sql-text",
+                "valueString": "SELECT\n    patient.id AS patient_id,\n    cast(NULL AS BOOLEAN) AS is_indeterminate,\n    cast(NULL AS VARCHAR) AS result_note,\n    date_diff('year', date(patient.birthdate), current_date) > 18 AS is_met\nFROM fhir.default.patient AS patient"
+              }
+            ],
+            "contentType": "application/sql;dialect=trino",
+            "data": "U0VMRUNUCiAgICBwYXRpZW50LmlkIEFTIHBhdGllbnRfaWQsCiAgICBjYXN0KE5VTEwgQVMgQk9PTEVBTikgQVMgaXNfaW5kZXRlcm1pbmF0ZSwKICAgIGNhc3QoTlVMTCBBUyBWQVJDSEFSKSBBUyByZXN1bHRfbm90ZSwKICAgIGRhdGVfZGlmZigneWVhcicsIGRhdGUocGF0aWVudC5iaXJ0aGRhdGUpLCBjdXJyZW50X2RhdGUpID4gMTggQVMgaXNfbWV0CkZST00gZmhpci5kZWZhdWx0LnBhdGllbnQgQVMgcGF0aWVudA=="
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Library/12b09320-2426-43e9-930d-64f151d39e68"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:9be54194-a4d9-4835-bf9e-21314e4f046c",
+      "resource": {
+        "resourceType": "Library",
+        "id": "9be54194-a4d9-4835-bf9e-21314e4f046c",
+        "identifier": [
+          {
+            "system": "https://miracum.github.io/recruit/fhir/identifiers/trino-sql-criteria-library-id",
+            "value": "sepsis"
+          }
+        ],
+        "title": "Sepsis condition",
+        "name": "sepsis",
+        "description": "Active sepsis condition (SNOMED CT code 91302008) documented at any time.",
+        "status": "active",
+        "type": {
+          "coding": [
+            {
+              "system": "https://sql-on-fhir.org/ig/CodeSystem/LibraryTypesCodes",
+              "code": "sql-query"
+            }
+          ]
+        },
+        "content": [
+          {
+            "extension": [
+              {
+                "url": "https://sql-on-fhir.org/ig/StructureDefinition/sql-text",
+                "valueString": "SELECT\n    patient.id AS patient_id,\n    EXISTS (\n        SELECT 1\n        FROM\n            fhir.default.condition,\n            UNNEST(condition.code.coding) AS condition_coding\n        WHERE\n            condition.subject.reference = CONCAT('Patient/', patient.id)\n            AND condition_coding.system = 'http://snomed.info/sct'\n            AND condition_coding.code IN ('91302008')\n    ) AS is_met,\n    CAST(NULL AS BOOLEAN) AS is_indeterminate,\n    CAST(NULL AS VARCHAR) AS result_note\nFROM fhir.default.patient AS patient"
+              }
+            ],
+            "contentType": "application/sql;dialect=trino",
+            "data": "U0VMRUNUCiAgICBwYXRpZW50LmlkIEFTIHBhdGllbnRfaWQsCiAgICBFWElTVFMgKAogICAgICAgIFNFTEVDVCAxCiAgICAgICAgRlJPTQogICAgICAgICAgICBmaGlyLmRlZmF1bHQuY29uZGl0aW9uLAogICAgICAgICAgICBVTk5FU1QoY29uZGl0aW9uLmNvZGUuY29kaW5nKSBBUyBjb25kaXRpb25fY29kaW5nCiAgICAgICAgV0hFUkUKICAgICAgICAgICAgY29uZGl0aW9uLnN1YmplY3QucmVmZXJlbmNlID0gQ09OQ0FUKCdQYXRpZW50LycsIHBhdGllbnQuaWQpCiAgICAgICAgICAgIEFORCBjb25kaXRpb25fY29kaW5nLnN5c3RlbSA9ICdodHRwOi8vc25vbWVkLmluZm8vc2N0JwogICAgICAgICAgICBBTkQgY29uZGl0aW9uX2NvZGluZy5jb2RlIElOICgnOTEzMDIwMDgnKQogICAgKSBBUyBpc19tZXQsCiAgICBDQVNUKE5VTEwgQVMgQk9PTEVBTikgQVMgaXNfaW5kZXRlcm1pbmF0ZSwKICAgIENBU1QoTlVMTCBBUyBWQVJDSEFSKSBBUyByZXN1bHRfbm90ZQpGUk9NIGZoaXIuZGVmYXVsdC5wYXRpZW50IEFTIHBhdGllbnQ="
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Library/9be54194-a4d9-4835-bf9e-21314e4f046c"
       }
     }
   ]

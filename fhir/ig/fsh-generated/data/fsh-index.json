@@ -1,0 +1,210 @@
+[
+  {
+    "outputFile": "Bundle-recruit-search-parameters-transaction.json",
+    "fshName": "RecruitSearchParametersTransaction",
+    "fshType": "Instance",
+    "fshFile": "searchparameters.fsh",
+    "startLine": 53,
+    "endLine": 69
+  },
+  {
+    "outputFile": "CodeSystem-eligibility-assessment-category.json",
+    "fshName": "EligibilityAssessmentCategory",
+    "fshType": "CodeSystem",
+    "fshFile": "eligibility-observation.fsh",
+    "startLine": 16,
+    "endLine": 20
+  },
+  {
+    "outputFile": "CodeSystem-eligibility-funnel-population-type.json",
+    "fshName": "EligibilityFunnelPopulationType",
+    "fshType": "CodeSystem",
+    "fshFile": "eligibility-funnel.fsh",
+    "startLine": 1,
+    "endLine": 6
+  },
+  {
+    "outputFile": "CodeSystem-screening-list-type.json",
+    "fshName": "CodeSystemScreeningList",
+    "fshType": "CodeSystem",
+    "fshFile": "screeninglist.fsh",
+    "startLine": 19,
+    "endLine": 22
+  },
+  {
+    "outputFile": "List-ScreeningListExample.json",
+    "fshName": "ScreeningListExample",
+    "fshType": "Instance",
+    "fshFile": "screeninglist.fsh",
+    "startLine": 37,
+    "endLine": 43
+  },
+  {
+    "outputFile": "NamingSystem-eligibility-assessment-id.json",
+    "fshName": "EligibilityAssessmentIdentifierSystem",
+    "fshType": "Instance",
+    "fshFile": "eligibility-observation.fsh",
+    "startLine": 38,
+    "endLine": 49
+  },
+  {
+    "outputFile": "NamingSystem-eligibility-funnel-measure-id.json",
+    "fshName": "EligibilityFunnelMeasureIdentifierSystem",
+    "fshType": "Instance",
+    "fshFile": "eligibility-funnel.fsh",
+    "startLine": 8,
+    "endLine": 19
+  },
+  {
+    "outputFile": "NamingSystem-eligibility-funnel-report-id.json",
+    "fshName": "EligibilityFunnelReportIdentifierSystem",
+    "fshType": "Instance",
+    "fshFile": "eligibility-funnel.fsh",
+    "startLine": 21,
+    "endLine": 32
+  },
+  {
+    "outputFile": "NamingSystem-eligibility-group-id.json",
+    "fshName": "EligibilityGroupIdentifierSystem",
+    "fshType": "Instance",
+    "fshFile": "eligibility-group.fsh",
+    "startLine": 1,
+    "endLine": 12
+  },
+  {
+    "outputFile": "NamingSystem-eligibility-library-id.json",
+    "fshName": "EligibilityLibraryIdentifierSystem",
+    "fshType": "Instance",
+    "fshFile": "eligibility-library.fsh",
+    "startLine": 1,
+    "endLine": 12
+  },
+  {
+    "outputFile": "NamingSystem-research-subject-id.json",
+    "fshName": "ResearchSubjectIdentifierSystem",
+    "fshType": "Instance",
+    "fshFile": "researchsubject.fsh",
+    "startLine": 1,
+    "endLine": 12
+  },
+  {
+    "outputFile": "NamingSystem-screening-list-id.json",
+    "fshName": "ScreeningListIdentifierSystem",
+    "fshType": "Instance",
+    "fshFile": "screeninglist.fsh",
+    "startLine": 24,
+    "endLine": 35
+  },
+  {
+    "outputFile": "NamingSystem-superset-synced-eligibility-library-id.json",
+    "fshName": "SupersetSyncedEligibilityLibraryIdentifierSystem",
+    "fshType": "Instance",
+    "fshFile": "eligibility-library.fsh",
+    "startLine": 14,
+    "endLine": 25
+  },
+  {
+    "outputFile": "NamingSystem-ui-created-eligibility-library-id.json",
+    "fshName": "UICreatedEligibilityLibraryIdentifierSystem",
+    "fshType": "Instance",
+    "fshFile": "eligibility-library.fsh",
+    "startLine": 27,
+    "endLine": 38
+  },
+  {
+    "outputFile": "NamingSystem-ui-created-research-study-id.json",
+    "fshName": "UICreatedResearchStudyIdentifierSystem",
+    "fshType": "Instance",
+    "fshFile": "recruit-researchstudy.fsh",
+    "startLine": 14,
+    "endLine": 25
+  },
+  {
+    "outputFile": "ResearchStudy-RecruitResearchStudyExample.json",
+    "fshName": "RecruitResearchStudyExample",
+    "fshType": "Instance",
+    "fshFile": "recruit-researchstudy.fsh",
+    "startLine": 9,
+    "endLine": 12
+  },
+  {
+    "outputFile": "SearchParameter-belongs-to-study.json",
+    "fshName": "SearchParameterBelongsToStudy",
+    "fshType": "Instance",
+    "fshFile": "searchparameters.fsh",
+    "startLine": 26,
+    "endLine": 38
+  },
+  {
+    "outputFile": "SearchParameter-group-characteristic.json",
+    "fshName": "GroupCharacteristic",
+    "fshType": "Instance",
+    "fshFile": "searchparameters.fsh",
+    "startLine": 14,
+    "endLine": 24
+  },
+  {
+    "outputFile": "SearchParameter-observation-derived-from-library.json",
+    "fshName": "ObservationDerivedFromLibrary",
+    "fshType": "Instance",
+    "fshFile": "searchparameters.fsh",
+    "startLine": 40,
+    "endLine": 51
+  },
+  {
+    "outputFile": "SearchParameter-researchstudy-enrollment.json",
+    "fshName": "ResearchStudyEnrollment",
+    "fshType": "Instance",
+    "fshFile": "searchparameters.fsh",
+    "startLine": 1,
+    "endLine": 12
+  },
+  {
+    "outputFile": "StructureDefinition-belongs-to-study.json",
+    "fshName": "BelongsToStudy",
+    "fshType": "Extension",
+    "fshFile": "screeninglist.fsh",
+    "startLine": 12,
+    "endLine": 17
+  },
+  {
+    "outputFile": "StructureDefinition-eligibility-assessment-derived-from-library.json",
+    "fshName": "EligibilityAssessmentDerivedFromLibrary",
+    "fshType": "Extension",
+    "fshFile": "eligibility-observation.fsh",
+    "startLine": 31,
+    "endLine": 36
+  },
+  {
+    "outputFile": "StructureDefinition-eligibility-assessment.json",
+    "fshName": "EligibilityAssessment",
+    "fshType": "Profile",
+    "fshFile": "eligibility-observation.fsh",
+    "startLine": 1,
+    "endLine": 14
+  },
+  {
+    "outputFile": "StructureDefinition-research-study.json",
+    "fshName": "RecruitResearchStudy",
+    "fshType": "Profile",
+    "fshFile": "recruit-researchstudy.fsh",
+    "startLine": 4,
+    "endLine": 7
+  },
+  {
+    "outputFile": "StructureDefinition-screening-list.json",
+    "fshName": "ScreeningList",
+    "fshType": "Profile",
+    "fshFile": "screeninglist.fsh",
+    "startLine": 4,
+    "endLine": 10
+  },
+  {
+    "outputFile": "ValueSet-eligibility-assessment-result.json",
+    "fshName": "EligibilityAssessmentResult",
+    "fshType": "ValueSet",
+    "fshFile": "eligibility-observation.fsh",
+    "startLine": 22,
+    "endLine": 29
+  }
+]

@@ -1,0 +1,232 @@
+@inject ResearchSubjectService ResearchSubjectService
+@inject PatientRecordService PatientRecordService
+@inject ToastService Toast
+@inject IStringLocalizer<SharedResources> Localizer
+
+<BbSheet Open="Patient is not null" OpenChanged="HandleOpenChanged" Side="SheetSide.Right">
+    <BbSheetContent Class="w-full overflow-y-auto" style="max-width: 46rem;" ShowClose="true">
+        @if (Patient is not null)
+        {
+            <BbSheetHeader>
+                @if (!string.IsNullOrEmpty(Acronym))
+                {
+                    <div class="flex items-center gap-2 pb-3">
+                        <span class="text-muted-foreground">
+                            <LucideIcon Name="flask-conical" Size="16" />
+                        </span>
+                        <span class="text-sm font-semibold text-foreground">@Acronym</span>
+                        @if (!string.IsNullOrEmpty(StudyTitle))
+                        {
+                            <span class="truncate text-sm text-muted-foreground">@StudyTitle</span>
+                        }
+                    </div>
+                    <BbSeparator />
+                }
+                <div class="mt-3 flex items-end gap-2">
+                    <BbSheetTitle style="line-height: 1;">@(Patient.Name ?? Patient.PatientId)</BbSheetTitle>
+                    <span class="text-sm font-normal text-muted-foreground" style="line-height: 1;">
+                        @(Patient.Age is not null ? Localizer["App.PatientDialog.AgeYo", Patient.Age] : Localizer["App.Common.AgeUnknown"])
+                        &middot; @(Patient.Gender is not null ? Localizer[GenderDisplay.GetKey(Patient.Gender)].Value : Localizer["App.Common.GenderUnknown"].Value)
+                    </span>
+                </div>
+                @if (!string.IsNullOrEmpty(Patient.LastKnownLocation))
+                {
+                    <BbSheetDescription>@Patient.LastKnownLocation</BbSheetDescription>
+                }
+            </BbSheetHeader>
+
+            <BbTabs DefaultValue="details" Class="mt-4">
+                <BbTabsList>
+                    <BbTabsTrigger Value="details">@Localizer["App.PatientDialog.TabDetails"]</BbTabsTrigger>
+                    <BbTabsTrigger Value="history">@Localizer["App.PatientDialog.TabHistory"]</BbTabsTrigger>
+                </BbTabsList>
+                <BbTabsContent Value="details">
+                    <div class="space-y-4">
+                        @if (!string.IsNullOrEmpty(Patient.Phone) || !string.IsNullOrEmpty(Patient.Email))
+                        {
+                            <div>
+                                <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.Patient.Contact"]</span>
+                                <div class="mt-2 space-y-1 text-sm">
+                                    @if (!string.IsNullOrEmpty(Patient.Phone))
+                                    {
+                                        <p>@Patient.Phone</p>
+                                    }
+                                    @if (!string.IsNullOrEmpty(Patient.Email))
+                                    {
+                                        <p>@Patient.Email</p>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <div>
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.Patient.RecruitmentStatus"]</span>
+                                <SaveStatusIndicator Saving="_statusSaving" />
+                            </div>
+                            @if (CanEdit)
+                            {
+                                <BbRadioGroup TValue="string" Value="@Patient.Status" ValueChanged="OnStatusChangedInternal"
+                                              Disabled="_statusSaving"
+                                              Class="mt-3 flex flex-row flex-wrap items-center gap-x-8 gap-y-3">
+                                    @foreach (var status in StatusOptions)
+                                    {
+                                        <BbRadioGroupItem TValue="string" Value="@status" Label="@Localizer[StatusDisplay.GetKey(status)].Value" />
+                                    }
+                                </BbRadioGroup>
+                            }
+                            else
+                            {
+                                <div class="mt-2">
+                                    <StatusBadge Status="@Patient.Status" />
+                                </div>
+                            }
+                        </div>
+
+                        <BbSeparator />
+
+                        @if (_criteriaLoading)
+                        {
+                            <div class="space-y-2">
+                                <BbSkeleton Class="h-5 w-full" />
+                                <BbSkeleton Class="h-5 w-full" />
+                            </div>
+                        }
+                        else if (_criteria.Count > 0)
+                        {
+                            <div>
+                                <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.Patient.EligibilityCriteria"]</span>
+                                <ul class="mt-2 space-y-1.5 text-sm">
+                                    @foreach (var criterion in _criteria)
+                                    {
+                                        <li class="flex items-center gap-2">
+                                            <CriterionStatusIcon Met="criterion.Met" Indeterminate="criterion.Indeterminate" Note="criterion.Note" />
+                                            <span>@criterion.DisplayText</span>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+
+                            <BbSeparator />
+                        }
+
+                        @if (TrialIdentifier is not null)
+                        {
+                            <PatientNotesSection Patient="Patient" TrialIdentifier="TrialIdentifier" CanEdit="CanEdit" />
+                        }
+                    </div>
+                </BbTabsContent>
+                <BbTabsContent Value="history">
+                    <PatientHistorySection Patient="Patient" />
+                </BbTabsContent>
+            </BbTabs>
+        }
+    </BbSheetContent>
+</BbSheet>
+
+@code {
+    [Parameter]
+    public PatientListEntryDto? Patient { get; set; }
+
+    [Parameter]
+    public EventCallback<PatientListEntryDto?> PatientChanged { get; set; }
+
+    [Parameter, EditorRequired]
+    public required string Acronym { get; set; }
+
+    [Parameter]
+    public string? StudyTitle { get; set; }
+
+    [Parameter]
+    public TrialIdentifier? TrialIdentifier { get; set; }
+
+    [Parameter]
+    public bool CanEdit { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    private static readonly string[] StatusOptions = ["candidate", "screening", "eligible", "ineligible", "on-study", "withdrawn"];
+
+    private ClaimsPrincipal _user = new();
+    private bool _statusSaving;
+    private IReadOnlyList<CriterionStatusDto> _criteria = [];
+    private bool _criteriaLoading;
+    private string? _loadedCriteriaForSubjectId;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _user = await AuthStateTask.GetUserAsync();
+
+        if (Patient is null)
+        {
+            return;
+        }
+
+        if (TrialIdentifier is not null && Patient.ResearchSubjectId != _loadedCriteriaForSubjectId)
+        {
+            _loadedCriteriaForSubjectId = Patient.ResearchSubjectId;
+            await LoadEligibilityCriteriaAsync();
+        }
+    }
+
+    private async Task LoadEligibilityCriteriaAsync()
+    {
+        if (Patient is null || TrialIdentifier is null)
+        {
+            return;
+        }
+
+        _criteriaLoading = true;
+        try
+        {
+            _criteria = await PatientRecordService.GetEligibilityCriteriaStatusAsync(Patient.PatientId, TrialIdentifier);
+        }
+        catch
+        {
+            // Best-effort - an empty criteria list is preferable to blocking the dialog on a fetch failure.
+            _criteria = [];
+        }
+        finally
+        {
+            _criteriaLoading = false;
+        }
+    }
+
+    private async Task OnStatusChangedInternal(string newStatus)
+    {
+        if (Patient is null || TrialIdentifier is null)
+        {
+            return;
+        }
+
+        _statusSaving = true;
+        StateHasChanged();
+
+        try
+        {
+            var updatedAt = await ResearchSubjectService.UpdateStatusAsync(Patient.ResearchSubjectId, newStatus, TrialIdentifier, _user);
+            Patient.Status = newStatus;
+            Patient.LastUpdated = updatedAt ?? DateTimeOffset.UtcNow;
+            Toast.Success(Localizer["App.Toast.StatusUpdated", Localizer[StatusDisplay.GetKey(newStatus)]], Localizer["App.Common.Saved"]);
+        }
+        catch (Exception ex)
+        {
+            Toast.Error(ex.Message, Localizer["App.Toast.StatusUpdateError"]);
+        }
+        finally
+        {
+            _statusSaving = false;
+        }
+    }
+
+    private async Task Close() => await PatientChanged.InvokeAsync(null);
+
+    private async Task HandleOpenChanged(bool open)
+    {
+        if (!open)
+        {
+            await Close();
+        }
+    }
+}

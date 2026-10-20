@@ -1,12 +1,179 @@
+/*
+  recruIT brand colors, taken from the logo (docs/_img/logo/): navy #10243e and orange #e0531f.
+  The orange used for text is darkened (light scheme) or lightened (dark scheme) to stay readable.
+*/
 :root > * {
-  --md-primary-fg-color: #1b2259;
-  --md-typeset-a-color: #1b2259;
+  --md-primary-fg-color: #10243e;
+  --md-primary-fg-color--light: #1c3a5e;
+  --md-primary-fg-color--dark: #0a1828;
+  --md-accent-fg-color: #c2410c;
+  --md-accent-fg-color--transparent: #e0531f1a;
+  --md-typeset-a-color: #10243e;
+  --rc-orange: #e0531f;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-accent-fg-color: #f07a4a;
+  --md-accent-fg-color--transparent: #f07a4a1f;
+  --md-typeset-a-color: #7e9cc7;
+  --rc-orange: #f07a4a;
 }
 
 .md-typeset a {
   font-weight: bold;
 }
 
-[data-md-color-scheme="slate"] {
-  --md-typeset-a-color: #4e5cc2;
+/*
+  overrides/partials/logo.html renders both variants of the mark and overrides/home.html both variants
+  of the hero screenshot, hide the one not matching the scheme.
+  !important, as the theme sets the logo's display with more specific selectors in the header and drawer.
+*/
+body:not([data-md-color-scheme="slate"]) img.rc-logo--dark,
+[data-md-color-scheme="slate"] img.rc-logo--light,
+body:not([data-md-color-scheme="slate"]) img.rc-hero__img--dark,
+[data-md-color-scheme="slate"] img.rc-hero__img--light {
+  display: none !important;
+}
+
+/* the mark has generous padding, so it needs a bit more room than the default 1.2rem */
+.md-header__button.md-logo img.rc-logo {
+  height: 1.6rem;
+  margin: -0.2rem 0;
+}
+
+/* Landing page (docs/index.md, overrides/home.html) */
+
+.rc-hero {
+  background: linear-gradient(135deg, #10243e 0%, #1c3a5e 100%);
+  color: #fff;
+}
+
+.rc-hero__inner {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: center;
+  padding: 2.5rem 0.8rem;
+}
+
+@media screen and (width >= 60em) {
+  .rc-hero__inner {
+    grid-template-columns: 5fr 6fr;
+    gap: 3rem;
+    padding: 4rem 0.8rem;
+  }
+}
+
+.rc-hero__logo {
+  display: block;
+  width: auto;
+  height: 3.2rem;
+  margin: 0 0 1.4rem -0.6rem;
+}
+
+.rc-hero__eyebrow {
+  margin: 0 0 0.8rem;
+  color: #f07a4a;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rc-hero__title {
+  margin: 0 0 1rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: inherit;
+}
+
+@media screen and (width >= 60em) {
+  .rc-hero__title {
+    font-size: 2rem;
+  }
+}
+
+.rc-hero__lead {
+  max-width: 32rem;
+  margin: 0 0 1.6rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+.rc-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.rc-hero .md-button {
+  margin: 0;
+  border: 0.1rem solid rgb(255 255 255 / 60%);
+  background-color: transparent;
+  color: #fff;
+}
+
+.rc-hero .md-button--primary {
+  border-color: #fff;
+  background-color: #fff;
+  color: #10243e;
+}
+
+.rc-hero .md-button:hover,
+.rc-hero .md-button:focus {
+  border-color: #fff;
+  background-color: rgb(255 255 255 / 15%);
+  color: #fff;
+}
+
+.rc-hero .md-button--primary:hover,
+.rc-hero .md-button--primary:focus {
+  background-color: rgb(255 255 255 / 85%);
+  color: #10243e;
+}
+
+.rc-hero__visual {
+  margin: 0;
+}
+
+.rc-hero__visual img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  object-position: top left;
+  border-radius: 0.5rem;
+  box-shadow: 0 1rem 2.5rem rgb(0 0 0 / 35%);
+}
+
+.rc-features .twemoji.lg {
+  height: 2rem;
+  color: var(--rc-orange);
+}
+
+.rc-features .twemoji.lg svg {
+  width: 2rem;
+  max-height: none;
+}
+
+.md-typeset img.rc-diagram {
+  display: block;
+  margin: 0 auto;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background-color: #fff;
+}
+
+.md-typeset .rc-cta {
+  margin-top: 3rem;
+  padding: 2rem 1rem;
+  border-radius: 0.5rem;
+  background-color: var(--md-code-bg-color);
+  text-align: center;
+}
+
+.md-typeset .rc-cta h2 {
+  margin-top: 0;
 }
