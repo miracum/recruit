@@ -121,7 +121,7 @@ All FHIR resources recruIT uses are described in its [FHIR Implementation Guide]
 
 ## Published research
 
-recruIT is developed within [MIRACUM](https://www.miracum.org/), a consortium of German university hospitals.
+recruIT was initially developed within [MIRACUM](https://www.miracum.org/), a consortium of German university hospitals.
 Its design and implementation are described in:
 
 !!! quote ""
