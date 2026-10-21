@@ -1,0 +1,5 @@
+{"resourceType": "Patient", "id": "0b6f6a4e-1111-4a8e-9f00-000000000001", "name": [{"text": "adult-bronchitis"}], "birthDate": "1970-01-01"}
+{"resourceType": "Patient", "id": "0b6f6a4e-1111-4a8e-9f00-000000000002", "name": [{"text": "adult-bronchitis-sepsis"}], "birthDate": "1970-01-01"}
+{"resourceType": "Patient", "id": "0b6f6a4e-1111-4a8e-9f00-000000000003", "name": [{"text": "child-bronchitis"}], "birthDate": "2020-01-01"}
+{"resourceType": "Patient", "id": "0b6f6a4e-1111-4a8e-9f00-000000000004", "name": [{"text": "adult-healthy"}], "birthDate": "1970-01-01"}
+{"resourceType": "Patient", "id": "0b6f6a4e-1111-4a8e-9f00-000000000005", "name": [{"text": "unknown-age-bronchitis"}]}

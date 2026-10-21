@@ -12,6 +12,9 @@ in order for the query module to correctly link them.
 
 The advantage is that no semantic transformation from mapping FHIR resources to the OMOP CDM is necessary.
 
+For trying it out without a lakehouse, the module can alternatively query FHIR resources stored as NDJSON files
+directly using an embedded [DuckDB](https://duckdb.org/), see [Querying FHIR resources with DuckDB](#querying-fhir-resources-with-duckdb).
+
 To create the necessary tables, you can install a Pathling server and use the [`$import` operation](https://pathling.csiro.au/docs/server/operations/import)
 to import FHIR bulk exports. You can find a demo setup for this approach at <https://github.com/bzkf/trino-on-fhir> as well.
 If you're using Kafka, then <https://github.com/bzkf/fhir-to-lakehouse> is another way.
@@ -46,11 +49,70 @@ query depends on.
 
 - If the Library has **no** `relatedArtifact` entries (i.e. it doesn't depend on any
   `ViewDefinition`) **and** it has a `content` entry with `contentType` set to
-  `application/sql;dialect=trino`, the SQL is executed directly against the configured Trino
-  database.
-- Otherwise (the query depends on one or more `ViewDefinition`s, or no `trino`-dialect content is
-  present), the whole Library resource is sent as the `queryResource` input parameter to the
+  `application/sql;dialect=<dialect>`, where `<dialect>` is the configured
+  `query-sql-on-fhir.sql-dialect` (`QUERY_SQL_ON_FHIR_SQL_DIALECT`, `trino` by default), the SQL is
+  executed directly against the configured database. A Library can carry the same criterion in
+  several dialects side by side, one `content` entry each.
+- Otherwise (the query depends on one or more `ViewDefinition`s, or no content in the configured
+  dialect is present), the whole Library resource is sent as the `queryResource` input parameter to the
   [`$sqlquery-run`](https://build.fhir.org/ig/FHIR/sql-on-fhir-v2/OperationDefinition-SQLQueryRun.html)
   operation of a configured sql-on-fhir server. For the development setup, this is a
   [Pathling](https://pathling.csiro.au/) server, configured via the `sql-on-fhir.url` /
   `SQL_ON_FHIR_URL` property.
+
+## Querying FHIR resources with DuckDB
+
+Instead of Trino, `query-sql-on-fhir` can run the eligibility criteria against an embedded, in-memory
+[DuckDB](https://duckdb.org/) that reads FHIR resources straight from NDJSON files, e.g. a
+[FHIR bulk export](https://hl7.org/fhir/uv/bulkdata/). This needs no lakehouse, Hive metastore, or Trino, which
+makes it a good fit for demos and small data sets - but since the files are re-read on every poll, it doesn't
+scale to a production-sized patient population.
+
+To try it, start the Compose demo with the additional `compose.demo-duckdb.yaml` overlay:
+
+```sh
+docker compose --project-name=recruit-demo \
+    --env-file=compose/.demo.env \
+    -f compose/compose.yaml \
+    -f compose/compose.demo.yaml \
+    -f compose/compose.demo-duckdb.yaml up --detach --wait
+```
+
+It is configured using the following settings, shown here as the environment variables used by the
+[`compose.demo-duckdb.yaml`](https://github.com/open-recruit/recruit/blob/master/compose/compose.demo-duckdb.yaml)
+overlay. With the Helm chart, set `querySqlOnFhir.sqlDialect=duckdb` and `querySqlOnFhir.duckdb.initSql` instead.
+
+```yaml
+QUERY_SQL_ON_FHIR_SQL_DIALECT: duckdb
+SPRING_DATASOURCE_URL: "jdbc:duckdb:"
+SPRING_DATASOURCE_DRIVERCLASSNAME: org.duckdb.DuckDBDriver
+# run on every new connection: each one is its own, empty in-memory database
+SPRING_DATASOURCE_HIKARI_CONNECTIONINITSQL: |
+  ATTACH ':memory:' AS fhir;
+  CREATE SCHEMA fhir."default";
+  CREATE VIEW fhir."default".patient AS SELECT * FROM read_json('/data/fhir/Patient.ndjson');
+  CREATE VIEW fhir."default".condition AS SELECT * FROM read_json('/data/fhir/Condition.ndjson');
+  USE fhir."default";
+```
+
+The views are named like the Delta Lake tables queried via Trino (`fhir.default.patient`, ...) and DuckDB infers
+the same nested structure from the JSON resources, so a criterion's DuckDB SQL usually only differs where the
+dialects do. The sample study's Libraries (see
+[`sample-study.fsh`](https://github.com/open-recruit/recruit/blob/master/fhir/ig/input/fsh/sample-study.fsh))
+carry each criterion in both dialects. Differences encountered so far:
+
+| Trino                                                                       | DuckDB                                                                                                                  |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `UNNEST(condition.code.coding) AS condition_coding`                         | `UNNEST(condition.code.coding) AS u(condition_coding)`                                                                  |
+| `date_diff('year', date(patient.birthdate), current_date)` (complete years) | `date_sub('year', CAST(patient.birthdate AS DATE), current_date)` - DuckDB's `date_diff` counts year boundaries instead |
+
+Since DuckDB infers each view's columns from the data, a criterion referencing an element that doesn't occur in any
+of the files (e.g. `Condition.abatementDateTime`) fails, unlike with Pathling's fixed schema.
+
+!!! note
+
+    The DuckDB JDBC driver extracts its native library (~60 MiB) to `/tmp` when it's loaded, so `/tmp` must be large
+    enough and allow executing files - Docker mounts tmpfs `noexec` by default, see the
+    `compose.demo-duckdb.yaml` overlay. Reading from S3-compatible object storage instead of local files works via
+    DuckDB's [`httpfs` extension](https://duckdb.org/docs/stable/core_extensions/httpfs/overview), which is downloaded
+    at runtime and so additionally requires internet access and a writable `extension_directory`.

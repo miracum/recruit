@@ -44,7 +44,8 @@ class SqlQueryExecutorTest {
   private final JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
   private final IGenericClient sqlOnFhirClient = mock(IGenericClient.class, RETURNS_DEEP_STUBS);
 
-  private final SqlQueryExecutor sut = new SqlQueryExecutor(jdbcTemplate, sqlOnFhirClient, false);
+  private final SqlQueryExecutor sut =
+      new SqlQueryExecutor(jdbcTemplate, sqlOnFhirClient, false, "trino");
 
   /**
    * Rows the merged query's {@link ResultSet} should stream back - see {@link #stubJdbcTemplate}.
@@ -53,9 +54,9 @@ class SqlQueryExecutorTest {
 
   /**
    * The merged, all-Trino path is exercised through both a {@code LIMIT 0} column-probe query (see
-   * {@code resolveResultColumns}) and the real merged query (see {@code evaluateAgainstTrino}) -
-   * both go through the same {@code jdbcTemplate.query(String, ResultSetExtractor)} overload, so
-   * this single stub distinguishes them by SQL content: a probe always wraps its criterion SQL with
+   * {@code resolveResultColumns}) and the real merged query (see {@code evaluateDirectly}) - both
+   * go through the same {@code jdbcTemplate.query(String, ResultSetExtractor)} overload, so this
+   * single stub distinguishes them by SQL content: a probe always wraps its criterion SQL with
    * {@code LIMIT 0}, the merged query never does. Probing both {@code SQL_AGE} and {@code
    * SQL_CHEMO} report {@code is_indeterminate}/{@code result_note} present; a test exercising a
    * criterion that omits either column overrides this stub for that criterion's specific probe SQL.
@@ -362,6 +363,37 @@ class SqlQueryExecutorTest {
                 row("patient_id", "pat-2", "is_met", false))));
 
     var results = collect(sut, List.of(criterion));
+
+    assertThat(results).extracting(PatientEligibilityResult::patientId).containsExactly("pat-1");
+    verifyNoInteractions(jdbcTemplate);
+  }
+
+  @Test
+  void evaluateEligibility_withDuckDbDialect_runsOnlyDuckDbContentOfLibraryWithBothDialects() {
+    var duckDbSut = new SqlQueryExecutor(jdbcTemplate, sqlOnFhirClient, false, "duckdb");
+    var library = trinoLibrary("SELECT 'trino' AS dialect FROM age");
+    library
+        .addContent()
+        .setContentType("application/sql; dialect=DuckDB")
+        .setData("SELECT 'duckdb' AS dialect FROM age".getBytes(StandardCharsets.UTF_8));
+
+    collect(duckDbSut, List.of(new EligibilityCriterion(library, "Age >= 18", false)));
+
+    var sqlCaptor = ArgumentCaptor.forClass(String.class);
+    verify(jdbcTemplate, atLeastOnce()).query(sqlCaptor.capture(), any(ResultSetExtractor.class));
+    assertThat(sqlCaptor.getAllValues())
+        .allSatisfy(sql -> assertThat(sql).contains("'duckdb'").doesNotContain("'trino'"));
+    verifyNoInteractions(sqlOnFhirClient);
+  }
+
+  @Test
+  void evaluateEligibility_withDuckDbDialect_delegatesTrinoOnlyLibraryToSqlOnFhir() {
+    var duckDbSut = new SqlQueryExecutor(jdbcTemplate, sqlOnFhirClient, false, "duckdb");
+    var criterion = new EligibilityCriterion(trinoLibrary(SQL_AGE), "Age >= 18", false);
+
+    stubSqlOnFhirResponse(parametersWithRows(List.of(row("patient_id", "pat-1", "is_met", true))));
+
+    var results = collect(duckDbSut, List.of(criterion));
 
     assertThat(results).extracting(PatientEligibilityResult::patientId).containsExactly("pat-1");
     verifyNoInteractions(jdbcTemplate);

@@ -46,14 +46,17 @@ import org.springframework.stereotype.Component;
  * treated as if it had selected {@code CAST(NULL AS BOOLEAN)} / {@code CAST(NULL AS VARCHAR)} for
  * it.
  *
- * <p>When every criterion's Library has {@code application/sql;dialect=trino} content and no {@code
- * relatedArtifact}, the merge is expressed as a single generated SQL query (one CTE per criterion)
- * run directly against Trino - this is the scalable path, since it never pulls a full population's
- * worth of rows over JDBC into this module's heap. If any criterion instead needs delegating to the
- * sql-on-fhir server's {@code $sqlquery-run} operation (because it depends on a ViewDefinition, or
- * uses a different dialect), the merge falls back to resolving each criterion's full-population
- * result independently and merging them in application memory - this does not scale as well and
- * should be avoided for large patient populations.
+ * <p>When every criterion's Library has {@code application/sql;dialect=<sql-dialect>} content (the
+ * dialect of the configured JDBC database, e.g. {@code trino} or {@code duckdb}, see {@code
+ * query-sql-on-fhir.sql-dialect}) and no {@code relatedArtifact}, the merge is expressed as a
+ * single generated SQL query (one CTE per criterion) run directly against that database - this is
+ * the scalable path, since it never pulls a full population's worth of rows over JDBC into this
+ * module's heap. The generated SQL around the criteria only uses syntax shared by all supported
+ * dialects. If any criterion instead needs delegating to the sql-on-fhir server's {@code
+ * $sqlquery-run} operation (because it depends on a ViewDefinition, or has no content in the
+ * configured dialect), the merge falls back to resolving each criterion's full-population result
+ * independently and merging them in application memory - this does not scale as well and should be
+ * avoided for large patient populations.
  *
  * <p>{@link #computeFunnel} answers a different question against the same criteria: not "who are
  * the candidates" but "how many patients survive after each cumulative step" - the attrition
@@ -65,7 +68,7 @@ public class SqlQueryExecutor {
 
   private static final Logger log = LoggerFactory.getLogger(SqlQueryExecutor.class);
 
-  private static final String TRINO_SQL_CONTENT_TYPE = "application/sql;dialect=trino";
+  private static final String SQL_CONTENT_TYPE_PREFIX = "application/sql;dialect=";
   private static final String PATIENT_ID_COLUMN = "patient_id";
   private static final String IS_MET_COLUMN = "is_met";
   private static final String IS_INDETERMINATE_COLUMN = "is_indeterminate";
@@ -75,14 +78,19 @@ public class SqlQueryExecutor {
   private final JdbcTemplate jdbcTemplate;
   private final IGenericClient sqlOnFhirClient;
   private final boolean requireAllCriteriaMet;
+  private final String sqlDialect;
+  private final String sqlContentType;
 
   public SqlQueryExecutor(
       JdbcTemplate jdbcTemplate,
       @Qualifier("sqlOnFhirClient") IGenericClient sqlOnFhirClient,
-      @Value("${query-sql-on-fhir.require-all-criteria-met:false}") boolean requireAllCriteriaMet) {
+      @Value("${query-sql-on-fhir.require-all-criteria-met:false}") boolean requireAllCriteriaMet,
+      @Value("${query-sql-on-fhir.sql-dialect:trino}") String sqlDialect) {
     this.jdbcTemplate = jdbcTemplate;
     this.sqlOnFhirClient = sqlOnFhirClient;
     this.requireAllCriteriaMet = requireAllCriteriaMet;
+    this.sqlDialect = sqlDialect.trim().toLowerCase(Locale.ROOT);
+    this.sqlContentType = SQL_CONTENT_TYPE_PREFIX + this.sqlDialect;
   }
 
   /**
@@ -91,7 +99,7 @@ public class SqlQueryExecutor {
    * least one unknown). Patients for whom at least one criterion is definitely not met are never
    * passed to {@code onResult}.
    *
-   * <p>On the all-Trino path, results are streamed row-by-row straight from the JDBC {@link
+   * <p>On the all-direct path, results are streamed row-by-row straight from the JDBC {@link
    * ResultSet} - at most one patient's worth of data is ever held in memory here, regardless of
    * population size. The delegated fallback path cannot offer that guarantee (see {@link
    * #evaluateWithFallbackMerge}) and instead resolves its full result in memory before invoking
@@ -103,14 +111,15 @@ public class SqlQueryExecutor {
       return;
     }
 
-    if (criteria.stream().allMatch(this::isTrinoDirect)) {
-      evaluateAgainstTrino(criteria, onResult);
+    if (criteria.stream().allMatch(this::isDirect)) {
+      evaluateDirectly(criteria, onResult);
       return;
     }
 
     log.warn(
-        "Study has a mix of Trino-direct and sql-on-fhir-delegated criteria; falling back to "
-            + "resolving each criterion independently and merging in application memory.");
+        "Study has a mix of {}-direct and sql-on-fhir-delegated criteria; falling back to "
+            + "resolving each criterion independently and merging in application memory.",
+        sqlDialect);
     evaluateWithFallbackMerge(criteria, onResult);
   }
 
@@ -119,10 +128,10 @@ public class SqlQueryExecutor {
    * run as an independent scalar count - deliberately not derived from {@code crit_0}, since a
    * criterion's SQL (especially the anchor) may already apply a narrowing {@code WHERE} clause and
    * so isn't reliable as "everyone who was screened" - and each criterion's cumulative
-   * remaining-candidate count is then computed either via one aggregate Trino query (see {@link
+   * remaining-candidate count is then computed either via one aggregate direct query (see {@link
    * #buildFunnelQuery}) or, on the delegated/mixed fallback path, from the same per-criterion maps
    * {@link #resolveRawCriterionResults} already resolves into memory for {@link
-   * #evaluateWithFallbackMerge} - so, unlike the streaming Trino path, this doesn't add a second
+   * #evaluateWithFallbackMerge} - so, unlike the streaming direct path, this doesn't add a second
    * full resolution pass on that already-non-scalable path.
    */
   public FunnelResult computeFunnel(
@@ -133,22 +142,26 @@ public class SqlQueryExecutor {
 
     var totalPopulation = jdbcTemplate.queryForObject(totalPopulationSql, Long.class);
 
-    if (criteria.stream().allMatch(this::isTrinoDirect)) {
-      return computeFunnelAgainstTrino(criteria, totalPopulation);
+    if (criteria.stream().allMatch(this::isDirect)) {
+      return computeFunnelDirectly(criteria, totalPopulation);
     }
 
     log.warn(
-        "Study has a mix of Trino-direct and sql-on-fhir-delegated criteria; falling back to "
+        "Study has a mix of {}-direct and sql-on-fhir-delegated criteria; falling back to "
             + "resolving each criterion independently and merging in application memory for the "
-            + "attrition funnel too.");
+            + "attrition funnel too.",
+        sqlDialect);
     return computeFunnelWithFallbackMerge(criteria, totalPopulation);
   }
 
-  private FunnelResult computeFunnelAgainstTrino(
+  private FunnelResult computeFunnelDirectly(
       List<EligibilityCriterion> criteria, long totalPopulation) {
     var sql = buildFunnelQuery(criteria);
     log.info(
-        "Running attrition funnel query for {} criteria against Trino:\n{}", criteria.size(), sql);
+        "Running attrition funnel query for {} criteria against {}:\n{}",
+        criteria.size(),
+        sqlDialect,
+        sql);
 
     var steps =
         jdbcTemplate.query(
@@ -212,41 +225,41 @@ public class SqlQueryExecutor {
     return new FunnelResult(totalPopulation, steps);
   }
 
-  private boolean isTrinoDirect(EligibilityCriterion criterion) {
+  private boolean isDirect(EligibilityCriterion criterion) {
     return !criterion.library().hasRelatedArtifact()
-        && findTrinoDialectContent(criterion.library()).isPresent();
+        && findDialectContent(criterion.library()).isPresent();
   }
 
-  private Optional<Attachment> findTrinoDialectContent(Library library) {
+  private Optional<Attachment> findDialectContent(Library library) {
     return library.getContent().stream()
-        .filter(a -> isTrinoDialect(a.getContentType()))
+        .filter(a -> isConfiguredDialect(a.getContentType()))
         .findFirst();
   }
 
-  private boolean isTrinoDialect(String contentType) {
+  private boolean isConfiguredDialect(String contentType) {
     if (contentType == null) {
       return false;
     }
     var normalized = contentType.replaceAll("\\s+", "").toLowerCase(Locale.ROOT);
-    return TRINO_SQL_CONTENT_TYPE.equals(normalized);
+    return sqlContentType.equals(normalized);
   }
 
-  private String trinoSql(EligibilityCriterion criterion) {
+  private String directSql(EligibilityCriterion criterion) {
     return new String(
-        findTrinoDialectContent(criterion.library()).orElseThrow().getData(),
-        StandardCharsets.UTF_8);
+        findDialectContent(criterion.library()).orElseThrow().getData(), StandardCharsets.UTF_8);
   }
 
-  // ---- all-Trino path: one generated, merged query ----
+  // ---- all-direct path: one generated, merged query ----
 
-  private void evaluateAgainstTrino(
+  private void evaluateDirectly(
       List<EligibilityCriterion> criteria, Consumer<PatientEligibilityResult> onResult) {
-    var criterionColumns = criteria.stream().map(c -> resolveResultColumns(trinoSql(c))).toList();
+    var criterionColumns = criteria.stream().map(c -> resolveResultColumns(directSql(c))).toList();
 
     var sql = buildMergedQuery(criteria, criterionColumns);
     log.info(
-        "Running merged eligibility query for {} criteria against Trino:\n{}",
+        "Running merged eligibility query for {} criteria against {}:\n{}",
         criteria.size(),
+        sqlDialect,
         sql);
 
     // A criterion's SQL is expected to return at most one row per patient_id - the merged query's
@@ -282,11 +295,11 @@ public class SqlQueryExecutor {
 
   /**
    * The lowercased column labels a criterion's SQL actually returns, found by probing it with a
-   * {@code LIMIT 0} wrapper - cheap since Trino doesn't need to scan any data to plan a query with
-   * no rows, and independent of the SQL's own result count. Used to tell whether the optional
-   * {@code is_indeterminate}/{@code result_note} columns are present before they're referenced by
-   * name in the generated merged query, since referencing a column a criterion's SQL doesn't
-   * actually select would otherwise fail the whole merged query at the database.
+   * {@code LIMIT 0} wrapper - cheap since the database doesn't need to scan any data to plan a
+   * query with no rows, and independent of the SQL's own result count. Used to tell whether the
+   * optional {@code is_indeterminate}/{@code result_note} columns are present before they're
+   * referenced by name in the generated merged query, since referencing a column a criterion's SQL
+   * doesn't actually select would otherwise fail the whole merged query at the database.
    */
   private Set<String> resolveResultColumns(String sql) {
     var probeSql = "SELECT * FROM (\n" + sql + "\n) AS probe LIMIT 0";
@@ -315,8 +328,8 @@ public class SqlQueryExecutor {
    * DISTINCT}/{@code GROUP BY} would otherwise fan that patient out into duplicate rows here. This
    * only collapses rows that come out fully identical, though; a criterion returning genuinely
    * conflicting rows for the same patient (e.g. {@code is_met} both {@code true} and {@code false})
-   * is a data problem in that criterion's SQL this can't safely resolve - {@link
-   * #evaluateAgainstTrino} still guards against that case defensively.
+   * is a data problem in that criterion's SQL this can't safely resolve - {@link #evaluateDirectly}
+   * still guards against that case defensively.
    */
   private String buildMergedQuery(
       List<EligibilityCriterion> criteria, List<Set<String>> criterionColumns) {
@@ -401,7 +414,7 @@ public class SqlQueryExecutor {
           .append(alias)
           .append(" AS (\n")
           .append("SELECT DISTINCT * FROM (\n")
-          .append(trinoSql(criterion))
+          .append(directSql(criterion))
           .append("\n) AS ")
           .append(alias)
           .append("_raw\n)");
@@ -465,14 +478,15 @@ public class SqlQueryExecutor {
 
   /**
    * Reads one merged-query row directly off the {@link ResultSet} - deliberately not via a {@code
-   * Map}-collecting row mapper, so that streaming callers (see {@link #evaluateAgainstTrino}) never
+   * Map}-collecting row mapper, so that streaming callers (see {@link #evaluateDirectly}) never
    * have more than the current row's data resident in memory. {@link JdbcUtils#getResultSetValue}
    * (rather than e.g. {@code rs.getBoolean}) is used so a SQL {@code NULL} comes through as Java
    * {@code null} instead of being coerced to {@code false}.
    */
   private PatientEligibilityResult toPatientEligibilityResult(
       ResultSet rs, List<EligibilityCriterion> criteria) throws SQLException {
-    var patientId = (String) JdbcUtils.getResultSetValue(rs, rs.findColumn(PATIENT_ID_COLUMN));
+    var patientId =
+        patientIdAsString(JdbcUtils.getResultSetValue(rs, rs.findColumn(PATIENT_ID_COLUMN)));
 
     var outcomes = new ArrayList<CriterionOutcome>();
     for (var i = 0; i < criteria.size(); i++) {
@@ -494,6 +508,15 @@ public class SqlQueryExecutor {
     }
 
     return new PatientEligibilityResult(patientId, outcomes);
+  }
+
+  /**
+   * A criterion's {@code patient_id} as a string, whatever SQL type the database returned it as -
+   * e.g. DuckDB infers FHIR ids that happen to be UUIDs (as Synthea generates them) as {@code UUID}
+   * when reading them from JSON, which the JDBC driver returns as a {@link java.util.UUID}.
+   */
+  private static String patientIdAsString(Object patientId) {
+    return patientId == null ? null : patientId.toString();
   }
 
   // ---- mixed/delegated fallback: resolve each criterion independently, merge in Java ----
@@ -534,11 +557,11 @@ public class SqlQueryExecutor {
 
   private Map<String, RawCriterionResult> resolveRawCriterionResults(
       EligibilityCriterion criterion) {
-    if (isTrinoDirect(criterion)) {
-      var rows = jdbcTemplate.queryForList(trinoSql(criterion));
+    if (isDirect(criterion)) {
+      var rows = jdbcTemplate.queryForList(directSql(criterion));
       var results = new LinkedHashMap<String, RawCriterionResult>();
       for (var row : rows) {
-        var patientId = (String) row.get(PATIENT_ID_COLUMN);
+        var patientId = patientIdAsString(row.get(PATIENT_ID_COLUMN));
         var met = (Boolean) row.get(IS_MET_COLUMN);
         var indeterminate = Boolean.TRUE.equals(row.get(IS_INDETERMINATE_COLUMN));
         var note = (String) row.get(RESULT_NOTE_COLUMN);

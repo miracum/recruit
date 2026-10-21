@@ -416,7 +416,7 @@ list:
   extraVolumeMounts: []
 
 querySqlOnFhir:
-  # -- Whether the Trino SQL-based query module should be enabled
+  # -- Whether the SQL-based query module (query-sql-on-fhir) should be enabled
   enabled: false
   # -- Number of replicas of the query module to run.
   # Running more than one replica for this component is discouraged.
@@ -467,6 +467,17 @@ querySqlOnFhir:
     port: 8080
     # -- the service port for the actuator/metrics endpoint
     metricsPort: 8081
+
+  # -- SQL dialect of the database the eligibility criteria's SQL is run against: `trino` (see `querySqlOnFhir.trino`)
+  # or `duckdb` (an embedded, in-memory DuckDB, see `querySqlOnFhir.duckdb`). A criterion Library is run directly
+  # if it has `application/sql;dialect=<sqlDialect>` content.
+  sqlDialect: "trino"
+
+  duckdb:
+    # -- SQL run on every new DuckDB connection, typically to create the tables the criteria query as views over
+    # the FHIR resources, e.g. `CREATE VIEW patient AS SELECT * FROM read_json('/data/fhir/Patient.ndjson');`.
+    # Mount local files via `querySqlOnFhir.extraVolumes`/`extraVolumeMounts`. Only used if `sqlDialect=duckdb`.
+    initSql: ""
 
   trino:
     # -- JDBC URL of the Trino server, e.g. `jdbc:trino://localhost:8080/fhir/default`

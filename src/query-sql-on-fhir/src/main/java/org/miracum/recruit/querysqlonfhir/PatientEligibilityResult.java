@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * One patient's merged eligibility outcome across every criterion of a study. Only patients whose
  * {@link #overallMet()} is not definitely {@code false} (i.e. candidate or unknown) should ever be
- * constructed here - definite non-matches are filtered out at the source (in SQL for the Trino
+ * constructed here - definite non-matches are filtered out at the source (in SQL for the direct
  * path, in Java for the delegated fallback) rather than being carried around and dropped later.
  */
 public record PatientEligibilityResult(String patientId, List<CriterionOutcome> criteria) {

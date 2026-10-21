@@ -5,6 +5,13 @@ query-sql-on-fhir:
   # Intended for running this module as a Job/Argo Workflow step instead of a long-running
   # service; the cron schedule below is ignored in this mode.
   run-mode: scheduled
+  # The SQL dialect of the database configured via spring.datasource. A criterion Library is run
+  # directly against that database if it has `application/sql;dialect=<sql-dialect>` content, so a
+  # Library can carry the same criterion for several dialects side by side. Bundled JDBC drivers:
+  # "trino" (io.trino.jdbc.TrinoDriver) and "duckdb" (org.duckdb.DuckDBDriver) - for DuckDB, the
+  # tables the criteria query are typically created as views over the FHIR resources via
+  # spring.datasource.hikari.connection-init-sql, see docs/trino/index.md.
+  sql-dialect: trino
   schedule:
     # every 1 hour
     cron: "@hourly"
@@ -31,7 +38,7 @@ query-sql-on-fhir:
     # order) as a Measure/MeasureReport pair every poll cycle. Disabled by default: unlike the main
     # eligibility query, the funnel query cannot benefit from filter-pushdown (it needs a count of
     # excluded patients too), so it is a materially more expensive query against the same data -
-    # enable only once that cost has been measured for your Trino deployment.
+    # enable only once that cost has been measured for your database deployment.
     enabled: false
     # A standalone "SELECT COUNT(*) FROM ..." query defining the funnel's anchor "total population"
     # step - deliberately independent of the first criterion's own SQL, which may already apply a
@@ -50,7 +57,7 @@ fhir:
 
 # base URL of a sql-on-fhir server (e.g. Pathling) implementing the $sqlquery-run operation.
 # only required if any of the polled SQLQuery Library resources depend on ViewDefinitions
-# (via relatedArtifact) or use a SQL dialect other than trino.
+# (via relatedArtifact) or have no content in the configured query-sql-on-fhir.sql-dialect.
 sql-on-fhir:
   url: ""
 

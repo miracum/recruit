@@ -4,8 +4,8 @@
     "fshName": "RecruitSampleStudyTransaction",
     "fshType": "Instance",
     "fshFile": "sample-study.fsh",
-    "startLine": 123,
-    "endLine": 133
+    "startLine": 171,
+    "endLine": 181
   },
   {
     "outputFile": "Bundle-recruit-search-parameters-transaction.json",

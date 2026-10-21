@@ -27,6 +27,12 @@ either Compose or Helm.
     The first start takes several minutes to download the images, pre-load the FHIR server with synthetic data,
     and register the same resources as Delta Lake tables for querying by Trino.
 
+    ??? tip "Lightweight demo without Trino"
+
+        Adding `-f compose/compose.demo-duckdb.yaml` after `compose.demo.yaml` skips the lakehouse and Trino
+        entirely and instead queries the synthetic data's NDJSON files directly using an embedded DuckDB, see
+        [Querying FHIR resources with DuckDB](../trino/index.md#querying-fhir-resources-with-duckdb).
+
     Once the command exits, you can open the screening list at <http://127.0.0.1:32080> and see the demo study.
 
     To stop and remove everything, including demo data, run:

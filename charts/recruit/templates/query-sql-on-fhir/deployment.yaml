@@ -91,6 +91,19 @@ spec:
           env:
             - name: FHIR_URL
               value: {{ include "recruit.fhirserver.url" $ }}
+            - name: QUERY_SQL_ON_FHIR_SQL_DIALECT
+              value: {{ .sqlDialect | quote }}
+            {{- if eq .sqlDialect "duckdb" }}
+            # every connection is its own, empty in-memory database, set up by the init SQL
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:duckdb:"
+            - name: SPRING_DATASOURCE_DRIVERCLASSNAME
+              value: org.duckdb.DuckDBDriver
+            {{- with .duckdb.initSql }}
+            - name: SPRING_DATASOURCE_HIKARI_CONNECTIONINITSQL
+              value: {{ tpl . $ | quote }}
+            {{- end }}
+            {{- else }}
             - name: SPRING_DATASOURCE_URL
               value: {{ include "recruit.trino.jdbcUrl" $ | quote }}
             - name: SPRING_DATASOURCE_USERNAME
@@ -100,6 +113,7 @@ spec:
                 secretKeyRef:
                   name: {{ include "recruit.trino.secret.name" $ }}
                   key: {{ include "recruit.trino.secret.key" $ }}
+            {{- end }}
             - name: QUERY_SQL_ON_FHIR_SCHEDULE_CRON
               value: {{ .schedule | quote }}
             - name: SQL_ON_FHIR_URL

@@ -123,6 +123,16 @@
               }
             ],
             "data": "U0VMRUNUCiAgICBwYXRpZW50LmlkIEFTIHBhdGllbnRfaWQsCiAgICBFWElTVFMgKAogICAgICAgIFNFTEVDVCAxCiAgICAgICAgRlJPTQogICAgICAgICAgICBmaGlyLmRlZmF1bHQuY29uZGl0aW9uLAogICAgICAgICAgICBVTk5FU1QoY29uZGl0aW9uLmNvZGUuY29kaW5nKSBBUyBjb25kaXRpb25fY29kaW5nCiAgICAgICAgV0hFUkUKICAgICAgICAgICAgY29uZGl0aW9uLnN1YmplY3QucmVmZXJlbmNlID0gQ09OQ0FUKCdQYXRpZW50LycsIHBhdGllbnQuaWQpCiAgICAgICAgICAgIEFORCBjb25kaXRpb25fY29kaW5nLnN5c3RlbSA9ICdodHRwOi8vc25vbWVkLmluZm8vc2N0JwogICAgICAgICAgICBBTkQgY29uZGl0aW9uX2NvZGluZy5jb2RlIElOICgnMTA1MDkwMDInKQogICAgKSBBUyBpc19tZXQsCiAgICBDQVNUKE5VTEwgQVMgQk9PTEVBTikgQVMgaXNfaW5kZXRlcm1pbmF0ZSwKICAgIENBU1QoTlVMTCBBUyBWQVJDSEFSKSBBUyByZXN1bHRfbm90ZQpGUk9NIGZoaXIuZGVmYXVsdC5wYXRpZW50IEFTIHBhdGllbnQ="
+          },
+          {
+            "contentType": "application/sql;dialect=duckdb",
+            "extension": [
+              {
+                "url": "https://sql-on-fhir.org/ig/StructureDefinition/sql-text",
+                "valueString": "SELECT\n    patient.id AS patient_id,\n    EXISTS (\n        SELECT 1\n        FROM\n            fhir.default.condition,\n            UNNEST(condition.code.coding) AS u(condition_coding)\n        WHERE\n            condition.subject.reference = CONCAT('Patient/', patient.id)\n            AND condition_coding.system = 'http://snomed.info/sct'\n            AND condition_coding.code IN ('10509002')\n    ) AS is_met,\n    CAST(NULL AS BOOLEAN) AS is_indeterminate,\n    CAST(NULL AS VARCHAR) AS result_note\nFROM fhir.default.patient AS patient"
+              }
+            ],
+            "data": "U0VMRUNUCiAgICBwYXRpZW50LmlkIEFTIHBhdGllbnRfaWQsCiAgICBFWElTVFMgKAogICAgICAgIFNFTEVDVCAxCiAgICAgICAgRlJPTQogICAgICAgICAgICBmaGlyLmRlZmF1bHQuY29uZGl0aW9uLAogICAgICAgICAgICBVTk5FU1QoY29uZGl0aW9uLmNvZGUuY29kaW5nKSBBUyB1KGNvbmRpdGlvbl9jb2RpbmcpCiAgICAgICAgV0hFUkUKICAgICAgICAgICAgY29uZGl0aW9uLnN1YmplY3QucmVmZXJlbmNlID0gQ09OQ0FUKCdQYXRpZW50LycsIHBhdGllbnQuaWQpCiAgICAgICAgICAgIEFORCBjb25kaXRpb25fY29kaW5nLnN5c3RlbSA9ICdodHRwOi8vc25vbWVkLmluZm8vc2N0JwogICAgICAgICAgICBBTkQgY29uZGl0aW9uX2NvZGluZy5jb2RlIElOICgnMTA1MDkwMDInKQogICAgKSBBUyBpc19tZXQsCiAgICBDQVNUKE5VTEwgQVMgQk9PTEVBTikgQVMgaXNfaW5kZXRlcm1pbmF0ZSwKICAgIENBU1QoTlVMTCBBUyBWQVJDSEFSKSBBUyByZXN1bHRfbm90ZQpGUk9NIGZoaXIuZGVmYXVsdC5wYXRpZW50IEFTIHBhdGllbnQ="
           }
         ],
         "title": "Bronchitis diagnosis",
@@ -163,6 +173,16 @@
               }
             ],
             "data": "U0VMRUNUCiAgICBwYXRpZW50LmlkIEFTIHBhdGllbnRfaWQsCiAgICBjYXN0KE5VTEwgQVMgQk9PTEVBTikgQVMgaXNfaW5kZXRlcm1pbmF0ZSwKICAgIGNhc3QoTlVMTCBBUyBWQVJDSEFSKSBBUyByZXN1bHRfbm90ZSwKICAgIGRhdGVfZGlmZigneWVhcicsIGRhdGUocGF0aWVudC5iaXJ0aGRhdGUpLCBjdXJyZW50X2RhdGUpID4gMTggQVMgaXNfbWV0CkZST00gZmhpci5kZWZhdWx0LnBhdGllbnQgQVMgcGF0aWVudA=="
+          },
+          {
+            "contentType": "application/sql;dialect=duckdb",
+            "extension": [
+              {
+                "url": "https://sql-on-fhir.org/ig/StructureDefinition/sql-text",
+                "valueString": "SELECT\n    patient.id AS patient_id,\n    cast(NULL AS BOOLEAN) AS is_indeterminate,\n    cast(NULL AS VARCHAR) AS result_note,\n    date_sub('year', CAST(patient.birthdate AS DATE), current_date) > 18 AS is_met\nFROM fhir.default.patient AS patient"
+              }
+            ],
+            "data": "U0VMRUNUCiAgICBwYXRpZW50LmlkIEFTIHBhdGllbnRfaWQsCiAgICBjYXN0KE5VTEwgQVMgQk9PTEVBTikgQVMgaXNfaW5kZXRlcm1pbmF0ZSwKICAgIGNhc3QoTlVMTCBBUyBWQVJDSEFSKSBBUyByZXN1bHRfbm90ZSwKICAgIGRhdGVfc3ViKCd5ZWFyJywgQ0FTVChwYXRpZW50LmJpcnRoZGF0ZSBBUyBEQVRFKSwgY3VycmVudF9kYXRlKSA+IDE4IEFTIGlzX21ldApGUk9NIGZoaXIuZGVmYXVsdC5wYXRpZW50IEFTIHBhdGllbnQ="
           }
         ],
         "title": "Age over 18",
@@ -203,6 +223,16 @@
               }
             ],
             "data": "U0VMRUNUCiAgICBwYXRpZW50LmlkIEFTIHBhdGllbnRfaWQsCiAgICBFWElTVFMgKAogICAgICAgIFNFTEVDVCAxCiAgICAgICAgRlJPTQogICAgICAgICAgICBmaGlyLmRlZmF1bHQuY29uZGl0aW9uLAogICAgICAgICAgICBVTk5FU1QoY29uZGl0aW9uLmNvZGUuY29kaW5nKSBBUyBjb25kaXRpb25fY29kaW5nCiAgICAgICAgV0hFUkUKICAgICAgICAgICAgY29uZGl0aW9uLnN1YmplY3QucmVmZXJlbmNlID0gQ09OQ0FUKCdQYXRpZW50LycsIHBhdGllbnQuaWQpCiAgICAgICAgICAgIEFORCBjb25kaXRpb25fY29kaW5nLnN5c3RlbSA9ICdodHRwOi8vc25vbWVkLmluZm8vc2N0JwogICAgICAgICAgICBBTkQgY29uZGl0aW9uX2NvZGluZy5jb2RlIElOICgnOTEzMDIwMDgnKQogICAgKSBBUyBpc19tZXQsCiAgICBDQVNUKE5VTEwgQVMgQk9PTEVBTikgQVMgaXNfaW5kZXRlcm1pbmF0ZSwKICAgIENBU1QoTlVMTCBBUyBWQVJDSEFSKSBBUyByZXN1bHRfbm90ZQpGUk9NIGZoaXIuZGVmYXVsdC5wYXRpZW50IEFTIHBhdGllbnQ="
+          },
+          {
+            "contentType": "application/sql;dialect=duckdb",
+            "extension": [
+              {
+                "url": "https://sql-on-fhir.org/ig/StructureDefinition/sql-text",
+                "valueString": "SELECT\n    patient.id AS patient_id,\n    EXISTS (\n        SELECT 1\n        FROM\n            fhir.default.condition,\n            UNNEST(condition.code.coding) AS u(condition_coding)\n        WHERE\n            condition.subject.reference = CONCAT('Patient/', patient.id)\n            AND condition_coding.system = 'http://snomed.info/sct'\n            AND condition_coding.code IN ('91302008')\n    ) AS is_met,\n    CAST(NULL AS BOOLEAN) AS is_indeterminate,\n    CAST(NULL AS VARCHAR) AS result_note\nFROM fhir.default.patient AS patient"
+              }
+            ],
+            "data": "U0VMRUNUCiAgICBwYXRpZW50LmlkIEFTIHBhdGllbnRfaWQsCiAgICBFWElTVFMgKAogICAgICAgIFNFTEVDVCAxCiAgICAgICAgRlJPTQogICAgICAgICAgICBmaGlyLmRlZmF1bHQuY29uZGl0aW9uLAogICAgICAgICAgICBVTk5FU1QoY29uZGl0aW9uLmNvZGUuY29kaW5nKSBBUyB1KGNvbmRpdGlvbl9jb2RpbmcpCiAgICAgICAgV0hFUkUKICAgICAgICAgICAgY29uZGl0aW9uLnN1YmplY3QucmVmZXJlbmNlID0gQ09OQ0FUKCdQYXRpZW50LycsIHBhdGllbnQuaWQpCiAgICAgICAgICAgIEFORCBjb25kaXRpb25fY29kaW5nLnN5c3RlbSA9ICdodHRwOi8vc25vbWVkLmluZm8vc2N0JwogICAgICAgICAgICBBTkQgY29uZGl0aW9uX2NvZGluZy5jb2RlIElOICgnOTEzMDIwMDgnKQogICAgKSBBUyBpc19tZXQsCiAgICBDQVNUKE5VTEwgQVMgQk9PTEVBTikgQVMgaXNfaW5kZXRlcm1pbmF0ZSwKICAgIENBU1QoTlVMTCBBUyBWQVJDSEFSKSBBUyByZXN1bHRfbm90ZQpGUk9NIGZoaXIuZGVmYXVsdC5wYXRpZW50IEFTIHBhdGllbnQ="
           }
         ],
         "title": "Sepsis condition",
