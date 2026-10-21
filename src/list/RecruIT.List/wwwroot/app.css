@@ -16,6 +16,20 @@ html, body {
     padding-top: 1.1rem;
 }
 
+/* Sidebar logo mark (see MainLayout.razor): the light-theme variant has a dark magnifier, the
+   dark-theme one a light magnifier, switched on the theme's `.dark` class. */
+.app-logo-dark {
+    display: none;
+}
+
+.dark .app-logo-light {
+    display: none;
+}
+
+.dark .app-logo-dark {
+    display: block;
+}
+
 h1:focus {
     outline: none;
 }
