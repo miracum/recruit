@@ -8,7 +8,7 @@
     "Group"
   ],
   "status": "active",
-  "code": "characteristic",
+  "code": "characteristic-reference",
   "type": "reference",
-  "expression": "characteristic.value.ofType(Reference)"
+  "expression": "Group.characteristic.value.ofType(Reference)"
 }

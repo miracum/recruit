@@ -1,5 +1,11 @@
-RuleSet: ExtensionReferenceExpression(extensionId)
-* expression = "extension('https://openrecruit.dev/fhir/StructureDefinition/{extensionId}').value.ofType(Reference)"
+// Expressions must start with the base resource type: HAPI accepts unprefixed expressions but
+// silently never indexes them, so searches on them return nothing. A SearchParameter with several
+// bases therefore needs a union of one prefixed path per base.
+RuleSet: ExtensionReferenceExpression(resourceType, extensionId)
+* expression = "{resourceType}.extension('https://openrecruit.dev/fhir/StructureDefinition/{extensionId}').value.ofType(Reference)"
+
+RuleSet: ExtensionReferenceUnionExpression(resourceType1, resourceType2, extensionId)
+* expression = "{resourceType1}.extension('https://openrecruit.dev/fhir/StructureDefinition/{extensionId}').value.ofType(Reference) | {resourceType2}.extension('https://openrecruit.dev/fhir/StructureDefinition/{extensionId}').value.ofType(Reference)"
 
 RuleSet: PutEntry(resource, url)
 * entry[+].resource = {resource}
@@ -16,7 +22,7 @@ Usage: #definition
 * status = #active
 * code = #enrollment
 * type = #reference
-* expression = "enrollment"
+* expression = "ResearchStudy.enrollment"
 * target = #Group
 
 Instance: GroupCharacteristic
@@ -27,9 +33,11 @@ Usage: #definition
 * description = "An entity referenced in a characteristic"
 * base = #Group
 * status = #active
-* code = #characteristic
+// not "characteristic": that's R4's built-in token parameter on Group.characteristic.code, and
+// HAPI rejects direct searches on a reference parameter that reuses its code (HAPI-1241)
+* code = #characteristic-reference
 * type = #reference
-* expression = "characteristic.value.ofType(Reference)"
+* expression = "Group.characteristic.value.ofType(Reference)"
 
 Instance: SearchParameterBelongsToStudy
 InstanceOf: SearchParameter
@@ -42,7 +50,7 @@ Usage: #definition
 * status = #active
 * code = #belongs-to-study
 * type = #reference
-* insert ExtensionReferenceExpression(belongs-to-study)
+* insert ExtensionReferenceUnionExpression(List, MeasureReport, belongs-to-study)
 * target = #ResearchStudy
 
 Instance: ObservationDerivedFromLibrary
@@ -55,7 +63,7 @@ Usage: #definition
 * status = #active
 * code = #derived-from-library
 * type = #reference
-* insert ExtensionReferenceExpression(eligibility-assessment-derived-from-library)
+* insert ExtensionReferenceExpression(Observation, eligibility-assessment-derived-from-library)
 * target = #Library
 
 Instance: RecruitSearchParametersTransaction
