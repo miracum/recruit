@@ -507,6 +507,9 @@
   <data name="App.Errors.LibrariesLoadFailed" xml:space="preserve">
     <value>Library-Ressourcen konnten nicht geladen werden.</value>
   </data>
+  <data name="App.Errors.StudyCriteriaLoadFailed" xml:space="preserve">
+    <value>Die Einschlusskriterien der ausgewählten Studie konnten nicht geladen werden.</value>
+  </data>
   <data name="App.Errors.ResearchStudiesLoadFailed" xml:space="preserve">
     <value>ResearchStudy-Ressourcen konnten nicht geladen werden.</value>
   </data>
@@ -866,6 +869,9 @@
   </data>
   <data name="App.CriteriaManager.SubmitErrorTitle" xml:space="preserve">
     <value>Übermittlung fehlgeschlagen</value>
+  </data>
+  <data name="App.CriteriaManager.StudyCriteriaLoadErrorTitle" xml:space="preserve">
+    <value>Studie konnte nicht geladen werden</value>
   </data>
   <data name="App.NotificationTest.PageTitle" xml:space="preserve">
     <value>Benachrichtigungstest</value>

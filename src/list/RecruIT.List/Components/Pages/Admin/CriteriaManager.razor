@@ -189,7 +189,11 @@ else
                         </BbButton>
                     </div>
 
-                    @if (_criteria.Count == 0)
+                    @if (_studyCriteriaLoading)
+                    {
+                        <BbSkeleton Class="bb:h-24 bb:w-full" />
+                    }
+                    else if (_criteria.Count == 0)
                     {
                         <p class="bb:text-sm bb:text-muted-foreground">@Localizer["App.CriteriaManager.NoCriteriaMessage"]</p>
                     }
@@ -251,11 +255,21 @@ else
 
     private bool _submitting;
 
+    private bool _studyCriteriaLoading;
+
+    /// <summary>The picked existing study's own criteria, dropped again if the study is cleared.</summary>
+    private readonly List<CriterionDraft> _studyCriteria = [];
+
     private string PreviewJson => CriteriaService.BuildPreviewJson(_studyDraft, _criteria);
 
-    /// <summary>A new study needs a Title to be worth submitting; an existing one always has one already.</summary>
+    /// <summary>
+    /// A new study needs a Title to be worth submitting; an existing one always has one already.
+    /// Never while an existing study's criteria are still loading: submitting replaces its
+    /// enrollment with only the criteria listed here, so it would drop the ones not loaded yet.
+    /// </summary>
     private bool CanSubmit =>
         !_submitting
+        && !_studyCriteriaLoading
         && (_studyDraft.ExistingStudyId is not null || !string.IsNullOrWhiteSpace(_studyDraft.Title));
 
     private List<LibrarySummaryDto> FilteredLibraries =>
@@ -323,10 +337,47 @@ else
                 Acronym = study.Acronym ?? string.Empty,
                 Description = study.Description ?? string.Empty,
             };
+            await LoadStudyCriteriaAsync(study.Id);
         }
     }
 
-    private void ClearExistingStudy() => _studyDraft = new ResearchStudyDraft();
+    /// <summary>
+    /// Replaces any previously picked study's criteria with this study's own, ahead of criteria
+    /// already drafted on this page. If they can't be loaded, the study is unpicked again rather
+    /// than left submittable without them.
+    /// </summary>
+    private async Task LoadStudyCriteriaAsync(string studyId)
+    {
+        RemoveStudyCriteria();
+        _studyCriteriaLoading = true;
+        try
+        {
+            var criteria = await CriteriaService.GetStudyCriteriaAsync(studyId);
+            _studyCriteria.AddRange(criteria);
+            _criteria.InsertRange(0, criteria);
+        }
+        catch (Exception ex)
+        {
+            _studyDraft = new ResearchStudyDraft();
+            Toast.Error(ex.Message, Localizer["App.CriteriaManager.StudyCriteriaLoadErrorTitle"]);
+        }
+        finally
+        {
+            _studyCriteriaLoading = false;
+        }
+    }
+
+    private void ClearExistingStudy()
+    {
+        _studyDraft = new ResearchStudyDraft();
+        RemoveStudyCriteria();
+    }
+
+    private void RemoveStudyCriteria()
+    {
+        _criteria.RemoveAll(_studyCriteria.Contains);
+        _studyCriteria.Clear();
+    }
 
     private async Task SubmitAsync()
     {

@@ -448,6 +448,9 @@
   <data name="App.Errors.LibrariesLoadFailed" xml:space="preserve">
     <value>Library resources could not be loaded.</value>
   </data>
+  <data name="App.Errors.StudyCriteriaLoadFailed" xml:space="preserve">
+    <value>The eligibility criteria of the selected study could not be loaded.</value>
+  </data>
   <data name="App.Errors.ResearchStudiesLoadFailed" xml:space="preserve">
     <value>ResearchStudy resources could not be loaded.</value>
   </data>
@@ -705,6 +708,9 @@
   </data>
   <data name="App.CriteriaManager.SubmitErrorTitle" xml:space="preserve">
     <value>Submission failed</value>
+  </data>
+  <data name="App.CriteriaManager.StudyCriteriaLoadErrorTitle" xml:space="preserve">
+    <value>Study could not be loaded</value>
   </data>
   <data name="App.NotificationTest.PageTitle" xml:space="preserve">
     <value>Notification Test</value>
