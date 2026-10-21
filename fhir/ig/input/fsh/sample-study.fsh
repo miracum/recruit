@@ -8,11 +8,14 @@
 // Attachment.data is base64-encoded, so each content's SQL is additionally carried as plain text in the SQL on FHIR
 // sql-text extension to keep it readable here. Both must be kept in sync - CI checks that the data decodes to exactly
 // the sql-text.
+RuleSet: OpenRecruitIdentifier(type, value)
+* identifier.system = "https://openrecruit.dev/fhir/identifiers/{type}"
+* identifier.value = "{value}"
+
 RuleSet: SqlQueryLibrary(name)
 * status = #active
 * name = "{name}"
-* identifier.system = "https://openrecruit.dev/fhir/identifiers/trino-sql-criteria-library-id"
-* identifier.value = "{name}"
+* insert OpenRecruitIdentifier(trino-sql-criteria-library-id, {name})
 * type = https://sql-on-fhir.org/ig/CodeSystem/LibraryTypesCodes#sql-query
 * content[0].contentType = #"application/sql;dialect=trino"
 * content[0].extension[0].url = "https://sql-on-fhir.org/ig/StructureDefinition/sql-text"
@@ -23,8 +26,7 @@ Instance: SampleStudy
 InstanceOf: ResearchStudy
 Usage: #inline
 * id = "98d96608-475f-4386-b7b5-6ddc1eb57e71"
-* identifier.system = "https://openrecruit.dev/fhir/identifiers/trino-sql-criteria-researchstudy-id"
-* identifier.value = "bronchitis"
+* insert OpenRecruitIdentifier(trino-sql-criteria-researchstudy-id, bronchitis)
 * extension[0].url = "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym"
 * extension[0].valueString = "DEMO-BRONCHITIS"
 * extension[1].url = "https://www.medizininformatik-initiative.de/fhir/modul-studie/StructureDefinition/mii-ex-studie-akronym"
@@ -37,8 +39,7 @@ Instance: SampleStudyEligibilityGroup
 InstanceOf: Group
 Usage: #inline
 * id = "be24c1a6-b052-4360-871b-0a1b7b6bdfb4"
-* identifier.system = "https://openrecruit.dev/fhir/identifiers/eligibility-group-id"
-* identifier.value = "bronchitis"
+* insert OpenRecruitIdentifier(eligibility-group-id, bronchitis)
 * actual = false
 * type = #person
 * active = true
