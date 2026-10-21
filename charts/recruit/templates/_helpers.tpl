@@ -118,6 +118,18 @@ Return the Trino credentials secret key
 {{- end -}}
 
 {{/*
+Return the Trino JDBC URL: the configured one, or the analytics-on-fhir sub-chart's Trino if that is enabled.
+*/}}
+{{- define "recruit.trino.jdbcUrl" -}}
+{{- if .Values.querySqlOnFhir.trino.jdbcUrl -}}
+    {{ tpl .Values.querySqlOnFhir.trino.jdbcUrl $ }}
+{{- else if (index .Values "analytics-on-fhir").enabled -}}
+    {{- $trino := index (index .Subcharts "analytics-on-fhir").Subcharts "trino" -}}
+    {{ printf "jdbc:trino://%s:%d/fhir/default" (include "trino.fullname" $trino) (int $trino.Values.service.port) }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Return the Trino password
 */}}
 {{- define "recruit.trino.password" -}}

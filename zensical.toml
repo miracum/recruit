@@ -122,8 +122,9 @@ pymdownx.highlight.pygments_lang_class = true
 pymdownx.inlinehilite = {}
 pymdownx.keys = {}
 pymdownx.magiclink = {}
-# the Kubernetes guide includes the sample values files from docs/_snippets/
-pymdownx.snippets.base_path = ["docs"]
+# the Kubernetes guide includes the sample values files from docs/_snippets/, the installation guide the Helm chart's
+# values-demo.yaml from charts/
+pymdownx.snippets.base_path = ["docs", "charts"]
 pymdownx.snippets.check_paths = true
 pymdownx.superfences.custom_fences = [
   { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },

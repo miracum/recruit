@@ -92,7 +92,7 @@ spec:
             - name: FHIR_URL
               value: {{ include "recruit.fhirserver.url" $ }}
             - name: SPRING_DATASOURCE_URL
-              value: {{ .trino.jdbcUrl | quote }}
+              value: {{ include "recruit.trino.jdbcUrl" $ | quote }}
             - name: SPRING_DATASOURCE_USERNAME
               value: {{ .trino.auth.username | quote }}
             - name: SPRING_DATASOURCE_PASSWORD

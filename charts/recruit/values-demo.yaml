@@ -1,0 +1,22 @@
+querySqlOnFhir:
+  enabled: true
+  schedule: "0 * * * * *"
+  trino:
+    auth:
+      username: trino
+  extraEnv:
+    - name: QUERY_SQL_ON_FHIR_FUNNEL_ENABLED
+      value: "true"
+
+sampleStudy:
+  enabled: true
+
+analytics-on-fhir:
+  enabled: true
+  trino:
+    coordinator:
+      jvm:
+        maxHeapSize: "2G"
+    worker:
+      jvm:
+        maxHeapSize: "2G"

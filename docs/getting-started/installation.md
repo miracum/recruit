@@ -39,8 +39,9 @@ either Compose or Helm.
 
 === "Helm"
 
-    Requires access to a Kubernetes cluster, e.g. a local one created using [KinD](https://kind.sigs.k8s.io/),
-    as well as [kubectl](https://kubernetes.io/docs/tasks/tools/) and [helm](https://helm.sh/docs/intro/install/).
+    Requires access to a Kubernetes cluster with around 16 GiB of memory, e.g. a local one created using
+    [KinD](https://kind.sigs.k8s.io/), as well as [kubectl](https://kubernetes.io/docs/tasks/tools/) and
+    [helm](https://helm.sh/docs/intro/install/).
 
     Create a basic KinD cluster:
 
@@ -48,7 +49,7 @@ either Compose or Helm.
     kind create cluster
     ```
 
-    Install the chart into a new `recruit` namespace:
+    Install the chart into a new `recruit` namespace, including demo fixtures:
 
     <!-- x-release-please-start-version -->
 
@@ -58,17 +59,23 @@ either Compose or Helm.
       --render-subchart-notes \
       --version 0.0.0-pr651 \
       --wait \
-      --timeout 15m \
+      --timeout 30m \
       recruit-demo \
-      oci://ghcr.io/open-recruit/recruit/charts/recruit
+      oci://ghcr.io/open-recruit/recruit/charts/recruit \
+      -f - <<'EOF'
+    --8<-- "recruit/values-demo.yaml"
+    EOF
     ```
 
     <!-- x-release-please-end-version -->
 
-    Foward the screening list port:
+    The install takes several minutes to download the images, generate synthetic patients, load them into
+    the FHIR server, and register the same resources as Delta Lake tables for querying by Trino.
+
+    Once the command exits, forward the screening list port:
 
     ```sh
-    kubectl -n recruit port-forward svc/recruit-list 32080:8080
+    kubectl -n recruit port-forward svc/recruit-demo-list 32080:8080
     ```
 
     and open the screening list at <http://127.0.0.1:32080> and see the demo study.
