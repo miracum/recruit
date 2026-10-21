@@ -32,7 +32,7 @@ nav = [
     "configuration/security.md",
     "configuration/existing-fhir-server.md",
   ] },
-  { "Trino query module" = [
+  { "Query module" = [
     "trino/index.md",
     "trino/eligibility-criteria-design.md",
   ] },

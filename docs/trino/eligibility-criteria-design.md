@@ -1,10 +1,10 @@
 # Design: Per-Criterion Eligibility Status
 
-!!! warning
+!!! info
 
-    This is a design proposal, not yet implemented. It extends the
-    [Trino SQL-based query module](index.md) and assumes that module as a
-    prerequisite.
+    This is the design behind how the [query module](index.md) evaluates
+    eligibility criteria one by one. For writing criteria, start with
+    [Writing a criterion](index.md#writing-a-criterion).
 
 ## Motivation
 

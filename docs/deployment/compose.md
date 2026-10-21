@@ -114,7 +114,7 @@ through Kafka, <https://github.com/bzkf/fhir-to-lakehouse> does the same continu
 complete, minimal setup using SeaweedFS as object storage. Refresh the tables regularly: recruIT can only recommend
 patients whose data is already in the lakehouse.
 
-See [Trino SQL-based Query Module](../trino/index.md) for more on the lakehouse and on writing criteria.
+See [Query module](../trino/index.md) for more on how criteria are run and how to write them.
 
 ### Pathling server (optional)
 
