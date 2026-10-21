@@ -48,3 +48,21 @@ gh attestation verify recruit-compose.tgz --repo open-recruit/recruit
 `gh attestation verify` exits with a non-zero status if verification fails, so it can also be used as a check in
 deployment scripts. See the [GitHub documentation](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations#verifying-artifact-attestations-with-the-github-cli)
 for more options, e.g. verifying offline.
+
+## Kubernetes hardening
+
+The Helm chart runs recruIT's own containers as non-root users with a read-only root filesystem, all Linux
+capabilities dropped, privilege escalation disallowed, and the `RuntimeDefault` seccomp profile, following the
+[NSA/CISA Kubernetes Hardening Guidance](https://www.cisa.gov/resources-tools/resources/kubernetes-hardening-guide).
+The container images are distroless, or chiseled for the list module, and contain no shell or package manager.
+
+Every change to the chart is scanned with [Kubescape](https://kubescape.io/). The reports for the chart of the current
+release, rendered with its default values, are published here:
+
+- [NSA/CISA framework](https://openrecruit.dev/kubescape-reports/nsa.html)
+- [All controls](https://openrecruit.dev/kubescape-reports/allcontrols.html)
+
+The reports include the chart's dependencies, i.e. the HAPI FHIR server, PostgreSQL, and MailDev, which are hardened
+less strictly. They also flag every workload for missing `NetworkPolicy` resources: the chart doesn't include any,
+since they depend too much on the deployment, see [Zero-trust networking](../deployment/kubernetes.md#zero-trust-networking)
+for a starting point.

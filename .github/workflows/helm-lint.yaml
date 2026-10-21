@@ -17,7 +17,7 @@ jobs:
   lint:
     name: Lint Helm Chart
     runs-on: ubuntu-26.04
-    container: ghcr.io/chgl/kube-powertools:v2.5.60@sha256:4292fd9aac961b4a47a8092f0a85aefcae9c07ccdc8c70ba91bda89b84edc802
+    container: ghcr.io/chgl/kube-powertools:v2.6.13@sha256:5e6cab6409850248d60d3686f02bf903f5f25aa8aa72058031aa5427d7f1c5cf
     steps:
       - name: Add workspace as safe directory
         run: |
@@ -51,6 +51,9 @@ jobs:
       - name: Run Powerlint
         env:
           KUBERNETES_VERSIONS: "1.33.0 1.34.0 1.35.0"
+          # scans the chart against kubescape's NSA/CISA and MITRE frameworks. The scan only reports the
+          # failed controls, it doesn't fail the job.
+          SKIP_KUBE_SCAPE: "0"
         run: chart-powerlint.sh
 
       # used to test whether the changelog generation process works
