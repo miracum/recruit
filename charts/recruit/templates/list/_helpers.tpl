@@ -7,7 +7,7 @@ Get the name of the secret containing list's OIDC client secret
 {{- if .Values.list.auth.oidc.existingSecret.name -}}
     {{ .Values.list.auth.oidc.existingSecret.name | quote }}
 {{- else -}}
-    {{ printf "%s-%s" .Release.Name "list-oidc" | quote }}
+    {{ printf "%s-%s" (include "common.names.fullname" .) "list-oidc" | quote }}
 {{- end -}}
 {{- end -}}
 
@@ -29,7 +29,7 @@ Get the name of the secret containing list's SMTP password
 {{- if .Values.list.notifyMailer.smtp.existingSecret -}}
     {{ .Values.list.notifyMailer.smtp.existingSecret | quote }}
 {{- else -}}
-    {{ printf "%s-%s" .Release.Name "list-smtp" | quote }}
+    {{ printf "%s-%s" (include "common.names.fullname" .) "list-smtp" | quote }}
 {{- end -}}
 {{- end -}}
 
@@ -80,7 +80,7 @@ Get the name of the secret containing list's database password
 {{- else if .Values.list.database.existingSecret.name -}}
     {{ .Values.list.database.existingSecret.name | quote }}
 {{- else -}}
-    {{ printf "%s-%s" .Release.Name "list-db" | quote }}
+    {{ printf "%s-%s" (include "common.names.fullname" .) "list-db" | quote }}
 {{- end -}}
 {{- end -}}
 

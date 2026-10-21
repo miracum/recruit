@@ -144,8 +144,7 @@ list:
   # actually stopping: without it, clients can see 502s because traffic keeps arriving for a
   # moment after the app has already stopped listening. Uses Kubernetes' native `sleep` lifecycle
   # action rather than an `exec` hook, since list's base image is chiseled and has no shell to
-  # run `sleep` in. Requires Kubernetes >=1.30 (or >=1.29 with the `PodLifecycleSleepAction`
-  # feature gate enabled) - set `enabled: false` on older clusters.
+  # run `sleep` in.
   # @ignore
   lifecycle: # +doc-gen:ignore
     enabled: true
@@ -317,7 +316,7 @@ list:
     #    hosts:
     #      - list-example.local
 
-  # -- set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if primary.resources is set (primary.resources is recommended for production).
+  # -- set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if `resources` is set (`resources` is recommended for production).
   # More information: <https://github.com/miracum/charts/blob/master/charts/common/templates/_resources.tpl#L1>
   resourcesPreset: "small"
 
@@ -496,8 +495,8 @@ querySqlOnFhir:
   # -- a Spring cron expression defining the execution schedule of the query module
   schedule: "@hourly"
 
-  # @ignored
-  readinessProbe:
+  # @ignore
+  readinessProbe: # +doc-gen:ignore
     enabled: true
     httpGet:
       path: /readyz
@@ -508,8 +507,8 @@ querySqlOnFhir:
     successThreshold: 1
     timeoutSeconds: 5
 
-  # @ignored
-  livenessProbe:
+  # @ignore
+  livenessProbe: # +doc-gen:ignore
     enabled: true
     httpGet:
       path: /livez
@@ -520,8 +519,8 @@ querySqlOnFhir:
     successThreshold: 1
     timeoutSeconds: 10
 
-  # @ignored
-  startupProbe:
+  # @ignore
+  startupProbe: # +doc-gen:ignore
     enabled: true
     httpGet:
       path: /livez
@@ -532,7 +531,7 @@ querySqlOnFhir:
     successThreshold: 1
     timeoutSeconds: 10
 
-  # -- set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if primary.resources is set (primary.resources is recommended for production).
+  # -- set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if `resources` is set (`resources` is recommended for production).
   # More information: <https://github.com/miracum/charts/blob/master/charts/common/templates/_resources.tpl#L1>
   resourcesPreset: "medium"
 
@@ -630,7 +629,7 @@ kubectl: # +doc-gen:ignore
 
 tests:
   automountServiceAccountToken: false
-  # -- set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if primary.resources is set (primary.resources is recommended for production).
+  # -- set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if `resources` is set (`resources` is recommended for production).
   # More information: <https://github.com/miracum/charts/blob/master/charts/common/templates/_resources.tpl#L1>
   resourcesPreset: "nano"
 
