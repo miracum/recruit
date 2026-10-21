@@ -2,10 +2,10 @@
 @inject IBbLocalizer BbLocalizer
 @inject EligibilityCriteriaService CriteriaService
 
-<div class="flex min-w-0 flex-col gap-4">
+<div class="bb:flex bb:min-w-0 bb:flex-col bb:gap-4">
     @if (_initialLoading)
     {
-        <div class="flex flex-col items-center justify-center gap-3 py-12 text-sm text-muted-foreground">
+        <div class="bb:flex bb:flex-col bb:items-center bb:justify-center bb:gap-3 bb:py-12 bb:text-sm bb:text-muted-foreground">
             <BbSpinner Size="SpinnerSize.Large" />
             <span>@BbLocalizer["DataView.Loading"]</span>
         </div>
@@ -27,21 +27,21 @@
 
         <BbDataView TItem="ResearchStudySummaryDto" Data="FilteredResults" ShowToolbar="false" ShowPagination="false"
                     EnableInfiniteScroll ScrollHeight="28rem" InitialPageSize="20"
-                    Class="min-w-0" ListClass="min-w-0">
+                    Class="bb:min-w-0" ListClass="bb:min-w-0">
             <ListTemplate Context="study">
-                <div class="flex w-full min-w-0 items-center justify-between gap-3 rounded-md border p-3">
-                    <div class="min-w-0 flex-1">
+                <div class="bb:flex bb:w-full bb:min-w-0 bb:items-center bb:justify-between bb:gap-3 bb:rounded-md bb:border bb:p-3">
+                    <div class="bb:min-w-0 bb:flex-1">
                         @if (!string.IsNullOrWhiteSpace(study.Acronym))
                         {
-                            <div class="truncate text-base font-semibold">@study.Acronym</div>
-                            <div class="truncate text-xs text-muted-foreground">@(study.Title ?? study.Id)</div>
+                            <div class="bb:truncate bb:text-base bb:font-semibold">@study.Acronym</div>
+                            <div class="bb:truncate bb:text-xs bb:text-muted-foreground">@(study.Title ?? study.Id)</div>
                         }
                         else
                         {
-                            <div class="truncate text-base font-semibold">@(study.Title ?? study.Id)</div>
+                            <div class="bb:truncate bb:text-base bb:font-semibold">@(study.Title ?? study.Id)</div>
                         }
                     </div>
-                    <BbButton Variant="ButtonVariant.Default" Size="ButtonSize.Small" Class="shrink-0" OnClick="@(() => SelectAsync(study))">
+                    <BbButton Variant="ButtonVariant.Default" Size="ButtonSize.Small" Class="bb:shrink-0" OnClick="@(() => SelectAsync(study))">
                         @Localizer["App.CriteriaManager.SelectCriterionButton"]
                     </BbButton>
                 </div>
@@ -49,7 +49,7 @@
         </BbDataView>
     }
 
-    <div class="flex justify-end">
+    <div class="bb:flex bb:justify-end">
         <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="CancelAsync">
             @Localizer["App.CriteriaManager.CancelButton"]
         </BbButton>

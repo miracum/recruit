@@ -11,8 +11,8 @@
 
 @if (_loading)
 {
-    <BbSkeleton Class="mb-4 h-8 w-64" />
-    <BbSkeleton Class="h-64 w-full" />
+    <BbSkeleton Class="bb:mb-4 bb:h-8 bb:w-64" />
+    <BbSkeleton Class="bb:w-full" />
 }
 else if (_errorMessage is not null)
 {
@@ -23,25 +23,25 @@ else if (_errorMessage is not null)
 }
 else if (_trial is not null)
 {
-    <h2 class="text-lg font-medium">@_trial.StudyAcronym</h2>
+    <h2 class="bb:text-lg bb:font-medium">@_trial.StudyAcronym</h2>
     @if (!string.IsNullOrEmpty(_trial.StudyTitle))
     {
-        <p class="mt-1 text-sm text-muted-foreground">@_trial.StudyTitle</p>
+        <p class="bb:mt-1 bb:text-sm bb:text-muted-foreground">@_trial.StudyTitle</p>
     }
 
-    <BbCard Class="mt-6">
+    <BbCard Class="bb:mt-6">
         <BbCardHeader>
             <BbCardTitle>@Localizer["App.TrialAccess.AddGrantTitle"]</BbCardTitle>
         </BbCardHeader>
         <BbCardContent>
-            <div class="flex flex-wrap items-end gap-3">
-                <div class="w-full max-w-sm min-w-64">
-                    <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.TrialAccess.EmailLabel"]</label>
-                    <BbInput @bind-Value="_newEmail" Placeholder="@Localizer["App.TrialAccess.EmailPlaceholder"]" Class="mt-1" />
+            <div class="bb:flex bb:flex-wrap bb:items-end bb:gap-3">
+                <div class="bb:w-full bb:max-w-sm">
+                    <label class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide bb:text-muted-foreground">@Localizer["App.TrialAccess.EmailLabel"]</label>
+                    <BbInput @bind-Value="_newEmail" Placeholder="@Localizer["App.TrialAccess.EmailPlaceholder"]" Class="bb:mt-1" />
                 </div>
                 <div>
-                    <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.TrialAccess.LevelLabel"]</label>
-                    <select class="mt-1 block rounded-md border bg-background p-2 text-sm" @bind="_newLevel">
+                    <label class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide bb:text-muted-foreground">@Localizer["App.TrialAccess.LevelLabel"]</label>
+                    <select class="bb:mt-1 bb:block bb:rounded-md bb:border bb:bg-background bb:p-2 bb:text-sm" @bind="_newLevel">
                         @foreach (var level in LevelOptions)
                         {
                             <option value="@level">@Localizer[LevelLabelKey(level)]</option>
@@ -55,7 +55,7 @@ else if (_trial is not null)
         </BbCardContent>
     </BbCard>
 
-    <BbCard Class="mt-6">
+    <BbCard Class="bb:mt-6">
         <BbCardHeader>
             <BbCardTitle>@Localizer["App.TrialAccess.GrantsTitle"]</BbCardTitle>
         </BbCardHeader>
@@ -72,14 +72,14 @@ else if (_trial is not null)
                         <BbDataTableColumn TData="TrialAccessGrant" TValue="string" Header="@Localizer["App.TrialAccess.ColumnEmail"]">
                             <CellTemplate Context="g">
                                 <div>
-                                    <span class="font-medium">@(g.DisplayName ?? g.Email)</span>
+                                    <span class="bb:font-medium">@(g.DisplayName ?? g.Email)</span>
                                     @if (!string.IsNullOrEmpty(g.DisplayName))
                                     {
-                                        <p class="text-xs text-muted-foreground">@g.Email</p>
+                                        <p class="bb:text-xs bb:text-muted-foreground">@g.Email</p>
                                     }
                                     @if (g.SubjectId is null)
                                     {
-                                        <BbBadge Variant="BadgeVariant.Outline" Class="mt-1">@Localizer["App.TrialAccess.PendingBadge"]</BbBadge>
+                                        <BbBadge Variant="BadgeVariant.Outline" Class="bb:mt-1">@Localizer["App.TrialAccess.PendingBadge"]</BbBadge>
                                     }
                                 </div>
                             </CellTemplate>
@@ -94,7 +94,7 @@ else if (_trial is not null)
                                 }
                                 else
                                 {
-                                    <select class="rounded-md border bg-background p-1.5 text-sm"
+                                    <select class="bb:rounded-md bb:border bb:bg-background bb:p-1.5 bb:text-sm"
                                             value="@g.Level" @onchange="e => ChangeLevelAsync(g, ParseLevel(e.Value))">
                                         @foreach (var level in LevelOptions)
                                         {

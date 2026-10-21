@@ -4,19 +4,19 @@
 <div>
     @if (_loading)
     {
-        <div class="space-y-3">
-            <BbSkeleton Class="h-12 w-full" />
-            <BbSkeleton Class="h-12 w-full" />
-            <BbSkeleton Class="h-12 w-full" />
+        <div class="bb:space-y-3">
+            <BbSkeleton Class="bb:h-12 bb:w-full" />
+            <BbSkeleton Class="bb:h-12 bb:w-full" />
+            <BbSkeleton Class="bb:h-12 bb:w-full" />
         </div>
     }
     else if (_entries.Count == 0)
     {
-        <p class="text-sm text-muted-foreground">@Localizer["App.PatientHistory.Empty"]</p>
+        <p class="bb:text-sm bb:text-muted-foreground">@Localizer["App.PatientHistory.Empty"]</p>
     }
     else
     {
-        <div class="pr-2">
+        <div class="bb:pe-2">
             <BbTimeline>
                 @foreach (var entry in _entries)
                 {

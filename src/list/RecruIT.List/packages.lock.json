@@ -13,13 +13,14 @@
       },
       "BlazorBlueprint.Components": {
         "type": "Direct",
-        "requested": "[3.17.0, )",
-        "resolved": "3.17.0",
-        "contentHash": "X4U7g4qEC1i19GzR0MKRTcd5RqjeF4zmMzK3mucjH7lfQDvBQ7iHtQG7AkBLmF5durOKLuutc6K+JlDCLbGR6w==",
+        "requested": "[4.1.0, )",
+        "resolved": "4.1.0",
+        "contentHash": "Sda4S3J0Lt23eKZ4wmBOUjRk7xsGhe2LWK0epGeaR2hWhw7YQrxK35aHuLPT9DHpt/U3au5gwJsn5yWcOVOLSg==",
         "dependencies": {
           "BlazorBlueprint.Icons.Lucide": "2.0.0",
-          "BlazorBlueprint.Primitives": "3.17.0",
+          "BlazorBlueprint.Primitives": "4.1.0",
           "HtmlSanitizer": "9.1.982",
+          "Ical.Net": "5.2.3",
           "Markdig": "0.37.0",
           "TailwindMerge.NET": "1.3.0"
         }
@@ -253,8 +254,8 @@
       },
       "BlazorBlueprint.Primitives": {
         "type": "Transitive",
-        "resolved": "3.17.0",
-        "contentHash": "xYCenAjeyjhdrfdYDYq2fdjqiJUXQrGfqqqRhcizjfXLuWiV0wQJZhQNEHQsG6kuGrM7HfpntibB0GBe8cBjRw=="
+        "resolved": "4.1.0",
+        "contentHash": "0anddIj6dgRlpeb99vJvDl1BJGxmZvP7rCPDLQHMGimRoiccbihEGMOrrgL/GhNo24LH58ORs/zfex6rEQcrRA=="
       },
       "BouncyCastle.Cryptography": {
         "type": "Transitive",
@@ -319,6 +320,14 @@
         "type": "Transitive",
         "resolved": "2.14.1",
         "contentHash": "lQKvtaTDOXnoVJ20ibTuSIOf2i0uO0MPbDhd1jm238I+U/2ZnRENj0cktKZhtchBMtCUSRQ5v4xBCUbKNmyVMw=="
+      },
+      "Ical.Net": {
+        "type": "Transitive",
+        "resolved": "5.2.3",
+        "contentHash": "zROvmrRPKqND0e0Bt/wSY+d8iYtL4+sP9mORyjT/ySBiIDfik4iovTjS+L9PFg+zoXfkJ5eBTHK2lX9c7lganw==",
+        "dependencies": {
+          "NodaTime": "3.2.2"
+        }
       },
       "Markdig": {
         "type": "Transitive",
@@ -492,6 +501,11 @@
         "type": "Transitive",
         "resolved": "13.0.4",
         "contentHash": "pdgNNMai3zv51W5aq268sujXUyx7SNdE2bj1wZcWjAQrKMFZV260lbqYop1d2GM67JI1huLRwxo9ZqnfF/lC6A=="
+      },
+      "NodaTime": {
+        "type": "Transitive",
+        "resolved": "3.2.2",
+        "contentHash": "dmju5W0UYC3QP/UJM0juKAZkH0HSDMp0gH91A0+mT9M0kgyM2Jm67hUZPl/WRQLq8Lijjqmdk8kyAViWFWM7dA=="
       },
       "Npgsql": {
         "type": "Transitive",

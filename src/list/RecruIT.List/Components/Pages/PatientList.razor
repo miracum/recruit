@@ -12,8 +12,8 @@
 
 @if (_loading)
 {
-    <BbSkeleton Class="mb-4 h-8 w-64" />
-    <BbSkeleton Class="h-96 w-full" />
+    <BbSkeleton Class="bb:mb-4 bb:h-8 bb:w-64" />
+    <BbSkeleton Class="bb:w-full" />
 }
 else if (_errorMessage is not null)
 {
@@ -24,20 +24,20 @@ else if (_errorMessage is not null)
 }
 else if (_summary is not null)
 {
-    <div class="flex items-start justify-between gap-4">
+    <div class="bb:flex bb:items-start bb:justify-between bb:gap-4">
         <div>
             @if (!string.IsNullOrEmpty(_summary.StudyTitle))
             {
-                <h2 class="text-lg font-medium">@_summary.StudyTitle</h2>
+                <h2 class="bb:text-lg bb:font-medium">@_summary.StudyTitle</h2>
             }
         </div>
-        <div class="flex shrink-0 items-center gap-2">
+        <div class="bb:flex bb:shrink-0 bb:items-center bb:gap-2">
             <NotificationSubscribeButton TrialIdentifier="_summary.TrialIdentifier" />
             @if (_canManageAccess)
             {
                 <BbTooltip>
                     <BbTooltipTrigger AsChild="true">
-                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Icon" Class="shrink-0" OnClick="@(() => Navigation.NavigateTo($"/trials/{ListId}/access"))">
+                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Icon" Class="bb:shrink-0" OnClick="@(() => Navigation.NavigateTo($"/trials/{ListId}/access"))">
                             <LucideIcon Name="shield" Size="16" />
                         </BbButton>
                     </BbTooltipTrigger>
@@ -49,21 +49,21 @@ else if (_summary is not null)
 
     @if (!string.IsNullOrEmpty(_summary.StudyDescription))
     {
-        <p class="mt-1 text-sm text-muted-foreground">@_summary.StudyDescription</p>
+        <p class="bb:mt-1 bb:text-sm bb:text-muted-foreground">@_summary.StudyDescription</p>
     }
 
     @if (_summary.Criteria.Count > 0)
     {
-        <div class="mt-3 grid grid-cols-2 gap-6 mb-4">
+        <div class="bb:mt-3 bb:grid bb:grid-cols-2 bb:gap-6 bb:mb-4">
             <div>
-                <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.PatientList.InclusionCriteria"]</span>
+                <span class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide bb:text-muted-foreground">@Localizer["App.PatientList.InclusionCriteria"]</span>
                 @if (InclusionCriteria.Count == 0)
                 {
-                    <p class="mt-1.5 text-sm text-muted-foreground">@Localizer["App.PatientList.NoCriteria"]</p>
+                    <p class="bb:mt-1.5 bb:text-sm bb:text-muted-foreground">@Localizer["App.PatientList.NoCriteria"]</p>
                 }
                 else
                 {
-                    <ul class="mt-1.5 space-y-1 text-sm">
+                    <ul class="bb:mt-1.5 bb:space-y-1 bb:text-sm">
                         @foreach (var criterion in InclusionCriteria)
                         {
                             <CriterionListItem Criterion="criterion" />
@@ -71,15 +71,15 @@ else if (_summary is not null)
                     </ul>
                 }
             </div>
-            <div class="criteria-column-divider pl-6">
-                <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.PatientList.ExclusionCriteria"]</span>
+            <div class="criteria-column-divider bb:ps-6">
+                <span class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide bb:text-muted-foreground">@Localizer["App.PatientList.ExclusionCriteria"]</span>
                 @if (ExclusionCriteria.Count == 0)
                 {
-                    <p class="mt-1.5 text-sm text-muted-foreground">@Localizer["App.PatientList.NoCriteria"]</p>
+                    <p class="bb:mt-1.5 bb:text-sm bb:text-muted-foreground">@Localizer["App.PatientList.NoCriteria"]</p>
                 }
                 else
                 {
-                    <ul class="mt-1.5 space-y-1 text-sm">
+                    <ul class="bb:mt-1.5 bb:space-y-1 bb:text-sm">
                         @foreach (var criterion in ExclusionCriteria)
                         {
                             <CriterionListItem Criterion="criterion" />
@@ -92,11 +92,11 @@ else if (_summary is not null)
 
     @if (FunnelChartData is { Count: > 0 })
     {
-        <BbCollapsible @bind-Open="_funnelExpanded" Class="mb-4 rounded-md border">
+        <BbCollapsible @bind-Open="_funnelExpanded" Class="bb:mb-4 bb:rounded-md bb:border">
             <BbCollapsibleTrigger>
-                <BbButton Variant="ButtonVariant.Ghost" Class="h-auto w-full rounded-b-none px-3 py-2 text-sm font-medium">
+                <BbButton Variant="ButtonVariant.Ghost" Class="bb:h-auto bb:w-full bb:px-3 bb:py-2 bb:text-sm bb:font-medium">
                     <ChildContent>
-                        <span class="flex w-full items-center justify-between">
+                        <span class="bb:flex bb:w-full bb:items-center bb:justify-between">
                             <span>@Localizer["App.PatientList.FunnelSectionTitle"]</span>
                             <LucideIcon Name="@(_funnelExpanded ? "chevron-up" : "chevron-down")" Size="16" />
                         </span>
@@ -104,7 +104,7 @@ else if (_summary is not null)
                 </BbButton>
             </BbCollapsibleTrigger>
             <BbCollapsibleContent>
-                <div class="border-t p-3">
+                <div class="bb:border-t bb:p-3">
                     <BbFunnelChart Data="@FunnelChartData" Height="280px">
                         <BbChartTooltip />
                         <BbFunnel DataKey="value" NameKey="stage" Sort="FunnelSort.None" LabelFormatter="{b}: {c}" MinSize="15%" />
@@ -125,34 +125,34 @@ else if (_summary is not null)
             <Columns>
                 <BbDataTableColumn TData="PatientListEntryDto" TValue="DateTimeOffset?" Header="@Localizer["App.PatientList.ColumnRecommended"]" Property="p => p.RecommendedDate" Sortable="true">
                     <CellTemplate Context="p">
-                        <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
+                        <div class="bb:block bb:cursor-pointer bb:p-4" @onclick="() => OpenPatient(p)">
                             @(p.RecommendedDate?.LocalDateTime.ToString("d") ?? "-")
                         </div>
                     </CellTemplate>
                 </BbDataTableColumn>
                 <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="@Localizer["App.PatientList.ColumnName"]" Property="p => p.Name ?? p.MedicalRecordNumber ?? p.PatientId" Sortable="true">
                     <CellTemplate Context="p">
-                        <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
-                            <span class="font-medium hover:underline">@(p.Name ?? p.MedicalRecordNumber ?? p.PatientId)</span>
+                        <div class="bb:block bb:cursor-pointer bb:p-4" @onclick="() => OpenPatient(p)">
+                            <span class="bb:font-medium bb:hover:underline">@(p.Name ?? p.MedicalRecordNumber ?? p.PatientId)</span>
                             @if (p.IsNew(NewSuggestionWindowDays))
                             {
-                                <BbBadge Variant="BadgeVariant.Default" Class="ml-2">@Localizer["App.PatientList.NewBadge"]</BbBadge>
+                                <BbBadge Variant="BadgeVariant.Default" Class="bb:ms-2">@Localizer["App.PatientList.NewBadge"]</BbBadge>
                             }
                         </div>
                     </CellTemplate>
                 </BbDataTableColumn>
                 <BbDataTableColumn TData="PatientListEntryDto" TValue="int?" Header="@Localizer["App.PatientList.ColumnDemographics"]" Width="140px">
                     <CellTemplate Context="p">
-                        <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
+                        <div class="bb:block bb:cursor-pointer bb:p-4" @onclick="() => OpenPatient(p)">
                             @(p.Age is not null ? p.Age.ToString() : Localizer["App.Common.AgeUnknown"].Value)
-                            <span class="mx-1.5 text-muted-foreground">&middot;</span>
+                            <span class="bb:text-muted-foreground">&middot;</span>
                             @(p.Gender is not null ? Localizer[GenderDisplay.GetKey(p.Gender)].Value : Localizer["App.Common.Unknown"].Value)
                         </div>
                     </CellTemplate>
                 </BbDataTableColumn>
                 <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="@Localizer["App.PatientList.ColumnStatus"]">
                     <CellTemplate Context="p">
-                        <div class="-m-4 flex flex-wrap items-center gap-2 cursor-pointer p-4" @onclick="() => OpenPatient(p)">
+                        <div class="bb:flex bb:flex-wrap bb:items-center bb:gap-2 bb:cursor-pointer bb:p-4" @onclick="() => OpenPatient(p)">
                             <StatusBadge Status="@p.Status" />
                             @if (p.SystemDeterminedIneligible)
                             {
@@ -163,21 +163,21 @@ else if (_summary is not null)
                 </BbDataTableColumn>
                 <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="@Localizer["App.PatientList.ColumnLocation"]">
                     <CellTemplate Context="p">
-                        <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
+                        <div class="bb:block bb:cursor-pointer bb:p-4" @onclick="() => OpenPatient(p)">
                             @if (p.LastKnownLocationLoaded)
                             {
                                 @(p.LastKnownLocation ?? Localizer["App.Common.Unknown"].Value)
                             }
                             else
                             {
-                                <BbSkeleton Class="h-4 w-24" />
+                                <BbSkeleton Class="bb:h-4 bb:w-24" />
                             }
                         </div>
                     </CellTemplate>
                 </BbDataTableColumn>
                 <BbDataTableColumn TData="PatientListEntryDto" TValue="DateTimeOffset?" Header="@Localizer["App.PatientList.ColumnUpdated"]" Property="p => p.LastUpdated" Sortable="true">
                     <CellTemplate Context="p">
-                        <div class="-m-4 block cursor-pointer p-4" @onclick="() => OpenPatient(p)">
+                        <div class="bb:block bb:cursor-pointer bb:p-4" @onclick="() => OpenPatient(p)">
                             @(p.LastUpdated?.LocalDateTime.ToString("g") ?? "-")
                         </div>
                     </CellTemplate>

@@ -9,7 +9,7 @@
 
 @if (_loading)
 {
-    <BbSkeleton Class="h-48 w-full" />
+    <BbSkeleton Class="bb:w-full" />
 }
 else if (_errorMessage is not null)
 {
@@ -24,20 +24,20 @@ else if (_items.Count == 0)
 }
 else
 {
-    <div class="space-y-3">
+    <div class="bb:space-y-3">
         @foreach (var item in _items)
         {
             <BbCard>
                 <BbCardContent>
-                    <div class="flex items-center justify-between gap-4">
+                    <div class="bb:flex bb:items-center bb:justify-between bb:gap-4">
                         <div>
-                            <p class="font-medium">@Localizer["App.Notifications.MessageFormat", item.PatientDisplayName, item.StudyAcronym]</p>
-                            <p class="text-sm text-muted-foreground">
+                            <p class="bb:font-medium">@Localizer["App.Notifications.MessageFormat", item.PatientDisplayName, item.StudyAcronym]</p>
+                            <p class="bb:text-sm bb:text-muted-foreground">
                                 @item.OccurredAt.LocalDateTime.ToString("g")
                                 &middot;
                                 @if (item.ListId is not null)
                                 {
-                                    <a href="/trials/@item.ListId/patients" class="hover:underline">@item.StudyAcronym</a>
+                                    <a href="/trials/@item.ListId/patients" class="bb:hover:underline">@item.StudyAcronym</a>
                                 }
                                 else
                                 {

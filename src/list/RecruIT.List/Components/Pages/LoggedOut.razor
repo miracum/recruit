@@ -2,10 +2,10 @@
 @layout EmptyLayout
 @inject IStringLocalizer<SharedResources> Localizer
 
-<div class="flex flex-col items-center gap-6 px-4 text-center">
-    <h1 class="text-3xl font-semibold">@Localizer["App.LoggedOut.Title"]</h1>
+<div class="bb:flex bb:flex-col bb:items-center bb:gap-6 bb:px-4 bb:text-center">
+    <h1 class="bb:text-3xl bb:font-semibold">@Localizer["App.LoggedOut.Title"]</h1>
     <a href="/authentication/login"
-       class="rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+       class="bb:rounded-md bb:bg-primary bb:px-6 bb:py-3 bb:text-sm bb:font-medium bb:text-primary-foreground bb:hover:bg-primary/90">
         @Localizer["App.LoggedOut.BackToApp"]
     </a>
 </div>

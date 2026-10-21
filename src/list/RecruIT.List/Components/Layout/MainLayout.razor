@@ -10,14 +10,14 @@
 <BbSidebarProvider CookieKey="@((string?)null)">
     <BbSidebar Collapsible="false">
         <BbSidebarHeader>
-            <div class="flex h-12 items-center gap-2 px-3">
-                <div class="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
+            <div class="bb:flex bb:h-12 bb:items-center bb:gap-2 bb:px-3">
+                <div class="bb:flex bb:h-7 bb:w-7 bb:items-center bb:justify-center bb:rounded-md bb:bg-primary bb:text-primary-foreground">
                     <LucideIcon Name="clipboard-list" Size="16" />
                 </div>
-                <span class="text-sm font-semibold">recruIT</span>
+                <span class="bb:text-sm bb:font-semibold">recruIT</span>
             </div>
         </BbSidebarHeader>
-        <BbSidebarContent Class="flex-1 overflow-auto px-2">
+        <BbSidebarContent Class="bb:flex-1 bb:overflow-auto bb:px-2">
             <BbSidebarGroup>
                 <BbSidebarGroupLabel>@Localizer["App.Nav.GroupMain"]</BbSidebarGroupLabel>
                 <BbSidebarMenu>
@@ -34,8 +34,8 @@
                         </BbSidebarMenuButton>
                     </BbSidebarMenuItem>
                     <BbSidebarMenuItem>
-                        <BbSidebarMenuButton Href="/notifications" Class="justify-between">
-                            <span class="flex items-center gap-2">
+                        <BbSidebarMenuButton Href="/notifications" Class="bb:justify-between">
+                            <span class="bb:flex bb:items-center bb:gap-2">
                                 <LucideIcon Name="bell" Size="16" />
                                 @Localizer["App.Nav.Notifications"]
                             </span>
@@ -74,7 +74,7 @@
             </AuthorizeView>
         </BbSidebarContent>
         <BbSidebarFooter>
-            <div class="px-3 py-2 text-xs text-muted-foreground">
+            <div class="bb:px-3 bb:py-2 bb:text-xs bb:text-muted-foreground">
                 <BbTooltip Placement="PopoverPlacement.Top">
                     <BbTooltipTrigger AsChild="false">
                         <span>@AppVersionShort</span>
@@ -85,26 +85,26 @@
         </BbSidebarFooter>
     </BbSidebar>
 
-    <BbSidebarInset Class="flex min-w-0 flex-col bg-background">
-        <header class="flex shrink-0 items-center justify-between border-b px-4 py-3">
-            <div class="flex items-center gap-2">
-                <BbSidebarTrigger Class="h-8 w-8 md:hidden">
+    <BbSidebarInset Class="bb:flex bb:min-w-0 bb:flex-col bb:bg-background">
+        <header class="bb:flex bb:shrink-0 bb:items-center bb:justify-between bb:border-b bb:px-4 bb:py-3">
+            <div class="bb:flex bb:items-center bb:gap-2">
+                <BbSidebarTrigger Class="bb:h-8 bb:w-8 bb:md:hidden">
                     <LucideIcon Name="menu" Size="16" />
                 </BbSidebarTrigger>
                 <Breadcrumbs Items="BreadcrumbState.Items" />
             </div>
-            <div class="flex items-center gap-2">
+            <div class="bb:flex bb:items-center bb:gap-2">
                 <button type="button" @onclick="ToggleTheme"
-                        class="rounded p-1 hover:bg-accent hover:text-accent-foreground"
+                        class="bb:rounded bb:p-1 bb:hover:bg-accent bb:hover:text-accent-foreground"
                         aria-label="@(ThemeService.IsDarkMode ? Localizer["App.Theme.SwitchToLight"] : Localizer["App.Theme.SwitchToDark"])">
                     <LucideIcon Name="@(ThemeService.IsDarkMode ? "sun" : "moon")" Size="16" />
                 </button>
-                <div class="flex items-center gap-1 text-xs text-muted-foreground">
+                <div class="bb:flex bb:items-center bb:gap-1 bb:text-xs bb:text-muted-foreground">
                     @for (var i = 0; i < SupportedCultures.Length; i++)
                     {
                         var culture = SupportedCultures[i];
                         <a href="@BuildCultureUrl(culture)" data-enhance-nav="false"
-                           class="rounded px-1.5 py-0.5 uppercase hover:bg-accent hover:text-accent-foreground @(IsCurrentCulture(culture) ? "font-semibold text-foreground" : "")">
+                           class="bb:rounded bb:px-1.5 bb:py-0.5 bb:uppercase bb:hover:bg-accent bb:hover:text-accent-foreground @(IsCurrentCulture(culture) ? "bb:font-semibold bb:text-foreground" : "")">
                             @culture
                         </a>
                         @if (i < SupportedCultures.Length - 1)
@@ -116,33 +116,33 @@
                 <AuthorizeView>
                     <Authorized>
                         <BbDropdownMenu>
-                            <BbDropdownMenuTrigger AsChild="false" Class="flex items-center gap-2 rounded-md p-1 hover:bg-accent hover:text-accent-foreground">
+                            <BbDropdownMenuTrigger AsChild="false" Class="bb:flex bb:items-center bb:gap-2 bb:rounded-md bb:p-1 bb:hover:bg-accent bb:hover:text-accent-foreground">
                                 <BbAvatar Size="AvatarSize.Small">
                                     <BbAvatarFallback>@GetInitials(context.User)</BbAvatarFallback>
                                 </BbAvatar>
                             </BbDropdownMenuTrigger>
-                            <BbDropdownMenuContent Side="PopoverSide.Bottom" Align="PopoverAlign.End" Class="w-64">
+                            <BbDropdownMenuContent Side="PopoverSide.Bottom" Align="PopoverAlign.End" Class="bb:w-64">
                                 <BbDropdownMenuLabel>
-                                    <div class="flex flex-col">
-                                        <span class="truncate text-sm font-medium">@GetFullName(context.User)</span>
-                                        <span class="truncate text-xs font-normal text-muted-foreground">@GetEmail(context.User)</span>
+                                    <div class="bb:flex bb:flex-col">
+                                        <span class="bb:truncate bb:text-sm bb:font-medium">@GetFullName(context.User)</span>
+                                        <span class="bb:truncate bb:text-xs bb:font-normal bb:text-muted-foreground">@GetEmail(context.User)</span>
                                     </div>
                                 </BbDropdownMenuLabel>
                                 <BbDropdownMenuSeparator />
-                                <BbDropdownMenuLabel Class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                                <BbDropdownMenuLabel Class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide bb:text-muted-foreground">
                                     @Localizer["App.User.Roles"]
                                 </BbDropdownMenuLabel>
-                                <div class="px-2 pb-2">
+                                <div class="bb:px-2 bb:pb-2">
                                     @{
                                         var roles = GetRoles(context.User);
                                     }
                                     @if (roles.Count == 0)
                                     {
-                                        <span class="text-xs text-muted-foreground">@Localizer["App.User.NoRoles"]</span>
+                                        <span class="bb:text-xs bb:text-muted-foreground">@Localizer["App.User.NoRoles"]</span>
                                     }
                                     else
                                     {
-                                        <div class="flex flex-wrap gap-1">
+                                        <div class="bb:flex bb:flex-wrap bb:gap-1">
                                             @foreach (var role in roles)
                                             {
                                                 <BbBadge Variant="BadgeVariant.Secondary">@role</BbBadge>
@@ -159,12 +159,12 @@
                         </BbDropdownMenu>
                     </Authorized>
                     <NotAuthorized>
-                        <a href="/authentication/login" class="text-sm">@Localizer["App.Nav.SignIn"]</a>
+                        <a href="/authentication/login" class="bb:text-sm">@Localizer["App.Nav.SignIn"]</a>
                     </NotAuthorized>
                 </AuthorizeView>
             </div>
         </header>
-        <main class="min-h-0 flex-1 overflow-auto p-4">
+        <main class="bb:min-h-0 bb:flex-1 bb:overflow-auto bb:p-4">
             <ErrorBoundary>
                 <ChildContent>
                     @Body

@@ -4,27 +4,27 @@
 @inject IStringLocalizer<SharedResources> Localizer
 
 <BbSheet Open="Patient is not null" OpenChanged="HandleOpenChanged" Side="SheetSide.Right">
-    <BbSheetContent Class="w-full overflow-y-auto" style="max-width: 46rem;" ShowClose="true">
+    <BbSheetContent Class="bb:w-full bb:overflow-y-auto" style="max-width: 46rem;" ShowClose="true">
         @if (Patient is not null)
         {
             <BbSheetHeader>
                 @if (!string.IsNullOrEmpty(Acronym))
                 {
-                    <div class="flex items-center gap-2 pb-3">
-                        <span class="text-muted-foreground">
+                    <div class="bb:flex bb:items-center bb:gap-2 bb:pb-3">
+                        <span class="bb:text-muted-foreground">
                             <LucideIcon Name="flask-conical" Size="16" />
                         </span>
-                        <span class="text-sm font-semibold text-foreground">@Acronym</span>
+                        <span class="bb:text-sm bb:font-semibold bb:text-foreground">@Acronym</span>
                         @if (!string.IsNullOrEmpty(StudyTitle))
                         {
-                            <span class="truncate text-sm text-muted-foreground">@StudyTitle</span>
+                            <span class="bb:truncate bb:text-sm bb:text-muted-foreground">@StudyTitle</span>
                         }
                     </div>
                     <BbSeparator />
                 }
-                <div class="mt-3 flex items-end gap-2">
+                <div class="bb:mt-3 bb:flex bb:items-end bb:gap-2">
                     <BbSheetTitle style="line-height: 1;">@(Patient.Name ?? Patient.PatientId)</BbSheetTitle>
-                    <span class="text-sm font-normal text-muted-foreground" style="line-height: 1;">
+                    <span class="bb:text-sm bb:font-normal bb:text-muted-foreground" style="line-height: 1;">
                         @(Patient.Age is not null ? Localizer["App.PatientDialog.AgeYo", Patient.Age] : Localizer["App.Common.AgeUnknown"])
                         &middot; @(Patient.Gender is not null ? Localizer[GenderDisplay.GetKey(Patient.Gender)].Value : Localizer["App.Common.GenderUnknown"].Value)
                     </span>
@@ -35,18 +35,18 @@
                 }
             </BbSheetHeader>
 
-            <BbTabs DefaultValue="details" Class="mt-4">
+            <BbTabs DefaultValue="details" Class="bb:mt-4">
                 <BbTabsList>
                     <BbTabsTrigger Value="details">@Localizer["App.PatientDialog.TabDetails"]</BbTabsTrigger>
                     <BbTabsTrigger Value="history">@Localizer["App.PatientDialog.TabHistory"]</BbTabsTrigger>
                 </BbTabsList>
                 <BbTabsContent Value="details">
-                    <div class="space-y-4">
+                    <div class="bb:space-y-4">
                         @if (!string.IsNullOrEmpty(Patient.Phone) || !string.IsNullOrEmpty(Patient.Email))
                         {
                             <div>
-                                <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.Patient.Contact"]</span>
-                                <div class="mt-2 space-y-1 text-sm">
+                                <span class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide bb:text-muted-foreground">@Localizer["App.Patient.Contact"]</span>
+                                <div class="bb:mt-2 bb:space-y-1 bb:text-sm">
                                     @if (!string.IsNullOrEmpty(Patient.Phone))
                                     {
                                         <p>@Patient.Phone</p>
@@ -60,15 +60,15 @@
                         }
 
                         <div>
-                            <div class="flex items-center justify-between gap-3">
-                                <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.Patient.RecruitmentStatus"]</span>
+                            <div class="bb:flex bb:items-center bb:justify-between bb:gap-3">
+                                <span class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide bb:text-muted-foreground">@Localizer["App.Patient.RecruitmentStatus"]</span>
                                 <SaveStatusIndicator Saving="_statusSaving" />
                             </div>
                             @if (CanEdit)
                             {
                                 <BbRadioGroup TValue="string" Value="@Patient.Status" ValueChanged="OnStatusChangedInternal"
                                               Disabled="_statusSaving"
-                                              Class="mt-3 flex flex-row flex-wrap items-center gap-x-8 gap-y-3">
+                                              Class="bb:mt-3 bb:flex bb:flex-row bb:flex-wrap bb:items-center">
                                     @foreach (var status in StatusOptions)
                                     {
                                         <BbRadioGroupItem TValue="string" Value="@status" Label="@Localizer[StatusDisplay.GetKey(status)].Value" />
@@ -77,7 +77,7 @@
                             }
                             else
                             {
-                                <div class="mt-2">
+                                <div class="bb:mt-2">
                                     <StatusBadge Status="@Patient.Status" />
                                 </div>
                             }
@@ -87,19 +87,19 @@
 
                         @if (_criteriaLoading)
                         {
-                            <div class="space-y-2">
-                                <BbSkeleton Class="h-5 w-full" />
-                                <BbSkeleton Class="h-5 w-full" />
+                            <div class="bb:space-y-2">
+                                <BbSkeleton Class="bb:h-5 bb:w-full" />
+                                <BbSkeleton Class="bb:h-5 bb:w-full" />
                             </div>
                         }
                         else if (_criteria.Count > 0)
                         {
                             <div>
-                                <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.Patient.EligibilityCriteria"]</span>
-                                <ul class="mt-2 space-y-1.5 text-sm">
+                                <span class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide bb:text-muted-foreground">@Localizer["App.Patient.EligibilityCriteria"]</span>
+                                <ul class="bb:mt-2 bb:space-y-1.5 bb:text-sm">
                                     @foreach (var criterion in _criteria)
                                     {
-                                        <li class="flex items-center gap-2">
+                                        <li class="bb:flex bb:items-center bb:gap-2">
                                             <CriterionStatusIcon Met="criterion.Met" Indeterminate="criterion.Indeterminate" Note="criterion.Note" />
                                             <span>@criterion.DisplayText</span>
                                         </li>

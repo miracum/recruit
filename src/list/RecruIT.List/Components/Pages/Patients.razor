@@ -9,8 +9,8 @@
 
 @if (_loading)
 {
-    <BbSkeleton Class="mb-4 h-8 w-64" />
-    <BbSkeleton Class="h-96 w-full" />
+    <BbSkeleton Class="bb:mb-4 bb:h-8 bb:w-64" />
+    <BbSkeleton Class="bb:w-full" />
 }
 else if (_errorMessage is not null)
 {
@@ -30,24 +30,24 @@ else
         <Columns>
             <BbDataTableColumn TData="PatientOverviewDto" TValue="string" Header="@Localizer["App.PatientList.ColumnName"]" Property="p => p.Name ?? p.PatientId" Sortable="true">
                 <CellTemplate Context="p">
-                    <span class="font-medium">@(p.Name ?? p.PatientId)</span>
+                    <span class="bb:font-medium">@(p.Name ?? p.PatientId)</span>
                 </CellTemplate>
             </BbDataTableColumn>
             <BbDataTableColumn TData="PatientOverviewDto" TValue="int?" Header="@Localizer["App.PatientList.ColumnDemographics"]" Width="140px">
                 <CellTemplate Context="p">
                     @(p.Age is not null ? p.Age.ToString() : Localizer["App.Common.AgeUnknown"].Value)
-                    <span class="mx-1.5 text-muted-foreground">&middot;</span>
+                    <span class="bb:text-muted-foreground">&middot;</span>
                     @(p.Gender is not null ? Localizer[GenderDisplay.GetKey(p.Gender)].Value : Localizer["App.Common.Unknown"].Value)
                 </CellTemplate>
             </BbDataTableColumn>
             <BbDataTableColumn TData="PatientOverviewDto" TValue="int" Header="@Localizer["App.PatientsPage.ColumnStudies"]">
                 <CellTemplate Context="p">
-                    <div class="flex flex-wrap gap-1.5">
+                    <div class="bb:flex bb:flex-wrap bb:gap-1.5">
                         @foreach (var membership in p.Trials)
                         {
-                            <div class="-m-0.5 flex cursor-pointer items-center gap-1 rounded-md p-0.5 hover:bg-accent"
+                            <div class="bb:flex bb:cursor-pointer bb:items-center bb:gap-1 bb:rounded-md bb:p-0.5 bb:hover:bg-accent"
                                  @onclick="() => OpenPatient(membership)">
-                                <span class="text-sm font-medium">@membership.StudyAcronym</span>
+                                <span class="bb:text-sm bb:font-medium">@membership.StudyAcronym</span>
                                 <StatusBadge Status="@membership.Status" />
                             </div>
                         }

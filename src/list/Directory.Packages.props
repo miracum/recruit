@@ -1,7 +1,7 @@
 <Project>
   <ItemGroup>
     <PackageVersion Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
-    <PackageVersion Include="BlazorBlueprint.Components" Version="3.17.0" />
+    <PackageVersion Include="BlazorBlueprint.Components" Version="4.1.0" />
     <PackageVersion Include="EFCore.NamingConventions" Version="10.0.1" />
     <PackageVersion Include="Fluid.Core" Version="2.40.0" />
     <PackageVersion Include="Hangfire.AspNetCore" Version="1.8.25" />
