@@ -127,6 +127,10 @@ else if (_summary is not null)
                     <CellTemplate Context="p">
                         <div class="bb:block bb:cursor-pointer bb:p-4" @onclick="() => OpenPatient(p)">
                             @(p.RecommendedDate?.LocalDateTime.ToString("d") ?? "-")
+                            @if (p.IsNew(NewSuggestionWindowDays))
+                            {
+                                <BbBadge Variant="BadgeVariant.Default" Class="bb:ms-2">@Localizer["App.PatientList.NewBadge"]</BbBadge>
+                            }
                         </div>
                     </CellTemplate>
                 </BbDataTableColumn>
@@ -134,10 +138,6 @@ else if (_summary is not null)
                     <CellTemplate Context="p">
                         <div class="bb:block bb:cursor-pointer bb:p-4" @onclick="() => OpenPatient(p)">
                             <span class="bb:font-medium bb:hover:underline">@(p.Name ?? p.MedicalRecordNumber ?? p.PatientId)</span>
-                            @if (p.IsNew(NewSuggestionWindowDays))
-                            {
-                                <BbBadge Variant="BadgeVariant.Default" Class="bb:ms-2">@Localizer["App.PatientList.NewBadge"]</BbBadge>
-                            }
                         </div>
                     </CellTemplate>
                 </BbDataTableColumn>
