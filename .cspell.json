@@ -11,7 +11,7 @@
     "**/*.svg",
     "zensical.toml",
     "uv.lock",
-    "docker-compose/*",
+    "compose/*",
     ".gitlab-ci.yml",
     ".*.json"
   ],

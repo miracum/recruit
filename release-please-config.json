@@ -18,7 +18,7 @@
         "src/list/Directory.Build.props",
         "src/buildSrc/src/main/groovy/org.miracum.recruit.java-common-conventions.gradle",
         "src/query-sql-on-fhir/src/main/resources/application.yml",
-        "docker-compose/docker-compose.yaml",
+        "compose/compose.yaml",
         "docs/configuration/security.md",
         "docs/_snippets/k8s/query-argo-workflow.yaml",
         {
