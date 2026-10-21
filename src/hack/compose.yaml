@@ -157,69 +157,46 @@ services:
     ports:
       - "127.0.0.1:8083:8080"
 
-  minio:
-    image: docker.io/bitnamilegacy/minio:2025.7.23-debian-12-r3@sha256:953d489a81cc4de7975f90e07202189c4325da39b0b92470b6a13c7ea99e36cd
+  seaweedfs:
+    image: docker.io/chrislusf/seaweedfs:4.48@sha256:4e61d15fd35994cb1e43e1e553dff106794841fd9a99ade2fc8c8bfce4d7872d
+    restart: unless-stopped
+    # the image's own seaweed user. Setting it here skips the entrypoint's chown + su-exec dance,
+    # which would otherwise need CAP_CHOWN/CAP_SETUID/CAP_SETGID.
+    user: "1000:1000"
     ipc: none
     security_opt:
       - "no-new-privileges:true"
     cap_drop:
       - ALL
     privileged: false
+    # all-in-one master, volume, filer, and S3 gateway. Creates the bucket on startup if it doesn't
+    # already exist, so there's no need for a separate bucket-creation job.
+    command:
+      - mini
+      - -bucket=fhir
     environment:
-      MINIO_UPDATE: "off"
-      MINIO_CALLHOME_ENABLE: "off"
-      MINIO_ROOT_USER: "admin"
-      MINIO_BROWSER: "on"
+      # used as the S3 gateway's admin identity
+      AWS_ACCESS_KEY_ID: "admin"
       # kics-scan ignore-line
-      MINIO_ROOT_PASSWORD: "miniopass" # gitleaks:allow
-      MINIO_SCHEME: "http"
+      AWS_SECRET_ACCESS_KEY: "seaweedfspass" # gitleaks:allow
+    healthcheck:
+      # the bucket is only created a few seconds after the S3 gateway is up, so probe the bucket
+      # itself instead of /healthz - this way, dependents can rely on it existing.
+      test:
+        - CMD-SHELL
+        - curl -sSf -o /dev/null -I --aws-sigv4 aws:amz:eu-central-1:s3 --user "$$AWS_ACCESS_KEY_ID:$$AWS_SECRET_ACCESS_KEY" http://127.0.0.1:8333/fhir
+      interval: 5s
+      timeout: 5s
+      retries: 30
     ports:
-      - "127.0.0.1:9001:9001"
-      - "127.0.0.1:9000:9000"
+      # S3 API
+      - "127.0.0.1:8333:8333"
+      # admin UI
+      - "127.0.0.1:23646:23646"
     deploy:
       resources:
         limits:
-          memory: 4G
-
-  wait-for-minio:
-    image: docker.io/curlimages/curl:8.22.0@sha256:58adaa4e8dca9c988bae2aba4ab3434a0bb2da16bbe3f92dec39ec7785166777
-    ipc: none
-    security_opt:
-      - "no-new-privileges:true"
-    cap_drop:
-      - ALL
-    privileged: false
-    restart: "no"
-    environment:
-      MINIO_ENDPOINT_URL: http://minio:9000
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        until [ "$(curl -s -o /dev/null -L -w "%{http_code}" "$$MINIO_ENDPOINT_URL/minio/health/live")" == "200" ]; do
-            echo "$(date): Waiting for minio server @ $$MINIO_ENDPOINT_URL to be up";
-            sleep 5;
-        done;
-    depends_on:
-      minio:
-        condition: service_started
-
-  create-bucket:
-    image: docker.io/bitnamilegacy/minio:2025.7.23-debian-12-r3@sha256:953d489a81cc4de7975f90e07202189c4325da39b0b92470b6a13c7ea99e36cd
-    restart: on-failure
-    cap_drop:
-      - ALL
-    privileged: false
-    ipc: none
-    security_opt:
-      - "no-new-privileges:true"
-    entrypoint: ["/bin/bash", "-c"]
-    command:
-      - |
-        mc alias set minio http://minio:9000 admin miniopass;
-        mc mb --ignore-existing minio/fhir;
-    depends_on:
-      wait-for-minio:
-        condition: service_completed_successfully
+          memory: 1G
 
   upload-to-fhir-server:
     # the image is overkill, but it is the only one that has the necessary tools and is up-to-date
@@ -247,22 +224,24 @@ services:
         /synthea/post-transactions.sh
         echo "Loading SearchParameter resources.";
         curl --fail-with-body --retry-connrefused -X POST -H "Content-Type: application/fhir+json" --data @/fhir/search-parameters-transaction-upsert.json "$$FHIR_SERVER_BASE_URL"
-        curl --fail-with-body --retry-connrefused -X POST -H "Content-Type: application/fhir+json" --data @/fhir/trino-sql-study-transaction-upsert.json "$$FHIR_SERVER_BASE_URL"
+        curl --fail-with-body --retry-connrefused -X POST -H "Content-Type: application/fhir+json" --data @/fhir/sample-study-transaction-upsert.json "$$FHIR_SERVER_BASE_URL"
     volumes:
       - ./synthea/:/synthea/
-      # ./fhir/search-parameters-transaction-upsert.json is a symlink pointing outside of ./fhir/.
+      # ./fhir/*-transaction-upsert.json are symlinks pointing outside of ./fhir/.
       # Mounting ./fhir/ as a whole would carry that symlink into the container, and Docker
       # resolves mount targets through existing symlinks - so a later mount at the same path
       # would follow it and (since /fhir/ is a live bind mount) recreate the resolved directory
       # tree back on the host. Mount each file individually by its real path instead.
-      - ./fhir/trino-sql-study-transaction-upsert.json:/fhir/trino-sql-study-transaction-upsert.json:ro
       - ../../fhir/ig/fsh-generated/resources/Bundle-recruit-search-parameters-transaction.json:/fhir/search-parameters-transaction-upsert.json:ro
+      - ../../fhir/ig/fsh-generated/resources/Bundle-recruit-sample-study-transaction.json:/fhir/sample-study-transaction-upsert.json:ro
     depends_on:
       fhir:
         condition: service_started
 
   convert-to-delta:
-    image: docker.io/library/eclipse-temurin:21-jre@sha256:8cef5fc7bebe421363ab543a2f4db5caf7d119d8db67d56b0f56c485d2de4d55
+    # the fhir-to-lakehouse image already ships Pathling, Delta Lake, and hadoop-aws along with all
+    # their jars, so nothing needs to be downloaded at runtime.
+    image: ghcr.io/bzkf/fhir-to-lakehouse:v1.14.1@sha256:a8c05aef73a54d4e74869aca1a05a377ec0acb119a9372553e31835a94a0fab4
     ipc: none
     security_opt:
       - "no-new-privileges:true"
@@ -270,28 +249,39 @@ services:
       - ALL
     privileged: false
     restart: "no"
-    entrypoint: ["/bin/bash", "-c"]
+    environment:
+      AWS_ENDPOINT_URL: "http://seaweedfs:8333"
+      AWS_ACCESS_KEY_ID: "admin"
+      AWS_SECRET_ACCESS_KEY: "seaweedfspass" # gitleaks:allow
+    entrypoint: ["python3", "-c"]
     command:
       - |
-        curl -LsSf https://astral.sh/uv/install.sh | sh
-        export PATH="$$HOME/.local/bin:$$PATH"
-        uvx pathling@9.8.0 \
-          --spark-conf spark.jars.packages=org.apache.hadoop:hadoop-aws:3.4.1 \
-          --spark-conf spark.hadoop.fs.s3a.endpoint=http://minio:9000 \
-          --spark-conf spark.hadoop.fs.s3a.access.key=admin \
-          --spark-conf spark.hadoop.fs.s3a.secret.key=miniopass \
-          --spark-conf spark.hadoop.fs.s3a.path.style.access=true \
-          --spark-conf spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem \
-          --spark-conf spark.hadoop.fs.s3a.connection.ssl.enabled=false \
-          run -c '
-        data_source = pathling.read.ndjson("/tmp/import")
+        import glob
+        import os
+
+        from pathling import PathlingContext
+        from pyspark.sql import SparkSession
+
+        jars = sorted(glob.glob(os.path.join(os.environ["SPARK_JARS_DIR"], "*.jar")))
+        spark = (
+            SparkSession.builder.config("spark.jars", ",".join(jars))
+            .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
+            .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
+            .config("spark.hadoop.fs.s3a.endpoint", os.environ["AWS_ENDPOINT_URL"])
+            .config("spark.hadoop.fs.s3a.access.key", os.environ["AWS_ACCESS_KEY_ID"])
+            .config("spark.hadoop.fs.s3a.secret.key", os.environ["AWS_SECRET_ACCESS_KEY"])
+            .config("spark.hadoop.fs.s3a.path.style.access", "true")
+            .config("spark.hadoop.fs.s3a.connection.ssl.enabled", "false")
+            .getOrCreate()
+        )
+
+        data_source = PathlingContext.create(spark).read.ndjson("/tmp/import")
         data_source.write.delta("s3a://fhir/default", save_mode="overwrite")
-        '
     volumes:
       - ./synthea/bulk/fhir/:/tmp/import/:ro
     depends_on:
-      create-bucket:
-        condition: service_completed_successfully
+      seaweedfs:
+        condition: service_healthy
     deploy:
       resources:
         limits:
@@ -309,16 +299,16 @@ services:
     environment:
       AWS_ALLOW_HTTP: "1"
       AWS_REGION: "eu-central-1"
-      AWS_ENDPOINT_URL: "http://minio:9000"
+      AWS_ENDPOINT_URL: "http://seaweedfs:8333"
       AWS_ACCESS_KEY_ID: "admin"
-      AWS_SECRET_ACCESS_KEY: "miniopass"
+      AWS_SECRET_ACCESS_KEY: "seaweedfspass" # gitleaks:allow
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
         python3 /app/src/lakehousekeeper.py register --bucket-name=fhir --database-name-prefix=default/ --hive-metastore=thrift://hive-metastore:9083
         python3 /app/src/lakehousekeeper.py vacuum   --bucket-name=fhir --database-name-prefix=default/ --retention-hours=0 --dry-run=false --enforce-retention-duration=false
     volumes:
-      - ./config/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf:ro
+      - ./config/spark-defaults.conf:/app/spark/conf/spark-defaults.conf:ro
     depends_on:
       convert-to-delta:
         condition: service_completed_successfully
@@ -343,7 +333,7 @@ services:
         -Djavax.jdo.option.ConnectionUserName=postgres
         -Djavax.jdo.option.ConnectionPassword=postgres
       AWS_ACCESS_KEY_ID: "admin"
-      AWS_SECRET_ACCESS_KEY: "miniopass"
+      AWS_SECRET_ACCESS_KEY: "seaweedfspass" # gitleaks:allow
       AWS_DEFAULT_REGION: "eu-central-1"
     volumes:
       - ./config/hive-site.xml:/opt/hive/conf/hive-site.xml:ro
@@ -366,7 +356,7 @@ services:
     restart: unless-stopped
     environment:
       AWS_ACCESS_KEY_ID: "admin"
-      AWS_SECRET_ACCESS_KEY: "miniopass"
+      AWS_SECRET_ACCESS_KEY: "seaweedfspass" # gitleaks:allow
     ports:
       - "127.0.0.1:8080:8080"
     volumes:

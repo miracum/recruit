@@ -14,7 +14,7 @@ maintainers:
 sources:
   - https://github.com/open-recruit/recruit/tree/master/charts/recruit
 deprecated: false
-kubeVersion: ">= 1.21.0"
+kubeVersion: ">= 1.30.0"
 icon: https://open-recruit.github.io/recruit/_img/miracum-recruit-k8s-logo.png
 dependencies:
   - condition: fhirserver.enabled

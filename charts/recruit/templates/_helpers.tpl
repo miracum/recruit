@@ -118,6 +118,13 @@ Return the Trino credentials secret key
 {{- end -}}
 
 {{/*
+Return the Trino JDBC URL
+*/}}
+{{- define "recruit.trino.jdbcUrl" -}}
+    {{ tpl .Values.querySqlOnFhir.trino.jdbcUrl $ }}
+{{- end -}}
+
+{{/*
 Return the Trino password
 */}}
 {{- define "recruit.trino.password" -}}

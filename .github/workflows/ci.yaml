@@ -38,7 +38,7 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@6611917e0cbce3777825e93e3f725c98a437c060 # v1.31.0
+    uses: miracum/.github/.github/workflows/standard-build.yaml@9b731cc069e92b534c819d2b6f250723b8f2d216 # v1.31.1
     with:
       image: ghcr.io/${{ github.repository }}/list
       build-context: "src/list/"
@@ -53,7 +53,7 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@6611917e0cbce3777825e93e3f725c98a437c060 # v1.31.0
+    uses: miracum/.github/.github/workflows/standard-build.yaml@9b731cc069e92b534c819d2b6f250723b8f2d216 # v1.31.1
     with:
       image: ghcr.io/${{ github.repository }}/query-sql-on-fhir
       build-context: "src/"
@@ -72,7 +72,7 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    uses: miracum/.github/.github/workflows/standard-build.yaml@6611917e0cbce3777825e93e3f725c98a437c060 # v1.31.0
+    uses: miracum/.github/.github/workflows/standard-build.yaml@9b731cc069e92b534c819d2b6f250723b8f2d216 # v1.31.1
     with:
       image: ghcr.io/${{ github.repository }}/superset-library-sync
       build-context: "src/"
@@ -91,7 +91,7 @@ jobs:
       # only lint, install, and publish the chart once the images it points at have passed all tests
       # (this already depends on the container structure `test` job).
       - compose-test
-    uses: miracum/.github/.github/workflows/standard-chart-publish.yaml@6611917e0cbce3777825e93e3f725c98a437c060 # v1.31.0
+    uses: miracum/.github/.github/workflows/standard-chart-publish.yaml@9b731cc069e92b534c819d2b6f250723b8f2d216 # v1.31.1
     permissions:
       contents: read
       packages: write # to push the chart and its signature/attestation to ghcr.io
@@ -252,7 +252,7 @@ jobs:
       token: ${{ secrets.GITHUB_TOKEN }}
 
   lint:
-    uses: miracum/.github/.github/workflows/standard-lint.yaml@6611917e0cbce3777825e93e3f725c98a437c060 # v1.31.0
+    uses: miracum/.github/.github/workflows/standard-lint.yaml@9b731cc069e92b534c819d2b6f250723b8f2d216 # v1.31.1
     permissions:
       contents: read
       pull-requests: write # for MegaLinter's PR comment with lint results

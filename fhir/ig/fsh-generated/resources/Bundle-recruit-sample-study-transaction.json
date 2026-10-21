@@ -1,0 +1,247 @@
+{
+  "resourceType": "Bundle",
+  "id": "recruit-sample-study-transaction",
+  "type": "transaction",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "ResearchStudy",
+        "id": "98d96608-475f-4386-b7b5-6ddc1eb57e71",
+        "identifier": [
+          {
+            "system": "https://openrecruit.dev/fhir/identifiers/trino-sql-criteria-researchstudy-id",
+            "value": "bronchitis"
+          }
+        ],
+        "extension": [
+          {
+            "url": "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym",
+            "valueString": "DEMO-BRONCHITIS"
+          },
+          {
+            "url": "https://www.medizininformatik-initiative.de/fhir/modul-studie/StructureDefinition/mii-ex-studie-akronym",
+            "valueString": "DEMO-BRONCHITIS"
+          }
+        ],
+        "status": "active",
+        "title": "Bronchitis Demo Study",
+        "enrollment": [
+          {
+            "reference": "Group/be24c1a6-b052-4360-871b-0a1b7b6bdfb4"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ResearchStudy/98d96608-475f-4386-b7b5-6ddc1eb57e71"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Group",
+        "id": "be24c1a6-b052-4360-871b-0a1b7b6bdfb4",
+        "identifier": [
+          {
+            "system": "https://openrecruit.dev/fhir/identifiers/eligibility-group-id",
+            "value": "bronchitis"
+          }
+        ],
+        "actual": false,
+        "type": "person",
+        "active": true,
+        "code": {
+          "coding": [
+            {
+              "code": "trino-sql",
+              "system": "https://openrecruit.dev/fhir/CodeSystem/eligibility-criteria-types"
+            }
+          ],
+          "text": "Trino SQL-encoded eligibility criteria"
+        },
+        "characteristic": [
+          {
+            "valueReference": {
+              "reference": "Library/bb4e037a-0a43-4fee-befc-b9ed598c3e64"
+            },
+            "code": {
+              "text": "Bronchitis diagnosis"
+            },
+            "exclude": false
+          },
+          {
+            "valueReference": {
+              "reference": "Library/12b09320-2426-43e9-930d-64f151d39e68"
+            },
+            "code": {
+              "text": "Age > 18 years"
+            },
+            "exclude": false
+          },
+          {
+            "valueReference": {
+              "reference": "Library/9be54194-a4d9-4835-bf9e-21314e4f046c"
+            },
+            "code": {
+              "text": "No sepsis diagnosis within 3 months of the bronchitis diagnosis"
+            },
+            "exclude": true
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Group/be24c1a6-b052-4360-871b-0a1b7b6bdfb4"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Library",
+        "id": "bb4e037a-0a43-4fee-befc-b9ed598c3e64",
+        "status": "active",
+        "name": "bronchitis",
+        "identifier": [
+          {
+            "system": "https://openrecruit.dev/fhir/identifiers/trino-sql-criteria-library-id",
+            "value": "bronchitis"
+          }
+        ],
+        "type": {
+          "coding": [
+            {
+              "code": "sql-query",
+              "system": "https://sql-on-fhir.org/ig/CodeSystem/LibraryTypesCodes"
+            }
+          ]
+        },
+        "content": [
+          {
+            "contentType": "application/sql;dialect=trino",
+            "extension": [
+              {
+                "url": "https://sql-on-fhir.org/ig/StructureDefinition/sql-text",
+                "valueString": "SELECT\n    patient.id AS patient_id,\n    EXISTS (\n        SELECT 1\n        FROM\n            fhir.default.condition,\n            UNNEST(condition.code.coding) AS condition_coding\n        WHERE\n            condition.subject.reference = CONCAT('Patient/', patient.id)\n            AND condition_coding.system = 'http://snomed.info/sct'\n            AND condition_coding.code IN ('10509002')\n    ) AS is_met\nFROM fhir.default.patient AS patient"
+              }
+            ],
+            "data": "U0VMRUNUCiAgICBwYXRpZW50LmlkIEFTIHBhdGllbnRfaWQsCiAgICBFWElTVFMgKAogICAgICAgIFNFTEVDVCAxCiAgICAgICAgRlJPTQogICAgICAgICAgICBmaGlyLmRlZmF1bHQuY29uZGl0aW9uLAogICAgICAgICAgICBVTk5FU1QoY29uZGl0aW9uLmNvZGUuY29kaW5nKSBBUyBjb25kaXRpb25fY29kaW5nCiAgICAgICAgV0hFUkUKICAgICAgICAgICAgY29uZGl0aW9uLnN1YmplY3QucmVmZXJlbmNlID0gQ09OQ0FUKCdQYXRpZW50LycsIHBhdGllbnQuaWQpCiAgICAgICAgICAgIEFORCBjb25kaXRpb25fY29kaW5nLnN5c3RlbSA9ICdodHRwOi8vc25vbWVkLmluZm8vc2N0JwogICAgICAgICAgICBBTkQgY29uZGl0aW9uX2NvZGluZy5jb2RlIElOICgnMTA1MDkwMDInKQogICAgKSBBUyBpc19tZXQKRlJPTSBmaGlyLmRlZmF1bHQucGF0aWVudCBBUyBwYXRpZW50"
+          },
+          {
+            "contentType": "application/sql;dialect=duckdb",
+            "extension": [
+              {
+                "url": "https://sql-on-fhir.org/ig/StructureDefinition/sql-text",
+                "valueString": "SELECT\n    patient.id AS patient_id,\n    EXISTS (\n        SELECT 1\n        FROM\n            fhir.default.condition,\n            UNNEST(condition.code.coding) AS u(condition_coding)\n        WHERE\n            condition.subject.reference = CONCAT('Patient/', patient.id)\n            AND condition_coding.system = 'http://snomed.info/sct'\n            AND condition_coding.code IN ('10509002')\n    ) AS is_met\nFROM fhir.default.patient AS patient"
+              }
+            ],
+            "data": "U0VMRUNUCiAgICBwYXRpZW50LmlkIEFTIHBhdGllbnRfaWQsCiAgICBFWElTVFMgKAogICAgICAgIFNFTEVDVCAxCiAgICAgICAgRlJPTQogICAgICAgICAgICBmaGlyLmRlZmF1bHQuY29uZGl0aW9uLAogICAgICAgICAgICBVTk5FU1QoY29uZGl0aW9uLmNvZGUuY29kaW5nKSBBUyB1KGNvbmRpdGlvbl9jb2RpbmcpCiAgICAgICAgV0hFUkUKICAgICAgICAgICAgY29uZGl0aW9uLnN1YmplY3QucmVmZXJlbmNlID0gQ09OQ0FUKCdQYXRpZW50LycsIHBhdGllbnQuaWQpCiAgICAgICAgICAgIEFORCBjb25kaXRpb25fY29kaW5nLnN5c3RlbSA9ICdodHRwOi8vc25vbWVkLmluZm8vc2N0JwogICAgICAgICAgICBBTkQgY29uZGl0aW9uX2NvZGluZy5jb2RlIElOICgnMTA1MDkwMDInKQogICAgKSBBUyBpc19tZXQKRlJPTSBmaGlyLmRlZmF1bHQucGF0aWVudCBBUyBwYXRpZW50"
+          }
+        ],
+        "title": "Bronchitis diagnosis",
+        "description": "Active bronchitis diagnosis (SNOMED CT code 10509002)."
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Library/bb4e037a-0a43-4fee-befc-b9ed598c3e64"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Library",
+        "id": "12b09320-2426-43e9-930d-64f151d39e68",
+        "status": "active",
+        "name": "age-over-18",
+        "identifier": [
+          {
+            "system": "https://openrecruit.dev/fhir/identifiers/trino-sql-criteria-library-id",
+            "value": "age-over-18"
+          }
+        ],
+        "type": {
+          "coding": [
+            {
+              "code": "sql-query",
+              "system": "https://sql-on-fhir.org/ig/CodeSystem/LibraryTypesCodes"
+            }
+          ]
+        },
+        "content": [
+          {
+            "contentType": "application/sql;dialect=trino",
+            "extension": [
+              {
+                "url": "https://sql-on-fhir.org/ig/StructureDefinition/sql-text",
+                "valueString": "SELECT\n    patient.id AS patient_id,\n    date_diff('year', date(patient.birthdate), current_date) > 18 AS is_met\nFROM fhir.default.patient AS patient"
+              }
+            ],
+            "data": "U0VMRUNUCiAgICBwYXRpZW50LmlkIEFTIHBhdGllbnRfaWQsCiAgICBkYXRlX2RpZmYoJ3llYXInLCBkYXRlKHBhdGllbnQuYmlydGhkYXRlKSwgY3VycmVudF9kYXRlKSA+IDE4IEFTIGlzX21ldApGUk9NIGZoaXIuZGVmYXVsdC5wYXRpZW50IEFTIHBhdGllbnQ="
+          },
+          {
+            "contentType": "application/sql;dialect=duckdb",
+            "extension": [
+              {
+                "url": "https://sql-on-fhir.org/ig/StructureDefinition/sql-text",
+                "valueString": "SELECT\n    patient.id AS patient_id,\n    date_sub('year', CAST(patient.birthdate AS DATE), current_date) > 18 AS is_met\nFROM fhir.default.patient AS patient"
+              }
+            ],
+            "data": "U0VMRUNUCiAgICBwYXRpZW50LmlkIEFTIHBhdGllbnRfaWQsCiAgICBkYXRlX3N1YigneWVhcicsIENBU1QocGF0aWVudC5iaXJ0aGRhdGUgQVMgREFURSksIGN1cnJlbnRfZGF0ZSkgPiAxOCBBUyBpc19tZXQKRlJPTSBmaGlyLmRlZmF1bHQucGF0aWVudCBBUyBwYXRpZW50"
+          }
+        ],
+        "title": "Age over 18",
+        "description": "Patient is over 18 years old."
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Library/12b09320-2426-43e9-930d-64f151d39e68"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Library",
+        "id": "9be54194-a4d9-4835-bf9e-21314e4f046c",
+        "status": "active",
+        "name": "sepsis",
+        "identifier": [
+          {
+            "system": "https://openrecruit.dev/fhir/identifiers/trino-sql-criteria-library-id",
+            "value": "sepsis"
+          }
+        ],
+        "type": {
+          "coding": [
+            {
+              "code": "sql-query",
+              "system": "https://sql-on-fhir.org/ig/CodeSystem/LibraryTypesCodes"
+            }
+          ]
+        },
+        "content": [
+          {
+            "contentType": "application/sql;dialect=trino",
+            "extension": [
+              {
+                "url": "https://sql-on-fhir.org/ig/StructureDefinition/sql-text",
+                "valueString": "SELECT\n    patient.id AS patient_id,\n    EXISTS (\n        SELECT 1\n        FROM\n            fhir.default.condition AS sepsis,\n            UNNEST(sepsis.code.coding) AS sepsis_coding,\n            fhir.default.condition AS bronchitis,\n            UNNEST(bronchitis.code.coding) AS bronchitis_coding\n        WHERE\n            sepsis.subject.reference = CONCAT('Patient/', patient.id)\n            AND sepsis_coding.system = 'http://snomed.info/sct'\n            AND sepsis_coding.code IN ('91302008')\n            AND bronchitis.subject.reference = sepsis.subject.reference\n            AND bronchitis_coding.system = 'http://snomed.info/sct'\n            AND bronchitis_coding.code IN ('10509002')\n            AND from_iso8601_timestamp(COALESCE(sepsis.onsetdatetime, sepsis.recordeddate))\n                BETWEEN from_iso8601_timestamp(COALESCE(bronchitis.onsetdatetime, bronchitis.recordeddate)) - INTERVAL '3' MONTH\n                    AND from_iso8601_timestamp(COALESCE(bronchitis.onsetdatetime, bronchitis.recordeddate)) + INTERVAL '3' MONTH\n    ) AS is_met\nFROM fhir.default.patient AS patient"
+              }
+            ],
+            "data": "U0VMRUNUCiAgICBwYXRpZW50LmlkIEFTIHBhdGllbnRfaWQsCiAgICBFWElTVFMgKAogICAgICAgIFNFTEVDVCAxCiAgICAgICAgRlJPTQogICAgICAgICAgICBmaGlyLmRlZmF1bHQuY29uZGl0aW9uIEFTIHNlcHNpcywKICAgICAgICAgICAgVU5ORVNUKHNlcHNpcy5jb2RlLmNvZGluZykgQVMgc2Vwc2lzX2NvZGluZywKICAgICAgICAgICAgZmhpci5kZWZhdWx0LmNvbmRpdGlvbiBBUyBicm9uY2hpdGlzLAogICAgICAgICAgICBVTk5FU1QoYnJvbmNoaXRpcy5jb2RlLmNvZGluZykgQVMgYnJvbmNoaXRpc19jb2RpbmcKICAgICAgICBXSEVSRQogICAgICAgICAgICBzZXBzaXMuc3ViamVjdC5yZWZlcmVuY2UgPSBDT05DQVQoJ1BhdGllbnQvJywgcGF0aWVudC5pZCkKICAgICAgICAgICAgQU5EIHNlcHNpc19jb2Rpbmcuc3lzdGVtID0gJ2h0dHA6Ly9zbm9tZWQuaW5mby9zY3QnCiAgICAgICAgICAgIEFORCBzZXBzaXNfY29kaW5nLmNvZGUgSU4gKCc5MTMwMjAwOCcpCiAgICAgICAgICAgIEFORCBicm9uY2hpdGlzLnN1YmplY3QucmVmZXJlbmNlID0gc2Vwc2lzLnN1YmplY3QucmVmZXJlbmNlCiAgICAgICAgICAgIEFORCBicm9uY2hpdGlzX2NvZGluZy5zeXN0ZW0gPSAnaHR0cDovL3Nub21lZC5pbmZvL3NjdCcKICAgICAgICAgICAgQU5EIGJyb25jaGl0aXNfY29kaW5nLmNvZGUgSU4gKCcxMDUwOTAwMicpCiAgICAgICAgICAgIEFORCBmcm9tX2lzbzg2MDFfdGltZXN0YW1wKENPQUxFU0NFKHNlcHNpcy5vbnNldGRhdGV0aW1lLCBzZXBzaXMucmVjb3JkZWRkYXRlKSkKICAgICAgICAgICAgICAgIEJFVFdFRU4gZnJvbV9pc284NjAxX3RpbWVzdGFtcChDT0FMRVNDRShicm9uY2hpdGlzLm9uc2V0ZGF0ZXRpbWUsIGJyb25jaGl0aXMucmVjb3JkZWRkYXRlKSkgLSBJTlRFUlZBTCAnMycgTU9OVEgKICAgICAgICAgICAgICAgICAgICBBTkQgZnJvbV9pc284NjAxX3RpbWVzdGFtcChDT0FMRVNDRShicm9uY2hpdGlzLm9uc2V0ZGF0ZXRpbWUsIGJyb25jaGl0aXMucmVjb3JkZWRkYXRlKSkgKyBJTlRFUlZBTCAnMycgTU9OVEgKICAgICkgQVMgaXNfbWV0CkZST00gZmhpci5kZWZhdWx0LnBhdGllbnQgQVMgcGF0aWVudA=="
+          },
+          {
+            "contentType": "application/sql;dialect=duckdb",
+            "extension": [
+              {
+                "url": "https://sql-on-fhir.org/ig/StructureDefinition/sql-text",
+                "valueString": "SELECT\n    patient.id AS patient_id,\n    EXISTS (\n        SELECT 1\n        FROM\n            fhir.default.condition AS sepsis,\n            UNNEST(sepsis.code.coding) AS u(sepsis_coding),\n            fhir.default.condition AS bronchitis,\n            UNNEST(bronchitis.code.coding) AS v(bronchitis_coding)\n        WHERE\n            sepsis.subject.reference = CONCAT('Patient/', patient.id)\n            AND sepsis_coding.system = 'http://snomed.info/sct'\n            AND sepsis_coding.code IN ('91302008')\n            AND bronchitis.subject.reference = sepsis.subject.reference\n            AND bronchitis_coding.system = 'http://snomed.info/sct'\n            AND bronchitis_coding.code IN ('10509002')\n            AND CAST(COALESCE(sepsis.onsetdatetime, sepsis.recordeddate) AS TIMESTAMPTZ)\n                BETWEEN CAST(COALESCE(bronchitis.onsetdatetime, bronchitis.recordeddate) AS TIMESTAMPTZ) - INTERVAL 3 MONTH\n                    AND CAST(COALESCE(bronchitis.onsetdatetime, bronchitis.recordeddate) AS TIMESTAMPTZ) + INTERVAL 3 MONTH\n    ) AS is_met\nFROM fhir.default.patient AS patient"
+              }
+            ],
+            "data": "U0VMRUNUCiAgICBwYXRpZW50LmlkIEFTIHBhdGllbnRfaWQsCiAgICBFWElTVFMgKAogICAgICAgIFNFTEVDVCAxCiAgICAgICAgRlJPTQogICAgICAgICAgICBmaGlyLmRlZmF1bHQuY29uZGl0aW9uIEFTIHNlcHNpcywKICAgICAgICAgICAgVU5ORVNUKHNlcHNpcy5jb2RlLmNvZGluZykgQVMgdShzZXBzaXNfY29kaW5nKSwKICAgICAgICAgICAgZmhpci5kZWZhdWx0LmNvbmRpdGlvbiBBUyBicm9uY2hpdGlzLAogICAgICAgICAgICBVTk5FU1QoYnJvbmNoaXRpcy5jb2RlLmNvZGluZykgQVMgdihicm9uY2hpdGlzX2NvZGluZykKICAgICAgICBXSEVSRQogICAgICAgICAgICBzZXBzaXMuc3ViamVjdC5yZWZlcmVuY2UgPSBDT05DQVQoJ1BhdGllbnQvJywgcGF0aWVudC5pZCkKICAgICAgICAgICAgQU5EIHNlcHNpc19jb2Rpbmcuc3lzdGVtID0gJ2h0dHA6Ly9zbm9tZWQuaW5mby9zY3QnCiAgICAgICAgICAgIEFORCBzZXBzaXNfY29kaW5nLmNvZGUgSU4gKCc5MTMwMjAwOCcpCiAgICAgICAgICAgIEFORCBicm9uY2hpdGlzLnN1YmplY3QucmVmZXJlbmNlID0gc2Vwc2lzLnN1YmplY3QucmVmZXJlbmNlCiAgICAgICAgICAgIEFORCBicm9uY2hpdGlzX2NvZGluZy5zeXN0ZW0gPSAnaHR0cDovL3Nub21lZC5pbmZvL3NjdCcKICAgICAgICAgICAgQU5EIGJyb25jaGl0aXNfY29kaW5nLmNvZGUgSU4gKCcxMDUwOTAwMicpCiAgICAgICAgICAgIEFORCBDQVNUKENPQUxFU0NFKHNlcHNpcy5vbnNldGRhdGV0aW1lLCBzZXBzaXMucmVjb3JkZWRkYXRlKSBBUyBUSU1FU1RBTVBUWikKICAgICAgICAgICAgICAgIEJFVFdFRU4gQ0FTVChDT0FMRVNDRShicm9uY2hpdGlzLm9uc2V0ZGF0ZXRpbWUsIGJyb25jaGl0aXMucmVjb3JkZWRkYXRlKSBBUyBUSU1FU1RBTVBUWikgLSBJTlRFUlZBTCAzIE1PTlRICiAgICAgICAgICAgICAgICAgICAgQU5EIENBU1QoQ09BTEVTQ0UoYnJvbmNoaXRpcy5vbnNldGRhdGV0aW1lLCBicm9uY2hpdGlzLnJlY29yZGVkZGF0ZSkgQVMgVElNRVNUQU1QVFopICsgSU5URVJWQUwgMyBNT05USAogICAgKSBBUyBpc19tZXQKRlJPTSBmaGlyLmRlZmF1bHQucGF0aWVudCBBUyBwYXRpZW50"
+          }
+        ],
+        "title": "Sepsis within 3 months of bronchitis",
+        "description": "Sepsis diagnosis (SNOMED CT code 91302008) with an onset within 3 months before or after a bronchitis diagnosis (SNOMED CT code 10509002), falling back to the recorded date where no onset is documented."
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Library/9be54194-a4d9-4835-bf9e-21314e4f046c"
+      }
+    }
+  ]
+}

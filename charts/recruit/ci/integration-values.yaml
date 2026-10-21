@@ -3,8 +3,7 @@ fhirserver:
   postgres:
     auth:
       # kics-scan ignore-line
-      postgresPassword: fhir
+      password: fhir
 
 postgres:
-  resourcesPreset: "none"
   enabled: true

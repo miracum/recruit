@@ -1,10 +1,21 @@
+{{- if and .Values.createSearchParameters.enabled (or .Values.fhirserver.enabled (ne .Values.externalFhirServer.url "")) -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "common.names.fullname" . }}-search-parameters
+  # a different name than the regular release resource this used to be: upgrading from such a release deletes that
+  # one only after the pre-upgrade hooks ran, which would otherwise take this hook-created one with it.
+  name: {{ include "common.names.fullname" . }}-search-parameters-hook
   labels:
     {{- include "recruit.labels" . | nindent 4 }}
     app.kubernetes.io/component: search-parameters
+  annotations:
+    # a hook itself, created right before the Job that uses it: as a regular release resource, it would only be
+    # updated after the pre-upgrade hooks ran, so the Job would install the previous release's SearchParameters.
+    "helm.sh/hook": post-install,pre-upgrade
+    "helm.sh/hook-weight": "-2"
+    # not hook-succeeded: that deletes a ConfigMap right after creating it, before the Job could mount it
+    "helm.sh/hook-delete-policy": before-hook-creation
 data:
   search-parameters-transaction-upsert.json: |
     {{- .Files.Get "files/fhir/search-parameters-transaction-upsert.json" | nindent 4 }}
+{{- end -}}

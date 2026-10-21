@@ -30,6 +30,9 @@ dependencies {
 
     // https://mvnrepository.com/artifact/io.trino/trino-jdbc
     implementation 'io.trino:trino-jdbc:482'
+    // https://mvnrepository.com/artifact/org.duckdb/duckdb_jdbc
+    // alternative to Trino for querying FHIR resources directly, e.g. NDJSON files, without a lakehouse
+    implementation 'org.duckdb:duckdb_jdbc:1.5.6.0'
 
     // Reads the standard OTEL_* env vars itself (see application.yml) and, via classpath
     // detection, auto-instruments the JdbcTemplate-backed Trino DataSource and the @Scheduled

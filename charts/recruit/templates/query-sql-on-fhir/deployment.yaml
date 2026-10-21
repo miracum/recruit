@@ -1,5 +1,6 @@
 {{- with .Values.querySqlOnFhir -}}
 {{- if .enabled -}}
+{{- $syntheticPatients := and $.Values.syntheticPatients.enabled (eq .sqlDialect "duckdb") -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -7,7 +8,7 @@ metadata:
   labels:
     {{- include "recruit.labels" $ | nindent 4 }}
     app.kubernetes.io/component: query-sql-on-fhir
-  {{- with .deploymentAnnotations }}
+  {{- with $.Values.deploymentAnnotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
@@ -26,12 +27,12 @@ spec:
         {{- with .extraPodLabels }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
-      {{- with .podAnnotations }}
+      {{- with $.Values.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
-      {{- with .imagePullSecrets }}
+      {{- with $.Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -58,6 +59,11 @@ spec:
                 echo "$(date): Waiting for FHIR server @ $FHIR_URL to be up";
                 sleep 15;
               done;
+        {{- if $syntheticPatients }}
+        # the same patients the synthetic patients Job loads into the FHIR server, as NDJSON files in /data/fhir/ to
+        # be queried via DuckDB
+        {{- include "recruit.syntheticPatients.generateContainer" (dict "root" $ "exporterArgs" "") | nindent 8 }}
+        {{- end }}
       containers:
         - name: query-sql-on-fhir
           image: "{{ .image.registry }}/{{ .image.repository }}:{{ .image.tag }}"
@@ -91,8 +97,21 @@ spec:
           env:
             - name: FHIR_URL
               value: {{ include "recruit.fhirserver.url" $ }}
+            - name: QUERY_SQL_ON_FHIR_SQL_DIALECT
+              value: {{ .sqlDialect | quote }}
+            {{- if eq .sqlDialect "duckdb" }}
+            # every connection is its own, empty in-memory database, set up by the init SQL
             - name: SPRING_DATASOURCE_URL
-              value: {{ .trino.jdbcUrl | quote }}
+              value: "jdbc:duckdb:"
+            - name: SPRING_DATASOURCE_DRIVERCLASSNAME
+              value: org.duckdb.DuckDBDriver
+            {{- with .duckdb.initSql }}
+            - name: SPRING_DATASOURCE_HIKARI_CONNECTIONINITSQL
+              value: {{ tpl . $ | quote }}
+            {{- end }}
+            {{- else }}
+            - name: SPRING_DATASOURCE_URL
+              value: {{ include "recruit.trino.jdbcUrl" $ | quote }}
             - name: SPRING_DATASOURCE_USERNAME
               value: {{ .trino.auth.username | quote }}
             - name: SPRING_DATASOURCE_PASSWORD
@@ -100,6 +119,7 @@ spec:
                 secretKeyRef:
                   name: {{ include "recruit.trino.secret.name" $ }}
                   key: {{ include "recruit.trino.secret.key" $ }}
+            {{- end }}
             - name: QUERY_SQL_ON_FHIR_SCHEDULE_CRON
               value: {{ .schedule | quote }}
             - name: SQL_ON_FHIR_URL
@@ -114,6 +134,11 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp-volume
+            {{- if $syntheticPatients }}
+            - mountPath: /data
+              name: synthetic-patients
+              readOnly: true
+            {{- end }}
           {{- if .extraVolumeMounts }}
             {{- toYaml .extraVolumeMounts | nindent 12 }}
           {{- end }}
@@ -136,6 +161,9 @@ spec:
       volumes:
         - name: tmp-volume
           emptyDir: {}
+        {{- if $syntheticPatients }}
+        {{- include "recruit.syntheticPatients.volumes" $ | nindent 8 }}
+        {{- end }}
       {{- if .extraVolumes }}
         {{- toYaml .extraVolumes | nindent 8 }}
       {{- end }}

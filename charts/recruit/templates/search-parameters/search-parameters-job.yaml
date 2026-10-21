@@ -7,8 +7,12 @@ metadata:
     {{- include "recruit.labels" . | nindent 4 }}
     app.kubernetes.io/component: search-parameters
   annotations:
-    "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-weight": "1"
+    # pre-upgrade so new SearchParameters exist before the new list and query module versions roll out. On install,
+    # the FHIR server is only created as part of the release, so this has to wait until after it.
+    "helm.sh/hook": post-install,pre-upgrade
+    # before any other hook loads data into the FHIR server, e.g. the synthetic patients Job (weight 0):
+    # the FHIR server only indexes resources by the SearchParameters that exist when they're written.
+    "helm.sh/hook-weight": "-1"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
   backoffLimit: {{ .Values.createSearchParameters.backoffLimit }}
@@ -88,5 +92,5 @@ spec:
       volumes:
         - name: search-parameters
           configMap:
-            name: {{ include "common.names.fullname" . }}-search-parameters
+            name: {{ include "common.names.fullname" . }}-search-parameters-hook
 {{- end -}}

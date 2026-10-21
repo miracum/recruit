@@ -5,7 +5,9 @@ either Compose or Helm.
 
 === "Compose"
 
-    Requires the [Docker CLI](https://docs.docker.com/get-started/get-docker/) with the Compose plugin.
+    Requires the [Docker CLI](https://docs.docker.com/get-started/get-docker/)
+    with the Compose plugin version 5.6.0 or later on a machine with around
+    16 GiB of memory.
 
     Download and extract the Compose files from the latest release:
 
@@ -13,69 +15,86 @@ either Compose or Helm.
     curl -fsSL https://github.com/open-recruit/recruit/releases/latest/download/recruit-compose.tgz | tar -xz
     ```
 
-    Start all services with sample data and a pre-configured Keycloak for authentication:
+    Start all services, including demo fixtures:
 
     ```sh
-    docker compose --project-name=recruit \
-        --env-file=compose/.staging.env \
+    docker compose --project-name=recruit-demo \
+        --env-file=compose/.demo.env \
         -f compose/compose.yaml \
-        -f compose/compose.staging.yaml up --detach
+        -f compose/compose.demo.yaml up --detach --wait
     ```
 
-    Once everything is up, open the screening list at <http://recruit-list.127.0.0.1.nip.io> and log in
-    as `uc1-admin` with password `admin`. Email notifications can be viewed at <http://maildev.127.0.0.1.nip.io>.
+    The first start takes several minutes to download the images, pre-load the FHIR server with synthetic data,
+    and register the same resources as Delta Lake tables for querying by Trino.
 
-    To stop and remove everything again, run:
+    Once the command exits, you can open the screening list at <http://127.0.0.1:32080> and see the demo study.
+
+    To stop and remove everything, including demo data, run:
 
     ```sh
-    docker compose --project-name=recruit \
-        --env-file=compose/.staging.env \
-        -f compose/compose.yaml \
-        -f compose/compose.staging.yaml down --volumes
+    docker compose --project-name=recruit-demo down --volumes
     ```
 
 === "Helm"
 
-    Requires access to a Kubernetes cluster, e.g. a local one created using [KinD](https://kind.sigs.k8s.io/),
-    as well as [kubectl](https://kubernetes.io/docs/tasks/tools/) and [helm](https://helm.sh/docs/intro/install/).
+    Requires access to a Kubernetes cluster with around 16 GiB of memory, e.g. a local one created using
+    [KinD](https://kind.sigs.k8s.io/), as well as [kubectl](https://kubernetes.io/docs/tasks/tools/) and
+    [helm](https://helm.sh/docs/intro/install/).
 
-    Install the chart into a new `recruit` namespace:
+    Create a basic KinD cluster:
 
     ```sh
-    helm install -n recruit \
+    kind create cluster
+    ```
+
+    Install the chart into a new `recruit` namespace, with demo fixtures enabled:
+
+    <!-- x-release-please-start-version -->
+
+    ```sh
+    helm upgrade --install -n recruit \
       --create-namespace \
       --render-subchart-notes \
+      --version 0.0.0 \
       --wait \
-      recruit oci://ghcr.io/open-recruit/recruit/charts/recruit
+      --timeout 30m \
+      -f https://raw.githubusercontent.com/open-recruit/recruit/0.0.0/charts/recruit/values-demo.yaml \
+      recruit-demo \
+      oci://ghcr.io/open-recruit/recruit/charts/recruit
     ```
 
-    Verify that all services are ready:
+    <!-- x-release-please-end-version -->
+
+    ??? example "Demo values"
+
+        The [`values-demo.yaml`](https://github.com/open-recruit/recruit/blob/master/charts/recruit/values-demo.yaml)
+        used above enables the query module and a sample study, and generates synthetic patients that are loaded
+        into the FHIR server and queried by the query module via an embedded DuckDB, see
+        [Querying FHIR resources with DuckDB](../trino/index.md#querying-fhir-resources-with-duckdb):
+
+        ```yaml title="values-demo.yaml"
+        --8<-- "recruit/values-demo.yaml"
+        ```
+
+    The install takes several minutes to download the images, generate synthetic patients, and load them into
+    the FHIR server.
+
+    Once the command exits, forward the screening list port:
 
     ```sh
-    helm test -n recruit recruit
+    kubectl -n recruit port-forward svc/recruit-demo-list 32080:8080
     ```
 
-    Follow the instructions printed after the installation to access the screening list.
+    and open the screening list at <http://127.0.0.1:32080> and see the demo study (it might take a couple of minutes for it to appear).
 
     To remove everything again, run:
 
     ```sh
-    helm uninstall -n recruit recruit
+    helm uninstall -n recruit recruit-demo
     kubectl delete namespace recruit
     ```
 
-See these guides for a production deployment using your own data:
+!!! tip
 
-[Deploy to Kubernetes using Helm](../deployment/kubernetes.md){ .md-button }
-
-[Deploy using Docker Compose](../deployment/docker-compose.md){ .md-button }
-
-!!! success "Your first study"
-
-    Once you've completed the installation, visit the [Creating your first study guide](./creating-your-first-study.md)
-    to learn how to add a study to the system and view screening recommendations.
-
-!!! tip "Kubernetes"
-
-    If available, we recommend deploying to Kubernetes as it allows enabling advanced features including simplified configuration,
-    observability, high-availability, and secure, mTLS-encrypted service-to-service communication via a service mesh.
+    You can now either [create your own study](creating-your-first-study.md) or head straight to the production deployment
+    guide using [Compose](../deployment/compose.md) or [Kubernetes](../deployment/kubernetes.md).

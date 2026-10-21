@@ -30,10 +30,9 @@ list:
       value: "debug"
 postgres:
   enabled: true
-  primary:
-    service:
-      annotations:
-        config.linkerd.io/opaque-ports: "5432"
+  service:
+    annotations:
+      config.linkerd.io/opaque-ports: "5432"
 
 fhirserver:
   replicaCount: 1
@@ -54,11 +53,10 @@ fhirserver:
   postgres:
     auth:
       # kics-scan ignore-line
-      postgresPassword: fhir
-    primary:
-      service:
-        annotations:
-          config.linkerd.io/opaque-ports: "5432"
+      password: fhir
+    service:
+      annotations:
+        config.linkerd.io/opaque-ports: "5432"
   podAnnotations:
     linkerd.io/inject: "enabled"
   metrics:

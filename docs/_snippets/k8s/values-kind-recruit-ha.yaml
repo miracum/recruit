@@ -1,4 +1,4 @@
-notify:
+list:
   replicaCount: 2
   podDisruptionBudget:
     enabled: true
@@ -12,41 +12,12 @@ notify:
           # note that this label depends on the name of the chart release
           # this assumes the chart is deployed with a name of `recruit`
           app.kubernetes.io/instance: recruit
-          app.kubernetes.io/component: notify
-  ha:
-    enabled: true
-
-list:
-  replicaCount: 2
-  podDisruptionBudget:
-    enabled: true
-  topologySpreadConstraints:
-    - maxSkew: 1
-      topologyKey: topology.kubernetes.io/zone
-      whenUnsatisfiable: ScheduleAnyway
-      labelSelector:
-        matchLabels:
-          app.kubernetes.io/name: recruit
-          app.kubernetes.io/instance: recruit
           app.kubernetes.io/component: list
 
 postgres:
   enabled: true
   auth:
-    postgresPassword: recruit-notify-ha
-
-ohdsi:
-  atlas:
-    replicaCount: 2
-    topologySpreadConstraints:
-      - maxSkew: 1
-        topologyKey: topology.kubernetes.io/zone
-        whenUnsatisfiable: ScheduleAnyway
-        labelSelector:
-          matchLabels:
-            app.kubernetes.io/name: ohdsi
-            app.kubernetes.io/instance: recruit
-            app.kubernetes.io/component: atlas
+    password: recruit-ha
 
 fhirserver:
   replicaCount: 2

@@ -2,37 +2,19 @@ podAnnotations:
   linkerd.io/inject: "enabled"
 
 postgres:
-  primary:
-    service:
-      annotations:
-        config.linkerd.io/opaque-ports: "5432"
-
-ohdsi:
-  postgres:
-    primary:
-      service:
-        annotations:
-          config.linkerd.io/opaque-ports: "5432"
-  atlas:
-    podAnnotations:
-      linkerd.io/inject: "enabled"
-  webApi:
-    podAnnotations:
-      linkerd.io/inject: "enabled"
+  service:
+    annotations:
+      config.linkerd.io/opaque-ports: "5432"
 
 fhirserver:
   postgres:
-    primary:
-      service:
-        annotations:
-          config.linkerd.io/opaque-ports: "5432"
+    service:
+      annotations:
+        config.linkerd.io/opaque-ports: "5432"
   podAnnotations:
     linkerd.io/inject: "enabled"
 
-mailhog:
-  automountServiceAccountToken: true
+maildev:
   podAnnotations:
     linkerd.io/inject: "enabled"
-  service:
-    annotations:
-      config.linkerd.io/opaque-ports: "1025"
+    config.linkerd.io/opaque-ports: "1025"

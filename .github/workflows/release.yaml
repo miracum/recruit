@@ -83,7 +83,9 @@ jobs:
 
       - name: Build Docker Compose deployment bundle
         run: |
-          cp -r compose/ dist/
+          # -L dereferences symlinks (e.g. compose/fhir/search-parameters-transaction-upsert.json,
+          # which points into fhir/ig/fsh-generated/) so the archive contains the actual files.
+          cp -rL compose/ dist/
           tar -C dist -zcvf dist/recruit-compose.tgz compose/
 
       - name: Generate checksums for release assets

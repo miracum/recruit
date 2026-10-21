@@ -2,33 +2,32 @@ fhirserver:
   postgres:
     auth:
       # kics-scan ignore-line
-      postgresPassword: fhir
-    primary:
-      service:
-        annotations:
-          config.linkerd.io/opaque-ports: "5432"
-      resources:
-        limits:
-          memory: 2Gi
-          cpu: 2500m
-        requests:
-          memory: 256Mi
-          cpu: 250m
-
-list:
-  podDisruptionBudget:
-    enabled: true
-
-postgres:
-  enabled: true
-  primary:
+      password: fhir
     service:
       annotations:
         config.linkerd.io/opaque-ports: "5432"
     resources:
       limits:
-        memory: 512Mi
+        memory: 2Gi
         cpu: 2500m
       requests:
         memory: 256Mi
         cpu: 250m
+
+list:
+  replicaCount: 2
+  podDisruptionBudget:
+    enabled: true
+
+postgres:
+  enabled: true
+  service:
+    annotations:
+      config.linkerd.io/opaque-ports: "5432"
+  resources:
+    limits:
+      memory: 512Mi
+      cpu: 2500m
+    requests:
+      memory: 256Mi
+      cpu: 250m

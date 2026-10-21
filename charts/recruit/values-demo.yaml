@@ -1,0 +1,51 @@
+postgres:
+  fullnameOverride: recruit-demo-postgres
+  initdb:
+    scripts:
+      init-databases.sql: |
+        CREATE DATABASE fhir;
+
+fhirserver:
+  # loading the synthetic patients is bound by how fast the FHIR server processes the transaction bundles
+  resourcesPreset: xlarge
+  # overrides the chart's default `fhirserver.extraEnv`, so its entries are repeated here
+  extraEnv:
+    - name: HAPI_FHIR_SUBSCRIPTION_RESTHOOK_ENABLED
+      value: "true"
+    - name: SPRING_FLYWAY_BASELINE_ON_MIGRATE
+      value: "true"
+    # the JVM defaults to a max heap of only 25% of the container's memory limit
+    - name: JAVA_TOOL_OPTIONS
+      value: "-XX:MaxRAMPercentage=75"
+  postgres:
+    enabled: false
+  externalDatabase:
+    host: recruit-demo-postgres
+    user: postgres
+    database: fhir
+    existingSecret: recruit-demo-postgres
+    existingSecretKey: postgres-password
+
+# loaded into the FHIR server, and generated once more as NDJSON files for the query module to query via DuckDB
+syntheticPatients:
+  enabled: true
+
+querySqlOnFhir:
+  enabled: true
+  schedule: "0 * * * * *"
+  sqlDialect: duckdb
+  duckdb:
+    # views over the synthetic patients' NDJSON files, named like the Delta Lake tables queried via Trino
+    initSql: |
+      ATTACH ':memory:' AS fhir;
+      CREATE SCHEMA fhir."default";
+      CREATE VIEW fhir."default".patient AS SELECT * FROM read_json('/data/fhir/Patient.ndjson');
+      CREATE VIEW fhir."default".condition AS SELECT * FROM read_json('/data/fhir/Condition.ndjson');
+      CREATE VIEW fhir."default".observation AS SELECT * FROM read_json('/data/fhir/Observation.ndjson');
+      USE fhir."default";
+  extraEnv:
+    - name: QUERY_SQL_ON_FHIR_FUNNEL_ENABLED
+      value: "true"
+
+sampleStudy:
+  enabled: true

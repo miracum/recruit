@@ -34,7 +34,7 @@ public class OneShotRunner implements ApplicationRunner {
   public void run(ApplicationArguments args) {
     var exitCode = runPollCycle();
 
-    // SpringApplication.exit closes the context (releasing the FHIR/Trino clients) and resolves
+    // SpringApplication.exit closes the context (releasing the FHIR/database clients) and resolves
     // the exit code; System.exit forces the JVM to actually stop, regardless of any non-daemon
     // threads (e.g. the embedded web server) that would otherwise keep it alive.
     System.exit(SpringApplication.exit(context, () -> exitCode));
