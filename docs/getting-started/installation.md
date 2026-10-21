@@ -54,13 +54,13 @@ either Compose or Helm.
     <!-- x-release-please-start-version -->
 
     ```sh
-    helm install -n recruit \
+    helm upgrade --install -n recruit \
       --create-namespace \
       --render-subchart-notes \
-      --version 0.0.0-pr651 \
+      --version 0.0.0-pr655 \
       --wait \
       --timeout 30m \
-      -f https://raw.githubusercontent.com/open-recruit/recruit/v0.0.0-pr651/charts/recruit/values-demo.yaml \
+      -f https://raw.githubusercontent.com/open-recruit/recruit/docs-update/charts/recruit/values-demo.yaml \
       recruit-demo \
       oci://ghcr.io/open-recruit/recruit/charts/recruit
     ```
