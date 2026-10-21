@@ -296,28 +296,27 @@ list:
     stalledLeadWindowDays: 14
     # -- how often, in seconds, list scans for screening list changes to notify about
     scanIntervalSeconds: 60
-
-  notifyMailer:
-    # -- Used to link back to list from a notification email. If `list.ingress.enabled` is
-    # `true`, the ingress host is used instead. A composite format string (see .NET's String.Format)
-    # with a single `{0}` placeholder for the list id.
-    screeningListLinkTemplate: "http://localhost:8080/recommendations/{0}"
-    # -- the sender email address for notification mails
-    from: "recruit@example.com"
-    # -- subject line template, a composite format string (see .NET's String.Format) with a single
-    # `{0}` placeholder for the study acronym
-    subjectTemplate: "MIRACUM Rekrutierungsunterstützung: neue Vorschläge für die Studie {0}"
-    smtp:
-      # -- hostname of the external SMTP mail server. Only used if `maildev.enabled` is `false`
-      host: ""
-      # -- mailserver port
-      port: 25
-      # -- mailserver username
-      username: ""
-      # -- mailserver password
-      password: ""
-      # -- name of an existing secret containing an `smtp-password` key to use instead of the password above
-      existingSecret: ""
+    email:
+      # -- Used to link back to list from a notification email. If `list.ingress.enabled` is
+      # `true`, the ingress host is used instead. A composite format string (see .NET's String.Format)
+      # with a single `{0}` placeholder for the list id.
+      screeningListLinkTemplate: "http://localhost:8080/recommendations/{0}"
+      # -- the sender email address for notification mails
+      from: "recruit@example.com"
+      # -- subject line template, a composite format string (see .NET's String.Format) with a single
+      # `{0}` placeholder for the study acronym
+      subjectTemplate: "MIRACUM Rekrutierungsunterstützung: neue Vorschläge für die Studie {0}"
+      smtp:
+        # -- hostname of the external SMTP mail server. Only used if `maildev.enabled` is `false`
+        host: ""
+        # -- mailserver port
+        port: 25
+        # -- mailserver username
+        username: ""
+        # -- mailserver password
+        password: ""
+        # -- name of an existing secret containing an `smtp-password` key to use instead of the password above
+        existingSecret: ""
 
   metrics:
     serviceMonitor:

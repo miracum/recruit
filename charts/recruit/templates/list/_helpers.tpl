@@ -26,8 +26,8 @@ Get the key inside the secret containing list's OIDC client secret
 Get the name of the secret containing list's SMTP password
 */}}
 {{- define "recruit.list.mail.secretName" -}}
-{{- if .Values.list.notifyMailer.smtp.existingSecret -}}
-    {{ .Values.list.notifyMailer.smtp.existingSecret | quote }}
+{{- if .Values.list.notifications.email.smtp.existingSecret -}}
+    {{ .Values.list.notifications.email.smtp.existingSecret | quote }}
 {{- else -}}
     {{ printf "%s-%s" (include "common.names.fullname" .) "list-smtp" | quote }}
 {{- end -}}
@@ -110,6 +110,6 @@ Get the screening list link template used in list's notification emails
     {{- $protocol := (empty .Values.list.ingress.tls) | ternary "http" "https" }}
     {{- printf "%s://%s/recommendations/{0}" $protocol $host -}}
 {{- else -}}
-    {{- .Values.list.notifyMailer.screeningListLinkTemplate | quote -}}
+    {{- .Values.list.notifications.email.screeningListLinkTemplate | quote -}}
 {{- end -}}
 {{- end -}}

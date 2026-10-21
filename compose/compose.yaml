@@ -10,12 +10,12 @@ services:
     read_only: true
     privileged: false
     environment:
-      Fhir__BaseUrl: ${FHIR_URL:?}
-      Auth__Disabled: ${AUTH_DISABLED:-true}
-      Oidc__Authority: ${OIDC_AUTHORITY:-}
-      Oidc__ClientId: ${OIDC_CLIENT_ID:-}
-      Oidc__ClientSecret: ${OIDC_CLIENT_SECRET:-}
-      Oidc__RoleClaimType: ${OIDC_ROLE_CLAIM_TYPE:-role}
+      FhirServer__BaseUrl: ${FHIR_SERVER_BASE_URL:?}
+      Auth__Enabled: ${AUTH_ENABLED:-false}
+      Auth__Oidc__Authority: ${AUTH_OIDC_AUTHORITY:-}
+      Auth__Oidc__ClientId: ${AUTH_OIDC_CLIENT_ID:-}
+      Auth__Oidc__ClientSecret: ${AUTH_OIDC_CLIENT_SECRET:-}
+      Auth__Oidc__RoleClaimType: ${AUTH_OIDC_ROLE_CLAIM_TYPE:-role}
       ConnectionStrings__AppDb: ${LIST_CONNECTIONSTRINGS_APPDB:?}
       PGPASSWORD: ${PGPASSWORD:?}
 
@@ -30,7 +30,7 @@ services:
     read_only: true
     privileged: false
     environment:
-      FHIR_URL: ${FHIR_URL:?}
+      FHIR_SERVER_BASE_URL: ${FHIR_SERVER_BASE_URL:?}
       SPRING_DATASOURCE_URL: ${TRINO_JDBC_URL:?}
       SPRING_DATASOURCE_USERNAME: ${TRINO_USERNAME:?}
       # may be empty: Trino only accepts a password over TLS, so one without authentication needs none
@@ -54,20 +54,20 @@ services:
     read_only: true
     privileged: false
     environment:
-      FHIR_URL: ${FHIR_URL:?}
+      FHIR_SERVER_BASE_URL: ${FHIR_SERVER_BASE_URL:?}
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
         set -eu
-        until [ "$(curl -s -o /dev/null -L -w '%{http_code}' "$$FHIR_URL/metadata")" = "200" ]; do
-          echo "$(date): Waiting for FHIR server @ $$FHIR_URL to be up";
+        until [ "$(curl -s -o /dev/null -L -w '%{http_code}' "$$FHIR_SERVER_BASE_URL/metadata")" = "200" ]; do
+          echo "$(date): Waiting for FHIR server @ $$FHIR_SERVER_BASE_URL to be up";
           sleep 5;
         done;
-        echo "Installing SearchParameter resources on $$FHIR_URL..."
+        echo "Installing SearchParameter resources on $$FHIR_SERVER_BASE_URL..."
         curl -sS --fail-with-body --retry 5 --retry-delay 5 --retry-connrefused --retry-all-errors \
           -X POST \
           -H "Content-Type: application/fhir+json" \
           --data @/fhir/search-parameters-transaction-upsert.json \
-          "$$FHIR_URL"
+          "$$FHIR_SERVER_BASE_URL"
     volumes:
       - ./fhir/search-parameters-transaction-upsert.json:/fhir/search-parameters-transaction-upsert.json:ro

@@ -50,13 +50,13 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           env:
-            - name: FHIR_URL
+            - name: FHIR_SERVER_BASE_URL
               value: {{ include "recruit.fhirserver.url" $ }}
           command: ["/bin/sh", "-c"]
           args:
             - |
-              until [ "$(curl -s -o /dev/null -L -w '%{http_code}' "$FHIR_URL/metadata")" == "200" ]; do
-                echo "$(date): Waiting for FHIR server @ $FHIR_URL to be up";
+              until [ "$(curl -s -o /dev/null -L -w '%{http_code}' "$FHIR_SERVER_BASE_URL/metadata")" == "200" ]; do
+                echo "$(date): Waiting for FHIR server @ $FHIR_SERVER_BASE_URL to be up";
                 sleep 15;
               done;
         {{- if $syntheticPatients }}
@@ -95,7 +95,7 @@ spec:
           resources: {{- include "common.resources.preset" (dict "type" .resourcesPreset) | nindent 12 }}
           {{- end }}
           env:
-            - name: FHIR_URL
+            - name: FHIR_SERVER_BASE_URL
               value: {{ include "recruit.fhirserver.url" $ }}
             - name: QUERY_SQL_ON_FHIR_SQL_DIALECT
               value: {{ .sqlDialect | quote }}

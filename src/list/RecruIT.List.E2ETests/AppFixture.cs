@@ -11,8 +11,8 @@ namespace RecruIT.List.E2ETests;
 /// Boots a real RecruIT.List instance in-process (via WebApplicationFactory, with a real Kestrel
 /// listener so Blazor Server's SignalR circuit works - the default TestServer doesn't carry
 /// WebSockets) against a disposable Testcontainers Postgres, for the Playwright tests to drive
-/// with an actual browser. Auth:Disabled swaps in DevBypassAuthenticationHandler so no IdP is
-/// needed, and Fhir:BaseUrl points at a closed port: the main page renders its own error state if
+/// with an actual browser. Auth:Enabled=false swaps in DevBypassAuthenticationHandler so no IdP
+/// is needed, and FhirServer:BaseUrl points at a closed port: the main page renders its own error state if
 /// FHIR is unreachable (see Dashboard.razor), so this is enough to prove the app shell itself
 /// comes up.
 ///
@@ -58,9 +58,9 @@ public sealed class AppFixture : IAsyncLifetime
             builder.UseSetting("HTTP_PORT", httpPort.ToString(CultureInfo.InvariantCulture));
             builder.UseSetting("METRICS_PORT", metricsPort.ToString(CultureInfo.InvariantCulture));
             builder.UseSetting("ConnectionStrings:AppDb", _postgres.GetConnectionString());
-            builder.UseSetting("Auth:Disabled", "true");
+            builder.UseSetting("Auth:Enabled", "false");
             // Deliberately unreachable - see class remarks.
-            builder.UseSetting("Fhir:BaseUrl", "http://127.0.0.1:1/fhir");
+            builder.UseSetting("FhirServer:BaseUrl", "http://127.0.0.1:1/fhir");
         });
         // The default TestServer is in-memory only and can't carry Blazor Server's SignalR
         // circuit - UseKestrel() (WithWebHostBuilder's clone doesn't inherit it from the base

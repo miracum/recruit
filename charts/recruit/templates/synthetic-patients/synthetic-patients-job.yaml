@@ -40,14 +40,14 @@ spec:
           command: ["/bin/bash", "-c"]
           workingDir: /data/fhir
           env:
-            - name: FHIR_URL
+            - name: FHIR_SERVER_BASE_URL
               value: {{ include "recruit.fhirserver.url" . }}
           args:
             - |
               set -euo pipefail
               shopt -s nullglob
-              until [ "$(curl -s -o /dev/null -L -w "%{http_code}" "${FHIR_URL}/metadata")" = "200" ]; do
-                echo "$(date): Waiting for FHIR server @ ${FHIR_URL} to be up";
+              until [ "$(curl -s -o /dev/null -L -w "%{http_code}" "${FHIR_SERVER_BASE_URL}/metadata")" = "200" ]; do
+                echo "$(date): Waiting for FHIR server @ ${FHIR_SERVER_BASE_URL} to be up";
                 sleep 5;
               done;
               # the hospital and practitioner bundles go first: the patient bundles reference their resources
@@ -57,7 +57,7 @@ spec:
                 # to PUTs to keep the generated ids, so they match the ones generated for the query module.
                 jq '.entry |= map(.request = {method: "PUT", url: "\(.resource.resourceType)/\(.resource.id)"})' "${file}" |
                   curl -sS --fail-with-body -o /dev/null --retry 5 --retry-delay 5 --retry-connrefused --retry-all-errors \
-                    -X POST -H "Content-Type: application/fhir+json" --data-binary @- "${FHIR_URL}"
+                    -X POST -H "Content-Type: application/fhir+json" --data-binary @- "${FHIR_SERVER_BASE_URL}"
               done
           volumeMounts:
             - name: synthetic-patients

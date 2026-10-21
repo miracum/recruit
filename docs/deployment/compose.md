@@ -1,89 +1,241 @@
 # Docker Compose
 
-The main repository contains the `docker-compose.yaml` files to deploy recruIT via Docker Compose.
-The following guides assume that you have cloned it to your current working directory:
+recruIT ships two Compose files:
+
+- `compose.yaml` contains only the recruIT modules: the screening list (`list`), the query module
+  (`query-sql-on-fhir`), and a one-off job that installs recruIT's FHIR SearchParameters. It expects every other service
+  to already exist and is the basis of a production installation.
+- `compose.demo.yaml` adds everything those modules need to run on a single machine with sample data: a HAPI FHIR
+  server, PostgreSQL, a Trino lakehouse filled with a handful of [Synthea](https://synthetichealth.github.io/synthea/)
+  patients, a sample study, and a mock mail server. It's meant for trying recruIT out, not for real patient data. See
+  the [Quickstart](../getting-started/installation.md) for how to run it.
+
+## Getting the Compose files
+
+Every [release](https://github.com/open-recruit/recruit/releases) has a `recruit-compose.tgz` asset. It contains the
+`compose/` folder with the image tags pinned to that release:
 
 ```sh
-git clone https://github.com/miracum/recruit.git
-cd recruit/
+tar -xzf recruit-compose.tgz
+cd compose/
 ```
 
-You can also download a versioned archive of the latest `docker-compose.yaml` files from the tagged releases by visiting
-<https://github.com/miracum/recruit/releases> and getting it from the assets.
+Alternatively, clone the repository and change into its `compose/` folder:
+
+```sh
+git clone https://github.com/open-recruit/recruit.git
+cd recruit/compose/
+```
+
+The commands on this page are run from inside the `compose/` folder.
 
 ## Prerequisites
 
-Docker CLI version 20.10.14 or later.
+[Docker Engine](https://docs.docker.com/engine/install/) with the [Compose plugin](https://docs.docker.com/compose/)
+version 5.6.0 or later (`docker compose`, not the legacy `docker-compose`).
 
-## Installation for local testing using sample data
+## Production installation
 
-To run everything locally with Keycloak-based authentication enabled, a sample cohort,
-and an OMOP DB filled with sample data:
+For production, deploy only `compose.yaml` and connect it to services you run and operate yourself. Everything
+`compose.demo.yaml` provides needs a production-grade replacement:
+
+| Dependency                  | Used by             | Purpose                                               |
+| --------------------------- | ------------------- | ----------------------------------------------------- |
+| FHIR server                 | all modules         | Holds patients, studies, criteria and screening lists |
+| Trino with a FHIR lakehouse | `query-sql-on-fhir` | Runs each study's eligibility criteria as SQL         |
+| PostgreSQL                  | `list`              | Stores permissions and notification subscriptions     |
+| OpenID Connect provider     | `list`              | Signs users in, e.g. Keycloak                         |
+| SMTP server                 | `list`              | Sends notification emails about new candidates        |
+| Reverse proxy with TLS      | `list`              | Serves the screening list over HTTPS                  |
+| Pathling server (optional)  | `query-sql-on-fhir` | Runs criteria that Trino can't run directly           |
+
+The modules work together like this:
+
+1. The FHIR server holds your clinical data, at least the Patient resources, and the studies to screen for.
+   Studies are ResearchStudy resources whose eligibility criteria are SQL queries stored in Library resources.
+1. Separately from recruIT, the FHIR data is regularly exported and encoded as Delta Lake tables using
+   [Pathling](https://pathling.csiro.au/), which Trino then queries.
+1. On a schedule, `query-sql-on-fhir` reads the studies from the FHIR server, runs their criteria through Trino, and
+   writes each study's candidates back to the FHIR server as a screening list.
+1. `list` shows those screening lists and patient details from the FHIR server, and emails subscribed users about new
+   candidates.
+
+### FHIR server
+
+recruIT needs a FHIR R4 server that supports:
+
+- transaction Bundles with conditional and update-as-create `PUT` requests, since recruIT writes screening lists and
+  studies this way
+- custom SearchParameters together with `_include` and `_include:iterate`, which recruIT uses to fetch a study together
+  with its criteria in a single request
+
+The demo uses the [HAPI FHIR JPA server](https://github.com/hapifhir/hapi-fhir-jpaserver-starter).
+
+The FHIR server must contain the Patient resources of the patients you screen, since the screening list displays their
+names and demographics from there. If it also holds Encounter and Location resources, the screening list also shows each
+patient's last known location.
+
+The `create-search-parameters` job installs recruIT's SearchParameters on every start, so the modules need write
+access to the FHIR server. Some FHIR servers only start indexing a new SearchParameter after a reindex or a restart. If
+yours is one of them, do that once after the first installation.
+
+### Trino and the FHIR lakehouse
+
+`query-sql-on-fhir` doesn't query the FHIR server for clinical data. It runs each criterion's SQL through Trino against
+the same FHIR data, encoded as [Delta Lake](https://delta.io/) tables by Pathling. You need:
+
+- the FHIR resources encoded as Delta Lake tables in object storage (e.g. S3), using Pathling's encoding, with one table
+  per resource type (`patient`, `condition`, `observation`, ...)
+- a Hive metastore those tables are registered in
+- Trino with a Delta Lake catalog on top of that metastore. Criteria refer to the tables as
+  `<catalog>.<schema>.<table>`, so their SQL has to use the catalog and schema you choose. The sample criteria use
+  `fhir.default`.
+
+The tables must be built from the same FHIR server that recruIT is connected to. The query module refers to each
+candidate as `Patient/<id>`, using the `id` column of the `patient` table, so those ids must match the Patient resources
+in the FHIR server.
+
+!!! warning "Keep the lakehouse in sync with the FHIR server"
+
+    The patients and encounters in the lakehouse must match those in the FHIR server. If they can't be updated at the
+    same time, the lakehouse may lag behind the FHIR server, but never the other way around:
+
+    - If the lakehouse lags behind, a new patient is only recommended once their data has reached the lakehouse.
+    - If the lakehouse is ahead, the query module may recommend patients the FHIR server doesn't know yet. Depending
+      on whether the FHIR server checks references, writing their screening list entries then either fails, or the
+      screening list shows them without a name and location.
+
+    So load new data into the FHIR server first, and only then update the lakehouse from it, e.g. from a bulk export
+    of the FHIR server.
+
+Pathling's [`$import` operation](https://pathling.csiro.au/docs/server/operations/import) can load a
+[FHIR bulk export](https://hl7.org/fhir/uv/bulkdata/) into Delta Lake tables. If your FHIR resources are streamed
+through Kafka, <https://github.com/bzkf/fhir-to-lakehouse> does the same continuously. `compose.demo.yaml` shows a
+complete, minimal setup using SeaweedFS as object storage. Refresh the tables regularly: recruIT can only recommend
+patients whose data is already in the lakehouse.
+
+See [Trino SQL-based Query Module](../trino/index.md) for more on the lakehouse and on writing criteria.
+
+### Pathling server (optional)
+
+A criterion runs directly on Trino if its Library has `application/sql;dialect=trino` content. Criteria that depend on
+SQL on FHIR ViewDefinitions, or that only exist in another SQL dialect, are instead sent to the `$sqlquery-run`
+operation of a SQL on FHIR server such as Pathling, configured via `SQL_ON_FHIR_URL`. Without it, studies with such
+criteria fail to run.
+
+### PostgreSQL
+
+`list` stores its own data in a PostgreSQL database, set via `LIST_CONNECTIONSTRINGS_APPDB`. Create the database
+beforehand. `list` creates and updates its tables itself on every start.
+
+### Configuration
+
+Create a `.env` file next to `compose.yaml`:
+
+```sh
+# the FHIR server's base URL, as reachable from inside the containers
+FHIR_SERVER_BASE_URL=https://fhir.example.com/fhir
+
+# Trino
+TRINO_JDBC_URL=jdbc:trino://trino.example.com:443/fhir/default?SSL=true
+TRINO_USERNAME=recruit
+TRINO_PASSWORD=change-me
+
+# optional: a SQL on FHIR server such as Pathling
+SQL_ON_FHIR_URL=
+
+# Spring cron expression (seconds, minutes, hours, day of month, month, day of week) or a macro like @hourly
+QUERY_SQL_ON_FHIR_SCHEDULE_CRON=@hourly
+
+# PostgreSQL for the screening list
+LIST_CONNECTIONSTRINGS_APPDB=Host=postgres.example.com;Port=5432;Database=recruit;Username=recruit
+PGPASSWORD=change-me
+
+# sign-in via OpenID Connect
+AUTH_ENABLED=true
+AUTH_OIDC_AUTHORITY=https://auth.example.com/realms/recruit
+AUTH_OIDC_CLIENT_ID=recruit-list
+AUTH_OIDC_CLIENT_SECRET=change-me
+AUTH_OIDC_ROLE_CLAIM_TYPE=role
+```
+
+| Variable                          | Required | Description                                                      |
+| --------------------------------- | -------- | ---------------------------------------------------------------- |
+| `FHIR_SERVER_BASE_URL`            | yes      | Base URL of the FHIR server                                      |
+| `TRINO_JDBC_URL`                  | yes      | [Trino JDBC URL](https://trino.io/docs/current/client/jdbc.html) |
+| `TRINO_USERNAME`                  | yes      | Trino user                                                       |
+| `TRINO_PASSWORD`                  | yes      | Trino password, empty for a Trino without authentication         |
+| `SQL_ON_FHIR_URL`                 | no       | Base URL of a SQL on FHIR server such as Pathling                |
+| `QUERY_SQL_ON_FHIR_SCHEDULE_CRON` | no       | When to update the screening lists. Defaults to `@hourly`        |
+| `LIST_CONNECTIONSTRINGS_APPDB`    | yes      | Connection string of the screening list's database               |
+| `PGPASSWORD`                      | yes      | Password of that database's user                                 |
+| `AUTH_ENABLED`                    | no       | Defaults to `false`. Always set it to `true` in production       |
+| `AUTH_OIDC_AUTHORITY`             | yes¹     | Issuer URL of the OpenID Connect provider                        |
+| `AUTH_OIDC_CLIENT_ID`             | yes¹     | Client ID of the screening list                                  |
+| `AUTH_OIDC_CLIENT_SECRET`         | yes¹     | Client secret of the screening list                              |
+| `AUTH_OIDC_ROLE_CLAIM_TYPE`       | no       | Claim holding the user's roles. Defaults to `role`               |
+| `RECRUIT_IMAGE_TAG`               | no       | recruIT version. Defaults to the release of the Compose files    |
+
+¹ Required when `AUTH_ENABLED=true`.
+
+A few notes on these:
+
+- `TRINO_JDBC_URL` must include the catalog and schema holding the FHIR tables, e.g. `/fhir/default`.
+- Trino only accepts passwords over TLS, so a Trino without authentication needs an empty `TRINO_PASSWORD`.
+- `LIST_CONNECTIONSTRINGS_APPDB` is an
+  [Npgsql connection string](https://www.npgsql.org/doc/connection-string-parameters.html).
+- With `AUTH_ENABLED=false`, the default, anyone who can reach the screening list can see every study and patient
+  without signing in.
+
+Register the screening list as a confidential client with the OpenID Connect provider, with the redirect URI
+`https://<screening list host>/signin-oidc`. Users with the `admin` role can see every study and manage the eligibility
+criteria and access permissions. Everyone else only sees the studies they've been given access to.
+
+### Mail server and port
+
+`compose.yaml` doesn't publish a port for `list` and doesn't configure the mail server, since both depend on your
+environment. Add them in a `compose.override.yaml` next to `compose.yaml`:
+
+```yaml
+services:
+  list:
+    ports:
+      # only reachable from the host itself, i.e. through a reverse proxy running there
+      - "127.0.0.1:8080:8080"
+    environment:
+      Notifications__Email__SmtpHost: smtp.example.com
+      Notifications__Email__SmtpPort: "587"
+      Notifications__Email__SmtpUsername: recruit
+      Notifications__Email__SmtpPassword: change-me
+      Notifications__Email__From: recruit@example.com
+      # link to a study's screening list in the emails. {0} is replaced with the list's id
+      Notifications__Email__ScreeningListLinkTemplate: https://recruit.example.com/trials/{0}/patients
+```
+
+TLS to the mail server is negotiated automatically based on the port.
+
+### Reverse proxy
+
+`list` serves plain HTTP on port 8080. Put it behind a reverse proxy that terminates TLS, such as
+[Traefik](https://traefik.io/), [Caddy](https://caddyserver.com/) or nginx, and forward the `X-Forwarded-For`,
+`X-Forwarded-Proto` and `X-Forwarded-Host` headers. `list` uses them to build the OpenID Connect redirect URI, so it
+must be served over HTTPS for sign-in to work.
+
+### Starting recruIT
 
 ```sh
 docker compose --project-name=recruit \
-    --env-file=docker-compose/.staging.env \
-    -f docker-compose/docker-compose.yaml \
-    -f docker-compose/docker-compose.staging.yaml up
+    -f compose.yaml \
+    -f compose.override.yaml up --detach
 ```
 
-You can run the following to probe every component for its health status:
+Compose reads `.env` from the current folder automatically. Check that the modules started and that
+`create-search-parameters` exited successfully:
 
 ```sh
-docker compose --project-name=recruit \
-    --env-file=docker-compose/.staging.env \
-    -f docker-compose/docker-compose.yaml \
-    -f docker-compose/docker-compose.staging.yaml \
-    -f docker-compose/docker-compose.probe.yaml run health-probes
+docker compose --project-name=recruit -f compose.yaml -f compose.override.yaml ps --all
+docker compose --project-name=recruit -f compose.yaml -f compose.override.yaml logs query-sql-on-fhir
 ```
 
-The `docker-compose.staging.yaml` also includes [Traefik](https://traefik.io/) as a reverse proxy, so you can access the
-services running on your local machine on the following named URLs:
-
-| Service                | Ingress URL                                    | Note                                                                                          |
-| ---------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| OHDSI Atlas            | <http://recruit-ohdsi.127.0.0.1.nip.io/atlas/> |                                                                                               |
-| recruIT Screening List | <http://recruit-list.127.0.0.1.nip.io>         | login with username: `user1` and password: `user1`; Or as `uc1-admin`/`admin` for full access |
-| HAPI FHIR Server       | <http://recruit-fhir-server.127.0.0.1.nip.io>  |                                                                                               |
-| MailDev                | <http://maildev.127.0.0.1.nip.io>              |                                                                                               |
-| Keycloak               | <http://auth.127.0.0.1.nip.io/>                | login with username: `admin` and password: `admin`                                            |
-
-By default, the query module runs every 5 minutes to check for new study candidates. After some time, you should see
-the following when opening the screening list at <http://recruit-list.127.0.0.1.nip.io> and logging in as `uc1-admin`/`admin`:
-
-![Screening list overview](../_img/docker-compose/list-overview.png)
-
-Clicking on the list for the `SAMPLE M` study should show the list of candidates:
-
-![Screening list for the sample study](../_img/docker-compose/list-sample-m.png)
-
-Finally, checking the mail viewer at <http://maildev.127.0.0.1.nip.io> you can see the email notifications:
-
-![Screening list for the sample study](../_img/docker-compose/notify-mail-sample-m.png)
-
-## Stop the deployment
-
-To stop all services, run:
-
-```sh
-docker compose --project-name=recruit \
-    --env-file=docker-compose/.staging.env \
-    -f docker-compose/docker-compose.yaml \
-    -f docker-compose/docker-compose.staging.yaml \
-    down -v
-```
-
-## Standalone installation
-
-The instructions above used the `docker-compose/docker-compose.staging.yaml` to deploy a FHIR server,
-a pre-filled OMOP CDM database, the OHDSI tools initialized with sample cohorts, a mock email viewer,
-and a pre-configured Keycloak.
-
-The recommended way to install in "production-mode" is to already have deployed all these services and only need to
-configure and deploy the recruIT modules. These modules are listed in the `docker-compose/docker-compose.yaml` file.
-
-Several environment variables need to be set before calling `docker-compose -f docker-compose/docker-compose.yaml up`.
-You can create a `.env` file in the current directory and set them according to your environment based on the `.staging.env`
-example configuration file in the `docker-compose` folder.
-
-You can find a [list of available configuration options here](../configuration/options.md).
+On every scheduled run, the query module logs `Polling for ResearchStudy resources referencing a Group with SQLQuery
+Library`, followed by the studies it found and processed.

@@ -74,7 +74,7 @@ services:
     read_only: true
     privileged: false
     environment:
-      FHIR_URL: "http://fhir:8080/fhir"
+      FHIR_SERVER_BASE_URL: "http://fhir:8080/fhir"
       SPRING_DATASOURCE_URL: "jdbc:trino://trino:8080/fhir/default"
       SPRING_DATASOURCE_USERNAME: "trino"
       SPRING_DATASOURCE_PASSWORD: ""

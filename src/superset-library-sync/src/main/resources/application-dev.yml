@@ -5,7 +5,8 @@ spring:
     password: "superset"
 
 fhir:
-  url: "http://recruit-fhir-server.127.0.0.1.nip.io/fhir"
+  server:
+    base-url: "http://recruit-fhir-server.127.0.0.1.nip.io/fhir"
 
 logging:
   level:

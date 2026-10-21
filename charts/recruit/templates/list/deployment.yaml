@@ -92,13 +92,13 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           env:
-            - name: FHIR_URL
+            - name: FHIR_SERVER_BASE_URL
               value: {{ include "recruit.fhirserver.url" $ }}
           command: ["/bin/sh", "-c"]
           args:
             - |
-              until [ "$(curl -s -o /dev/null -L -w '%{http_code}' "$FHIR_URL/metadata")" == "200" ]; do
-                echo "$(date): Waiting for FHIR server @ $FHIR_URL to be up";
+              until [ "$(curl -s -o /dev/null -L -w '%{http_code}' "$FHIR_SERVER_BASE_URL/metadata")" == "200" ]; do
+                echo "$(date): Waiting for FHIR server @ $FHIR_SERVER_BASE_URL to be up";
                 sleep 15;
               done;
       containers:
@@ -136,21 +136,21 @@ spec:
           resources: {{- include "common.resources.preset" (dict "type" .resourcesPreset) | nindent 12 }}
           {{- end }}
           env:
-            - name: Fhir__BaseUrl
+            - name: FhirServer__BaseUrl
               value: {{ include "recruit.fhirserver.url" $ }}
-            - name: Auth__Disabled
-              value: {{ .auth.enabled | ternary "false" "true" | quote }}
+            - name: Auth__Enabled
+              value: {{ .auth.enabled | toString | quote }}
             {{- if .auth.enabled }}
-            - name: Oidc__Authority
+            - name: Auth__Oidc__Authority
               value: {{ .auth.oidc.authority | quote }}
-            - name: Oidc__ClientId
+            - name: Auth__Oidc__ClientId
               value: {{ .auth.oidc.clientId | quote }}
-            - name: Oidc__ClientSecret
+            - name: Auth__Oidc__ClientSecret
               valueFrom:
                 secretKeyRef:
                   name: {{ include "recruit.list.oidc.secretName" $ }}
                   key: {{ include "recruit.list.oidc.secretKey" $ }}
-            - name: Oidc__RoleClaimType
+            - name: Auth__Oidc__RoleClaimType
               value: {{ .auth.oidc.roleClaimType | quote }}
             {{- end }}
             - name: ConnectionStrings__AppDb
@@ -170,31 +170,31 @@ spec:
               value: {{ .notifications.stalledLeadWindowDays | quote }}
             - name: Notifications__ScanIntervalSeconds
               value: {{ .notifications.scanIntervalSeconds | quote }}
-            - name: NotifyMailer__ScreeningListLinkTemplate
+            - name: Notifications__Email__ScreeningListLinkTemplate
               value: {{ include "recruit.list.mail.screeningListLinkTemplate" $ }}
-            - name: NotifyMailer__From
-              value: {{ .notifyMailer.from | quote }}
-            - name: NotifyMailer__SubjectTemplate
-              value: {{ .notifyMailer.subjectTemplate | quote }}
-            - name: NotifyMailer__SmtpHost
+            - name: Notifications__Email__From
+              value: {{ .notifications.email.from | quote }}
+            - name: Notifications__Email__SubjectTemplate
+              value: {{ .notifications.email.subjectTemplate | quote }}
+            - name: Notifications__Email__SmtpHost
               {{- if $.Values.maildev.enabled }}
               value: {{ printf "%s-smtp" (include "recruit.maildev.fullname" $) }}
               {{- else }}
-              value: {{ .notifyMailer.smtp.host | quote }}
+              value: {{ .notifications.email.smtp.host | quote }}
               {{- end }}
-            - name: NotifyMailer__SmtpPort
+            - name: Notifications__Email__SmtpPort
               {{- if $.Values.maildev.enabled }}
               value: {{ $.Values.maildev.ports.smtp | quote }}
               {{- else }}
-              value: {{ .notifyMailer.smtp.port | quote }}
+              value: {{ .notifications.email.smtp.port | quote }}
               {{- end }}
-            - name: NotifyMailer__SmtpUsername
+            - name: Notifications__Email__SmtpUsername
               {{- if $.Values.maildev.enabled }}
               value: ""
               {{- else }}
-              value: {{ .notifyMailer.smtp.username | quote }}
+              value: {{ .notifications.email.smtp.username | quote }}
               {{- end }}
-            - name: NotifyMailer__SmtpPassword
+            - name: Notifications__Email__SmtpPassword
               valueFrom:
                 secretKeyRef:
                   name: {{ include "recruit.list.mail.secretName" $ }}

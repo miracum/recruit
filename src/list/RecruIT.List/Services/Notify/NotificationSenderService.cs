@@ -30,7 +30,7 @@ public sealed class NotificationSenderService(
     IDbContextFactory<AppDbContext> dbContextFactory,
     ScreeningListService screeningListService,
     TrialAccessService accessService,
-    IOptions<NotifyMailerOptions> mailerOptions,
+    IOptions<EmailNotificationOptions> mailerOptions,
     INotificationChannel channel,
     ILogger<NotificationSenderService> logger
 )
@@ -275,7 +275,7 @@ public sealed class NotificationSenderService(
 
     /// <summary>
     /// Admin-triggered, one-off send: exercises the exact same SMTP config and MJML template as a
-    /// real digest, using one obviously-fake sample item, so an admin can verify NotifyMailerOptions
+    /// real digest, using one obviously-fake sample item, so an admin can verify EmailNotificationOptions
     /// (SMTP host/credentials, From, subject/link templates) actually works without waiting for a
     /// real detected event or touching any subscription/delivery rows.
     /// </summary>

@@ -27,7 +27,7 @@ using RecruIT.List.Services.Notify;
 var builder = WebApplication.CreateBuilder(args);
 
 // Lets the dedicated migration Job (charts/recruit/templates/list/migrate-job.yaml) reuse
-// this exact image/entrypoint to run migrations and exit, without requiring Fhir__BaseUrl/Oidc/etc
+// this exact image/entrypoint to run migrations and exit, without requiring FhirServer__BaseUrl/Auth__Oidc/etc
 // - those are read unconditionally further down and would otherwise force the Job to carry
 // irrelevant app config just to avoid an unrelated startup throw. list's own Deployment pods
 // never set this; they wait for that Job via a wait-for-migration initContainer instead.
@@ -88,22 +88,24 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
         .AddSupportedUICultures(supportedCultures);
 });
 
-builder.Services.Configure<FhirOptions>(builder.Configuration.GetSection(FhirOptions.SectionName));
+builder.Services.Configure<FhirServerOptions>(
+    builder.Configuration.GetSection(FhirServerOptions.SectionName)
+);
 builder.Services.Configure<AuthOptions>(builder.Configuration.GetSection(AuthOptions.SectionName));
 builder.Services.Configure<NotificationOptions>(
     builder.Configuration.GetSection(NotificationOptions.SectionName)
 );
-builder.Services.Configure<NotifyMailerOptions>(
-    builder.Configuration.GetSection(NotifyMailerOptions.SectionName)
+builder.Services.Configure<EmailNotificationOptions>(
+    builder.Configuration.GetSection(EmailNotificationOptions.SectionName)
 );
 builder.Services.Configure<TracingOptions>(
     builder.Configuration.GetSection(TracingOptions.SectionName)
 );
 
 var fhirBaseUrl =
-    builder.Configuration.GetValue<string>("Fhir:BaseUrl")
-    ?? throw new InvalidOperationException("Fhir:BaseUrl must be configured.");
-var authDisabled = builder.Configuration.GetValue<bool>("Auth:Disabled");
+    builder.Configuration.GetValue<string>("FhirServer:BaseUrl")
+    ?? throw new InvalidOperationException("FhirServer:BaseUrl must be configured.");
+var authEnabled = builder.Configuration.GetValue<bool>("Auth:Enabled");
 
 // Read once at startup rather than threading IOptions<AuthOptions> through every call site.
 if (builder.Configuration["Auth:AdminRole"] is { Length: > 0 } adminRole)
@@ -206,7 +208,7 @@ builder.Services.AddAuthorizationCore(options =>
     options.AddPolicy("Admin", policy => policy.RequireRole(TrialAccessService.AdminRole));
 });
 
-if (authDisabled)
+if (!authEnabled)
 {
     builder
         .Services.AddAuthentication(DevBypassAuthenticationHandler.SchemeName)
@@ -218,7 +220,7 @@ if (authDisabled)
 }
 else
 {
-    var oidcSection = builder.Configuration.GetSection("Oidc");
+    var oidcSection = builder.Configuration.GetSection(AuthOptions.OidcSectionName);
     var roleClaimType = oidcSection["RoleClaimType"] is { Length: > 0 } rc ? rc : "role";
 
     builder.Services.AddTransient<OidcEvents>();
@@ -259,8 +261,8 @@ else
     builder.Services.AddAuthorization();
 }
 
-// TODO: the FHIR server call currently carries no credentials at all - same as Auth:Disabled
-// mode. This app used to forward the signed-in user's OIDC access token (AddUserAccessTokenHttpClient),
+// TODO: the FHIR server call currently carries no credentials at all - same as when Auth:Enabled
+// is false. This app used to forward the signed-in user's OIDC access token (AddUserAccessTokenHttpClient),
 // but per-user FHIR authorization isn't needed right now; a static/service-account credential
 // (the app calling FHIR as itself, not as any particular user) should replace this later.
 builder.Services.AddHttpClient(
@@ -374,10 +376,7 @@ app.UseAuthorization();
 
 app.UseHangfireDashboard(
     "/hangfire",
-    new DashboardOptions
-    {
-        Authorization = [new HangfireDashboardAuthorizationFilter(authDisabled)],
-    }
+    new DashboardOptions { Authorization = [new HangfireDashboardAuthorizationFilter(authEnabled)] }
 );
 
 app.MapHealthChecks("/livez", new HealthCheckOptions { Predicate = _ => false });
@@ -388,7 +387,7 @@ app.MapHealthChecks(
 
 app.MapPrometheusScrapingEndpoint();
 
-if (!authDisabled)
+if (authEnabled)
 {
     var authGroup = app.MapGroup("/authentication");
     authGroup.MapGet(

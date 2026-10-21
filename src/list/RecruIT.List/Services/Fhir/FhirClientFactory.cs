@@ -10,7 +10,7 @@ namespace RecruIT.List.Services.Fhir;
 /// </summary>
 public sealed class FhirClientFactory(
     IHttpClientFactory httpClientFactory,
-    IOptions<FhirOptions> fhirOptions
+    IOptions<FhirServerOptions> fhirServerOptions
 )
 {
     public const string HttpClientName = "fhir";
@@ -25,6 +25,6 @@ public sealed class FhirClientFactory(
     public FhirClient CreateClient()
     {
         var httpClient = httpClientFactory.CreateClient(HttpClientName);
-        return new FhirClient(fhirOptions.Value.BaseUrl, httpClient, Settings);
+        return new FhirClient(fhirServerOptions.Value.BaseUrl, httpClient, Settings);
     }
 }

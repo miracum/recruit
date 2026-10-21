@@ -1,8 +1,8 @@
 namespace RecruIT.List.Options;
 
-public sealed class FhirOptions
+public sealed class FhirServerOptions
 {
-    public const string SectionName = "Fhir";
+    public const string SectionName = "FhirServer";
 
     public required string BaseUrl { get; set; }
 }
@@ -12,13 +12,20 @@ public sealed class AuthOptions
     public const string SectionName = "Auth";
 
     /// <summary>
-    /// Dev-only escape hatch (mirrors list-old's KEYCLOAK_DISABLED): skips OIDC entirely and
-    /// treats every visitor as an authenticated admin. Never enable this outside local development.
+    /// Whether visitors sign in via OIDC (configured in the nested Oidc section, see
+    /// OidcSectionName). When false (the default), OIDC is skipped entirely and every visitor is
+    /// treated as an authenticated admin - only ever leave it off for local development and demos.
     /// </summary>
-    public bool Disabled { get; set; }
+    public bool Enabled { get; set; }
 
     /// <summary>The OIDC role value that grants global admin privileges.</summary>
     public string AdminRole { get; set; } = "admin";
+
+    /// <summary>
+    /// The OpenIdConnectOptions bound as-is (Authority, ClientId, ClientSecret, ...), plus this
+    /// app's own RoleClaimType, GroupClaimType and GroupRoleMappings - see Program.cs and OidcEvents.
+    /// </summary>
+    public const string OidcSectionName = $"{SectionName}:Oidc";
 }
 
 public sealed class NotificationOptions
@@ -45,13 +52,13 @@ public sealed class TracingOptions
 }
 
 /// <summary>
-/// Config for the screening-list-change email notifier (Services/Notify). Deliberately a
-/// separate section from NotificationOptions above, which is about the in-app "is this
-/// recommendation new" UI threshold, not this background poller/mailer.
+/// Config for the screening-list-change email notifier (Services/Notify), nested under the
+/// Notifications section but bound separately from NotificationOptions above, which is about the
+/// in-app "is this recommendation new" UI threshold and the scan interval, not the mail delivery.
 /// </summary>
-public sealed class NotifyMailerOptions
+public sealed class EmailNotificationOptions
 {
-    public const string SectionName = "NotifyMailer";
+    public const string SectionName = $"{NotificationOptions.SectionName}:Email";
 
     /// <summary>
     /// Used to link back to the screening list web app from an email - a composite format string
