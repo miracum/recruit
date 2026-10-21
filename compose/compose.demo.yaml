@@ -13,7 +13,7 @@ services:
       - /app/target
     privileged: false
     environment:
-      SPRING_DATASOURCE_URL: "jdbc:postgresql://fhir-db:5432/fhir?currentSchema=public"
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://db:5432/fhir?currentSchema=public"
       SPRING_DATASOURCE_USERNAME: postgres
       # kics-scan ignore-line
       SPRING_DATASOURCE_PASSWORD: postgres
@@ -26,9 +26,9 @@ services:
       HAPI_FHIR_SUBSCRIPTION_RESTHOOK_ENABLED: "true"
       HAPI_FHIR_ALLOW_MULTIPLE_DELETE: "true"
     depends_on:
-      - fhir-db
+      - db
 
-  fhir-db:
+  db:
     image: docker.io/library/postgres:18.4@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a
     restart: unless-stopped
     ipc: private
@@ -37,8 +37,9 @@ services:
     privileged: false
     environment:
       # kics-scan ignore-line
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: fhir
+      POSTGRES_PASSWORD: ${PGPASSWORD:?}
+    volumes:
+      - ./demo/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql:ro
 
   maildev:
     image: docker.io/maildev/maildev:3.0.0@sha256:6e09695961f4aef9016a390ad391314a078220216601b15a35d389a7df2a3855
@@ -53,8 +54,11 @@ services:
     tmpfs:
       - /tmp
     ports:
-      - "127.0.0.1:32080:1080"
+      - "127.0.0.1:32025:1080"
 
   list:
     depends_on:
       - fhir
+      - maildev
+    ports:
+      - "127.0.0.1:32080:8080"
