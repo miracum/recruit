@@ -886,6 +886,7 @@
         "dependencies": {
           "AspNetCore.HealthChecks.NpgSql": "[9.0.0, )",
           "BlazorBlueprint.Components": "[3.17.0, )",
+          "DizUker.FhirIgConstants": "[0.3.0-alpha.5, )",
           "EFCore.NamingConventions": "[10.0.1, )",
           "Fluid.Core": "[2.40.0, )",
           "Hangfire.AspNetCore": "[1.8.25, )",
@@ -905,8 +906,7 @@
           "OpenTelemetry.Instrumentation.Http": "[1.19.0, )",
           "OpenTelemetry.Instrumentation.Runtime": "[1.19.0, )",
           "RecruIT.FhirConstants": "[10.5.7, )",
-          "Slugify.Core": "[5.1.1, )",
-          "io.github.diz-uker.fhir-ig-constants": "[0.2.18, )"
+          "Slugify.Core": "[5.1.1, )"
         }
       },
       "AspNetCore.HealthChecks.NpgSql": {
@@ -931,6 +931,15 @@
           "Markdig": "0.37.0",
           "Microsoft.AspNetCore.Components.Web": "8.0.14",
           "TailwindMerge.NET": "1.3.0"
+        }
+      },
+      "DizUker.FhirIgConstants": {
+        "type": "CentralTransitive",
+        "requested": "[0.3.0-alpha.5, )",
+        "resolved": "0.3.0-alpha.5",
+        "contentHash": "1tia3sHBqhT+WYcXb6dXHOyy93PF3tMFuDaJsaYZbZicYcN5T3/FMtMLPzD8+jyLUK6JLhA8UZbDH7x4iz7N2A==",
+        "dependencies": {
+          "Hl7.Fhir.R4": "6.4.0"
         }
       },
       "EFCore.NamingConventions": {
@@ -993,15 +1002,6 @@
         "dependencies": {
           "AngleSharp": "1.7.2",
           "AngleSharp.Css": "1.0.2"
-        }
-      },
-      "io.github.diz-uker.fhir-ig-constants": {
-        "type": "CentralTransitive",
-        "requested": "[0.2.18, )",
-        "resolved": "0.2.18",
-        "contentHash": "EJUgMOdI05CpPUob3CgPQHOa/MEp6nathN3e7U6N1WbFEyCbPuucdCsGMubfgbESL8pRSfGdEmoEatK6g39M2g==",
-        "dependencies": {
-          "Hl7.Fhir.R4": "6.4.0"
         }
       },
       "MailKit": {

@@ -4,7 +4,7 @@
     "fshName": "RecruitSearchParametersTransaction",
     "fshType": "Instance",
     "fshFile": "searchparameters.fsh",
-    "startLine": 53,
+    "startLine": 61,
     "endLine": 69
   },
   {
@@ -132,32 +132,32 @@
     "fshName": "SearchParameterBelongsToStudy",
     "fshType": "Instance",
     "fshFile": "searchparameters.fsh",
-    "startLine": 26,
-    "endLine": 38
+    "startLine": 34,
+    "endLine": 46
   },
   {
     "outputFile": "SearchParameter-group-characteristic.json",
     "fshName": "GroupCharacteristic",
     "fshType": "Instance",
     "fshFile": "searchparameters.fsh",
-    "startLine": 14,
-    "endLine": 24
+    "startLine": 22,
+    "endLine": 32
   },
   {
     "outputFile": "SearchParameter-observation-derived-from-library.json",
     "fshName": "ObservationDerivedFromLibrary",
     "fshType": "Instance",
     "fshFile": "searchparameters.fsh",
-    "startLine": 40,
-    "endLine": 51
+    "startLine": 48,
+    "endLine": 59
   },
   {
     "outputFile": "SearchParameter-researchstudy-enrollment.json",
     "fshName": "ResearchStudyEnrollment",
     "fshType": "Instance",
     "fshFile": "searchparameters.fsh",
-    "startLine": 1,
-    "endLine": 12
+    "startLine": 9,
+    "endLine": 20
   },
   {
     "outputFile": "StructureDefinition-belongs-to-study.json",

@@ -10,5 +10,5 @@
   "status": "active",
   "code": "characteristic",
   "type": "reference",
-  "expression": "Group.characteristic.value.ofType(Reference)"
+  "expression": "characteristic.value.ofType(Reference)"
 }

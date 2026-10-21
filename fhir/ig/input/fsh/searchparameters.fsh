@@ -1,3 +1,11 @@
+RuleSet: ExtensionReferenceExpression(extensionId)
+* expression = "extension('https://openrecruit.dev/fhir/StructureDefinition/{extensionId}').value.ofType(Reference)"
+
+RuleSet: PutEntry(resource, url)
+* entry[+].resource = {resource}
+* entry[=].request.method = #PUT
+* entry[=].request.url = "{url}"
+
 Instance: ResearchStudyEnrollment
 InstanceOf: SearchParameter
 Usage: #definition
@@ -8,7 +16,7 @@ Usage: #definition
 * status = #active
 * code = #enrollment
 * type = #reference
-* expression = "ResearchStudy.enrollment"
+* expression = "enrollment"
 * target = #Group
 
 Instance: GroupCharacteristic
@@ -21,7 +29,7 @@ Usage: #definition
 * status = #active
 * code = #characteristic
 * type = #reference
-* expression = "Group.characteristic.value.ofType(Reference)"
+* expression = "characteristic.value.ofType(Reference)"
 
 Instance: SearchParameterBelongsToStudy
 InstanceOf: SearchParameter
@@ -34,7 +42,7 @@ Usage: #definition
 * status = #active
 * code = #belongs-to-study
 * type = #reference
-* expression = "extension('https://openrecruit.dev/fhir/StructureDefinition/belongs-to-study').value.ofType(Reference)"
+* insert ExtensionReferenceExpression(belongs-to-study)
 * target = #ResearchStudy
 
 Instance: ObservationDerivedFromLibrary
@@ -47,7 +55,7 @@ Usage: #definition
 * status = #active
 * code = #derived-from-library
 * type = #reference
-* expression = "Observation.extension('https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment-derived-from-library').value.ofType(Reference)"
+* insert ExtensionReferenceExpression(eligibility-assessment-derived-from-library)
 * target = #Library
 
 Instance: RecruitSearchParametersTransaction
@@ -55,15 +63,7 @@ InstanceOf: Bundle
 Usage: #definition
 * id = "recruit-search-parameters-transaction"
 * type = #transaction
-* entry[0].resource = ResearchStudyEnrollment
-* entry[0].request.method = #PUT
-* entry[0].request.url = "SearchParameter/researchstudy-enrollment"
-* entry[1].resource = GroupCharacteristic
-* entry[1].request.method = #PUT
-* entry[1].request.url = "SearchParameter/group-characteristic"
-* entry[2].resource = SearchParameterBelongsToStudy
-* entry[2].request.method = #PUT
-* entry[2].request.url = "SearchParameter/belongs-to-study"
-* entry[3].resource = ObservationDerivedFromLibrary
-* entry[3].request.method = #PUT
-* entry[3].request.url = "SearchParameter/observation-derived-from-library"
+* insert PutEntry(ResearchStudyEnrollment, SearchParameter/researchstudy-enrollment)
+* insert PutEntry(GroupCharacteristic, SearchParameter/group-characteristic)
+* insert PutEntry(SearchParameterBelongsToStudy, SearchParameter/belongs-to-study)
+* insert PutEntry(ObservationDerivedFromLibrary, SearchParameter/observation-derived-from-library)

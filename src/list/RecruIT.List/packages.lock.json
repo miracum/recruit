@@ -24,6 +24,15 @@
           "TailwindMerge.NET": "1.3.0"
         }
       },
+      "DizUker.FhirIgConstants": {
+        "type": "Direct",
+        "requested": "[0.3.0-alpha.5, )",
+        "resolved": "0.3.0-alpha.5",
+        "contentHash": "1tia3sHBqhT+WYcXb6dXHOyy93PF3tMFuDaJsaYZbZicYcN5T3/FMtMLPzD8+jyLUK6JLhA8UZbDH7x4iz7N2A==",
+        "dependencies": {
+          "Hl7.Fhir.R4": "6.4.0"
+        }
+      },
       "EFCore.NamingConventions": {
         "type": "Direct",
         "requested": "[10.0.1, )",
@@ -82,15 +91,6 @@
         "dependencies": {
           "AngleSharp": "1.7.2",
           "AngleSharp.Css": "1.0.2"
-        }
-      },
-      "io.github.diz-uker.fhir-ig-constants": {
-        "type": "Direct",
-        "requested": "[0.2.18, )",
-        "resolved": "0.2.18",
-        "contentHash": "EJUgMOdI05CpPUob3CgPQHOa/MEp6nathN3e7U6N1WbFEyCbPuucdCsGMubfgbESL8pRSfGdEmoEatK6g39M2g==",
-        "dependencies": {
-          "Hl7.Fhir.R4": "6.4.0"
         }
       },
       "MailKit": {

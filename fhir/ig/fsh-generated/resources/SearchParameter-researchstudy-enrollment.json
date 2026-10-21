@@ -10,7 +10,7 @@
   "status": "active",
   "code": "enrollment",
   "type": "reference",
-  "expression": "ResearchStudy.enrollment",
+  "expression": "enrollment",
   "target": [
     "Group"
   ]

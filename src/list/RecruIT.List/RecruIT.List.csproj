@@ -13,7 +13,7 @@
     <PackageReference Include="Hangfire.PostgreSql" />
     <PackageReference Include="Hl7.Fhir.R4" />
     <PackageReference Include="HtmlSanitizer" />
-    <PackageReference Include="io.github.diz-uker.fhir-ig-constants" />
+    <PackageReference Include="DizUker.FhirIgConstants" />
     <PackageReference Include="MailKit" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" />
     <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" />

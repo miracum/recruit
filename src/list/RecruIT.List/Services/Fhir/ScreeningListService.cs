@@ -224,7 +224,7 @@ public sealed class ScreeningListService(
 
         // The acronym, trial identifier (see TrialIdentifier) and title/description all live on
         // the ResearchStudy itself - pulled in via the belongs-to-study SearchParameter (see
-        // src/hack/fhir/search-parameters-transaction.json) rather than trusting a Reference.display
+        // fhir/ig/input/fsh/searchparameters.fsh) rather than trusting a Reference.display
         // text cached on the List extension (see GetStudyAcronym).
         var study = resources.OfType<ResearchStudy>().FirstOrDefault();
         var acronym = study?.GetStudyAcronym();
@@ -239,8 +239,8 @@ public sealed class ScreeningListService(
         }
 
         // ResearchStudy.enrollment -> Group.characteristic, pulled in via the
-        // researchstudy-enrollment-reference SearchParameter (see
-        // src/hack/fhir/search-parameters-transaction.json) rather than a separate fetch.
+        // researchstudy-enrollment SearchParameter (see
+        // fhir/ig/input/fsh/searchparameters.fsh) rather than a separate fetch.
         var enrolledGroupId = study?.Enrollment?.FirstOrDefault()?.GetReferencedId();
         var group = enrolledGroupId is not null
             ? resources.OfType<Group>().FirstOrDefault(g => g.Id == enrolledGroupId)
@@ -509,7 +509,7 @@ public sealed class ScreeningListService(
     /// Resolves each List's ResearchStudy - its business identifier (see TrialIdentifier) and its
     /// acronym, read live off the ResearchStudy rather than trusting a Reference.display text
     /// cached on the List - from ResearchStudy resources already pulled into the same response via
-    /// the belongs-to-study SearchParameter (see src/hack/fhir/search-parameters-transaction.json),
+    /// the belongs-to-study SearchParameter (see fhir/ig/input/fsh/searchparameters.fsh),
     /// so this needs no request of its own.
     /// </summary>
     private static Dictionary<string, TrialInfo> BuildTrialInfoByListId(

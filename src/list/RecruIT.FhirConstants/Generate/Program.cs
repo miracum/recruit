@@ -1,4 +1,4 @@
-#:package io.github.diz-uker.ig-codegen-core
+#:package DizUker.IgCodegen.Core
 #:property PublishAot=false
 
 using IgCodegen;
