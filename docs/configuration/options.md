@@ -9,7 +9,7 @@ This is a non-exhaustive list of available configuration options for the recruIT
     <https://github.com/miracum/charts/blob/master/charts/recruit/README.md#configuration>. If anything is missing, you
     can use the `extraEnv` option to supply additional environment variables to the modules.
 
-"Staging Default Value" refers to the default value for that option when [deploying via Docker Compose](../deployment/docker-compose.md)
+"Staging Default Value" refers to the default value for that option when [deploying via Docker Compose](../deployment/compose.md)
 using the `.staging.env` file.
 
 ## Used by multiple modules

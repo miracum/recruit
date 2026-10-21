@@ -33,7 +33,8 @@ services:
       FHIR_URL: ${FHIR_URL:?}
       SPRING_DATASOURCE_URL: ${TRINO_JDBC_URL:?}
       SPRING_DATASOURCE_USERNAME: ${TRINO_USERNAME:?}
-      SPRING_DATASOURCE_PASSWORD: ${TRINO_PASSWORD:?}
+      # may be empty: Trino only accepts a password over TLS, so one without authentication needs none
+      SPRING_DATASOURCE_PASSWORD: ${TRINO_PASSWORD?}
       QUERY_SQL_ON_FHIR_SCHEDULE_CRON: ${QUERY_SQL_ON_FHIR_SCHEDULE_CRON:-@hourly}
       SQL_ON_FHIR_URL: ${SQL_ON_FHIR_URL:-}
     volumes:
@@ -41,3 +42,32 @@ services:
         target: /tmp
         tmpfs:
           size: 1024
+
+  create-search-parameters:
+    image: docker.io/curlimages/curl:8.22.0@sha256:58adaa4e8dca9c988bae2aba4ab3434a0bb2da16bbe3f92dec39ec7785166777
+    restart: "no"
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    read_only: true
+    privileged: false
+    environment:
+      FHIR_URL: ${FHIR_URL:?}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -eu
+        until [ "$(curl -s -o /dev/null -L -w '%{http_code}' "$$FHIR_URL/metadata")" = "200" ]; do
+          echo "$(date): Waiting for FHIR server @ $$FHIR_URL to be up";
+          sleep 5;
+        done;
+        echo "Installing SearchParameter resources on $$FHIR_URL..."
+        curl -sS --fail-with-body --retry 5 --retry-delay 5 --retry-connrefused --retry-all-errors \
+          -X POST \
+          -H "Content-Type: application/fhir+json" \
+          --data @/fhir/search-parameters-transaction-upsert.json \
+          "$$FHIR_URL"
+    volumes:
+      - ./fhir/search-parameters-transaction-upsert.json:/fhir/search-parameters-transaction-upsert.json:ro

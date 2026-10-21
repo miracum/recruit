@@ -58,7 +58,272 @@ services:
 
   list:
     depends_on:
-      - fhir
-      - maildev
+      fhir:
+        condition: service_started
+      maildev:
+        condition: service_started
+      load-sample-resources:
+        condition: service_completed_successfully
     ports:
       - "127.0.0.1:32080:8080"
+
+  create-search-parameters:
+    depends_on:
+      - fhir
+
+  # loads the same sample data as src/hack/compose.yaml: a handful of Synthea patients and a demo
+  # ResearchStudy. Runs after the SearchParameters are installed, so the new resources get indexed
+  # by them right away. All bundles use PUT, so this is safe to re-run on every `up`.
+  load-sample-resources:
+    image: docker.io/curlimages/curl:8.22.0@sha256:58adaa4e8dca9c988bae2aba4ab3434a0bb2da16bbe3f92dec39ec7785166777
+    restart: "no"
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    read_only: true
+    privileged: false
+    environment:
+      FHIR_URL: ${FHIR_URL:?}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -eu
+        # sorting in reverse sends the lowercase hospitalInformation and practitionerInformation
+        # bundles first, since the patient bundles reference their resources
+        for file in $$(ls /sample-data/synthea/*.put.json | sort -r); do
+          echo "Sending $$file"
+          curl -sS -o /dev/null --fail-with-body --retry 5 --retry-delay 5 --retry-connrefused --retry-all-errors \
+            -X POST -H "Content-Type: application/fhir+json" --data @"$$file" "$$FHIR_URL"
+        done
+        echo "Sending sample ResearchStudy"
+        curl -sS -o /dev/null --fail-with-body --retry 5 --retry-delay 5 --retry-connrefused --retry-all-errors \
+          -X POST -H "Content-Type: application/fhir+json" \
+          --data @/sample-data/sample-study-transaction-upsert.json "$$FHIR_URL"
+    volumes:
+      # both are symlinks into src/hack/ in the repository; the release bundle contains the
+      # dereferenced files. Mount each path itself so Docker resolves the symlinks on the host.
+      - ./demo/synthea:/sample-data/synthea:ro
+      - ./demo/sample-study-transaction-upsert.json:/sample-data/sample-study-transaction-upsert.json:ro
+    depends_on:
+      create-search-parameters:
+        condition: service_completed_successfully
+
+  # the services below stand up the same SQL-on-FHIR stack as src/hack/compose.yaml: the Synthea
+  # bulk export is converted to Delta tables in SeaweedFS, registered in a Hive metastore, and queried
+  # through Trino by query-sql-on-fhir, which writes the resulting screening lists back to the FHIR
+  # server.
+  query-sql-on-fhir:
+    environment:
+      QUERY_SQL_ON_FHIR_FUNNEL_ENABLED: "true"
+    depends_on:
+      load-sample-resources:
+        condition: service_completed_successfully
+      # ensures the Delta tables are converted, uploaded, and registered in the Hive metastore -
+      # i.e. actually queryable via Trino - before this module starts polling for studies.
+      warehousekeeper:
+        condition: service_completed_successfully
+
+  seaweedfs:
+    image: docker.io/chrislusf/seaweedfs:4.48@sha256:4e61d15fd35994cb1e43e1e553dff106794841fd9a99ade2fc8c8bfce4d7872d
+    restart: unless-stopped
+    # the image's own seaweed user. Setting it here skips the entrypoint's chown + su-exec dance,
+    # which would otherwise need CAP_CHOWN/CAP_SETUID/CAP_SETGID.
+    user: "1000:1000"
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    privileged: false
+    # all-in-one master, volume, filer, and S3 gateway. Creates the bucket on startup if it doesn't
+    # already exist, so there's no need for a separate bucket-creation job.
+    command:
+      - mini
+      - -bucket=fhir
+      - -admin.ui=false
+    environment:
+      # used as the S3 gateway's admin identity
+      AWS_ACCESS_KEY_ID: "admin"
+      # kics-scan ignore-line
+      AWS_SECRET_ACCESS_KEY: "seaweedfspass" # gitleaks:allow
+    healthcheck:
+      # the bucket is only created a few seconds after the S3 gateway is up, so probe the bucket
+      # itself instead of /healthz - this way, dependents can rely on it existing.
+      test:
+        - CMD-SHELL
+        - curl -sSf -o /dev/null -I --aws-sigv4 aws:amz:eu-central-1:s3 --user "$$AWS_ACCESS_KEY_ID:$$AWS_SECRET_ACCESS_KEY" http://127.0.0.1:8333/fhir
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  convert-to-delta:
+    # the fhir-to-lakehouse image already ships Pathling, Delta Lake, and hadoop-aws along with all
+    # their jars, so nothing needs to be downloaded at runtime.
+    image: ghcr.io/bzkf/fhir-to-lakehouse:v1.14.1@sha256:a8c05aef73a54d4e74869aca1a05a377ec0acb119a9372553e31835a94a0fab4
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    privileged: false
+    restart: "no"
+    environment:
+      AWS_ENDPOINT_URL: "http://seaweedfs:8333"
+      AWS_ACCESS_KEY_ID: "admin"
+      AWS_SECRET_ACCESS_KEY: "seaweedfspass" # gitleaks:allow
+    entrypoint: ["python3", "-c"]
+    command:
+      - |
+        import glob
+        import os
+
+        from pathling import PathlingContext
+        from pyspark.sql import SparkSession
+
+        jars = sorted(glob.glob(os.path.join(os.environ["SPARK_JARS_DIR"], "*.jar")))
+        spark = (
+            SparkSession.builder.config("spark.jars", ",".join(jars))
+            .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
+            .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
+            .config("spark.hadoop.fs.s3a.endpoint", os.environ["AWS_ENDPOINT_URL"])
+            .config("spark.hadoop.fs.s3a.access.key", os.environ["AWS_ACCESS_KEY_ID"])
+            .config("spark.hadoop.fs.s3a.secret.key", os.environ["AWS_SECRET_ACCESS_KEY"])
+            .config("spark.hadoop.fs.s3a.path.style.access", "true")
+            .config("spark.hadoop.fs.s3a.connection.ssl.enabled", "false")
+            .getOrCreate()
+        )
+
+        data_source = PathlingContext.create(spark).read.ndjson("/tmp/import")
+        data_source.write.delta("s3a://fhir/default", save_mode="overwrite")
+    volumes:
+      # a symlink to src/hack/synthea/bulk/fhir/ in the repository; the release bundle contains
+      # the dereferenced files.
+      - ./demo/synthea-bulk:/tmp/import:ro
+    depends_on:
+      seaweedfs:
+        condition: service_healthy
+
+  warehousekeeper:
+    image: ghcr.io/bzkf/fhir-to-lakehouse:v1.14.1@sha256:a8c05aef73a54d4e74869aca1a05a377ec0acb119a9372553e31835a94a0fab4
+    restart: "no"
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    privileged: false
+    environment:
+      AWS_ALLOW_HTTP: "1"
+      AWS_REGION: "eu-central-1"
+      AWS_ENDPOINT_URL: "http://seaweedfs:8333"
+      AWS_ACCESS_KEY_ID: "admin"
+      AWS_SECRET_ACCESS_KEY: "seaweedfspass" # gitleaks:allow
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        python3 /app/src/lakehousekeeper.py register --bucket-name=fhir --database-name-prefix=default/ --hive-metastore=thrift://hive-metastore:9083
+        python3 /app/src/lakehousekeeper.py optimize --bucket-name=fhir --database-name-prefix=default/ --dry-run=false
+        python3 /app/src/lakehousekeeper.py vacuum   --bucket-name=fhir --database-name-prefix=default/ --retention-hours=0 --dry-run=false --enforce-retention-duration=false
+    volumes:
+      - ./demo/config/spark-defaults.conf:/app/spark/conf/spark-defaults.conf:ro
+    depends_on:
+      convert-to-delta:
+        condition: service_completed_successfully
+      hive-metastore:
+        condition: service_started
+      trino:
+        condition: service_started
+
+  hive-metastore:
+    image: ghcr.io/miracum/util-images/hive-metastore:v1.4.3@sha256:91f6a16a2d80911f5cf1e411bb36590df763269f3ff1efbff4f811eb63d56483
+    restart: unless-stopped
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    privileged: false
+    environment:
+      SERVICE_NAME: metastore
+      DB_DRIVER: postgres
+      SERVICE_OPTS: |
+        -Djavax.jdo.option.ConnectionUserName=postgres
+        -Djavax.jdo.option.ConnectionPassword=${PGPASSWORD:?}
+      AWS_ACCESS_KEY_ID: "admin"
+      AWS_SECRET_ACCESS_KEY: "seaweedfspass" # gitleaks:allow
+      AWS_DEFAULT_REGION: "eu-central-1"
+    volumes:
+      - ./demo/config/hive-site.xml:/opt/hive/conf/hive-site.xml:ro
+    depends_on:
+      db:
+        condition: service_started
+
+  trino:
+    image: docker.io/trinodb/trino:483@sha256:db58cc93e593a2706553745f276bb119c9810e69918be56ecde088ba7ccb0534
+    restart: unless-stopped
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    privileged: false
+    environment:
+      AWS_ACCESS_KEY_ID: "admin"
+      AWS_SECRET_ACCESS_KEY: "seaweedfspass" # gitleaks:allow
+    volumes:
+      - ./demo/config/trino/etc:/etc/trino:ro
+    depends_on:
+      hive-metastore:
+        condition: service_started
+
+  # prints a banner to the `docker compose up` output once everything above is set up: the
+  # SearchParameters and sample resources are loaded into the FHIR server, the Delta tables are
+  # registered and queryable via Trino, and the list UI is ready to serve requests.
+  ready:
+    image: docker.io/curlimages/curl:8.22.0@sha256:58adaa4e8dca9c988bae2aba4ab3434a0bb2da16bbe3f92dec39ec7785166777
+    restart: "no"
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    read_only: true
+    privileged: false
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -eu
+        until [ "$(curl -s -o /dev/null -w '%{http_code}' http://list:8080/readyz)" = "200" ]; do
+          echo "$(date): Waiting for the list module to be ready";
+          sleep 5;
+        done;
+        cat <<'BANNER'
+        ==========================================================================
+          recruIT demo is ready
+
+          Screening list UI:  http://127.0.0.1:32080
+          Notification mails: http://127.0.0.1:32025
+
+          query-sql-on-fhir polls for studies every minute, so the sample
+          study's screening list shows up within about a minute from now.
+        ==========================================================================
+        BANNER
+    depends_on:
+      load-sample-resources:
+        condition: service_completed_successfully
+      warehousekeeper:
+        condition: service_completed_successfully
+      trino:
+        condition: service_healthy
+      query-sql-on-fhir:
+        condition: service_started
+      list:
+        condition: service_started
+      maildev:
+        condition: service_started

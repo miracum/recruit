@@ -16,7 +16,7 @@ This will start these development fixtures:
 - Jaeger
 - MailDev
 - Keycloak
-- MinIO
+- SeaweedFS
 - Hive Metastore
 - Trino
 
