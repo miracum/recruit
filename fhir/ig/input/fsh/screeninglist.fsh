@@ -6,7 +6,7 @@ Id: screening-list
 Parent: List
 Description: "A profile for the List resource used to represent a list of identified study candidates."
 * mode = http://hl7.org/fhir/list-mode#working
-* code.coding = CodeSystemScreeningList#screening-recommendations
+* code.coding = ScreeningListType#screening-recommendations
 * extension contains BelongsToStudy named belongsToStudy 1..1
 
 Extension: BelongsToStudy
@@ -16,7 +16,7 @@ Description: "A reference to the clinical study that a resource concerns - a Lis
 Context: List, MeasureReport
 * value[x] only Reference(RecruitResearchStudy)
 
-CodeSystem: CodeSystemScreeningList
+CodeSystem: ScreeningListType
 Id: screening-list-type
 Title: "recruIT screening list type"
 * #screening-recommendations "Screening recommendations"
@@ -37,7 +37,8 @@ Description: "The identifier system for a screening List's business identifier, 
 Instance: ScreeningListExample
 InstanceOf: ScreeningList
 Description: "An example of a screening list."
+* id = "screening-list-example"
 * status = http://hl7.org/fhir/list-status#current
 * title = "Test"
-* code.coding = CodeSystemScreeningList#screening-recommendations
+* code.coding = ScreeningListType#screening-recommendations
 * extension[BelongsToStudy].valueReference = Reference(RecruitResearchStudyExample) "SAMPLE STUDY"

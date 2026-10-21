@@ -223,8 +223,7 @@ public class EligibilityBundleBuilder {
     // referenced via a
     // custom extension instead of a core element.
     observation.addExtension(
-        Recruit.Extensions.eligibilityAssessmentDerivedFromLibrary(
-            new Reference("Library/" + libraryId)));
+        Recruit.Extensions.derivedFromLibrary(new Reference("Library/" + libraryId)));
     observation.setEffective(new DateTimeType(effectiveDate));
     observation.setValue(buildResultValue(outcome));
 

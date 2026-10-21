@@ -1,4 +1,4 @@
-name: test-docker-compose
+name: test-compose
 on:
   workflow_call:
     inputs:
@@ -51,32 +51,32 @@ jobs:
       #   run: |
       #     docker compose \
       #       --project-name=recruit \
-      #       --env-file=docker-compose/.staging.env \
-      #       -f docker-compose/docker-compose.yaml \
-      #       -f docker-compose/docker-compose.staging.yaml up --detach
+      #       --env-file=compose/.staging.env \
+      #       -f compose/compose.yaml \
+      #       -f compose/compose.staging.yaml up --detach
 
       # - name: List containers
       #   run: |
       #     docker compose \
       #       --project-name=recruit \
-      #       --env-file=docker-compose/.staging.env \
-      #       -f docker-compose/docker-compose.yaml \
-      #       -f docker-compose/docker-compose.staging.yaml ps
+      #       --env-file=compose/.staging.env \
+      #       -f compose/compose.yaml \
+      #       -f compose/compose.staging.yaml ps
 
       # - name: Run basic health probes
       #   run: |
       #     docker compose \
       #       --project-name=recruit \
-      #       --env-file=docker-compose/.staging.env \
-      #       -f docker-compose/docker-compose.yaml \
-      #       -f docker-compose/docker-compose.staging.yaml \
-      #       -f docker-compose/docker-compose.probe.yaml run health-probes
+      #       --env-file=compose/.staging.env \
+      #       -f compose/compose.yaml \
+      #       -f compose/compose.staging.yaml \
+      #       -f compose/compose.probe.yaml run health-probes
 
       # - name: Display logs
       #   if: always()
       #   run: |
       #     docker compose \
       #       --project-name=recruit \
-      #       --env-file=docker-compose/.staging.env \
-      #       -f docker-compose/docker-compose.yaml \
-      #       -f docker-compose/docker-compose.staging.yaml logs
+      #       --env-file=compose/.staging.env \
+      #       -f compose/compose.yaml \
+      #       -f compose/compose.staging.yaml logs

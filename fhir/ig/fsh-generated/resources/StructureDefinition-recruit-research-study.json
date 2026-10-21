@@ -1,7 +1,7 @@
 {
   "resourceType": "StructureDefinition",
-  "id": "research-study",
-  "url": "https://openrecruit.dev/fhir/StructureDefinition/research-study",
+  "id": "recruit-research-study",
+  "url": "https://openrecruit.dev/fhir/StructureDefinition/recruit-research-study",
   "name": "RecruitResearchStudy",
   "status": "active",
   "description": "A profile for the ResearchStudy resource used to represent a clinical trial.",

@@ -47,8 +47,15 @@ jobs:
       - name: Cache FHIR packages # zizmor: ignore[cache-poisoning]
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: /root/.fhir/packages
-          key: fhir-packages-${{ hashFiles('fhir/package.json') }}
+          # the IG Publisher caches in /root (Java's user.home), but SUSHI follows $HOME, which GitHub
+          # sets to /github/home inside containers
+          path: |
+            /root/.fhir/packages
+            /github/home/.fhir/packages
+          # the container image pins the publisher and SUSHI versions, which decide the packages they
+          # fetch. fhir/package.json is left out because release-please bumps its version every release.
+          key: fhir-packages-${{ hashFiles('.github/workflows/build-docs.yaml') }}
+          restore-keys: fhir-packages-
           lookup-only: ${{ github.event_name != 'pull_request' }}
 
       - name: Build FHIR IG

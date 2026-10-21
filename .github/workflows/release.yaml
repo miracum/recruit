@@ -64,7 +64,7 @@ jobs:
           helm pull "oci://ghcr.io/${GITHUB_REPOSITORY}/charts/${CHART_NAME}" --version "${CHART_VERSION}" --destination /tmp
           cp "/tmp/${CHART_NAME}-${CHART_VERSION}.tgz" dist/recruit-helm-chart.tgz
 
-      - name: Pin image tags in docker-compose.yaml to their resolved digests
+      - name: Pin image tags in compose.yaml to their resolved digests
         # these come directly from each module's own build job output (docker/build-push-action's
         # `digest` output), not from re-querying the registry -- that would leave a window between
         # build and release for the tag to be repointed to a different image.
@@ -72,24 +72,24 @@ jobs:
           LIST_DIGEST: ${{ inputs.list-image-digest }}
           QUERY_SQL_ON_FHIR_DIGEST: ${{ inputs.query-sql-on-fhir-image-digest }}
         run: |
-          # maps each docker-compose service name to its released image's digest
+          # maps each compose service name to its released image's digest
           declare -A digest_for=( [list]="${LIST_DIGEST}" [query-sql-on-fhir]="${QUERY_SQL_ON_FHIR_DIGEST}" )
           for service in "${!digest_for[@]}"; do
             digest="${digest_for[$service]}"
-            current="$(yq -r ".services.${service}.image" docker-compose/docker-compose.yaml)"
+            current="$(yq -r ".services.${service}.image" compose/compose.yaml)"
             updated="$(sed -E "s/(RECRUIT_IMAGE_TAG:-[^}]*)/\1@${digest}/" <<<"${current}")"
-            yq -i ".services.${service}.image = \"${updated}\"" docker-compose/docker-compose.yaml
+            yq -i ".services.${service}.image = \"${updated}\"" compose/compose.yaml
           done
 
       - name: Build Docker Compose deployment bundle
         run: |
-          cp -r docker-compose/ dist/
-          tar -C dist -zcvf dist/recruit-docker-compose.tgz docker-compose/
+          cp -r compose/ dist/
+          tar -C dist -zcvf dist/recruit-compose.tgz compose/
 
       - name: Generate checksums for release assets
         working-directory: dist
         run: |
-          sha256sum recruit-docker-compose.tgz recruit-helm-chart.tgz > checksums.sha256
+          sha256sum recruit-compose.tgz recruit-helm-chart.tgz > checksums.sha256
 
       - name: Generate build provenance attestation
         uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1

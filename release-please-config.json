@@ -18,10 +18,13 @@
         "src/list/Directory.Build.props",
         "src/buildSrc/src/main/groovy/org.miracum.recruit.java-common-conventions.gradle",
         "src/query-sql-on-fhir/src/main/resources/application.yml",
-        "docker-compose/docker-compose.yaml",
+        "compose/compose.yaml",
         "docs/configuration/security.md",
         "docs/_snippets/k8s/query-argo-workflow.yaml",
-        "fhir/ig/sushi-config.yaml",
+        {
+          "type": "generic",
+          "path": "fhir/ig/sushi-config.yaml"
+        },
         {
           "type": "json",
           "path": "fhir/package.json",
@@ -29,7 +32,7 @@
         },
         {
           "type": "json",
-          "path": "fhir/ig/fsh-generated/resources/ImplementationGuide-recruIT.json",
+          "path": "fhir/ig/fsh-generated/resources/ImplementationGuide-dev.openrecruit.fhir.json",
           "jsonpath": "$.version"
         }
       ],

@@ -167,18 +167,13 @@ class FunnelReportBuilderTest {
     var total = population.get(0);
     assertThat(total.getCount()).isEqualTo(1000);
     assertThat(total.getCode().getCodingFirstRep().getCode()).isEqualTo("total-population");
-    assertThat(
-            total.getExtensionByUrl(
-                Recruit.Extensions.Urls.eligibilityAssessmentDerivedFromLibrary()))
-        .isNull();
+    assertThat(total.getExtensionByUrl(Recruit.Extensions.Urls.derivedFromLibrary())).isNull();
 
     var afterAge = population.get(1);
     assertThat(afterAge.getCount()).isEqualTo(900);
     assertThat(afterAge.getCode().getCodingFirstRep().getCode()).isEqualTo("after-criterion");
     assertThat(afterAge.getCode().getText()).isEqualTo("Age >= 18 years");
-    assertThat(
-            afterAge.getExtensionByUrl(
-                Recruit.Extensions.Urls.eligibilityAssessmentDerivedFromLibrary()))
+    assertThat(afterAge.getExtensionByUrl(Recruit.Extensions.Urls.derivedFromLibrary()))
         .isNotNull();
 
     var afterChemo = population.get(2);

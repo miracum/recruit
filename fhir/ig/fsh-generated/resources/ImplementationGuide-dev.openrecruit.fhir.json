@@ -1,7 +1,7 @@
 {
   "resourceType": "ImplementationGuide",
-  "id": "recruIT",
-  "url": "https://openrecruit.dev/fhir/ImplementationGuide/recruIT",
+  "id": "dev.openrecruit.fhir",
+  "url": "https://openrecruit.dev/fhir/ImplementationGuide/dev.openrecruit.fhir",
   "version": "0.1.0",
   "name": "RecruITIG",
   "title": "recruIT FHIR IG",
@@ -19,7 +19,7 @@
     }
   ],
   "description": "FHIR Implementation Guide for the recruIT clinical trial patient recruitment support system.",
-  "packageId": "recruIT",
+  "packageId": "dev.openrecruit.fhir",
   "license": "AGPL-3.0-or-later",
   "fhirVersion": [
     "4.0.1"
@@ -36,9 +36,9 @@
       },
       {
         "reference": {
-          "reference": "StructureDefinition/eligibility-assessment-derived-from-library"
+          "reference": "StructureDefinition/derived-from-library"
         },
-        "name": "Eligibility assessment derived-from Library",
+        "name": "Derived from Library",
         "description": "A reference to the eligibility-criterion Library resource this assessment - or, on a MeasureReport's attrition-funnel population, this cumulative step - was derived from. Neither Observation.derivedFrom nor MeasureReport.group.population has a slot accepting Library as a target type, so this extension carries the reference instead.",
         "exampleBoolean": false
       },
@@ -84,9 +84,9 @@
       },
       {
         "reference": {
-          "reference": "SearchParameter/group-characteristic"
+          "reference": "SearchParameter/group-characteristic-reference"
         },
-        "name": "GroupCharacteristic",
+        "name": "GroupCharacteristicReference",
         "description": "An entity referenced in a characteristic",
         "exampleBoolean": false
       },
@@ -139,7 +139,7 @@
       },
       {
         "reference": {
-          "reference": "StructureDefinition/research-study"
+          "reference": "StructureDefinition/recruit-research-study"
         },
         "name": "RecruitResearchStudy",
         "description": "A profile for the ResearchStudy resource used to represent a clinical trial.",
@@ -147,11 +147,11 @@
       },
       {
         "reference": {
-          "reference": "ResearchStudy/RecruitResearchStudyExample"
+          "reference": "ResearchStudy/recruit-research-study-example"
         },
         "name": "RecruitResearchStudyExample",
         "description": "An example of a recruIT ResearchStudy.",
-        "exampleCanonical": "https://openrecruit.dev/fhir/StructureDefinition/research-study"
+        "exampleCanonical": "https://openrecruit.dev/fhir/StructureDefinition/recruit-research-study"
       },
       {
         "reference": {
@@ -210,7 +210,7 @@
       },
       {
         "reference": {
-          "reference": "List/ScreeningListExample"
+          "reference": "List/screening-list-example"
         },
         "name": "Test",
         "description": "An example of a screening list.",

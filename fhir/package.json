@@ -1,5 +1,5 @@
 {
-  "name": "io.github.miracum.recruit",
+  "name": "dev.openrecruit.fhir",
   "version": "0.1.0",
   "description": "recruIT FHIR Implementation Guide",
   "dependencies": {

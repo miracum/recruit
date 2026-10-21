@@ -222,7 +222,7 @@
           {
             "code": "Reference",
             "targetProfile": [
-              "https://openrecruit.dev/fhir/StructureDefinition/research-study"
+              "https://openrecruit.dev/fhir/StructureDefinition/recruit-research-study"
             ]
           }
         ],
@@ -272,7 +272,7 @@
           {
             "code": "Reference",
             "targetProfile": [
-              "https://openrecruit.dev/fhir/StructureDefinition/research-study"
+              "https://openrecruit.dev/fhir/StructureDefinition/recruit-research-study"
             ]
           }
         ]

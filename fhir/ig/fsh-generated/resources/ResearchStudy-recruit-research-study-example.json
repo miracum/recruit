@@ -1,0 +1,10 @@
+{
+  "resourceType": "ResearchStudy",
+  "id": "recruit-research-study-example",
+  "meta": {
+    "profile": [
+      "https://openrecruit.dev/fhir/StructureDefinition/recruit-research-study"
+    ]
+  },
+  "status": "active"
+}

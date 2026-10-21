@@ -141,7 +141,7 @@
         ],
         "extension": [
           {
-            "url": "https://openrecruit.dev/fhir/StructureDefinition/screening-list-belongs-to-study",
+            "url": "https://openrecruit.dev/fhir/StructureDefinition/belongs-to-study",
             "valueReference": {
               "reference": "ResearchStudy/1",
               "display": "AMICA"

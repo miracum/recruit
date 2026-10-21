@@ -1,0 +1,43 @@
+services:
+  list:
+    image: ${RECRUIT_IMAGE_BASE_NAME:-ghcr.io/open-recruit/recruit}/list:${RECRUIT_IMAGE_TAG:-v10.5.7} # x-release-please-version
+    restart: unless-stopped
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    read_only: true
+    privileged: false
+    environment:
+      Fhir__BaseUrl: ${FHIR_URL:?}
+      Auth__Disabled: ${AUTH_DISABLED:-true}
+      Oidc__Authority: ${OIDC_AUTHORITY:-}
+      Oidc__ClientId: ${OIDC_CLIENT_ID:-}
+      Oidc__ClientSecret: ${OIDC_CLIENT_SECRET:-}
+      Oidc__RoleClaimType: ${OIDC_ROLE_CLAIM_TYPE:-role}
+      ConnectionStrings__AppDb: ${LIST_CONNECTIONSTRINGS_APPDB:?}
+      PGPASSWORD: ${PGPASSWORD:?}
+
+  query-sql-on-fhir:
+    image: ${RECRUIT_IMAGE_BASE_NAME:-ghcr.io/open-recruit/recruit}/query-sql-on-fhir:${RECRUIT_IMAGE_TAG:-v10.5.7} # x-release-please-version
+    restart: unless-stopped
+    ipc: none
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    read_only: true
+    privileged: false
+    environment:
+      FHIR_URL: ${FHIR_URL:?}
+      SPRING_DATASOURCE_URL: ${TRINO_JDBC_URL:?}
+      SPRING_DATASOURCE_USERNAME: ${TRINO_USERNAME:?}
+      SPRING_DATASOURCE_PASSWORD: ${TRINO_PASSWORD:?}
+      QUERY_SQL_ON_FHIR_SCHEDULE_CRON: ${QUERY_SQL_ON_FHIR_SCHEDULE_CRON:-@hourly}
+      SQL_ON_FHIR_URL: ${SQL_ON_FHIR_URL:-}
+    volumes:
+      - type: tmpfs
+        target: /tmp
+        tmpfs:
+          size: 1024
