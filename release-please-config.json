@@ -21,7 +21,10 @@
         "docker-compose/docker-compose.yaml",
         "docs/configuration/security.md",
         "docs/_snippets/k8s/query-argo-workflow.yaml",
-        "fhir/ig/sushi-config.yaml",
+        {
+          "type": "generic",
+          "path": "fhir/ig/sushi-config.yaml"
+        },
         {
           "type": "json",
           "path": "fhir/package.json",
