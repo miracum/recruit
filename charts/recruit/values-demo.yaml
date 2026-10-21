@@ -4,7 +4,6 @@ postgres:
     scripts:
       init-databases.sql: |
         CREATE DATABASE fhir;
-        CREATE DATABASE hive_metastore;
 
 fhirserver:
   # loading the synthetic patients is bound by how fast the FHIR server processes the transaction bundles
@@ -27,35 +26,26 @@ fhirserver:
     existingSecret: recruit-demo-postgres
     existingSecretKey: postgres-password
 
+# loaded into the FHIR server, and generated once more as NDJSON files for the query module to query via DuckDB
+syntheticPatients:
+  enabled: true
+
 querySqlOnFhir:
   enabled: true
   schedule: "0 * * * * *"
-  trino:
-    auth:
-      username: trino
+  sqlDialect: duckdb
+  duckdb:
+    # views over the synthetic patients' NDJSON files, named like the Delta Lake tables queried via Trino
+    initSql: |
+      ATTACH ':memory:' AS fhir;
+      CREATE SCHEMA fhir."default";
+      CREATE VIEW fhir."default".patient AS SELECT * FROM read_json('/data/fhir/Patient.ndjson');
+      CREATE VIEW fhir."default".condition AS SELECT * FROM read_json('/data/fhir/Condition.ndjson');
+      CREATE VIEW fhir."default".observation AS SELECT * FROM read_json('/data/fhir/Observation.ndjson');
+      USE fhir."default";
   extraEnv:
     - name: QUERY_SQL_ON_FHIR_FUNNEL_ENABLED
       value: "true"
 
 sampleStudy:
   enabled: true
-
-analytics-on-fhir:
-  enabled: true
-  hive-metastore:
-    postgres:
-      enabled: false
-    database:
-      host: recruit-demo-postgres
-      username: postgres
-      database: hive_metastore
-      existingSecret:
-        name: recruit-demo-postgres
-        key: postgres-password
-  trino:
-    coordinator:
-      jvm:
-        maxHeapSize: "2G"
-    worker:
-      jvm:
-        maxHeapSize: "2G"

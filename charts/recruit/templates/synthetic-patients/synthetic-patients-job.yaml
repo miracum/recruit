@@ -1,0 +1,81 @@
+{{- if and .Values.syntheticPatients.enabled (or .Values.fhirserver.enabled (ne .Values.externalFhirServer.url "")) -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "common.names.fullname" . }}-synthetic-patients
+  labels:
+    {{- include "recruit.labels" . | nindent 4 }}
+    app.kubernetes.io/component: synthetic-patients
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    # after the SearchParameters (weight -1): the FHIR server only indexes resources by the SearchParameters that
+    # exist when they're written.
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: {{ .Values.syntheticPatients.backoffLimit }}
+  template:
+    metadata:
+      {{- with .Values.syntheticPatients.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "recruit.labels" . | nindent 8 }}
+        app.kubernetes.io/component: synthetic-patients
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        # Synthea can only export either NDJSON or transaction bundles per run - the FHIR server gets the latter
+        {{- include "recruit.syntheticPatients.generateContainer" (dict "root" . "exporterArgs" "--exporter.fhir.bulk_data=false --exporter.fhir.transaction_bundle=true") | nindent 8 }}
+      containers:
+        - name: load-into-fhir-server
+          image: {{ include "recruit.syntheticPatients.image" . }}
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/bash", "-c"]
+          workingDir: /data/fhir
+          env:
+            - name: FHIR_URL
+              value: {{ include "recruit.fhirserver.url" . }}
+          args:
+            - |
+              set -euo pipefail
+              shopt -s nullglob
+              until [ "$(curl -s -o /dev/null -L -w "%{http_code}" "${FHIR_URL}/metadata")" = "200" ]; do
+                echo "$(date): Waiting for FHIR server @ ${FHIR_URL} to be up";
+                sleep 5;
+              done;
+              # the hospital and practitioner bundles go first: the patient bundles reference their resources
+              for file in hospitalInformation*.json practitionerInformation*.json *_*.json; do
+                echo "Sending ${file}"
+                # Synthea creates all resources via POST, which makes the FHIR server assign new ids. Rewrite them
+                # to PUTs to keep the generated ids, so they match the ones generated for the query module.
+                jq '.entry |= map(.request = {method: "PUT", url: "\(.resource.resourceType)/\(.resource.id)"})' "${file}" |
+                  curl -sS --fail-with-body -o /dev/null --retry 5 --retry-delay 5 --retry-connrefused --retry-all-errors \
+                    -X POST -H "Content-Type: application/fhir+json" --data-binary @- "${FHIR_URL}"
+              done
+          volumeMounts:
+            - name: synthetic-patients
+              mountPath: /data
+              readOnly: true
+          {{- with .Values.restrictedContainerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            limits:
+              cpu: 500m
+              ephemeral-storage: 50Mi
+              memory: 256Mi
+            requests:
+              cpu: 50m
+              ephemeral-storage: 50Mi
+              memory: 256Mi
+      volumes:
+        {{- include "recruit.syntheticPatients.volumes" . | nindent 8 }}
+{{- end -}}

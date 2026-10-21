@@ -10,7 +10,7 @@ metadata:
     # pre-upgrade so new SearchParameters exist before the new list and query module versions roll out. On install,
     # the FHIR server is only created as part of the release, so this has to wait until after it.
     "helm.sh/hook": post-install,pre-upgrade
-    # before any other hook loads data into the FHIR server, e.g. the analytics-on-fhir sub-chart's init job (weight 0):
+    # before any other hook loads data into the FHIR server, e.g. the synthetic patients Job (weight 0):
     # the FHIR server only indexes resources by the SearchParameters that exist when they're written.
     "helm.sh/hook-weight": "-1"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded

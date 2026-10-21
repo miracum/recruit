@@ -84,7 +84,7 @@ createSearchParameters:
 
 # installs a sample ResearchStudy whose SQL-based eligibility criteria are evaluated by the query-sql-on-fhir module,
 # via a Helm `post-install` and `post-upgrade` hook Job, using `curl`. Intended for demos, together with the
-# `analytics-on-fhir` sub-chart's synthetic patients, see `values-demo.yaml`.
+# `syntheticPatients`, see `values-demo.yaml`.
 sampleStudy:
   # -- whether to install/update the sample ResearchStudy. Only takes effect if `fhirserver.enabled=true` or
   # `externalFhirServer.url` is set.
@@ -100,6 +100,44 @@ sampleStudy:
   resourcesPreset: "nano"
   # -- configure the job pod's resource requests and limits
   resources: {}
+
+# generates synthetic patients using [Synthea](https://github.com/synthetichealth/synthea), intended for demos, see
+# `values-demo.yaml`: a Helm `post-install` and `post-upgrade` hook Job loads them into the FHIR server, and if
+# `querySqlOnFhir.sqlDialect=duckdb`, an init container of the query module's pod generates the exact same patients
+# as NDJSON files into `/data/fhir/`, to be queried via DuckDB (see `querySqlOnFhir.duckdb.initSql`). The same seed,
+# reference date, and Synthea version always generate the same patients with the same resource ids.
+syntheticPatients:
+  # -- whether to generate synthetic patients. Only takes effect if `fhirserver.enabled=true` or
+  # `externalFhirServer.url` is set.
+  enabled: false
+  # -- seed for Synthea's random number generators
+  seed: "20250916"
+  # -- date (YYYYMMDD) the patients' records are generated up to. Fixed, so their ages and resources don't change
+  # depending on when they're generated.
+  referenceDate: "20250916"
+  # -- number of living synthetic patients to generate
+  population: 100
+  # -- number of retries for the Job before it is considered failed
+  backoffLimit: 3
+  # -- annotations to add to the Job's pod
+  podAnnotations: {}
+  # -- resource requests and limits for the containers running Synthea. Synthea generates the patients in parallel,
+  # one thread per core.
+  resources:
+    limits:
+      cpu: 4000m
+      ephemeral-storage: 2Gi
+      memory: 3Gi
+    requests:
+      cpu: 500m
+      ephemeral-storage: 2Gi
+      memory: 3Gi
+  # the image containing Synthea, as well as curl and jq to load the patients into the FHIR server
+  # @ignore
+  image: # +doc-gen:ignore
+    registry: ghcr.io
+    repository: miracum/ig-build-tools
+    tag: v2.4.1@sha256:7457e0a45199c1e17048f8eb1337d28fcbc123b5c5c97797a5e7c15bbb9e36a8
 
 externalFhirServer:
   # -- URL of an external FHIR Server - only used when `fhirserver.enabled` is set to `false`
@@ -482,8 +520,7 @@ querySqlOnFhir:
   trino:
     # -- JDBC URL of the Trino server, e.g. `jdbc:trino://localhost:8080/fhir/default`
     #    the URL can optionally include the catalog and schema, whether this is necessary depends
-    #    on how the SQL cohorts are written in the FHIR Library. Defaults to the `analytics-on-fhir` sub-chart's
-    #    Trino if that is enabled.
+    #    on how the SQL cohorts are written in the FHIR Library.
     jdbcUrl: ""
     auth:
       # -- the username to login as.
@@ -595,21 +632,6 @@ querySqlOnFhir:
 
   # -- extra volumes to mount inside the container
   extraVolumeMounts: []
-
-analytics-on-fhir:
-  # -- deploy a Delta Lake with synthetic patients, queryable via Trino, using the
-  # [analytics-on-fhir](https://github.com/miracum/charts/tree/master/charts/analytics-on-fhir) chart. Intended for
-  # demos and testing, see `values-demo.yaml`. If `querySqlOnFhir.trino.jdbcUrl` is empty, the query module uses
-  # its Trino.
-  enabled: false
-  trino:
-    # -- the query module requires Trino to run the eligibility criteria SQL queries
-    enabled: true
-  initJob:
-    fhirServer:
-      # -- also load the synthetic patients into the included FHIR server, so the query module's results can be
-      # looked up in it. Change this when using `externalFhirServer.url` instead.
-      url: '{{ printf "http://%s-fhirserver:8080/fhir" .Release.Name }}'
 
 postgres:
   # -- enable the included postgres DB. Used by the list module unless `list.database.connectionString`

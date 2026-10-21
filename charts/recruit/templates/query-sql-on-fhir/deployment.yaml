@@ -1,5 +1,6 @@
 {{- with .Values.querySqlOnFhir -}}
 {{- if .enabled -}}
+{{- $syntheticPatients := and $.Values.syntheticPatients.enabled (eq .sqlDialect "duckdb") -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -58,6 +59,11 @@ spec:
                 echo "$(date): Waiting for FHIR server @ $FHIR_URL to be up";
                 sleep 15;
               done;
+        {{- if $syntheticPatients }}
+        # the same patients the synthetic patients Job loads into the FHIR server, as NDJSON files in /data/fhir/ to
+        # be queried via DuckDB
+        {{- include "recruit.syntheticPatients.generateContainer" (dict "root" $ "exporterArgs" "") | nindent 8 }}
+        {{- end }}
       containers:
         - name: query-sql-on-fhir
           image: "{{ .image.registry }}/{{ .image.repository }}:{{ .image.tag }}"
@@ -128,6 +134,11 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp-volume
+            {{- if $syntheticPatients }}
+            - mountPath: /data
+              name: synthetic-patients
+              readOnly: true
+            {{- end }}
           {{- if .extraVolumeMounts }}
             {{- toYaml .extraVolumeMounts | nindent 12 }}
           {{- end }}
@@ -150,6 +161,9 @@ spec:
       volumes:
         - name: tmp-volume
           emptyDir: {}
+        {{- if $syntheticPatients }}
+        {{- include "recruit.syntheticPatients.volumes" $ | nindent 8 }}
+        {{- end }}
       {{- if .extraVolumes }}
         {{- toYaml .extraVolumes | nindent 8 }}
       {{- end }}

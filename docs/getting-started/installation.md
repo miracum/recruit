@@ -27,12 +27,6 @@ either Compose or Helm.
     The first start takes several minutes to download the images, pre-load the FHIR server with synthetic data,
     and register the same resources as Delta Lake tables for querying by Trino.
 
-    ??? tip "Lightweight demo without Trino"
-
-        Adding `-f compose/compose.demo-duckdb.yaml` after `compose.demo.yaml` skips the lakehouse and Trino
-        entirely and instead queries the synthetic data's NDJSON files directly using an embedded DuckDB, see
-        [Querying FHIR resources with DuckDB](../trino/index.md#querying-fhir-resources-with-duckdb).
-
     Once the command exits, you can open the screening list at <http://127.0.0.1:32080> and see the demo study.
 
     To stop and remove everything, including demo data, run:
@@ -74,16 +68,16 @@ either Compose or Helm.
     ??? example "Demo values"
 
         The [`values-demo.yaml`](https://github.com/open-recruit/recruit/blob/master/charts/recruit/values-demo.yaml)
-        used above enables the query module and a sample study, and deploys the
-        [analytics-on-fhir](https://github.com/miracum/charts/tree/master/charts/analytics-on-fhir) chart to
-        generate the synthetic patients and query them via Trino:
+        used above enables the query module and a sample study, and generates synthetic patients that are loaded
+        into the FHIR server and queried by the query module via an embedded DuckDB, see
+        [Querying FHIR resources with DuckDB](../trino/index.md#querying-fhir-resources-with-duckdb):
 
         ```yaml title="values-demo.yaml"
         --8<-- "recruit/values-demo.yaml"
         ```
 
-    The install takes several minutes to download the images, generate synthetic patients, load them into
-    the FHIR server, and register the same resources as Delta Lake tables for querying by Trino.
+    The install takes several minutes to download the images, generate synthetic patients, and load them into
+    the FHIR server.
 
     Once the command exits, forward the screening list port:
 

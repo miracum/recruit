@@ -1,0 +1,12 @@
+{{- if and .Values.syntheticPatients.enabled (or .Values.fhirserver.enabled (ne .Values.externalFhirServer.url "")) -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "common.names.fullname" . }}-synthetic-patients
+  labels:
+    {{- include "recruit.labels" . | nindent 4 }}
+    app.kubernetes.io/component: synthetic-patients
+data:
+  synthea.properties: |
+    {{- .Files.Get "files/synthea.properties" | nindent 4 }}
+{{- end -}}
