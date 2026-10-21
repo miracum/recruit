@@ -17,8 +17,9 @@ sync:
     topic: ""
 
 fhir:
-  url: ""
   server:
+    # base URL of the FHIR server, e.g. "https://fhir.example.com/fhir". Set via FHIR_SERVER_BASE_URL.
+    base-url: ""
     timeout-in-seconds: 300
 
 spring:

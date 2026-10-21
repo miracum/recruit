@@ -9,10 +9,10 @@
 
 @if (_loading)
 {
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <BbSkeleton Class="h-40 w-full" />
-        <BbSkeleton Class="h-40 w-full" />
-        <BbSkeleton Class="h-40 w-full" />
+    <div class="bb:grid bb:grid-cols-1 bb:gap-4 bb:md:grid-cols-2 bb:lg:grid-cols-3">
+        <BbSkeleton Class="bb:w-full" />
+        <BbSkeleton Class="bb:w-full" />
+        <BbSkeleton Class="bb:w-full" />
     </div>
 }
 else if (_errorMessage is not null)

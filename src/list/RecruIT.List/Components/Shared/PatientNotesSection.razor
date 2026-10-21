@@ -4,30 +4,30 @@
 @inject IStringLocalizer<SharedResources> Localizer
 
 <div>
-    <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.Patient.Notes"]</span>
+    <span class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide bb:text-muted-foreground">@Localizer["App.Patient.Notes"]</span>
 
-    <div class="mt-2 max-h-48 space-y-2 overflow-y-auto">
+    <div class="bb:mt-2 bb:max-h-48 bb:space-y-2 bb:overflow-y-auto">
         @if (_loading)
         {
-            <BbSkeleton Class="h-14 w-full" />
+            <BbSkeleton Class="bb:h-14 bb:w-full" />
         }
         else if (_notes.Count == 0)
         {
-            <p class="text-sm text-muted-foreground">@Localizer["App.PatientNotes.Empty"]</p>
+            <p class="bb:text-sm bb:text-muted-foreground">@Localizer["App.PatientNotes.Empty"]</p>
         }
         else
         {
             @foreach (var note in _notes)
             {
-                <div class="rounded border bg-muted/40 p-3">
-                    <p class="text-xs text-muted-foreground">
+                <div class="bb:rounded bb:border bb:bg-muted/40 bb:p-3">
+                    <p class="bb:text-xs bb:text-muted-foreground">
                         @(note.Time?.LocalDateTime.ToString("g") ?? Localizer["App.PatientNotes.UnknownTime"])
                         @if (!string.IsNullOrEmpty(note.Author))
                         {
                             <span> &middot; @note.Author</span>
                         }
                     </p>
-                    <div class="prose prose-sm dark:prose-invert max-w-none text-sm [&_p]:mb-2 [&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4 [&_li]:mb-1 [&_strong]:font-bold [&_em]:italic">@RenderNote(note.Text)</div>
+                    <div class="bb:max-w-none bb:text-sm bb:[&_p]:mb-2 bb:[&_ul]:list-disc bb:[&_ul]:ms-4 bb:[&_ol]:list-decimal bb:[&_ol]:ms-4 bb:[&_li]:mb-1 bb:[&_strong]:font-bold bb:[&_em]:italic">@RenderNote(note.Text)</div>
                 </div>
             }
         }
@@ -35,8 +35,8 @@
 
     @if (CanEdit && Patient.ResearchSubjectIdentifier is not null)
     {
-        <BbRichTextEditor @bind-Value="_noteDraftHtml" Placeholder="@Localizer["App.PatientNotes.Placeholder"]" Class="mt-3" MinHeight="120px" />
-        <div class="mt-2 flex items-center justify-end gap-3">
+        <BbRichTextEditor @bind-Value="_noteDraftHtml" Placeholder="@Localizer["App.PatientNotes.Placeholder"]" Class="bb:mt-3" MinHeight="120px" />
+        <div class="bb:mt-2 bb:flex bb:items-center bb:justify-end bb:gap-3">
             <SaveStatusIndicator Saving="_saving" />
             <BbButton Variant="ButtonVariant.Default" Disabled="@(IsNoteDraftEmpty || _saving)"
                       Loading="_saving" OnClick="SaveNoteAsync">

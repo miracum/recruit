@@ -1,3 +1,4 @@
-exclude = [ '.*\.nip.io', '.*support.cloudbees.com.*', '.*example:8080.*', '^https://github.com/.*/compare/' ]
+# cisa.gov answers 403 to non-browser clients
+exclude = [ '.*\.nip.io', '.*support.cloudbees.com.*', '.*example:8080.*', '^https://github.com/.*/compare/', '^https://www\.cisa\.gov/' ]
 exclude_path = [ 'CHANGELOG.md', 'src/list/frontend/public/index.html' ]
 exclude_all_private = true

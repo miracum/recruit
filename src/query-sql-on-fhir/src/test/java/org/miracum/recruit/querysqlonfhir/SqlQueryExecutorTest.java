@@ -1,6 +1,7 @@
 package org.miracum.recruit.querysqlonfhir;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -136,6 +137,7 @@ class SqlQueryExecutorTest {
   }
 
   private void stubSqlOnFhirResponse(Parameters response) {
+    when(sqlOnFhirClient.getServerBase()).thenReturn("http://sql-on-fhir.test/fhir");
     when(sqlOnFhirClient
             .operation()
             .onServer()
@@ -396,6 +398,26 @@ class SqlQueryExecutorTest {
     var results = collect(duckDbSut, List.of(criterion));
 
     assertThat(results).extracting(PatientEligibilityResult::patientId).containsExactly("pat-1");
+    verifyNoInteractions(jdbcTemplate);
+  }
+
+  @Test
+  void evaluateEligibility_withDelegatedCriterionButNoSqlOnFhirUrl_failsNamingTheMissingDialect() {
+    var library = new Library();
+    library.setId("Library/duckdb-only");
+    library
+        .addContent()
+        .setContentType("application/sql;dialect=duckdb")
+        .setData(SQL_AGE.getBytes(StandardCharsets.UTF_8));
+    when(sqlOnFhirClient.getServerBase()).thenReturn("");
+
+    assertThatThrownBy(
+            () -> collect(sut, List.of(new EligibilityCriterion(library, "Age >= 18", false))))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("Library/duckdb-only")
+        .hasMessageContaining("application/sql;dialect=duckdb")
+        .hasMessageContaining("no application/sql;dialect=trino content")
+        .hasMessageContaining("sql-on-fhir.url is not set");
     verifyNoInteractions(jdbcTemplate);
   }
 

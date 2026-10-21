@@ -1,20 +1,20 @@
 @inject IStringLocalizer<SharedResources> Localizer
 
-<div class="h-full cursor-pointer transition-shadow hover:shadow-md" @onclick="NavigateToPatients">
-    <BbCard Class="flex h-full flex-col">
+<div class="bb:h-full bb:cursor-pointer bb:transition-shadow" @onclick="NavigateToPatients">
+    <BbCard Class="bb:flex bb:h-full bb:flex-col">
         <BbCardHeader>
-            <div class="flex items-start justify-between gap-2">
-                <div class="space-y-1">
+            <div class="bb:flex bb:items-start bb:justify-between bb:gap-2">
+                <div class="bb:space-y-1">
                     <BbCardTitle>@Trial.StudyAcronym</BbCardTitle>
                     <BbCardDescription>@Trial.StudyTitle</BbCardDescription>
                 </div>
-                <div class="flex items-center gap-1" @onclick:stopPropagation="true">
+                <div class="bb:flex bb:items-center bb:gap-1" @onclick:stopPropagation="true">
                     @if (_canManageAccess)
                     {
                         <BbTooltip>
                             <BbTooltipTrigger AsChild="true">
-                                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Icon" OnClick="NavigateToAccess">
-                                    <LucideIcon Name="shield" Size="16" />
+                                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Icon" AriaLabel="@Localizer["App.PatientList.ManageAccessLink"]" OnClick="NavigateToAccess">
+                                    <LucideIcon Name="lock" Size="16" />
                                 </BbButton>
                             </BbTooltipTrigger>
                             <BbTooltipContent>@Localizer["App.PatientList.ManageAccessLink"]</BbTooltipContent>
@@ -24,8 +24,8 @@
                 </div>
             </div>
         </BbCardHeader>
-        <BbCardContent Class="flex-1">
-            <div class="grid grid-cols-3 gap-4">
+        <BbCardContent Class="bb:flex-1">
+            <div class="bb:grid bb:grid-cols-3 bb:gap-4">
                 <MetricTile Label="@Localizer["App.TrialCard.Recruited"]" Value="Trial.RecruitedCount" />
                 <MetricTile Label="@Localizer["App.TrialCard.Pending"]" Value="Trial.PendingCount" />
                 <MetricTile Label="@Localizer["App.TrialCard.NotRecruited"]" Value="Trial.NotRecruitedCount" />

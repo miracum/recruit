@@ -214,6 +214,12 @@
   <data name="App.PatientList.ExclusionCriteria" xml:space="preserve">
     <value>Exclusion criteria</value>
   </data>
+  <data name="App.PatientList.CriteriaButton" xml:space="preserve">
+    <value>Eligibility criteria</value>
+  </data>
+  <data name="App.PatientList.SearchPlaceholder" xml:space="preserve">
+    <value>Search patients...</value>
+  </data>
   <data name="App.PatientList.NoCriteria" xml:space="preserve">
     <value>None</value>
   </data>
@@ -447,6 +453,9 @@
   </data>
   <data name="App.Errors.LibrariesLoadFailed" xml:space="preserve">
     <value>Library resources could not be loaded.</value>
+  </data>
+  <data name="App.Errors.StudyCriteriaLoadFailed" xml:space="preserve">
+    <value>The eligibility criteria of the selected study could not be loaded.</value>
   </data>
   <data name="App.Errors.ResearchStudiesLoadFailed" xml:space="preserve">
     <value>ResearchStudy resources could not be loaded.</value>
@@ -685,6 +694,9 @@
   <data name="App.CriteriaManager.CriterionSqlLabel" xml:space="preserve">
     <value>SQL</value>
   </data>
+  <data name="App.CriteriaManager.CriterionSqlDialectLabel" xml:space="preserve">
+    <value>SQL dialect</value>
+  </data>
   <data name="App.CriteriaManager.PreviewSectionTitle" xml:space="preserve">
     <value>Preview</value>
   </data>
@@ -702,6 +714,9 @@
   </data>
   <data name="App.CriteriaManager.SubmitErrorTitle" xml:space="preserve">
     <value>Submission failed</value>
+  </data>
+  <data name="App.CriteriaManager.StudyCriteriaLoadErrorTitle" xml:space="preserve">
+    <value>Study could not be loaded</value>
   </data>
   <data name="App.NotificationTest.PageTitle" xml:space="preserve">
     <value>Notification Test</value>

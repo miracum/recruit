@@ -116,10 +116,13 @@ public class SqlQueryExecutor {
       return;
     }
 
+    requireSqlOnFhirServerFor(criteria);
     log.warn(
-        "Study has a mix of {}-direct and sql-on-fhir-delegated criteria; falling back to "
+        "{} of {} criteria have no {} content and are delegated to the sql-on-fhir server; "
             + "resolving each criterion independently and merging in application memory.",
-        sqlDialect);
+        countDelegated(criteria),
+        criteria.size(),
+        sqlContentType);
     evaluateWithFallbackMerge(criteria, onResult);
   }
 
@@ -146,11 +149,14 @@ public class SqlQueryExecutor {
       return computeFunnelDirectly(criteria, totalPopulation);
     }
 
+    requireSqlOnFhirServerFor(criteria);
     log.warn(
-        "Study has a mix of {}-direct and sql-on-fhir-delegated criteria; falling back to "
+        "{} of {} criteria have no {} content and are delegated to the sql-on-fhir server; "
             + "resolving each criterion independently and merging in application memory for the "
             + "attrition funnel too.",
-        sqlDialect);
+        countDelegated(criteria),
+        criteria.size(),
+        sqlContentType);
     return computeFunnelWithFallbackMerge(criteria, totalPopulation);
   }
 
@@ -223,6 +229,43 @@ public class SqlQueryExecutor {
     }
 
     return new FunnelResult(totalPopulation, steps);
+  }
+
+  private long countDelegated(List<EligibilityCriterion> criteria) {
+    return criteria.stream().filter(c -> !isDirect(c)).count();
+  }
+
+  /**
+   * Fails before running anything if a criterion needs delegating but no {@code sql-on-fhir.url} is
+   * configured - otherwise the client's empty base URL only surfaces as an opaque "no scheme" error
+   * from the HTTP client, which doesn't hint at the actual cause: usually a Library authored for a
+   * different SQL dialect than the configured {@code query-sql-on-fhir.sql-dialect}.
+   */
+  private void requireSqlOnFhirServerFor(List<EligibilityCriterion> criteria) {
+    var serverBase = sqlOnFhirClient.getServerBase();
+    if (serverBase != null && !serverBase.isBlank()) {
+      return;
+    }
+
+    var delegated =
+        criteria.stream()
+            .filter(c -> !isDirect(c))
+            .map(
+                c ->
+                    String.format(
+                        "%s (content types: %s%s)",
+                        c.library().getId(),
+                        c.library().getContent().stream().map(Attachment::getContentType).toList(),
+                        c.library().hasRelatedArtifact() ? ", has relatedArtifact" : ""))
+            .toList();
+    throw new IllegalStateException(
+        String.format(
+            "Criteria Libraries %s have no %s content (or depend on ViewDefinitions via "
+                + "relatedArtifact) and so must be delegated to a sql-on-fhir server, but "
+                + "sql-on-fhir.url is not set. Either add %s content to these Libraries, set "
+                + "query-sql-on-fhir.sql-dialect to the dialect they are written in, or configure "
+                + "sql-on-fhir.url.",
+            delegated, sqlContentType, sqlContentType));
   }
 
   private boolean isDirect(EligibilityCriterion criterion) {

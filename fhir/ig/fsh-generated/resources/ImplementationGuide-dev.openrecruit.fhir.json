@@ -28,6 +28,14 @@
     "resource": [
       {
         "reference": {
+          "reference": "Library/sql-query-library-example"
+        },
+        "name": "All patients",
+        "description": "An example of a SQL-encoded eligibility criterion that every patient meets.",
+        "exampleCanonical": "https://openrecruit.dev/fhir/StructureDefinition/sql-query-library"
+      },
+      {
+        "reference": {
           "reference": "StructureDefinition/belongs-to-study"
         },
         "name": "Clinical study reference",
@@ -65,6 +73,22 @@
         "name": "EligibilityFunnelReportIdentifierSystem",
         "description": "The identifier system for a study's attrition-funnel MeasureReport's business identifier - used as the conditional-update key, keyed on the same value as the study's own identifier.",
         "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "StructureDefinition/eligibility-group"
+        },
+        "name": "EligibilityGroup",
+        "description": "A profile for the Group resource referenced by a RecruitResearchStudy's enrollment, which defines the study's eligibility criteria as characteristics referencing one or more SQLQueryLibrary criteria.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "Group/eligibility-group-example"
+        },
+        "name": "EligibilityGroupExample",
+        "description": "An example of a recruIT eligibility Group with a single inclusion criterion.",
+        "exampleCanonical": "https://openrecruit.dev/fhir/StructureDefinition/eligibility-group"
       },
       {
         "reference": {
@@ -120,6 +144,22 @@
         },
         "name": "recruIT eligibility assessment result",
         "description": "The SNOMED CT qualifier values a per-criterion eligibility assessment's value may be set to, indicating whether the criterion is met, not met, unknown, or indeterminate.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "CodeSystem/eligibility-criteria-types"
+        },
+        "name": "recruIT eligibility criteria type",
+        "description": "How an eligibility Group's criteria are encoded. Purely descriptive - query-sql-on-fhir discovers studies by their criteria Libraries' type, not by this code.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "ValueSet/eligibility-criteria-types"
+        },
+        "name": "recruIT eligibility criteria types",
+        "description": "The ways an eligibility Group's criteria may be encoded.",
         "exampleBoolean": false
       },
       {
@@ -206,6 +246,30 @@
         },
         "name": "SearchParameterBelongsToStudy",
         "description": "The ResearchStudy a List or MeasureReport pertains to",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "StructureDefinition/sql-query-library"
+        },
+        "name": "SQL Query Library",
+        "description": "A Library holding a SQL-encoded eligibility criterion, one content per supported SQL dialect. Mirrors the SQL on FHIR SQLQuery profile.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "NamingSystem/sql-criteria-library-id"
+        },
+        "name": "SqlCriteriaLibraryIdentifierSystem",
+        "description": "The identifier system for a SQLQueryLibrary criterion authored as FSH, such as the demo study's criteria.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "NamingSystem/sql-criteria-research-study-id"
+        },
+        "name": "SqlCriteriaResearchStudyIdentifierSystem",
+        "description": "The identifier system for a RecruitResearchStudy whose SQL-encoded criteria are authored as FSH, such as the demo study.",
         "exampleBoolean": false
       },
       {

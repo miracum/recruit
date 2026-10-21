@@ -136,7 +136,7 @@ The `ohdsi.cdmInitJob.extraEnv` option `SETUP_SYNPUF=true` means that the OMOP d
 !!! info "Documentation for all available chart options"
 
     You can find a complete description of all available chart configuration options here:
-    <https://github.com/miracum/charts/blob/master/charts/recruit/README.md#configuration>
+    <https://github.com/open-recruit/recruit/blob/master/charts/recruit/README.md#values>
 
 ```yaml title="values-kind-recruit.yaml"
 --8<-- "_snippets/k8s/values-kind-recruit.yaml"

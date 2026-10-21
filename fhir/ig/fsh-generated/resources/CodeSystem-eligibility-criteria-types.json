@@ -1,0 +1,18 @@
+{
+  "resourceType": "CodeSystem",
+  "status": "active",
+  "content": "complete",
+  "name": "EligibilityCriteriaType",
+  "id": "eligibility-criteria-types",
+  "title": "recruIT eligibility criteria type",
+  "description": "How an eligibility Group's criteria are encoded. Purely descriptive - query-sql-on-fhir discovers studies by their criteria Libraries' type, not by this code.",
+  "url": "https://openrecruit.dev/fhir/CodeSystem/eligibility-criteria-types",
+  "concept": [
+    {
+      "code": "sql-query",
+      "display": "SQL query",
+      "definition": "The criteria are SQLQueryLibrary resources, each carrying its SQL in one or more dialects."
+    }
+  ],
+  "count": 1
+}

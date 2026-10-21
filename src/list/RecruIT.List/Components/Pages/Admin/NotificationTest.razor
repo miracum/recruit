@@ -1,7 +1,7 @@
 @page "/admin/notify-test"
 @attribute [Authorize]
 @inject NotificationSenderService SenderService
-@inject IOptions<NotifyMailerOptions> MailerOptions
+@inject IOptions<EmailNotificationOptions> MailerOptions
 @inject ToastService Toast
 @inject BreadcrumbState BreadcrumbState
 @inject IStringLocalizer<SharedResources> Localizer
@@ -21,29 +21,29 @@ else
             <BbCardTitle>@Localizer["App.NotificationTest.SettingsTitle"]</BbCardTitle>
         </BbCardHeader>
         <BbCardContent>
-            <dl class="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+            <dl class="bb:grid bb:grid-cols-1 bb:gap-y-2 bb:text-sm bb:sm:grid-cols-2">
                 <div>
-                    <dt class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.NotificationTest.SmtpHostLabel"]</dt>
+                    <dt class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide bb:text-muted-foreground">@Localizer["App.NotificationTest.SmtpHostLabel"]</dt>
                     <dd>@MailerOptions.Value.SmtpHost:@MailerOptions.Value.SmtpPort</dd>
                 </div>
                 <div>
-                    <dt class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.NotificationTest.FromLabel"]</dt>
+                    <dt class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide bb:text-muted-foreground">@Localizer["App.NotificationTest.FromLabel"]</dt>
                     <dd>@MailerOptions.Value.From</dd>
                 </div>
             </dl>
         </BbCardContent>
     </BbCard>
 
-    <BbCard Class="mt-6">
+    <BbCard Class="bb:mt-6">
         <BbCardHeader>
             <BbCardTitle>@Localizer["App.NotificationTest.SendTitle"]</BbCardTitle>
         </BbCardHeader>
         <BbCardContent>
-            <p class="mb-3 text-sm text-muted-foreground">@Localizer["App.NotificationTest.SendDescription"]</p>
-            <div class="flex flex-wrap items-end gap-3">
-                <div class="w-full max-w-sm min-w-64">
-                    <label class="text-xs font-medium uppercase tracking-wide text-muted-foreground">@Localizer["App.NotificationTest.EmailLabel"]</label>
-                    <BbInput @bind-Value="_recipientEmail" Type="InputType.Email" Placeholder="@Localizer["App.NotificationTest.EmailPlaceholder"]" Class="mt-1" />
+            <p class="bb:mb-3 bb:text-sm bb:text-muted-foreground">@Localizer["App.NotificationTest.SendDescription"]</p>
+            <div class="bb:flex bb:flex-wrap bb:items-end bb:gap-3">
+                <div class="bb:w-full bb:max-w-sm">
+                    <label class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide bb:text-muted-foreground">@Localizer["App.NotificationTest.EmailLabel"]</label>
+                    <BbInput @bind-Value="_recipientEmail" Type="InputType.Email" Placeholder="@Localizer["App.NotificationTest.EmailPlaceholder"]" Class="bb:mt-1" />
                 </div>
                 <BbButton Variant="ButtonVariant.Default" Loading="_sending" Disabled="@string.IsNullOrWhiteSpace(_recipientEmail)" OnClick="SendTestEmailAsync">
                     @Localizer["App.NotificationTest.SendButton"]

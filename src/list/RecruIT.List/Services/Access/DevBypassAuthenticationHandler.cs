@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 namespace RecruIT.List.Services.Access;
 
 /// <summary>
-/// Dev-only stand-in for OIDC (see Options.AuthOptions.Disabled), mirroring list-old's
+/// Dev-only stand-in for OIDC (used while Options.AuthOptions.Enabled is false), mirroring list-old's
 /// KEYCLOAK_DISABLED behavior: treat every request as an authenticated admin so the UI is fully
 /// usable without a running identity provider. Registered as a real authentication scheme (rather
 /// than only a Blazor AuthenticationStateProvider) because Blazor Web App endpoints enforce

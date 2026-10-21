@@ -7,9 +7,14 @@
       "resource": {
         "resourceType": "ResearchStudy",
         "id": "98d96608-475f-4386-b7b5-6ddc1eb57e71",
+        "meta": {
+          "profile": [
+            "https://openrecruit.dev/fhir/StructureDefinition/recruit-research-study"
+          ]
+        },
         "identifier": [
           {
-            "system": "https://openrecruit.dev/fhir/identifiers/trino-sql-criteria-researchstudy-id",
+            "system": "https://openrecruit.dev/fhir/identifiers/sql-criteria-research-study-id",
             "value": "bronchitis"
           }
         ],
@@ -40,23 +45,28 @@
       "resource": {
         "resourceType": "Group",
         "id": "be24c1a6-b052-4360-871b-0a1b7b6bdfb4",
+        "meta": {
+          "profile": [
+            "https://openrecruit.dev/fhir/StructureDefinition/eligibility-group"
+          ]
+        },
+        "actual": false,
         "identifier": [
           {
             "system": "https://openrecruit.dev/fhir/identifiers/eligibility-group-id",
             "value": "bronchitis"
           }
         ],
-        "actual": false,
         "type": "person",
         "active": true,
         "code": {
           "coding": [
             {
-              "code": "trino-sql",
+              "code": "sql-query",
               "system": "https://openrecruit.dev/fhir/CodeSystem/eligibility-criteria-types"
             }
           ],
-          "text": "Trino SQL-encoded eligibility criteria"
+          "text": "SQL-encoded eligibility criteria"
         },
         "characteristic": [
           {
@@ -97,14 +107,11 @@
       "resource": {
         "resourceType": "Library",
         "id": "bb4e037a-0a43-4fee-befc-b9ed598c3e64",
-        "status": "active",
-        "name": "bronchitis",
-        "identifier": [
-          {
-            "system": "https://openrecruit.dev/fhir/identifiers/trino-sql-criteria-library-id",
-            "value": "bronchitis"
-          }
-        ],
+        "meta": {
+          "profile": [
+            "https://openrecruit.dev/fhir/StructureDefinition/sql-query-library"
+          ]
+        },
         "type": {
           "coding": [
             {
@@ -113,6 +120,14 @@
             }
           ]
         },
+        "status": "active",
+        "name": "bronchitis",
+        "identifier": [
+          {
+            "system": "https://openrecruit.dev/fhir/identifiers/sql-criteria-library-id",
+            "value": "bronchitis"
+          }
+        ],
         "content": [
           {
             "contentType": "application/sql;dialect=trino",
@@ -147,14 +162,11 @@
       "resource": {
         "resourceType": "Library",
         "id": "12b09320-2426-43e9-930d-64f151d39e68",
-        "status": "active",
-        "name": "age-over-18",
-        "identifier": [
-          {
-            "system": "https://openrecruit.dev/fhir/identifiers/trino-sql-criteria-library-id",
-            "value": "age-over-18"
-          }
-        ],
+        "meta": {
+          "profile": [
+            "https://openrecruit.dev/fhir/StructureDefinition/sql-query-library"
+          ]
+        },
         "type": {
           "coding": [
             {
@@ -163,6 +175,14 @@
             }
           ]
         },
+        "status": "active",
+        "name": "age-over-18",
+        "identifier": [
+          {
+            "system": "https://openrecruit.dev/fhir/identifiers/sql-criteria-library-id",
+            "value": "age-over-18"
+          }
+        ],
         "content": [
           {
             "contentType": "application/sql;dialect=trino",
@@ -197,14 +217,11 @@
       "resource": {
         "resourceType": "Library",
         "id": "9be54194-a4d9-4835-bf9e-21314e4f046c",
-        "status": "active",
-        "name": "sepsis",
-        "identifier": [
-          {
-            "system": "https://openrecruit.dev/fhir/identifiers/trino-sql-criteria-library-id",
-            "value": "sepsis"
-          }
-        ],
+        "meta": {
+          "profile": [
+            "https://openrecruit.dev/fhir/StructureDefinition/sql-query-library"
+          ]
+        },
         "type": {
           "coding": [
             {
@@ -213,6 +230,14 @@
             }
           ]
         },
+        "status": "active",
+        "name": "sepsis",
+        "identifier": [
+          {
+            "system": "https://openrecruit.dev/fhir/identifiers/sql-criteria-library-id",
+            "value": "sepsis"
+          }
+        ],
         "content": [
           {
             "contentType": "application/sql;dialect=trino",

@@ -1,22 +1,21 @@
 # Design: Per-Criterion Eligibility Status
 
-!!! warning
+!!! info
 
-    This is a design proposal, not yet implemented. It extends the
-    [Trino SQL-based query module](index.md) and assumes that module as a
-    prerequisite.
+    This is the design behind how the [query module](index.md) evaluates
+    eligibility criteria one by one. For writing criteria, start with
+    [Writing a criterion](index.md#writing-a-criterion).
 
 ## Motivation
 
 Today, `query-sql-on-fhir`'s `PollForStudies` evaluates exactly **one** SQL
-query per study (`ResearchStudy.enrollment` -> `Group` with
-`Group.code = trino-sql` -> the first `Group.characteristic` -> a `Library`
-holding base64-encoded SQL). The query returns a flat list of `patient_id`s
-that satisfy the *entire* criteria set, and those patients become
-`ResearchSubject` entries on the study's screening `List`. There is no way to
-tell, from the resulting FHIR data, *which* individual criteria a patient
-does or doesn't satisfy - only the collapsed pass/fail outcome of the whole
-query.
+query per study (`ResearchStudy.enrollment` -> `Group` -> the first
+`Group.characteristic` -> a `Library` holding base64-encoded SQL). The query
+returns a flat list of `patient_id`s that satisfy the *entire* criteria set,
+and those patients become `ResearchSubject` entries on the study's screening
+`List`. There is no way to tell, from the resulting FHIR data, *which*
+individual criteria a patient does or doesn't satisfy - only the collapsed
+pass/fail outcome of the whole query.
 
 The goal of this design is to let `list` show, per patient, a
 per-criterion breakdown with four states:
@@ -61,17 +60,18 @@ per-criterion breakdown with four states:
 ## Criterion definition
 
 Extend `Group.characteristic` from a single entry (today) to one entry per
-criterion. `Group.code` stays `trino-sql` so the existing discovery query in
-`PollForStudies` still finds it unchanged.
+criterion. `PollForStudies` discovers studies by their criteria `Library`'s
+`type` (`sql-query`), not by `Group.code`, so the discovery query stays
+unchanged. `Group.code` is purely descriptive and optional.
 
 ```json
 {
   "resourceType": "Group",
   "id": "trial-042-eligibility",
   "type": "person",
-  "actual": true,
+  "actual": false,
   "code": {
-    "coding": [{ "system": "https://recruit.miracum.org/fhir/CodeSystem/eligibility-criteria-types", "code": "trino-sql" }]
+    "coding": [{ "system": "https://openrecruit.dev/fhir/CodeSystem/eligibility-criteria-types", "code": "sql-query" }]
   },
   "characteristic": [
     {

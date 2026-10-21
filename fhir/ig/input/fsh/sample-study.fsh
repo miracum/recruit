@@ -15,7 +15,7 @@ RuleSet: OpenRecruitIdentifier(type, value)
 RuleSet: SqlQueryLibrary(name)
 * status = #active
 * name = "{name}"
-* insert OpenRecruitIdentifier(trino-sql-criteria-library-id, {name})
+* insert OpenRecruitIdentifier(sql-criteria-library-id, {name})
 * type = https://sql-on-fhir.org/ig/CodeSystem/LibraryTypesCodes#sql-query
 * content[0].contentType = #"application/sql;dialect=trino"
 * content[0].extension[0].url = "https://sql-on-fhir.org/ig/StructureDefinition/sql-text"
@@ -23,10 +23,10 @@ RuleSet: SqlQueryLibrary(name)
 * content[1].extension[0].url = "https://sql-on-fhir.org/ig/StructureDefinition/sql-text"
 
 Instance: SampleStudy
-InstanceOf: ResearchStudy
+InstanceOf: RecruitResearchStudy
 Usage: #inline
 * id = "98d96608-475f-4386-b7b5-6ddc1eb57e71"
-* insert OpenRecruitIdentifier(trino-sql-criteria-researchstudy-id, bronchitis)
+* insert OpenRecruitIdentifier(sql-criteria-research-study-id, bronchitis)
 * extension[0].url = "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym"
 * extension[0].valueString = "DEMO-BRONCHITIS"
 * extension[1].url = "https://www.medizininformatik-initiative.de/fhir/modul-studie/StructureDefinition/mii-ex-studie-akronym"
@@ -36,15 +36,15 @@ Usage: #inline
 * enrollment = Reference(SampleStudyEligibilityGroup)
 
 Instance: SampleStudyEligibilityGroup
-InstanceOf: Group
+InstanceOf: EligibilityGroup
 Usage: #inline
 * id = "be24c1a6-b052-4360-871b-0a1b7b6bdfb4"
 * insert OpenRecruitIdentifier(eligibility-group-id, bronchitis)
 * actual = false
 * type = #person
 * active = true
-* code = https://openrecruit.dev/fhir/CodeSystem/eligibility-criteria-types#trino-sql
-* code.text = "Trino SQL-encoded eligibility criteria"
+* code = EligibilityCriteriaType#sql-query
+* code.text = "SQL-encoded eligibility criteria"
 * characteristic[0].valueReference = Reference(SampleStudyBronchitisLibrary)
 * characteristic[=].code.text = "Bronchitis diagnosis"
 * characteristic[=].exclude = false
@@ -56,7 +56,7 @@ Usage: #inline
 * characteristic[=].exclude = true
 
 Instance: SampleStudyBronchitisLibrary
-InstanceOf: Library
+InstanceOf: SQLQueryLibrary
 Usage: #inline
 * id = "bb4e037a-0a43-4fee-befc-b9ed598c3e64"
 * insert SqlQueryLibrary(bronchitis)
@@ -96,7 +96,7 @@ Usage: #inline
 * content[1].data = "U0VMRUNUCiAgICBwYXRpZW50LmlkIEFTIHBhdGllbnRfaWQsCiAgICBFWElTVFMgKAogICAgICAgIFNFTEVDVCAxCiAgICAgICAgRlJPTQogICAgICAgICAgICBmaGlyLmRlZmF1bHQuY29uZGl0aW9uLAogICAgICAgICAgICBVTk5FU1QoY29uZGl0aW9uLmNvZGUuY29kaW5nKSBBUyB1KGNvbmRpdGlvbl9jb2RpbmcpCiAgICAgICAgV0hFUkUKICAgICAgICAgICAgY29uZGl0aW9uLnN1YmplY3QucmVmZXJlbmNlID0gQ09OQ0FUKCdQYXRpZW50LycsIHBhdGllbnQuaWQpCiAgICAgICAgICAgIEFORCBjb25kaXRpb25fY29kaW5nLnN5c3RlbSA9ICdodHRwOi8vc25vbWVkLmluZm8vc2N0JwogICAgICAgICAgICBBTkQgY29uZGl0aW9uX2NvZGluZy5jb2RlIElOICgnMTA1MDkwMDInKQogICAgKSBBUyBpc19tZXQKRlJPTSBmaGlyLmRlZmF1bHQucGF0aWVudCBBUyBwYXRpZW50"
 
 Instance: SampleStudyAgeOver18Library
-InstanceOf: Library
+InstanceOf: SQLQueryLibrary
 Usage: #inline
 * id = "12b09320-2426-43e9-930d-64f151d39e68"
 * insert SqlQueryLibrary(age-over-18)
@@ -118,7 +118,7 @@ Usage: #inline
 * content[1].data = "U0VMRUNUCiAgICBwYXRpZW50LmlkIEFTIHBhdGllbnRfaWQsCiAgICBkYXRlX3N1YigneWVhcicsIENBU1QocGF0aWVudC5iaXJ0aGRhdGUgQVMgREFURSksIGN1cnJlbnRfZGF0ZSkgPiAxOCBBUyBpc19tZXQKRlJPTSBmaGlyLmRlZmF1bHQucGF0aWVudCBBUyBwYXRpZW50"
 
 Instance: SampleStudySepsisLibrary
-InstanceOf: Library
+InstanceOf: SQLQueryLibrary
 Usage: #inline
 * id = "9be54194-a4d9-4835-bf9e-21314e4f046c"
 * insert SqlQueryLibrary(sepsis)

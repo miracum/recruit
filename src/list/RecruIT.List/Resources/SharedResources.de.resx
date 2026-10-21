@@ -273,6 +273,12 @@
   <data name="App.PatientList.ExclusionCriteria" xml:space="preserve">
     <value>Ausschlusskriterien</value>
   </data>
+  <data name="App.PatientList.CriteriaButton" xml:space="preserve">
+    <value>Ein- und Ausschlusskriterien</value>
+  </data>
+  <data name="App.PatientList.SearchPlaceholder" xml:space="preserve">
+    <value>Patienten durchsuchen...</value>
+  </data>
   <data name="App.PatientList.NoCriteria" xml:space="preserve">
     <value>Keine</value>
   </data>
@@ -506,6 +512,9 @@
   </data>
   <data name="App.Errors.LibrariesLoadFailed" xml:space="preserve">
     <value>Library-Ressourcen konnten nicht geladen werden.</value>
+  </data>
+  <data name="App.Errors.StudyCriteriaLoadFailed" xml:space="preserve">
+    <value>Die Einschlusskriterien der ausgewählten Studie konnten nicht geladen werden.</value>
   </data>
   <data name="App.Errors.ResearchStudiesLoadFailed" xml:space="preserve">
     <value>ResearchStudy-Ressourcen konnten nicht geladen werden.</value>
@@ -846,6 +855,9 @@
   <data name="App.CriteriaManager.CriterionSqlLabel" xml:space="preserve">
     <value>SQL</value>
   </data>
+  <data name="App.CriteriaManager.CriterionSqlDialectLabel" xml:space="preserve">
+    <value>SQL-Dialekt</value>
+  </data>
   <data name="App.CriteriaManager.PreviewSectionTitle" xml:space="preserve">
     <value>Vorschau</value>
   </data>
@@ -863,6 +875,9 @@
   </data>
   <data name="App.CriteriaManager.SubmitErrorTitle" xml:space="preserve">
     <value>Übermittlung fehlgeschlagen</value>
+  </data>
+  <data name="App.CriteriaManager.StudyCriteriaLoadErrorTitle" xml:space="preserve">
+    <value>Studie konnte nicht geladen werden</value>
   </data>
   <data name="App.NotificationTest.PageTitle" xml:space="preserve">
     <value>Benachrichtigungstest</value>

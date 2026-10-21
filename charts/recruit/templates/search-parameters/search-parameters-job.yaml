@@ -49,12 +49,12 @@ spec:
           resources: {{- include "common.resources.preset" (dict "type" .Values.createSearchParameters.resourcesPreset) | nindent 12 }}
           {{- end }}
           env:
-            - name: FHIR_URL
+            - name: FHIR_SERVER_BASE_URL
               value: {{ include "recruit.fhirserver.url" . }}
           command: ["/bin/sh", "-c"]
           args:
             - |
-              until [ "$(curl -s -o /dev/null -L -w '%{http_code}' "$FHIR_URL/metadata")" == "200" ]; do
+              until [ "$(curl -s -o /dev/null -L -w '%{http_code}' "$FHIR_SERVER_BASE_URL/metadata")" == "200" ]; do
                 echo "$(date): Waiting for FHIR server to be up";
                 sleep 15;
               done;
@@ -72,19 +72,19 @@ spec:
           resources: {{- include "common.resources.preset" (dict "type" .Values.createSearchParameters.resourcesPreset) | nindent 12 }}
           {{- end }}
           env:
-            - name: FHIR_URL
+            - name: FHIR_SERVER_BASE_URL
               value: {{ include "recruit.fhirserver.url" . }}
           command: ["/bin/sh", "-c"]
           args:
             - |
               set -eu
 
-              echo "Installing SearchParameter resources on $FHIR_URL..."
+              echo "Installing SearchParameter resources on $FHIR_SERVER_BASE_URL..."
               curl --fail-with-body --retry 5 --retry-delay 5 --retry-connrefused --retry-all-errors \
                 -X POST \
                 -H "Content-Type: application/fhir+json" \
                 --data @/fhir/search-parameters-transaction-upsert.json \
-                "$FHIR_URL"
+                "$FHIR_SERVER_BASE_URL"
           volumeMounts:
             - name: search-parameters
               mountPath: /fhir

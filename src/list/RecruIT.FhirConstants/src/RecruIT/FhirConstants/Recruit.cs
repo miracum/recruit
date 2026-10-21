@@ -13,6 +13,10 @@ public static class Recruit
             public static string EligibilityAssessmentCategory =>
                 "https://openrecruit.dev/fhir/CodeSystem/eligibility-assessment-category";
 
+            /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/CodeSystem/eligibility-criteria-types</c>.</summary>
+            public static string EligibilityCriteriaTypes =>
+                "https://openrecruit.dev/fhir/CodeSystem/eligibility-criteria-types";
+
             /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/CodeSystem/eligibility-funnel-population-type</c>.</summary>
             public static string EligibilityFunnelPopulationType =>
                 "https://openrecruit.dev/fhir/CodeSystem/eligibility-funnel-population-type";
@@ -27,6 +31,13 @@ public static class Recruit
         {
             /// <summary><c>eligibility-assessment</c> - Eligibility assessment</summary>
             EligibilityAssessment,
+        }
+
+        /// <summary>Concepts for <c>https://openrecruit.dev/fhir/CodeSystem/eligibility-criteria-types</c>.</summary>
+        public enum EligibilityCriteriaTypes
+        {
+            /// <summary><c>sql-query</c> - SQL query</summary>
+            SqlQuery,
         }
 
         /// <summary>Concepts for <c>https://openrecruit.dev/fhir/CodeSystem/eligibility-funnel-population-type</c>.</summary>
@@ -53,6 +64,10 @@ public static class Recruit
         public static string EligibilityAssessment =>
             "https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment";
 
+        /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/StructureDefinition/eligibility-group</c>.</summary>
+        public static string EligibilityGroup =>
+            "https://openrecruit.dev/fhir/StructureDefinition/eligibility-group";
+
         /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/StructureDefinition/recruit-research-study</c>.</summary>
         public static string RecruitResearchStudy =>
             "https://openrecruit.dev/fhir/StructureDefinition/recruit-research-study";
@@ -61,12 +76,20 @@ public static class Recruit
         public static string ScreeningList =>
             "https://openrecruit.dev/fhir/StructureDefinition/screening-list";
 
+        /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/StructureDefinition/sql-query-library</c>.</summary>
+        public static string SqlQueryLibrary =>
+            "https://openrecruit.dev/fhir/StructureDefinition/sql-query-library";
+
         /// <summary>The profiles' canonical URLs without their <c>|version</c> suffix.</summary>
         public static class Versionless
         {
             /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment</c>.</summary>
             public static string EligibilityAssessment =>
                 "https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment";
+
+            /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/StructureDefinition/eligibility-group</c>.</summary>
+            public static string EligibilityGroup =>
+                "https://openrecruit.dev/fhir/StructureDefinition/eligibility-group";
 
             /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/StructureDefinition/recruit-research-study</c>.</summary>
             public static string RecruitResearchStudy =>
@@ -75,6 +98,10 @@ public static class Recruit
             /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/StructureDefinition/screening-list</c>.</summary>
             public static string ScreeningList =>
                 "https://openrecruit.dev/fhir/StructureDefinition/screening-list";
+
+            /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/StructureDefinition/sql-query-library</c>.</summary>
+            public static string SqlQueryLibrary =>
+                "https://openrecruit.dev/fhir/StructureDefinition/sql-query-library";
         }
     }
 
@@ -162,6 +189,22 @@ public static class Recruit
                 "https://openrecruit.dev/fhir/identifiers/screening-list-id";
         }
 
+        /// <summary>The identifier system for a SQLQueryLibrary criterion authored as FSH, such as the demo study's criteria.</summary>
+        public static class SqlCriteriaLibraryId
+        {
+            /// <summary><c>https://openrecruit.dev/fhir/identifiers/sql-criteria-library-id</c></summary>
+            public static string Uri =>
+                "https://openrecruit.dev/fhir/identifiers/sql-criteria-library-id";
+        }
+
+        /// <summary>The identifier system for a RecruitResearchStudy whose SQL-encoded criteria are authored as FSH, such as the demo study.</summary>
+        public static class SqlCriteriaResearchStudyId
+        {
+            /// <summary><c>https://openrecruit.dev/fhir/identifiers/sql-criteria-research-study-id</c></summary>
+            public static string Uri =>
+                "https://openrecruit.dev/fhir/identifiers/sql-criteria-research-study-id";
+        }
+
         /// <summary>The identifier system for a criterion expressed in a Library resource when synced from a Superset instance.</summary>
         public static class SupersetSyncedEligibilityLibraryId
         {
@@ -233,6 +276,49 @@ public static class EligibilityAssessmentCategoryExtensions
     /// <returns>The matching <see cref="Recruit.CodeSystems.EligibilityAssessmentCategory"/>.</returns>
     /// <exception cref="ArgumentException">If no constant has that code.</exception>
     public static Recruit.CodeSystems.EligibilityAssessmentCategory FromValueOrThrow(string code) =>
+        FromValue(code) ?? throw new ArgumentException($"Unknown code: {code}", nameof(code));
+}
+
+/// <summary>Extension methods for <see cref="Recruit.CodeSystems.EligibilityCriteriaTypes"/>.</summary>
+public static class EligibilityCriteriaTypesExtensions
+{
+    /// <returns>The CodeSystem URL <c>https://openrecruit.dev/fhir/CodeSystem/eligibility-criteria-types</c>.</returns>
+    public static string Url(this Recruit.CodeSystems.EligibilityCriteriaTypes _) =>
+        "https://openrecruit.dev/fhir/CodeSystem/eligibility-criteria-types";
+
+    /// <returns>The FHIR code for this concept.</returns>
+    public static string Code(this Recruit.CodeSystems.EligibilityCriteriaTypes value) =>
+        value switch
+        {
+            Recruit.CodeSystems.EligibilityCriteriaTypes.SqlQuery => "sql-query",
+            _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+        };
+
+    /// <returns>The display label for this concept, or <c>null</c> if none.</returns>
+    public static string? Display(this Recruit.CodeSystems.EligibilityCriteriaTypes value) =>
+        value switch
+        {
+            Recruit.CodeSystems.EligibilityCriteriaTypes.SqlQuery => "SQL query",
+            _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+        };
+
+    /// <returns>A new <see cref="Coding"/> for this concept.</returns>
+    public static Coding Coding(this Recruit.CodeSystems.EligibilityCriteriaTypes value) =>
+        new(value.Url(), value.Code(), value.Display());
+
+    /// <param name="code">The FHIR code to look up.</param>
+    /// <returns>The matching <see cref="Recruit.CodeSystems.EligibilityCriteriaTypes"/>, or <c>null</c> if none matches.</returns>
+    public static Recruit.CodeSystems.EligibilityCriteriaTypes? FromValue(string code) =>
+        code switch
+        {
+            "sql-query" => Recruit.CodeSystems.EligibilityCriteriaTypes.SqlQuery,
+            _ => null,
+        };
+
+    /// <param name="code">The FHIR code to look up.</param>
+    /// <returns>The matching <see cref="Recruit.CodeSystems.EligibilityCriteriaTypes"/>.</returns>
+    /// <exception cref="ArgumentException">If no constant has that code.</exception>
+    public static Recruit.CodeSystems.EligibilityCriteriaTypes FromValueOrThrow(string code) =>
         FromValue(code) ?? throw new ArgumentException($"Unknown code: {code}", nameof(code));
 }
 

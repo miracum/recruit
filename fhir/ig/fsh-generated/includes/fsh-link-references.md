@@ -1,8 +1,11 @@
+[sql-query-library-example]: Library-sql-query-library-example.html
 [BelongsToStudy]: StructureDefinition-belongs-to-study.html
 [DerivedFromLibrary]: StructureDefinition-derived-from-library.html
 [eligibility-assessment-id]: NamingSystem-eligibility-assessment-id.html
 [eligibility-funnel-measure-id]: NamingSystem-eligibility-funnel-measure-id.html
 [eligibility-funnel-report-id]: NamingSystem-eligibility-funnel-report-id.html
+[EligibilityGroup]: StructureDefinition-eligibility-group.html
+[eligibility-group-example]: Group-eligibility-group-example.html
 [eligibility-group-id]: NamingSystem-eligibility-group-id.html
 [eligibility-library-id]: NamingSystem-eligibility-library-id.html
 [group-characteristic-reference]: SearchParameter-group-characteristic-reference.html
@@ -10,6 +13,8 @@
 [EligibilityAssessment]: StructureDefinition-eligibility-assessment.html
 [EligibilityAssessmentCategory]: CodeSystem-eligibility-assessment-category.html
 [EligibilityAssessmentResult]: ValueSet-eligibility-assessment-result.html
+[EligibilityCriteriaType]: CodeSystem-eligibility-criteria-types.html
+[EligibilityCriteriaTypes]: ValueSet-eligibility-criteria-types.html
 [EligibilityFunnelPopulationType]: CodeSystem-eligibility-funnel-population-type.html
 [ScreeningListType]: CodeSystem-screening-list-type.html
 [RecruitResearchStudy]: StructureDefinition-recruit-research-study.html
@@ -21,6 +26,9 @@
 [ScreeningList]: StructureDefinition-screening-list.html
 [screening-list-id]: NamingSystem-screening-list-id.html
 [belongs-to-study]: SearchParameter-belongs-to-study.html
+[SQLQueryLibrary]: StructureDefinition-sql-query-library.html
+[sql-criteria-library-id]: NamingSystem-sql-criteria-library-id.html
+[sql-criteria-research-study-id]: NamingSystem-sql-criteria-research-study-id.html
 [superset-synced-eligibility-library-id]: NamingSystem-superset-synced-eligibility-library-id.html
 [screening-list-example]: List-screening-list-example.html
 [ui-created-eligibility-library-id]: NamingSystem-ui-created-eligibility-library-id.html

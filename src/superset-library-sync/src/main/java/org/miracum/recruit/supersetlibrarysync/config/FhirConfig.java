@@ -33,7 +33,7 @@ public class FhirConfig {
 
   @Bean
   public IGenericClient fhirClient(
-      FhirContext fhirContext, @Value("${fhir.url}") String fhirServerUrl) {
+      FhirContext fhirContext, @Value("${fhir.server.base-url}") String fhirServerUrl) {
     return fhirContext.newRestfulGenericClient(fhirServerUrl);
   }
 }

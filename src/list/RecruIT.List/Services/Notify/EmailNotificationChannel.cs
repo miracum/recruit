@@ -6,7 +6,7 @@ using RecruIT.List.Options;
 
 namespace RecruIT.List.Services.Notify;
 
-public sealed class EmailNotificationChannel(IOptions<NotifyMailerOptions> mailerOptions)
+public sealed class EmailNotificationChannel(IOptions<EmailNotificationOptions> mailerOptions)
     : INotificationChannel
 {
     public async Task<INotificationBatch> BeginBatchAsync(CancellationToken ct = default)

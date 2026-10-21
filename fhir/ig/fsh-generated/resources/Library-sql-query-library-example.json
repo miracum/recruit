@@ -1,0 +1,32 @@
+{
+  "resourceType": "Library",
+  "id": "sql-query-library-example",
+  "meta": {
+    "profile": [
+      "https://openrecruit.dev/fhir/StructureDefinition/sql-query-library"
+    ]
+  },
+  "type": {
+    "coding": [
+      {
+        "code": "sql-query",
+        "system": "https://sql-on-fhir.org/ig/CodeSystem/LibraryTypesCodes"
+      }
+    ]
+  },
+  "status": "active",
+  "name": "all-patients",
+  "title": "All patients",
+  "content": [
+    {
+      "contentType": "application/sql;dialect=trino",
+      "data": "U0VMRUNUIHBhdGllbnQuaWQgQVMgcGF0aWVudF9pZCwgVFJVRSBBUyBpc19tZXQgRlJPTSBmaGlyLmRlZmF1bHQucGF0aWVudCBBUyBwYXRpZW50",
+      "extension": [
+        {
+          "url": "https://sql-on-fhir.org/ig/StructureDefinition/sql-text",
+          "valueString": "SELECT patient.id AS patient_id, TRUE AS is_met FROM fhir.default.patient AS patient"
+        }
+      ]
+    }
+  ]
+}

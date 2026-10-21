@@ -22,18 +22,17 @@ nav = [
     "getting-started/creating-your-first-study.md",
   ] },
   { "Deployment" = [
-    "deployment/docker-compose.md",
+    "deployment/compose.md",
     "deployment/kubernetes.md",
     "deployment/observability.md",
     "deployment/resource-requirements.md",
   ] },
   { "Configuration" = [
     "configuration/options.md",
-    "configuration/ui-configuration.md",
     "configuration/security.md",
     "configuration/existing-fhir-server.md",
   ] },
-  { "Trino query module" = [
+  { "Query module" = [
     "trino/index.md",
     "trino/eligibility-criteria-design.md",
   ] },

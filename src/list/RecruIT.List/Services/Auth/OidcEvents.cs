@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.EntityFrameworkCore;
 using RecruIT.List.Data;
+using RecruIT.List.Options;
 
 namespace RecruIT.List.Services.Auth;
 
@@ -28,24 +29,28 @@ public sealed class OidcEvents(
 
     /// <summary>
     /// Lets an IdP group double as an app role without needing IdP-side realm-role/client-scope
-    /// setup: configure Oidc:GroupClaimType (default "groups") and Oidc:GroupRoleMappings (a
+    /// setup: configure Auth:Oidc:GroupClaimType (default "groups") and Auth:Oidc:GroupRoleMappings (a
     /// { "&lt;group name or path&gt;": "&lt;role&gt;" } map, e.g. { "/recruit-admins": "admin" })
     /// and any matching group membership becomes a role claim of the app's configured RoleClaimType.
     /// </summary>
     private void ApplyGroupRoleMappings(ClaimsPrincipal principal)
     {
         var mappings = configuration
-            .GetSection("Oidc:GroupRoleMappings")
+            .GetSection($"{AuthOptions.OidcSectionName}:GroupRoleMappings")
             .Get<Dictionary<string, string>>();
         if (mappings is not { Count: > 0 } || principal.Identity is not ClaimsIdentity identity)
         {
             return;
         }
 
-        var groupClaimType = configuration["Oidc:GroupClaimType"] is { Length: > 0 } gct
+        var groupClaimType = configuration[$"{AuthOptions.OidcSectionName}:GroupClaimType"]
+            is { Length: > 0 } gct
             ? gct
             : "groups";
-        var roleClaimType = configuration["Oidc:RoleClaimType"] is { Length: > 0 } rc ? rc : "role";
+        var roleClaimType = configuration[$"{AuthOptions.OidcSectionName}:RoleClaimType"]
+            is { Length: > 0 } rc
+            ? rc
+            : "role";
         var existingRoles = identity.FindAll(roleClaimType).Select(c => c.Value).ToHashSet();
 
         foreach (var groupClaim in identity.FindAll(groupClaimType))

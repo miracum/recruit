@@ -23,7 +23,8 @@ server:
   port: 8090
 
 fhir:
-  url: "http://localhost:8082/fhir"
+  server:
+    base-url: "http://localhost:8082/fhir"
 
 sql-on-fhir:
   url: ""

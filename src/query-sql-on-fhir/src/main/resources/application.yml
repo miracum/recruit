@@ -49,8 +49,9 @@ query-sql-on-fhir:
     total-population-sql: "SELECT COUNT(*) FROM Patient"
 
 fhir:
-  url: ""
   server:
+    # base URL of the FHIR server, e.g. "https://fhir.example.com/fhir". Set via FHIR_SERVER_BASE_URL.
+    base-url: ""
     # call, connect, read, and write timeout to the FHIR server in seconds
     timeout-in-seconds: 300
   use-update-as-create: false

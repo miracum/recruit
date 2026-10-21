@@ -1170,8 +1170,8 @@
         "alias": [
           "patient"
         ],
-        "min": 0,
-        "max": "*",
+        "min": 1,
+        "max": "1",
         "base": {
           "path": "ResearchStudy.enrollment",
           "min": 0,
@@ -1181,7 +1181,7 @@
           {
             "code": "Reference",
             "targetProfile": [
-              "http://hl7.org/fhir/StructureDefinition/Group"
+              "https://openrecruit.dev/fhir/StructureDefinition/eligibility-group"
             ]
           }
         ],
@@ -2068,8 +2068,18 @@
   "differential": {
     "element": [
       {
-        "id": "ResearchStudy",
-        "path": "ResearchStudy"
+        "id": "ResearchStudy.enrollment",
+        "path": "ResearchStudy.enrollment",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "https://openrecruit.dev/fhir/StructureDefinition/eligibility-group"
+            ]
+          }
+        ]
       }
     ]
   }

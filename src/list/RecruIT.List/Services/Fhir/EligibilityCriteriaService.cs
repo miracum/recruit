@@ -201,6 +201,98 @@ public sealed class EligibilityCriteriaService(
     }
 
     /// <summary>
+    /// Loads an existing study's current eligibility criteria (ResearchStudy.enrollment ->
+    /// Group.characteristic -> Library, pulled in via the researchstudy-enrollment and
+    /// group-characteristic SearchParameters, see fhir/ig/input/fsh/searchparameters.fsh) as drafts
+    /// that reuse their Library by reference - so re-submitting the study keeps them, since
+    /// BuildExistingStudyEntry replaces the study's enrollment with a Group of only the drafted
+    /// criteria. Characteristics from every enrolled Group are kept, in enrollment order.
+    /// </summary>
+    public async Task<IReadOnlyList<CriterionDraft>> GetStudyCriteriaAsync(
+        string studyId,
+        CancellationToken ct = default
+    )
+    {
+        List<Resource> resources;
+        try
+        {
+            resources = await FhirBundleHelpers.GetAllPagesAsync(
+                clientFactory.CreateClient(),
+                $"ResearchStudy?_id={Uri.EscapeDataString(studyId)}"
+                    + "&_include=ResearchStudy:enrollment"
+                    + "&_include:iterate=Group:characteristic-reference",
+                ct
+            );
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                ex,
+                "Failed to load eligibility criteria of ResearchStudy {StudyId}",
+                studyId
+            );
+            throw new FhirAccessException(localizer["App.Errors.StudyCriteriaLoadFailed"], ex);
+        }
+
+        var study = resources.OfType<ResearchStudy>().FirstOrDefault(s => s.Id == studyId);
+        var groupsById = resources
+            .OfType<Group>()
+            .Where(g => g.Id is not null)
+            .ToDictionary(g => g.Id!);
+        var librariesById = resources
+            .OfType<Library>()
+            .Where(l => l.Id is not null)
+            .ToDictionary(l => l.Id!);
+
+        var criteria = new List<CriterionDraft>();
+        foreach (var enrollment in study?.Enrollment ?? [])
+        {
+            if (
+                enrollment.GetReferencedId() is not { } groupId
+                || !groupsById.TryGetValue(groupId, out var group)
+            )
+            {
+                continue;
+            }
+
+            foreach (var characteristic in group.Characteristic)
+            {
+                if (
+                    characteristic.Value is not ResourceReference libraryReference
+                    || libraryReference.GetReferencedId() is not { } libraryId
+                )
+                {
+                    logger.LogWarning(
+                        "Skipping a characteristic of Group {GroupId} that doesn't reference a Library",
+                        groupId
+                    );
+                    continue;
+                }
+
+                // Code.Text first, since that's what gets written back to the characteristic on
+                // submit - the Library's own title only as a fallback for characteristics
+                // authored without one.
+                var library = librariesById.GetValueOrDefault(libraryId);
+                criteria.Add(
+                    new CriterionDraft
+                    {
+                        DisplayText =
+                            characteristic.Code?.Text
+                            ?? library?.Title
+                            ?? library?.Name
+                            ?? libraryId,
+                        Exclude = characteristic.Exclude ?? false,
+                        ExistingLibraryReference = $"Library/{libraryId}",
+                        Sql = library?.GetSqlText() ?? string.Empty,
+                    }
+                );
+            }
+        }
+
+        return criteria;
+    }
+
+    /// <summary>
     /// Assembles the draft into a preview-only FHIR transaction Bundle and serializes it to
     /// pretty-printed JSON. Bundle shape: one Library entry per newly-authored criterion, one Group
     /// entry referencing all of them (plus any reused-by-reference criteria) via
@@ -238,6 +330,14 @@ public sealed class EligibilityCriteriaService(
             throw new FhirAccessException(localizer["App.Errors.CriteriaSubmitFailed"], ex);
         }
     }
+
+    private static Attachment BuildSqlAttachment(string contentType, string sql) =>
+        new()
+        {
+            ContentType = contentType,
+            Extension = [new Extension(SqlTextExtensionUrl, new FhirString(sql))],
+            Data = Encoding.UTF8.GetBytes(sql),
+        };
 
     private Bundle BuildPreviewBundle(
         ResearchStudyDraft studyDraft,
@@ -281,17 +381,17 @@ public sealed class EligibilityCriteriaService(
                     // chained discovery search looks for - without it this Library would be
                     // invisible to both the catalog and the poll job once actually persisted.
                     Type = new CodeableConcept(SqlQueryLibraryTypeSystem, SqlQueryLibraryTypeCode),
+                    // Same shape as superset-library-sync's Libraries: a dialect-agnostic
+                    // application/sql content first (which GetSqlText reads back), plus the same SQL
+                    // as application/sql;dialect=<dialect>, which query-sql-on-fhir runs directly
+                    // when it matches its configured dialect.
                     Content =
                     [
-                        new Attachment
-                        {
-                            ContentType = "application/sql",
-                            Extension =
-                            [
-                                new Extension(SqlTextExtensionUrl, new FhirString(criterion.Sql)),
-                            ],
-                            Data = Encoding.UTF8.GetBytes(criterion.Sql),
-                        },
+                        BuildSqlAttachment("application/sql", criterion.Sql),
+                        BuildSqlAttachment(
+                            $"application/sql;dialect={criterion.Dialect.ContentTypeParameter()}",
+                            criterion.Sql
+                        ),
                     ],
                 };
                 library.Identifier.Add(

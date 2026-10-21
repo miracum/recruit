@@ -85,7 +85,7 @@ services:
     read_only: true
     privileged: false
     environment:
-      FHIR_URL: ${FHIR_URL:?}
+      FHIR_SERVER_BASE_URL: ${FHIR_SERVER_BASE_URL:?}
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
@@ -95,12 +95,12 @@ services:
         for file in $$(ls /sample-data/synthea/*.put.json | sort -r); do
           echo "Sending $$file"
           curl -sS -o /dev/null --fail-with-body --retry 5 --retry-delay 5 --retry-connrefused --retry-all-errors \
-            -X POST -H "Content-Type: application/fhir+json" --data @"$$file" "$$FHIR_URL"
+            -X POST -H "Content-Type: application/fhir+json" --data @"$$file" "$$FHIR_SERVER_BASE_URL"
         done
         echo "Sending sample ResearchStudy"
         curl -sS -o /dev/null --fail-with-body --retry 5 --retry-delay 5 --retry-connrefused --retry-all-errors \
           -X POST -H "Content-Type: application/fhir+json" \
-          --data @/sample-data/sample-study-transaction-upsert.json "$$FHIR_URL"
+          --data @/sample-data/sample-study-transaction-upsert.json "$$FHIR_SERVER_BASE_URL"
     volumes:
       # both are symlinks into src/hack/ in the repository; the release bundle contains the
       # dereferenced files. Mount each path itself so Docker resolves the symlinks on the host.

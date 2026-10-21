@@ -7,6 +7,7 @@ on:
       - docs/**
       - overrides/**
       - fhir/**
+      - charts/**
       - zensical.toml
       - pyproject.toml
       - uv.lock
@@ -69,6 +70,41 @@ jobs:
           path: fhir/ig/output
           retention-days: 1
 
+  # published with the site, so each release's docs link the scan of the chart it released
+  kubescape-reports:
+    name: Generate Kubescape Reports
+    runs-on: ubuntu-26.04
+    container: ghcr.io/chgl/kube-powertools:v2.6.13@sha256:5e6cab6409850248d60d3686f02bf903f5f25aa8aa72058031aa5427d7f1c5cf
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Add helm repos and update deps
+        run: |
+          helm repo add hapifhir https://hapifhir.github.io/hapi-fhir-jpaserver-starter
+          helm repo add maildev https://maildev.github.io/helm/
+          helm dependency update charts/recruit
+
+      # kubescape can render charts itself, but fails on the recruit.fhirserver.url helper's .Subcharts lookup, so the
+      # chart is rendered with helm instead. Using the default values, so the reports show what a plain install deploys.
+      # --use-artifacts-from uses the frameworks bundled with the image instead of downloading the latest ones.
+      - name: Generate kubescape reports
+        run: |
+          mkdir kubescape-reports
+          helm template recruit charts/recruit > recruit.yaml
+          kubescape scan framework nsa --use-artifacts-from "$KS_CACHE_DIR" --keep-local \
+            --format=html --output=kubescape-reports/nsa.html recruit.yaml
+          kubescape scan framework AllControls --use-artifacts-from "$KS_CACHE_DIR" --keep-local \
+            --format=html --output=kubescape-reports/allcontrols.html recruit.yaml
+
+      - name: Upload kubescape reports
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: kubescape-reports
+          path: kubescape-reports/
+          retention-days: 1
+
   build-site:
     name: Build Documentation
     runs-on: ubuntu-26.04
@@ -95,12 +131,14 @@ jobs:
           path: site/
           retention-days: 1
 
-  # the site and the IG build independently, this job puts the IG into the site's fhir/ directory
+  # the site, the IG, and the kubescape reports build independently, this job puts the IG into the site's fhir/
+  # directory and the reports into kubescape-reports/
   assemble:
     name: Assemble Pages
     needs:
       - build-ig
       - build-site
+      - kubescape-reports
     runs-on: ubuntu-26.04
     steps:
       - name: Download site
@@ -114,6 +152,42 @@ jobs:
         with:
           name: fhir-ig
           path: site/fhir
+
+      - name: Download kubescape reports
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: kubescape-reports
+          path: site/kubescape-reports
+
+      # GitHub Pages can't redirect server-side, so each canonical URL (e.g. fhir/StructureDefinition/<id>), each
+      # resource's <type>/<id> and each NamingSystem's identifier system URI (e.g. fhir/identifiers/<id>) gets an
+      # index.html that forwards to the resource's page. Those root pages in turn redirect to the language folder.
+      - name: Add canonical URL redirects
+        env:
+          # the canonical from fhir/ig/sushi-config.yaml
+          CANONICAL: https://openrecruit.dev/fhir
+        run: |
+          for resource in site/fhir/en/*.json; do
+            jq -r --arg c "$CANONICAL/" '
+              select(type == "object" and has("resourceType") and has("id"))
+              | "\(.resourceType)-\(.id).html" as $page
+              | [
+                  "\(.resourceType)/\(.id)",
+                  (.url // empty | select(startswith($c)) | ltrimstr($c)),
+                  (.uniqueId[]? | select(.type == "uri") | .value | select(startswith($c)) | ltrimstr($c))
+                ]
+              | unique[]
+              | "\(.)\t\($page)"
+            ' "$resource"
+          done | while IFS=$'\t' read -r path page; do
+            dir="site/fhir/$path"
+            # never overwrite anything the IG Publisher generated
+            [[ -e "$dir" ]] && continue
+            target="$(sed -E 's#[^/]+#..#g' <<<"$path")/$page"
+            mkdir -p "$dir"
+            printf '<!doctype html><meta charset="utf-8"><title>Redirecting</title><link rel="canonical" href="%s"><meta http-equiv="refresh" content="0; url=%s"><a href="%s">%s</a>\n' \
+              "$target" "$target" "$target" "$page" >"$dir/index.html"
+          done
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
