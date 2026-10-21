@@ -3,7 +3,7 @@
   "id": "RecruitResearchStudyExample",
   "meta": {
     "profile": [
-      "https://miracum.github.io/recruit/fhir/StructureDefinition/research-study"
+      "https://openrecruit.dev/fhir/StructureDefinition/research-study"
     ]
   },
   "status": "active"

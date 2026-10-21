@@ -8,8 +8,8 @@
     <PackageVersion Include="Hangfire.PostgreSql" Version="1.21.1" />
     <PackageVersion Include="Hl7.Fhir.R4" Version="6.6.0" />
     <PackageVersion Include="HtmlSanitizer" Version="9.2.1039" />
-    <PackageVersion Include="io.github.diz-uker.fhir-ig-constants" Version="0.2.18" />
-    <PackageVersion Include="io.github.diz-uker.ig-codegen-core" Version="0.2.18" />
+    <PackageVersion Include="DizUker.FhirIgConstants " Version="0.3.0-alpha.5" />
+    <PackageVersion Include="DizUker.IgCodegen.Core" Version="0.3.0-alpha.5" />
     <PackageVersion Include="MailKit" Version="4.18.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.12" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.12" />

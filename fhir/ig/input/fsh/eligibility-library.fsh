@@ -8,7 +8,7 @@ Description: "The identifier system for a criterion expressed in a Library resou
 * kind = #identifier
 * date = "2026-08-14"
 * uniqueId.type = #uri
-* uniqueId.value = "https://miracum.github.io/recruit/fhir/identifiers/eligibility-library-id"
+* uniqueId.value = "https://openrecruit.dev/fhir/identifiers/eligibility-library-id"
 * uniqueId.preferred = true
 
 Instance: SupersetSyncedEligibilityLibraryIdentifierSystem
@@ -21,7 +21,7 @@ Description: "The identifier system for a criterion expressed in a Library resou
 * kind = #identifier
 * date = "2026-08-14"
 * uniqueId.type = #uri
-* uniqueId.value = "https://miracum.github.io/recruit/fhir/identifiers/superset-synced-eligibility-library-id"
+* uniqueId.value = "https://openrecruit.dev/fhir/identifiers/superset-synced-eligibility-library-id"
 * uniqueId.preferred = true
 
 Instance: UICreatedEligibilityLibraryIdentifierSystem
@@ -34,5 +34,5 @@ Description: "The identifier system for a criterion expressed in a Library resou
 * kind = #identifier
 * date = "2026-08-14"
 * uniqueId.type = #uri
-* uniqueId.value = "https://miracum.github.io/recruit/fhir/identifiers/ui-created-eligibility-library-id"
+* uniqueId.value = "https://openrecruit.dev/fhir/identifiers/ui-created-eligibility-library-id"
 * uniqueId.preferred = true

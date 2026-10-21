@@ -9,7 +9,7 @@
         "id": "98d96608-475f-4386-b7b5-6ddc1eb57e71",
         "identifier": [
           {
-            "system": "https://miracum.github.io/recruit/fhir/identifiers/trino-sql-criteria-researchstudy-id",
+            "system": "https://openrecruit.dev/fhir/identifiers/trino-sql-criteria-researchstudy-id",
             "value": "bronchitis"
           }
         ],
@@ -43,7 +43,7 @@
         "id": "be24c1a6-b052-4360-871b-0a1b7b6bdfb4",
         "identifier": [
           {
-            "system": "https://miracum.github.io/recruit/fhir/identifiers/eligibility-group-id",
+            "system": "https://openrecruit.dev/fhir/identifiers/eligibility-group-id",
             "value": "bronchitis"
           }
         ],
@@ -53,7 +53,7 @@
         "code": {
           "coding": [
             {
-              "system": "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-criteria-types",
+              "system": "https://openrecruit.dev/fhir/CodeSystem/eligibility-criteria-types",
               "code": "trino-sql"
             }
           ],
@@ -101,7 +101,7 @@
         "id": "bb4e037a-0a43-4fee-befc-b9ed598c3e64",
         "identifier": [
           {
-            "system": "https://miracum.github.io/recruit/fhir/identifiers/trino-sql-criteria-library-id",
+            "system": "https://openrecruit.dev/fhir/identifiers/trino-sql-criteria-library-id",
             "value": "bronchitis"
           }
         ],
@@ -142,7 +142,7 @@
         "id": "12b09320-2426-43e9-930d-64f151d39e68",
         "identifier": [
           {
-            "system": "https://miracum.github.io/recruit/fhir/identifiers/trino-sql-criteria-library-id",
+            "system": "https://openrecruit.dev/fhir/identifiers/trino-sql-criteria-library-id",
             "value": "age-over-18"
           }
         ],
@@ -183,7 +183,7 @@
         "id": "9be54194-a4d9-4835-bf9e-21314e4f046c",
         "identifier": [
           {
-            "system": "https://miracum.github.io/recruit/fhir/identifiers/trino-sql-criteria-library-id",
+            "system": "https://openrecruit.dev/fhir/identifiers/trino-sql-criteria-library-id",
             "value": "sepsis"
           }
         ],

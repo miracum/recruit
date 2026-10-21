@@ -18,30 +18,30 @@ public final class Recruit {
     }
 
     /**
-     * The canonical URL {@code https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category}.
+     * The canonical URL {@code https://openrecruit.dev/fhir/CodeSystem/eligibility-assessment-category}.
      *
-     * @return {@code https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category}
+     * @return {@code https://openrecruit.dev/fhir/CodeSystem/eligibility-assessment-category}
      */
     public static String eligibilityAssessmentCategory() {
-      return "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category";
+      return "https://openrecruit.dev/fhir/CodeSystem/eligibility-assessment-category";
     }
 
     /**
-     * The canonical URL {@code https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type}.
+     * The canonical URL {@code https://openrecruit.dev/fhir/CodeSystem/eligibility-funnel-population-type}.
      *
-     * @return {@code https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type}
+     * @return {@code https://openrecruit.dev/fhir/CodeSystem/eligibility-funnel-population-type}
      */
     public static String eligibilityFunnelPopulationType() {
-      return "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type";
+      return "https://openrecruit.dev/fhir/CodeSystem/eligibility-funnel-population-type";
     }
 
     /**
-     * The canonical URL {@code https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type}.
+     * The canonical URL {@code https://openrecruit.dev/fhir/CodeSystem/screening-list-type}.
      *
-     * @return {@code https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type}
+     * @return {@code https://openrecruit.dev/fhir/CodeSystem/screening-list-type}
      */
     public static String screeningListType() {
-      return "https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type";
+      return "https://openrecruit.dev/fhir/CodeSystem/screening-list-type";
     }
 
     public enum EligibilityAssessmentCategory {
@@ -60,17 +60,17 @@ public final class Recruit {
       }
 
       /**
-       * @return the CodeSystem URL {@code https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category}
+       * @return the CodeSystem URL {@code https://openrecruit.dev/fhir/CodeSystem/eligibility-assessment-category}
        */
       public @NonNull String system(@NonNull EligibilityAssessmentCategory this) {
-        return "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category";
+        return "https://openrecruit.dev/fhir/CodeSystem/eligibility-assessment-category";
       }
 
       /**
-       * @return a new {@link Coding} for this concept, with system {@code https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category}
+       * @return a new {@link Coding} for this concept, with system {@code https://openrecruit.dev/fhir/CodeSystem/eligibility-assessment-category}
        */
       public @NonNull Coding coding(@NonNull EligibilityAssessmentCategory this) {
-        return new Coding("https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category", code, display);
+        return new Coding("https://openrecruit.dev/fhir/CodeSystem/eligibility-assessment-category", code, display);
       }
 
       /**
@@ -118,17 +118,17 @@ public final class Recruit {
       }
 
       /**
-       * @return the CodeSystem URL {@code https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type}
+       * @return the CodeSystem URL {@code https://openrecruit.dev/fhir/CodeSystem/eligibility-funnel-population-type}
        */
       public @NonNull String system(@NonNull EligibilityFunnelPopulationType this) {
-        return "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type";
+        return "https://openrecruit.dev/fhir/CodeSystem/eligibility-funnel-population-type";
       }
 
       /**
-       * @return a new {@link Coding} for this concept, with system {@code https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type}
+       * @return a new {@link Coding} for this concept, with system {@code https://openrecruit.dev/fhir/CodeSystem/eligibility-funnel-population-type}
        */
       public @NonNull Coding coding(@NonNull EligibilityFunnelPopulationType this) {
-        return new Coding("https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type", code, display);
+        return new Coding("https://openrecruit.dev/fhir/CodeSystem/eligibility-funnel-population-type", code, display);
       }
 
       /**
@@ -172,17 +172,17 @@ public final class Recruit {
       }
 
       /**
-       * @return the CodeSystem URL {@code https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type}
+       * @return the CodeSystem URL {@code https://openrecruit.dev/fhir/CodeSystem/screening-list-type}
        */
       public @NonNull String system(@NonNull ScreeningListType this) {
-        return "https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type";
+        return "https://openrecruit.dev/fhir/CodeSystem/screening-list-type";
       }
 
       /**
-       * @return a new {@link Coding} for this concept, with system {@code https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type}
+       * @return a new {@link Coding} for this concept, with system {@code https://openrecruit.dev/fhir/CodeSystem/screening-list-type}
        */
       public @NonNull Coding coding(@NonNull ScreeningListType this) {
-        return new Coding("https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type", code, display);
+        return new Coding("https://openrecruit.dev/fhir/CodeSystem/screening-list-type", code, display);
       }
 
       /**
@@ -214,30 +214,30 @@ public final class Recruit {
     }
 
     /**
-     * The canonical URL {@code https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment}.
+     * The canonical URL {@code https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment}.
      *
-     * @return {@code https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment}
+     * @return {@code https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment}
      */
     public static String eligibilityAssessment() {
-      return "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment";
+      return "https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment";
     }
 
     /**
-     * The canonical URL {@code https://miracum.github.io/recruit/fhir/StructureDefinition/research-study}.
+     * The canonical URL {@code https://openrecruit.dev/fhir/StructureDefinition/research-study}.
      *
-     * @return {@code https://miracum.github.io/recruit/fhir/StructureDefinition/research-study}
+     * @return {@code https://openrecruit.dev/fhir/StructureDefinition/research-study}
      */
     public static String researchStudy() {
-      return "https://miracum.github.io/recruit/fhir/StructureDefinition/research-study";
+      return "https://openrecruit.dev/fhir/StructureDefinition/research-study";
     }
 
     /**
-     * The canonical URL {@code https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list}.
+     * The canonical URL {@code https://openrecruit.dev/fhir/StructureDefinition/screening-list}.
      *
-     * @return {@code https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list}
+     * @return {@code https://openrecruit.dev/fhir/StructureDefinition/screening-list}
      */
     public static String screeningList() {
-      return "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list";
+      return "https://openrecruit.dev/fhir/StructureDefinition/screening-list";
     }
   }
 
@@ -246,35 +246,35 @@ public final class Recruit {
     }
 
     /**
-     * A new {@link Extension} for the canonical URL {@code https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study}.
+     * A new {@link Extension} for the canonical URL {@code https://openrecruit.dev/fhir/StructureDefinition/belongs-to-study}.
      *
      * @param value the extension value
-     * @return a new {@link Extension} with url {@code https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study} and the given value
+     * @return a new {@link Extension} with url {@code https://openrecruit.dev/fhir/StructureDefinition/belongs-to-study} and the given value
      */
     public static @NonNull Extension belongsToStudy(@NonNull Reference value) {
-      return new Extension("https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study", value);
+      return new Extension("https://openrecruit.dev/fhir/StructureDefinition/belongs-to-study", value);
     }
 
     /**
-     * A new {@link Extension} for the canonical URL {@code https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library}.
+     * A new {@link Extension} for the canonical URL {@code https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment-derived-from-library}.
      *
      * @param value the extension value
-     * @return a new {@link Extension} with url {@code https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library} and the given value
+     * @return a new {@link Extension} with url {@code https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment-derived-from-library} and the given value
      */
     public static @NonNull Extension eligibilityAssessmentDerivedFromLibrary(
         @NonNull Reference value) {
-      return new Extension("https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library", value);
+      return new Extension("https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment-derived-from-library", value);
     }
 
     /**
-     * Gets the value of extension {@code https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study} from {@code resource}, or {@code null} if absent.
+     * Gets the value of extension {@code https://openrecruit.dev/fhir/StructureDefinition/belongs-to-study} from {@code resource}, or {@code null} if absent.
      *
      * @param resource the resource or element to read from
      * @return the extension value, or {@code null}
      */
     public static @Nullable Reference getBelongsToStudy(@NonNull IBaseHasExtensions resource) {
       for (var e : resource.getExtension()) {
-        if ("https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study".equals(e.getUrl())) {
+        if ("https://openrecruit.dev/fhir/StructureDefinition/belongs-to-study".equals(e.getUrl())) {
           return (Reference) ((Extension) e).getValue();
         }
       }
@@ -282,7 +282,7 @@ public final class Recruit {
     }
 
     /**
-     * Gets the value of extension {@code https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library} from {@code resource}, or {@code null} if absent.
+     * Gets the value of extension {@code https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment-derived-from-library} from {@code resource}, or {@code null} if absent.
      *
      * @param resource the resource or element to read from
      * @return the extension value, or {@code null}
@@ -290,7 +290,7 @@ public final class Recruit {
     public static @Nullable Reference getEligibilityAssessmentDerivedFromLibrary(
         @NonNull IBaseHasExtensions resource) {
       for (var e : resource.getExtension()) {
-        if ("https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library".equals(e.getUrl())) {
+        if ("https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment-derived-from-library".equals(e.getUrl())) {
           return (Reference) ((Extension) e).getValue();
         }
       }
@@ -302,17 +302,17 @@ public final class Recruit {
       }
 
       /**
-       * @return the extension URL {@code https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study}
+       * @return the extension URL {@code https://openrecruit.dev/fhir/StructureDefinition/belongs-to-study}
        */
       public static @NonNull String belongsToStudy() {
-        return "https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study";
+        return "https://openrecruit.dev/fhir/StructureDefinition/belongs-to-study";
       }
 
       /**
-       * @return the extension URL {@code https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library}
+       * @return the extension URL {@code https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment-derived-from-library}
        */
       public static @NonNull String eligibilityAssessmentDerivedFromLibrary() {
-        return "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library";
+        return "https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment-derived-from-library";
       }
     }
   }
@@ -329,10 +329,10 @@ public final class Recruit {
       }
 
       /**
-       * @return {@code https://miracum.github.io/recruit/fhir/identifiers/eligibility-assessment-id}
+       * @return {@code https://openrecruit.dev/fhir/identifiers/eligibility-assessment-id}
        */
       public static @NonNull String uri() {
-        return "https://miracum.github.io/recruit/fhir/identifiers/eligibility-assessment-id";
+        return "https://openrecruit.dev/fhir/identifiers/eligibility-assessment-id";
       }
     }
 
@@ -344,10 +344,10 @@ public final class Recruit {
       }
 
       /**
-       * @return {@code https://miracum.github.io/recruit/fhir/identifiers/eligibility-funnel-measure-id}
+       * @return {@code https://openrecruit.dev/fhir/identifiers/eligibility-funnel-measure-id}
        */
       public static @NonNull String uri() {
-        return "https://miracum.github.io/recruit/fhir/identifiers/eligibility-funnel-measure-id";
+        return "https://openrecruit.dev/fhir/identifiers/eligibility-funnel-measure-id";
       }
     }
 
@@ -359,10 +359,10 @@ public final class Recruit {
       }
 
       /**
-       * @return {@code https://miracum.github.io/recruit/fhir/identifiers/eligibility-funnel-report-id}
+       * @return {@code https://openrecruit.dev/fhir/identifiers/eligibility-funnel-report-id}
        */
       public static @NonNull String uri() {
-        return "https://miracum.github.io/recruit/fhir/identifiers/eligibility-funnel-report-id";
+        return "https://openrecruit.dev/fhir/identifiers/eligibility-funnel-report-id";
       }
     }
 
@@ -374,10 +374,10 @@ public final class Recruit {
       }
 
       /**
-       * @return {@code https://miracum.github.io/recruit/fhir/identifiers/eligibility-group-id}
+       * @return {@code https://openrecruit.dev/fhir/identifiers/eligibility-group-id}
        */
       public static @NonNull String uri() {
-        return "https://miracum.github.io/recruit/fhir/identifiers/eligibility-group-id";
+        return "https://openrecruit.dev/fhir/identifiers/eligibility-group-id";
       }
     }
 
@@ -389,10 +389,10 @@ public final class Recruit {
       }
 
       /**
-       * @return {@code https://miracum.github.io/recruit/fhir/identifiers/eligibility-library-id}
+       * @return {@code https://openrecruit.dev/fhir/identifiers/eligibility-library-id}
        */
       public static @NonNull String uri() {
-        return "https://miracum.github.io/recruit/fhir/identifiers/eligibility-library-id";
+        return "https://openrecruit.dev/fhir/identifiers/eligibility-library-id";
       }
     }
 
@@ -404,10 +404,10 @@ public final class Recruit {
       }
 
       /**
-       * @return {@code https://miracum.github.io/recruit/fhir/identifiers/research-subject-id}
+       * @return {@code https://openrecruit.dev/fhir/identifiers/research-subject-id}
        */
       public static @NonNull String uri() {
-        return "https://miracum.github.io/recruit/fhir/identifiers/research-subject-id";
+        return "https://openrecruit.dev/fhir/identifiers/research-subject-id";
       }
     }
 
@@ -419,10 +419,10 @@ public final class Recruit {
       }
 
       /**
-       * @return {@code https://miracum.github.io/recruit/fhir/identifiers/screening-list-id}
+       * @return {@code https://openrecruit.dev/fhir/identifiers/screening-list-id}
        */
       public static @NonNull String uri() {
-        return "https://miracum.github.io/recruit/fhir/identifiers/screening-list-id";
+        return "https://openrecruit.dev/fhir/identifiers/screening-list-id";
       }
     }
 
@@ -434,10 +434,10 @@ public final class Recruit {
       }
 
       /**
-       * @return {@code https://miracum.github.io/recruit/fhir/identifiers/superset-synced-eligibility-library-id}
+       * @return {@code https://openrecruit.dev/fhir/identifiers/superset-synced-eligibility-library-id}
        */
       public static @NonNull String uri() {
-        return "https://miracum.github.io/recruit/fhir/identifiers/superset-synced-eligibility-library-id";
+        return "https://openrecruit.dev/fhir/identifiers/superset-synced-eligibility-library-id";
       }
     }
 
@@ -449,10 +449,10 @@ public final class Recruit {
       }
 
       /**
-       * @return {@code https://miracum.github.io/recruit/fhir/identifiers/ui-created-eligibility-library-id}
+       * @return {@code https://openrecruit.dev/fhir/identifiers/ui-created-eligibility-library-id}
        */
       public static @NonNull String uri() {
-        return "https://miracum.github.io/recruit/fhir/identifiers/ui-created-eligibility-library-id";
+        return "https://openrecruit.dev/fhir/identifiers/ui-created-eligibility-library-id";
       }
     }
 
@@ -464,10 +464,10 @@ public final class Recruit {
       }
 
       /**
-       * @return {@code https://miracum.github.io/recruit/fhir/identifiers/ui-created-research-study-id}
+       * @return {@code https://openrecruit.dev/fhir/identifiers/ui-created-research-study-id}
        */
       public static @NonNull String uri() {
-        return "https://miracum.github.io/recruit/fhir/identifiers/ui-created-research-study-id";
+        return "https://openrecruit.dev/fhir/identifiers/ui-created-research-study-id";
       }
     }
   }

@@ -8,5 +8,5 @@ Description: "The identifier system for the Group containing references to one o
 * kind = #identifier
 * date = "2026-08-14"
 * uniqueId.type = #uri
-* uniqueId.value = "https://miracum.github.io/recruit/fhir/identifiers/eligibility-group-id"
+* uniqueId.value = "https://openrecruit.dev/fhir/identifiers/eligibility-group-id"
 * uniqueId.preferred = true

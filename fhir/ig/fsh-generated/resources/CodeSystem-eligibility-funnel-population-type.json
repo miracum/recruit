@@ -6,7 +6,7 @@
   "id": "eligibility-funnel-population-type",
   "title": "recruIT eligibility funnel population type",
   "description": "The two population kinds making up a study's attrition-funnel MeasureReport.group.population: the total screened population, and the population remaining after cumulatively applying one more criterion.",
-  "url": "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type",
+  "url": "https://openrecruit.dev/fhir/CodeSystem/eligibility-funnel-population-type",
   "concept": [
     {
       "code": "total-population",

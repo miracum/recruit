@@ -9,27 +9,27 @@ public static class Recruit
     {
         public static class Urls
         {
-            /// <summary>The canonical URL <c>https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category</c>.</summary>
+            /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/CodeSystem/eligibility-assessment-category</c>.</summary>
             public static string EligibilityAssessmentCategory =>
-                "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category";
+                "https://openrecruit.dev/fhir/CodeSystem/eligibility-assessment-category";
 
-            /// <summary>The canonical URL <c>https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type</c>.</summary>
+            /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/CodeSystem/eligibility-funnel-population-type</c>.</summary>
             public static string EligibilityFunnelPopulationType =>
-                "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type";
+                "https://openrecruit.dev/fhir/CodeSystem/eligibility-funnel-population-type";
 
-            /// <summary>The canonical URL <c>https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type</c>.</summary>
+            /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/CodeSystem/screening-list-type</c>.</summary>
             public static string ScreeningListType =>
-                "https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type";
+                "https://openrecruit.dev/fhir/CodeSystem/screening-list-type";
         }
 
-        /// <summary>Concepts for <c>https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category</c>.</summary>
+        /// <summary>Concepts for <c>https://openrecruit.dev/fhir/CodeSystem/eligibility-assessment-category</c>.</summary>
         public enum EligibilityAssessmentCategory
         {
             /// <summary><c>eligibility-assessment</c> - Eligibility assessment</summary>
             EligibilityAssessment,
         }
 
-        /// <summary>Concepts for <c>https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type</c>.</summary>
+        /// <summary>Concepts for <c>https://openrecruit.dev/fhir/CodeSystem/eligibility-funnel-population-type</c>.</summary>
         public enum EligibilityFunnelPopulationType
         {
             /// <summary><c>total-population</c> - Total population</summary>
@@ -39,7 +39,7 @@ public static class Recruit
             AfterCriterion,
         }
 
-        /// <summary>Concepts for <c>https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type</c>.</summary>
+        /// <summary>Concepts for <c>https://openrecruit.dev/fhir/CodeSystem/screening-list-type</c>.</summary>
         public enum ScreeningListType
         {
             /// <summary><c>screening-recommendations</c> - Screening recommendations</summary>
@@ -49,47 +49,60 @@ public static class Recruit
 
     public static class Profiles
     {
-        /// <summary>The canonical URL <c>https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment</c>.</summary>
+        /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment</c>.</summary>
         public static string EligibilityAssessment =>
-            "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment";
+            "https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment";
 
-        /// <summary>The canonical URL <c>https://miracum.github.io/recruit/fhir/StructureDefinition/research-study</c>.</summary>
+        /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/StructureDefinition/research-study</c>.</summary>
         public static string ResearchStudy =>
-            "https://miracum.github.io/recruit/fhir/StructureDefinition/research-study";
+            "https://openrecruit.dev/fhir/StructureDefinition/research-study";
 
-        /// <summary>The canonical URL <c>https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list</c>.</summary>
+        /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/StructureDefinition/screening-list</c>.</summary>
         public static string ScreeningList =>
-            "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list";
+            "https://openrecruit.dev/fhir/StructureDefinition/screening-list";
+
+        /// <summary>The profiles' canonical URLs without their <c>|version</c> suffix.</summary>
+        public static class Versionless
+        {
+            /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment</c>.</summary>
+            public static string EligibilityAssessment =>
+                "https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment";
+
+            /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/StructureDefinition/research-study</c>.</summary>
+            public static string ResearchStudy =>
+                "https://openrecruit.dev/fhir/StructureDefinition/research-study";
+
+            /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/StructureDefinition/screening-list</c>.</summary>
+            public static string ScreeningList =>
+                "https://openrecruit.dev/fhir/StructureDefinition/screening-list";
+        }
     }
 
     public static class Extensions
     {
         public static class Urls
         {
-            /// <summary>The extension URL <c>https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study</c>.</summary>
+            /// <summary>The extension URL <c>https://openrecruit.dev/fhir/StructureDefinition/belongs-to-study</c>.</summary>
             public static string BelongsToStudy =>
-                "https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study";
+                "https://openrecruit.dev/fhir/StructureDefinition/belongs-to-study";
 
-            /// <summary>The extension URL <c>https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library</c>.</summary>
+            /// <summary>The extension URL <c>https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment-derived-from-library</c>.</summary>
             public static string EligibilityAssessmentDerivedFromLibrary =>
-                "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library";
+                "https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment-derived-from-library";
         }
 
-        /// <summary>A new <see cref="Extension"/> for <c>https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study</c>.</summary>
+        /// <summary>A new <see cref="Extension"/> for <c>https://openrecruit.dev/fhir/StructureDefinition/belongs-to-study</c>.</summary>
         /// <param name="value">The extension value.</param>
-        /// <returns>A new <see cref="Extension"/> with url <c>https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study</c> and the given value.</returns>
+        /// <returns>A new <see cref="Extension"/> with url <c>https://openrecruit.dev/fhir/StructureDefinition/belongs-to-study</c> and the given value.</returns>
         public static Extension BelongsToStudy(ResourceReference value) =>
-            new(
-                "https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study",
-                value
-            );
+            new("https://openrecruit.dev/fhir/StructureDefinition/belongs-to-study", value);
 
-        /// <summary>A new <see cref="Extension"/> for <c>https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library</c>.</summary>
+        /// <summary>A new <see cref="Extension"/> for <c>https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment-derived-from-library</c>.</summary>
         /// <param name="value">The extension value.</param>
-        /// <returns>A new <see cref="Extension"/> with url <c>https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library</c> and the given value.</returns>
+        /// <returns>A new <see cref="Extension"/> with url <c>https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment-derived-from-library</c> and the given value.</returns>
         public static Extension EligibilityAssessmentDerivedFromLibrary(ResourceReference value) =>
             new(
-                "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library",
+                "https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment-derived-from-library",
                 value
             );
     }
@@ -99,81 +112,81 @@ public static class Recruit
         /// <summary>The identifier system for a per-criterion eligibility Observation's business identifier. Derived from the ResearchSubject identifier and the Library identifier of the eligibility criterion.</summary>
         public static class EligibilityAssessmentId
         {
-            /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/eligibility-assessment-id</c></summary>
+            /// <summary><c>https://openrecruit.dev/fhir/identifiers/eligibility-assessment-id</c></summary>
             public static string Uri =>
-                "https://miracum.github.io/recruit/fhir/identifiers/eligibility-assessment-id";
+                "https://openrecruit.dev/fhir/identifiers/eligibility-assessment-id";
         }
 
         /// <summary>The identifier system for a study's attrition-funnel Measure's business identifier - used as the conditional-update key, keyed on the same value as the study's own identifier.</summary>
         public static class EligibilityFunnelMeasureId
         {
-            /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/eligibility-funnel-measure-id</c></summary>
+            /// <summary><c>https://openrecruit.dev/fhir/identifiers/eligibility-funnel-measure-id</c></summary>
             public static string Uri =>
-                "https://miracum.github.io/recruit/fhir/identifiers/eligibility-funnel-measure-id";
+                "https://openrecruit.dev/fhir/identifiers/eligibility-funnel-measure-id";
         }
 
         /// <summary>The identifier system for a study's attrition-funnel MeasureReport's business identifier - used as the conditional-update key, keyed on the same value as the study's own identifier.</summary>
         public static class EligibilityFunnelReportId
         {
-            /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/eligibility-funnel-report-id</c></summary>
+            /// <summary><c>https://openrecruit.dev/fhir/identifiers/eligibility-funnel-report-id</c></summary>
             public static string Uri =>
-                "https://miracum.github.io/recruit/fhir/identifiers/eligibility-funnel-report-id";
+                "https://openrecruit.dev/fhir/identifiers/eligibility-funnel-report-id";
         }
 
         /// <summary>The identifier system for the Group containing references to one or more eligibility criteria Library resources</summary>
         public static class EligibilityGroupId
         {
-            /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/eligibility-group-id</c></summary>
+            /// <summary><c>https://openrecruit.dev/fhir/identifiers/eligibility-group-id</c></summary>
             public static string Uri =>
-                "https://miracum.github.io/recruit/fhir/identifiers/eligibility-group-id";
+                "https://openrecruit.dev/fhir/identifiers/eligibility-group-id";
         }
 
         /// <summary>The identifier system for a criterion expressed in a Library resource</summary>
         public static class EligibilityLibraryId
         {
-            /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/eligibility-library-id</c></summary>
+            /// <summary><c>https://openrecruit.dev/fhir/identifiers/eligibility-library-id</c></summary>
             public static string Uri =>
-                "https://miracum.github.io/recruit/fhir/identifiers/eligibility-library-id";
+                "https://openrecruit.dev/fhir/identifiers/eligibility-library-id";
         }
 
         /// <summary>The identifier system for a recruIT-created ResearchSubject's business identifier</summary>
         public static class ResearchSubjectId
         {
-            /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/research-subject-id</c></summary>
+            /// <summary><c>https://openrecruit.dev/fhir/identifiers/research-subject-id</c></summary>
             public static string Uri =>
-                "https://miracum.github.io/recruit/fhir/identifiers/research-subject-id";
+                "https://openrecruit.dev/fhir/identifiers/research-subject-id";
         }
 
         /// <summary>The identifier system for a screening List's business identifier, which is the study's own identifier - used as the conditional-update key for a study's screening List.</summary>
         public static class ScreeningListId
         {
-            /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/screening-list-id</c></summary>
+            /// <summary><c>https://openrecruit.dev/fhir/identifiers/screening-list-id</c></summary>
             public static string Uri =>
-                "https://miracum.github.io/recruit/fhir/identifiers/screening-list-id";
+                "https://openrecruit.dev/fhir/identifiers/screening-list-id";
         }
 
         /// <summary>The identifier system for a criterion expressed in a Library resource when synced from a Superset instance.</summary>
         public static class SupersetSyncedEligibilityLibraryId
         {
-            /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/superset-synced-eligibility-library-id</c></summary>
+            /// <summary><c>https://openrecruit.dev/fhir/identifiers/superset-synced-eligibility-library-id</c></summary>
             public static string Uri =>
-                "https://miracum.github.io/recruit/fhir/identifiers/superset-synced-eligibility-library-id";
+                "https://openrecruit.dev/fhir/identifiers/superset-synced-eligibility-library-id";
         }
 
         /// <summary>The identifier system for a criterion expressed in a Library resource created via the UI.</summary>
         public static class UiCreatedEligibilityLibraryId
         {
-            /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/ui-created-eligibility-library-id</c></summary>
+            /// <summary><c>https://openrecruit.dev/fhir/identifiers/ui-created-eligibility-library-id</c></summary>
             public static string Uri =>
-                "https://miracum.github.io/recruit/fhir/identifiers/ui-created-eligibility-library-id";
+                "https://openrecruit.dev/fhir/identifiers/ui-created-eligibility-library-id";
         }
 
         /// <summary>The identifier system for a ResearchStudy resource created via the UI.</summary>
         public static class UiCreatedResearchStudyId
         {
-            /// <summary><c>https://miracum.github.io/recruit/fhir/identifiers/ui-created-research-study-id</c></summary>
+            /// <summary><c>https://openrecruit.dev/fhir/identifiers/ui-created-research-study-id</c></summary>
             public static string Uri =>
-                "https://miracum.github.io/recruit/fhir/identifiers/ui-created-research-study-id";
+                "https://openrecruit.dev/fhir/identifiers/ui-created-research-study-id";
         }
     }
 }
@@ -181,9 +194,9 @@ public static class Recruit
 /// <summary>Extension methods for <see cref="Recruit.CodeSystems.EligibilityAssessmentCategory"/>.</summary>
 public static class EligibilityAssessmentCategoryExtensions
 {
-    /// <returns>The CodeSystem URL <c>https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category</c>.</returns>
+    /// <returns>The CodeSystem URL <c>https://openrecruit.dev/fhir/CodeSystem/eligibility-assessment-category</c>.</returns>
     public static string Url(this Recruit.CodeSystems.EligibilityAssessmentCategory _) =>
-        "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-assessment-category";
+        "https://openrecruit.dev/fhir/CodeSystem/eligibility-assessment-category";
 
     /// <returns>The FHIR code for this concept.</returns>
     public static string Code(this Recruit.CodeSystems.EligibilityAssessmentCategory value) =>
@@ -229,9 +242,9 @@ public static class EligibilityAssessmentCategoryExtensions
 /// <summary>Extension methods for <see cref="Recruit.CodeSystems.EligibilityFunnelPopulationType"/>.</summary>
 public static class EligibilityFunnelPopulationTypeExtensions
 {
-    /// <returns>The CodeSystem URL <c>https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type</c>.</returns>
+    /// <returns>The CodeSystem URL <c>https://openrecruit.dev/fhir/CodeSystem/eligibility-funnel-population-type</c>.</returns>
     public static string Url(this Recruit.CodeSystems.EligibilityFunnelPopulationType _) =>
-        "https://miracum.github.io/recruit/fhir/CodeSystem/eligibility-funnel-population-type";
+        "https://openrecruit.dev/fhir/CodeSystem/eligibility-funnel-population-type";
 
     /// <returns>The FHIR code for this concept.</returns>
     public static string Code(this Recruit.CodeSystems.EligibilityFunnelPopulationType value) =>
@@ -281,9 +294,9 @@ public static class EligibilityFunnelPopulationTypeExtensions
 /// <summary>Extension methods for <see cref="Recruit.CodeSystems.ScreeningListType"/>.</summary>
 public static class ScreeningListTypeExtensions
 {
-    /// <returns>The CodeSystem URL <c>https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type</c>.</returns>
+    /// <returns>The CodeSystem URL <c>https://openrecruit.dev/fhir/CodeSystem/screening-list-type</c>.</returns>
     public static string Url(this Recruit.CodeSystems.ScreeningListType _) =>
-        "https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type";
+        "https://openrecruit.dev/fhir/CodeSystem/screening-list-type";
 
     /// <returns>The FHIR code for this concept.</returns>
     public static string Code(this Recruit.CodeSystems.ScreeningListType value) =>
@@ -329,17 +342,17 @@ public static class ScreeningListTypeExtensions
 /// <summary>Extension methods for reading <see cref="Recruit.Extensions"/> from FHIR resources.</summary>
 public static class RecruitFhirExtensions
 {
-    /// <summary>Gets the value of extension <c>https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study</c> from <paramref name="resource"/>, or <c>null</c> if absent.</summary>
+    /// <summary>Gets the value of extension <c>https://openrecruit.dev/fhir/StructureDefinition/belongs-to-study</c> from <paramref name="resource"/>, or <c>null</c> if absent.</summary>
     public static ResourceReference? GetBelongsToStudy(this IExtendable resource) =>
         resource.GetExtensionValue<ResourceReference>(
-            "https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study"
+            "https://openrecruit.dev/fhir/StructureDefinition/belongs-to-study"
         );
 
-    /// <summary>Gets the value of extension <c>https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library</c> from <paramref name="resource"/>, or <c>null</c> if absent.</summary>
+    /// <summary>Gets the value of extension <c>https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment-derived-from-library</c> from <paramref name="resource"/>, or <c>null</c> if absent.</summary>
     public static ResourceReference? GetEligibilityAssessmentDerivedFromLibrary(
         this IExtendable resource
     ) =>
         resource.GetExtensionValue<ResourceReference>(
-            "https://miracum.github.io/recruit/fhir/StructureDefinition/eligibility-assessment-derived-from-library"
+            "https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment-derived-from-library"
         );
 }

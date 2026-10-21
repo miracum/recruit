@@ -20,7 +20,18 @@
         "src/query-sql-on-fhir/src/main/resources/application.yml",
         "docker-compose/docker-compose.yaml",
         "docs/configuration/security.md",
-        "docs/_snippets/k8s/query-argo-workflow.yaml"
+        "docs/_snippets/k8s/query-argo-workflow.yaml",
+        "fhir/ig/sushi-config.yaml",
+        {
+          "type": "json",
+          "path": "fhir/package.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": "fhir/ig/fsh-generated/resources/ImplementationGuide-recruIT.json",
+          "jsonpath": "$.version"
+        }
       ],
       "changelog-sections": [
         {

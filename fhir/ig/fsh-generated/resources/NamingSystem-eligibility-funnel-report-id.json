@@ -9,7 +9,7 @@
   "uniqueId": [
     {
       "type": "uri",
-      "value": "https://miracum.github.io/recruit/fhir/identifiers/eligibility-funnel-report-id",
+      "value": "https://openrecruit.dev/fhir/identifiers/eligibility-funnel-report-id",
       "preferred": true
     }
   ]

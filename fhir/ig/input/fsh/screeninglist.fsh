@@ -31,7 +31,7 @@ Description: "The identifier system for a screening List's business identifier, 
 * kind = #identifier
 * date = "2026-08-14"
 * uniqueId.type = #uri
-* uniqueId.value = "https://miracum.github.io/recruit/fhir/identifiers/screening-list-id"
+* uniqueId.value = "https://openrecruit.dev/fhir/identifiers/screening-list-id"
 * uniqueId.preferred = true
 
 Instance: ScreeningListExample

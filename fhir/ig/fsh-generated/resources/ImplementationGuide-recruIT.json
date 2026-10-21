@@ -1,25 +1,25 @@
 {
   "resourceType": "ImplementationGuide",
-  "id": "recruit",
-  "url": "https://miracum.github.io/recruit/fhir/ImplementationGuide/recruit",
+  "id": "recruIT",
+  "url": "https://openrecruit.dev/fhir/ImplementationGuide/recruIT",
   "version": "0.1.0",
   "name": "RecruITIG",
   "title": "recruIT FHIR IG",
   "status": "active",
-  "publisher": "MIRACUM",
+  "publisher": "The recruIT Developers",
   "contact": [
     {
-      "name": "MIRACUM",
+      "name": "The recruIT Developers",
       "telecom": [
         {
           "system": "url",
-          "value": "https://miracum.org"
+          "value": "https://openrecruit.dev"
         }
       ]
     }
   ],
   "description": "FHIR Implementation Guide for the recruIT clinical trial patient recruitment support system.",
-  "packageId": "recruit",
+  "packageId": "recruIT",
   "license": "AGPL-3.0-or-later",
   "fhirVersion": [
     "4.0.1"
@@ -151,7 +151,7 @@
         },
         "name": "RecruitResearchStudyExample",
         "description": "An example of a recruIT ResearchStudy.",
-        "exampleCanonical": "https://miracum.github.io/recruit/fhir/StructureDefinition/research-study"
+        "exampleCanonical": "https://openrecruit.dev/fhir/StructureDefinition/research-study"
       },
       {
         "reference": {
@@ -214,7 +214,7 @@
         },
         "name": "Test",
         "description": "An example of a screening list.",
-        "exampleCanonical": "https://miracum.github.io/recruit/fhir/StructureDefinition/screening-list"
+        "exampleCanonical": "https://openrecruit.dev/fhir/StructureDefinition/screening-list"
       },
       {
         "reference": {

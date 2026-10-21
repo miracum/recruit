@@ -1,7 +1,7 @@
 {
   "resourceType": "SearchParameter",
   "id": "belongs-to-study",
-  "url": "https://miracum.github.io/recruit/fhir/SearchParameter/belongs-to-study",
+  "url": "https://openrecruit.dev/fhir/SearchParameter/belongs-to-study",
   "name": "BelongsToStudy",
   "description": "The ResearchStudy a List or MeasureReport pertains to",
   "base": [
@@ -11,7 +11,7 @@
   "status": "active",
   "code": "belongs-to-study",
   "type": "reference",
-  "expression": "extension('https://miracum.github.io/recruit/fhir/StructureDefinition/belongs-to-study').value.ofType(Reference)",
+  "expression": "List.extension('https://openrecruit.dev/fhir/StructureDefinition/belongs-to-study').value.ofType(Reference) | MeasureReport.extension('https://openrecruit.dev/fhir/StructureDefinition/belongs-to-study').value.ofType(Reference)",
   "target": [
     "ResearchStudy"
   ]

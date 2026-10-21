@@ -5,7 +5,7 @@
   "name": "CodeSystemScreeningList",
   "id": "screening-list-type",
   "title": "recruIT screening list type",
-  "url": "https://miracum.github.io/recruit/fhir/CodeSystem/screening-list-type",
+  "url": "https://openrecruit.dev/fhir/CodeSystem/screening-list-type",
   "concept": [
     {
       "code": "screening-recommendations",

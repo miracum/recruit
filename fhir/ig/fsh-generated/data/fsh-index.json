@@ -4,8 +4,8 @@
     "fshName": "RecruitSearchParametersTransaction",
     "fshType": "Instance",
     "fshFile": "searchparameters.fsh",
-    "startLine": 53,
-    "endLine": 69
+    "startLine": 69,
+    "endLine": 77
   },
   {
     "outputFile": "CodeSystem-eligibility-assessment-category.json",
@@ -132,32 +132,32 @@
     "fshName": "SearchParameterBelongsToStudy",
     "fshType": "Instance",
     "fshFile": "searchparameters.fsh",
-    "startLine": 26,
-    "endLine": 38
+    "startLine": 42,
+    "endLine": 54
   },
   {
     "outputFile": "SearchParameter-group-characteristic.json",
     "fshName": "GroupCharacteristic",
     "fshType": "Instance",
     "fshFile": "searchparameters.fsh",
-    "startLine": 14,
-    "endLine": 24
+    "startLine": 28,
+    "endLine": 40
   },
   {
     "outputFile": "SearchParameter-observation-derived-from-library.json",
     "fshName": "ObservationDerivedFromLibrary",
     "fshType": "Instance",
     "fshFile": "searchparameters.fsh",
-    "startLine": 40,
-    "endLine": 51
+    "startLine": 56,
+    "endLine": 67
   },
   {
     "outputFile": "SearchParameter-researchstudy-enrollment.json",
     "fshName": "ResearchStudyEnrollment",
     "fshType": "Instance",
     "fshFile": "searchparameters.fsh",
-    "startLine": 1,
-    "endLine": 12
+    "startLine": 15,
+    "endLine": 26
   },
   {
     "outputFile": "StructureDefinition-belongs-to-study.json",

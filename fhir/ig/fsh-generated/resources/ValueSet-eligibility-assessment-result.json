@@ -5,7 +5,7 @@
   "id": "eligibility-assessment-result",
   "title": "recruIT eligibility assessment result",
   "description": "The SNOMED CT qualifier values a per-criterion eligibility assessment's value may be set to, indicating whether the criterion is met, not met, unknown, or indeterminate.",
-  "url": "https://miracum.github.io/recruit/fhir/ValueSet/eligibility-assessment-result",
+  "url": "https://openrecruit.dev/fhir/ValueSet/eligibility-assessment-result",
   "compose": {
     "include": [
       {

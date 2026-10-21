@@ -21,5 +21,5 @@ Description: "The identifier system for a ResearchStudy resource created via the
 * kind = #identifier
 * date = "2026-08-14"
 * uniqueId.type = #uri
-* uniqueId.value = "https://miracum.github.io/recruit/fhir/identifiers/ui-created-research-study-id"
+* uniqueId.value = "https://openrecruit.dev/fhir/identifiers/ui-created-research-study-id"
 * uniqueId.preferred = true
