@@ -136,15 +136,11 @@
 }
 
 /* Global Element Styles - plain-CSS equivalent of the source theme's
-   `@layer base { * { @apply border-border outline-ring/50; } body { @apply bg-background
-   text-foreground; } }`. This app has no Tailwind build step (only BlazorBlueprint.Components'
-   precompiled CSS), so @apply/@layer never run - these variable-based rules are what actually
-   ships the colors. */
-* {
-  border-color: var(--border);
-  outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
-}
-
+   `@layer base { body { @apply bg-background text-foreground; } }`. This app has no Tailwind
+   build step (only BlazorBlueprint.Components' precompiled CSS), so @apply never runs - these
+   variable-based rules are what actually ships the colors. The theme's `* { border-border
+   outline-ring/50 }` lives in app.css instead: it has to sit in the base layer after the
+   library's preflight, and unlayered here it outranked every `bb:border-*` utility. */
 body {
   background-color: var(--background);
   color: var(--foreground);

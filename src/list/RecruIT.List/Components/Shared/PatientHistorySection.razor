@@ -17,18 +17,21 @@
     else
     {
         <div class="bb:pe-2">
-            <BbTimeline>
+            @* Alternate puts the time in the date column opposite each entry's content. *@
+            <BbTimeline Align="TimelineAlign.Alternate">
                 @foreach (var entry in _entries)
                 {
                     <BbTimelineItem IconColor="@(entry.Kind == PatientHistoryEntryKind.Note ? TimelineColor.Secondary : TimelineColor.Primary)">
                         <IconContent>
                             <LucideIcon Name="@(entry.Kind == PatientHistoryEntryKind.Note ? "message-square" : "activity")" Size="12" />
                         </IconContent>
+                        <TimeContent>
+                            <BbTimelineTime>@entry.Time.LocalDateTime.ToString("g")</BbTimelineTime>
+                        </TimeContent>
                         <ChildContent>
                             <BbTimelineContent>
                                 <BbTimelineHeader>
                                     <BbTimelineTitle>@entry.Title</BbTimelineTitle>
-                                    <BbTimelineTime>@entry.Time.LocalDateTime.ToString("g")</BbTimelineTime>
                                 </BbTimelineHeader>
                                 @if (!string.IsNullOrEmpty(entry.Description))
                                 {

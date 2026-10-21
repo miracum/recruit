@@ -2,6 +2,16 @@ html, body {
     height: 100%;
 }
 
+/* The theme's `* { @apply border-border outline-ring/50; }`. In the base layer, after
+   blazorblueprint.css's preflight (which resets `border` and already sets `border-color:
+   var(--border)`), so `bb:` utilities such as a checked radio's `bb:border-primary` still win.
+   Unlayered, this outranked every utility regardless of specificity. */
+@layer base {
+    * {
+        outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
+    }
+}
+
 .content {
     padding-top: 1.1rem;
 }
