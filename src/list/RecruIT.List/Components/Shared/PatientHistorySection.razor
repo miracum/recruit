@@ -18,15 +18,25 @@
     {
         <div class="bb:pe-2">
             @* Alternate puts the time in the date column opposite each entry's content. *@
-            <BbTimeline Align="TimelineAlign.Alternate">
-                @foreach (var entry in _entries)
+            <BbTimeline Align="TimelineAlign.Alternate" Size="TimelineSize.Small">
+                @for (var i = 0; i < _entries.Count; i++)
                 {
-                    <BbTimelineItem IconColor="@(entry.Kind == PatientHistoryEntryKind.Note ? TimelineColor.Secondary : TimelineColor.Primary)">
+                    var entry = _entries[i];
+                    var color = entry.Kind == PatientHistoryEntryKind.Note ? TimelineColor.Secondary : TimelineColor.Primary;
+                    @* Alternate keeps even items' content on the right, so their date column is on
+                       the left. TimeContent gets no alignment from the library, so push each date
+                       toward the line itself, or the left-hand ones sit at the far edge. *@
+                    var timeClass = i % 2 == 0 ? "bb:text-end" : "bb:text-start";
+                    <BbTimelineItem IconColor="color" IconSize="TimelineSize.Small" ShowConnector="@(i < _entries.Count - 1)">
                         <IconContent>
-                            <LucideIcon Name="@(entry.Kind == PatientHistoryEntryKind.Note ? "message-square" : "activity")" Size="12" />
+                            @* IconContent replaces the whole icon, circle included - BbTimelineIcon
+                               puts the circle (and IconColor's color) back. *@
+                            <BbTimelineIcon Color="color" Size="TimelineSize.Small">
+                                <LucideIcon Name="@(entry.Kind == PatientHistoryEntryKind.Note ? "message-square" : "activity")" Size="14" />
+                            </BbTimelineIcon>
                         </IconContent>
                         <TimeContent>
-                            <BbTimelineTime>@entry.Time.LocalDateTime.ToString("g")</BbTimelineTime>
+                            <BbTimelineTime Class="@timeClass">@entry.Time.LocalDateTime.ToString("g")</BbTimelineTime>
                         </TimeContent>
                         <ChildContent>
                             <BbTimelineContent>
