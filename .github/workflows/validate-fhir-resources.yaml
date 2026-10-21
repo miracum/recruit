@@ -49,7 +49,15 @@ jobs:
         run: |
           find ../src/ -name "*.fhir.json" -exec fhir validate --verbose --fail "{}" \;
 
-      - name: Check fsh-generated search-parameters Bundle is up-to-date with the FSH source
+      - name: Check sample study Library SQL is consistent
+        run: |
+          # Library.content.data is base64-encoded, so the FSH source additionally carries each
+          # criterion's SQL as plain text in the sql-text extension - both must stay identical.
+          jq -e '[.. | objects | select(.resourceType? == "Library") | .content[]? | select(.extension) |
+            (.data | @base64d) == (.extension[] | select(.url == "https://sql-on-fhir.org/ig/StructureDefinition/sql-text") | .valueString)] | all' \
+            fhir/ig/fsh-generated/resources/Bundle-recruit-sample-study-transaction.json
+
+      - name: Check fsh-generated resources are up-to-date with the FSH source
         continue-on-error: true
         run: |
           # clean rebuild: a stale committed file left over from a since-renamed FSH
@@ -58,8 +66,8 @@ jobs:
           rm -rf fhir/ig/fsh-generated
           sushi --snapshot fhir/ig
           if git diff --exit-code -- fhir/ig/fsh-generated; then
-            echo -e "\033[0;32mfsh-generated search-parameters Bundle is up to date\033[0m ✔"
+            echo -e "\033[0;32mfsh-generated resources are up to date\033[0m ✔"
           else
-            echo -e "\033[0;31mfsh-generated search-parameters Bundle is outdated! Please run \`npx fsh-sushi --snapshot fhir/ig\` locally and push the changes.\033[0m ❌"
+            echo -e "\033[0;31mfsh-generated resources are outdated! Please run \`npx fsh-sushi --snapshot fhir/ig\` locally and push the changes.\033[0m ❌"
             exit 1
           fi

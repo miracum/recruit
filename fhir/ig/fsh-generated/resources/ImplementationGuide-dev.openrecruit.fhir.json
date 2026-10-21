@@ -155,6 +155,14 @@
       },
       {
         "reference": {
+          "reference": "Bundle/recruit-sample-study-transaction"
+        },
+        "name": "RecruitSampleStudyTransaction",
+        "description": "A demo ResearchStudy with three Trino SQL-encoded eligibility criteria: a bronchitis diagnosis, an age over 18, and no prior sepsis.",
+        "exampleBoolean": true
+      },
+      {
+        "reference": {
           "reference": "Bundle/recruit-search-parameters-transaction"
         },
         "name": "RecruitSearchParametersTransaction",

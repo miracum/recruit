@@ -14,6 +14,7 @@
 [ScreeningListType]: CodeSystem-screening-list-type.html
 [RecruitResearchStudy]: StructureDefinition-recruit-research-study.html
 [recruit-research-study-example]: ResearchStudy-recruit-research-study-example.html
+[recruit-sample-study-transaction]: Bundle-recruit-sample-study-transaction.html
 [recruit-search-parameters-transaction]: Bundle-recruit-search-parameters-transaction.html
 [researchstudy-enrollment]: SearchParameter-researchstudy-enrollment.html
 [research-subject-id]: NamingSystem-research-subject-id.html

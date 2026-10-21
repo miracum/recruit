@@ -1,4 +1,5 @@
 Output File                                               Name                                              Type        FSH File                     Lines
+Bundle-recruit-sample-study-transaction.json              RecruitSampleStudyTransaction                     Instance    sample-study.fsh             123 - 133
 Bundle-recruit-search-parameters-transaction.json         RecruitSearchParametersTransaction                Instance    searchparameters.fsh         69 - 77
 CodeSystem-eligibility-assessment-category.json           EligibilityAssessmentCategory                     CodeSystem  eligibility-observation.fsh  16 - 20
 CodeSystem-eligibility-funnel-population-type.json        EligibilityFunnelPopulationType                   CodeSystem  eligibility-funnel.fsh       1 - 6
