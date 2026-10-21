@@ -62,6 +62,20 @@
                       @bind="Criterion.Description" @bind:event="oninput" @bind:after="OnChanged.InvokeAsync"></textarea>
         </div>
         <div class="bb:mt-3">
+            <label class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide bb:text-muted-foreground">@Localizer["App.CriteriaManager.CriterionSqlDialectLabel"]</label>
+            <BbSelect TValue="SqlDialect" @bind-Value="Criterion.Dialect" @bind-Value:after="OnChanged.InvokeAsync" Class="bb:mt-1 bb:w-48">
+                <BbSelectTrigger>
+                    <BbSelectValue />
+                </BbSelectTrigger>
+                <BbSelectContent>
+                    @foreach (var dialect in Enum.GetValues<SqlDialect>())
+                    {
+                        <BbSelectItem TValue="SqlDialect" Value="@dialect" Text="@dialect.DisplayName()" />
+                    }
+                </BbSelectContent>
+            </BbSelect>
+        </div>
+        <div class="bb:mt-3">
             <label class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide bb:text-muted-foreground">@Localizer["App.CriteriaManager.CriterionSqlLabel"]</label>
             <textarea class="bb:mt-1 bb:block bb:w-full bb:rounded-md bb:border bb:bg-background bb:p-2 bb:font-mono bb:text-xs" rows="4"
                       @bind="Criterion.Sql" @bind:event="oninput" @bind:after="OnChanged.InvokeAsync"></textarea>

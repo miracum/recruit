@@ -239,6 +239,14 @@ public sealed class EligibilityCriteriaService(
         }
     }
 
+    private static Attachment BuildSqlAttachment(string contentType, string sql) =>
+        new()
+        {
+            ContentType = contentType,
+            Extension = [new Extension(SqlTextExtensionUrl, new FhirString(sql))],
+            Data = Encoding.UTF8.GetBytes(sql),
+        };
+
     private Bundle BuildPreviewBundle(
         ResearchStudyDraft studyDraft,
         IReadOnlyList<CriterionDraft> criteria
@@ -281,17 +289,17 @@ public sealed class EligibilityCriteriaService(
                     // chained discovery search looks for - without it this Library would be
                     // invisible to both the catalog and the poll job once actually persisted.
                     Type = new CodeableConcept(SqlQueryLibraryTypeSystem, SqlQueryLibraryTypeCode),
+                    // Same shape as superset-library-sync's Libraries: a dialect-agnostic
+                    // application/sql content first (which GetSqlText reads back), plus the same SQL
+                    // as application/sql;dialect=<dialect>, which query-sql-on-fhir runs directly
+                    // when it matches its configured dialect.
                     Content =
                     [
-                        new Attachment
-                        {
-                            ContentType = "application/sql",
-                            Extension =
-                            [
-                                new Extension(SqlTextExtensionUrl, new FhirString(criterion.Sql)),
-                            ],
-                            Data = Encoding.UTF8.GetBytes(criterion.Sql),
-                        },
+                        BuildSqlAttachment("application/sql", criterion.Sql),
+                        BuildSqlAttachment(
+                            $"application/sql;dialect={criterion.Dialect.ContentTypeParameter()}",
+                            criterion.Sql
+                        ),
                     ],
                 };
                 library.Identifier.Add(

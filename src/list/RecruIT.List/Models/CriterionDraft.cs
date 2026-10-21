@@ -20,6 +20,9 @@ public sealed class CriterionDraft
 
     public string Sql { get; set; } = string.Empty;
 
+    /// <summary>The dialect Sql is written in - unused when ExistingLibraryReference is set.</summary>
+    public SqlDialect Dialect { get; set; } = SqlDialect.Trino;
+
     /// <summary>Library.description for a newly-authored Library - unused when ExistingLibraryReference is set.</summary>
     public string Description { get; set; } = string.Empty;
 }

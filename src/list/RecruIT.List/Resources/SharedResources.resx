@@ -685,6 +685,9 @@
   <data name="App.CriteriaManager.CriterionSqlLabel" xml:space="preserve">
     <value>SQL</value>
   </data>
+  <data name="App.CriteriaManager.CriterionSqlDialectLabel" xml:space="preserve">
+    <value>SQL dialect</value>
+  </data>
   <data name="App.CriteriaManager.PreviewSectionTitle" xml:space="preserve">
     <value>Preview</value>
   </data>
