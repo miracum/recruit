@@ -49,7 +49,7 @@ either Compose or Helm.
     kind create cluster
     ```
 
-    Install the chart into a new `recruit` namespace, including demo fixtures:
+    Install the chart into a new `recruit` namespace, with demo fixtures enabled:
 
     <!-- x-release-please-start-version -->
 
@@ -60,14 +60,23 @@ either Compose or Helm.
       --version 0.0.0-pr651 \
       --wait \
       --timeout 30m \
+      -f https://raw.githubusercontent.com/open-recruit/recruit/v0.0.0-pr651/charts/recruit/values-demo.yaml \
       recruit-demo \
-      oci://ghcr.io/open-recruit/recruit/charts/recruit \
-      -f - <<'EOF'
-    --8<-- "recruit/values-demo.yaml"
-    EOF
+      oci://ghcr.io/open-recruit/recruit/charts/recruit
     ```
 
     <!-- x-release-please-end-version -->
+
+    ??? example "Demo values"
+
+        The [`values-demo.yaml`](https://github.com/open-recruit/recruit/blob/master/charts/recruit/values-demo.yaml)
+        used above enables the query module and a sample study, and deploys the
+        [analytics-on-fhir](https://github.com/miracum/charts/tree/master/charts/analytics-on-fhir) chart to
+        generate the synthetic patients and query them via Trino:
+
+        ```yaml title="values-demo.yaml"
+        --8<-- "recruit/values-demo.yaml"
+        ```
 
     The install takes several minutes to download the images, generate synthetic patients, load them into
     the FHIR server, and register the same resources as Delta Lake tables for querying by Trino.

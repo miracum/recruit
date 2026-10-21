@@ -9,4 +9,8 @@ fhir/ig/fsh-generated/
 **/*.approved.fhir.json
 # symlinks into fhir/ig/fsh-generated/
 charts/*/files/fhir/search-parameters-transaction-upsert.json
+compose/fhir/search-parameters-transaction-upsert.json
 src/hack/fhir/search-parameters-transaction-upsert.json
+# symlinks to src/hack/fhir/trino-sql-study-transaction-upsert.json
+charts/*/files/fhir/sample-study-transaction-upsert.json
+compose/demo/sample-study-transaction-upsert.json
