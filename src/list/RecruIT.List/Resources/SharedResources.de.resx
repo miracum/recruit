@@ -273,6 +273,12 @@
   <data name="App.PatientList.ExclusionCriteria" xml:space="preserve">
     <value>Ausschlusskriterien</value>
   </data>
+  <data name="App.PatientList.CriteriaButton" xml:space="preserve">
+    <value>Ein- und Ausschlusskriterien</value>
+  </data>
+  <data name="App.PatientList.SearchPlaceholder" xml:space="preserve">
+    <value>Patienten durchsuchen...</value>
+  </data>
   <data name="App.PatientList.NoCriteria" xml:space="preserve">
     <value>Keine</value>
   </data>

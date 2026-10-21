@@ -25,7 +25,9 @@ else if (_patients.Count == 0)
 }
 else
 {
-    <BbDataTable TData="PatientOverviewDto" Data="_patients" ShowPagination="true"
+    <BbInput @bind-Value="_search" UpdateTiming="UpdateTiming.Debounced" DebounceInterval="300"
+             Placeholder="@Localizer["App.PatientList.SearchPlaceholder"]" Class="bb:mb-4 bb:max-w-sm" />
+    <BbDataTable TData="PatientOverviewDto" Data="FilteredPatients" ShowToolbar="false" ShowPagination="true"
                  PageSizes="new[] { 10, 25, 50, 100 }" InitialPageSize="25" IsLoading="false">
         <Columns>
             <BbDataTableColumn TData="PatientOverviewDto" TValue="string" Header="@Localizer["App.PatientList.ColumnName"]" Property="p => p.Name ?? p.PatientId" Sortable="true">
@@ -73,6 +75,18 @@ else
     private Task<AuthenticationState>? AuthStateTask { get; set; }
 
     private List<PatientOverviewDto> _patients = [];
+    private string _search = string.Empty;
+
+    /// <summary>
+    /// Replaces the data table's own toolbar search, which comes with an unwanted column-visibility
+    /// button - matches what the table shows: name, patient id and the acronyms of their studies.
+    /// </summary>
+    private List<PatientOverviewDto> FilteredPatients => string.IsNullOrWhiteSpace(_search)
+        ? _patients
+        : [.. _patients.Where(p =>
+            Matches(p.Name) || Matches(p.PatientId) || p.Trials.Any(t => Matches(t.StudyAcronym)))];
+
+    private bool Matches(string? value) => value?.Contains(_search.Trim(), StringComparison.OrdinalIgnoreCase) ?? false;
     private bool _loading = true;
     private string? _errorMessage;
     private ClaimsPrincipal _user = new();

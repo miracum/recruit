@@ -76,15 +76,9 @@ h1:focus {
     color: var(--color-orange-accent);
 }
 
-/* Inclusion/exclusion criteria columns (see PatientList.razor). A plain border rather than a
-   Tailwind border utility, for the same precompiled-bundle reason as above. */
-.criteria-column-divider {
-    border-left: 1px solid var(--border);
-}
-
 /* Manual bullet dot instead of native `list-disc` markers - list-style-position: outside can
-   render the marker box past its column's edge (into the divider/gap) depending on the parent's
-   layout, which native `list-style` gives no reliable way to constrain. */
+   render the marker box past its column's edge depending on the parent's layout, which native
+   `list-style` gives no reliable way to constrain. */
 .criteria-bullet {
     display: inline-block;
     width: 0.375rem;

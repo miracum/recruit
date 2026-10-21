@@ -32,13 +32,86 @@ else if (_summary is not null)
             }
         </div>
         <div class="bb:flex bb:shrink-0 bb:items-center bb:gap-2">
+            @if (_summary.Criteria.Count > 0 || FunnelChartData is { Count: > 0 })
+            {
+                @* Opened via OnClick rather than a BbSheetTrigger: the tooltip trigger already passes its own
+                   trigger context to the button, so the two AsChild triggers would compete for it. *@
+                <BbTooltip>
+                    <BbTooltipTrigger AsChild="true">
+                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Icon" Class="bb:shrink-0"
+                                  AriaLabel="@Localizer["App.PatientList.CriteriaButton"]" OnClick="@(() => _criteriaOpen = true)">
+                            <LucideIcon Name="list-checks" Size="16" />
+                        </BbButton>
+                    </BbTooltipTrigger>
+                    <BbTooltipContent>@Localizer["App.PatientList.CriteriaButton"]</BbTooltipContent>
+                </BbTooltip>
+                <BbSheet @bind-Open="_criteriaOpen">
+                    @* Focus the panel rather than the first criterion, whose SQL popover would otherwise get the focus ring.
+                       Width set inline: the precompiled bb: bundle has no utility wide enough to beat the sheet's sm:max-w-sm. *@
+                    <BbSheetContent Class="bb:overflow-y-auto" InitialFocus="FocusTrapInitialFocus.Container"
+                                    style="width: min(36rem, 100vw); max-width: 100vw;">
+                        <BbSheetHeader>
+                            <BbSheetTitle>@Localizer["App.PatientList.CriteriaButton"]</BbSheetTitle>
+                            @if (!string.IsNullOrEmpty(_summary.StudyTitle))
+                            {
+                                <BbSheetDescription>@_summary.StudyTitle</BbSheetDescription>
+                            }
+                        </BbSheetHeader>
+                        <div class="bb:flex bb:flex-col bb:gap-6 bb:px-4 bb:pb-4">
+                            <div>
+                                <span class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide bb:text-muted-foreground">@Localizer["App.PatientList.InclusionCriteria"]</span>
+                                @if (InclusionCriteria.Count == 0)
+                                {
+                                    <p class="bb:mt-1.5 bb:text-sm bb:text-muted-foreground">@Localizer["App.PatientList.NoCriteria"]</p>
+                                }
+                                else
+                                {
+                                    <ul class="bb:mt-1.5 bb:space-y-1 bb:text-sm">
+                                        @foreach (var criterion in InclusionCriteria)
+                                        {
+                                            <CriterionListItem Criterion="criterion" />
+                                        }
+                                    </ul>
+                                }
+                            </div>
+                            <div>
+                                <span class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide bb:text-muted-foreground">@Localizer["App.PatientList.ExclusionCriteria"]</span>
+                                @if (ExclusionCriteria.Count == 0)
+                                {
+                                    <p class="bb:mt-1.5 bb:text-sm bb:text-muted-foreground">@Localizer["App.PatientList.NoCriteria"]</p>
+                                }
+                                else
+                                {
+                                    <ul class="bb:mt-1.5 bb:space-y-1 bb:text-sm">
+                                        @foreach (var criterion in ExclusionCriteria)
+                                        {
+                                            <CriterionListItem Criterion="criterion" />
+                                        }
+                                    </ul>
+                                }
+                            </div>
+                            @if (FunnelChartData is { Count: > 0 })
+                            {
+                                <div>
+                                    <span class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide bb:text-muted-foreground">@Localizer["App.PatientList.FunnelSectionTitle"]</span>
+                                    <BbFunnelChart Data="@FunnelChartData" Height="280px" Class="bb:mt-1.5">
+                                        <BbChartTooltip />
+                                        <BbFunnel DataKey="value" NameKey="stage" Sort="FunnelSort.None" LabelFormatter="{b}: {c}" MinSize="15%" />
+                                    </BbFunnelChart>
+                                </div>
+                            }
+                        </div>
+                    </BbSheetContent>
+                </BbSheet>
+            }
             <NotificationSubscribeButton TrialIdentifier="_summary.TrialIdentifier" />
             @if (_canManageAccess)
             {
                 <BbTooltip>
                     <BbTooltipTrigger AsChild="true">
-                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Icon" Class="bb:shrink-0" OnClick="@(() => Navigation.NavigateTo($"/trials/{ListId}/access"))">
-                            <LucideIcon Name="shield" Size="16" />
+                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Icon" Class="bb:shrink-0"
+                                  AriaLabel="@Localizer["App.PatientList.ManageAccessLink"]" OnClick="@(() => Navigation.NavigateTo($"/trials/{ListId}/access"))">
+                            <LucideIcon Name="lock" Size="16" />
                         </BbButton>
                     </BbTooltipTrigger>
                     <BbTooltipContent>@Localizer["App.PatientList.ManageAccessLink"]</BbTooltipContent>
@@ -52,75 +125,15 @@ else if (_summary is not null)
         <p class="bb:mt-1 bb:text-sm bb:text-muted-foreground">@_summary.StudyDescription</p>
     }
 
-    @if (_summary.Criteria.Count > 0)
-    {
-        <div class="bb:mt-3 bb:grid bb:grid-cols-2 bb:gap-6 bb:mb-4">
-            <div>
-                <span class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide bb:text-muted-foreground">@Localizer["App.PatientList.InclusionCriteria"]</span>
-                @if (InclusionCriteria.Count == 0)
-                {
-                    <p class="bb:mt-1.5 bb:text-sm bb:text-muted-foreground">@Localizer["App.PatientList.NoCriteria"]</p>
-                }
-                else
-                {
-                    <ul class="bb:mt-1.5 bb:space-y-1 bb:text-sm">
-                        @foreach (var criterion in InclusionCriteria)
-                        {
-                            <CriterionListItem Criterion="criterion" />
-                        }
-                    </ul>
-                }
-            </div>
-            <div class="criteria-column-divider bb:ps-6">
-                <span class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide bb:text-muted-foreground">@Localizer["App.PatientList.ExclusionCriteria"]</span>
-                @if (ExclusionCriteria.Count == 0)
-                {
-                    <p class="bb:mt-1.5 bb:text-sm bb:text-muted-foreground">@Localizer["App.PatientList.NoCriteria"]</p>
-                }
-                else
-                {
-                    <ul class="bb:mt-1.5 bb:space-y-1 bb:text-sm">
-                        @foreach (var criterion in ExclusionCriteria)
-                        {
-                            <CriterionListItem Criterion="criterion" />
-                        }
-                    </ul>
-                }
-            </div>
-        </div>
-    }
-
-    @if (FunnelChartData is { Count: > 0 })
-    {
-        <BbCollapsible @bind-Open="_funnelExpanded" Class="bb:mb-4 bb:rounded-md bb:border">
-            <BbCollapsibleTrigger>
-                <BbButton Variant="ButtonVariant.Ghost" Class="bb:h-auto bb:w-full bb:px-3 bb:py-2 bb:text-sm bb:font-medium">
-                    <ChildContent>
-                        <span class="bb:flex bb:w-full bb:items-center bb:justify-between">
-                            <span>@Localizer["App.PatientList.FunnelSectionTitle"]</span>
-                            <LucideIcon Name="@(_funnelExpanded ? "chevron-up" : "chevron-down")" Size="16" />
-                        </span>
-                    </ChildContent>
-                </BbButton>
-            </BbCollapsibleTrigger>
-            <BbCollapsibleContent>
-                <div class="bb:border-t bb:p-3">
-                    <BbFunnelChart Data="@FunnelChartData" Height="280px">
-                        <BbChartTooltip />
-                        <BbFunnel DataKey="value" NameKey="stage" Sort="FunnelSort.None" LabelFormatter="{b}: {c}" MinSize="15%" />
-                    </BbFunnelChart>
-                </div>
-            </BbCollapsibleContent>
-        </BbCollapsible>
-    }
-
     @if (_patients.Count == 0)
     {
         <BbEmpty Title="@Localizer["App.PatientList.EmptyTitle"]" Description="@Localizer["App.PatientList.EmptyDescription"]" />
     }
     else
     {
-        <BbDataTable TData="PatientListEntryDto" Data="_patients" ShowPagination="true"
+        <BbInput @bind-Value="_search" UpdateTiming="UpdateTiming.Debounced" DebounceInterval="300"
+                 Placeholder="@Localizer["App.PatientList.SearchPlaceholder"]" Class="bb:mb-4 bb:max-w-sm" />
+        <BbDataTable TData="PatientListEntryDto" Data="FilteredPatients" ShowToolbar="false" ShowPagination="true"
                      PageSizes="new[] { 10, 25, 50, 100 }" InitialPageSize="25" IsLoading="false">
             <Columns>
                 <BbDataTableColumn TData="PatientListEntryDto" TValue="DateTimeOffset?" Header="@Localizer["App.PatientList.ColumnRecommended"]" Property="p => p.RecommendedDate" Sortable="true">
@@ -203,8 +216,9 @@ else if (_summary is not null)
 
     private TrialSummaryDto? _summary;
     private List<PatientListEntryDto> _patients = [];
+    private string _search = string.Empty;
+    private bool _criteriaOpen;
     private List<FunnelStepDto>? _funnelSteps;
-    private bool _funnelExpanded;
     private bool _loading = true;
     private bool _canEdit;
     private bool _canManageAccess;
@@ -212,6 +226,17 @@ else if (_summary is not null)
     private ClaimsPrincipal _user = new();
 
     private PatientListEntryDto? _selectedPatient;
+
+    /// <summary>
+    /// Replaces the data table's own toolbar search, which comes with an unwanted column-visibility
+    /// button - matches what the table shows: name, MRN, patient id and last known location.
+    /// </summary>
+    private List<PatientListEntryDto> FilteredPatients => string.IsNullOrWhiteSpace(_search)
+        ? _patients
+        : [.. _patients.Where(p =>
+            Matches(p.Name) || Matches(p.MedicalRecordNumber) || Matches(p.PatientId) || Matches(p.LastKnownLocation))];
+
+    private bool Matches(string? value) => value?.Contains(_search.Trim(), StringComparison.OrdinalIgnoreCase) ?? false;
 
     private int NewSuggestionWindowDays => NotificationOptionsAccessor.Value.NewSuggestionWindowDays;
 
