@@ -2,7 +2,7 @@
   "resourceType": "CodeSystem",
   "status": "active",
   "content": "complete",
-  "name": "CodeSystemScreeningList",
+  "name": "ScreeningListType",
   "id": "screening-list-type",
   "title": "recruIT screening list type",
   "url": "https://openrecruit.dev/fhir/CodeSystem/screening-list-type",

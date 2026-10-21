@@ -136,7 +136,7 @@ public class FunnelReportBuilder {
               .setText(step.criterion().displayText()));
       population.setCount((int) step.remainingCount());
       population.addExtension(
-          Recruit.Extensions.eligibilityAssessmentDerivedFromLibrary(
+          Recruit.Extensions.derivedFromLibrary(
               new Reference("Library/" + step.criterion().library().getIdElement().getIdPart())));
     }
 

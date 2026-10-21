@@ -4,7 +4,7 @@ Parent: Observation
 Title: "recruIT eligibility assessment"
 Description: "A per-criterion eligibility Assessment produced by the query engine, indicating whether a single eligibility criterion is met for a ResearchSubject."
 * category = EligibilityAssessmentCategory#eligibility-assessment
-* extension contains EligibilityAssessmentDerivedFromLibrary named derivedFromLibrary 1..1
+* extension contains DerivedFromLibrary named derivedFromLibrary 1..1
 * focus 1..1
 * focus only Reference(RecruitResearchStudy)
 * subject 1..1
@@ -28,9 +28,9 @@ Description: "The SNOMED CT qualifier values a per-criterion eligibility assessm
 * http://snomed.info/sct#261665006 "Unknown (qualifier value)"
 * http://snomed.info/sct#82334004 "Indeterminate (qualifier value)"
 
-Extension: EligibilityAssessmentDerivedFromLibrary
-Id: eligibility-assessment-derived-from-library
-Title: "Eligibility assessment derived-from Library"
+Extension: DerivedFromLibrary
+Id: derived-from-library
+Title: "Derived from Library"
 Description: "A reference to the eligibility-criterion Library resource this assessment - or, on a MeasureReport's attrition-funnel population, this cumulative step - was derived from. Neither Observation.derivedFrom nor MeasureReport.group.population has a slot accepting Library as a target type, so this extension carries the reference instead."
 Context: Observation, MeasureReport.group.population
 * value[x] only Reference(Library)

@@ -32,7 +32,7 @@
         },
         {
           "type": "json",
-          "path": "fhir/ig/fsh-generated/resources/ImplementationGuide-recruIT.json",
+          "path": "fhir/ig/fsh-generated/resources/ImplementationGuide-dev.openrecruit.fhir.json",
           "jsonpath": "$.version"
         }
       ],

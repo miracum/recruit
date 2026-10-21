@@ -25,11 +25,11 @@ Usage: #definition
 * expression = "ResearchStudy.enrollment"
 * target = #Group
 
-Instance: GroupCharacteristic
+Instance: GroupCharacteristicReference
 InstanceOf: SearchParameter
 Usage: #definition
-* id = "group-characteristic"
-* name = "GroupCharacteristic"
+* id = "group-characteristic-reference"
+* name = "GroupCharacteristicReference"
 * description = "An entity referenced in a characteristic"
 * base = #Group
 * status = #active
@@ -63,7 +63,7 @@ Usage: #definition
 * status = #active
 * code = #derived-from-library
 * type = #reference
-* insert ExtensionReferenceExpression(Observation, eligibility-assessment-derived-from-library)
+* insert ExtensionReferenceExpression(Observation, derived-from-library)
 * target = #Library
 
 Instance: RecruitSearchParametersTransaction
@@ -72,6 +72,6 @@ Usage: #definition
 * id = "recruit-search-parameters-transaction"
 * type = #transaction
 * insert PutEntry(ResearchStudyEnrollment, SearchParameter/researchstudy-enrollment)
-* insert PutEntry(GroupCharacteristic, SearchParameter/group-characteristic)
+* insert PutEntry(GroupCharacteristicReference, SearchParameter/group-characteristic-reference)
 * insert PutEntry(SearchParameterBelongsToStudy, SearchParameter/belongs-to-study)
 * insert PutEntry(ObservationDerivedFromLibrary, SearchParameter/observation-derived-from-library)

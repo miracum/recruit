@@ -1,6 +1,6 @@
 {
   "resourceType": "List",
-  "id": "ScreeningListExample",
+  "id": "screening-list-example",
   "meta": {
     "profile": [
       "https://openrecruit.dev/fhir/StructureDefinition/screening-list"
@@ -11,7 +11,7 @@
     {
       "url": "https://openrecruit.dev/fhir/StructureDefinition/belongs-to-study",
       "valueReference": {
-        "reference": "ResearchStudy/RecruitResearchStudyExample",
+        "reference": "ResearchStudy/recruit-research-study-example",
         "display": "SAMPLE STUDY"
       }
     }

@@ -25,19 +25,19 @@
   },
   {
     "outputFile": "CodeSystem-screening-list-type.json",
-    "fshName": "CodeSystemScreeningList",
+    "fshName": "ScreeningListType",
     "fshType": "CodeSystem",
     "fshFile": "screeninglist.fsh",
     "startLine": 19,
     "endLine": 22
   },
   {
-    "outputFile": "List-ScreeningListExample.json",
+    "outputFile": "List-screening-list-example.json",
     "fshName": "ScreeningListExample",
     "fshType": "Instance",
     "fshFile": "screeninglist.fsh",
     "startLine": 37,
-    "endLine": 43
+    "endLine": 44
   },
   {
     "outputFile": "NamingSystem-eligibility-assessment-id.json",
@@ -116,16 +116,16 @@
     "fshName": "UICreatedResearchStudyIdentifierSystem",
     "fshType": "Instance",
     "fshFile": "recruit-researchstudy.fsh",
-    "startLine": 14,
-    "endLine": 25
+    "startLine": 15,
+    "endLine": 26
   },
   {
-    "outputFile": "ResearchStudy-RecruitResearchStudyExample.json",
+    "outputFile": "ResearchStudy-recruit-research-study-example.json",
     "fshName": "RecruitResearchStudyExample",
     "fshType": "Instance",
     "fshFile": "recruit-researchstudy.fsh",
     "startLine": 9,
-    "endLine": 12
+    "endLine": 13
   },
   {
     "outputFile": "SearchParameter-belongs-to-study.json",
@@ -136,8 +136,8 @@
     "endLine": 54
   },
   {
-    "outputFile": "SearchParameter-group-characteristic.json",
-    "fshName": "GroupCharacteristic",
+    "outputFile": "SearchParameter-group-characteristic-reference.json",
+    "fshName": "GroupCharacteristicReference",
     "fshType": "Instance",
     "fshFile": "searchparameters.fsh",
     "startLine": 28,
@@ -168,8 +168,8 @@
     "endLine": 17
   },
   {
-    "outputFile": "StructureDefinition-eligibility-assessment-derived-from-library.json",
-    "fshName": "EligibilityAssessmentDerivedFromLibrary",
+    "outputFile": "StructureDefinition-derived-from-library.json",
+    "fshName": "DerivedFromLibrary",
     "fshType": "Extension",
     "fshFile": "eligibility-observation.fsh",
     "startLine": 31,
@@ -184,7 +184,7 @@
     "endLine": 14
   },
   {
-    "outputFile": "StructureDefinition-research-study.json",
+    "outputFile": "StructureDefinition-recruit-research-study.json",
     "fshName": "RecruitResearchStudy",
     "fshType": "Profile",
     "fshFile": "recruit-researchstudy.fsh",

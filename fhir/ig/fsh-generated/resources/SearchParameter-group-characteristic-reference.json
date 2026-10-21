@@ -1,8 +1,8 @@
 {
   "resourceType": "SearchParameter",
-  "id": "group-characteristic",
-  "url": "https://openrecruit.dev/fhir/SearchParameter/group-characteristic",
-  "name": "GroupCharacteristic",
+  "id": "group-characteristic-reference",
+  "url": "https://openrecruit.dev/fhir/SearchParameter/group-characteristic-reference",
+  "name": "GroupCharacteristicReference",
   "description": "An entity referenced in a characteristic",
   "base": [
     "Group"

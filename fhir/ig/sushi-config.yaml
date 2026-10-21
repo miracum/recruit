@@ -3,7 +3,7 @@
 # │  used properties are included. For a list of all supported properties and their functions,     │
 # │  see: https://fshschool.org/docs/sushi/configuration/.                                         │
 # ╰────────────────────────────────────────────────────────────────────────────────────────────────╯
-id: recruIT
+id: dev.openrecruit.fhir
 canonical: https://openrecruit.dev/fhir
 name: RecruITIG
 title: recruIT FHIR IG
