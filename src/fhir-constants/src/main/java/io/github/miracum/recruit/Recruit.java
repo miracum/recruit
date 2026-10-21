@@ -27,6 +27,15 @@ public final class Recruit {
     }
 
     /**
+     * The canonical URL {@code https://openrecruit.dev/fhir/CodeSystem/eligibility-criteria-types}.
+     *
+     * @return {@code https://openrecruit.dev/fhir/CodeSystem/eligibility-criteria-types}
+     */
+    public static String eligibilityCriteriaTypes() {
+      return "https://openrecruit.dev/fhir/CodeSystem/eligibility-criteria-types";
+    }
+
+    /**
      * The canonical URL {@code https://openrecruit.dev/fhir/CodeSystem/eligibility-funnel-population-type}.
      *
      * @return {@code https://openrecruit.dev/fhir/CodeSystem/eligibility-funnel-population-type}
@@ -93,6 +102,58 @@ public final class Recruit {
        * @throws IllegalArgumentException if no constant has that code
        */
       public static @NonNull EligibilityAssessmentCategory fromValueOrThrow(@NonNull String code) {
+        return fromValue(code).orElseThrow(() -> new IllegalArgumentException("Unknown code: " + code));
+      }
+    }
+
+    public enum EligibilityCriteriaTypes {
+      /**
+       * {@code sql-query} - SQL query
+       */
+      SQL_QUERY("sql-query", "SQL query");
+
+      private final @NonNull String code;
+
+      private final @Nullable String display;
+
+      EligibilityCriteriaTypes(@NonNull String code, @Nullable String display) {
+        this.code = code;
+        this.display = display;
+      }
+
+      /**
+       * @return the CodeSystem URL {@code https://openrecruit.dev/fhir/CodeSystem/eligibility-criteria-types}
+       */
+      public @NonNull String system(@NonNull EligibilityCriteriaTypes this) {
+        return "https://openrecruit.dev/fhir/CodeSystem/eligibility-criteria-types";
+      }
+
+      /**
+       * @return a new {@link Coding} for this concept, with system {@code https://openrecruit.dev/fhir/CodeSystem/eligibility-criteria-types}
+       */
+      public @NonNull Coding coding(@NonNull EligibilityCriteriaTypes this) {
+        return new Coding("https://openrecruit.dev/fhir/CodeSystem/eligibility-criteria-types", code, display);
+      }
+
+      /**
+       * @param code the FHIR code to look up
+       * @return an {@link Optional} containing the constant whose {@code code} matches, or empty if none matches
+       */
+      public static Optional<@NonNull EligibilityCriteriaTypes> fromValue(@NonNull String code) {
+        for (EligibilityCriteriaTypes value : values()) {
+          if (value.code.equals(code)) {
+            return Optional.of(value);
+          }
+        }
+        return Optional.empty();
+      }
+
+      /**
+       * @param code the FHIR code to look up
+       * @return the constant whose {@code code} matches
+       * @throws IllegalArgumentException if no constant has that code
+       */
+      public static @NonNull EligibilityCriteriaTypes fromValueOrThrow(@NonNull String code) {
         return fromValue(code).orElseThrow(() -> new IllegalArgumentException("Unknown code: " + code));
       }
     }
@@ -223,6 +284,15 @@ public final class Recruit {
     }
 
     /**
+     * The canonical URL {@code https://openrecruit.dev/fhir/StructureDefinition/eligibility-group}.
+     *
+     * @return {@code https://openrecruit.dev/fhir/StructureDefinition/eligibility-group}
+     */
+    public static String eligibilityGroup() {
+      return "https://openrecruit.dev/fhir/StructureDefinition/eligibility-group";
+    }
+
+    /**
      * The canonical URL {@code https://openrecruit.dev/fhir/StructureDefinition/recruit-research-study}.
      *
      * @return {@code https://openrecruit.dev/fhir/StructureDefinition/recruit-research-study}
@@ -238,6 +308,15 @@ public final class Recruit {
      */
     public static String screeningList() {
       return "https://openrecruit.dev/fhir/StructureDefinition/screening-list";
+    }
+
+    /**
+     * The canonical URL {@code https://openrecruit.dev/fhir/StructureDefinition/sql-query-library}.
+     *
+     * @return {@code https://openrecruit.dev/fhir/StructureDefinition/sql-query-library}
+     */
+    public static String sqlQueryLibrary() {
+      return "https://openrecruit.dev/fhir/StructureDefinition/sql-query-library";
     }
   }
 
@@ -421,6 +500,36 @@ public final class Recruit {
        */
       public static @NonNull String uri() {
         return "https://openrecruit.dev/fhir/identifiers/screening-list-id";
+      }
+    }
+
+    /**
+     * The identifier system for a SQLQueryLibrary criterion authored as FSH, such as the demo study's criteria.
+     */
+    public static final class SqlCriteriaLibraryId {
+      private SqlCriteriaLibraryId() {
+      }
+
+      /**
+       * @return {@code https://openrecruit.dev/fhir/identifiers/sql-criteria-library-id}
+       */
+      public static @NonNull String uri() {
+        return "https://openrecruit.dev/fhir/identifiers/sql-criteria-library-id";
+      }
+    }
+
+    /**
+     * The identifier system for a RecruitResearchStudy whose SQL-encoded criteria are authored as FSH, such as the demo study.
+     */
+    public static final class SqlCriteriaResearchStudyId {
+      private SqlCriteriaResearchStudyId() {
+      }
+
+      /**
+       * @return {@code https://openrecruit.dev/fhir/identifiers/sql-criteria-research-study-id}
+       */
+      public static @NonNull String uri() {
+        return "https://openrecruit.dev/fhir/identifiers/sql-criteria-research-study-id";
       }
     }
 

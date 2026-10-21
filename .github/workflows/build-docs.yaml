@@ -115,6 +115,36 @@ jobs:
           name: fhir-ig
           path: site/fhir
 
+      # GitHub Pages can't redirect server-side, so each canonical URL (e.g. fhir/StructureDefinition/<id>), each
+      # resource's <type>/<id> and each NamingSystem's identifier system URI (e.g. fhir/identifiers/<id>) gets an
+      # index.html that forwards to the resource's page. Those root pages in turn redirect to the language folder.
+      - name: Add canonical URL redirects
+        env:
+          # the canonical from fhir/ig/sushi-config.yaml
+          CANONICAL: https://openrecruit.dev/fhir
+        run: |
+          for resource in site/fhir/en/*.json; do
+            jq -r --arg c "$CANONICAL/" '
+              select(type == "object" and has("resourceType") and has("id"))
+              | "\(.resourceType)-\(.id).html" as $page
+              | [
+                  "\(.resourceType)/\(.id)",
+                  (.url // empty | select(startswith($c)) | ltrimstr($c)),
+                  (.uniqueId[]? | select(.type == "uri") | .value | select(startswith($c)) | ltrimstr($c))
+                ]
+              | unique[]
+              | "\(.)\t\($page)"
+            ' "$resource"
+          done | while IFS=$'\t' read -r path page; do
+            dir="site/fhir/$path"
+            # never overwrite anything the IG Publisher generated
+            [[ -e "$dir" ]] && continue
+            target="$(sed -E 's#[^/]+#..#g' <<<"$path")/$page"
+            mkdir -p "$dir"
+            printf '<!doctype html><meta charset="utf-8"><title>Redirecting</title><link rel="canonical" href="%s"><meta http-equiv="refresh" content="0; url=%s"><a href="%s">%s</a>\n' \
+              "$target" "$target" "$target" "$page" >"$dir/index.html"
+          done
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:

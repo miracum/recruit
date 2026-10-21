@@ -1,0 +1,16 @@
+{
+  "resourceType": "ValueSet",
+  "status": "active",
+  "name": "EligibilityCriteriaTypes",
+  "id": "eligibility-criteria-types",
+  "title": "recruIT eligibility criteria types",
+  "description": "The ways an eligibility Group's criteria may be encoded.",
+  "url": "https://openrecruit.dev/fhir/ValueSet/eligibility-criteria-types",
+  "compose": {
+    "include": [
+      {
+        "system": "https://openrecruit.dev/fhir/CodeSystem/eligibility-criteria-types"
+      }
+    ]
+  }
+}

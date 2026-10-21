@@ -33,10 +33,22 @@ tasks.register('generateIgConstants') {
     group = 'codegen'
     description = 'Regenerates the constant classes'
     def resourcesDir = layout.projectDirectory.dir('../../fhir/ig/fsh-generated/resources')
+    def conformanceResourcesDir = layout.buildDirectory.dir('ig-conformance-resources')
     def outputDir = layout.projectDirectory.dir('src/main/java')
     doLast {
+        // ig-codegen reads every resource's `type` as a string, which fails on example instances
+        // whose `type` is a CodeableConcept (e.g. Library), so only the conformance resources are
+        // scanned. See https://github.com/diz-uker/to-fhir/issues/113.
+        def scanDir = conformanceResourcesDir.get().asFile
+        project.delete(scanDir)
+        project.copy {
+            from resourcesDir
+            include 'CodeSystem-*.json', 'ValueSet-*.json', 'StructureDefinition-*.json',
+                'NamingSystem-*.json', 'SearchParameter-*.json', 'ImplementationGuide-*.json'
+            into scanDir
+        }
         def scanner = new IgPackageScanner(new ObjectMapper())
-        def model = scanner.scan(resourcesDir.asFile.toPath(), 'dev.openrecruit.fhir', '0.1.0')
+        def model = scanner.scan(scanDir.toPath(), 'dev.openrecruit.fhir', '0.1.0')
         def generatedFile = JavaConstantsGenerator.writeTo(
             model, 'io.github.miracum.recruit', 'Recruit', outputDir.asFile.toPath())
         logger.lifecycle('Generated {}', generatedFile)

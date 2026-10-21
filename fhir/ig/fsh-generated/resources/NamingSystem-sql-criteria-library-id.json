@@ -1,0 +1,16 @@
+{
+  "resourceType": "NamingSystem",
+  "id": "sql-criteria-library-id",
+  "description": "The identifier system for a SQLQueryLibrary criterion authored as FSH, such as the demo study's criteria.",
+  "name": "SqlCriteriaLibraryIdentifier",
+  "status": "active",
+  "kind": "identifier",
+  "date": "2026-10-21",
+  "uniqueId": [
+    {
+      "type": "uri",
+      "value": "https://openrecruit.dev/fhir/identifiers/sql-criteria-library-id",
+      "preferred": true
+    }
+  ]
+}

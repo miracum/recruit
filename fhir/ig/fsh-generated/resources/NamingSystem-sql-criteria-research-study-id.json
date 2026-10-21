@@ -1,0 +1,16 @@
+{
+  "resourceType": "NamingSystem",
+  "id": "sql-criteria-research-study-id",
+  "description": "The identifier system for a RecruitResearchStudy whose SQL-encoded criteria are authored as FSH, such as the demo study.",
+  "name": "SqlCriteriaResearchStudyIdentifier",
+  "status": "active",
+  "kind": "identifier",
+  "date": "2026-10-21",
+  "uniqueId": [
+    {
+      "type": "uri",
+      "value": "https://openrecruit.dev/fhir/identifiers/sql-criteria-research-study-id",
+      "preferred": true
+    }
+  ]
+}

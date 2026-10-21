@@ -6,5 +6,10 @@
       "https://openrecruit.dev/fhir/StructureDefinition/recruit-research-study"
     ]
   },
-  "status": "active"
+  "status": "active",
+  "enrollment": [
+    {
+      "reference": "Group/eligibility-group-example"
+    }
+  ]
 }

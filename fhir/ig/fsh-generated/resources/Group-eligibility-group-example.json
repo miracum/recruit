@@ -1,0 +1,36 @@
+{
+  "resourceType": "Group",
+  "id": "eligibility-group-example",
+  "meta": {
+    "profile": [
+      "https://openrecruit.dev/fhir/StructureDefinition/eligibility-group"
+    ]
+  },
+  "actual": false,
+  "identifier": [
+    {
+      "system": "https://openrecruit.dev/fhir/identifiers/eligibility-group-id",
+      "value": "example"
+    }
+  ],
+  "type": "person",
+  "code": {
+    "coding": [
+      {
+        "code": "sql-query",
+        "system": "https://openrecruit.dev/fhir/CodeSystem/eligibility-criteria-types"
+      }
+    ]
+  },
+  "characteristic": [
+    {
+      "code": {
+        "text": "All patients"
+      },
+      "valueReference": {
+        "reference": "Library/sql-query-library-example"
+      },
+      "exclude": false
+    }
+  ]
+}

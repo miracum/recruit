@@ -24,6 +24,14 @@
     "endLine": 20
   },
   {
+    "outputFile": "CodeSystem-eligibility-criteria-types.json",
+    "fshName": "EligibilityCriteriaType",
+    "fshType": "CodeSystem",
+    "fshFile": "eligibility-group.fsh",
+    "startLine": 10,
+    "endLine": 14
+  },
+  {
     "outputFile": "CodeSystem-eligibility-funnel-population-type.json",
     "fshName": "EligibilityFunnelPopulationType",
     "fshType": "CodeSystem",
@@ -38,6 +46,22 @@
     "fshFile": "screeninglist.fsh",
     "startLine": 19,
     "endLine": 22
+  },
+  {
+    "outputFile": "Group-eligibility-group-example.json",
+    "fshName": "EligibilityGroupExample",
+    "fshType": "Instance",
+    "fshFile": "eligibility-group.fsh",
+    "startLine": 35,
+    "endLine": 46
+  },
+  {
+    "outputFile": "Library-sql-query-library-example.json",
+    "fshName": "SQLQueryLibraryExample",
+    "fshType": "Instance",
+    "fshFile": "eligibility-library.fsh",
+    "startLine": 71,
+    "endLine": 82
   },
   {
     "outputFile": "List-screening-list-example.json",
@@ -76,16 +100,16 @@
     "fshName": "EligibilityGroupIdentifierSystem",
     "fshType": "Instance",
     "fshFile": "eligibility-group.fsh",
-    "startLine": 1,
-    "endLine": 12
+    "startLine": 22,
+    "endLine": 33
   },
   {
     "outputFile": "NamingSystem-eligibility-library-id.json",
     "fshName": "EligibilityLibraryIdentifierSystem",
     "fshType": "Instance",
     "fshFile": "eligibility-library.fsh",
-    "startLine": 1,
-    "endLine": 12
+    "startLine": 19,
+    "endLine": 30
   },
   {
     "outputFile": "NamingSystem-research-subject-id.json",
@@ -104,36 +128,52 @@
     "endLine": 35
   },
   {
+    "outputFile": "NamingSystem-sql-criteria-library-id.json",
+    "fshName": "SqlCriteriaLibraryIdentifierSystem",
+    "fshType": "Instance",
+    "fshFile": "eligibility-library.fsh",
+    "startLine": 32,
+    "endLine": 43
+  },
+  {
+    "outputFile": "NamingSystem-sql-criteria-research-study-id.json",
+    "fshName": "SqlCriteriaResearchStudyIdentifierSystem",
+    "fshType": "Instance",
+    "fshFile": "recruit-researchstudy.fsh",
+    "startLine": 31,
+    "endLine": 42
+  },
+  {
     "outputFile": "NamingSystem-superset-synced-eligibility-library-id.json",
     "fshName": "SupersetSyncedEligibilityLibraryIdentifierSystem",
     "fshType": "Instance",
     "fshFile": "eligibility-library.fsh",
-    "startLine": 14,
-    "endLine": 25
+    "startLine": 45,
+    "endLine": 56
   },
   {
     "outputFile": "NamingSystem-ui-created-eligibility-library-id.json",
     "fshName": "UICreatedEligibilityLibraryIdentifierSystem",
     "fshType": "Instance",
     "fshFile": "eligibility-library.fsh",
-    "startLine": 27,
-    "endLine": 38
+    "startLine": 58,
+    "endLine": 69
   },
   {
     "outputFile": "NamingSystem-ui-created-research-study-id.json",
     "fshName": "UICreatedResearchStudyIdentifierSystem",
     "fshType": "Instance",
     "fshFile": "recruit-researchstudy.fsh",
-    "startLine": 15,
-    "endLine": 26
+    "startLine": 18,
+    "endLine": 29
   },
   {
     "outputFile": "ResearchStudy-recruit-research-study-example.json",
     "fshName": "RecruitResearchStudyExample",
     "fshType": "Instance",
     "fshFile": "recruit-researchstudy.fsh",
-    "startLine": 9,
-    "endLine": 13
+    "startLine": 11,
+    "endLine": 16
   },
   {
     "outputFile": "SearchParameter-belongs-to-study.json",
@@ -192,12 +232,20 @@
     "endLine": 14
   },
   {
+    "outputFile": "StructureDefinition-eligibility-group.json",
+    "fshName": "EligibilityGroup",
+    "fshType": "Profile",
+    "fshFile": "eligibility-group.fsh",
+    "startLine": 1,
+    "endLine": 8
+  },
+  {
     "outputFile": "StructureDefinition-recruit-research-study.json",
     "fshName": "RecruitResearchStudy",
     "fshType": "Profile",
     "fshFile": "recruit-researchstudy.fsh",
     "startLine": 4,
-    "endLine": 7
+    "endLine": 9
   },
   {
     "outputFile": "StructureDefinition-screening-list.json",
@@ -208,11 +256,27 @@
     "endLine": 10
   },
   {
+    "outputFile": "StructureDefinition-sql-query-library.json",
+    "fshName": "SQLQueryLibrary",
+    "fshType": "Profile",
+    "fshFile": "eligibility-library.fsh",
+    "startLine": 3,
+    "endLine": 12
+  },
+  {
     "outputFile": "ValueSet-eligibility-assessment-result.json",
     "fshName": "EligibilityAssessmentResult",
     "fshType": "ValueSet",
     "fshFile": "eligibility-observation.fsh",
     "startLine": 22,
     "endLine": 29
+  },
+  {
+    "outputFile": "ValueSet-eligibility-criteria-types.json",
+    "fshName": "EligibilityCriteriaTypes",
+    "fshType": "ValueSet",
+    "fshFile": "eligibility-group.fsh",
+    "startLine": 16,
+    "endLine": 20
   }
 ]
