@@ -29,9 +29,6 @@ either Compose or Helm.
 
     Once the command exits, you can open the screening list at <http://127.0.0.1:32080> and see the demo study.
 
-    You can now either [create your own study](creating-your-first-study.md) or head straight to the
-    production deployment guide using [Compose](../deployment/compose.md).
-
     To stop and remove everything, including demo data, run:
 
     ```sh
@@ -58,10 +55,10 @@ either Compose or Helm.
     helm upgrade --install -n recruit \
       --create-namespace \
       --render-subchart-notes \
-      --version 0.0.0-pr655 \
+      --version 0.0.0 \
       --wait \
       --timeout 30m \
-      -f https://raw.githubusercontent.com/open-recruit/recruit/docs-update/charts/recruit/values-demo.yaml \
+      -f https://raw.githubusercontent.com/open-recruit/recruit/0.0.0/charts/recruit/values-demo.yaml \
       recruit-demo \
       oci://ghcr.io/open-recruit/recruit/charts/recruit
     ```
@@ -88,7 +85,7 @@ either Compose or Helm.
     kubectl -n recruit port-forward svc/recruit-demo-list 32080:8080
     ```
 
-    and open the screening list at <http://127.0.0.1:32080> and see the demo study.
+    and open the screening list at <http://127.0.0.1:32080> and see the demo study (it might take a couple of minutes for it to appear).
 
     To remove everything again, run:
 
@@ -96,3 +93,8 @@ either Compose or Helm.
     helm uninstall -n recruit recruit-demo
     kubectl delete namespace recruit
     ```
+
+!!! tip
+
+    You can now either [create your own study](creating-your-first-study.md) or head straight to the production deployment
+    guide using [Compose](../deployment/compose.md) or [Kubernetes](../deployment/kubernetes.md).
