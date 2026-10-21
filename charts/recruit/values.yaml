@@ -122,16 +122,16 @@ syntheticPatients:
   # -- annotations to add to the Job's pod
   podAnnotations: {}
   # -- resource requests and limits for the containers running Synthea. Synthea generates the patients in parallel,
-  # one thread per core.
+  # one thread per core. 100 patients need well under 1Gi of memory.
   resources:
     limits:
       cpu: 4000m
       ephemeral-storage: 2Gi
-      memory: 3Gi
+      memory: 1536Mi
     requests:
       cpu: 500m
       ephemeral-storage: 2Gi
-      memory: 3Gi
+      memory: 1536Mi
   # the image containing Synthea, as well as curl and jq to load the patients into the FHIR server
   # @ignore
   image: # +doc-gen:ignore

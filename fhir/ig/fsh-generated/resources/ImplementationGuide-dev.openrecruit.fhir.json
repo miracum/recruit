@@ -158,7 +158,7 @@
           "reference": "Bundle/recruit-sample-study-transaction"
         },
         "name": "RecruitSampleStudyTransaction",
-        "description": "A demo ResearchStudy with three SQL-encoded eligibility criteria, each in both the Trino and the DuckDB dialect: a bronchitis diagnosis, an age over 18, and no prior sepsis.",
+        "description": "A demo ResearchStudy with three SQL-encoded eligibility criteria, each in both the Trino and the DuckDB dialect: a bronchitis diagnosis, an age over 18, and no sepsis diagnosis within 3 months of the bronchitis diagnosis.",
         "exampleBoolean": true
       },
       {
