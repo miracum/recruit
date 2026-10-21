@@ -22,7 +22,7 @@ nav = [
     "getting-started/creating-your-first-study.md",
   ] },
   { "Deployment" = [
-    "deployment/docker-compose.md",
+    "deployment/compose.md",
     "deployment/kubernetes.md",
     "deployment/observability.md",
     "deployment/resource-requirements.md",
