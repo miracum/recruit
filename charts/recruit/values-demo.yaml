@@ -1,3 +1,21 @@
+postgres:
+  fullnameOverride: recruit-demo-postgres
+  initdb:
+    scripts:
+      init-databases.sql: |
+        CREATE DATABASE fhir;
+        CREATE DATABASE hive_metastore;
+
+fhirserver:
+  postgres:
+    enabled: false
+  externalDatabase:
+    host: recruit-demo-postgres
+    user: postgres
+    database: fhir
+    existingSecret: recruit-demo-postgres
+    existingSecretKey: postgres-password
+
 querySqlOnFhir:
   enabled: true
   schedule: "0 * * * * *"
@@ -13,6 +31,16 @@ sampleStudy:
 
 analytics-on-fhir:
   enabled: true
+  hive-metastore:
+    postgres:
+      enabled: false
+    database:
+      host: recruit-demo-postgres
+      username: postgres
+      database: hive_metastore
+      existingSecret:
+        name: recruit-demo-postgres
+        key: postgres-password
   trino:
     coordinator:
       jvm:

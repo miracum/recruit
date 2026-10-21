@@ -6,7 +6,8 @@ either Compose or Helm.
 === "Compose"
 
     Requires the [Docker CLI](https://docs.docker.com/get-started/get-docker/)
-    with the Compose plugin version 5.6.0 or later.
+    with the Compose plugin version 5.6.0 or later on a machine with around
+    16 GiB of memory.
 
     Download and extract the Compose files from the latest release:
 
