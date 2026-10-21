@@ -36,8 +36,6 @@ hide:
     Study teams can review candidates in a web-based screening list: track each one's recruitment
     status, add notes, and view the change history.
 
-    [:octicons-arrow-right-24: Customize the user interface](configuration/ui-configuration.md)
-
 - :lucide-mail:{ .lg } **Email notifications**
 
     Subscribe to email notifications as soon as new candidates are added to one of
@@ -49,7 +47,7 @@ hide:
 
     OIDC-based sign-in with the access to screening lists configurable per-user.
 
-    [:octicons-arrow-right-24: Security](configuration/security.md)
+    [:octicons-arrow-right-24: Authentication](configuration/options.md#authentication)
 
 - :lucide-cloud:{ .lg } **Cloud-native**
 

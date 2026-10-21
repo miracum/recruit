@@ -133,7 +133,7 @@ beforehand. `list` creates and updates its tables itself on every start.
 Create a `.env` file next to `compose.yaml`:
 
 ```sh
-# the FHIR server's base URL, as reachable from inside the containers
+# FHIR server, as reachable from inside the containers
 FHIR_SERVER_BASE_URL=https://fhir.example.com/fhir
 
 # Trino
@@ -141,10 +141,8 @@ TRINO_JDBC_URL=jdbc:trino://trino.example.com:443/fhir/default?SSL=true
 TRINO_USERNAME=recruit
 TRINO_PASSWORD=change-me
 
-# optional: a SQL on FHIR server such as Pathling
+# optional
 SQL_ON_FHIR_URL=
-
-# Spring cron expression (seconds, minutes, hours, day of month, month, day of week) or a macro like @hourly
 QUERY_SQL_ON_FHIR_SCHEDULE_CRON=@hourly
 
 # PostgreSQL for the screening list
@@ -159,37 +157,8 @@ AUTH_OIDC_CLIENT_SECRET=change-me
 AUTH_OIDC_ROLE_CLAIM_TYPE=role
 ```
 
-| Variable                          | Required | Description                                                      |
-| --------------------------------- | -------- | ---------------------------------------------------------------- |
-| `FHIR_SERVER_BASE_URL`            | yes      | Base URL of the FHIR server                                      |
-| `TRINO_JDBC_URL`                  | yes      | [Trino JDBC URL](https://trino.io/docs/current/client/jdbc.html) |
-| `TRINO_USERNAME`                  | yes      | Trino user                                                       |
-| `TRINO_PASSWORD`                  | yes      | Trino password, empty for a Trino without authentication         |
-| `SQL_ON_FHIR_URL`                 | no       | Base URL of a SQL on FHIR server such as Pathling                |
-| `QUERY_SQL_ON_FHIR_SCHEDULE_CRON` | no       | When to update the screening lists. Defaults to `@hourly`        |
-| `LIST_CONNECTIONSTRINGS_APPDB`    | yes      | Connection string of the screening list's database               |
-| `PGPASSWORD`                      | yes      | Password of that database's user                                 |
-| `AUTH_ENABLED`                    | no       | Defaults to `false`. Always set it to `true` in production       |
-| `AUTH_OIDC_AUTHORITY`             | yes¹     | Issuer URL of the OpenID Connect provider                        |
-| `AUTH_OIDC_CLIENT_ID`             | yes¹     | Client ID of the screening list                                  |
-| `AUTH_OIDC_CLIENT_SECRET`         | yes¹     | Client secret of the screening list                              |
-| `AUTH_OIDC_ROLE_CLAIM_TYPE`       | no       | Claim holding the user's roles. Defaults to `role`               |
-| `RECRUIT_IMAGE_TAG`               | no       | recruIT version. Defaults to the release of the Compose files    |
-
-¹ Required when `AUTH_ENABLED=true`.
-
-A few notes on these:
-
-- `TRINO_JDBC_URL` must include the catalog and schema holding the FHIR tables, e.g. `/fhir/default`.
-- Trino only accepts passwords over TLS, so a Trino without authentication needs an empty `TRINO_PASSWORD`.
-- `LIST_CONNECTIONSTRINGS_APPDB` is an
-  [Npgsql connection string](https://www.npgsql.org/doc/connection-string-parameters.html).
-- With `AUTH_ENABLED=false`, the default, anyone who can reach the screening list can see every study and patient
-  without signing in.
-
-Register the screening list as a confidential client with the OpenID Connect provider, with the redirect URI
-`https://<screening list host>/signin-oidc`. Users with the `admin` role can see every study and manage the eligibility
-criteria and access permissions. Everyone else only sees the studies they've been given access to.
+See [Configuration options](../configuration/options.md#docker-compose) for what each variable sets and for all
+other settings, including the [OpenID Connect client setup](../configuration/options.md#authentication).
 
 ### Mail server and port
 
@@ -208,11 +177,10 @@ services:
       Notifications__Email__SmtpUsername: recruit
       Notifications__Email__SmtpPassword: change-me
       Notifications__Email__From: recruit@example.com
-      # link to a study's screening list in the emails. {0} is replaced with the list's id
       Notifications__Email__ScreeningListLinkTemplate: https://recruit.example.com/trials/{0}/patients
 ```
 
-TLS to the mail server is negotiated automatically based on the port.
+See [Notifications](../configuration/options.md#notifications) for what these settings do.
 
 ### Reverse proxy
 

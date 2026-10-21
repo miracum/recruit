@@ -29,7 +29,6 @@ nav = [
   ] },
   { "Configuration" = [
     "configuration/options.md",
-    "configuration/ui-configuration.md",
     "configuration/security.md",
     "configuration/existing-fhir-server.md",
   ] },

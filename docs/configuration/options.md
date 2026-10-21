@@ -1,80 +1,159 @@
 # Configuration Options
 
-This is a non-exhaustive list of available configuration options for the recruIT deployment.
+The recruIT modules are configured through environment variables. This page lists every setting of the screening list
+(`list`) and the query module (`query-sql-on-fhir`).
 
-!!! note ""
+How you set them depends on how recruIT is deployed:
 
-    When deploying using Helm, many of these options are automatically configured or exposed via `values.yaml`.
-    You can find a complete description of all available chart configuration options here:
-    <https://github.com/miracum/charts/blob/master/charts/recruit/README.md#configuration>. If anything is missing, you
-    can use the `extraEnv` option to supply additional environment variables to the modules.
+- **Docker Compose**: `compose.yaml` passes the most important settings from variables in your `.env` file, see
+  [below](#docker-compose). To set any other setting on this page, add it to the service's `environment` in a
+  `compose.override.yaml`, see [Mail server and port](../deployment/compose.md#mail-server-and-port) for an example.
+- **Helm**: the chart sets these from its values, which are documented in the
+  [chart's README](https://github.com/open-recruit/recruit/blob/master/charts/recruit/README.md#values). For a setting
+  the chart doesn't expose, use `list.extraEnv` or `querySqlOnFhir.extraEnv`.
 
-"Staging Default Value" refers to the default value for that option when [deploying via Docker Compose](../deployment/compose.md)
-using the `.staging.env` file.
+## Docker Compose
 
-## Used by multiple modules
+These are the variables `compose.yaml` reads from your `.env` file, and the module settings they set:
 
-| Variable | Description                                                                                                           | Staging Default Value   |
-| -------- | --------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| FHIR_URL | URL of a FHIR server used to store the screening lists and retrieve patient data (if available). Used by all modules. | `http://fhir:8080/fhir` |
+| `.env` variable                   | Required | Screening list setting      | Query module setting              |
+| --------------------------------- | -------- | --------------------------- | --------------------------------- |
+| `FHIR_SERVER_BASE_URL`            | yes      | `FhirServer__BaseUrl`       | `FHIR_SERVER_BASE_URL`            |
+| `LIST_CONNECTIONSTRINGS_APPDB`    | yes      | `ConnectionStrings__AppDb`  |                                   |
+| `PGPASSWORD`                      | yes      | `PGPASSWORD`                |                                   |
+| `AUTH_ENABLED`                    | no       | `Auth__Enabled`             |                                   |
+| `AUTH_OIDC_AUTHORITY`             | yes¹     | `Auth__Oidc__Authority`     |                                   |
+| `AUTH_OIDC_CLIENT_ID`             | yes¹     | `Auth__Oidc__ClientId`      |                                   |
+| `AUTH_OIDC_CLIENT_SECRET`         | yes¹     | `Auth__Oidc__ClientSecret`  |                                   |
+| `AUTH_OIDC_ROLE_CLAIM_TYPE`       | no       | `Auth__Oidc__RoleClaimType` |                                   |
+| `TRINO_JDBC_URL`                  | yes      |                             | `SPRING_DATASOURCE_URL`           |
+| `TRINO_USERNAME`                  | yes      |                             | `SPRING_DATASOURCE_USERNAME`      |
+| `TRINO_PASSWORD`                  | yes²     |                             | `SPRING_DATASOURCE_PASSWORD`      |
+| `SQL_ON_FHIR_URL`                 | no       |                             | `SQL_ON_FHIR_URL`                 |
+| `QUERY_SQL_ON_FHIR_SCHEDULE_CRON` | no       |                             | `QUERY_SQL_ON_FHIR_SCHEDULE_CRON` |
 
-## Screening List
+¹ Required when `AUTH_ENABLED=true`.
 
-| Variable                | Description                                                                                                                                                | Staging Default Value               |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| KEYCLOAK_DISABLED       | Disable Keycloak authentication for the screening list.                                                                                                    | `false`                             |
-| KEYCLOAK_CLIENT_ID      | Keycloak client id for the screening list component.                                                                                                       | `uc1-screeninglist`                 |
-| KEYCLOAK_REALM          | The Keycloak realm.                                                                                                                                        | `MIRACUM`                           |
-| KEYCLOAK_AUTH_URL       | Base URL of the Keycloak server (no `/auth` suffix for Keycloak 17+, unless the server has `KC_HTTP_RELATIVE_PATH=/auth` set for backwards compatibility). | `http://host.docker.internal:38086` |
-| HIDE_DEMOGRAPHICS       | Don't show age and gender of the persons                                                                                                                   | `false`                             |
-| HIDE_LAST_VISIT         | Don't show the last visit information                                                                                                                      | `false`                             |
-| HIDE_EHR_BUTTON         | Don't show the button to show EHR information of the person                                                                                                | `false`                             |
-| PROXY_IS_SECURE_BACKEND | If `FHIR_URL` points to a server using HTTPS, then you should set this to `1` or `true`                                                                    | `false`                             |
+² May be empty: Trino only accepts passwords over TLS, so a Trino without authentication needs an empty password.
 
-## Query Module
+Two more variables select the images: `RECRUIT_IMAGE_BASE_NAME` (default `ghcr.io/open-recruit/recruit`) and
+`RECRUIT_IMAGE_TAG` (default: the release the Compose files belong to).
 
-| Variable                                      | Description                                                                                                                                                                                                                                                                                  | Staging Default Value                 |
-| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| ATLAS_URL                                     | URL of the ATLAS WebAPI endpoint. Usually ends in `/WebAPI`. Used by the query module.¹                                                                                                                                                                                                      | `http://ohdsi-webapi:8080/WebAPI`     |
-| ATLAS_DATASOURCE                              | Name of the ATLAS datasource used to generate the cohorts from.                                                                                                                                                                                                                              | `OHDSI-CDMV5`                         |
-| OMOP_JDBCURL                                  | JDBC URL of the OMOP database.                                                                                                                                                                                                                                                               | `jdbc:postgresql://omopdb:5432/OHDSI` |
-| OMOP_USERNAME                                 | Username to access the OMOP database.                                                                                                                                                                                                                                                        | `postgres`                            |
-| OMOP_PASSWORD                                 | Password to access the OMOP database.                                                                                                                                                                                                                                                        | `postgres`                            |
-| OMOP_RESULTSSCHEMA                            | Name of the database schema containing the results of the cohort generation.                                                                                                                                                                                                                 | `synpuf_results`                      |
-| OMOP_CDMSCHEMA                                | Name of the database schema containing the actual clinical data.                                                                                                                                                                                                                             | `synpuf_cdm`                          |
-| QUERY_SCHEDULE_UNIXCRON                       | A UNIX-compliant CRON expression to configure the execution schedule of the query module (see <https://crontab.guru/>).                                                                                                                                                                      | `*/5 * * * *` (Run every 5 minutes)   |
-| QUERY_SELECTOR_MATCHLABELS                    | Comma-separated list of labels which must be present in either the cohort's name or description enclosed in `[]` in order to be processed by the query module.²                                                                                                                              | `UC1,Test`                            |
-| QUERY_WEBAPI_AUTH_ENABLED                     | Set to true if the OHDSI WebAPI requires authentication.                                                                                                                                                                                                                                     | `false`                               |
-| QUERY_WEBAPI_AUTH_LOGIN_PATH                  | The login method to use. See <https://github.com/OHDSI/Atlas/blob/master/js/config/app.js#L20> for a list of possible paths.                                                                                                                                                                 | `/user/login/db`                      |
-| QUERY_WEBAPI_AUTH_USERNAME                    | The username to login as. Note that this user needs permissions to query and generate cohorts.                                                                                                                                                                                               | `""`                                  |
-| QUERY_WEBAPI_AUTH_PASSWORD                    | The password used to login.                                                                                                                                                                                                                                                                  | `""`                                  |
-| QUERY_APPEND_RECOMMENDATIONS_TO_EXISTING_LIST | if true, instead of overwriting the contents of the List for each cohort based on what the last generation run returned, append to this list                                                                                                                                                 | `false`                               |
-| QUERY_FORCE_UPDATE_SCREENING_LIST             | if true, always send a List resource as part of the transaction even if nothing changed                                                                                                                                                                                                      | `false`                               |
-| QUERY_ONLY_CREATE_PATIENTS_IF_NOT_EXIST       | if true, send Patient resources as "conditional-creates" on their first identifier instead of using "conditional-update". Useful if the server is already filled with Patient resources from a different system                                                                              | `false`                               |
-| QUERY_COHORTSIZETHRESHOLD                     | Maximum number of patients to be included in the generated screening list. A warning will appear on the screening list view if a list exceeded this count.                                                                                                                                   | `100`                                 |
-| QUERY_WEBAPI_COHORT_CACHE_SCHEMA              | The name of the schema which contains the cohort definitions cache.                                                                                                                                                                                                                          | `ohdsi`                               |
-| QUERY_RUN_ONCE_AND_EXIT                       | If set to `true`, run the query module only once against all discovered cohort definitions and exit. Useful when running the module as part of a larger workflow. See [here](../deployment/kubernetes.md#running-the-query-module-using-argo-workflows) for an example using Argo Workflows. | `false`                               |
+The `create-search-parameters` job only uses `FHIR_SERVER_BASE_URL`.
 
-¹: This is usually the same URL you configured in the `config-local.js` file when setting up the ATLAS server.
+## Screening list
 
-²: For example, the default values of `UC1,Test` require the cohort definitions name or description in Atlas to contain either
-the string `[UC1]` or `[Test]` in order to be processed by the query module.
+The screening list is an ASP.NET Core app. Nested settings use `__` as the separator in environment variable names,
+e.g. `Auth__Oidc__Authority` sets `Oidc.Authority` inside the `Auth` section.
 
-## Notification Module
+### FHIR server
 
-| Variable                   | Description                                                                                                                                  | Staging Default Value                                            |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| NOTIFY_WEBHOOK_ENDPOINT    | External URL for the notification module's webhook endpoint. Should end in `/on-list-change`.³                                               | `http://notify:8080/on-list-change`                              |
-| NOTIFY_RULES_CONFIG_PATH   | Path to the notification rule configuration file. The file is mounted inside the notification module.                                        | `./staging/notify-rules.yml`                                     |
-| NOTIFY_MAIL_HOST           | Host of the SMTP server used to send notification emails.                                                                                    | `maildev`                                                        |
-| NOTIFY_MAIL_SMTP_PORT      | SMTP port on the host.                                                                                                                       | `1025`                                                           |
-| NOTIFY_MAIL_USERNAME       | SMTP username.                                                                                                                               | `user`                                                           |
-| NOTIFY_MAIL_PASSWORD       | SMTP password.                                                                                                                               | `pass`                                                           |
-| NOTIFY_MAILER_LINKTEMPLATE | Template used to generate a clickable link in the notification emails. `[list_id]` is mandatory and is replaced with the lists internal id.⁴ | `http://recruit-list.127.0.0.1.nip.io/recommendations/[list_id]` |
-| NOTIFY_MAILER_FROM         | The sender email address for the created notification mails.                                                                                 | `rekrutierung@miracum.org`                                       |
+- `FhirServer__BaseUrl` (required): base URL of the FHIR server, e.g. `https://fhir.example.com/fhir`.
 
-³: If your FHIR server is running on `fhir.example.com` and your notification module runs on `notify.example.com:8080`,
-then this value should be set to `http://notify.example.com:8080/on-list-change`. The default exposed port of the notification module is `38087`. This external port is used when the FHIR server can't access the notification module using the Docker-network internal host and port `notify:8080`.
+### Database
 
-⁴: If your screening list is running on `https://list.example.com:38080/`, then this value should be set to
-`https://list.example.com:38080/recommendations/[list_id]`.
+The screening list stores user permissions, notification subscriptions and its job queue in PostgreSQL.
+
+- `ConnectionStrings__AppDb` (required): an
+  [Npgsql connection string](https://www.npgsql.org/doc/connection-string-parameters.html), e.g.
+  `Host=postgres;Port=5432;Database=recruit;Username=recruit`.
+- `PGUSER`, `PGPASSWORD`: database user and password, used if the connection string doesn't contain them.
+
+### Authentication
+
+- `Auth__Enabled` (default `false`): whether users sign in via OpenID Connect. When `false`, anyone who can reach the
+  screening list is treated as a signed-in admin and can see every study and patient. Always set it to `true` in
+  production.
+- `Auth__AdminRole` (default `admin`): the role that can see every study and manage eligibility criteria and access
+  permissions. Users without it only see the studies they've been given access to.
+- `Auth__Oidc__Authority`: issuer URL of the OpenID Connect provider, e.g. `https://auth.example.com/realms/recruit`.
+- `Auth__Oidc__ClientId`, `Auth__Oidc__ClientSecret`: the screening list's client credentials.
+- `Auth__Oidc__RoleClaimType` (default `role`): the claim holding the user's roles.
+- `Auth__Oidc__GroupClaimType` (default `groups`) and `Auth__Oidc__GroupRoleMappings`: grant a role to the members
+  of an identity provider group. `GroupRoleMappings` maps group names to roles, e.g.
+  `{ "/recruit-admins": "admin" }` in the `Auth:Oidc` section of the app's configuration.
+
+Register the screening list as a confidential client with the OpenID Connect provider, with the redirect URI
+`https://<screening list host>/signin-oidc`. The screening list requests the `openid`, `profile`, `email` and
+`offline_access` scopes.
+
+### Notifications
+
+- `Notifications__ScanIntervalSeconds` (default `60`): how often to check the screening lists for new candidates to
+  notify subscribers about.
+- `Notifications__NewSuggestionWindowDays` (default `7`): for how many days a new candidate is highlighted as new.
+
+Notifications are sent by email:
+
+- `Notifications__Email__SmtpHost`, `Notifications__Email__SmtpPort`: the SMTP server. TLS is negotiated
+  automatically based on the port.
+- `Notifications__Email__SmtpUsername`, `Notifications__Email__SmtpPassword`: SMTP credentials, if the server needs
+  them.
+- `Notifications__Email__From`: the sender address.
+- `Notifications__Email__SubjectTemplate`: the subject line. `{0}` is replaced with the study's acronym.
+- `Notifications__Email__ScreeningListLinkTemplate`: the link to a study's screening list in the emails, e.g.
+  `https://recruit.example.com/trials/{0}/patients`. `{0}` is replaced with the list's id.
+
+### Ports and observability
+
+- `HTTP_PORT` (default `8080`): port of the web app.
+- `METRICS_PORT` (default `8081`): port serving Prometheus metrics at `/metrics`.
+- `Tracing__Enabled` (default `false`): export OpenTelemetry traces, configured via the standard variables like
+  `OTEL_EXPORTER_OTLP_ENDPOINT`.
+
+## Query module
+
+The query module is a Spring Boot app. Its settings can be set as environment variables using Spring Boot's
+[relaxed binding](https://docs.spring.io/spring-boot/reference/features/external-config.html#features.external-config.typesafe-configuration-properties.relaxed-binding.environment-variables),
+e.g. `QUERY_SQL_ON_FHIR_SCHEDULE_CRON` for `query-sql-on-fhir.schedule.cron`.
+
+### FHIR server access
+
+- `FHIR_SERVER_BASE_URL` (required): base URL of the FHIR server.
+- `FHIR_SERVER_TIMEOUT_IN_SECONDS` (default `300`): timeout of requests to the FHIR server.
+- `FHIR_USE_UPDATE_AS_CREATE` (default `false`): write screening list entries using `PUT` with a deterministic id
+  instead of conditional creates, for FHIR servers that don't support conditional creates.
+
+### Criteria database
+
+The database the eligibility criteria's SQL is run against.
+
+- `SPRING_DATASOURCE_URL` (required): JDBC URL, e.g. `jdbc:trino://trino.example.com:443/fhir/default?SSL=true`.
+  For Trino, it must include the catalog and schema holding the FHIR tables.
+- `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`: database credentials.
+- `QUERY_SQL_ON_FHIR_SQL_DIALECT` (default `trino`): the database's SQL dialect, `trino` or `duckdb`. A criterion is
+  run directly if its Library has `application/sql;dialect=<dialect>` content. For DuckDB, also set
+  `SPRING_DATASOURCE_DRIVERCLASSNAME=org.duckdb.DuckDBDriver`, see
+  [Querying FHIR resources with DuckDB](../trino/index.md#querying-fhir-resources-with-duckdb).
+- `SQL_ON_FHIR_URL`: base URL of a SQL on FHIR server such as [Pathling](https://pathling.csiro.au/). Criteria that
+  depend on ViewDefinitions or have no content in the configured dialect are sent to its `$sqlquery-run` operation.
+
+### Schedule
+
+- `QUERY_SQL_ON_FHIR_RUN_MODE` (default `scheduled`): `scheduled` runs forever on the schedule below. `one-shot` runs
+  once and exits, with a non-zero exit code if any study failed, e.g. for running it as a Kubernetes Job.
+- `QUERY_SQL_ON_FHIR_SCHEDULE_CRON` (default `@hourly`): when to update the screening lists, as a
+  [Spring cron expression](https://docs.spring.io/spring-framework/reference/integration/scheduling.html#scheduling-cron-expression)
+  with six fields (seconds first) or a macro like `@hourly`.
+
+### Screening behavior
+
+- `QUERY_SQL_ON_FHIR_REQUIRE_ALL_CRITERIA_MET` (default `false`): by default, patients for whom a criterion can't be
+  evaluated because of missing data are also recommended, for manual review. When `true`, only patients who meet
+  every criterion are recommended.
+- `QUERY_SQL_ON_FHIR_MAX_RESEARCH_SUBJECTS` (default `-1`, unlimited): skip a study if it would recommend more
+  patients than this.
+- `QUERY_SQL_ON_FHIR_DRY_RUN` (default `false`): run the criteria and log how many patients would be recommended,
+  without writing anything to the FHIR server.
+- `QUERY_SQL_ON_FHIR_TRANSACTION_BUNDLE_CHUNK_SIZE` (default `500`): the maximum number of patients written to the
+  FHIR server per transaction.
+- `QUERY_SQL_ON_FHIR_FUNNEL_ENABLED` (default `false`): also compute each study's attrition funnel, i.e. how many
+  patients remain after applying each criterion, shown in the screening list. It's a considerably more expensive query.
+- `QUERY_SQL_ON_FHIR_FUNNEL_TOTAL_POPULATION_SQL` (default `SELECT COUNT(*) FROM Patient`): the query counting the
+  funnel's total population, e.g. `SELECT COUNT(*) FROM fhir.default.patient`.
+
+### Observability
+
+- `OTEL_SDK_DISABLED` (default `true`): set to `false` to export OpenTelemetry traces, configured via the standard
+  variables like `OTEL_EXPORTER_OTLP_ENDPOINT`.
+- Health checks are served at `/actuator/health` and Prometheus metrics at `/actuator/prometheus` on port `8080`.
