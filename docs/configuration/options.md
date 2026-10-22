@@ -79,20 +79,22 @@ Register the screening list as a confidential client with the OpenID Connect pro
 
 ### Notifications
 
-- `Notifications__ScanIntervalSeconds` (default `60`): how often to check the screening lists for new candidates to
-  notify subscribers about.
-- `Notifications__NewSuggestionWindowDays` (default `7`): for how many days a new candidate is highlighted as new.
+See [Notifications](notifications.md) for how notifications work. They are sent by email:
 
-Notifications are sent by email:
-
-- `Notifications__Email__SmtpHost`, `Notifications__Email__SmtpPort`: the SMTP server. TLS is negotiated
-  automatically based on the port.
+- `Notifications__Email__SmtpHost`, `Notifications__Email__SmtpPort` (default `25`): the SMTP server. TLS is
+  negotiated automatically based on the port.
 - `Notifications__Email__SmtpUsername`, `Notifications__Email__SmtpPassword`: SMTP credentials, if the server needs
   them.
 - `Notifications__Email__From`: the sender address.
 - `Notifications__Email__SubjectTemplate`: the subject line. `{0}` is replaced with the study's acronym.
-- `Notifications__Email__PublicBaseUrl`: the URL users reach the app at, e.g. `https://recruit.example.com/`. Links in
-  the emails are built from it.
+- `Notifications__Email__PublicBaseUrl`: the URL users open the screening list at, e.g. `https://recruit.example.com/`.
+  Every link in the emails is built from it, so it must be reachable from where your users read their email.
+
+The screening list checks for new candidates every minute and sends due emails every 5 minutes. Neither interval is
+configurable.
+
+- `Notifications__NewSuggestionWindowDays` (default `7`): for how many days after being recommended a candidate is
+  marked as new on the screening list. This only affects that marker, not notifications.
 
 ### Ports and observability
 

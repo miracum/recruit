@@ -239,7 +239,7 @@ public sealed class NotificationSenderService(
             var digestId = Guid.NewGuid();
             var html = RenderHtml(
                 includedDeliveries.Count,
-                subjectAcronym,
+                distinctAcronyms,
                 EmailDigestLink(digestId)
             );
 
@@ -302,7 +302,7 @@ public sealed class NotificationSenderService(
         const string sampleAcronym = "TEST-TRIAL";
 
         var subject = "[Test] " + string.Format(mailerOptions.Value.SubjectTemplate, sampleAcronym);
-        var html = RenderHtml(1, sampleAcronym, EmailDigestLink(Guid.NewGuid()));
+        var html = RenderHtml(1, [sampleAcronym], EmailDigestLink(Guid.NewGuid()));
 
         await using var batch = await channel.BeginBatchAsync(protocolLog, ct);
         await batch.SendAsync(recipientEmail, subject, html, ct);
@@ -315,15 +315,17 @@ public sealed class NotificationSenderService(
     /// <summary>
     /// Renders the digest email body from an aggregate count only - no patient names or other
     /// per-subject data is ever passed to the template, since a subscriber must not learn who was
-    /// suggested from the notification email itself (data protection).
+    /// suggested from the notification email itself (data protection). The template gets every
+    /// acronym rather than the subject line's pre-joined "N trials" so it can word single- and
+    /// multi-trial digests properly.
     /// </summary>
     private static string RenderHtml(
         int numNewSubjects,
-        string studyAcronym,
+        IReadOnlyList<string> studyAcronyms,
         string screeningListLink
     )
     {
-        var model = new DigestTemplateModel(numNewSubjects, studyAcronym, screeningListLink);
+        var model = new DigestTemplateModel(numNewSubjects, studyAcronyms, screeningListLink);
         var context = new TemplateContext(model, DigestTemplateOptions);
         var mjml = DigestTemplate.Render(context, HtmlEncoder.Default);
 
@@ -368,7 +370,7 @@ public sealed class NotificationSenderService(
 
     private sealed record DigestTemplateModel(
         int NumNewSubjects,
-        string StudyAcronym,
+        IReadOnlyList<string> StudyAcronyms,
         string ScreeningListLink
     );
 }

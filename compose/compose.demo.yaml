@@ -66,6 +66,11 @@ services:
         condition: service_completed_successfully
     ports:
       - "127.0.0.1:32080:8080"
+    environment:
+      # notification emails go to the demo's MailDev, viewable at http://127.0.0.1:32025
+      Notifications__Email__SmtpHost: maildev
+      Notifications__Email__SmtpPort: "1025"
+      Notifications__Email__PublicBaseUrl: http://127.0.0.1:32080/
 
   create-search-parameters:
     depends_on:

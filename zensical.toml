@@ -29,8 +29,8 @@ nav = [
   ] },
   { "Configuration" = [
     "configuration/options.md",
+    "configuration/notifications.md",
     "configuration/security.md",
-    "configuration/existing-fhir-server.md",
   ] },
   { "Query module" = [
     "trino/index.md",

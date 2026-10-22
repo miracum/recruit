@@ -41,7 +41,8 @@ either Compose or Helm.
         - a lakehouse with the same patients as [Delta Lake](https://delta.io/) tables, made up of SeaweedFS as object
           storage, a Hive metastore, and [Trino](https://trino.io/) to query them
         - PostgreSQL for the FHIR server, the screening list, and the Hive metastore
-        - [MailDev](https://github.com/maildev/maildev), a mock mail server
+        - [MailDev](https://github.com/maildev/maildev), a mock mail server that catches the notification emails,
+          at <http://127.0.0.1:32025>
 
         For a production installation, all of these are replaced by your own services, see
         [Docker Compose](../deployment/compose.md#production-installation).

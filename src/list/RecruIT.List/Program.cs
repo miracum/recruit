@@ -334,7 +334,7 @@ await using (var scope = app.Services.CreateAsyncScope())
     recurringJobManager.AddOrUpdate<NotificationSenderService>(
         "send-due-notification-emails",
         s => s.SendDueAsync(CancellationToken.None),
-        Cron.MinuteInterval(10)
+        Cron.MinuteInterval(5)
     );
     // AddOrUpdate only ever adds/updates - it never removes a job id that's stopped being
     // registered, so the old "poll-screening-lists" recurring job (ScreeningListPollService, now
