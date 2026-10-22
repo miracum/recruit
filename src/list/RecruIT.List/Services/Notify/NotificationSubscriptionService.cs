@@ -211,6 +211,7 @@ public sealed class NotificationSubscriptionService(
                     d.Id,
                     d.ReadAt,
                     e.TrialIdentifier,
+                    e.PatientReference,
                     e.PatientDisplayName,
                     e.OccurredAt,
                 }
@@ -225,6 +226,7 @@ public sealed class NotificationSubscriptionService(
             .Select(j => new NotificationFeedItemDto(
                 j.Id,
                 j.TrialIdentifier,
+                j.PatientReference,
                 j.PatientDisplayName,
                 j.OccurredAt,
                 j.ReadAt

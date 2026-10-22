@@ -11,6 +11,7 @@ namespace RecruIT.List.Models;
 public sealed record NotificationFeedItemDto(
     Guid DeliveryId,
     string TrialIdentifier,
+    string PatientReference,
     string PatientDisplayName,
     DateTimeOffset OccurredAt,
     DateTimeOffset? ReadAt

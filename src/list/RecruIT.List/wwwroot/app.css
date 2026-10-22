@@ -123,3 +123,13 @@ h1:focus {
     font-size: 0.75rem;
     line-height: 1.4;
 }
+
+/* The patient deep-linked from a notification (see PatientList.razor's ?subject=). BbDataTable
+   has no per-row class, so its cells carry a marker class and the row is tinted from here. */
+tr:has(.patient-row-highlight) > td {
+    background-color: color-mix(in oklab, var(--primary) 10%, transparent);
+}
+
+tr:has(.patient-row-highlight) > td:first-child {
+    box-shadow: inset 3px 0 0 var(--primary);
+}

@@ -138,7 +138,7 @@ else if (_summary is not null)
             <Columns>
                 <BbDataTableColumn TData="PatientListEntryDto" TValue="DateTimeOffset?" Header="@Localizer["App.PatientList.ColumnRecommended"]" Property="p => p.RecommendedDate" Sortable="true">
                     <CellTemplate Context="p">
-                        <div class="bb:block bb:cursor-pointer bb:p-4" @onclick="() => OpenPatient(p)">
+                        <div class="bb:block bb:cursor-pointer bb:p-4 @RowMarker(p)" @onclick="() => OpenPatient(p)">
                             @(p.RecommendedDate?.LocalDateTime.ToString("d") ?? "-")
                             @if (p.IsNew(NewSuggestionWindowDays))
                             {
@@ -149,14 +149,14 @@ else if (_summary is not null)
                 </BbDataTableColumn>
                 <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="@Localizer["App.PatientList.ColumnName"]" Property="p => p.Name ?? p.MedicalRecordNumber ?? p.PatientId" Sortable="true">
                     <CellTemplate Context="p">
-                        <div class="bb:block bb:cursor-pointer bb:p-4" @onclick="() => OpenPatient(p)">
+                        <div class="bb:block bb:cursor-pointer bb:p-4 @RowMarker(p)" @onclick="() => OpenPatient(p)">
                             <span class="bb:font-medium bb:hover:underline">@(p.Name ?? p.MedicalRecordNumber ?? p.PatientId)</span>
                         </div>
                     </CellTemplate>
                 </BbDataTableColumn>
                 <BbDataTableColumn TData="PatientListEntryDto" TValue="int?" Header="@Localizer["App.PatientList.ColumnDemographics"]" Width="140px">
                     <CellTemplate Context="p">
-                        <div class="bb:block bb:cursor-pointer bb:p-4" @onclick="() => OpenPatient(p)">
+                        <div class="bb:block bb:cursor-pointer bb:p-4 @RowMarker(p)" @onclick="() => OpenPatient(p)">
                             @(p.Age is not null ? p.Age.ToString() : Localizer["App.Common.AgeUnknown"].Value)
                             <span class="bb:text-muted-foreground">&middot;</span>
                             @(p.Gender is not null ? Localizer[GenderDisplay.GetKey(p.Gender)].Value : Localizer["App.Common.Unknown"].Value)
@@ -165,7 +165,7 @@ else if (_summary is not null)
                 </BbDataTableColumn>
                 <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="@Localizer["App.PatientList.ColumnStatus"]">
                     <CellTemplate Context="p">
-                        <div class="bb:flex bb:flex-wrap bb:items-center bb:gap-2 bb:cursor-pointer bb:p-4" @onclick="() => OpenPatient(p)">
+                        <div class="bb:flex bb:flex-wrap bb:items-center bb:gap-2 bb:cursor-pointer bb:p-4 @RowMarker(p)" @onclick="() => OpenPatient(p)">
                             <StatusBadge Status="@p.Status" />
                             @if (p.SystemDeterminedIneligible)
                             {
@@ -176,7 +176,7 @@ else if (_summary is not null)
                 </BbDataTableColumn>
                 <BbDataTableColumn TData="PatientListEntryDto" TValue="string" Header="@Localizer["App.PatientList.ColumnLocation"]">
                     <CellTemplate Context="p">
-                        <div class="bb:block bb:cursor-pointer bb:p-4" @onclick="() => OpenPatient(p)">
+                        <div class="bb:block bb:cursor-pointer bb:p-4 @RowMarker(p)" @onclick="() => OpenPatient(p)">
                             @if (p.LastKnownLocationLoaded)
                             {
                                 @(p.LastKnownLocation ?? Localizer["App.Common.Unknown"].Value)
@@ -190,7 +190,7 @@ else if (_summary is not null)
                 </BbDataTableColumn>
                 <BbDataTableColumn TData="PatientListEntryDto" TValue="DateTimeOffset?" Header="@Localizer["App.PatientList.ColumnUpdated"]" Property="p => p.LastUpdated" Sortable="true">
                     <CellTemplate Context="p">
-                        <div class="bb:block bb:cursor-pointer bb:p-4" @onclick="() => OpenPatient(p)">
+                        <div class="bb:block bb:cursor-pointer bb:p-4 @RowMarker(p)" @onclick="() => OpenPatient(p)">
                             @(p.LastUpdated?.LocalDateTime.ToString("g") ?? "-")
                         </div>
                     </CellTemplate>
@@ -207,6 +207,13 @@ else if (_summary is not null)
 @code {
     [Parameter]
     public string ListId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// A ResearchSubject id to open and highlight once the list has loaded - the deep link the
+    /// notifications page uses for "this patient was newly recommended".
+    /// </summary>
+    [SupplyParameterFromQuery(Name = "subject")]
+    public string? Subject { get; set; }
 
     [CascadingParameter]
     private Task<AuthenticationState>? AuthStateTask { get; set; }
@@ -227,14 +234,33 @@ else if (_summary is not null)
 
     private PatientListEntryDto? _selectedPatient;
 
+    /// <summary>The ?subject= deep link's patient, if it's on this list - stays highlighted after its dialog is closed.</summary>
+    private PatientListEntryDto? _highlightedPatient;
+
     /// <summary>
     /// Replaces the data table's own toolbar search, which comes with an unwanted column-visibility
     /// button - matches what the table shows: name, MRN, patient id and last known location.
     /// </summary>
     private List<PatientListEntryDto> FilteredPatients => string.IsNullOrWhiteSpace(_search)
-        ? _patients
-        : [.. _patients.Where(p =>
+        ? PinnedPatients
+        : [.. PinnedPatients.Where(p =>
             Matches(p.Name) || Matches(p.MedicalRecordNumber) || Matches(p.PatientId) || Matches(p.LastKnownLocation))];
+
+    /// <summary>
+    /// The highlighted patient first, rest in their usual order (OrderBy is stable) - the data
+    /// table pages client-side and offers no way to jump to a row's page, so this is what keeps
+    /// the deep-linked patient on the first page (until the user sorts by a column themselves).
+    /// </summary>
+    private List<PatientListEntryDto> PinnedPatients => _highlightedPatient is null
+        ? _patients
+        : [.. _patients.OrderBy(p => !ReferenceEquals(p, _highlightedPatient))];
+
+    /// <summary>
+    /// The data table has no per-row class, so each cell of the highlighted row carries this
+    /// marker instead and app.css tints the whole row via tr:has(...).
+    /// </summary>
+    private string RowMarker(PatientListEntryDto patient) =>
+        ReferenceEquals(patient, _highlightedPatient) ? "patient-row-highlight" : string.Empty;
 
     private bool Matches(string? value) => value?.Contains(_search.Trim(), StringComparison.OrdinalIgnoreCase) ?? false;
 
@@ -271,6 +297,8 @@ else if (_summary is not null)
             var (summary, patients) = await ScreeningListService.GetListWithPatientsAsync(ListId, _user);
             _summary = summary;
             _patients = [.. patients];
+            _highlightedPatient = Subject is null ? null : _patients.FirstOrDefault(p => p.ResearchSubjectId == Subject);
+            _selectedPatient ??= _highlightedPatient;
             var permission = await AccessService.GetPermissionAsync(_user, summary.TrialIdentifier);
             _canEdit = TrialAccessService.MeetsCoordinatorThreshold(permission);
             _canManageAccess = TrialAccessService.MeetsTrialAdminThreshold(permission);

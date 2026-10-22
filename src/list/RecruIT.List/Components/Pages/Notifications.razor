@@ -41,6 +41,7 @@
         string TrialIdentifier,
         string? ListId,
         string StudyAcronym,
+        string? ResearchSubjectId,
         string PatientDisplayName,
         DateTimeOffset OccurredAt
     );
@@ -111,6 +112,7 @@
                         feedItem.TrialIdentifier,
                         listInfo?.ListId,
                         listInfo?.StudyAcronym ?? feedItem.TrialIdentifier,
+                        ResearchSubjectIdOf(feedItem.PatientReference),
                         feedItem.PatientDisplayName,
                         feedItem.OccurredAt
                     )
@@ -203,6 +205,16 @@
             () => NotificationSubscriptionService.MarkAllReadAsync(_user, trialIdentifier)
         );
 
+    /// <summary>
+    /// The event's PatientReference is the screening list entry's own reference
+    /// ("ResearchSubject/{id}", see NotificationDetectorService) - its id is what PatientList's
+    /// ?subject= deep link matches on.
+    /// </summary>
+    private static string? ResearchSubjectIdOf(string patientReference) =>
+        patientReference.StartsWith("ResearchSubject/", StringComparison.Ordinal)
+            ? patientReference["ResearchSubject/".Length..].Split('/')[0]
+            : null;
+
     private async Task OpenAsync(DisplayItem item)
     {
         if (Filter == NotificationFeedFilter.Unread)
@@ -210,7 +222,13 @@
             await MarkReadAsync([item]);
         }
 
-        Navigation.NavigateTo($"/trials/{Uri.EscapeDataString(item.ListId!)}/patients");
+        var url = $"/trials/{Uri.EscapeDataString(item.ListId!)}/patients";
+        if (item.ResearchSubjectId is not null)
+        {
+            url += $"?subject={Uri.EscapeDataString(item.ResearchSubjectId)}";
+        }
+
+        Navigation.NavigateTo(url);
     }
 
     private RenderFragment Feed => __builder =>
