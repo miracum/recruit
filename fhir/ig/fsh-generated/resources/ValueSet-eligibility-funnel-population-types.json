@@ -1,0 +1,16 @@
+{
+  "resourceType": "ValueSet",
+  "status": "active",
+  "name": "EligibilityFunnelPopulationTypes",
+  "id": "eligibility-funnel-population-types",
+  "title": "recruIT eligibility funnel population types",
+  "description": "The population kinds a study's attrition-funnel MeasureReport.group.population may be coded as.",
+  "url": "https://openrecruit.dev/fhir/ValueSet/eligibility-funnel-population-types",
+  "compose": {
+    "include": [
+      {
+        "system": "https://openrecruit.dev/fhir/CodeSystem/eligibility-funnel-population-type"
+      }
+    ]
+  }
+}

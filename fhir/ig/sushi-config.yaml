@@ -30,6 +30,8 @@ publisher:
 #     id: mcode
 #     uri: http://hl7.org/fhir/us/mcode/ImplementationGuide/hl7.fhir.us.mcode
 #     version: 1.0.0
+dependencies:
+  de.medizininformatikinitiative.kerndatensatz.studie: 2026.0.2
 #
 #
 # The pages property corresponds to IG.definition.page. SUSHI can

@@ -27,10 +27,7 @@ InstanceOf: RecruitResearchStudy
 Usage: #inline
 * id = "98d96608-475f-4386-b7b5-6ddc1eb57e71"
 * insert OpenRecruitIdentifier(sql-criteria-research-study-id, bronchitis)
-* extension[0].url = "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym"
-* extension[0].valueString = "DEMO-BRONCHITIS"
-* extension[1].url = "https://www.medizininformatik-initiative.de/fhir/modul-studie/StructureDefinition/mii-ex-studie-akronym"
-* extension[1].valueString = "DEMO-BRONCHITIS"
+* extension[Akronym].valueString = "DEMO-BRONCHITIS"
 * status = #active
 * title = "Bronchitis Demo Study"
 * enrollment = Reference(SampleStudyEligibilityGroup)

@@ -24,6 +24,14 @@
   "fhirVersion": [
     "4.0.1"
   ],
+  "dependsOn": [
+    {
+      "packageId": "de.medizininformatikinitiative.kerndatensatz.studie",
+      "version": "2026.0.2",
+      "uri": "http://fhir.org/packages/de.medizininformatikinitiative.kerndatensatz.studie/ImplementationGuide/de.medizininformatikinitiative.kerndatensatz.studie",
+      "id": "de_medizininformatikinitiative_kerndatensatz_studie"
+    }
+  ],
   "definition": {
     "resource": [
       {
@@ -68,6 +76,14 @@
       },
       {
         "reference": {
+          "reference": "MeasureReport/eligibility-funnel-report-example"
+        },
+        "name": "EligibilityFunnelReportExample",
+        "description": "An example of a study's attrition-funnel MeasureReport with a single criterion step.",
+        "exampleCanonical": "https://openrecruit.dev/fhir/StructureDefinition/eligibility-funnel-report"
+      },
+      {
+        "reference": {
           "reference": "NamingSystem/eligibility-funnel-report-id"
         },
         "name": "EligibilityFunnelReportIdentifierSystem",
@@ -105,6 +121,14 @@
         "name": "EligibilityLibraryIdentifierSystem",
         "description": "The identifier system for a criterion expressed in a Library resource",
         "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "Measure/eligibility-funnel-measure-example"
+        },
+        "name": "EXAMPLE eligibility attrition funnel",
+        "description": "An example of a study's attrition-funnel Measure.",
+        "exampleCanonical": "https://openrecruit.dev/fhir/StructureDefinition/eligibility-funnel-measure"
       },
       {
         "reference": {
@@ -164,10 +188,34 @@
       },
       {
         "reference": {
+          "reference": "StructureDefinition/eligibility-funnel-measure"
+        },
+        "name": "recruIT eligibility funnel Measure",
+        "description": "The Measure a study's attrition-funnel MeasureReport is reported against. Nothing is evaluated as a quality measure - it exists so MeasureReport.measure has a real canonical to resolve, and lists the criterion Libraries the funnel steps were derived from.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "StructureDefinition/eligibility-funnel-report"
+        },
+        "name": "recruIT eligibility funnel MeasureReport",
+        "description": "A study's eligibility attrition funnel: the total screened population, followed by one population per eligibility criterion holding the number of patients remaining after cumulatively applying it, in Group.characteristic order.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
           "reference": "CodeSystem/eligibility-funnel-population-type"
         },
         "name": "recruIT eligibility funnel population type",
         "description": "The two population kinds making up a study's attrition-funnel MeasureReport.group.population: the total screened population, and the population remaining after cumulatively applying one more criterion.",
+        "exampleBoolean": false
+      },
+      {
+        "reference": {
+          "reference": "ValueSet/eligibility-funnel-population-types"
+        },
+        "name": "recruIT eligibility funnel population types",
+        "description": "The population kinds a study's attrition-funnel MeasureReport.group.population may be coded as.",
         "exampleBoolean": false
       },
       {
@@ -182,7 +230,7 @@
           "reference": "StructureDefinition/recruit-research-study"
         },
         "name": "RecruitResearchStudy",
-        "description": "A profile for the ResearchStudy resource used to represent a clinical trial.",
+        "description": "A profile for the ResearchStudy resource used to represent a clinical trial, based on the MII Studie module's ResearchStudy profile.",
         "exampleBoolean": false
       },
       {

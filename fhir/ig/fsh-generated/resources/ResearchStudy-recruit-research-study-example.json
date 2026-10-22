@@ -6,6 +6,12 @@
       "https://openrecruit.dev/fhir/StructureDefinition/recruit-research-study"
     ]
   },
+  "extension": [
+    {
+      "url": "https://www.medizininformatik-initiative.de/fhir/modul-studie/StructureDefinition/mii-ex-studie-akronym",
+      "valueString": "EXAMPLE"
+    }
+  ],
   "status": "active",
   "enrollment": [
     {

@@ -66,7 +66,7 @@ public class FunnelReportBuilder {
     // is (see IdUtils.fromIdentifier) gives it exactly that, without a second round trip to look
     // the id up after submission.
     var measureCanonicalUrl =
-        "https://miracum.github.io/recruit/fhir/Measure/"
+        "https://openrecruit.dev/fhir/Measure/"
             + IdUtils.fromIdentifier(measureIdentifier).getIdPart();
 
     var measure = buildMeasure(study, measureCanonicalUrl, funnel.steps());
@@ -87,6 +87,7 @@ public class FunnelReportBuilder {
   private Measure buildMeasure(
       ResearchStudy study, String canonicalUrl, List<FunnelResult.Step> steps) {
     var measure = new Measure();
+    measure.getMeta().addProfile(Recruit.Profiles.eligibilityFunnelMeasure());
     measure.setUrl(canonicalUrl);
     measure.setStatus(Enumerations.PublicationStatus.ACTIVE);
     measure.setTitle(
@@ -108,6 +109,7 @@ public class FunnelReportBuilder {
   private MeasureReport buildMeasureReport(
       ResearchStudy study, FunnelResult funnel, Date effectiveDate, String measureUrl) {
     var report = new MeasureReport();
+    report.getMeta().addProfile(Recruit.Profiles.eligibilityFunnelReport());
     report.setStatus(MeasureReport.MeasureReportStatus.COMPLETE);
     report.setType(MeasureReport.MeasureReportType.SUMMARY);
     report.setMeasure(measureUrl);

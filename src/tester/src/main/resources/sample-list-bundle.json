@@ -193,7 +193,7 @@
         ],
         "extension": [
           {
-            "url": "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym",
+            "url": "https://www.medizininformatik-initiative.de/fhir/modul-studie/StructureDefinition/mii-ex-studie-akronym",
             "valueString": "AMICA"
           }
         ],

@@ -3,11 +3,13 @@
 [DerivedFromLibrary]: StructureDefinition-derived-from-library.html
 [eligibility-assessment-id]: NamingSystem-eligibility-assessment-id.html
 [eligibility-funnel-measure-id]: NamingSystem-eligibility-funnel-measure-id.html
+[eligibility-funnel-report-example]: MeasureReport-eligibility-funnel-report-example.html
 [eligibility-funnel-report-id]: NamingSystem-eligibility-funnel-report-id.html
 [EligibilityGroup]: StructureDefinition-eligibility-group.html
 [eligibility-group-example]: Group-eligibility-group-example.html
 [eligibility-group-id]: NamingSystem-eligibility-group-id.html
 [eligibility-library-id]: NamingSystem-eligibility-library-id.html
+[eligibility-funnel-measure-example]: Measure-eligibility-funnel-measure-example.html
 [group-characteristic-reference]: SearchParameter-group-characteristic-reference.html
 [observation-derived-from-library]: SearchParameter-observation-derived-from-library.html
 [EligibilityAssessment]: StructureDefinition-eligibility-assessment.html
@@ -15,7 +17,10 @@
 [EligibilityAssessmentResult]: ValueSet-eligibility-assessment-result.html
 [EligibilityCriteriaType]: CodeSystem-eligibility-criteria-types.html
 [EligibilityCriteriaTypes]: ValueSet-eligibility-criteria-types.html
+[EligibilityFunnelMeasure]: StructureDefinition-eligibility-funnel-measure.html
+[EligibilityFunnelReport]: StructureDefinition-eligibility-funnel-report.html
 [EligibilityFunnelPopulationType]: CodeSystem-eligibility-funnel-population-type.html
+[EligibilityFunnelPopulationTypes]: ValueSet-eligibility-funnel-population-types.html
 [ScreeningListType]: CodeSystem-screening-list-type.html
 [RecruitResearchStudy]: StructureDefinition-recruit-research-study.html
 [recruit-research-study-example]: ResearchStudy-recruit-research-study-example.html

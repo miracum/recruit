@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "description": "recruIT FHIR Implementation Guide",
   "dependencies": {
-    "hl7.fhir.r4.core": "4.0.1"
+    "hl7.fhir.r4.core": "4.0.1",
+    "de.medizininformatikinitiative.kerndatensatz.studie": "2026.0.2"
   },
   "fhirVersions": [
     "4.0.1"
