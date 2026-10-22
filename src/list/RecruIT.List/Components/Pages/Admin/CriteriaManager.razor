@@ -144,8 +144,10 @@ else
                             <BbInput @bind-Value="_studyDraft.Title" Required="true" Disabled="@(_studyDraft.ExistingStudyId is not null)" Class="bb:mt-1" />
                         </div>
                         <div class="bb:w-full">
-                            <label class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide bb:text-muted-foreground">@Localizer["App.CriteriaManager.StudyAcronymLabel"]</label>
-                            <BbInput @bind-Value="_studyDraft.Acronym" Disabled="@(_studyDraft.ExistingStudyId is not null)" Class="bb:mt-1" />
+                            <label class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide bb:text-muted-foreground">
+                                @Localizer["App.CriteriaManager.StudyAcronymLabel"] <span class="bb:text-destructive">*</span>
+                            </label>
+                            <BbInput @bind-Value="_studyDraft.Acronym" Required="true" Disabled="@(_studyDraft.ExistingStudyId is not null)" Class="bb:mt-1" />
                         </div>
                     </div>
 
@@ -263,14 +265,21 @@ else
     private string PreviewJson => CriteriaService.BuildPreviewJson(_studyDraft, _criteria);
 
     /// <summary>
-    /// A new study needs a Title to be worth submitting; an existing one always has one already.
-    /// Never while an existing study's criteria are still loading: submitting replaces its
-    /// enrollment with only the criteria listed here, so it would drop the ones not loaded yet.
+    /// A new study needs a Title and an Acronym (1..1 in the RecruitResearchStudy profile) to be
+    /// worth submitting; an existing one is submitted unmodified. Never while an existing study's
+    /// criteria are still loading: submitting replaces its enrollment with only the criteria listed
+    /// here, so it would drop the ones not loaded yet.
     /// </summary>
     private bool CanSubmit =>
         !_submitting
         && !_studyCriteriaLoading
-        && (_studyDraft.ExistingStudyId is not null || !string.IsNullOrWhiteSpace(_studyDraft.Title));
+        && (
+            _studyDraft.ExistingStudyId is not null
+            || (
+                !string.IsNullOrWhiteSpace(_studyDraft.Title)
+                && !string.IsNullOrWhiteSpace(_studyDraft.Acronym)
+            )
+        );
 
     private List<LibrarySummaryDto> FilteredLibraries =>
         [.. _libraries.Where(MatchesLibrarySearch)];

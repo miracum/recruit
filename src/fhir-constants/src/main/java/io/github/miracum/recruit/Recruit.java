@@ -284,6 +284,24 @@ public final class Recruit {
     }
 
     /**
+     * The canonical URL {@code https://openrecruit.dev/fhir/StructureDefinition/eligibility-funnel-measure}.
+     *
+     * @return {@code https://openrecruit.dev/fhir/StructureDefinition/eligibility-funnel-measure}
+     */
+    public static String eligibilityFunnelMeasure() {
+      return "https://openrecruit.dev/fhir/StructureDefinition/eligibility-funnel-measure";
+    }
+
+    /**
+     * The canonical URL {@code https://openrecruit.dev/fhir/StructureDefinition/eligibility-funnel-report}.
+     *
+     * @return {@code https://openrecruit.dev/fhir/StructureDefinition/eligibility-funnel-report}
+     */
+    public static String eligibilityFunnelReport() {
+      return "https://openrecruit.dev/fhir/StructureDefinition/eligibility-funnel-report";
+    }
+
+    /**
      * The canonical URL {@code https://openrecruit.dev/fhir/StructureDefinition/eligibility-group}.
      *
      * @return {@code https://openrecruit.dev/fhir/StructureDefinition/eligibility-group}

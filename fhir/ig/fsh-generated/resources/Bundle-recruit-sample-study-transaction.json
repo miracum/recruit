@@ -12,20 +12,16 @@
             "https://openrecruit.dev/fhir/StructureDefinition/recruit-research-study"
           ]
         },
+        "extension": [
+          {
+            "url": "https://www.medizininformatik-initiative.de/fhir/modul-studie/StructureDefinition/mii-ex-studie-akronym",
+            "valueString": "DEMO-BRONCHITIS"
+          }
+        ],
         "identifier": [
           {
             "system": "https://openrecruit.dev/fhir/identifiers/sql-criteria-research-study-id",
             "value": "bronchitis"
-          }
-        ],
-        "extension": [
-          {
-            "url": "https://fhir.miracum.org/uc1/StructureDefinition/studyAcronym",
-            "valueString": "DEMO-BRONCHITIS"
-          },
-          {
-            "url": "https://www.medizininformatik-initiative.de/fhir/modul-studie/StructureDefinition/mii-ex-studie-akronym",
-            "valueString": "DEMO-BRONCHITIS"
           }
         ],
         "status": "active",

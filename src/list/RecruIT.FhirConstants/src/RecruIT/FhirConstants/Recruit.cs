@@ -64,6 +64,14 @@ public static class Recruit
         public static string EligibilityAssessment =>
             "https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment";
 
+        /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/StructureDefinition/eligibility-funnel-measure</c>.</summary>
+        public static string EligibilityFunnelMeasure =>
+            "https://openrecruit.dev/fhir/StructureDefinition/eligibility-funnel-measure";
+
+        /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/StructureDefinition/eligibility-funnel-report</c>.</summary>
+        public static string EligibilityFunnelReport =>
+            "https://openrecruit.dev/fhir/StructureDefinition/eligibility-funnel-report";
+
         /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/StructureDefinition/eligibility-group</c>.</summary>
         public static string EligibilityGroup =>
             "https://openrecruit.dev/fhir/StructureDefinition/eligibility-group";
@@ -86,6 +94,14 @@ public static class Recruit
             /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment</c>.</summary>
             public static string EligibilityAssessment =>
                 "https://openrecruit.dev/fhir/StructureDefinition/eligibility-assessment";
+
+            /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/StructureDefinition/eligibility-funnel-measure</c>.</summary>
+            public static string EligibilityFunnelMeasure =>
+                "https://openrecruit.dev/fhir/StructureDefinition/eligibility-funnel-measure";
+
+            /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/StructureDefinition/eligibility-funnel-report</c>.</summary>
+            public static string EligibilityFunnelReport =>
+                "https://openrecruit.dev/fhir/StructureDefinition/eligibility-funnel-report";
 
             /// <summary>The canonical URL <c>https://openrecruit.dev/fhir/StructureDefinition/eligibility-group</c>.</summary>
             public static string EligibilityGroup =>

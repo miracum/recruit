@@ -4,8 +4,8 @@
     "fshName": "RecruitSampleStudyTransaction",
     "fshType": "Instance",
     "fshFile": "sample-study.fsh",
-    "startLine": 176,
-    "endLine": 186
+    "startLine": 173,
+    "endLine": 183
   },
   {
     "outputFile": "Bundle-recruit-search-parameters-transaction.json",
@@ -72,6 +72,22 @@
     "endLine": 44
   },
   {
+    "outputFile": "Measure-eligibility-funnel-measure-example.json",
+    "fshName": "EligibilityFunnelMeasureExample",
+    "fshType": "Instance",
+    "fshFile": "eligibility-funnel.fsh",
+    "startLine": 50,
+    "endLine": 58
+  },
+  {
+    "outputFile": "MeasureReport-eligibility-funnel-report-example.json",
+    "fshName": "EligibilityFunnelReportExample",
+    "fshType": "Instance",
+    "fshFile": "eligibility-funnel.fsh",
+    "startLine": 60,
+    "endLine": 76
+  },
+  {
     "outputFile": "NamingSystem-eligibility-assessment-id.json",
     "fshName": "EligibilityAssessmentIdentifierSystem",
     "fshType": "Instance",
@@ -84,16 +100,16 @@
     "fshName": "EligibilityFunnelMeasureIdentifierSystem",
     "fshType": "Instance",
     "fshFile": "eligibility-funnel.fsh",
-    "startLine": 8,
-    "endLine": 19
+    "startLine": 78,
+    "endLine": 89
   },
   {
     "outputFile": "NamingSystem-eligibility-funnel-report-id.json",
     "fshName": "EligibilityFunnelReportIdentifierSystem",
     "fshType": "Instance",
     "fshFile": "eligibility-funnel.fsh",
-    "startLine": 21,
-    "endLine": 32
+    "startLine": 91,
+    "endLine": 102
   },
   {
     "outputFile": "NamingSystem-eligibility-group-id.json",
@@ -140,8 +156,8 @@
     "fshName": "SqlCriteriaResearchStudyIdentifierSystem",
     "fshType": "Instance",
     "fshFile": "recruit-researchstudy.fsh",
-    "startLine": 31,
-    "endLine": 42
+    "startLine": 33,
+    "endLine": 44
   },
   {
     "outputFile": "NamingSystem-superset-synced-eligibility-library-id.json",
@@ -164,16 +180,16 @@
     "fshName": "UICreatedResearchStudyIdentifierSystem",
     "fshType": "Instance",
     "fshFile": "recruit-researchstudy.fsh",
-    "startLine": 18,
-    "endLine": 29
+    "startLine": 20,
+    "endLine": 31
   },
   {
     "outputFile": "ResearchStudy-recruit-research-study-example.json",
     "fshName": "RecruitResearchStudyExample",
     "fshType": "Instance",
     "fshFile": "recruit-researchstudy.fsh",
-    "startLine": 11,
-    "endLine": 16
+    "startLine": 12,
+    "endLine": 18
   },
   {
     "outputFile": "SearchParameter-belongs-to-study.json",
@@ -232,6 +248,22 @@
     "endLine": 14
   },
   {
+    "outputFile": "StructureDefinition-eligibility-funnel-measure.json",
+    "fshName": "EligibilityFunnelMeasure",
+    "fshType": "Profile",
+    "fshFile": "eligibility-funnel.fsh",
+    "startLine": 19,
+    "endLine": 29
+  },
+  {
+    "outputFile": "StructureDefinition-eligibility-funnel-report.json",
+    "fshName": "EligibilityFunnelReport",
+    "fshType": "Profile",
+    "fshFile": "eligibility-funnel.fsh",
+    "startLine": 31,
+    "endLine": 48
+  },
+  {
     "outputFile": "StructureDefinition-eligibility-group.json",
     "fshName": "EligibilityGroup",
     "fshType": "Profile",
@@ -245,7 +277,7 @@
     "fshType": "Profile",
     "fshFile": "recruit-researchstudy.fsh",
     "startLine": 4,
-    "endLine": 9
+    "endLine": 10
   },
   {
     "outputFile": "StructureDefinition-screening-list.json",
@@ -278,5 +310,13 @@
     "fshFile": "eligibility-group.fsh",
     "startLine": 16,
     "endLine": 20
+  },
+  {
+    "outputFile": "ValueSet-eligibility-funnel-population-types.json",
+    "fshName": "EligibilityFunnelPopulationTypes",
+    "fshType": "ValueSet",
+    "fshFile": "eligibility-funnel.fsh",
+    "startLine": 8,
+    "endLine": 12
   }
 ]

@@ -2,9 +2,10 @@
 // This file can be renamed, and additional FSH files can be added.
 // SUSHI will look for definitions in any file using the .fsh ending.
 Profile: RecruitResearchStudy
-Parent: ResearchStudy
+Parent: https://www.medizininformatik-initiative.de/fhir/modul-studie/StructureDefinition/mii-pr-studie-studie
 Id: recruit-research-study
-Description: "A profile for the ResearchStudy resource used to represent a clinical trial."
+Description: "A profile for the ResearchStudy resource used to represent a clinical trial, based on the MII Studie module's ResearchStudy profile."
+* extension[Akronym] 1..1
 * enrollment 1..1
 * enrollment only Reference(EligibilityGroup)
 
@@ -12,6 +13,7 @@ Instance: RecruitResearchStudyExample
 InstanceOf: RecruitResearchStudy
 Description: "An example of a recruIT ResearchStudy."
 * id = "recruit-research-study-example"
+* extension[Akronym].valueString = "EXAMPLE"
 * status = http://hl7.org/fhir/research-study-status#active
 * enrollment = Reference(EligibilityGroupExample)
 

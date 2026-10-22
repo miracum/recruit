@@ -42,6 +42,13 @@ jobs:
         with:
           persist-credentials: false
 
+      # hashes only the IG's declared dependencies, not the whole sushi-config.yaml: release-please
+      # bumps its version every release.
+      - name: Hash FHIR IG dependencies
+        id: fhir-deps
+        run: |
+          echo "hash=$(sed -n '/^dependencies:/,/^[^ ]/{/^  /p}' fhir/ig/sushi-config.yaml | sha256sum | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
       # only pull request runs restore the cache: release and workflow_dispatch runs publish the
       # site, so they only check for an entry and never restore anything another run could have written.
       # zizmor can't evaluate the lookup-only expression, hence the ignore.
@@ -54,8 +61,9 @@ jobs:
             /root/.fhir/packages
             /github/home/.fhir/packages
           # the container image pins the publisher and SUSHI versions, which decide the packages they
-          # fetch. fhir/package.json is left out because release-please bumps its version every release.
-          key: fhir-packages-${{ hashFiles('.github/workflows/build-docs.yaml') }}
+          # fetch, on top of the IG's own dependencies. fhir/package.json is left out because
+          # release-please bumps its version every release.
+          key: fhir-packages-${{ hashFiles('.github/workflows/build-docs.yaml') }}-${{ steps.fhir-deps.outputs.hash }}
           restore-keys: fhir-packages-
           lookup-only: ${{ github.event_name != 'pull_request' }}
 

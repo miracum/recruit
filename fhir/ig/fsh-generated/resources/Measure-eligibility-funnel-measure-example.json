@@ -1,0 +1,20 @@
+{
+  "resourceType": "Measure",
+  "id": "eligibility-funnel-measure-example",
+  "meta": {
+    "profile": [
+      "https://openrecruit.dev/fhir/StructureDefinition/eligibility-funnel-measure"
+    ]
+  },
+  "url": "https://openrecruit.dev/fhir/Measure/eligibility-funnel-measure-example",
+  "identifier": [
+    {
+      "value": "example"
+    }
+  ],
+  "status": "active",
+  "title": "EXAMPLE eligibility attrition funnel",
+  "library": [
+    "https://openrecruit.dev/fhir/Library/sql-query-library-example"
+  ]
+}
