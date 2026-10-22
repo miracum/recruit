@@ -120,13 +120,17 @@ jobs:
       extra-helm-repos: |
         hapifhir=https://hapifhir.github.io/hapi-fhir-jpaserver-starter
         maildev=https://maildev.github.io/helm/
-      # test ct install against the images this PR just built instead of the tags baked into
-      # values.yaml. Restricted to same-repo PRs: forked PRs never get their images pushed to
-      # ghcr.io, so kind wouldn't be able to pull them - falls back to the chart's default tags there.
+      # test ct install against the exact images this run just built instead of the tags baked into
+      # values.yaml - those only exist once release-please has cut that release, so on master pushes
+      # between releases they point at a tag that was never pushed. Same condition standard-build uses
+      # to decide whether to push at all: forked PRs never get their images pushed to ghcr.io, so kind
+      # wouldn't be able to pull them - falls back to the chart's default tags there.
       helm-extra-set-args: >-
         ${{
-          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name)
-          && format('--set=list.image.tag={0},querySqlOnFhir.image.tag={0}', needs.build-list.outputs.image-version)
+          (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name)
+          && format('--set=list.image.tag={0}@{1},querySqlOnFhir.image.tag={2}@{3}',
+            needs.build-list.outputs.image-version, needs.build-list.outputs.image-digest,
+            needs.build-query-sql-on-fhir.outputs.image-version, needs.build-query-sql-on-fhir.outputs.image-digest)
           || ''
         }}
       # pins every app image in the published chart to the exact digest its build job produced. On PRs
