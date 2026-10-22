@@ -7,7 +7,7 @@ namespace RecruIT.List.Data.Entities;
 /// that actually drives sending/reading. SubjectId/Email are denormalized from the subscription so
 /// the bell's hot "unread count" query needs no join. Both InApp and Email rows are created
 /// immediately for every subscription when the event is detected (ScheduledFor = event.OccurredAt);
-/// InApp rows never get SentAt set (only ReadAt, once dismissed). Email rows are picked up by
+/// InApp rows never get SentAt set (only ReadAt, once read). Email rows are picked up by
 /// NotificationSenderService, which decides at *send* time - not from ScheduledFor - whether the
 /// owning subscription is actually due yet, based on its current Frequency/DayOfWeek/TimeOfDay
 /// against the last time it was successfully sent. That's deliberate: it's what makes a
@@ -38,6 +38,16 @@ public sealed class NotificationDelivery
     /// <summary>Email only - when NotificationSenderService actually sent this delivery.</summary>
     public DateTimeOffset? SentAt { get; set; }
 
-    /// <summary>InApp only - when the subscriber dismissed/read this delivery in the feed.</summary>
+    /// <summary>
+    /// InApp only - when the subscriber marked this delivery read, either in the feed or by
+    /// opening the email that covered it (see EmailDigestId). Null means unread.
+    /// </summary>
     public DateTimeOffset? ReadAt { get; set; }
+
+    /// <summary>
+    /// Email only - shared by every delivery included in one sent digest email, set together with
+    /// SentAt. The email's link carries this id (see Program.cs's /notifications/email endpoint),
+    /// which is how opening the email marks the matching InApp deliveries read.
+    /// </summary>
+    public Guid? EmailDigestId { get; set; }
 }

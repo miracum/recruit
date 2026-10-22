@@ -16,7 +16,14 @@ public interface INotificationChannel
     /// police - a burst of one-off connections is what trips them, not the number of messages sent
     /// over an already-open session.
     /// </summary>
-    Task<INotificationBatch> BeginBatchAsync(CancellationToken ct = default);
+    /// <param name="protocolLog">
+    /// Optional sink for the channel's wire-level conversation (for email, the SMTP transcript),
+    /// left open afterwards - used by the admin test page to show exactly what the server said.
+    /// </param>
+    Task<INotificationBatch> BeginBatchAsync(
+        Stream? protocolLog = null,
+        CancellationToken ct = default
+    );
 }
 
 public interface INotificationBatch : IAsyncDisposable

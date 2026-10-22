@@ -50,12 +50,12 @@ hide:
     See how many patients remain after each eligibility criterion, to spot the criteria that
     narrow down a trial's candidate pool the most.
 
-- :lucide-mail:{ .lg } **Email notifications**
+- :lucide-mail:{ .lg } **Notifications**
 
-    Get an email as soon as new candidates turn up for a trial, or a daily, weekly or monthly
-    digest instead.
+    Find new candidates for your trials in the app's notification list, and get an email as soon
+    as they turn up, or a daily, weekly or monthly digest instead.
 
-    [:octicons-arrow-right-24: Configuration options](configuration/options.md)
+    [:octicons-arrow-right-24: Notifications](configuration/notifications.md)
 
 - :lucide-shield-check:{ .lg } **Secure**
 

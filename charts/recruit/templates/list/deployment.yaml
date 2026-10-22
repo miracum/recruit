@@ -170,8 +170,8 @@ spec:
               value: {{ .notifications.stalledLeadWindowDays | quote }}
             - name: Notifications__ScanIntervalSeconds
               value: {{ .notifications.scanIntervalSeconds | quote }}
-            - name: Notifications__Email__ScreeningListLinkTemplate
-              value: {{ include "recruit.list.mail.screeningListLinkTemplate" $ }}
+            - name: Notifications__Email__PublicBaseUrl
+              value: {{ include "recruit.list.publicBaseUrl" $ }}
             - name: Notifications__Email__From
               value: {{ .notifications.email.from | quote }}
             - name: Notifications__Email__SubjectTemplate

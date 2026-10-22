@@ -15,5 +15,6 @@ Internally, the modules communicate using HL7 FHIR® via a central FHIR server.
 ## Architecture
 
 Fundamentally, the design of the application is based on the publication [Design and Multicentric Implementation of a Generic Software Architecture for Patient Recruitment Systems Re-Using Existing HIS Tools and Routine Patient Data](https://dx.doi.org/10.4338%2FACI-2013-07-RA-0047) by Trinczek et al.
-Of the 5 presented modules, recruIT implements the notification module (`notify`), the screening list module (`list`),
-and the query module (`query`). The patient data module can be any database queryable via Trino, DuckDB, or a SQL on FHIR server.
+Of the 5 presented modules, recruIT implements the screening list module (`list`), which also sends the
+[notifications](../configuration/notifications.md), and the query module (`query-sql-on-fhir`). The patient data
+module can be any database queryable via Trino, DuckDB, or a SQL on FHIR server.

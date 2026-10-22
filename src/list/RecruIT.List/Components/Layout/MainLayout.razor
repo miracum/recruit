@@ -2,7 +2,7 @@
 @inherits LayoutComponentBase
 @implements IDisposable
 @inject BreadcrumbState BreadcrumbState
-@inject NotificationSubscriptionService NotificationSubscriptionService
+@inject NotificationInboxState NotificationInboxState
 @inject IStringLocalizer<SharedResources> Localizer
 @inject NavigationManager Navigation
 @inject ThemeService ThemeService
@@ -39,9 +39,9 @@
                                 <LucideIcon Name="bell" Size="16" />
                                 @Localizer["App.Nav.Notifications"]
                             </span>
-                            @if (_unreadNotificationCount > 0)
+                            @if (NotificationInboxState.UnreadCount > 0)
                             {
-                                <BbBadge Variant="BadgeVariant.Destructive">@(_unreadNotificationCount > 9 ? "9+" : _unreadNotificationCount.ToString())</BbBadge>
+                                <BbBadge Variant="BadgeVariant.Destructive">@(NotificationInboxState.UnreadCount > 9 ? "9+" : NotificationInboxState.UnreadCount.ToString())</BbBadge>
                             }
                         </BbSidebarMenuButton>
                     </BbSidebarMenuItem>
@@ -205,22 +205,20 @@
 
     private static readonly string AppVersionShort = AppVersion.Split('+')[0];
 
-    private int _unreadNotificationCount;
-
     protected override async Task OnInitializedAsync()
     {
-        BreadcrumbState.Changed += OnBreadcrumbChanged;
+        BreadcrumbState.Changed += OnStateChanged;
+        NotificationInboxState.Changed += OnStateChanged;
 
         try
         {
             var user = await AuthStateTask.GetUserAsync();
-            _unreadNotificationCount = await NotificationSubscriptionService.GetUnreadInAppCountAsync(user);
+            await NotificationInboxState.RefreshAsync(user);
         }
         catch
         {
             // Best-effort - the nav item simply shows no badge if the count can't be computed
             // (including if AuthStateTask itself failed, e.g. a token-refresh error).
-            _unreadNotificationCount = 0;
         }
     }
 
@@ -252,7 +250,7 @@
         return $"/culture/set?culture={culture}&redirectUri={redirectUri}";
     }
 
-    private void OnBreadcrumbChanged() => InvokeAsync(StateHasChanged);
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
 
     // forceLoad is required: a Blazor Server circuit has no HTTP response of its own to attach a
     // Set-Cookie header to, so signing out has to happen via a real navigation to the endpoint
@@ -286,5 +284,9 @@
         };
     }
 
-    public void Dispose() => BreadcrumbState.Changed -= OnBreadcrumbChanged;
+    public void Dispose()
+    {
+        BreadcrumbState.Changed -= OnStateChanged;
+        NotificationInboxState.Changed -= OnStateChanged;
+    }
 }

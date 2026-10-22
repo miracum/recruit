@@ -81,6 +81,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             });
             entity.HasIndex(d => d.NotificationEventId);
             entity.HasIndex(d => d.NotificationSubscriptionId);
+            // The email link's "which deliveries did this email cover" lookup.
+            entity.HasIndex(d => d.EmailDigestId);
         });
     }
 }

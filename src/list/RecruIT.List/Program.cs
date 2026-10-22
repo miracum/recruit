@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Security.Claims;
 using BlazorBlueprint.Components;
 using Hangfire;
 using Hangfire.PostgreSql;
@@ -286,6 +287,7 @@ builder.Services.AddScoped<BreadcrumbState>();
 
 builder.Services.AddScoped<INotificationChannel, EmailNotificationChannel>();
 builder.Services.AddScoped<NotificationSubscriptionService>();
+builder.Services.AddScoped<NotificationInboxState>();
 builder.Services.AddScoped<NotificationDetectorService>();
 builder.Services.AddScoped<NotificationSenderService>();
 
@@ -332,7 +334,7 @@ await using (var scope = app.Services.CreateAsyncScope())
     recurringJobManager.AddOrUpdate<NotificationSenderService>(
         "send-due-notification-emails",
         s => s.SendDueAsync(CancellationToken.None),
-        Cron.MinuteInterval(10)
+        Cron.MinuteInterval(5)
     );
     // AddOrUpdate only ever adds/updates - it never removes a job id that's stopped being
     // registered, so the old "poll-screening-lists" recurring job (ScreeningListPollService, now
@@ -457,6 +459,46 @@ app.MapGet(
         return Results.LocalRedirect(string.IsNullOrEmpty(redirectUri) ? "/" : redirectUri);
     }
 );
+
+// Every notification digest email links here (see NotificationSenderService.EmailDigestLink):
+// marks the in-app items that email covered read, then forwards to the one trial it was about (or
+// the trial overview for a multi-trial digest). Requires sign-in - challenging via OIDC and coming
+// back here if needed - rather than trusting the link alone, so neither a forwarded email nor a
+// mail scanner prefetching links can mark anything read on the subscriber's behalf. The target
+// List is resolved now rather than baked into the email at send time, since a trial's List id
+// isn't guaranteed stable (see NotificationEvent).
+app.MapGet(
+        "/notifications/email/{digestId:guid}",
+        async (
+            Guid digestId,
+            ClaimsPrincipal user,
+            NotificationSubscriptionService notifications,
+            ScreeningListService screeningLists,
+            CancellationToken ct
+        ) =>
+        {
+            var trialTokens = await notifications.MarkEmailDigestReadAsync(digestId, user, ct);
+            if (trialTokens.Count > 1)
+            {
+                return Results.LocalRedirect("/");
+            }
+
+            if (
+                trialTokens.Count == 1
+                && await screeningLists.ResolveListForTrialAsync(trialTokens[0], ct) is { } listInfo
+            )
+            {
+                return Results.LocalRedirect(
+                    $"/trials/{Uri.EscapeDataString(listInfo.ListId)}/patients"
+                );
+            }
+
+            // Unknown, someone else's, or a test email's digest - or a trial whose List can't be
+            // resolved right now.
+            return Results.LocalRedirect("/notifications");
+        }
+    )
+    .RequireAuthorization();
 
 app.UseAntiforgery();
 

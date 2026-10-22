@@ -18,7 +18,7 @@ namespace RecruIT.List.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.11")
+                .HasAnnotation("ProductVersion", "10.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "notification_channel", new[] { "email", "in_app" });
@@ -40,6 +40,10 @@ namespace RecruIT.List.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("email");
+
+                    b.Property<Guid?>("EmailDigestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("email_digest_id");
 
                     b.Property<Guid>("NotificationEventId")
                         .HasColumnType("uuid")
@@ -68,6 +72,9 @@ namespace RecruIT.List.Data.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_notification_deliveries");
+
+                    b.HasIndex("EmailDigestId")
+                        .HasDatabaseName("ix_notification_deliveries_email_digest_id");
 
                     b.HasIndex("NotificationEventId")
                         .HasDatabaseName("ix_notification_deliveries_notification_event_id");

@@ -68,6 +68,8 @@ recruIT needs a FHIR R4 server that supports:
   studies this way
 - custom SearchParameters together with `_include` and `_include:iterate`, which recruIT uses to fetch a study together
   with its criteria in a single request
+- reading earlier versions of a resource (`vread`), which the screening list uses to find newly recommended patients
+  for [notifications](../configuration/notifications.md).
 
 The demo uses the [HAPI FHIR JPA server](https://github.com/hapifhir/hapi-fhir-jpaserver-starter).
 
@@ -177,10 +179,11 @@ services:
       Notifications__Email__SmtpUsername: recruit
       Notifications__Email__SmtpPassword: change-me
       Notifications__Email__From: recruit@example.com
-      Notifications__Email__ScreeningListLinkTemplate: https://recruit.example.com/trials/{0}/patients
+      Notifications__Email__PublicBaseUrl: https://recruit.example.com/
 ```
 
-See [Notifications](../configuration/options.md#notifications) for what these settings do.
+See [Notifications](../configuration/options.md#notifications) for what these settings do. `PublicBaseUrl` must be the
+URL your users open the screening list at, since the links in the emails are built from it.
 
 ### Reverse proxy
 

@@ -61,10 +61,24 @@ public sealed class EmailNotificationOptions
     public const string SectionName = $"{NotificationOptions.SectionName}:Email";
 
     /// <summary>
-    /// Used to link back to the screening list web app from an email - a composite format string
-    /// (see string.Format) with a single `{0}` placeholder for the list id.
+    /// The app's public root URL as users reach it, e.g. "https://recruit.example.com/" - every
+    /// link in a notification email is built from this by the app itself (see PublicUrl).
     /// </summary>
-    public required string ScreeningListLinkTemplate { get; set; }
+    public required string PublicBaseUrl { get; set; }
+
+    /// <summary>
+    /// Resolves an app-relative path against PublicBaseUrl, keeping any path base it has (e.g.
+    /// "https://host/recruit" + "notifications" is "https://host/recruit/notifications") whether or
+    /// not PublicBaseUrl ends in a slash - plain Uri resolution would drop "recruit" without one.
+    /// </summary>
+    public string PublicUrl(string relativePath)
+    {
+        var baseUri = new Uri(
+            PublicBaseUrl.EndsWith('/') ? PublicBaseUrl : PublicBaseUrl + "/",
+            UriKind.Absolute
+        );
+        return new Uri(baseUri, relativePath.TrimStart('/')).ToString();
+    }
 
     /// <summary>The sender email address for notification mails.</summary>
     public required string From { get; set; }
