@@ -24,13 +24,15 @@ namespace RecruIT.List.Services.Notify;
 /// the same subscriber between ticks become one digest rather than several. Subscriptions whose
 /// trial access has since been revoked are skipped and cleaned up the same way as ones that were
 /// unsubscribed - see TrialAccessService.GetGrantedPairsAsync (no IsAdmin bypass there; see its
-/// doc comment).
+/// doc comment). The one exception is Auth:Enabled=false, where that check is skipped entirely -
+/// see SendDueAsync.
 /// </summary>
 public sealed class NotificationSenderService(
     IDbContextFactory<AppDbContext> dbContextFactory,
     ScreeningListService screeningListService,
     TrialAccessService accessService,
     IOptions<EmailNotificationOptions> mailerOptions,
+    IOptions<AuthOptions> authOptions,
     INotificationChannel channel,
     ILogger<NotificationSenderService> logger
 )
@@ -83,11 +85,17 @@ public sealed class NotificationSenderService(
             .Select(g => new { SubscriptionId = g.Key, LastSentAt = g.Max(d => d.SentAt) })
             .ToDictionaryAsync(x => x.SubscriptionId, x => x.LastSentAt, ct);
 
-        var grantedPairs = await accessService.GetGrantedPairsAsync(
-            subscriptionsById.Values.Select(s => s.SubjectId).Distinct().ToList(),
-            subscriptionsById.Values.Select(s => s.Email).Distinct().ToList(),
-            ct
-        );
+        // With auth disabled, every request is DevBypassAuthenticationHandler's admin, who can
+        // already see every trial - there's no per-user access left to enforce here, and requiring
+        // a grant row (admins never otherwise need one) would just mean silently dropping the dev
+        // admin's emails. null means "everyone has access", like GetAccessibleTrialIdentifiersAsync.
+        var grantedPairs = authOptions.Value.Enabled
+            ? await accessService.GetGrantedPairsAsync(
+                subscriptionsById.Values.Select(s => s.SubjectId).Distinct().ToList(),
+                subscriptionsById.Values.Select(s => s.Email).Distinct().ToList(),
+                ct
+            )
+            : null;
 
         var toCleanUpSubscriptionIds = new List<Guid>();
         var dueSubscriptionIds = new List<Guid>();
@@ -102,7 +110,8 @@ public sealed class NotificationSenderService(
             }
 
             var hasAccess =
-                grantedPairs.Contains((subscription.SubjectId, subscription.TrialIdentifier))
+                grantedPairs is null
+                || grantedPairs.Contains((subscription.SubjectId, subscription.TrialIdentifier))
                 || grantedPairs.Contains((subscription.Email, subscription.TrialIdentifier));
             if (!hasAccess)
             {
