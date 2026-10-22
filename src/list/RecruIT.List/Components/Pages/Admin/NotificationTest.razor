@@ -1,8 +1,12 @@
 @page "/admin/notify-test"
 @attribute [Authorize]
+@using System.Net.Sockets
+@using System.Text
+@using MailKit.Net.Smtp
 @inject NotificationSenderService SenderService
 @inject IOptions<EmailNotificationOptions> MailerOptions
 @inject ToastService Toast
+@inject IJSRuntime JS
 @inject BreadcrumbState BreadcrumbState
 @inject IStringLocalizer<SharedResources> Localizer
 
@@ -51,15 +55,84 @@ else
             </div>
         </BbCardContent>
     </BbCard>
+
+    @if (_failure is not null)
+    {
+        <BbAlert Variant="AlertVariant.Danger" Class="bb:mt-6">
+            <BbAlertTitle>@Localizer["App.NotificationTest.SendErrorTitle"]</BbAlertTitle>
+            <BbAlertDescription>
+                <p class="bb:break-all">@_failure.Message</p>
+                <dl class="bb:mt-3 bb:grid bb:grid-cols-1 bb:gap-y-2 bb:text-sm bb:sm:grid-cols-2">
+                    @foreach (var (label, value) in _failure.Details)
+                    {
+                        <div>
+                            <dt class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide">@label</dt>
+                            <dd class="bb:break-all bb:font-mono">@value</dd>
+                        </div>
+                    }
+                </dl>
+            </BbAlertDescription>
+        </BbAlert>
+
+        <BbCard Class="bb:mt-6">
+            <BbCardHeader>
+                <div class="bb:flex bb:items-center bb:justify-between bb:gap-3">
+                    <BbCardTitle>@Localizer["App.NotificationTest.ExceptionTitle"]</BbCardTitle>
+                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="@(() => CopyAsync(_failure.Exception))">
+                        <LucideIcon Name="copy" Size="16" />
+                        @Localizer["App.NotificationTest.Copy"]
+                    </BbButton>
+                </div>
+            </BbCardHeader>
+            <BbCardContent>
+                <textarea readonly class="diagnostic-textarea bb:rounded-md bb:border bb:p-3" aria-label="@Localizer["App.NotificationTest.ExceptionTitle"]">@_failure.Exception</textarea>
+            </BbCardContent>
+        </BbCard>
+    }
+
+    @if (_transcript is not null)
+    {
+        <BbCard Class="bb:mt-6">
+            <BbCardHeader>
+                <div class="bb:flex bb:items-center bb:justify-between bb:gap-3">
+                    <div>
+                        <BbCardTitle>@Localizer["App.NotificationTest.TranscriptTitle"]</BbCardTitle>
+                        <p class="bb:mt-1 bb:text-sm bb:text-muted-foreground">@Localizer["App.NotificationTest.TranscriptDescription"]</p>
+                    </div>
+                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Class="bb:shrink-0" OnClick="@(() => CopyAsync(_transcript))">
+                        <LucideIcon Name="copy" Size="16" />
+                        @Localizer["App.NotificationTest.Copy"]
+                    </BbButton>
+                </div>
+            </BbCardHeader>
+            <BbCardContent>
+                @* Expanded straight away when the send failed - that's when the transcript matters
+                   most; collapsed after a success, where it's only for "sent but never arrived". *@
+                <details open="@(_failure is not null)">
+                    <summary class="bb:cursor-pointer bb:text-sm">@Localizer["App.NotificationTest.TranscriptToggle"]</summary>
+                    <textarea readonly class="diagnostic-textarea bb:mt-3 bb:rounded-md bb:border bb:p-3" aria-label="@Localizer["App.NotificationTest.TranscriptTitle"]">@(_transcript.Length > 0 ? _transcript : Localizer["App.NotificationTest.TranscriptEmpty"].Value)</textarea>
+                </details>
+            </BbCardContent>
+        </BbCard>
+    }
 }
 
 @code {
     [CascadingParameter]
     private Task<AuthenticationState>? AuthStateTask { get; set; }
 
+    /// <summary>What the admin needs to debug a failed send, captured once at failure time.</summary>
+    private sealed record SendFailure(
+        string Message,
+        IReadOnlyList<(string Label, string Value)> Details,
+        string Exception
+    );
+
     private bool _isAdmin;
     private bool _sending;
     private string _recipientEmail = string.Empty;
+    private SendFailure? _failure;
+    private string? _transcript;
 
     protected override async Task OnInitializedAsync()
     {
@@ -79,19 +152,121 @@ else
             return;
         }
 
+        var recipient = _recipientEmail.Trim();
         _sending = true;
+        _failure = null;
+        _transcript = null;
+
+        using var protocolLog = new MemoryStream();
         try
         {
-            await SenderService.SendTestEmailAsync(_recipientEmail.Trim());
+            await SenderService.SendTestEmailAsync(recipient, protocolLog);
             Toast.Success(Localizer["App.NotificationTest.SentToast"], Localizer["App.Common.Saved"]);
         }
         catch (Exception ex)
         {
+            _failure = DescribeFailure(ex, recipient);
             Toast.Error(ex.Message, Localizer["App.NotificationTest.SendErrorTitle"]);
         }
         finally
         {
+            _transcript = CollapseMessageBody(Encoding.UTF8.GetString(protocolLog.ToArray()));
             _sending = false;
+        }
+    }
+
+    private SendFailure DescribeFailure(Exception ex, string recipient)
+    {
+        var options = MailerOptions.Value;
+        var details = new List<(string Label, string Value)>
+        {
+            (Localizer["App.NotificationTest.ExceptionTypeLabel"], ex.GetType().FullName ?? ex.GetType().Name),
+            (Localizer["App.NotificationTest.SmtpHostLabel"], $"{options.SmtpHost}:{options.SmtpPort}"),
+            (Localizer["App.NotificationTest.FromLabel"], options.From),
+            (Localizer["App.NotificationTest.EmailLabel"], recipient),
+        };
+
+        if (ex is SmtpCommandException command)
+        {
+            // The server's own verdict - e.g. 535 for rejected credentials, 550 for a refused mailbox.
+            details.Add((Localizer["App.NotificationTest.SmtpStatusCodeLabel"], $"{(int)command.StatusCode} ({command.StatusCode})"));
+            details.Add((Localizer["App.NotificationTest.SmtpErrorCodeLabel"], command.ErrorCode.ToString()));
+            if (command.Mailbox is not null)
+            {
+                details.Add((Localizer["App.NotificationTest.MailboxLabel"], command.Mailbox.Address));
+            }
+        }
+
+        // Connection failures (refused, DNS, timeout) usually arrive wrapped, so look past the
+        // outermost exception for the socket-level cause.
+        for (var inner = ex; inner is not null; inner = inner.InnerException)
+        {
+            if (inner is SocketException socket)
+            {
+                details.Add((Localizer["App.NotificationTest.SocketErrorLabel"], socket.SocketErrorCode.ToString()));
+                break;
+            }
+        }
+
+        // Exception.ToString() covers the type, message and stack trace of the whole inner
+        // exception chain - everything a bug report or a support ticket would need.
+        return new SendFailure(ex.Message, details, ex.ToString());
+    }
+
+    /// <summary>
+    /// The transcript otherwise carries the whole rendered HTML body (several hundred lines of
+    /// MJML output) between the DATA command's headers and its terminating "." - irrelevant for
+    /// debugging delivery and burying the server's replies that come after it. Keeps the headers
+    /// (From/To/Subject are useful) and replaces only the body with a line count.
+    /// </summary>
+    private string CollapseMessageBody(string transcript)
+    {
+        var lines = transcript.Split('\n');
+        var result = new List<string>(lines.Length);
+        var state = 0; // 0 = SMTP commands, 1 = message headers, 2 = message body
+        var bodyLines = 0;
+        foreach (var rawLine in lines)
+        {
+            var line = rawLine.TrimEnd('\r');
+            if (state == 0 && line.StartsWith("S: 354", StringComparison.Ordinal))
+            {
+                state = 1;
+            }
+            else if (state == 1 && line == "C: ")
+            {
+                state = 2;
+            }
+            else if (state == 2)
+            {
+                if (line != "C: .")
+                {
+                    bodyLines++;
+                    continue;
+                }
+
+                result.Add($"C: [{Localizer["App.NotificationTest.TranscriptBodyOmitted", bodyLines]}]");
+                state = 0;
+                bodyLines = 0;
+            }
+
+            result.Add(line);
+        }
+
+        return string.Join('\n', result);
+    }
+
+    private async Task CopyAsync(string text)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", text);
+            Toast.Success(Localizer["App.NotificationTest.CopiedToast"], Localizer["App.NotificationTest.Copy"]);
+        }
+        catch (JSException)
+        {
+            // The clipboard API needs a secure context (HTTPS or localhost) and permission - the
+            // text is still right there to select by hand.
+            Toast.Error(Localizer["App.NotificationTest.CopyFailedToast"], Localizer["App.NotificationTest.Copy"]);
         }
     }
 }

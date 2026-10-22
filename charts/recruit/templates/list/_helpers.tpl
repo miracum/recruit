@@ -102,14 +102,14 @@ Get the key inside the secret containing list's database password
 {{- end -}}
 
 {{/*
-Get the screening list link template used in list's notification emails
+Get the public base URL of list, used to build the links in its notification emails
 */}}
-{{- define "recruit.list.mail.screeningListLinkTemplate" -}}
+{{- define "recruit.list.publicBaseUrl" -}}
 {{- if .Values.list.ingress.enabled -}}
     {{- $host := (index .Values.list.ingress.hosts 0).host }}
     {{- $protocol := (empty .Values.list.ingress.tls) | ternary "http" "https" }}
-    {{- printf "%s://%s/recommendations/{0}" $protocol $host -}}
+    {{- printf "%s://%s/" $protocol $host | quote -}}
 {{- else -}}
-    {{- .Values.list.notifications.email.screeningListLinkTemplate | quote -}}
+    {{- .Values.list.notifications.email.publicBaseUrl | quote -}}
 {{- end -}}
 {{- end -}}

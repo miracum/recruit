@@ -23,7 +23,7 @@ public sealed class NotificationSubscriptionService(
     TrialAccessService accessService
 )
 {
-    /// <summary>Upper bound on how many unread items the in-app feed ever returns in one page.</summary>
+    /// <summary>Upper bound on how many items the in-app feed ever returns in one page.</summary>
     private const int MaxFeedItems = 100;
 
     public async Task<NotificationSubscription?> GetAsync(
@@ -170,8 +170,13 @@ public sealed class NotificationSubscriptionService(
             .CountAsync(token => accessibleTokens.Contains(token), ct);
     }
 
+    /// <summary>
+    /// The caller's in-app feed - Unread newest event first, Read most recently read first (the
+    /// order GitHub's notification list uses for its "Done" view too).
+    /// </summary>
     public async Task<IReadOnlyList<NotificationFeedItemDto>> ListInAppFeedAsync(
         ClaimsPrincipal user,
+        NotificationFeedFilter filter,
         CancellationToken ct = default
     )
     {
@@ -188,33 +193,41 @@ public sealed class NotificationSubscriptionService(
         }
 
         await using var db = await dbContextFactory.CreateDbContextAsync(ct);
-        var items = await db
+        var deliveries = db
             .NotificationDeliveries.AsNoTracking()
-            .Where(d =>
-                d.SubjectId == subjectId
-                && d.Channel == NotificationChannel.InApp
-                && d.ReadAt == null
-            )
-            .Join(
-                db.NotificationEvents,
-                d => d.NotificationEventId,
-                e => e.Id,
-                (d, e) =>
-                    new
-                    {
-                        d.Id,
-                        e.TrialIdentifier,
-                        e.PatientDisplayName,
-                        e.OccurredAt,
-                    }
-            )
-            .OrderByDescending(joined => joined.OccurredAt)
+            .Where(d => d.SubjectId == subjectId && d.Channel == NotificationChannel.InApp);
+        deliveries =
+            filter == NotificationFeedFilter.Unread
+                ? deliveries.Where(d => d.ReadAt == null)
+                : deliveries.Where(d => d.ReadAt != null);
+
+        var joined = deliveries.Join(
+            db.NotificationEvents,
+            d => d.NotificationEventId,
+            e => e.Id,
+            (d, e) =>
+                new
+                {
+                    d.Id,
+                    d.ReadAt,
+                    e.TrialIdentifier,
+                    e.PatientDisplayName,
+                    e.OccurredAt,
+                }
+        );
+        var ordered =
+            filter == NotificationFeedFilter.Unread
+                ? joined.OrderByDescending(j => j.OccurredAt)
+                : joined.OrderByDescending(j => j.ReadAt);
+
+        var items = await ordered
             .Take(MaxFeedItems)
-            .Select(joined => new NotificationFeedItemDto(
-                joined.Id,
-                joined.TrialIdentifier,
-                joined.PatientDisplayName,
-                joined.OccurredAt
+            .Select(j => new NotificationFeedItemDto(
+                j.Id,
+                j.TrialIdentifier,
+                j.PatientDisplayName,
+                j.OccurredAt,
+                j.ReadAt
             ))
             .ToListAsync(ct);
 
@@ -242,10 +255,133 @@ public sealed class NotificationSubscriptionService(
         return accessibleTrials?.Select(t => t.ToToken()).ToHashSet();
     }
 
-    public async Task MarkReadAsync(
-        Guid deliveryId,
+    public Task MarkReadAsync(
+        IReadOnlyCollection<Guid> deliveryIds,
         ClaimsPrincipal user,
         CancellationToken ct = default
+    ) =>
+        deliveryIds.Count == 0
+            ? Task.CompletedTask
+            : SetOwnInAppReadAtAsync(
+                user,
+                (_, own) => own.Where(d => d.ReadAt == null && deliveryIds.Contains(d.Id)),
+                DateTimeOffset.UtcNow,
+                ct
+            );
+
+    public Task MarkUnreadAsync(
+        IReadOnlyCollection<Guid> deliveryIds,
+        ClaimsPrincipal user,
+        CancellationToken ct = default
+    ) =>
+        deliveryIds.Count == 0
+            ? Task.CompletedTask
+            : SetOwnInAppReadAtAsync(
+                user,
+                (_, own) => own.Where(d => d.ReadAt != null && deliveryIds.Contains(d.Id)),
+                null,
+                ct
+            );
+
+    /// <summary>
+    /// Marks every unread item read - all of them, or only one trial's when trialIdentifierToken
+    /// ("system|value") is given. Deliberately not narrowed to currently-accessible trials like the
+    /// feed is: clearing items the caller can no longer even see is harmless, and keeps the
+    /// unread count from resurfacing them should access be restored later.
+    /// </summary>
+    public Task MarkAllReadAsync(
+        ClaimsPrincipal user,
+        string? trialIdentifierToken = null,
+        CancellationToken ct = default
+    ) =>
+        SetOwnInAppReadAtAsync(
+            user,
+            (db, own) =>
+            {
+                var unread = own.Where(d => d.ReadAt == null);
+                return trialIdentifierToken is null
+                    ? unread
+                    : unread.Where(d =>
+                        db.NotificationEvents.Any(e =>
+                            e.Id == d.NotificationEventId
+                            && e.TrialIdentifier == trialIdentifierToken
+                        )
+                    );
+            },
+            DateTimeOffset.UtcNow,
+            ct
+        );
+
+    /// <summary>
+    /// Marks read the caller's in-app items for exactly the events one sent digest email covered
+    /// (see NotificationDelivery.EmailDigestId), and returns those events' distinct trial
+    /// identifier tokens so the caller can decide where to send the user next. A digest that
+    /// doesn't belong to the caller - a forwarded email, or a guessed id - matches nothing, so it
+    /// changes nothing and returns an empty list, indistinguishable from an unknown id.
+    /// </summary>
+    public async Task<IReadOnlyList<string>> MarkEmailDigestReadAsync(
+        Guid digestId,
+        ClaimsPrincipal user,
+        CancellationToken ct = default
+    )
+    {
+        var (subjectId, _) = user.GetUserKeys();
+        if (subjectId is null)
+        {
+            return [];
+        }
+
+        await using var db = await dbContextFactory.CreateDbContextAsync(ct);
+        var emailed = await db
+            .NotificationDeliveries.AsNoTracking()
+            .Where(d =>
+                d.EmailDigestId == digestId
+                && d.SubjectId == subjectId
+                && d.Channel == NotificationChannel.Email
+            )
+            .Select(d => new { d.NotificationSubscriptionId, d.NotificationEventId })
+            .ToListAsync(ct);
+        if (emailed.Count == 0)
+        {
+            return [];
+        }
+
+        // A digest is always one subscription's deliveries (NotificationSenderService groups by
+        // subscription), so matching on both id sets selects exactly the emailed pairs.
+        var subscriptionIds = emailed.Select(e => e.NotificationSubscriptionId).Distinct().ToList();
+        var eventIds = emailed.Select(e => e.NotificationEventId).Distinct().ToList();
+
+        await db
+            .NotificationDeliveries.Where(d =>
+                d.SubjectId == subjectId
+                && d.Channel == NotificationChannel.InApp
+                && d.ReadAt == null
+                && subscriptionIds.Contains(d.NotificationSubscriptionId)
+                && eventIds.Contains(d.NotificationEventId)
+            )
+            .ExecuteUpdateAsync(set => set.SetProperty(d => d.ReadAt, DateTimeOffset.UtcNow), ct);
+
+        return await db
+            .NotificationEvents.AsNoTracking()
+            .Where(e => eventIds.Contains(e.Id))
+            .Select(e => e.TrialIdentifier)
+            .Distinct()
+            .ToListAsync(ct);
+    }
+
+    /// <summary>
+    /// Shared set-based update behind every read/unread mutation: always narrowed to the caller's
+    /// own InApp rows first, so no filter passed in can ever reach another user's deliveries.
+    /// </summary>
+    private async Task SetOwnInAppReadAtAsync(
+        ClaimsPrincipal user,
+        Func<
+            AppDbContext,
+            IQueryable<NotificationDelivery>,
+            IQueryable<NotificationDelivery>
+        > narrow,
+        DateTimeOffset? readAt,
+        CancellationToken ct
     )
     {
         var (subjectId, _) = user.GetUserKeys();
@@ -255,16 +391,9 @@ public sealed class NotificationSubscriptionService(
         }
 
         await using var db = await dbContextFactory.CreateDbContextAsync(ct);
-        var delivery = await db.NotificationDeliveries.FirstOrDefaultAsync(
-            d => d.Id == deliveryId && d.SubjectId == subjectId,
-            ct
+        var own = db.NotificationDeliveries.Where(d =>
+            d.SubjectId == subjectId && d.Channel == NotificationChannel.InApp
         );
-        if (delivery is null)
-        {
-            return;
-        }
-
-        delivery.ReadAt = DateTimeOffset.UtcNow;
-        await db.SaveChangesAsync(ct);
+        await narrow(db, own).ExecuteUpdateAsync(set => set.SetProperty(d => d.ReadAt, readAt), ct);
     }
 }

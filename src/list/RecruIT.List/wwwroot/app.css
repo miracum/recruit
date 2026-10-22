@@ -102,3 +102,24 @@ h1:focus {
     background-color: var(--muted-foreground);
     flex-shrink: 0;
 }
+
+/* A notification's text, rendered as a plain-looking button (see Notifications.razor) so clicking
+   it can mark the item read before navigating. Block-level so `bb:truncate` has a width to clip
+   at; text-align isn't in BlazorBlueprint's precompiled utilities (see the status badges above). */
+.notification-open-button {
+    display: block;
+    max-width: 100%;
+    text-align: left;
+}
+
+/* Read-only diagnostic dumps on the notification test page (stack trace, SMTP transcript):
+   preserved line breaks, horizontally scrollable instead of wrapped, so stack frames line up. */
+.diagnostic-textarea {
+    width: 100%;
+    height: 16rem;
+    white-space: pre;
+    overflow: auto;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.75rem;
+    line-height: 1.4;
+}

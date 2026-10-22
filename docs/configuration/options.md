@@ -91,8 +91,8 @@ Notifications are sent by email:
   them.
 - `Notifications__Email__From`: the sender address.
 - `Notifications__Email__SubjectTemplate`: the subject line. `{0}` is replaced with the study's acronym.
-- `Notifications__Email__ScreeningListLinkTemplate`: the link to a study's screening list in the emails, e.g.
-  `https://recruit.example.com/trials/{0}/patients`. `{0}` is replaced with the list's id.
+- `Notifications__Email__PublicBaseUrl`: the URL users reach the app at, e.g. `https://recruit.example.com/`. Links in
+  the emails are built from it.
 
 ### Ports and observability
 

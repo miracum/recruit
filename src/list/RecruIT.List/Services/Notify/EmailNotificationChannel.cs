@@ -1,3 +1,4 @@
+using MailKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Options;
@@ -9,11 +10,20 @@ namespace RecruIT.List.Services.Notify;
 public sealed class EmailNotificationChannel(IOptions<EmailNotificationOptions> mailerOptions)
     : INotificationChannel
 {
-    public async Task<INotificationBatch> BeginBatchAsync(CancellationToken ct = default)
+    public async Task<INotificationBatch> BeginBatchAsync(
+        Stream? protocolLog = null,
+        CancellationToken ct = default
+    )
     {
         var options = mailerOptions.Value;
 
-        var client = new SmtpClient();
+        // RedactSecrets masks the AUTH exchange's credentials, so the transcript is safe to show to
+        // an admin - set explicitly rather than relying on MailKit's undocumented default.
+        var client = new SmtpClient(
+            protocolLog is null
+                ? new NullProtocolLogger()
+                : new ProtocolLogger(protocolLog, leaveOpen: true) { RedactSecrets = true }
+        );
         try
         {
             await client.ConnectAsync(

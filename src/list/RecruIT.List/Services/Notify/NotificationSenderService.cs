@@ -169,8 +169,9 @@ public sealed class NotificationSenderService(
             .ToDictionaryAsync(e => e.Id, ct);
 
         // Several events commonly share a trial (and several deliveries across groups commonly
-        // share an event's trial too) - resolve each trial's current List id/acronym at most once
-        // for this whole tick rather than once per delivery.
+        // share an event's trial too) - resolve each trial's current acronym at most once for this
+        // whole tick rather than once per delivery. Where the email's link leads is resolved
+        // separately, at click time (see Program.cs's /notifications/email endpoint).
         var listInfoByTrial = await screeningListService.ResolveListsForTrialsAsync(
             due.Where(d => events.ContainsKey(d.NotificationEventId))
                 .Select(d => events[d.NotificationEventId].TrialIdentifier),
@@ -180,14 +181,14 @@ public sealed class NotificationSenderService(
         // One SMTP session for every due recipient this tick, rather than reconnecting and
         // re-authenticating per recipient - real SMTP relays commonly rate-limit new connections
         // per source, so a batch of digests is exactly the kind of connection burst that trips it.
-        await using var batch = await channel.BeginBatchAsync(ct);
+        await using var batch = await channel.BeginBatchAsync(ct: ct);
 
         foreach (var group in due.GroupBy(d => d.NotificationSubscriptionId))
         {
             var deliveries = group.ToList();
             var recipientEmail = deliveries[0].Email;
 
-            var items = new List<(string StudyAcronym, string ListUrl)>();
+            var acronyms = new List<string>();
             var includedDeliveries = new List<NotificationDelivery>();
             foreach (var delivery in deliveries)
             {
@@ -211,27 +212,27 @@ public sealed class NotificationSenderService(
                     continue;
                 }
 
-                items.Add(
-                    (
-                        listInfo.Value.StudyAcronym,
-                        string.Format(
-                            mailerOptions.Value.ScreeningListLinkTemplate,
-                            listInfo.Value.ListId
-                        )
-                    )
-                );
+                acronyms.Add(listInfo.Value.StudyAcronym);
                 includedDeliveries.Add(delivery);
             }
 
-            if (items.Count == 0)
+            if (includedDeliveries.Count == 0)
             {
                 continue;
             }
 
-            var acronyms = items.Select(i => i.StudyAcronym).Distinct().ToList();
-            var subjectAcronym = acronyms.Count == 1 ? acronyms[0] : $"{acronyms.Count} trials";
+            var distinctAcronyms = acronyms.Distinct().ToList();
+            var subjectAcronym =
+                distinctAcronyms.Count == 1
+                    ? distinctAcronyms[0]
+                    : $"{distinctAcronyms.Count} trials";
             var subject = string.Format(mailerOptions.Value.SubjectTemplate, subjectAcronym);
-            var html = RenderHtml(items.Count, subjectAcronym, items[0].ListUrl);
+            var digestId = Guid.NewGuid();
+            var html = RenderHtml(
+                includedDeliveries.Count,
+                subjectAcronym,
+                EmailDigestLink(digestId)
+            );
 
             try
             {
@@ -240,6 +241,7 @@ public sealed class NotificationSenderService(
                 foreach (var delivery in includedDeliveries)
                 {
                     delivery.SentAt = sentAt;
+                    delivery.EmailDigestId = digestId;
                 }
             }
             catch (Exception ex)
@@ -276,28 +278,30 @@ public sealed class NotificationSenderService(
     /// <summary>
     /// Admin-triggered, one-off send: exercises the exact same SMTP config and MJML template as a
     /// real digest, using one obviously-fake sample item, so an admin can verify EmailNotificationOptions
-    /// (SMTP host/credentials, From, subject/link templates) actually works without waiting for a
-    /// real detected event or touching any subscription/delivery rows.
+    /// (SMTP host/credentials, From, subject template, public base URL) actually works without
+    /// waiting for a real detected event or touching any subscription/delivery rows. Its link
+    /// carries a digest id no delivery has, which the email endpoint treats like any unknown
+    /// digest - a plain redirect to the notifications page.
     /// </summary>
-    public async Task SendTestEmailAsync(string recipientEmail, CancellationToken ct = default)
+    /// <param name="protocolLog">Receives the SMTP transcript, see INotificationChannel.BeginBatchAsync.</param>
+    public async Task SendTestEmailAsync(
+        string recipientEmail,
+        Stream? protocolLog = null,
+        CancellationToken ct = default
+    )
     {
-        var sampleItems = new List<(string StudyAcronym, string ListUrl)>
-        {
-            ("TEST-TRIAL", string.Format(mailerOptions.Value.ScreeningListLinkTemplate, "test")),
-        };
+        const string sampleAcronym = "TEST-TRIAL";
 
-        var subject =
-            "[Test] "
-            + string.Format(mailerOptions.Value.SubjectTemplate, sampleItems[0].StudyAcronym);
-        var html = RenderHtml(
-            sampleItems.Count,
-            sampleItems[0].StudyAcronym,
-            sampleItems[0].ListUrl
-        );
+        var subject = "[Test] " + string.Format(mailerOptions.Value.SubjectTemplate, sampleAcronym);
+        var html = RenderHtml(1, sampleAcronym, EmailDigestLink(Guid.NewGuid()));
 
-        await using var batch = await channel.BeginBatchAsync(ct);
+        await using var batch = await channel.BeginBatchAsync(protocolLog, ct);
         await batch.SendAsync(recipientEmail, subject, html, ct);
     }
+
+    /// <summary>The link a digest email's button points at - see Program.cs's /notifications/email endpoint.</summary>
+    private string EmailDigestLink(Guid digestId) =>
+        mailerOptions.Value.PublicUrl($"notifications/email/{digestId}");
 
     /// <summary>
     /// Renders the digest email body from an aggregate count only - no patient names or other

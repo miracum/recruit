@@ -162,6 +162,8 @@ maildev:
     runAsGroup: 1000
     seccompProfile:
       type: RuntimeDefault
+  image:
+    tag: "3.0.0@sha256:6e09695961f4aef9016a390ad391314a078220216601b15a35d389a7df2a3855"
 
 list:
   # -- Whether the list module should be enabled. Requires a PostgreSQL database, see `list.database`.
@@ -297,10 +299,9 @@ list:
     # -- how often, in seconds, list scans for screening list changes to notify about
     scanIntervalSeconds: 60
     email:
-      # -- Used to link back to list from a notification email. If `list.ingress.enabled` is
-      # `true`, the ingress host is used instead. A composite format string (see .NET's String.Format)
-      # with a single `{0}` placeholder for the list id.
-      screeningListLinkTemplate: "http://localhost:8080/recommendations/{0}"
+      # -- the URL users reach list at, used to build the links in notification emails. If
+      # `list.ingress.enabled` is `true`, the first ingress host is used instead.
+      publicBaseUrl: "http://localhost:8080/"
       # -- the sender email address for notification mails
       from: "recruit@example.com"
       # -- subject line template, a composite format string (see .NET's String.Format) with a single

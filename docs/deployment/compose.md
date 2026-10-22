@@ -177,7 +177,7 @@ services:
       Notifications__Email__SmtpUsername: recruit
       Notifications__Email__SmtpPassword: change-me
       Notifications__Email__From: recruit@example.com
-      Notifications__Email__ScreeningListLinkTemplate: https://recruit.example.com/trials/{0}/patients
+      Notifications__Email__PublicBaseUrl: https://recruit.example.com/
 ```
 
 See [Notifications](../configuration/options.md#notifications) for what these settings do.

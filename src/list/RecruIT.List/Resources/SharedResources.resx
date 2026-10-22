@@ -298,11 +298,44 @@
   <data name="App.Notifications.EmptyDescription" xml:space="preserve">
     <value>There are no new recruitment suggestions to review.</value>
   </data>
-  <data name="App.Notifications.Dismiss" xml:space="preserve">
-    <value>Dismiss</value>
-  </data>
   <data name="App.Notifications.MessageFormat" xml:space="preserve">
     <value>{0} was newly recommended for {1}</value>
+  </data>
+  <data name="App.Notifications.UnreadTab" xml:space="preserve">
+    <value>Unread</value>
+  </data>
+  <data name="App.Notifications.ReadTab" xml:space="preserve">
+    <value>Read</value>
+  </data>
+  <data name="App.Notifications.ReadEmptyTitle" xml:space="preserve">
+    <value>No read notifications</value>
+  </data>
+  <data name="App.Notifications.ReadEmptyDescription" xml:space="preserve">
+    <value>Notifications you mark as read show up here.</value>
+  </data>
+  <data name="App.Notifications.SelectAll" xml:space="preserve">
+    <value>Select all notifications</value>
+  </data>
+  <data name="App.Notifications.SelectItem" xml:space="preserve">
+    <value>Select notification</value>
+  </data>
+  <data name="App.Notifications.SelectedCount" xml:space="preserve">
+    <value>{0} selected</value>
+  </data>
+  <data name="App.Notifications.MarkRead" xml:space="preserve">
+    <value>Mark as read</value>
+  </data>
+  <data name="App.Notifications.MarkUnread" xml:space="preserve">
+    <value>Mark as unread</value>
+  </data>
+  <data name="App.Notifications.MarkAllRead" xml:space="preserve">
+    <value>Mark all as read</value>
+  </data>
+  <data name="App.Notifications.MarkTrialRead" xml:space="preserve">
+    <value>Mark trial as read</value>
+  </data>
+  <data name="App.Notifications.UpdateErrorTitle" xml:space="preserve">
+    <value>Could not update notifications</value>
   </data>
   <data name="App.Status.Candidate" xml:space="preserve">
     <value>candidate</value>
@@ -753,6 +786,48 @@
   </data>
   <data name="App.NotificationTest.SendErrorTitle" xml:space="preserve">
     <value>Failed to send test email</value>
+  </data>
+  <data name="App.NotificationTest.ExceptionTitle" xml:space="preserve">
+    <value>Error details</value>
+  </data>
+  <data name="App.NotificationTest.ExceptionTypeLabel" xml:space="preserve">
+    <value>Exception type</value>
+  </data>
+  <data name="App.NotificationTest.SmtpStatusCodeLabel" xml:space="preserve">
+    <value>SMTP status code</value>
+  </data>
+  <data name="App.NotificationTest.SmtpErrorCodeLabel" xml:space="preserve">
+    <value>SMTP error</value>
+  </data>
+  <data name="App.NotificationTest.MailboxLabel" xml:space="preserve">
+    <value>Affected mailbox</value>
+  </data>
+  <data name="App.NotificationTest.SocketErrorLabel" xml:space="preserve">
+    <value>Network error</value>
+  </data>
+  <data name="App.NotificationTest.TranscriptTitle" xml:space="preserve">
+    <value>SMTP transcript</value>
+  </data>
+  <data name="App.NotificationTest.TranscriptDescription" xml:space="preserve">
+    <value>The conversation with the mail server during the last send. Credentials are redacted.</value>
+  </data>
+  <data name="App.NotificationTest.TranscriptToggle" xml:space="preserve">
+    <value>Show transcript</value>
+  </data>
+  <data name="App.NotificationTest.TranscriptBodyOmitted" xml:space="preserve">
+    <value>{0} lines of message body omitted</value>
+  </data>
+  <data name="App.NotificationTest.TranscriptEmpty" xml:space="preserve">
+    <value>(No connection to the mail server was established.)</value>
+  </data>
+  <data name="App.NotificationTest.Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="App.NotificationTest.CopiedToast" xml:space="preserve">
+    <value>Copied to the clipboard.</value>
+  </data>
+  <data name="App.NotificationTest.CopyFailedToast" xml:space="preserve">
+    <value>Could not access the clipboard - select the text and copy it manually.</value>
   </data>
   <data name="App.Subscription.ButtonLabel" xml:space="preserve">
     <value>Notification settings</value>

@@ -1,66 +1,44 @@
 @page "/notifications"
 @attribute [Authorize]
 @inject NotificationSubscriptionService NotificationSubscriptionService
+@inject NotificationInboxState NotificationInboxState
 @inject ScreeningListService ScreeningListService
 @inject BreadcrumbState BreadcrumbState
+@inject NavigationManager Navigation
+@inject ToastService Toast
 @inject IStringLocalizer<SharedResources> Localizer
 
 <PageTitle>@Localizer["App.Nav.Notifications"]</PageTitle>
 
-@if (_loading)
-{
-    <BbSkeleton Class="bb:w-full" />
-}
-else if (_errorMessage is not null)
-{
-    <BbAlert Variant="AlertVariant.Danger">
-        <BbAlertTitle>@Localizer["App.Notifications.LoadErrorTitle"]</BbAlertTitle>
-        <BbAlertDescription>@_errorMessage</BbAlertDescription>
-    </BbAlert>
-}
-else if (_items.Count == 0)
-{
-    <BbEmpty Title="@Localizer["App.Notifications.EmptyTitle"]" Description="@Localizer["App.Notifications.EmptyDescription"]" />
-}
-else
-{
-    <div class="bb:space-y-3">
-        @foreach (var item in _items)
-        {
-            <BbCard>
-                <BbCardContent>
-                    <div class="bb:flex bb:items-center bb:justify-between bb:gap-4">
-                        <div>
-                            <p class="bb:font-medium">@Localizer["App.Notifications.MessageFormat", item.PatientDisplayName, item.StudyAcronym]</p>
-                            <p class="bb:text-sm bb:text-muted-foreground">
-                                @item.OccurredAt.LocalDateTime.ToString("g")
-                                &middot;
-                                @if (item.ListId is not null)
-                                {
-                                    <a href="/trials/@item.ListId/patients" class="bb:hover:underline">@item.StudyAcronym</a>
-                                }
-                                else
-                                {
-                                    @item.StudyAcronym
-                                }
-                            </p>
-                        </div>
-                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="@(() => DismissAsync(item))">
-                            @Localizer["App.Notifications.Dismiss"]
-                        </BbButton>
-                    </div>
-                </BbCardContent>
-            </BbCard>
-        }
-    </div>
-}
+<BbTabs Value="@CurrentTab" ValueChanged="OnTabChanged">
+    <BbTabsList>
+        <BbTabsTrigger Value="@UnreadTab">
+            @Localizer["App.Notifications.UnreadTab"]
+            @if (NotificationInboxState.UnreadCount > 0)
+            {
+                <BbBadge Variant="BadgeVariant.Secondary" Class="bb:ml-2">@NotificationInboxState.UnreadCount</BbBadge>
+            }
+        </BbTabsTrigger>
+        <BbTabsTrigger Value="@ReadTab">@Localizer["App.Notifications.ReadTab"]</BbTabsTrigger>
+    </BbTabsList>
+    <BbTabsContent Value="@UnreadTab">@Feed</BbTabsContent>
+    <BbTabsContent Value="@ReadTab">@Feed</BbTabsContent>
+</BbTabs>
 
 @code {
+    private const string UnreadTab = "unread";
+    private const string ReadTab = "read";
+
     [CascadingParameter]
     private Task<AuthenticationState>? AuthStateTask { get; set; }
 
+    /// <summary>"read" for the Read tab; anything else (including absent) is the Unread tab.</summary>
+    [SupplyParameterFromQuery(Name = "tab")]
+    public string? Tab { get; set; }
+
     private sealed record DisplayItem(
         Guid DeliveryId,
+        string TrialIdentifier,
         string? ListId,
         string StudyAcronym,
         string PatientDisplayName,
@@ -68,23 +46,57 @@ else
     );
 
     private List<DisplayItem> _items = [];
+    private readonly HashSet<Guid> _selected = [];
     private bool _loading = true;
+    private bool _busy;
     private string? _errorMessage;
     private ClaimsPrincipal _user = new();
+    private NotificationFeedFilter? _loadedFilter;
+
+    private NotificationFeedFilter Filter =>
+        string.Equals(Tab, ReadTab, StringComparison.OrdinalIgnoreCase)
+            ? NotificationFeedFilter.Read
+            : NotificationFeedFilter.Unread;
+
+    private string CurrentTab => Filter == NotificationFeedFilter.Read ? ReadTab : UnreadTab;
+
+    private bool AllSelected => _items.Count > 0 && _selected.Count == _items.Count;
+
+    private bool SomeSelected => _selected.Count > 0 && _selected.Count < _items.Count;
 
     protected override async Task OnInitializedAsync()
     {
         BreadcrumbState.Set(new BreadcrumbItem(Localizer["App.Nav.Notifications"]));
+        _user = await AuthStateTask.GetUserAsync();
+    }
+
+    // Switching tabs only changes the ?tab= query parameter, which re-runs this rather than
+    // OnInitializedAsync - so the feed is (re)loaded here, once per distinct filter.
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_loadedFilter != Filter)
+        {
+            await LoadAsync();
+        }
+    }
+
+    private void OnTabChanged(string? value) =>
+        Navigation.NavigateTo(Navigation.GetUriWithQueryParameter("tab", value == ReadTab ? ReadTab : null));
+
+    private async Task LoadAsync()
+    {
+        var filter = Filter;
+        _loading = true;
+        _errorMessage = null;
+        _selected.Clear();
 
         try
         {
-            _user = await AuthStateTask.GetUserAsync();
+            var feedItems = await NotificationSubscriptionService.ListInAppFeedAsync(_user, filter);
 
-            var feedItems = await NotificationSubscriptionService.ListInAppFeedAsync(_user);
-
-            // Each unread item only carries the trial's stable identifier token - resolve the
-            // current List id/acronym once per distinct trial rather than per item, since several
-            // items commonly share the same trial.
+            // Each item only carries the trial's stable identifier token - resolve the current
+            // List id/acronym once per distinct trial rather than per item, since several items
+            // commonly share the same trial.
             var listInfoByTrial = await ScreeningListService.ResolveListsForTrialsAsync(
                 feedItems.Select(f => f.TrialIdentifier)
             );
@@ -96,6 +108,7 @@ else
                 _items.Add(
                     new DisplayItem(
                         feedItem.DeliveryId,
+                        feedItem.TrialIdentifier,
                         listInfo?.ListId,
                         listInfo?.StudyAcronym ?? feedItem.TrialIdentifier,
                         feedItem.PatientDisplayName,
@@ -103,6 +116,8 @@ else
                     )
                 );
             }
+
+            await NotificationInboxState.RefreshAsync(_user);
         }
         catch (Exception)
         {
@@ -110,13 +125,211 @@ else
         }
         finally
         {
+            _loadedFilter = filter;
             _loading = false;
         }
     }
 
-    private async Task DismissAsync(DisplayItem item)
+    private void ToggleSelected(Guid deliveryId, bool selected)
     {
-        await NotificationSubscriptionService.MarkReadAsync(item.DeliveryId, _user);
-        _items.Remove(item);
+        if (selected)
+        {
+            _selected.Add(deliveryId);
+        }
+        else
+        {
+            _selected.Remove(deliveryId);
+        }
     }
+
+    private void ToggleSelectAll(bool selected)
+    {
+        _selected.Clear();
+        if (selected)
+        {
+            _selected.UnionWith(_items.Select(i => i.DeliveryId));
+        }
+    }
+
+    /// <summary>
+    /// Optimistically drops the affected items from the current tab (marking read moves them out
+    /// of Unread, marking unread moves them out of Read), then persists - reloading on failure so
+    /// the list never stays out of sync with what was actually saved.
+    /// </summary>
+    private async Task MutateAsync(IReadOnlyCollection<DisplayItem> affected, Func<Task> persist)
+    {
+        if (_busy)
+        {
+            return;
+        }
+
+        _busy = true;
+        var affectedIds = affected.Select(i => i.DeliveryId).ToHashSet();
+        _items.RemoveAll(i => affectedIds.Contains(i.DeliveryId));
+        _selected.ExceptWith(affectedIds);
+
+        try
+        {
+            await persist();
+            await NotificationInboxState.RefreshAsync(_user);
+        }
+        catch (Exception ex)
+        {
+            Toast.Error(ex.Message, Localizer["App.Notifications.UpdateErrorTitle"]);
+            await LoadAsync();
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private Task MarkReadAsync(IReadOnlyCollection<DisplayItem> items) =>
+        MutateAsync(items, () => NotificationSubscriptionService.MarkReadAsync([.. items.Select(i => i.DeliveryId)], _user));
+
+    private Task MarkUnreadAsync(IReadOnlyCollection<DisplayItem> items) =>
+        MutateAsync(items, () => NotificationSubscriptionService.MarkUnreadAsync([.. items.Select(i => i.DeliveryId)], _user));
+
+    private Task MarkSelectedAsync() =>
+        Filter == NotificationFeedFilter.Unread
+            ? MarkReadAsync([.. _items.Where(i => _selected.Contains(i.DeliveryId))])
+            : MarkUnreadAsync([.. _items.Where(i => _selected.Contains(i.DeliveryId))]);
+
+    // Goes through MarkAllReadAsync rather than MarkReadAsync(visible ids), so items beyond the
+    // feed's page size (or hidden by a since-revoked trial access) are cleared too.
+    private Task MarkAllReadAsync(string? trialIdentifier) =>
+        MutateAsync(
+            [.. _items.Where(i => trialIdentifier is null || i.TrialIdentifier == trialIdentifier)],
+            () => NotificationSubscriptionService.MarkAllReadAsync(_user, trialIdentifier)
+        );
+
+    private async Task OpenAsync(DisplayItem item)
+    {
+        if (Filter == NotificationFeedFilter.Unread)
+        {
+            await MarkReadAsync([item]);
+        }
+
+        Navigation.NavigateTo($"/trials/{Uri.EscapeDataString(item.ListId!)}/patients");
+    }
+
+    private RenderFragment Feed => __builder =>
+    {
+        if (_loading)
+        {
+            <BbSkeleton Class="bb:mt-4 bb:w-full" />
+        }
+        else if (_errorMessage is not null)
+        {
+            <BbAlert Variant="AlertVariant.Danger" Class="bb:mt-4">
+                <BbAlertTitle>@Localizer["App.Notifications.LoadErrorTitle"]</BbAlertTitle>
+                <BbAlertDescription>@_errorMessage</BbAlertDescription>
+            </BbAlert>
+        }
+        else if (_items.Count == 0)
+        {
+            if (Filter == NotificationFeedFilter.Unread)
+            {
+                <BbEmpty Title="@Localizer["App.Notifications.EmptyTitle"]" Description="@Localizer["App.Notifications.EmptyDescription"]" />
+            }
+            else
+            {
+                <BbEmpty Title="@Localizer["App.Notifications.ReadEmptyTitle"]" Description="@Localizer["App.Notifications.ReadEmptyDescription"]" />
+            }
+        }
+        else
+        {
+            <div class="bb:mt-4 bb:flex bb:flex-wrap bb:items-center bb:justify-between bb:gap-3">
+                <div class="bb:flex bb:items-center bb:gap-3">
+                    <BbCheckbox Checked="AllSelected" Indeterminate="SomeSelected" CheckedChanged="ToggleSelectAll"
+                                AriaLabel="@Localizer["App.Notifications.SelectAll"]" />
+                    @if (_selected.Count > 0)
+                    {
+                        <span class="bb:text-sm bb:text-muted-foreground">@Localizer["App.Notifications.SelectedCount", _selected.Count]</span>
+                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Disabled="_busy" OnClick="MarkSelectedAsync">
+                            @(Filter == NotificationFeedFilter.Unread ? Localizer["App.Notifications.MarkRead"] : Localizer["App.Notifications.MarkUnread"])
+                        </BbButton>
+                    }
+                </div>
+                @if (Filter == NotificationFeedFilter.Unread)
+                {
+                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Disabled="_busy" OnClick="@(() => MarkAllReadAsync(null))">
+                        <LucideIcon Name="check-check" Size="16" />
+                        @Localizer["App.Notifications.MarkAllRead"]
+                    </BbButton>
+                }
+            </div>
+
+            <div class="bb:mt-3 bb:space-y-4">
+                @* GroupBy keeps the feed's own order, both for the groups (first occurrence) and within them. *@
+                @foreach (var group in _items.GroupBy(i => i.TrialIdentifier))
+                {
+                    var first = group.First();
+                    <div class="bb:overflow-hidden bb:rounded-lg bb:border" @key="group.Key">
+                        <div class="bb:flex bb:items-center bb:justify-between bb:gap-3 bb:border-b bb:bg-muted/50 bb:px-4 bb:py-2">
+                            <div class="bb:flex bb:min-w-0 bb:items-center bb:gap-2">
+                                @if (first.ListId is not null)
+                                {
+                                    <a href="/trials/@first.ListId/patients" class="bb:truncate bb:text-sm bb:font-semibold bb:hover:underline">@first.StudyAcronym</a>
+                                }
+                                else
+                                {
+                                    <span class="bb:truncate bb:text-sm bb:font-semibold">@first.StudyAcronym</span>
+                                }
+                                <BbBadge Variant="BadgeVariant.Secondary">@group.Count()</BbBadge>
+                            </div>
+                            @if (Filter == NotificationFeedFilter.Unread)
+                            {
+                                <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Disabled="_busy" OnClick="@(() => MarkAllReadAsync(group.Key))">
+                                    @Localizer["App.Notifications.MarkTrialRead"]
+                                </BbButton>
+                            }
+                        </div>
+                        <ul class="bb:divide-y">
+                            @foreach (var item in group)
+                            {
+                                <li class="bb:flex bb:items-center bb:gap-3 bb:px-4 bb:py-3 bb:hover:bg-muted/50" @key="item.DeliveryId">
+                                    <BbCheckbox Checked="_selected.Contains(item.DeliveryId)"
+                                                CheckedChanged="@(v => ToggleSelected(item.DeliveryId, v))"
+                                                AriaLabel="@Localizer["App.Notifications.SelectItem"]" />
+                                    @if (Filter == NotificationFeedFilter.Unread)
+                                    {
+                                        <span class="bb:size-2 bb:shrink-0 bb:rounded-full bb:bg-primary" aria-hidden="true"></span>
+                                    }
+                                    <div class="bb:min-w-0 bb:flex-1">
+                                        @if (item.ListId is not null)
+                                        {
+                                            <button type="button" class="notification-open-button bb:cursor-pointer bb:truncate bb:text-sm bb:font-medium bb:hover:underline"
+                                                    @onclick="@(() => OpenAsync(item))">
+                                                @Localizer["App.Notifications.MessageFormat", item.PatientDisplayName, item.StudyAcronym]
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <p class="bb:truncate bb:text-sm bb:font-medium">@Localizer["App.Notifications.MessageFormat", item.PatientDisplayName, item.StudyAcronym]</p>
+                                        }
+                                        <p class="bb:text-xs bb:text-muted-foreground">@item.OccurredAt.LocalDateTime.ToString("g")</p>
+                                    </div>
+                                    @if (Filter == NotificationFeedFilter.Unread)
+                                    {
+                                        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" Disabled="_busy"
+                                                  AriaLabel="@Localizer["App.Notifications.MarkRead"]" OnClick="@(() => MarkReadAsync([item]))">
+                                            <LucideIcon Name="check" Size="16" />
+                                        </BbButton>
+                                    }
+                                    else
+                                    {
+                                        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" Disabled="_busy"
+                                                  AriaLabel="@Localizer["App.Notifications.MarkUnread"]" OnClick="@(() => MarkUnreadAsync([item]))">
+                                            <LucideIcon Name="mail" Size="16" />
+                                        </BbButton>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </div>
+        }
+    };
 }

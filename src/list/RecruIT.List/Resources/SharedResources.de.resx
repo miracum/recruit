@@ -357,11 +357,44 @@
   <data name="App.Notifications.EmptyDescription" xml:space="preserve">
     <value>Es liegen keine neuen Rekrutierungsvorschläge zur Überprüfung vor.</value>
   </data>
-  <data name="App.Notifications.Dismiss" xml:space="preserve">
-    <value>Verwerfen</value>
-  </data>
   <data name="App.Notifications.MessageFormat" xml:space="preserve">
     <value>{0} wurde neu für {1} vorgeschlagen</value>
+  </data>
+  <data name="App.Notifications.UnreadTab" xml:space="preserve">
+    <value>Ungelesen</value>
+  </data>
+  <data name="App.Notifications.ReadTab" xml:space="preserve">
+    <value>Gelesen</value>
+  </data>
+  <data name="App.Notifications.ReadEmptyTitle" xml:space="preserve">
+    <value>Keine gelesenen Benachrichtigungen</value>
+  </data>
+  <data name="App.Notifications.ReadEmptyDescription" xml:space="preserve">
+    <value>Benachrichtigungen, die Sie als gelesen markieren, erscheinen hier.</value>
+  </data>
+  <data name="App.Notifications.SelectAll" xml:space="preserve">
+    <value>Alle Benachrichtigungen auswählen</value>
+  </data>
+  <data name="App.Notifications.SelectItem" xml:space="preserve">
+    <value>Benachrichtigung auswählen</value>
+  </data>
+  <data name="App.Notifications.SelectedCount" xml:space="preserve">
+    <value>{0} ausgewählt</value>
+  </data>
+  <data name="App.Notifications.MarkRead" xml:space="preserve">
+    <value>Als gelesen markieren</value>
+  </data>
+  <data name="App.Notifications.MarkUnread" xml:space="preserve">
+    <value>Als ungelesen markieren</value>
+  </data>
+  <data name="App.Notifications.MarkAllRead" xml:space="preserve">
+    <value>Alle als gelesen markieren</value>
+  </data>
+  <data name="App.Notifications.MarkTrialRead" xml:space="preserve">
+    <value>Studie als gelesen markieren</value>
+  </data>
+  <data name="App.Notifications.UpdateErrorTitle" xml:space="preserve">
+    <value>Benachrichtigungen konnten nicht aktualisiert werden</value>
   </data>
   <data name="App.Status.Candidate" xml:space="preserve">
     <value>Kandidat</value>
@@ -914,6 +947,48 @@
   </data>
   <data name="App.NotificationTest.SendErrorTitle" xml:space="preserve">
     <value>Test-E-Mail konnte nicht gesendet werden</value>
+  </data>
+  <data name="App.NotificationTest.ExceptionTitle" xml:space="preserve">
+    <value>Fehlerdetails</value>
+  </data>
+  <data name="App.NotificationTest.ExceptionTypeLabel" xml:space="preserve">
+    <value>Ausnahmetyp</value>
+  </data>
+  <data name="App.NotificationTest.SmtpStatusCodeLabel" xml:space="preserve">
+    <value>SMTP-Statuscode</value>
+  </data>
+  <data name="App.NotificationTest.SmtpErrorCodeLabel" xml:space="preserve">
+    <value>SMTP-Fehler</value>
+  </data>
+  <data name="App.NotificationTest.MailboxLabel" xml:space="preserve">
+    <value>Betroffenes Postfach</value>
+  </data>
+  <data name="App.NotificationTest.SocketErrorLabel" xml:space="preserve">
+    <value>Netzwerkfehler</value>
+  </data>
+  <data name="App.NotificationTest.TranscriptTitle" xml:space="preserve">
+    <value>SMTP-Protokoll</value>
+  </data>
+  <data name="App.NotificationTest.TranscriptDescription" xml:space="preserve">
+    <value>Die Kommunikation mit dem Mailserver beim letzten Versand. Zugangsdaten sind unkenntlich gemacht.</value>
+  </data>
+  <data name="App.NotificationTest.TranscriptToggle" xml:space="preserve">
+    <value>Protokoll anzeigen</value>
+  </data>
+  <data name="App.NotificationTest.TranscriptBodyOmitted" xml:space="preserve">
+    <value>{0} Zeilen Nachrichteninhalt ausgelassen</value>
+  </data>
+  <data name="App.NotificationTest.TranscriptEmpty" xml:space="preserve">
+    <value>(Es wurde keine Verbindung zum Mailserver aufgebaut.)</value>
+  </data>
+  <data name="App.NotificationTest.Copy" xml:space="preserve">
+    <value>Kopieren</value>
+  </data>
+  <data name="App.NotificationTest.CopiedToast" xml:space="preserve">
+    <value>In die Zwischenablage kopiert.</value>
+  </data>
+  <data name="App.NotificationTest.CopyFailedToast" xml:space="preserve">
+    <value>Kein Zugriff auf die Zwischenablage - bitte den Text markieren und manuell kopieren.</value>
   </data>
   <data name="App.Subscription.ButtonLabel" xml:space="preserve">
     <value>Benachrichtigungseinstellungen</value>
