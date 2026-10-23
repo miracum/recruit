@@ -4,6 +4,9 @@ podAnnotations:
 list:
   podDisruptionBudget:
     enabled: true
+  notifications:
+    testing:
+      enabled: true
   replicaCount: 1
   topologySpreadConstraints:
     - maxSkew: 1

@@ -198,6 +198,37 @@ jobs:
 
           ./container-structure-test-linux-amd64 test --image="${IMAGE_NAME}:${IMAGE_TAG}" --config=tests/container-structure/common-tests.yaml
 
+  # list's unit and E2E tests - both start their own Postgres (and, for E2E, HAPI FHIR) via
+  # Testcontainers, so they only need Docker, which the runner already has.
+  test-list:
+    name: test list
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Build
+        working-directory: src/list
+        run: dotnet build RecruIT.slnx
+
+      # the E2E fixture downloads Chromium itself, but not the system libraries it needs.
+      - name: Install Playwright's browser dependencies
+        working-directory: src/list
+        run: pwsh RecruIT.List.E2ETests/bin/Debug/net10.0/playwright.ps1 install --with-deps chromium
+
+      - name: Run unit tests
+        working-directory: src/list
+        run: dotnet test --project RecruIT.List.Tests --no-build
+
+      - name: Run E2E tests
+        working-directory: src/list
+        run: dotnet test --project RecruIT.List.E2ETests --no-build
+
   compose-test:
     needs:
       - build-query-sql-on-fhir
@@ -216,6 +247,7 @@ jobs:
     needs:
       - chart
       - compose-test
+      - test-list
     runs-on: ubuntu-26.04
     steps:
       - name: Fail unless all required jobs succeeded

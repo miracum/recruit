@@ -62,9 +62,11 @@ dropped, and your subscription takes effect again if access is restored.
 
 ## How new recommendations are detected
 
-Every minute, the screening list compares each trial's screening list on the FHIR server with the version it saw last
-time, using the FHIR server's version history. Every patient added since then becomes a notification for each
-subscriber of that trial. A patient who was removed from a screening list and later added back counts as new again.
+Every minute, the screening list goes through every version of each trial's screening list saved on the FHIR server
+since the version it saw last time. Every patient on the current version who was missing from any of those versions
+becomes a notification for each subscriber of that trial. So a patient who was removed from a screening list and later
+added back counts as new again, even if both happened within the same minute. A patient who was added and removed again
+in between isn't notified about.
 
 The first time the screening list sees a trial's screening list, it notes the current patients without notifying
 anyone, so installing recruIT or creating a study doesn't produce a notification for every existing candidate.
@@ -91,4 +93,16 @@ screening list is all you need.
 
 The demo's patient data never changes, though. Its screening list gets all of its candidates in the query module's
 first run, which the screening list only notes, as described [above](#how-new-recommendations-are-detected), so no
-notifications turn up on their own. To see an email arrive, use the **Notification Test** page.
+notifications turn up on their own. To try them out, open **Notification Test** in the sidebar:
+
+- **Simulate a new recommendation** removes a patient you pick from a trial's screening list and adds them back, as
+  if the query module had found them again. Everyone subscribed to that trial gets a notification in the app straight
+  away, and by email at the frequency they chose. The page warns you if you aren't subscribed yourself.
+- **Send due emails now** sends the emails that are due without waiting for the next 5-minute round, such as those
+  for Instant subscribers.
+
+Both are only shown when `Notifications__Testing__Enabled` is `true`, as in the demo, see
+[Configuration options](options.md#notifications). They notify real subscribers and change the real screening list
+on the FHIR server, so leave this off in production.
+
+To check just the mail settings, use **Send test email** on the same page, which works whether or not this is enabled.

@@ -1,6 +1,8 @@
 using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
+using DotNet.Testcontainers.Builders;
+using DotNet.Testcontainers.Containers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Testcontainers.PostgreSql;
@@ -10,22 +12,36 @@ namespace RecruIT.List.E2ETests;
 /// <summary>
 /// Boots a real RecruIT.List instance in-process (via WebApplicationFactory, with a real Kestrel
 /// listener so Blazor Server's SignalR circuit works - the default TestServer doesn't carry
-/// WebSockets) against a disposable Testcontainers Postgres, for the Playwright tests to drive
-/// with an actual browser. Auth:Enabled=false swaps in DevBypassAuthenticationHandler so no IdP
-/// is needed, and FhirServer:BaseUrl points at a closed port: the main page renders its own error state if
-/// FHIR is unreachable (see Dashboard.razor), so this is enough to prove the app shell itself
-/// comes up.
+/// WebSockets) against disposable Testcontainers Postgres and HAPI FHIR servers, for the
+/// Playwright tests to drive with an actual browser. The FHIR server is seeded with a screening
+/// list (see FhirSeed), so tests can go through real trial pages. Auth:Enabled=false swaps in
+/// DevBypassAuthenticationHandler (an admin with an email address), so no IdP is needed, and
+/// Notifications:Testing:Enabled turns on the Notification Test page's re-recommend action.
 ///
 /// Set <see cref="BaseUrlEnvVar"/> to point the same tests at an already-running instance instead
 /// - e.g. a post-deploy smoke test against a container/Kubernetes deployment in CI - in which case
-/// this fixture starts neither Postgres nor the app itself.
+/// this fixture starts neither the containers nor the app itself. That instance needs at least
+/// one trial with patients on its screening list, and Notifications:Testing:Enabled.
 /// </summary>
+[CollectionDefinition(Name)]
+public sealed class AppCollection : ICollectionFixture<AppFixture>
+{
+    /// <summary>
+    /// Shared by every test class, so they run against one app and one set of containers rather
+    /// than each starting its own.
+    /// </summary>
+    public const string Name = "app";
+}
+
 public sealed class AppFixture : IAsyncLifetime
 {
     private const string BaseUrlEnvVar = "E2E_BASE_URL";
 
+    private const int FhirPort = 8080;
+
     private WebApplicationFactory<Program>? _factory;
     private PostgreSqlContainer? _postgres;
+    private IContainer? _fhir;
 
     public string BaseUrl { get; private set; } = "";
 
@@ -44,7 +60,27 @@ public sealed class AppFixture : IAsyncLifetime
         _postgres = new PostgreSqlBuilder(
             "docker.io/library/postgres:18.4@sha256:a02db8cac496f15b094798a38254f14d6e00741f709360e5e00bb6668ea31636"
         ).Build();
-        await _postgres.StartAsync();
+        // Same image as src/hack/compose.yaml. Its in-memory H2 database is plenty for a test run.
+        _fhir = new ContainerBuilder(
+            "docker.io/hapiproject/hapi:v8.12.0-2@sha256:0ff86aac4c7bd13a1ee226444a70263bb46ed1c28ef543c30a44f865b80ca04e"
+        )
+            .WithPortBinding(FhirPort, assignRandomHostPort: true)
+            // Otherwise HAPI hands back an identical search's results for a minute, so e.g. a List
+            // written after a search for it stays invisible to that same search.
+            .WithEnvironment("HAPI_FHIR_REUSE_CACHED_SEARCH_RESULTS_MILLIS", "0")
+            .WithWaitStrategy(
+                Wait.ForUnixContainer()
+                    .UntilHttpRequestIsSucceeded(request =>
+                        request.ForPort(FhirPort).ForPath("/fhir/metadata")
+                    )
+            )
+            .Build();
+        // HAPI takes far longer to come up than Postgres, so start both at once.
+        await Task.WhenAll(_postgres.StartAsync(), _fhir.StartAsync());
+
+        var fhirBaseUrl =
+            $"http://{_fhir.Hostname}:{_fhir.GetMappedPublicPort(FhirPort).ToString(CultureInfo.InvariantCulture)}/fhir";
+        await FhirSeed.SeedAsync(fhirBaseUrl, TimeSpan.FromSeconds(60));
 
         var httpPort = GetFreeTcpPort();
         var metricsPort = GetFreeTcpPort();
@@ -59,8 +95,8 @@ public sealed class AppFixture : IAsyncLifetime
             builder.UseSetting("METRICS_PORT", metricsPort.ToString(CultureInfo.InvariantCulture));
             builder.UseSetting("ConnectionStrings:AppDb", _postgres.GetConnectionString());
             builder.UseSetting("Auth:Enabled", "false");
-            // Deliberately unreachable - see class remarks.
-            builder.UseSetting("FhirServer:BaseUrl", "http://127.0.0.1:1/fhir");
+            builder.UseSetting("FhirServer:BaseUrl", fhirBaseUrl);
+            builder.UseSetting("Notifications:Testing:Enabled", "true");
         });
         // The default TestServer is in-memory only and can't carry Blazor Server's SignalR
         // circuit - UseKestrel() (WithWebHostBuilder's clone doesn't inherit it from the base
@@ -83,6 +119,11 @@ public sealed class AppFixture : IAsyncLifetime
         if (_postgres is not null)
         {
             await _postgres.DisposeAsync();
+        }
+
+        if (_fhir is not null)
+        {
+            await _fhir.DisposeAsync();
         }
     }
 

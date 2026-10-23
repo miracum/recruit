@@ -28,6 +28,9 @@ services:
       HAPI_FHIR_ENFORCE_REFERENTIAL_INTEGRITY_ON_WRITE: "false"
       HAPI_FHIR_SUBSCRIPTION_RESTHOOK_ENABLED: "true"
       HAPI_FHIR_ALLOW_MULTIPLE_DELETE: "true"
+      # don't reuse an identical search's results for a minute, so new screening lists and their entries
+      # show up straight away, e.g. after re-recommending a patient on the Notification Test page
+      HAPI_FHIR_REUSE_CACHED_SEARCH_RESULTS_MILLIS: "0"
       JAVA_TOOL_OPTIONS: "-javaagent:/app/opentelemetry-javaagent.jar"
       OTEL_METRICS_EXPORTER: "none"
       OTEL_LOGS_EXPORTER: "none"

@@ -93,6 +93,12 @@ See [Notifications](notifications.md) for how notifications work. They are sent 
 The screening list checks for new candidates every minute and sends due emails every 5 minutes. Neither interval is
 configurable.
 
+- `Notifications__Testing__Enabled` (default `false`): adds buttons to the admin-only **Notification Test** page to
+  simulate a new recommendation and to send due emails straight away, see
+  [Trying it out in the demo](notifications.md#trying-it-out-in-the-demo). Simulating a recommendation notifies everyone
+  subscribed to the trial for real and changes its screening list on the FHIR server, so only turn this on for
+  development, demo and test installations.
+
 ### Ports and observability
 
 - `HTTP_PORT` (default `8080`): port of the web app.

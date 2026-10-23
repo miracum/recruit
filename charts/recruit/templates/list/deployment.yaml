@@ -168,6 +168,8 @@ spec:
               value: {{ .notifications.stalledLeadWindowDays | quote }}
             - name: Notifications__ScanIntervalSeconds
               value: {{ .notifications.scanIntervalSeconds | quote }}
+            - name: Notifications__Testing__Enabled
+              value: {{ .notifications.testing.enabled | quote }}
             - name: Notifications__Email__PublicBaseUrl
               value: {{ include "recruit.list.publicBaseUrl" $ }}
             - name: Notifications__Email__From

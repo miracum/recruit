@@ -12,9 +12,9 @@ namespace RecruIT.List.Services.Notify;
 
 /// <summary>
 /// Recurring, cluster-wide poll trigger (Hangfire guarantees exactly one `list` replica fires
-/// per tick) - same detection technique as the old ScreeningListPollService (plain FHIR search +
-/// vread against `List` version history, via PollCursor and ScreeningListDiff), but instead of
-/// delivering immediately, it writes one NotificationEvent per newly-diffed patient and
+/// per tick) - a plain FHIR search, then each `List`'s instance history since the version its
+/// PollCursor last saw, diffed by ScreeningListDiff. Instead of delivering immediately, it
+/// writes one NotificationEvent per newly-diffed patient and
 /// materializes NotificationDelivery rows for every active subscription on that trial in the same
 /// pass - see NotificationSenderService for what actually sends the Email rows.
 /// </summary>
@@ -43,6 +43,21 @@ public sealed class NotificationDetectorService(
         await Task.WhenAll(
             resources.OfType<FhirList>().Select(list => PollListSafeAsync(list, ct))
         );
+    }
+
+    /// <summary>
+    /// One list's poll, outside the recurring tick - for NotificationTestService, which needs its
+    /// changes detected straight away. Unlike the tick, failures propagate to the caller. Safe to
+    /// overlap with a tick polling the same list: the cursor's concurrency token lets only one of
+    /// them record each version transition (see PollListAsync below).
+    /// </summary>
+    public async Task PollListAsync(string listId, CancellationToken ct = default)
+    {
+        var client = clientFactory.CreateClient();
+        var list =
+            await client.ReadAsync<FhirList>($"List/{listId}", ct: ct)
+            ?? throw new InvalidOperationException($"List/{listId} not found.");
+        await PollListAsync(client, list, ct);
     }
 
     private async Task PollListSafeAsync(FhirList list, CancellationToken ct)
@@ -101,18 +116,19 @@ public sealed class NotificationDetectorService(
             return;
         }
 
-        var previousVersionId = cursor.LastSeenVersionId;
-
-        // Read the previous version and compute the diff *before* touching the cursor - if this
-        // throws (transient network error, or the previous version was pruned server-side), the
-        // exception propagates to PollAllTrialsAsync's per-list catch and the cursor is left
-        // exactly where it was, so the next tick retries this same diff instead of silently and
-        // permanently skipping the patients it would have found.
-        var previous = await client.ReadAsync<FhirList>(
-            $"List/{listId}/_history/{previousVersionId}",
-            ct: ct
+        // Read the versions in between and compute the diff *before* touching the cursor - if this
+        // throws (transient network error, or the cursor's version was pruned server-side), the
+        // exception propagates to the caller's catch and the cursor is left exactly where it was,
+        // so the next tick retries this same diff instead of silently and permanently skipping
+        // the patients it would have found.
+        var earlierVersions = await ReadVersionsSinceAsync(
+            client,
+            listId,
+            cursor.LastSeenVersionId,
+            currentVersionId,
+            ct
         );
-        var newReferences = ScreeningListDiff.NewEntryReferences(previous, current);
+        var newReferences = ScreeningListDiff.NewEntryReferences(earlierVersions, current);
 
         cursor.LastSeenVersionId = currentVersionId;
         cursor.UpdatedAt = DateTimeOffset.UtcNow;
@@ -143,6 +159,56 @@ public sealed class NotificationDetectorService(
         {
             // another replica already recorded these exact events (DedupeKey collision) - fine, skip.
         }
+    }
+
+    /// <summary>
+    /// Every version from the cursor's (sinceVersionId, included) up to the current one
+    /// (excluded), oldest first, from the List's instance history - rather than just the cursor's
+    /// own version, so a patient removed and re-added between two ticks is still seen missing in
+    /// between (see ScreeningListDiff). The history is newest first, so this only pages back as
+    /// far as the cursor, usually a single page. Versions newer than currentVersionId (written
+    /// since the search that found it) are left for the next tick; deleted versions carry no
+    /// resource and come back as null.
+    /// </summary>
+    private static async Task<List<FhirList?>> ReadVersionsSinceAsync(
+        Hl7.Fhir.Rest.FhirClient client,
+        string listId,
+        string sinceVersionId,
+        string currentVersionId,
+        CancellationToken ct
+    )
+    {
+        var newestFirst = new List<FhirList?>();
+        var reachedCurrent = false;
+        var bundle = await client.GetAsync($"List/{listId}/_history?_count=50", ct) as Bundle;
+        while (bundle is not null)
+        {
+            foreach (var entry in bundle.Entry)
+            {
+                var version = entry.Resource as FhirList;
+                var versionId = version?.Meta?.VersionId;
+                if (!reachedCurrent)
+                {
+                    reachedCurrent = versionId == currentVersionId;
+                    continue;
+                }
+
+                newestFirst.Add(version);
+                if (versionId == sinceVersionId)
+                {
+                    newestFirst.Reverse();
+                    return newestFirst;
+                }
+            }
+
+            bundle = bundle.NextLink is null
+                ? null
+                : await client.ContinueAsync(bundle, Hl7.Fhir.Rest.PageDirection.Next, ct);
+        }
+
+        throw new InvalidOperationException(
+            $"Version {sinceVersionId} of List/{listId} is not in its history (anymore)."
+        );
     }
 
     /// <summary>

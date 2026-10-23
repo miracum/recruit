@@ -99,6 +99,9 @@ builder.Services.Configure<NotificationOptions>(
 builder.Services.Configure<EmailNotificationOptions>(
     builder.Configuration.GetSection(EmailNotificationOptions.SectionName)
 );
+builder.Services.Configure<NotificationTestingOptions>(
+    builder.Configuration.GetSection(NotificationTestingOptions.SectionName)
+);
 builder.Services.Configure<TracingOptions>(
     builder.Configuration.GetSection(TracingOptions.SectionName)
 );
@@ -290,6 +293,7 @@ builder.Services.AddScoped<NotificationSubscriptionService>();
 builder.Services.AddScoped<NotificationInboxState>();
 builder.Services.AddScoped<NotificationDetectorService>();
 builder.Services.AddScoped<NotificationSenderService>();
+builder.Services.AddScoped<NotificationTestService>();
 
 var app = builder.Build();
 
@@ -332,7 +336,7 @@ await using (var scope = app.Services.CreateAsyncScope())
         Cron.Minutely()
     );
     recurringJobManager.AddOrUpdate<NotificationSenderService>(
-        "send-due-notification-emails",
+        NotificationSenderService.RecurringJobId,
         s => s.SendDueAsync(CancellationToken.None),
         Cron.MinuteInterval(5)
     );

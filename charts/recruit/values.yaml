@@ -293,6 +293,11 @@ list:
     stalledLeadWindowDays: 14
     # -- how often, in seconds, list scans for screening list changes to notify about
     scanIntervalSeconds: 60
+    testing:
+      # -- adds a button to the admin-only Notification Test page that removes a patient from a trial's
+      # screening list and adds them back, notifying every subscriber of that trial for real, in the app
+      # and by email. Meant for development, demo and test deployments only.
+      enabled: false
     email:
       # -- the URL users reach list at, used to build the links in notification emails. If
       # `list.ingress.enabled` is `true`, the first ingress host is used instead.
