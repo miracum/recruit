@@ -4,16 +4,27 @@ namespace RecruIT.List.Services.Notify;
 
 /// <summary>
 /// Pure diffing logic, deliberately free of any FHIR-client or DB dependency so it's trivially
-/// unit-testable: given the `List` snapshot a cursor last saw and the current snapshot, which
-/// entries (by reference, e.g. "Patient/123") are genuinely new?
+/// unit-testable: given every `List` version since the one a cursor last saw (that one included)
+/// and the current one, which entries (by reference, e.g. "ResearchSubject/123") are genuinely
+/// new?
 /// </summary>
 public static class ScreeningListDiff
 {
-    public static IReadOnlyList<string> NewEntryReferences(FhirList? previous, FhirList current)
+    /// <summary>
+    /// The current entries missing from at least one of earlierVersions - not just from the
+    /// oldest one, so a patient removed and re-added between two polls counts as new again, the
+    /// same as if a poll had seen the version without them. A null version (a deleted one, from
+    /// the instance history) has no entries. Patients added and removed again in between aren't
+    /// in current, so they're never reported.
+    /// </summary>
+    public static IReadOnlyList<string> NewEntryReferences(
+        IEnumerable<FhirList?> earlierVersions,
+        FhirList current
+    )
     {
-        var previousRefs = EntryReferences(previous);
+        var earlierRefs = earlierVersions.Select(EntryReferences).ToList();
         return EntryReferences(current)
-            .Where(reference => !previousRefs.Contains(reference))
+            .Where(reference => earlierRefs.Any(refs => !refs.Contains(reference)))
             .ToList();
     }
 

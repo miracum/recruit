@@ -29,4 +29,21 @@
   <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
+
+  <!--
+    The same SearchParameters and sample study the chart and compose load (see FhirSeed), so the
+    E2E FHIR server is set up exactly like a real deployment's.
+  -->
+  <ItemGroup>
+    <None
+      Include="..\..\..\charts\recruit\files\fhir\search-parameters-transaction-upsert.json"
+      Link="fhir\search-parameters-transaction-upsert.json"
+      CopyToOutputDirectory="PreserveNewest"
+    />
+    <None
+      Include="..\..\..\charts\recruit\files\fhir\sample-study-transaction-upsert.json"
+      Link="fhir\sample-study-transaction-upsert.json"
+      CopyToOutputDirectory="PreserveNewest"
+    />
+  </ItemGroup>
 </Project>

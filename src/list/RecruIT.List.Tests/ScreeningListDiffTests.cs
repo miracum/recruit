@@ -12,7 +12,7 @@ public sealed class ScreeningListDiffTests
         var previous = ListOf("Patient/1", "Patient/2");
         var current = ListOf("Patient/1", "Patient/2", "Patient/3");
 
-        var result = ScreeningListDiff.NewEntryReferences(previous, current);
+        var result = ScreeningListDiff.NewEntryReferences([previous], current);
 
         Assert.Equal(["Patient/3"], result);
     }
@@ -23,7 +23,7 @@ public sealed class ScreeningListDiffTests
         var previous = ListOf("Patient/1");
         var current = ListOf("Patient/1");
 
-        Assert.Empty(ScreeningListDiff.NewEntryReferences(previous, current));
+        Assert.Empty(ScreeningListDiff.NewEntryReferences([previous], current));
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public sealed class ScreeningListDiffTests
         var previous = ListOf("Patient/1");
         var current = ListOf("Patient/2");
 
-        Assert.Equal(["Patient/2"], ScreeningListDiff.NewEntryReferences(previous, current));
+        Assert.Equal(["Patient/2"], ScreeningListDiff.NewEntryReferences([previous], current));
     }
 
     [Fact]
@@ -42,7 +42,32 @@ public sealed class ScreeningListDiffTests
     {
         var current = ListOf("Patient/1");
 
-        Assert.Equal(["Patient/1"], ScreeningListDiff.NewEntryReferences(null, current));
+        Assert.Equal(["Patient/1"], ScreeningListDiff.NewEntryReferences([null], current));
+    }
+
+    [Fact]
+    public void NewEntryReferences_FindsPatientRemovedAndReAddedBetweenPolls()
+    {
+        // The cursor's version and the current one look the same, but Patient/1 was missing from
+        // the version in between.
+        var cursorVersion = ListOf("Patient/1", "Patient/2");
+        var removed = ListOf("Patient/2");
+        var current = ListOf("Patient/1", "Patient/2");
+
+        Assert.Equal(
+            ["Patient/1"],
+            ScreeningListDiff.NewEntryReferences([cursorVersion, removed], current)
+        );
+    }
+
+    [Fact]
+    public void NewEntryReferences_IgnoresPatientAddedAndRemovedBetweenPolls()
+    {
+        var cursorVersion = ListOf("Patient/1");
+        var added = ListOf("Patient/1", "Patient/2");
+        var current = ListOf("Patient/1");
+
+        Assert.Empty(ScreeningListDiff.NewEntryReferences([cursorVersion, added], current));
     }
 
     private static FhirList ListOf(params string[] references)

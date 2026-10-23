@@ -223,12 +223,21 @@ helm upgrade -n recruit \
   recruit oci://ghcr.io/miracum/recruit/charts/recruit
 ```
 
-Opening the Grafana instance included with the `kube-prometheus-stack` chart will allow you to query the exposed metrics:
+`grafanaDashboard.enabled` creates a ConfigMap with recruIT's Grafana dashboard, which the Grafana included with
+`kube-prometheus-stack` picks up on its own. Open it as **recruIT** in Grafana's dashboard list:
 
 <figure markdown>
-  ![Grafana Explore view of some metrics for the list module](_img/grafana-sample-metrics.png)
-  <figcaption>Grafana Explore view of some metrics for the list module</figcaption>
+  ![The recruIT dashboard in Grafana](_img/grafana-recruit-dashboard.png)
+  <figcaption>The recruIT dashboard in Grafana</figcaption>
 </figure>
+
+The dashboard finds the screening list's and the query module's metrics by their Prometheus `job` label, which the
+ServiceMonitors set to the services' names, so it picks the first job containing `list` and `query`. If you scrape
+them some other way, pick the right jobs in the **Screening list job** and **Query module job** selectors at the top.
+
+Grafana's dashboard sidecar only looks for ConfigMaps labeled `grafana_dashboard: "1"` by default, and in some setups
+only in its own namespace. Use `grafanaDashboard.labels` and `grafanaDashboard.namespace` to match yours. Without the
+sidecar, import `charts/recruit/files/dashboards/recruit.json` from the repository in Grafana instead.
 
 ## High-Availability
 

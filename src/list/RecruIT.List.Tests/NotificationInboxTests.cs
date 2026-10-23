@@ -55,7 +55,8 @@ public sealed class NotificationInboxTests
 
     private static async Task<Guid> SeedEventAsync(
         SqliteDbContextFactory factory,
-        TrialIdentifier trial
+        TrialIdentifier trial,
+        string? researchSubjectId = null
     )
     {
         await using var db = factory.CreateDbContext();
@@ -65,7 +66,7 @@ public sealed class NotificationInboxTests
             {
                 Id = id,
                 TrialIdentifier = trial.ToToken(),
-                PatientReference = $"ResearchSubject/{id}",
+                PatientReference = $"ResearchSubject/{researchSubjectId ?? id.ToString()}",
                 PatientDisplayName = "Test Patient",
                 OccurredAt = DateTimeOffset.UtcNow,
                 DedupeKey = id.ToString(),
@@ -269,5 +270,56 @@ public sealed class NotificationInboxTests
         Assert.Empty(await service.MarkEmailDigestReadAsync(digestId, Bob, ct));
         Assert.Empty(await service.MarkEmailDigestReadAsync(Guid.NewGuid(), Alice, ct));
         Assert.False(await IsReadAsync(factory, alicesItem));
+    }
+
+    [Fact]
+    public async Task Unread_items_are_grouped_by_research_subject_for_one_trial()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var (service, factory) = await CreateServiceAsync();
+        using var _ = factory;
+        var subscription = Guid.NewGuid();
+        // Recommended, dropped and recommended again - two events for the same subject.
+        var first = await SeedDeliveriesAsync(
+            factory,
+            await SeedEventAsync(factory, TrialA, "subject-1"),
+            subscription,
+            AliceSub,
+            AliceEmail
+        );
+        var second = await SeedDeliveriesAsync(
+            factory,
+            await SeedEventAsync(factory, TrialA, "subject-1"),
+            subscription,
+            AliceSub,
+            AliceEmail
+        );
+        var alreadyRead = await SeedDeliveriesAsync(
+            factory,
+            await SeedEventAsync(factory, TrialA, "subject-2"),
+            subscription,
+            AliceSub,
+            AliceEmail
+        );
+        await service.MarkReadAsync([alreadyRead], Alice, ct);
+        await SeedDeliveriesAsync(
+            factory,
+            await SeedEventAsync(factory, TrialB, "subject-3"),
+            Guid.NewGuid(),
+            AliceSub,
+            AliceEmail
+        );
+        await SeedDeliveriesAsync(
+            factory,
+            await SeedEventAsync(factory, TrialA, "subject-4"),
+            Guid.NewGuid(),
+            BobSub,
+            BobEmail
+        );
+
+        var unread = await service.GetUnreadInAppByResearchSubjectAsync(Alice, TrialA, ct);
+
+        Assert.Equal(["subject-1"], unread.Keys);
+        Assert.Equal(new[] { first, second }.Order(), unread["subject-1"].Order());
     }
 }

@@ -184,8 +184,8 @@
   <data name="App.PatientList.ColumnName" xml:space="preserve">
     <value>Name</value>
   </data>
-  <data name="App.PatientList.NewBadge" xml:space="preserve">
-    <value>New</value>
+  <data name="App.PatientList.NewIndicator" xml:space="preserve">
+    <value>New suggestion</value>
   </data>
   <data name="App.PatientList.SystemIneligibleBadge" xml:space="preserve">
     <value>System: ineligible</value>
@@ -828,6 +828,81 @@
   </data>
   <data name="App.NotificationTest.CopyFailedToast" xml:space="preserve">
     <value>Could not access the clipboard - select the text and copy it manually.</value>
+  </data>
+  <data name="App.NotificationTest.SimulateTitle" xml:space="preserve">
+    <value>Simulate a new recommendation</value>
+  </data>
+  <data name="App.NotificationTest.SimulateDescription" xml:space="preserve">
+    <value>Removes a patient from a trial's screening list and adds them back, as if the query module had found them again. Everyone subscribed to the trial is notified, in the app and by email.</value>
+  </data>
+  <data name="App.NotificationTest.TrialLabel" xml:space="preserve">
+    <value>Trial</value>
+  </data>
+  <data name="App.NotificationTest.TrialPlaceholder" xml:space="preserve">
+    <value>Select a trial</value>
+  </data>
+  <data name="App.NotificationTest.PatientLabel" xml:space="preserve">
+    <value>Patient</value>
+  </data>
+  <data name="App.NotificationTest.PatientPlaceholder" xml:space="preserve">
+    <value>Select a patient</value>
+  </data>
+  <data name="App.NotificationTest.NoTrials" xml:space="preserve">
+    <value>There are no trials with a screening list yet.</value>
+  </data>
+  <data name="App.NotificationTest.NoPatients" xml:space="preserve">
+    <value>This trial's screening list is empty.</value>
+  </data>
+  <data name="App.NotificationTest.LoadError" xml:space="preserve">
+    <value>Could not load the trials and patients.</value>
+  </data>
+  <data name="App.NotificationTest.ReRecommendButton" xml:space="preserve">
+    <value>Re-recommend patient</value>
+  </data>
+  <data name="App.NotificationTest.SubscriberCount" xml:space="preserve">
+    <value>{0} subscriber(s) will be notified.</value>
+  </data>
+  <data name="App.NotificationTest.NotSubscribed" xml:space="preserve">
+    <value>You aren't subscribed to this trial, so nothing will show up in your own notifications. Subscribe from the trial's screening list first.</value>
+  </data>
+  <data name="App.NotificationTest.OpenScreeningList" xml:space="preserve">
+    <value>Open screening list</value>
+  </data>
+  <data name="App.NotificationTest.OpenNotifications" xml:space="preserve">
+    <value>Open notifications</value>
+  </data>
+  <data name="App.NotificationTest.ReRecommendedTitle" xml:space="preserve">
+    <value>Notification created</value>
+  </data>
+  <data name="App.NotificationTest.ReRecommendedDescription" xml:space="preserve">
+    <value>{0} was re-recommended for {1}.</value>
+  </data>
+  <data name="App.NotificationTest.ReRecommendNoEventTitle" xml:space="preserve">
+    <value>No notification created</value>
+  </data>
+  <data name="App.NotificationTest.ReRecommendNoEventDescription" xml:space="preserve">
+    <value>The patient was re-added to the screening list, but no notification was recorded. The app's logs should say why.</value>
+  </data>
+  <data name="App.NotificationTest.ReRecommendErrorTitle" xml:space="preserve">
+    <value>Could not re-recommend the patient</value>
+  </data>
+  <data name="App.NotificationTest.ReRecommendNotOnList" xml:space="preserve">
+    <value>This patient is no longer on the trial's screening list.</value>
+  </data>
+  <data name="App.NotificationTest.ReRecommendNoTrial" xml:space="preserve">
+    <value>The screening list's study has no trial identifier, so no notifications can be created for it.</value>
+  </data>
+  <data name="App.NotificationTest.ReRecommendConflict" xml:space="preserve">
+    <value>The screening list changed at the same moment. Please try again.</value>
+  </data>
+  <data name="App.NotificationTest.SendDueDescription" xml:space="preserve">
+    <value>Emails are sent every 5 minutes. This sends the ones that are due now, such as Instant subscribers' emails, straight away. Daily, weekly and monthly digests still wait for their time.</value>
+  </data>
+  <data name="App.NotificationTest.SendDueButton" xml:space="preserve">
+    <value>Send due emails now</value>
+  </data>
+  <data name="App.NotificationTest.SendDueQueuedToast" xml:space="preserve">
+    <value>Sending due emails. They should arrive within a minute.</value>
   </data>
   <data name="App.Subscription.ButtonLabel" xml:space="preserve">
     <value>Notification settings</value>

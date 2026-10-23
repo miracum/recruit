@@ -47,3 +47,4 @@ jobs:
             query
             helm
             master
+            ui

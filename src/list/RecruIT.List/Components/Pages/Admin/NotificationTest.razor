@@ -4,10 +4,14 @@
 @using System.Text
 @using MailKit.Net.Smtp
 @inject NotificationSenderService SenderService
+@inject NotificationTestService TestService
+@inject NotificationSubscriptionService SubscriptionService
+@inject ScreeningListService ScreeningListService
 @inject IOptions<EmailNotificationOptions> MailerOptions
 @inject ToastService Toast
 @inject IJSRuntime JS
 @inject BreadcrumbState BreadcrumbState
+@inject NotificationInboxState NotificationInboxState
 @inject IStringLocalizer<SharedResources> Localizer
 
 <PageTitle>@Localizer["App.NotificationTest.PageTitle"]</PageTitle>
@@ -115,6 +119,98 @@ else
             </BbCardContent>
         </BbCard>
     }
+
+    @if (_simulationAvailable)
+    {
+        <BbCard Class="bb:mt-6">
+            <BbCardHeader>
+                <BbCardTitle>@Localizer["App.NotificationTest.SimulateTitle"]</BbCardTitle>
+            </BbCardHeader>
+            <BbCardContent>
+                <p class="bb:mb-3 bb:text-sm bb:text-muted-foreground">@Localizer["App.NotificationTest.SimulateDescription"]</p>
+                @if (_simulationError is not null)
+                {
+                    <BbAlert Variant="AlertVariant.Danger">
+                        <BbAlertDescription>@_simulationError</BbAlertDescription>
+                    </BbAlert>
+                }
+                else if (_trials is null)
+                {
+                    <BbSkeleton Class="bb:h-9 bb:w-full bb:max-w-sm" />
+                }
+                else if (_trials.Count == 0)
+                {
+                    <p class="bb:text-sm">@Localizer["App.NotificationTest.NoTrials"]</p>
+                }
+                else
+                {
+                    <div class="bb:flex bb:flex-wrap bb:items-end bb:gap-3">
+                        <div class="bb:w-full bb:max-w-xs">
+                            <label class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide bb:text-muted-foreground">@Localizer["App.NotificationTest.TrialLabel"]</label>
+                            <BbSelect TValue="string" Value="_selectedListId" ValueChanged="OnTrialChangedAsync" Options="TrialOptions"
+                                      Placeholder="@Localizer["App.NotificationTest.TrialPlaceholder"]" AriaLabel="@Localizer["App.NotificationTest.TrialLabel"]" Class="bb:mt-1" />
+                        </div>
+                        <div class="bb:w-full bb:max-w-xs">
+                            <label class="bb:text-xs bb:font-medium bb:uppercase bb:tracking-wide bb:text-muted-foreground">@Localizer["App.NotificationTest.PatientLabel"]</label>
+                            <BbSelect TValue="string" @bind-Value="_selectedSubjectId" Options="PatientOptions" Disabled="@(_patients is not { Count: > 0 })"
+                                      Placeholder="@Localizer["App.NotificationTest.PatientPlaceholder"]" AriaLabel="@Localizer["App.NotificationTest.PatientLabel"]" Class="bb:mt-1" />
+                        </div>
+                        <BbButton Variant="ButtonVariant.Default" Loading="_reRecommending" Disabled="@(_selectedSubjectId is null)" OnClick="ReRecommendAsync">
+                            @Localizer["App.NotificationTest.ReRecommendButton"]
+                        </BbButton>
+                    </div>
+
+                    @if (_selectedTrial is not null)
+                    {
+                        <div class="bb:mt-3 bb:space-y-2 bb:text-sm">
+                            @if (_patients is { Count: 0 })
+                            {
+                                <p>@Localizer["App.NotificationTest.NoPatients"]</p>
+                            }
+                            <p class="bb:text-muted-foreground">@Localizer["App.NotificationTest.SubscriberCount", _subscriberCount]</p>
+                            @if (!_subscribed)
+                            {
+                                <BbAlert Variant="AlertVariant.Warning">
+                                    <BbAlertDescription>
+                                        @Localizer["App.NotificationTest.NotSubscribed"]
+                                        <a href="/trials/@_selectedTrial.ListId/patients" class="bb:ms-1 bb:font-medium bb:underline">@Localizer["App.NotificationTest.OpenScreeningList"]</a>
+                                    </BbAlertDescription>
+                                </BbAlert>
+                            }
+                        </div>
+                    }
+                }
+
+                @if (_reRecommendResult is not null)
+                {
+                    <BbAlert Variant="@(_reRecommendResult.NotificationCount > 0 ? AlertVariant.Success : AlertVariant.Warning)" Class="bb:mt-4">
+                        @if (_reRecommendResult.NotificationCount > 0)
+                        {
+                            <BbAlertTitle>@Localizer["App.NotificationTest.ReRecommendedTitle"]</BbAlertTitle>
+                            <BbAlertDescription>
+                                <p>@Localizer["App.NotificationTest.ReRecommendedDescription", _reRecommendResult.PatientDisplayName, _reRecommendResult.Trial.StudyAcronym]</p>
+                                <p class="bb:mt-1 bb:flex bb:flex-wrap bb:gap-4">
+                                    <a href="/notifications" class="bb:font-medium bb:underline">@Localizer["App.NotificationTest.OpenNotifications"]</a>
+                                    <a href="/trials/@_reRecommendResult.Trial.ListId/patients" class="bb:font-medium bb:underline">@Localizer["App.NotificationTest.OpenScreeningList"]</a>
+                                </p>
+                            </BbAlertDescription>
+                        }
+                        else
+                        {
+                            <BbAlertTitle>@Localizer["App.NotificationTest.ReRecommendNoEventTitle"]</BbAlertTitle>
+                            <BbAlertDescription>@Localizer["App.NotificationTest.ReRecommendNoEventDescription"]</BbAlertDescription>
+                        }
+                    </BbAlert>
+                }
+
+                <BbSeparator Class="bb:my-6" />
+                <p class="bb:mb-3 bb:text-sm bb:text-muted-foreground">@Localizer["App.NotificationTest.SendDueDescription"]</p>
+                <BbButton Variant="ButtonVariant.Outline" OnClick="SendDueEmailsNow">
+                    @Localizer["App.NotificationTest.SendDueButton"]
+                </BbButton>
+            </BbCardContent>
+        </BbCard>
+    }
 }
 
 @code {
@@ -128,21 +224,125 @@ else
         string Exception
     );
 
+    private sealed record ReRecommendResult(TrialSummaryDto Trial, string PatientDisplayName, int NotificationCount);
+
+    private ClaimsPrincipal _user = new();
     private bool _isAdmin;
     private bool _sending;
     private string _recipientEmail = string.Empty;
     private SendFailure? _failure;
     private string? _transcript;
 
+    /// <summary>NotificationTestService.IsAvailable - Notifications:Testing:Enabled on top of the admin role.</summary>
+    private bool _simulationAvailable;
+    private string? _simulationError;
+    private List<TrialSummaryDto>? _trials;
+    private string? _selectedListId;
+    private TrialSummaryDto? _selectedTrial;
+    private List<PatientListEntryDto>? _patients;
+    private string? _selectedSubjectId;
+    private int _subscriberCount;
+    private bool _subscribed;
+    private bool _reRecommending;
+    private ReRecommendResult? _reRecommendResult;
+
+    private IEnumerable<SelectOption<string>> TrialOptions =>
+        (_trials ?? []).Select(t => new SelectOption<string>(t.ListId, t.StudyAcronym));
+
+    private IEnumerable<SelectOption<string>> PatientOptions =>
+        (_patients ?? []).Select(p => new SelectOption<string>(p.ResearchSubjectId, PatientDisplayName(p)));
+
+    private static string PatientDisplayName(PatientListEntryDto patient) =>
+        patient.Name ?? patient.MedicalRecordNumber ?? patient.PatientId;
+
     protected override async Task OnInitializedAsync()
     {
-        var user = await AuthStateTask.GetUserAsync();
-        _isAdmin = TrialAccessService.IsAdmin(user);
-        _recipientEmail = user.GetEmail() ?? string.Empty;
+        _user = await AuthStateTask.GetUserAsync();
+        _isAdmin = TrialAccessService.IsAdmin(_user);
+        _recipientEmail = _user.GetEmail() ?? string.Empty;
 
         BreadcrumbState.Set(
             new BreadcrumbItem(Localizer["App.Common.AllTrialsBreadcrumb"], "/"),
             new BreadcrumbItem(Localizer["App.NotificationTest.Breadcrumb"]));
+
+        _simulationAvailable = TestService.IsAvailable(_user);
+        if (_simulationAvailable)
+        {
+            try
+            {
+                _trials = [.. await ScreeningListService.GetAccessibleTrialsAsync(_user)];
+            }
+            catch (Exception)
+            {
+                _simulationError = Localizer["App.NotificationTest.LoadError"];
+            }
+        }
+    }
+
+    private async Task OnTrialChangedAsync(string? listId)
+    {
+        _selectedListId = listId;
+        _selectedTrial = null;
+        _patients = null;
+        _selectedSubjectId = null;
+        _reRecommendResult = null;
+        if (listId is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var (summary, patients) = await ScreeningListService.GetListWithPatientsAsync(listId, _user);
+            _patients = [.. patients];
+            _subscriberCount = await TestService.CountSubscribersAsync(summary.TrialIdentifier);
+            _subscribed = await SubscriptionService.GetAsync(_user, summary.TrialIdentifier) is not null;
+            _selectedTrial = summary;
+        }
+        catch (Exception)
+        {
+            _simulationError = Localizer["App.NotificationTest.LoadError"];
+        }
+    }
+
+    private async Task ReRecommendAsync()
+    {
+        if (_selectedTrial is null || _selectedSubjectId is null || _reRecommending)
+        {
+            return;
+        }
+
+        var trial = _selectedTrial;
+        var patient = _patients?.FirstOrDefault(p => p.ResearchSubjectId == _selectedSubjectId);
+        _reRecommending = true;
+        _reRecommendResult = null;
+        try
+        {
+            var count = await TestService.ReRecommendAsync(trial.ListId, _selectedSubjectId, _user);
+            _reRecommendResult = new ReRecommendResult(trial, patient is null ? _selectedSubjectId : PatientDisplayName(patient), count);
+            await NotificationInboxState.RefreshAsync(_user);
+        }
+        catch (Exception ex)
+        {
+            Toast.Error(ex.Message, Localizer["App.NotificationTest.ReRecommendErrorTitle"]);
+        }
+        finally
+        {
+            _reRecommending = false;
+        }
+    }
+
+    private void SendDueEmailsNow()
+    {
+        try
+        {
+            TestService.SendDueEmailsNow(_user);
+            Toast.Success(Localizer["App.NotificationTest.SendDueQueuedToast"], Localizer["App.NotificationTest.SendDueButton"]);
+        }
+        catch (Exception ex)
+        {
+            Toast.Error(ex.Message, Localizer["App.NotificationTest.SendDueButton"]);
+        }
     }
 
     private async Task SendTestEmailAsync()

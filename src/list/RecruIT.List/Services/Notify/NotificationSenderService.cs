@@ -1,6 +1,8 @@
+using System.Diagnostics;
 using System.Reflection;
 using System.Text.Encodings.Web;
 using Fluid;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Mjml.Net;
@@ -34,9 +36,17 @@ public sealed class NotificationSenderService(
     IOptions<EmailNotificationOptions> mailerOptions,
     IOptions<AuthOptions> authOptions,
     INotificationChannel channel,
+    RecruitMetrics metrics,
     ILogger<NotificationSenderService> logger
 )
 {
+    /// <summary>
+    /// The Hangfire recurring job id this runs under (see Program.cs) - also how the Notification
+    /// Test page runs it on demand, through Hangfire rather than calling SendDueAsync directly, so
+    /// the lock below keeps the two from sending the same deliveries twice.
+    /// </summary>
+    public const string RecurringJobId = "send-due-notification-emails";
+
     private static readonly MjmlRenderer Renderer = new();
 
     private static readonly TemplateOptions DigestTemplateOptions = CreateDigestTemplateOptions();
@@ -51,6 +61,10 @@ public sealed class NotificationSenderService(
     /// </summary>
     private static readonly TimeSpan MaxDeliveryAge = TimeSpan.FromDays(30);
 
+    // Nothing below claims a delivery before sending it, so two overlapping runs would both send
+    // it - a scheduled tick and an on-demand one can otherwise overlap (ticks alone are 5 minutes
+    // apart). A run that can't get the lock within the timeout fails and is retried by Hangfire.
+    [DisableConcurrentExecution(timeoutInSeconds: 300)]
     public async Task SendDueAsync(CancellationToken ct = default)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync(ct);
@@ -243,9 +257,11 @@ public sealed class NotificationSenderService(
                 EmailDigestLink(digestId)
             );
 
+            var sendStart = Stopwatch.GetTimestamp();
             try
             {
                 await batch.SendAsync(recipientEmail, subject, html, ct);
+                metrics.RecordEmailSend(Stopwatch.GetElapsedTime(sendStart), succeeded: true);
                 var sentAt = DateTimeOffset.UtcNow;
                 foreach (var delivery in includedDeliveries)
                 {
@@ -255,6 +271,7 @@ public sealed class NotificationSenderService(
             }
             catch (Exception ex)
             {
+                metrics.RecordEmailSend(Stopwatch.GetElapsedTime(sendStart), succeeded: false);
                 logger.LogError(
                     ex,
                     "Failed to send notification email to {Email} for {Count} deliveries - will retry next tick",
@@ -277,6 +294,7 @@ public sealed class NotificationSenderService(
                         MaxDeliveryAge.TotalDays
                     );
                     db.NotificationDeliveries.RemoveRange(stale);
+                    metrics.RecordEmailDeliveriesDropped(stale.Count);
                 }
             }
         }

@@ -5,6 +5,8 @@
 @inject PatientRecordService PatientRecordService
 @inject TrialAccessService AccessService
 @inject BreadcrumbState BreadcrumbState
+@inject NotificationSubscriptionService NotificationSubscriptionService
+@inject NotificationInboxState NotificationInboxState
 @inject NavigationManager Navigation
 @inject IStringLocalizer<SharedResources> Localizer
 
@@ -120,11 +122,6 @@ else if (_summary is not null)
         </div>
     </div>
 
-    @if (!string.IsNullOrEmpty(_summary.StudyDescription))
-    {
-        <p class="bb:mt-1 bb:text-sm bb:text-muted-foreground">@_summary.StudyDescription</p>
-    }
-
     @if (_patients.Count == 0)
     {
         <BbEmpty Title="@Localizer["App.PatientList.EmptyTitle"]" Description="@Localizer["App.PatientList.EmptyDescription"]" />
@@ -138,12 +135,18 @@ else if (_summary is not null)
             <Columns>
                 <BbDataTableColumn TData="PatientListEntryDto" TValue="DateTimeOffset?" Header="@Localizer["App.PatientList.ColumnRecommended"]" Property="p => p.RecommendedDate" Sortable="true">
                     <CellTemplate Context="p">
-                        <div class="bb:block bb:cursor-pointer bb:p-4 @RowMarker(p)" @onclick="() => OpenPatient(p)">
-                            @(p.RecommendedDate?.LocalDateTime.ToString("d") ?? "-")
-                            @if (p.IsNew(NewSuggestionWindowDays))
+                        <div class="bb:flex bb:items-center bb:gap-2 bb:cursor-pointer bb:p-4 @RowMarker(p)" @onclick="() => OpenPatient(p)">
+                            @* The slot is always there so the dates stay aligned whether or not a row has a dot. *@
+                            @if (IsNew(p))
                             {
-                                <BbBadge Variant="BadgeVariant.Default" Class="bb:ms-2">@Localizer["App.PatientList.NewBadge"]</BbBadge>
+                                <span class="new-suggestion-dot bb:size-2 bb:shrink-0 bb:rounded-full bb:bg-primary" title="@Localizer["App.PatientList.NewIndicator"]"></span>
+                                <span class="bb:sr-only">@Localizer["App.PatientList.NewIndicator"]</span>
                             }
+                            else
+                            {
+                                <span class="bb:size-2 bb:shrink-0" aria-hidden="true"></span>
+                            }
+                            @(p.RecommendedDate?.LocalDateTime.ToString("d") ?? "-")
                         </div>
                     </CellTemplate>
                 </BbDataTableColumn>
@@ -218,9 +221,6 @@ else if (_summary is not null)
     [CascadingParameter]
     private Task<AuthenticationState>? AuthStateTask { get; set; }
 
-    [Inject]
-    private IOptions<NotificationOptions> NotificationOptionsAccessor { get; set; } = default!;
-
     private TrialSummaryDto? _summary;
     private List<PatientListEntryDto> _patients = [];
     private string _search = string.Empty;
@@ -236,6 +236,13 @@ else if (_summary is not null)
 
     /// <summary>The ?subject= deep link's patient, if it's on this list - stays highlighted after its dialog is closed.</summary>
     private PatientListEntryDto? _highlightedPatient;
+
+    /// <summary>
+    /// The caller's unread in-app notifications for this trial, by ResearchSubject id (see
+    /// NotificationSubscriptionService.GetUnreadInAppByResearchSubjectAsync) - a row is shown as
+    /// new while its patient is in here, and opening it marks those notifications read.
+    /// </summary>
+    private Dictionary<string, IReadOnlyList<Guid>> _unreadBySubject = [];
 
     /// <summary>
     /// Replaces the data table's own toolbar search, which comes with an unwanted column-visibility
@@ -264,7 +271,7 @@ else if (_summary is not null)
 
     private bool Matches(string? value) => value?.Contains(_search.Trim(), StringComparison.OrdinalIgnoreCase) ?? false;
 
-    private int NewSuggestionWindowDays => NotificationOptionsAccessor.Value.NewSuggestionWindowDays;
+    private bool IsNew(PatientListEntryDto patient) => _unreadBySubject.ContainsKey(patient.ResearchSubjectId);
 
     private List<CriterionDefinitionDto> InclusionCriteria => _summary?.Criteria.Where(c => !c.Exclude).ToList() ?? [];
 
@@ -304,6 +311,14 @@ else if (_summary is not null)
             _canManageAccess = TrialAccessService.MeetsTrialAdminThreshold(permission);
             BreadcrumbState.Set(new BreadcrumbItem(Localizer["App.Common.AllTrialsBreadcrumb"], "/"), new BreadcrumbItem(summary.StudyAcronym));
             _funnelSteps = await TryLoadFunnelAsync(summary.StudyId);
+            _unreadBySubject = await TryLoadUnreadAsync(summary.TrialIdentifier);
+            if (_highlightedPatient is not null)
+            {
+                // Opened straight away by the deep link, so it counts as seen just like a click -
+                // the notifications page already marked the item it came from read, but an older
+                // notification for the same patient could still be unread.
+                await MarkSeenAsync(_highlightedPatient);
+            }
 
             // Fire-and-forget rather than gating on OnAfterRenderAsync(firstRender): when
             // GetListWithPatientsAsync resolves fast enough (e.g. a warm connection from in-app
@@ -351,6 +366,43 @@ else if (_summary is not null)
         }
     }
 
+    /// <summary>Best-effort like the funnel - without it the list simply shows no rows as new.</summary>
+    private async Task<Dictionary<string, IReadOnlyList<Guid>>> TryLoadUnreadAsync(TrialIdentifier trialIdentifier)
+    {
+        try
+        {
+            var unread = await NotificationSubscriptionService.GetUnreadInAppByResearchSubjectAsync(_user, trialIdentifier);
+            return new Dictionary<string, IReadOnlyList<Guid>>(unread);
+        }
+        catch (Exception)
+        {
+            return [];
+        }
+    }
+
+    /// <summary>
+    /// Drops the row's dot right away, then marks its notifications read and refreshes the
+    /// sidebar's unread badge. Best-effort: if saving fails the item simply stays unread on the
+    /// notifications page, which isn't worth interrupting opening the patient over.
+    /// </summary>
+    private async Task MarkSeenAsync(PatientListEntryDto patient)
+    {
+        if (!_unreadBySubject.Remove(patient.ResearchSubjectId, out var deliveryIds))
+        {
+            return;
+        }
+
+        try
+        {
+            await NotificationSubscriptionService.MarkReadAsync(deliveryIds, _user);
+            await NotificationInboxState.RefreshAsync(_user);
+        }
+        catch (Exception)
+        {
+            // See summary - left unread, nothing else to undo.
+        }
+    }
+
     private async Task LoadLocationsInBackgroundAsync()
     {
         using var throttle = new SemaphoreSlim(8);
@@ -377,5 +429,9 @@ else if (_summary is not null)
         await Task.WhenAll(tasks);
     }
 
-    private void OpenPatient(PatientListEntryDto patient) => _selectedPatient = patient;
+    private Task OpenPatient(PatientListEntryDto patient)
+    {
+        _selectedPatient = patient;
+        return MarkSeenAsync(patient);
+    }
 }

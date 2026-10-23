@@ -3,7 +3,8 @@ using Microsoft.Playwright.Xunit.v3;
 
 namespace RecruIT.List.E2ETests;
 
-public sealed class MainPageTests(AppFixture app) : PageTest, IClassFixture<AppFixture>
+[Collection(AppCollection.Name)]
+public sealed class MainPageTests(AppFixture app) : PageTest
 {
     [Fact]
     public async Task MainPage_loads_and_renders_the_app_shell()

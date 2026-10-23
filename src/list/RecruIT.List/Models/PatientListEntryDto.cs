@@ -61,8 +61,4 @@ public sealed class PatientListEntryDto
 
     /// <summary>Populated only in cross-trial views. The trial's stable business identity - see TrialIdentifier.</summary>
     public TrialIdentifier? TrialIdentifier { get; init; }
-
-    public bool IsNew(int windowDays) =>
-        RecommendedDate is not null
-        && RecommendedDate.Value >= DateTimeOffset.UtcNow.AddDays(-windowDays);
 }

@@ -99,6 +99,9 @@ builder.Services.Configure<NotificationOptions>(
 builder.Services.Configure<EmailNotificationOptions>(
     builder.Configuration.GetSection(EmailNotificationOptions.SectionName)
 );
+builder.Services.Configure<NotificationTestingOptions>(
+    builder.Configuration.GetSection(NotificationTestingOptions.SectionName)
+);
 builder.Services.Configure<TracingOptions>(
     builder.Configuration.GetSection(TracingOptions.SectionName)
 );
@@ -134,9 +137,17 @@ var otelBuilder = builder
     .WithMetrics(metrics =>
         metrics
             .AddAspNetCoreInstrumentation()
+            // Blazor Server's own meters (circuits, navigation, event handling, rendering) - not
+            // part of AddAspNetCoreInstrumentation, which only covers HTTP-level ones.
+            .AddMeter(
+                "Microsoft.AspNetCore.Components",
+                "Microsoft.AspNetCore.Components.Lifecycle",
+                "Microsoft.AspNetCore.Components.Server.Circuits"
+            )
             .AddHttpClientInstrumentation()
             .AddNpgsqlInstrumentation()
             .AddRuntimeInstrumentation()
+            .AddMeter(RecruitMetrics.MeterName)
             .AddPrometheusExporter()
     );
 
@@ -277,6 +288,7 @@ builder.Services.AddHttpClient(
 
 builder.Services.AddScoped<TrialAccessService>();
 builder.Services.AddSingleton<FhirClientFactory>();
+builder.Services.AddSingleton<RecruitMetrics>();
 builder.Services.AddScoped<ScreeningListService>();
 builder.Services.AddScoped<ResearchSubjectService>();
 builder.Services.AddScoped<ScreeningNoteService>();
@@ -290,6 +302,7 @@ builder.Services.AddScoped<NotificationSubscriptionService>();
 builder.Services.AddScoped<NotificationInboxState>();
 builder.Services.AddScoped<NotificationDetectorService>();
 builder.Services.AddScoped<NotificationSenderService>();
+builder.Services.AddScoped<NotificationTestService>();
 
 var app = builder.Build();
 
@@ -317,6 +330,10 @@ await using (var scope = app.Services.CreateAsyncScope())
     await dataProtectionKeyContext.Database.MigrateAsync();
 }
 
+// Created up front rather than on first use, so its gauges are exported from the first scrape on
+// instead of only once something has recorded a measurement.
+app.Services.GetRequiredService<RecruitMetrics>();
+
 // Every list replica runs a Hangfire server (AddHangfireServer above); they self-coordinate
 // via the shared Postgres storage, so registering the recurring jobs on every replica's startup is
 // safe and idempotent (Hangfire dedupes by job id). Uses the DI-based IRecurringJobManager rather
@@ -332,7 +349,7 @@ await using (var scope = app.Services.CreateAsyncScope())
         Cron.Minutely()
     );
     recurringJobManager.AddOrUpdate<NotificationSenderService>(
-        "send-due-notification-emails",
+        NotificationSenderService.RecurringJobId,
         s => s.SendDueAsync(CancellationToken.None),
         Cron.MinuteInterval(5)
     );

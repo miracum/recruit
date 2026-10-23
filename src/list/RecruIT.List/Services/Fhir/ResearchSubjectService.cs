@@ -26,6 +26,7 @@ public sealed class ResearchSubjectService(
     TrialAccessService accessService,
     ScreeningNoteService screeningNoteService,
     IStringLocalizer<SharedResources> localizer,
+    RecruitMetrics metrics,
     ILogger<ResearchSubjectService> logger
 )
 {
@@ -84,6 +85,7 @@ public sealed class ResearchSubjectService(
         try
         {
             var updated = await client.UpdateAsync(current, versionAware: true, ct);
+            metrics.RecordStatusChange(EnumUtility.GetLiteral(current.Status) ?? newStatus);
             return updated?.Meta?.LastUpdated;
         }
         catch (FhirOperationException ex)

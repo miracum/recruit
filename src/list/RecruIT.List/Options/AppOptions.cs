@@ -32,8 +32,6 @@ public sealed class NotificationOptions
 {
     public const string SectionName = "Notifications";
 
-    public int NewSuggestionWindowDays { get; set; } = 7;
-
     public int ScanIntervalSeconds { get; set; } = 60;
 }
 
@@ -52,9 +50,22 @@ public sealed class TracingOptions
 }
 
 /// <summary>
+/// The Notification Test page's "re-recommend a patient" action (see NotificationTestService).
+/// Off by default: it edits the trial's real screening list on the FHIR server and notifies -
+/// in the app and by email - everyone subscribed to that trial, so it's meant for development,
+/// demo and E2E-test deployments only.
+/// </summary>
+public sealed class NotificationTestingOptions
+{
+    public const string SectionName = $"{NotificationOptions.SectionName}:Testing";
+
+    public bool Enabled { get; set; }
+}
+
+/// <summary>
 /// Config for the screening-list-change email notifier (Services/Notify), nested under the
 /// Notifications section but bound separately from NotificationOptions above, which is about the
-/// in-app "is this recommendation new" UI threshold and the scan interval, not the mail delivery.
+/// scan interval, not the mail delivery.
 /// </summary>
 public sealed class EmailNotificationOptions
 {

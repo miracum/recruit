@@ -9,7 +9,10 @@
     {
       "customType": "regex",
       "description": "MII Kerndatensatz FHIR packages, kept in sync between the IG's sushi-config.yaml and fhir/package.json",
-      "managerFilePatterns": ["/^fhir/ig/sushi-config\\.yaml$/", "/^fhir/package\\.json$/"],
+      "managerFilePatterns": [
+        "/^fhir/ig/sushi-config\\.yaml$/",
+        "/^fhir/package\\.json$/"
+      ],
       "matchStrings": [
         "\"?(?<depName>de\\.medizininformatikinitiative\\.kerndatensatz\\.[a-z0-9.-]+)\"?:\\s*\"?(?<currentValue>\\d[^\"\\s]*)\"?"
       ],

@@ -289,12 +289,15 @@ list:
       roleClaimType: "role"
 
   notifications:
-    # -- a screening recommendation is highlighted as new if it first appeared within this many days
-    newSuggestionWindowDays: 7
     # -- a pending recommendation is highlighted as stalled if untouched for this many days
     stalledLeadWindowDays: 14
     # -- how often, in seconds, list scans for screening list changes to notify about
     scanIntervalSeconds: 60
+    testing:
+      # -- adds a button to the admin-only Notification Test page that removes a patient from a trial's
+      # screening list and adds them back, notifying every subscriber of that trial for real, in the app
+      # and by email. Meant for development, demo and test deployments only.
+      enabled: false
     email:
       # -- the URL users reach list at, used to build the links in notification emails. If
       # `list.ingress.enabled` is `true`, the first ingress host is used instead.
@@ -639,6 +642,21 @@ postgres:
   auth:
     # -- set the default database name to `recruit`
     database: "recruit"
+
+grafanaDashboard:
+  # -- if enabled, creates a ConfigMap with recruIT's Grafana dashboard (see `files/dashboards/recruit.json`)
+  # for Grafana's dashboard sidecar to load, as included in kube-prometheus-stack. Needs the metrics of
+  # `list` and `querySqlOnFhir` scraped, e.g. via their `metrics.serviceMonitor`.
+  enabled: false
+  # -- labels the dashboard sidecar looks for. `grafana_dashboard: "1"` is the sidecar's default.
+  labels:
+    grafana_dashboard: "1"
+  # -- annotations, e.g. `grafana_folder: recruIT` to put it in a folder if the sidecar's
+  # `folderAnnotation` is set to `grafana_folder`
+  annotations: {}
+  # -- namespace to create the ConfigMap in, if the sidecar only watches some namespaces. Defaults to the
+  # release namespace.
+  namespace: ""
 
 # @ignore
 curl: # +doc-gen:ignore
