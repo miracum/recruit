@@ -1,10 +1,15 @@
-{#-
-  Base for every page. The theme only links the single favicon from zensical.toml, so the smaller
-  favicon and the icon for iOS home screens are added here.
--#}
-{% extends "base.html" %}
-
-{% block extrahead %}
-  <link rel="icon" type="image/png" sizes="16x16" href="{{ '_img/logo/favicon-16.png' | url }}">
-  <link rel="apple-touch-icon" sizes="180x180" href="{{ '_img/logo/web/apple-touch-icon-180.png' | url }}">
+{#- Base for every page. The theme only links the single favicon from
+zensical.toml, so the smaller favicon and the icon for iOS home screens are
+added here. -#} {% extends "base.html" %} {% block extrahead %}
+<link
+  rel="icon"
+  type="image/png"
+  sizes="16x16"
+  href="{{ '_img/logo/favicon-16.png' | url }}"
+/>
+<link
+  rel="apple-touch-icon"
+  sizes="180x180"
+  href="{{ '_img/logo/web/apple-touch-icon-180.png' | url }}"
+/>
 {% endblock %}
