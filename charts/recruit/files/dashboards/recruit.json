@@ -81,9 +81,9 @@
           "type": "prometheus",
           "uid": "${datasource}"
         },
-        "definition": "label_values(up{namespace=~\"$namespace\"}, job)",
+        "definition": "label_values({__name__=~\"up|recruit_query_poll_seconds_count\", namespace=~\"$namespace\"}, job)",
         "query": {
-          "query": "label_values(up{namespace=~\"$namespace\"}, job)",
+          "query": "label_values({__name__=~\"up|recruit_query_poll_seconds_count\", namespace=~\"$namespace\"}, job)",
           "refId": "query_job-variable"
         },
         "regex": "/.*query.*/",
@@ -177,8 +177,8 @@
     {
       "type": "stat",
       "id": 3,
-      "title": "Query instances up",
-      "description": "query-sql-on-fhir instances Prometheus can currently scrape.",
+      "title": "Last successful poll",
+      "description": "How long ago the query module last finished a poll without any study failing. Works the same whether it runs on its schedule or as one-shot runs pushing their metrics to a Pushgateway - should never be much older than its schedule.",
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
@@ -196,15 +196,15 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum(up{namespace=~\"$namespace\", job=~\"$query_job\"})",
+          "expr": "time() - max(recruit_query_poll_last_success_timestamp_seconds{namespace=~\"$namespace\", job=~\"$query_job\"})",
           "legendFormat": "",
           "range": true
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
-          "noValue": "0",
+          "unit": "s",
+          "noValue": "never",
           "color": {
             "mode": "thresholds"
           },
@@ -212,15 +212,20 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "green",
                 "value": null
               },
               {
-                "color": "green",
-                "value": 1
+                "color": "orange",
+                "value": 7200
+              },
+              {
+                "color": "red",
+                "value": 86400
               }
             ]
-          }
+          },
+          "decimals": 0
         },
         "overrides": []
       },

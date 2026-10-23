@@ -397,34 +397,46 @@ Finally, install the recruIT chart using the following updated values.yaml:
 
 ## Running the query module using Argo Workflows
 
-By default, the query module runs on a dedicated schedule. As of version `10.1.0`,
-the module can also be configured to run as a one-shot container. This is useful
-when integrating with existing containerized workflows, e.g. using
-[Airflow](https://airflow.apache.org/docs/apache-airflow/stable/administration-and-deployment/kubernetes.html)
-or [Argo Workflows](https://argoproj.github.io/argo-workflows/).
+By default, the query module runs on its own schedule. It can also run once and exit, setting
+`QUERY_SQL_ON_FHIR_RUN_MODE=one-shot`, which is useful for running it right after the jobs that update the data it
+queries, e.g. using [Airflow](https://airflow.apache.org/docs/apache-airflow/stable/administration-and-deployment/kubernetes.html)
+or [Argo Workflows](https://argoproj.github.io/argo-workflows/). It exits with a non-zero code if any study failed, so
+the workflow step fails too.
 
-Below you can find an example for running the query module as part of a larger workflow:
+Below you can find an example for running the query module as part of a larger workflow. Adjust the FHIR server and
+Trino settings to your installation, see [Configuration options](../configuration/options.md):
 
 ```yaml title="query-argo-workflow.yaml"
 --8<-- "_snippets/k8s/query-argo-workflow.yaml"
 ```
 
-You can run this workflow against the integration test setup of the recruIT Helm chart:
+```sh
+argo submit -n recruit --wait --log query-argo-workflow.yaml
+```
+
+### Metrics for one-shot runs
+
+A one-shot run is usually over before Prometheus would scrape its metrics, so the example pushes them to a
+[Prometheus Pushgateway](https://github.com/prometheus/pushgateway) instead: every minute while running, and once more
+right before exiting. Each run replaces what the previous one pushed. To install a Pushgateway that the
+`kube-prometheus-stack` from [Metrics](#metrics) scrapes:
 
 ```sh
-kubectl create namespace recruit
-
-helm repo add argo https://argoproj.github.io/argo-helm
-helm upgrade --install \
-  --create-namespace \
-  --namespace=argo-workflows \
-  -f tests/chaos/argo-workflows-values.yaml \
-  argo-workflows argo/argo-workflows
-
-helm upgrade --install \
-  --namespace=recruit \
-  -f charts/recruit/ci/integration-values.yaml \
-  recruit charts/recruit/
-
-argo submit -n recruit --wait --log docs/_snippets/k8s/query-argo-workflow.yaml
+helm upgrade --install -n monitoring prometheus-pushgateway \
+  oci://ghcr.io/prometheus-community/charts/prometheus-pushgateway \
+  --set serviceMonitor.enabled=true \
+  --set serviceMonitor.additionalLabels.release=kube-prometheus-stack
 ```
+
+Its ServiceMonitor keeps the labels the metrics were pushed with (`honorLabels: true`). If you scrape the Pushgateway
+some other way, set `honor_labels: true` there too, or Prometheus replaces the pushed `job` and `namespace` labels
+with the Pushgateway's own. The pushed `namespace` label comes from
+`MANAGEMENT_PROMETHEUS_METRICS_EXPORT_PUSHGATEWAY_GROUPINGKEY_NAMESPACE` in the example.
+
+The recruIT dashboard's eligibility query panels then work as for the scheduled module. **Last successful poll** at
+the top shows how long ago a run last finished without any study failing, which is also a good metric to alert on
+(`recruit_query_poll_last_success_timestamp_seconds`): it catches failed runs and runs that never happened. The
+dashboard's runtime panels only show a one-shot run's last moments, though, so they don't mean much for it.
+
+The `metrics` section of the example's `recruit-query` step adds Argo's own metrics for the step: how long it took
+and whether it succeeded, also for runs that failed before the query module could push anything.

@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/argoproj/argo-workflows/v3.4.3/api/jsonschema/schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/argoproj/argo-workflows/v3.7.2/api/jsonschema/schema.json
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
@@ -6,11 +6,12 @@ metadata:
 spec:
   entrypoint: full-run
   templates:
-    - name: omop-cdm-etl
+    # stands in for whatever updates the data the eligibility criteria are queried against
+    - name: etl
       container:
         image: docker.io/docker/whalesay@sha256:178598e51a26abbc958b8a2e48825c90bc22e641de3d31e18aaf55f3258ba93b
         command: [cowsay]
-        args: ["Running ETL Job from source to the OMOP CDM database"]
+        args: ["Running the ETL job that updates the data lakehouse"]
         securityContext:
           readOnlyRootFilesystem: true
           runAsUser: 65532
@@ -24,93 +25,48 @@ spec:
           privileged: false
           runAsNonRoot: true
 
-    - name: ohdsi-achilles
-      # run for at most 1 hour before timing out to make sure the query module will run eventually
-      activeDeadlineSeconds: "3600"
-      container:
-        image: docker.io/ohdsi/broadsea-achilles:sha-bccd396@sha256:a881063aff6200d0d368ec30eb633381465fb8aa15e7d7138b7d48b6256a6feb
-        env:
-          - name: ACHILLES_DB_URI
-            value: >-
-              postgresql://broadsea-atlasdb:5432/postgres?ApplicationName=recruit-ohdsi-achilles
-          - name: ACHILLES_DB_USERNAME
-            value: postgres
-          - name: ACHILLES_DB_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: recruit-ohdsi-webapi-db-secret
-                key: postgres-password
-          - name: ACHILLES_CDM_SCHEMA
-            value: demo_cdm
-          - name: ACHILLES_VOCAB_SCHEMA
-            value: demo_cdm
-          - name: ACHILLES_RES_SCHEMA
-            value: demo_cdm_results
-          - name: ACHILLES_CDM_VERSION
-            value: "5.3"
-          - name: ACHILLES_SOURCE
-            value: EUNOMIA
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          privileged: false
-          runAsNonRoot: true
-          runAsUser: 10001
-          runAsGroup: 10001
-          readOnlyRootFilesystem: true
-          seccompProfile:
-            type: RuntimeDefault
-        volumeMounts:
-          - name: achilles-workspace-volume
-            mountPath: /opt/achilles/workspace
-          - name: r-tempdir-volume
-            mountPath: /tmp
-      volumes:
-        - name: achilles-workspace-volume
-          emptyDir: {}
-        - name: r-tempdir-volume
-          emptyDir: {}
-
     - name: recruit-query
+      # Argo's own metrics for this step, served by the workflow controller's metrics endpoint. Unlike
+      # the ones the query module pushes, they also cover runs that failed before it could push anything.
+      metrics:
+        prometheus:
+          - name: recruit_query_step_duration_seconds
+            help: How long the last recruIT query step took
+            labels:
+              - key: status
+                value: "{{status}}"
+            gauge:
+              realtime: false
+              value: "{{duration}}"
+          - name: recruit_query_step_runs
+            help: recruIT query steps run, by status
+            labels:
+              - key: status
+                value: "{{status}}"
+            counter:
+              value: "1"
       container:
-        image: ghcr.io/miracum/recruit/query:v10.5.7 # x-release-please-version
+        image: ghcr.io/open-recruit/recruit/query-sql-on-fhir:v10.5.7 # x-release-please-version
         env:
-          - name: QUERY_RUN_ONCE_AND_EXIT
-            value: "true"
-          - name: QUERY_SCHEDULE_ENABLED
-            value: "false"
-          - name: QUERY_SELECTOR_MATCHLABELS
-            value: ""
-          - name: FHIR_URL
+          # one poll cycle, then exit - non-zero if any study failed, which fails the step
+          - name: QUERY_SQL_ON_FHIR_RUN_MODE
+            value: one-shot
+          - name: FHIR_SERVER_BASE_URL
             value: http://recruit-fhirserver:8080/fhir
-          - name: OMOP_JDBCURL
-            value: >-
-              jdbc:postgresql://broadsea-atlasdb:5432/postgres?ApplicationName=recruit-query
-          - name: OMOP_USERNAME
-            value: postgres
-          - name: OMOP_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: recruit-ohdsi-webapi-db-secret
-                key: postgres-password
-          - name: OMOP_CDMSCHEMA
-            value: demo_cdm
-          - name: OMOP_RESULTSSCHEMA
-            value: demo_cdm_results
-          - name: QUERY_WEBAPI_BASE_URL
-            value: http://recruit-ohdsi-webapi:8080/WebAPI
-          - name: ATLAS_DATASOURCE
-            value: EUNOMIA
-          - name: MANAGEMENT_ENDPOINT_HEALTH_PROBES_ADD_ADDITIONAL_PATHS
+          - name: SPRING_DATASOURCE_URL
+            value: jdbc:trino://trino:8080/fhir/default
+          - name: SPRING_DATASOURCE_USERNAME
+            value: trino
+          # the pod exits before Prometheus could scrape it, so push the metrics to a Pushgateway instead
+          - name: MANAGEMENT_PROMETHEUS_METRICS_EXPORT_PUSHGATEWAY_ENABLED
             value: "true"
-          - name: MANAGEMENT_SERVER_PORT
-            value: "8081"
-          - name: CAMEL_HEALTH_ENABLED
-            value: "false"
-          - name: QUERY_WEBAPI_COHORT_CACHE_SCHEMA
-            value: webapi
+          - name: MANAGEMENT_PROMETHEUS_METRICS_EXPORT_PUSHGATEWAY_ADDRESS
+            value: prometheus-pushgateway.monitoring.svc:9091
+          # labels the pushed metrics with the workflow's namespace rather than the Pushgateway's
+          - name: MANAGEMENT_PROMETHEUS_METRICS_EXPORT_PUSHGATEWAY_GROUPINGKEY_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
         securityContext:
           privileged: false
           capabilities:
@@ -133,12 +89,8 @@ spec:
     - name: full-run
       dag:
         tasks:
-          - name: run-omop-cdm-etl
-            template: omop-cdm-etl
-          - name: run-ohdsi-achilles
-            depends: run-omop-cdm-etl
-            template: ohdsi-achilles
+          - name: run-etl
+            template: etl
           - name: run-recruit-query
-            # doesn't really matter whether the achilles job failed or succeeded
-            depends: "run-omop-cdm-etl && (run-ohdsi-achilles.Succeeded || run-ohdsi-achilles.Failed)"
+            depends: run-etl
             template: recruit-query

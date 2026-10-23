@@ -4,8 +4,10 @@ import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +25,8 @@ public class PollMetrics {
 
   private final MeterRegistry registry;
   private final Map<String, AtomicLong> candidatesByStudy = new ConcurrentHashMap<>();
+  private final AtomicLong lastSuccessEpochSeconds = new AtomicLong();
+  private final AtomicBoolean lastSuccessRegistered = new AtomicBoolean();
 
   public PollMetrics(MeterRegistry registry) {
     this.registry = registry;
@@ -38,6 +42,25 @@ public class PollMetrics {
         timer("recruit.query.poll", "How long one poll cycle took, across every study.")
             .tag(OUTCOME_TAG, outcome(succeeded))
             .register(registry));
+    if (succeeded) {
+      lastSuccessEpochSeconds.set(Instant.now().getEpochSecond());
+      registerLastSuccessGauge();
+    }
+  }
+
+  /**
+   * Registered on the first successful poll rather than up front, so it's absent - instead of the
+   * epoch - until a poll actually succeeded. Mostly for one-shot runs, where nothing else says when
+   * the last one happened: an alert on its age catches runs that failed and runs that never ran.
+   */
+  private void registerLastSuccessGauge() {
+    if (lastSuccessRegistered.compareAndSet(false, true)) {
+      Gauge.builder(
+              "recruit.query.poll.last.success.timestamp", lastSuccessEpochSeconds, AtomicLong::get)
+          .description("When the last fully successful poll cycle finished, as a Unix timestamp.")
+          .baseUnit("seconds")
+          .register(registry);
+    }
   }
 
   /** One study's eligibility evaluation, including writing its results to the FHIR server. */
