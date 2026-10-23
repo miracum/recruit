@@ -93,9 +93,6 @@ See [Notifications](notifications.md) for how notifications work. They are sent 
 The screening list checks for new candidates every minute and sends due emails every 5 minutes. Neither interval is
 configurable.
 
-- `Notifications__NewSuggestionWindowDays` (default `7`): for how many days after being recommended a candidate is
-  marked as new on the screening list. This only affects that marker, not notifications.
-
 ### Ports and observability
 
 - `HTTP_PORT` (default `8080`): port of the web app.

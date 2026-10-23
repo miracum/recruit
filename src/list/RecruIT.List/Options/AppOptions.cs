@@ -32,8 +32,6 @@ public sealed class NotificationOptions
 {
     public const string SectionName = "Notifications";
 
-    public int NewSuggestionWindowDays { get; set; } = 7;
-
     public int ScanIntervalSeconds { get; set; } = 60;
 }
 
@@ -54,7 +52,7 @@ public sealed class TracingOptions
 /// <summary>
 /// Config for the screening-list-change email notifier (Services/Notify), nested under the
 /// Notifications section but bound separately from NotificationOptions above, which is about the
-/// in-app "is this recommendation new" UI threshold and the scan interval, not the mail delivery.
+/// scan interval, not the mail delivery.
 /// </summary>
 public sealed class EmailNotificationOptions
 {

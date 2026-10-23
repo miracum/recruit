@@ -124,6 +124,40 @@ h1:focus {
     line-height: 1.4;
 }
 
+/* The screening list's "new" dot (see PatientList.razor): a soft ring pinging out from the dot.
+   Custom since `animate-ping` isn't in BlazorBlueprint's precompiled utilities. */
+.new-suggestion-dot {
+    position: relative;
+}
+
+.new-suggestion-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background-color: inherit;
+    animation: new-suggestion-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes new-suggestion-ping {
+    0% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+
+    75%,
+    100% {
+        transform: scale(2.25);
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .new-suggestion-dot::after {
+        animation: none;
+    }
+}
+
 /* The patient deep-linked from a notification (see PatientList.razor's ?subject=). BbDataTable
    has no per-row class, so its cells carry a marker class and the row is tinted from here. */
 tr:has(.patient-row-highlight) > td {

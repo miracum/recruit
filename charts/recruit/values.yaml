@@ -289,8 +289,6 @@ list:
       roleClaimType: "role"
 
   notifications:
-    # -- a screening recommendation is highlighted as new if it first appeared within this many days
-    newSuggestionWindowDays: 7
     # -- a pending recommendation is highlighted as stalled if untouched for this many days
     stalledLeadWindowDays: 14
     # -- how often, in seconds, list scans for screening list changes to notify about

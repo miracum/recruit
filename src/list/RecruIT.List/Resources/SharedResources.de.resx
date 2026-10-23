@@ -243,8 +243,8 @@
   <data name="App.PatientList.ColumnName" xml:space="preserve">
     <value>Name</value>
   </data>
-  <data name="App.PatientList.NewBadge" xml:space="preserve">
-    <value>Neu</value>
+  <data name="App.PatientList.NewIndicator" xml:space="preserve">
+    <value>Neuer Vorschlag</value>
   </data>
   <data name="App.PatientList.SystemIneligibleBadge" xml:space="preserve">
     <value>System: nicht geeignet</value>

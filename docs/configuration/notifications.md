@@ -34,6 +34,8 @@ next to it counts the unread ones.
   trial clears only that trial's notifications. Use the checkboxes to mark several at once.
 - Clicking a notification marks it as read and opens the trial's screening list with that patient's details open.
   After you close them, the patient's row stays highlighted at the top of the list.
+- On a trial's screening list, patients with an unread notification have a pulsing dot next to their recommendation
+  date. Opening such a patient marks their notification as read, and the dot goes away.
 
 If you lose access to a trial, its notifications are hidden from the list.
 

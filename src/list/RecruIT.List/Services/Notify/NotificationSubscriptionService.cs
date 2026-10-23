@@ -244,6 +244,62 @@ public sealed class NotificationSubscriptionService(
     }
 
     /// <summary>
+    /// The caller's unread in-app delivery ids for one trial, grouped by the ResearchSubject id
+    /// each one is about - what the screening list's "new" dot is driven by, so a patient is
+    /// marked new for exactly as long as their notification sits unread in the feed. A list per
+    /// subject, since a patient dropped from the list and later re-recommended gets another event.
+    /// No access re-check like the feed's: the screening list only calls this once its own access
+    /// check for this very trial has passed.
+    /// </summary>
+    public async Task<
+        IReadOnlyDictionary<string, IReadOnlyList<Guid>>
+    > GetUnreadInAppByResearchSubjectAsync(
+        ClaimsPrincipal user,
+        TrialIdentifier trialIdentifier,
+        CancellationToken ct = default
+    )
+    {
+        var (subjectId, _) = user.GetUserKeys();
+        if (subjectId is null)
+        {
+            return new Dictionary<string, IReadOnlyList<Guid>>();
+        }
+
+        var token = trialIdentifier.ToToken();
+        await using var db = await dbContextFactory.CreateDbContextAsync(ct);
+        var unread = await db
+            .NotificationDeliveries.AsNoTracking()
+            .Where(d =>
+                d.SubjectId == subjectId
+                && d.Channel == NotificationChannel.InApp
+                && d.ReadAt == null
+            )
+            .Join(
+                db.NotificationEvents.Where(e => e.TrialIdentifier == token),
+                d => d.NotificationEventId,
+                e => e.Id,
+                (d, e) => new { d.Id, e.PatientReference }
+            )
+            .ToListAsync(ct);
+
+        return unread
+            .Select(u => (u.Id, ResearchSubjectId: ResearchSubjectIdOf(u.PatientReference)))
+            .Where(u => u.ResearchSubjectId is not null)
+            .GroupBy(u => u.ResearchSubjectId!, u => u.Id)
+            .ToDictionary(g => g.Key, IReadOnlyList<Guid> (g) => [.. g]);
+    }
+
+    /// <summary>
+    /// An event's PatientReference is the screening list entry's own reference
+    /// ("ResearchSubject/{id}", see NotificationDetectorService) - its id is what the screening
+    /// list's rows (PatientListEntryDto.ResearchSubjectId) and its ?subject= deep link match on.
+    /// </summary>
+    public static string? ResearchSubjectIdOf(string patientReference) =>
+        patientReference.StartsWith("ResearchSubject/", StringComparison.Ordinal)
+            ? patientReference["ResearchSubject/".Length..].Split('/')[0]
+            : null;
+
+    /// <summary>
     /// null means "admin, everything is accessible" (see TrialAccessService.CanAccessTrial) - kept
     /// as null rather than expanded to a full trial list so callers can distinguish "no
     /// restriction" from "restricted to zero trials" without a separate admin check.
