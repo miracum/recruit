@@ -37,6 +37,7 @@ public class PollForStudies {
   private final EligibilityBundleBuilder bundleBuilder;
   private final FunnelReportBuilder funnelReportBuilder;
   private final IGenericClient fhirClient;
+  private final PollMetrics metrics;
   private final boolean dryRun;
   private final int maxResearchSubjects;
   private final boolean funnelEnabled;
@@ -47,6 +48,7 @@ public class PollForStudies {
       EligibilityBundleBuilder bundleBuilder,
       FunnelReportBuilder funnelReportBuilder,
       IGenericClient fhirClient,
+      PollMetrics metrics,
       @Value("${query-sql-on-fhir.dry-run:false}") boolean dryRun,
       @Value("${query-sql-on-fhir.max-research-subjects:-1}") int maxResearchSubjects,
       @Value("${query-sql-on-fhir.funnel.enabled:false}") boolean funnelEnabled,
@@ -55,6 +57,7 @@ public class PollForStudies {
     this.bundleBuilder = bundleBuilder;
     this.funnelReportBuilder = funnelReportBuilder;
     this.fhirClient = fhirClient;
+    this.metrics = metrics;
     this.dryRun = dryRun;
     this.maxResearchSubjects = maxResearchSubjects;
     this.funnelEnabled = funnelEnabled;
@@ -77,6 +80,17 @@ public class PollForStudies {
    * happens with the returned failure count differs.
    */
   public PollResult pollForStudies() {
+    var sample = metrics.startTimer();
+    PollResult result = null;
+    try {
+      result = pollAllStudies();
+      return result;
+    } finally {
+      metrics.recordPoll(sample, result != null && !result.hasFailures());
+    }
+  }
+
+  private PollResult pollAllStudies() {
     log.info(
         "Polling for ResearchStudy resources referencing a Group with SQLQuery Library"
             + " characteristics");
@@ -110,14 +124,19 @@ public class PollForStudies {
 
     var failedCount = 0;
     for (var study : researchStudies) {
+      var sample = metrics.startTimer();
+      var succeeded = false;
       try {
         processStudy(study);
+        succeeded = true;
       } catch (Exception ex) {
         // isolate one study's failure so it doesn't abort polling for every other study found in
         // this run - now that a study's update can span several chunked transactions, a mid-way
         // failure is no longer necessarily atomic the way a single-transaction update was.
         failedCount++;
         log.error("Failed to process ResearchStudy with id {}", study.getId(), ex);
+      } finally {
+        metrics.recordStudy(sample, EligibilityBundleBuilder.getStudyAcronym(study), succeeded);
       }
     }
 
@@ -202,6 +221,7 @@ public class PollForStudies {
     var listBundle =
         bundleBuilder.buildScreeningListBundle(study, patientIds, previousScreeningList);
     fhirClient.transaction().withBundle(listBundle).execute();
+    metrics.setCandidates(EligibilityBundleBuilder.getStudyAcronym(study), patientIds.size());
 
     if (funnelEnabled) {
       submitFunnelReport(study, criteria, effectiveDate);

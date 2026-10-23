@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Hl7.Fhir.Model;
 using Microsoft.EntityFrameworkCore;
 using RecruIT.List.Data;
@@ -21,6 +22,7 @@ namespace RecruIT.List.Services.Notify;
 public sealed class NotificationDetectorService(
     FhirClientFactory clientFactory,
     IDbContextFactory<AppDbContext> dbContextFactory,
+    RecruitMetrics metrics,
     ILogger<NotificationDetectorService> logger
 )
 {
@@ -34,15 +36,29 @@ public sealed class NotificationDetectorService(
 
     public async Task PollAllTrialsAsync(CancellationToken ct = default)
     {
-        var client = clientFactory.CreateClient();
-        var resources = await FhirBundleHelpers.GetAllPagesAsync(client, ListSearchCriteria, ct);
+        var start = Stopwatch.GetTimestamp();
+        var succeeded = false;
+        try
+        {
+            var client = clientFactory.CreateClient();
+            var resources = await FhirBundleHelpers.GetAllPagesAsync(
+                client,
+                ListSearchCriteria,
+                ct
+            );
 
-        // Lists are independent - polled concurrently, each with its own FhirClient (BaseFhirClient
-        // tracks last-request state as mutable instance fields, so a shared client isn't safe to
-        // call from multiple tasks at once).
-        await Task.WhenAll(
-            resources.OfType<FhirList>().Select(list => PollListSafeAsync(list, ct))
-        );
+            // Lists are independent - polled concurrently, each with its own FhirClient
+            // (BaseFhirClient tracks last-request state as mutable instance fields, so a shared
+            // client isn't safe to call from multiple tasks at once).
+            await Task.WhenAll(
+                resources.OfType<FhirList>().Select(list => PollListSafeAsync(list, ct))
+            );
+            succeeded = true;
+        }
+        finally
+        {
+            metrics.RecordDetectionRun(Stopwatch.GetElapsedTime(start), succeeded);
+        }
     }
 
     /// <summary>
@@ -70,6 +86,7 @@ public sealed class NotificationDetectorService(
         {
             // one misbehaving list must not stop the rest of this tick from being processed.
             logger.LogError(ex, "Failed to poll List/{ListId}", list.Id);
+            metrics.RecordDetectionFailure();
         }
     }
 
@@ -246,6 +263,10 @@ public sealed class NotificationDetectorService(
         }
 
         var token = trialIdentifier.ToToken();
+        metrics.RecordRecommendations(
+            newReferences.Count,
+            study!.GetStudyAcronym() is { Length: > 0 } acronym ? acronym : token
+        );
         var subscriptions = await db
             .NotificationSubscriptions.AsNoTracking()
             .Where(s => s.TrialIdentifier == token)

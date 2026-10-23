@@ -643,6 +643,21 @@ postgres:
     # -- set the default database name to `recruit`
     database: "recruit"
 
+grafanaDashboard:
+  # -- if enabled, creates a ConfigMap with recruIT's Grafana dashboard (see `files/dashboards/recruit.json`)
+  # for Grafana's dashboard sidecar to load, as included in kube-prometheus-stack. Needs the metrics of
+  # `list` and `querySqlOnFhir` scraped, e.g. via their `metrics.serviceMonitor`.
+  enabled: false
+  # -- labels the dashboard sidecar looks for. `grafana_dashboard: "1"` is the sidecar's default.
+  labels:
+    grafana_dashboard: "1"
+  # -- annotations, e.g. `grafana_folder: recruIT` to put it in a folder if the sidecar's
+  # `folderAnnotation` is set to `grafana_folder`
+  annotations: {}
+  # -- namespace to create the ConfigMap in, if the sidecar only watches some namespaces. Defaults to the
+  # release namespace.
+  namespace: ""
+
 # @ignore
 curl: # +doc-gen:ignore
   image:

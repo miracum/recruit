@@ -5,31 +5,13 @@ list:
       additionalLabels:
         release: kube-prometheus-stack
 
-query:
+querySqlOnFhir:
   metrics:
     serviceMonitor:
       enabled: true
       additionalLabels:
         release: kube-prometheus-stack
 
-notify:
-  metrics:
-    serviceMonitor:
-      enabled: true
-      additionalLabels:
-        release: kube-prometheus-stack
-
-fhirserver:
-  metrics:
-    serviceMonitor:
-      enabled: true
-      additionalLabels:
-        release: kube-prometheus-stack
-
-ohdsi:
-  webApi:
-    metrics:
-      serviceMonitor:
-        enabled: true
-        additionalLabels:
-          release: kube-prometheus-stack
+# loaded by the Grafana included with kube-prometheus-stack, see below
+grafanaDashboard:
+  enabled: true

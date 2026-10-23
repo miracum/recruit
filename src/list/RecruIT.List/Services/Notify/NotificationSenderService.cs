@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Reflection;
 using System.Text.Encodings.Web;
 using Fluid;
@@ -35,6 +36,7 @@ public sealed class NotificationSenderService(
     IOptions<EmailNotificationOptions> mailerOptions,
     IOptions<AuthOptions> authOptions,
     INotificationChannel channel,
+    RecruitMetrics metrics,
     ILogger<NotificationSenderService> logger
 )
 {
@@ -255,9 +257,11 @@ public sealed class NotificationSenderService(
                 EmailDigestLink(digestId)
             );
 
+            var sendStart = Stopwatch.GetTimestamp();
             try
             {
                 await batch.SendAsync(recipientEmail, subject, html, ct);
+                metrics.RecordEmailSend(Stopwatch.GetElapsedTime(sendStart), succeeded: true);
                 var sentAt = DateTimeOffset.UtcNow;
                 foreach (var delivery in includedDeliveries)
                 {
@@ -267,6 +271,7 @@ public sealed class NotificationSenderService(
             }
             catch (Exception ex)
             {
+                metrics.RecordEmailSend(Stopwatch.GetElapsedTime(sendStart), succeeded: false);
                 logger.LogError(
                     ex,
                     "Failed to send notification email to {Email} for {Count} deliveries - will retry next tick",
@@ -289,6 +294,7 @@ public sealed class NotificationSenderService(
                         MaxDeliveryAge.TotalDays
                     );
                     db.NotificationDeliveries.RemoveRange(stale);
+                    metrics.RecordEmailDeliveriesDropped(stale.Count);
                 }
             }
         }

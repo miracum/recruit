@@ -37,6 +37,12 @@ public sealed class AppFixture : IAsyncLifetime
 {
     private const string BaseUrlEnvVar = "E2E_BASE_URL";
 
+    /// <summary>
+    /// The instance's metrics endpoint, for <see cref="BaseUrlEnvVar"/> - it's on a separate port
+    /// (METRICS_PORT), which usually isn't reachable from wherever the app itself is. Optional.
+    /// </summary>
+    private const string MetricsUrlEnvVar = "E2E_METRICS_URL";
+
     private const int FhirPort = 8080;
 
     private WebApplicationFactory<Program>? _factory;
@@ -44,6 +50,9 @@ public sealed class AppFixture : IAsyncLifetime
     private IContainer? _fhir;
 
     public string BaseUrl { get; private set; } = "";
+
+    /// <summary>The app's Prometheus scrape endpoint, or null if it isn't known (see <see cref="MetricsUrlEnvVar"/>).</summary>
+    public string? MetricsUrl { get; private set; }
 
     public async ValueTask InitializeAsync()
     {
@@ -54,6 +63,10 @@ public sealed class AppFixture : IAsyncLifetime
         if (Environment.GetEnvironmentVariable(BaseUrlEnvVar) is { Length: > 0 } externalUrl)
         {
             BaseUrl = externalUrl.TrimEnd('/');
+            MetricsUrl = Environment.GetEnvironmentVariable(MetricsUrlEnvVar)
+                is { Length: > 0 } metricsUrl
+                ? metricsUrl
+                : null;
             return;
         }
 
@@ -85,6 +98,8 @@ public sealed class AppFixture : IAsyncLifetime
         var httpPort = GetFreeTcpPort();
         var metricsPort = GetFreeTcpPort();
         BaseUrl = $"http://127.0.0.1:{httpPort.ToString(CultureInfo.InvariantCulture)}";
+        MetricsUrl =
+            $"http://127.0.0.1:{metricsPort.ToString(CultureInfo.InvariantCulture)}/metrics";
 
         _factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {

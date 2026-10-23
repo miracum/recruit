@@ -104,6 +104,12 @@ management:
     web:
       exposure:
         include: "health,prometheus"
+  metrics:
+    distribution:
+      # histogram buckets for the FHIR client's request timer (see FhirConfig), so its latency
+      # percentiles can be computed in Prometheus - off by default for every timer.
+      percentiles-histogram:
+        "[fhir.client]": true
 
 server:
   shutdown: graceful

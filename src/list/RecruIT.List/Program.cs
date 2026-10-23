@@ -137,9 +137,17 @@ var otelBuilder = builder
     .WithMetrics(metrics =>
         metrics
             .AddAspNetCoreInstrumentation()
+            // Blazor Server's own meters (circuits, navigation, event handling, rendering) - not
+            // part of AddAspNetCoreInstrumentation, which only covers HTTP-level ones.
+            .AddMeter(
+                "Microsoft.AspNetCore.Components",
+                "Microsoft.AspNetCore.Components.Lifecycle",
+                "Microsoft.AspNetCore.Components.Server.Circuits"
+            )
             .AddHttpClientInstrumentation()
             .AddNpgsqlInstrumentation()
             .AddRuntimeInstrumentation()
+            .AddMeter(RecruitMetrics.MeterName)
             .AddPrometheusExporter()
     );
 
@@ -280,6 +288,7 @@ builder.Services.AddHttpClient(
 
 builder.Services.AddScoped<TrialAccessService>();
 builder.Services.AddSingleton<FhirClientFactory>();
+builder.Services.AddSingleton<RecruitMetrics>();
 builder.Services.AddScoped<ScreeningListService>();
 builder.Services.AddScoped<ResearchSubjectService>();
 builder.Services.AddScoped<ScreeningNoteService>();
@@ -320,6 +329,10 @@ await using (var scope = app.Services.CreateAsyncScope())
         scope.ServiceProvider.GetRequiredService<DataProtectionKeyContext>();
     await dataProtectionKeyContext.Database.MigrateAsync();
 }
+
+// Created up front rather than on first use, so its gauges are exported from the first scrape on
+// instead of only once something has recorded a measurement.
+app.Services.GetRequiredService<RecruitMetrics>();
 
 // Every list replica runs a Hangfire server (AddHangfireServer above); they self-coordinate
 // via the shared Postgres storage, so registering the recurring jobs on every replica's startup is
