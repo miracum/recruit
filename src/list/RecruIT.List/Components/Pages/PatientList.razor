@@ -122,11 +122,6 @@ else if (_summary is not null)
         </div>
     </div>
 
-    @if (!string.IsNullOrEmpty(_summary.StudyDescription))
-    {
-        <p class="bb:mt-1 bb:text-sm bb:text-muted-foreground">@_summary.StudyDescription</p>
-    }
-
     @if (_patients.Count == 0)
     {
         <BbEmpty Title="@Localizer["App.PatientList.EmptyTitle"]" Description="@Localizer["App.PatientList.EmptyDescription"]" />
