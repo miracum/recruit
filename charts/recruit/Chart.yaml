@@ -33,8 +33,8 @@ dependencies:
   - name: common
     repository: oci://ghcr.io/miracum/charts
     version: 0.2.0
-version: 10.5.7 # x-release-please-version
-appVersion: 10.5.7 # x-release-please-version
+version: 11.0.0 # x-release-please-version
+appVersion: 11.0.0 # x-release-please-version
 annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   artifacthub.io/operator: "false"
@@ -55,6 +55,6 @@ annotations:
       url: https://open-recruit.github.io/recruit/_img/atlas-first-cohort/list-test-study.png
   artifacthub.io/changes: |-
     - kind: changed
-      description: updated recruIT image tags to v10.5.7 # x-release-please-version
+      description: updated recruIT image tags to v11.0.0 # x-release-please-version
     - kind: changed
       description: dropped all bitnami charts and images

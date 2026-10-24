@@ -1,6 +1,6 @@
 {
   "name": "dev.openrecruit.fhir",
-  "version": "0.1.0",
+  "version": "11.0.0",
   "description": "recruIT FHIR Implementation Guide",
   "dependencies": {
     "hl7.fhir.r4.core": "4.0.1",

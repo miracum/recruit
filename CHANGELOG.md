@@ -1,5 +1,43 @@
 # Changelog
 
+## [11.0.0](https://github.com/open-recruit/recruit/compare/v10.5.7...v11.0.0) (2026-10-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* next-generation list module and only support SQL-on-FHIR query module ([#642](https://github.com/open-recruit/recruit/issues/642))
+
+### Features
+
+* improved notifications UI ([#658](https://github.com/open-recruit/recruit/issues/658)) ([8034175](https://github.com/open-recruit/recruit/commit/803417522c99c6912e95523d559abf41eab3f078))
+* next-generation list module and only support SQL-on-FHIR query module ([#642](https://github.com/open-recruit/recruit/issues/642)) ([cc186fa](https://github.com/open-recruit/recruit/commit/cc186faf5eff1c6a9fa09ff505cbe7106f1c2ea3))
+* pushgateway support for query module ([#661](https://github.com/open-recruit/recruit/issues/661)) ([9cb6da1](https://github.com/open-recruit/recruit/commit/9cb6da1386dd66900733f3659d5d4e9af2dff1cd))
+* support for DuckDB as a query engine - used to simplify the demo chart deployment ([#656](https://github.com/open-recruit/recruit/issues/656)) ([a07eed5](https://github.com/open-recruit/recruit/commit/a07eed59b01c795d3ea97b184941a8d8542b030d))
+* **ui:** new suggestions indicator and notification tester ([#660](https://github.com/open-recruit/recruit/issues/660)) ([a08670a](https://github.com/open-recruit/recruit/commit/a08670aa4ac3a1e6c79ed24f94753099fabac681))
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#646](https://github.com/open-recruit/recruit/issues/646)) ([51aa202](https://github.com/open-recruit/recruit/commit/51aa202b87d10bf741b0e5e5299e62126d304c66))
+* migrate to blazor v4 and minor ui fixes ([#657](https://github.com/open-recruit/recruit/issues/657)) ([37c1e6f](https://github.com/open-recruit/recruit/commit/37c1e6f523c319d7108fc4941f214a3325455e75))
+
+
+### Documentation
+
+* build ig and pages concurrently ([#652](https://github.com/open-recruit/recruit/issues/652)) ([bcce849](https://github.com/open-recruit/recruit/commit/bcce849b86a0b795f402c8b11ff8174fb23204e7))
+
+
+### Miscellaneous Chores
+
+* cache and yaml rewrite fix ([#654](https://github.com/open-recruit/recruit/issues/654)) ([5dcb4c7](https://github.com/open-recruit/recruit/commit/5dcb4c7715b53580e18b5d93d5a6234a4438603d))
+* fsh refactor to comply to mii resources and removal of older miracum urls ([#659](https://github.com/open-recruit/recruit/issues/659)) ([b1c6978](https://github.com/open-recruit/recruit/commit/b1c69783903c3e0a0c89bf1e18bbe9fd30764998))
+
+
+### CI/CD
+
+* fix chart tags on non-PR pushes ([4f06807](https://github.com/open-recruit/recruit/commit/4f0680789d8827fade032c3ac84f5154e235b3c3))
+* reset chart changelog annotations ([#653](https://github.com/open-recruit/recruit/issues/653)) ([5a61873](https://github.com/open-recruit/recruit/commit/5a618737f7e0d98ef20cee04b32ee2d35f396c24))
+
 ## [10.5.7](https://github.com/miracum/recruit/compare/v10.5.6...v10.5.7) (2026-08-03)
 
 

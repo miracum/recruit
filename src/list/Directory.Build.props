@@ -10,7 +10,7 @@
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <RestoreLockedMode>true</RestoreLockedMode>
     <!-- x-release-please-start-version -->
-    <Version>10.5.7</Version>
+    <Version>11.0.0</Version>
     <!-- x-release-please-end -->
     <Company>miracum.org</Company>
     <Description>Patient recruitment on FHIR.</Description>

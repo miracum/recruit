@@ -194,7 +194,7 @@ list:
   image: # +doc-gen:ignore
     registry: ghcr.io
     repository: open-recruit/recruit/list
-    tag: v10.5.7 # x-release-please-version
+    tag: v11.0.0 # x-release-please-version
     pullPolicy: IfNotPresent
 
   serviceAccount:
@@ -467,7 +467,7 @@ querySqlOnFhir:
   image: # +doc-gen:ignore
     registry: ghcr.io
     repository: open-recruit/recruit/query-sql-on-fhir
-    tag: v10.5.7 # x-release-please-version
+    tag: v11.0.0 # x-release-please-version
     pullPolicy: IfNotPresent
 
   serviceAccount:
