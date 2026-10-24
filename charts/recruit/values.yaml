@@ -137,7 +137,7 @@ syntheticPatients:
   image: # +doc-gen:ignore
     registry: ghcr.io
     repository: miracum/ig-build-tools
-    tag: v2.4.1@sha256:7457e0a45199c1e17048f8eb1337d28fcbc123b5c5c97797a5e7c15bbb9e36a8
+    tag: v2.4.3@sha256:45399d5fcbaf62a9c4ed7f85b5b449c947ce2ab06bfb9b87ea482fd582d6d605
 
 externalFhirServer:
   # -- URL of an external FHIR Server - only used when `fhirserver.enabled` is set to `false`

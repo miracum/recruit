@@ -27,7 +27,7 @@ dependencies:
     repository: https://maildev.github.io/helm/
     version: 0.2.0
   - name: postgres
-    version: 0.21.1
+    version: 0.21.2
     repository: oci://registry-1.docker.io/cloudpirates
     condition: postgres.enabled
   - name: common

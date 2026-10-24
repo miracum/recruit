@@ -16,7 +16,7 @@ plugins {
 // for every io.opentelemetry(.instrumentation) artifact so the whole graph stays mutually consistent.
 dependencyManagement {
     imports {
-        mavenBom 'io.opentelemetry:opentelemetry-bom:1.66.0'
+        mavenBom 'io.opentelemetry:opentelemetry-bom:1.67.0'
         mavenBom 'io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:2.30.0-alpha'
     }
 }
