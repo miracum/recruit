@@ -22,7 +22,7 @@ jobs:
   validate-fhir-resource:
     name: Validate FHIR resources
     runs-on: ubuntu-26.04
-    container: ghcr.io/miracum/ig-build-tools:v2.2.48@sha256:15cdabfe5eccf66da197b19fa4e723ff7ba80ac127948d3bcf1164b5631dccc8
+    container: ghcr.io/miracum/ig-build-tools:v2.4.3@sha256:45399d5fcbaf62a9c4ed7f85b5b449c947ce2ab06bfb9b87ea482fd582d6d605
     steps:
       - name: Add workspace as safe directory
         run: |
