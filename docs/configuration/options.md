@@ -140,6 +140,11 @@ The database the eligibility criteria's SQL is run against.
 - `QUERY_SQL_ON_FHIR_SCHEDULE_CRON` (default `@hourly`): when to update the screening lists, as a
   [Spring cron expression](https://docs.spring.io/spring-framework/reference/integration/scheduling.html#scheduling-cron-expression)
   with six fields (seconds first) or a macro like `@hourly`.
+- `MANAGEMENT_PROMETHEUS_METRICS_EXPORT_PUSHGATEWAY_ENABLED` (default `false`): push the metrics to a
+  [Prometheus Pushgateway](https://github.com/prometheus/pushgateway) at
+  `MANAGEMENT_PROMETHEUS_METRICS_EXPORT_PUSHGATEWAY_ADDRESS` (`host:port`), for one-shot runs that exit before
+  Prometheus would scrape them. `MANAGEMENT_PROMETHEUS_METRICS_EXPORT_PUSHGATEWAY_GROUPINGKEY_<NAME>` adds a label to
+  every pushed metric. See [Metrics for one-shot runs](../deployment/kubernetes.md#metrics-for-one-shot-runs).
 
 ### Screening behavior
 

@@ -48,6 +48,11 @@ dependencies {
     // ones exporting fine.
     implementation 'org.aspectj:aspectjweaver'
 
+    // Pushes the metrics to a Prometheus Pushgateway, for one-shot runs (e.g. as an Argo Workflow
+    // step) that exit before Prometheus would ever scrape them - see application.yml. Version
+    // managed by Spring Boot, like micrometer-registry-prometheus.
+    implementation 'io.prometheus:prometheus-metrics-exporter-pushgateway'
+
     testImplementation 'com.approvaltests:approvaltests:31.0.0'
     testImplementation 'com.google.code.gson:gson:2.14.0'
 }

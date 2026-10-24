@@ -3,6 +3,7 @@ package org.miracum.recruit.querysqlonfhir;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
 
 class PollMetricsTest {
@@ -37,6 +38,20 @@ class PollMetricsTest {
 
     assertThat(registry.get("recruit.query.poll").tag("outcome", "failure").timer().count())
         .isEqualTo(1);
+  }
+
+  @Test
+  void recordPoll_onlyExportsTheLastSuccessOnceAPollSucceeded() {
+    var registry = new SimpleMeterRegistry();
+    var metrics = new PollMetrics(registry);
+
+    metrics.recordPoll(metrics.startTimer(), false);
+    assertThat(registry.find("recruit.query.poll.last.success.timestamp").gauge()).isNull();
+
+    var before = Instant.now().getEpochSecond();
+    metrics.recordPoll(metrics.startTimer(), true);
+    assertThat(registry.get("recruit.query.poll.last.success.timestamp").gauge().value())
+        .isGreaterThanOrEqualTo(before);
   }
 
   @Test

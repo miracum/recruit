@@ -9,7 +9,8 @@ or the [ELK Stack](https://www.elastic.co/elastic-stack) to collect these logs a
 
 All components expose metrics in Prometheus format: the screening list (`list`) at `:8081/metrics`, and
 `query-sql-on-fhir` at `/actuator/prometheus` on its management port (`:8081` in the Helm chart, the same port as the
-app itself otherwise).
+app itself otherwise). Run as a one-shot job, `query-sql-on-fhir` can push them to a Pushgateway instead, see
+[Metrics for one-shot runs](./kubernetes.md#metrics-for-one-shot-runs).
 
 Besides the usual HTTP, runtime and database metrics, both report what recruIT itself is doing:
 
@@ -24,6 +25,7 @@ Besides the usual HTTP, runtime and database metrics, both report what recruIT i
 | `recruit_screening_status_changes_total`            | list              | Recruitment status changes saved by users, by the new `status`                                  |
 | `recruit_query_poll_seconds`                        | query-sql-on-fhir | How long one poll took, evaluating every study, by `outcome`                                    |
 | `recruit_query_study_seconds`                       | query-sql-on-fhir | How long evaluating one study's criteria and writing its results took, by `study` and `outcome` |
+| `recruit_query_poll_last_success_timestamp_seconds` | query-sql-on-fhir | When the last poll without any failing study finished, as a Unix timestamp                      |
 | `recruit_query_study_candidates`                    | query-sql-on-fhir | Patients on a study's screening list after its latest evaluation, by `study`                    |
 
 The screening list also reports Blazor's own metrics, such as open sessions (`aspnetcore_components_circuit_*`) and
