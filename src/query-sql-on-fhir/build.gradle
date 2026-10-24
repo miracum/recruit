@@ -29,7 +29,7 @@ dependencies {
     implementation 'io.github.diz-uker:fhir-ig-constants:0.2.21'
 
     // https://mvnrepository.com/artifact/io.trino/trino-jdbc
-    implementation 'io.trino:trino-jdbc:482'
+    implementation 'io.trino:trino-jdbc:483'
     // https://mvnrepository.com/artifact/org.duckdb/duckdb_jdbc
     // alternative to Trino for querying FHIR resources directly, e.g. NDJSON files, without a lakehouse
     implementation 'org.duckdb:duckdb_jdbc:1.5.6.0'
