@@ -9,7 +9,7 @@ name: RecruITIG
 title: recruIT FHIR IG
 description: FHIR Implementation Guide for the recruIT clinical trial patient recruitment support system.
 status: active # draft | active | retired | unknown
-version: 0.1.0 # x-release-please-version
+version: 11.0.0 # x-release-please-version
 fhirVersion: 4.0.1 # https://www.hl7.org/fhir/valueset-FHIR-version.html
 copyrightYear: 2022+
 releaseLabel: trial-use # ci-build | draft | qa-preview | ballot | trial-use | release | update | normative+trial-use

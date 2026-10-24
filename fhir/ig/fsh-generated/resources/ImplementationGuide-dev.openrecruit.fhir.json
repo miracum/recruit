@@ -2,7 +2,7 @@
   "resourceType": "ImplementationGuide",
   "id": "dev.openrecruit.fhir",
   "url": "https://openrecruit.dev/fhir/ImplementationGuide/dev.openrecruit.fhir",
-  "version": "0.1.0",
+  "version": "11.0.0",
   "name": "RecruITIG",
   "title": "recruIT FHIR IG",
   "status": "active",

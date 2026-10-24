@@ -21,7 +21,7 @@ The images are built by a shared workflow in the [miracum/.github](https://githu
 has to be given as the signer:
 
 ```sh
-gh attestation verify oci://ghcr.io/open-recruit/recruit/list:v10.5.7 \
+gh attestation verify oci://ghcr.io/open-recruit/recruit/list:v11.0.0 \
     --repo open-recruit/recruit \
     --signer-workflow miracum/.github/.github/workflows/standard-build.yaml
 ```
@@ -31,7 +31,7 @@ The same works for the query module's image, `ghcr.io/open-recruit/recruit/query
 ### Helm chart
 
 ```sh
-gh attestation verify oci://ghcr.io/open-recruit/recruit/charts/recruit:10.5.7 \
+gh attestation verify oci://ghcr.io/open-recruit/recruit/charts/recruit:11.0.0 \
     --repo open-recruit/recruit \
     --signer-workflow miracum/.github/.github/workflows/standard-chart-publish.yaml
 ```
@@ -39,7 +39,7 @@ gh attestation verify oci://ghcr.io/open-recruit/recruit/charts/recruit:10.5.7 \
 ### Compose archive
 
 ```sh
-gh release download v10.5.7 --repo open-recruit/recruit --pattern recruit-compose.tgz
+gh release download v11.0.0 --repo open-recruit/recruit --pattern recruit-compose.tgz
 gh attestation verify recruit-compose.tgz --repo open-recruit/recruit
 ```
 

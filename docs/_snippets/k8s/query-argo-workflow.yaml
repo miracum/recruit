@@ -46,7 +46,7 @@ spec:
             counter:
               value: "1"
       container:
-        image: ghcr.io/open-recruit/recruit/query-sql-on-fhir:v10.5.7 # x-release-please-version
+        image: ghcr.io/open-recruit/recruit/query-sql-on-fhir:v11.0.0 # x-release-please-version
         env:
           # one poll cycle, then exit - non-zero if any study failed, which fails the step
           - name: QUERY_SQL_ON_FHIR_RUN_MODE
